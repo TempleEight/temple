@@ -2,10 +2,10 @@ package temple.DSL
 
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
-import scala.io.Source
 import scala.util.parsing.combinator.JavaTokenParsers
+import java.io.InputStreamReader
 
-class DSLParser extends JavaTokenParsers {
+protected class DSLParser extends JavaTokenParsers {
 
   def repUntil[T](p0: => Parser[T], q0: => Parser[Any] = ""): Parser[List[T]] = Parser { in =>
     lazy val p = p0
@@ -44,9 +44,10 @@ class DSLParser extends JavaTokenParsers {
     case function ~ (args ~ kwargs) => Entry.Metadata(function, args, kwargs)
   }
 
-  def attribute: Parser[Entry.Attribute] = (ident <~ ":") ~ fieldType ~ repUntil(annotation, guard("[;}]".r)) ^^ {
-    case key ~ fieldType ~ annotations => Entry.Attribute(key, fieldType, annotations)
-  }
+  def attribute: Parser[Entry.Attribute] =
+    (ident <~ ":") ~ fieldType ~ repUntil(annotation, guard("[;}]".r)) ^^ {
+      case key ~ fieldType ~ annotations => Entry.Attribute(key, fieldType, annotations)
+    }
 
   // find a comma or the end of the argument list
   def argsListSeparator: Parser[Unit] = ("," | guard("]" | ")" | "}")) ^^^ ()
@@ -70,21 +71,15 @@ class DSLParser extends JavaTokenParsers {
 }
 
 object DSLParser extends DSLParser {
-
-  def printError(input: Input): String = {
+  protected def printError(input: Input): String = {
     val lineNo = input.pos.line.toString
     lineNo + " | " + input.source.toString.split("\n")(input.pos.line - 1) + "\n" +
     (" " * (input.pos.column + 2 + lineNo.length)) + "^"
   }
 
-  def main(args: Array[String]): Unit = {
-
-    val fSource = Source.fromFile(args(0))
-    try parseAll(rootItem, fSource.reader()) match {
-      case Success(result, input) => println(result)
-      case NoSuccess(str, input)  => System.err.println(str + '\n' + printError(input))
-    } finally {
-      fSource.close()
+  def parse(contents: InputStreamReader): Either[String, temple.DSL.DSLRoot] =
+    parseAll(rootItem, contents) match {
+      case Success(result, input) => Right(result)
+      case NoSuccess(str, input)  => Left(str + '\n' + printError(input))
     }
-  }
 }

@@ -1,6 +1,10 @@
-object Main extends App {
-  def square(x: Int): Int =
-    x * x
+import scala.io.Source
+import temple.DSL.DSLParser
 
-  println("Hello, Temple!")
+object Main extends App {
+  val fSource = Source.fromFile(args(0))
+  val result  = DSLParser.parse(fSource.reader())
+  println(result)
+
+  fSource.close()
 }
