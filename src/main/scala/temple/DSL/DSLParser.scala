@@ -1,7 +1,5 @@
 package temple.DSL
 
-import temple.DSL
-
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
@@ -29,17 +27,46 @@ class DSLParser extends JavaTokenParsers {
     applyp(in)
   }
 
-  def rootItem: Parser[DSLRoot] = (ident <~ ":") ~ (ident <~ "{") ~ repUntil(entry <~ ";", "}") ^^ {
+  def rootItem: Parser[DSLRoot] = (ident <~ ":") ~ (ident <~ "{") ~ repUntil(entry, "}") ^^ {
     case key ~ tag ~ entries => DSLRoot(key, tag, entries)
   }
 
-  def entry: Parser[Entry] = attribute
+  def entry: Parser[Entry] = (attribute | metadata) <~ ";" | rootItem <~ ";".?
+
+  def shorthandArgList[T]: Parser[List[Arg] ~ List[T]] = {
+    val listParser = "[" ~> repUntil(arg <~ argsListSeparator, "]") ^^ { elems =>
+      List(Arg.ListArg(elems))
+    }
+    listParser ~ success(List())
+  }
+
+  def metadata: Parser[Entry.Metadata] = "#" ~> ident ~ (allArgs | shorthandArgList) ^^ {
+    case function ~ (args ~ kwargs) => Entry.Metadata(function, args, kwargs)
+  }
 
   def attribute: Parser[Entry.Attribute] = (ident <~ ":") ~ fieldType ~ repUntil(annotation, guard("[;}]".r)) ^^ {
     case key ~ fieldType ~ annotations => Entry.Attribute(key, fieldType, annotations)
   }
 
-  def fieldType: Parser[FieldType] = ident ^^ FieldType.SimpleType
+  def argsListSeparator: Parser[Unit] = ("," | guard("]" | ")" | "}")) ^^^ ()
+
+  def arg: Parser[Arg] =
+    ident ^^ Arg.TokenArg |
+    wholeNumber ^^ { str =>
+      Arg.IntArg(str.toInt)
+    } |
+    floatingPointNumber ^^ { str =>
+      Arg.FloatingArg(str.toDouble)
+    }
+  def kwarg: Parser[(String, Arg)] = ((ident <~ ":") ~ arg) ^^ { case ident ~ arg => (ident, arg) }
+
+  def allArgs: Parser[List[Arg] ~ List[(String, Arg)]] =
+    "(" ~> (rep(arg <~ argsListSeparator) ~ repUntil(kwarg <~ argsListSeparator, ")"))
+
+  def fieldType: Parser[FieldType] = ident ~ allArgs.? ^^ {
+    case name ~ Some(args ~ kwargs) => FieldType(name, args, kwargs)
+    case name ~ None                => FieldType(name)
+  }
 
   def annotation: Parser[Annotation] = "@" ~> ident ^^ Annotation
 }
@@ -53,6 +80,7 @@ object DSLParser extends DSLParser {
   }
 
   def main(args: Array[String]): Unit = {
+
     val fSource = Source.fromFile(args(0))
     try parseAll(rootItem, fSource.reader()) match {
       case Success(result, input) => println(result)

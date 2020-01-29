@@ -1,12 +1,19 @@
 User: service {
   username: string;
-  email: string;
+  email: string(40,5);
   firstName: string;
   lastName: string;
   createdAt: datetimetz;
   numberOfDogs: int;
   yeets: bool;
-  currentBankBalance: fixed;
+  currentBankBalance: fixed(places: 2);
   birthDate: date;
   breakfastTime: time;
+
+  Fred: subservice {
+    field: string;
+  };
+
+  #auth(login: username);
+  #uses [Booking, Events];
 }
