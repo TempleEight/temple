@@ -1,0 +1,12 @@
+User: service {
+  username: string;
+  email: string;
+  firstName: string;
+  lastName: string;
+  createdAt: datetimetz;
+  numberOfDogs: int;
+  yeets: bool;
+  currentBankBalance: fixed;
+  birthDate: date;
+  breakfastTime: time;
+}
