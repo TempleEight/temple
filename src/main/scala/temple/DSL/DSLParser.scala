@@ -3,7 +3,7 @@ package temple.DSL
 import scala.annotation.tailrec
 import scala.collection.mutable.ListBuffer
 import scala.io.Source
-import scala.util.parsing.combinator._
+import scala.util.parsing.combinator.JavaTokenParsers
 
 class DSLParser extends JavaTokenParsers {
 
@@ -48,16 +48,14 @@ class DSLParser extends JavaTokenParsers {
     case key ~ fieldType ~ annotations => Entry.Attribute(key, fieldType, annotations)
   }
 
+  // find a comma or the end of the argument list
   def argsListSeparator: Parser[Unit] = ("," | guard("]" | ")" | "}")) ^^^ ()
 
   def arg: Parser[Arg] =
     ident ^^ Arg.TokenArg |
-    wholeNumber ^^ { str =>
-      Arg.IntArg(str.toInt)
-    } |
-    floatingPointNumber ^^ { str =>
-      Arg.FloatingArg(str.toDouble)
-    }
+    wholeNumber ^^ (str => Arg.IntArg(str.toInt)) |
+    floatingPointNumber ^^ (str => Arg.FloatingArg(str.toDouble))
+
   def kwarg: Parser[(String, Arg)] = ((ident <~ ":") ~ arg) ^^ { case ident ~ arg => (ident, arg) }
 
   def allArgs: Parser[List[Arg] ~ List[(String, Arg)]] =
