@@ -1,5 +1,6 @@
 import generate.database.PostgresGenerator
 import generate.GenerationOutputter
+import generate.database.ast._
 
 object Main extends App {
   def square(x: Int): Int =
@@ -7,10 +8,9 @@ object Main extends App {
 
   println("Hello, Temple!")
 
+  val statement = Create("Users", List(IntColumn("yeets"), StringColumn("username"), StringColumn("email")))
   val postgresGen = new PostgresGenerator()
-  postgresGen.create("Users")
-  postgresGen.create("Bookings")
-  postgresGen.delete("Users")
+  postgresGen.generate(statement)
 
   val outputter = new GenerationOutputter("Test.SQL")
   outputter.output(postgresGen)

@@ -1,12 +1,10 @@
 package generate.database
 
+import generate.database.ast.Statement
+
 abstract class DatabaseGenerator {
 
   def getText: String
 
-  def create(tableName: String): Unit
-
-  def select(tableName: String): Unit
-
-  def delete(tableName: String): Unit
+  def generate(statement: Statement): Unit
 }
