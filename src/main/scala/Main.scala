@@ -1,6 +1,6 @@
 import generate.database.PostgresGenerator
-import generate.GenerationOutputter
 import generate.database.ast._
+import utils.utils // TODO: Rename
 
 object Main extends App {
   def square(x: Int): Int =
@@ -8,11 +8,21 @@ object Main extends App {
 
   println("Hello, Temple!")
 
-  val statement = Create("Users", List(IntColumn("yeets"), StringColumn("username"), StringColumn("email")))
-  val postgresGen = new PostgresGenerator()
-  postgresGen.generate(statement)
+  val statement = Create(
+    "Users",
+    List(
+      StringColumn("username"),
+      StringColumn("email"),
+      StringColumn("firstName"),
+      StringColumn("lastName"),
+      DateTimeTzColumn("createdAt"),
+      IntColumn("numberOfDogs"),
+      BoolColumn("yeets"),
+      FloatColumn("currentBankBalance"),
+      DateColumn("birthDate"),
+      TimeColumn("breakfastTime")
+    )
+  )
 
-  val outputter = new GenerationOutputter("Test.SQL")
-  outputter.output(postgresGen)
-  outputter.close()
+  utils.writeToFile("test.sql", PostgresGenerator.generate(statement))
 }

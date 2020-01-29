@@ -1,27 +1,26 @@
 package generate.database
+
 import generate.database.ast._
 
-class PostgresGenerator extends DatabaseGenerator {
+object PostgresGenerator extends DatabaseGenerator {
 
-  private val sb = new StringBuilder()
-
-  override def getText: String =
-    this.sb.mkString
-
-  override def generate(statement: Statement): Unit =
+  override def generate(statement: Statement): String = {
+    val sb = new StringBuilder()
     statement match {
       case Create(tableName, columns) =>
         sb.append(s"CREATE TABLE $tableName (\n")
         columns foreach {
           case IntColumn(name)        => sb.append(s"    $name INT,\n")
-          case StringColumn(name)     => sb.append(s"    $name TEXT,\n")
-          case DateTimeTzColumn(name) => sb.append(s"    $name TIMESTAMPTZ,\n")
-          case BoolColumn(name)       => sb.append(s"    $name BOOLEAN,\n")
           case FloatColumn(name)      => sb.append(s"    $name REAL,\n")
+          case StringColumn(name)     => sb.append(s"    $name TEXT,\n")
+          case BoolColumn(name)       => sb.append(s"    $name BOOLEAN,\n")
           case DateColumn(name)       => sb.append(s"    $name DATE,\n")
           case TimeColumn(name)       => sb.append(s"    $name TIME,\n")
+          case DateTimeTzColumn(name) => sb.append(s"    $name TIMESTAMPTZ,\n")
         }
         sb.append(");\n")
     }
+    sb.mkString
+  }
 
 }
