@@ -3,7 +3,7 @@ import temple.DSL.DSLParser
 
 object Main extends App {
   val fSource = Source.fromFile(args(0))
-  val result  = DSLParser.parse(fSource.reader())
+  val result  = DSLParser.parse(fSource.mkString)
   println(result)
 
   fSource.close()

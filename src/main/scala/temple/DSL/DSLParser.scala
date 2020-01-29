@@ -77,7 +77,7 @@ object DSLParser extends DSLParser {
     (" " * (input.pos.column + 2 + lineNo.length)) + "^"
   }
 
-  def parse(contents: InputStreamReader): Either[String, temple.DSL.DSLRoot] =
+  def parse(contents: String): Either[String, temple.DSL.DSLRoot] =
     parseAll(rootItem, contents) match {
       case Success(result, input) => Right(result)
       case NoSuccess(str, input)  => Left(str + '\n' + printError(input))
