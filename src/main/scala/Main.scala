@@ -1,6 +1,6 @@
 import generate.database.PostgresGenerator
 import generate.database.ast._
-import utils.utils // TODO: Rename
+import utils.FileUtils
 
 object Main extends App {
 
@@ -25,5 +25,5 @@ object Main extends App {
     )
   )
 
-  utils.writeToFile("test.sql", PostgresGenerator.generate(statement))
+  FileUtils.writeToFile("test.sql", PostgresGenerator.generate(statement))
 }

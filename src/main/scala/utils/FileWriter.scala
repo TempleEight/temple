@@ -2,7 +2,7 @@ package utils
 
 import java.io.{File, PrintWriter}
 
-object utils {
+object FileUtils {
 
   def writeToFile(filename: String, s: String): Unit = {
     val writer = new PrintWriter(new File(filename))
