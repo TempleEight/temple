@@ -7,7 +7,7 @@ package object database {
   /** Static testing assets for DB generation */
   object TestData {
 
-    val create_Statement = Create(
+    val createStatement = Create(
       "Users",
       List(
         StringColumn("username"),
@@ -23,7 +23,7 @@ package object database {
       )
     )
 
-    val create_String: String =
+    val createString: String =
       """CREATE TABLE Users (
         |    username TEXT,
         |    email TEXT,

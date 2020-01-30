@@ -4,9 +4,6 @@ import utils.FileUtils
 
 object Main extends App {
 
-  def square(x: Int): Int =
-    x * x
-
   println("Hello, Temple!")
 
   val statement = Create(
