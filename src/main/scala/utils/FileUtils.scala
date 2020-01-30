@@ -8,10 +8,7 @@ object FileUtils {
   /** Write a string to file */
   def writeToFile(filename: String, s: String): Unit = {
     val writer = new PrintWriter(new File(filename))
-    try {
-      writer.write(s)
-    } finally {
-      writer.close()
-    }
+    try writer.write(s)
+    finally writer.close()
   }
 }
