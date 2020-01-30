@@ -58,7 +58,7 @@ package object DSL {
     }
   }
 
-  case class DSLRoot(key: String, tag: String, entries: List[Entry]) extends Entry {
+  case class DSLRootItem(key: String, tag: String, entries: List[Entry]) extends Entry {
     override def toString: String = {
       val contents = indentString(entries.mkString("\n"))
       s"$key: $tag {\n$contents\n}"

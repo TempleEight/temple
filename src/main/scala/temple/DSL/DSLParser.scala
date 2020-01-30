@@ -5,84 +5,124 @@ import scala.collection.mutable.ListBuffer
 import scala.util.parsing.combinator.JavaTokenParsers
 import java.io.InputStreamReader
 
+/** A library of parser generators for the Templefile DSL */
 protected class DSLParser extends JavaTokenParsers {
 
+  /**
+    * A parser generator for repetitions, terminated by a given parser `p0`
+    *
+    * This is different from `rep` because, unless it finds the termination `q0`, the error message is related to the
+    * parsing of `p0` not `q0`
+    * @param p0 The parser that is repeated
+    * @param q0 The parser marking the end of the sequence. Use `guard` to avoid consuming this input
+    * @return A parser that returns a list of the successful parses of `p0`
+    */
   def repUntil[T](p0: => Parser[T], q0: => Parser[Any] = ""): Parser[List[T]] = Parser { in =>
     lazy val p = p0
     lazy val q = q0
     val elems  = new ListBuffer[T]
 
-    @tailrec def applyp(in0: Input): ParseResult[List[T]] = p(in0) match {
-      case Success(x, rest) => elems += x; applyp(rest)
-      case e: Error         => e // still have to propagate error
+    // run `p0` repeatedly
+    @tailrec def applyP(in0: Input): ParseResult[List[T]] = p(in0) match {
+      case Success(x, rest) => elems += x; applyP(rest)
+      case e: Error         => e // still have to propagate `p`’s parser error
       case Failure(str, input) =>
         q(in0) match {
-          case Success(_, next) => Success(elems.toList, next)
-          case _: Failure       => Failure(str, input)
-          case e: Error         => e // still have to propagate error
+          case Success(_, next) => Success(elems.toList, next) // allow `q` to consume (use guard to avoid)
+          case _: Failure       => Failure(str, input)         // If both fail, propagate `p0`’s failure.
+          case e: Error         => e                           // still have to propagate `q0`’s parser error
         }
       case _ => Success(elems.toList, in0)
     }
 
-    applyp(in)
+    applyP(in)
   }
 
+  /**
+    * A parser generator for repetitions until the end of the input
+    *
+    * This is different from `rep` because the error message is related to the parsing of `p0`, rather than stating that
+    * the end of the string is expected
+    *
+    * @param p0 The parser that is repeated
+    * @return A parser that returns a list of the successful parses of `p0`
+    */
   def repAll[T](p0: => Parser[T]): Parser[List[T]] = repUntil(p0, "$".r)
 
-  def rootItem: Parser[DSLRoot] = (ident <~ ":") ~ (ident <~ "{") ~ repUntil(entry, "}") ^^ {
-    case key ~ tag ~ entries => DSLRoot(key, tag, entries)
+  /** A parser generator for an entire Templefile */
+  def templeFile: Parser[List[DSLRootItem]] = repAll(rootItem)
+
+  /** A parser generator for each item at the root level, i.e. a name, tag and block */
+  def rootItem: Parser[DSLRootItem] = (ident <~ ":") ~ (ident <~ "{") ~ repUntil(entry, "}") ^^ {
+    case key ~ tag ~ entries => DSLRootItem(key, tag, entries)
   }
 
+  /** A parser generator for an entry within a block. */
   def entry: Parser[Entry] = (attribute | metadata) <~ ";" | rootItem <~ ";".?
 
-  def listArg[T]: Parser[Arg] =
-    "[" ~> repUntil(arg <~ argsListSeparator, "]") ^^ { elems =>
-      Arg.ListArg(elems)
-    }
+  /** A parser generator for a list of arguments in square brackets */
+  def listArg: Parser[Arg] = "[" ~> repUntil(arg <~ argsListSeparator, "]") ^^ (elems => Arg.ListArg(elems))
 
+  /** A parser generator for a list of arguments in square brackets, when used in shorthand to replace the brackets */
   def shorthandListArg[T]: Parser[List[Arg] ~ List[T]] = (listArg ^^ (list => List(list))) ~ success(List())
 
+  /** A parser generator for a line of metadata */
   def metadata: Parser[Entry.Metadata] = "#" ~> ident ~ (allArgs | shorthandListArg) ^^ {
     case function ~ (args ~ kwargs) => Entry.Metadata(function, args, kwargs)
   }
 
+  /** A parser generator for an attribute, i.e. a field of the database/data structure */
   def attribute: Parser[Entry.Attribute] =
-    (ident <~ ":") ~ fieldType ~ repUntil(annotation, guard("[;}]".r)) ^^ {
+    (ident <~ ":") ~ attributeType ~ repUntil(annotation, guard("[;}]".r)) ^^ {
       case key ~ fieldType ~ annotations => Entry.Attribute(key, fieldType, annotations)
     }
 
-  // find a comma or the end of the argument list
+  /** A parser generator for a comma or the end of the argument list */
   def argsListSeparator: Parser[Unit] = ("," | guard("]" | ")" | "}")) ^^^ ()
 
+  /**
+    * A parser generator for any argument passed to a type or metadata
+    */
   def arg: Parser[Arg] =
     ident ^^ Arg.TokenArg |
     wholeNumber ^^ (str => Arg.IntArg(str.toInt)) |
     floatingPointNumber ^^ (str => Arg.FloatingArg(str.toDouble)) |
     listArg
 
+  /** A parser generator for an argument keyed by a keyword */
   def kwarg: Parser[(String, Arg)] = ((ident <~ ":") ~ arg) ^^ { case ident ~ arg => (ident, arg) }
 
+  /** A parser generator for a sequence of arguments, starting positionally and subsequently keyed */
   def allArgs: Parser[List[Arg] ~ List[(String, Arg)]] =
     "(" ~> (rep(arg <~ argsListSeparator) ~ repUntil(kwarg <~ argsListSeparator, ")"))
 
-  def fieldType: Parser[FieldType] = ident ~ allArgs.? ^^ {
+  /** A parser generator for the type of an attribute */
+  def attributeType: Parser[FieldType] = ident ~ allArgs.? ^^ {
     case name ~ Some(args ~ kwargs) => FieldType(name, args, kwargs)
     case name ~ None                => FieldType(name)
   }
 
+  /** A parser generator for an annotation on an attribute */
   def annotation: Parser[Annotation] = "@" ~> ident ^^ Annotation
 }
 
 object DSLParser extends DSLParser {
+
+  /** Show an error message for a failed parse, with the line and number printed */
   protected def printError(input: Input): String = {
     val lineNo = input.pos.line.toString
     lineNo + " | " + input.source.toString.split("\n")(input.pos.line - 1) + "\n" +
     (" " * (input.pos.column + 2 + lineNo.length)) + "^"
   }
 
-  def parse(contents: String): Either[String, List[DSLRoot]] =
-    parseAll(repAll(rootItem), contents) match {
-      case Success(result, input) => Right(result)
-      case NoSuccess(str, input)  => Left(str + '\n' + printError(input))
+  /**
+    * Parse the contents of a Temple file
+    * @param contents the contents of a Templefile as a string
+    * @return Right of the the parsed list of root elements, or Left of a string representing the error
+    */
+  def parse(contents: String): Either[String, List[DSLRootItem]] =
+    parseAll(templeFile, contents) match {
+      case Success(result, _)    => Right(result)
+      case NoSuccess(str, input) => Left(str + '\n' + printError(input))
     }
 }

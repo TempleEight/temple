@@ -1,5 +1,5 @@
 import org.scalatest.{FlatSpec, Matchers}
-import temple.DSL.{DSLParser, DSLRoot, Entry}
+import temple.DSL._
 import TestUtils._
 import temple.DSL
 
