@@ -1,24 +1,27 @@
 package generate.database
 
 import generate.database.ast._
+import generate.database.ast.ColType._
 import utils.StringUtils._
 
 /** Implementation of [[DatabaseGenerator]] for generating PostgreSQL */
 object PostgresGenerator extends DatabaseGenerator {
 
-  /** Given a column, parse it into the type required by Postgres */
+  /** Given a column type, parse it into the type required by PostgreSQL */
+  private def parseColumnType(columnType: ColType): String =
+    columnType match {
+      case IntCol        => s"INT"
+      case FloatCol      => s"REAL"
+      case StringCol     => s"TEXT"
+      case BoolCol       => s"BOOLEAN"
+      case DateCol       => s"DATE"
+      case TimeCol       => s"TIME"
+      case DateTimeTzCol => s"TIMESTAMPTZ"
+    }
+
+  /** Parse a given column into PostgreSQL syntax */
   private def parseColumnDef(column: ColumnDef): String =
-    indent(
-      column.colType match {
-        case ColType.IntCol        => s"${column.name} INT"
-        case ColType.FloatCol      => s"${column.name} REAL"
-        case ColType.StringCol     => s"${column.name} TEXT"
-        case ColType.BoolCol       => s"${column.name} BOOLEAN"
-        case ColType.DateCol       => s"${column.name} DATE"
-        case ColType.TimeCol       => s"${column.name} TIME"
-        case ColType.DateTimeTzCol => s"${column.name} TIMESTAMPTZ"
-      }
-    )
+    indent(s"${column.name} ${parseColumnType(column.colType)}")
 
   /** Given a statement, parse it into a valid PostgreSQL statement */
   override def generate(statement: Statement): String = {
