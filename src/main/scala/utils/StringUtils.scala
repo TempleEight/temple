@@ -5,7 +5,4 @@ object StringUtils {
 
   /** Given a string, indent it by a given number of spaces */
   def indent(str: String, length: Int = 2): String = str.replaceAll("^|(?<=\n)", " " * length)
-
-  /** Given a string, wrap it with `left` on the left and `right` on the right */
-  def wrap(str: String, left: String = "(", right: String = ")"): String = left + str + right
 }
