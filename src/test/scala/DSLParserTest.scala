@@ -1,7 +1,7 @@
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL._
-import TestUtils._
-import temple.DSL
+import utils.FileUtils._
+import utils.MonadUtils.FromEither
 
 class DSLParserTest extends FlatSpec with Matchers {
   "Empty string" should "parse" in {

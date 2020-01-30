@@ -10,7 +10,7 @@ User: service {
   birthDate: date;
   breakfastTime: time;
 
-  Fred: subservice {
+  Fred: struct {
     field: string;
   };
 

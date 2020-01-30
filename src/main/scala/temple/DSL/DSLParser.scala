@@ -71,7 +71,7 @@ protected class DSLParser extends JavaTokenParsers {
     case function ~ (args ~ kwargs) => Entry.Metadata(function, args, kwargs)
   }
 
-  /** A parser generator for an attribute, i.e. a field of the database/data structure */
+  /** A parser generator for a struct’s attribute */
   def attribute: Parser[Entry.Attribute] =
     (ident <~ ":") ~ attributeType ~ repUntil(annotation, guard("[;}]".r)) ^^ {
       case key ~ fieldType ~ annotations => Entry.Attribute(key, fieldType, annotations)
@@ -97,9 +97,9 @@ protected class DSLParser extends JavaTokenParsers {
     "(" ~> (rep(arg <~ argsListSeparator) ~ repUntil(kwarg <~ argsListSeparator, ")"))
 
   /** A parser generator for the type of an attribute */
-  def attributeType: Parser[FieldType] = ident ~ allArgs.? ^^ {
-    case name ~ Some(args ~ kwargs) => FieldType(name, args, kwargs)
-    case name ~ None                => FieldType(name)
+  def attributeType: Parser[AttributeType] = ident ~ allArgs.? ^^ {
+    case name ~ Some(args ~ kwargs) => AttributeType(name, args, kwargs)
+    case name ~ None                => AttributeType(name)
   }
 
   /** A parser generator for an annotation on an attribute */
