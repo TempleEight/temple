@@ -27,20 +27,22 @@ protected class DSLParser extends JavaTokenParsers {
     applyp(in)
   }
 
+  def repAll[T](p0: => Parser[T]): Parser[List[T]] = repUntil(p0, "$".r)
+
   def rootItem: Parser[DSLRoot] = (ident <~ ":") ~ (ident <~ "{") ~ repUntil(entry, "}") ^^ {
     case key ~ tag ~ entries => DSLRoot(key, tag, entries)
   }
 
   def entry: Parser[Entry] = (attribute | metadata) <~ ";" | rootItem <~ ";".?
 
-  def shorthandArgList[T]: Parser[List[Arg] ~ List[T]] = {
-    val listParser = "[" ~> repUntil(arg <~ argsListSeparator, "]") ^^ { elems =>
-      List(Arg.ListArg(elems))
+  def listArg[T]: Parser[Arg] =
+    "[" ~> repUntil(arg <~ argsListSeparator, "]") ^^ { elems =>
+      Arg.ListArg(elems)
     }
-    listParser ~ success(List())
-  }
 
-  def metadata: Parser[Entry.Metadata] = "#" ~> ident ~ (allArgs | shorthandArgList) ^^ {
+  def shorthandListArg[T]: Parser[List[Arg] ~ List[T]] = (listArg ^^ (list => List(list))) ~ success(List())
+
+  def metadata: Parser[Entry.Metadata] = "#" ~> ident ~ (allArgs | shorthandListArg) ^^ {
     case function ~ (args ~ kwargs) => Entry.Metadata(function, args, kwargs)
   }
 
@@ -55,7 +57,8 @@ protected class DSLParser extends JavaTokenParsers {
   def arg: Parser[Arg] =
     ident ^^ Arg.TokenArg |
     wholeNumber ^^ (str => Arg.IntArg(str.toInt)) |
-    floatingPointNumber ^^ (str => Arg.FloatingArg(str.toDouble))
+    floatingPointNumber ^^ (str => Arg.FloatingArg(str.toDouble)) |
+    listArg
 
   def kwarg: Parser[(String, Arg)] = ((ident <~ ":") ~ arg) ^^ { case ident ~ arg => (ident, arg) }
 
@@ -77,8 +80,8 @@ object DSLParser extends DSLParser {
     (" " * (input.pos.column + 2 + lineNo.length)) + "^"
   }
 
-  def parse(contents: String): Either[String, temple.DSL.DSLRoot] =
-    parseAll(rootItem, contents) match {
+  def parse(contents: String): Either[String, List[DSLRoot]] =
+    parseAll(repAll(rootItem), contents) match {
       case Success(result, input) => Right(result)
       case NoSuccess(str, input)  => Left(str + '\n' + printError(input))
     }

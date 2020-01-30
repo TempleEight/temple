@@ -2,7 +2,8 @@ package temple
 
 package object DSL {
   // indent a multi-line string: insert two spaces at the start of the string and immediately following newline chars
-  private def indentString(str: String): String = str.replaceAll("^|(?<=\n)", "  ")
+  // TODO: use global utils once merged
+  private def indentString(str: String, length: Int = 2): String = str.replaceAll("^|(?<=\n)", " " * length)
 
   case class FieldType(typeName: String, args: List[Arg] = List(), kwargs: List[(String, Arg)] = List()) {
     override def toString: String = {
@@ -11,6 +12,7 @@ package object DSL {
       typeName + argsStr
     }
   }
+// TODO: move to the next step
 
 //  object FieldType {
 //    case class FieldType(typeName: String, args: List[Arg], kwargs: List[(String, Arg)]) extends FieldType
@@ -59,7 +61,7 @@ package object DSL {
   case class DSLRoot(key: String, tag: String, entries: List[Entry]) extends Entry {
     override def toString: String = {
       val contents = indentString(entries.mkString("\n"))
-      s"$key: service {\n$contents\n}"
+      s"$key: $tag {\n$contents\n}"
     }
   }
 

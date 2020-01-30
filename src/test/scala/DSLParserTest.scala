@@ -1,27 +1,27 @@
-import org.scalatest.FunSuite
-import temple.DSL.DSLParser
-import scala.io.Source
+import org.scalatest.{FlatSpec, Matchers}
+import temple.DSL.{DSLParser, DSLRoot, Entry}
+import TestUtils._
 import temple.DSL
 
-class DSLParserTest extends FunSuite {
-  test("DSLParser.emptyString") {
-    assert(DSLParser.parse("").isLeft)
+class DSLParserTest extends FlatSpec with Matchers {
+  "Empty string" should "parse" in {
+    DSLParser.parse("").isRight shouldBe true
   }
 
-  test("DSLParser.emptyService") {
-    assert(DSLParser.parse("Test: service { }").isRight)
+  "Empty service" should "parse" in {
+    DSLParser.parse("Test: service { }").isRight shouldBe true
   }
 
-  test("DSLParser.topLevelAnnotation") {
-    assert(DSLParser.parse("@server Test: service { }").isLeft)
+  "Annotations" should "not parse at the top level" in {
+    DSLParser.parse("@server Test: service { }").isLeft shouldBe true
   }
 
-  test("DSLParser.validSimpleInput") {
-    val fileSource  = Source.fromFile("src/test/scala/testfiles/simple.temple").mkString
-    val parseResult = DSLParser.parse(fileSource)
-    assert(parseResult.isRight)
+  "Simple.temple" should "parse" in {
+    val source      = readFile("src/test/scala/testfiles/simple.temple")
+    val parseResult = DSLParser.parse(source).fromEither(msg => fail(s"first parse failed, $msg"))
+    val reSourced   = parseResult.mkString("\n\n")
 
-    val removeWhitespace = fileSource.split("\n").filter(_.nonEmpty).mkString("\n")
-    assert(removeWhitespace == parseResult.right.get.toString())
+    val reParsedResult = DSLParser.parse(reSourced).fromEither(msg => fail(s"second parse failed, $msg"))
+    parseResult shouldEqual reParsedResult
   }
 }
