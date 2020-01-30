@@ -10,17 +10,17 @@ package object database {
     val createStatement = Create(
       "Users",
       List(
-        Column("id", Some(ColType.IntCol)),
-        Column("bankBalance", Some(ColType.FloatCol)),
-        Column("name", Some(ColType.StringCol)),
-        Column("isStudent", Some(ColType.BoolCol)),
-        Column("dateOfBirth", Some(ColType.DateCol)),
-        Column("timeOfDay", Some(ColType.TimeCol)),
-        Column("expiry", Some(ColType.DateTimeTzCol))
+        ColumnDef("id", ColType.IntCol),
+        ColumnDef("bankBalance", ColType.FloatCol),
+        ColumnDef("name", ColType.StringCol),
+        ColumnDef("isStudent", ColType.BoolCol),
+        ColumnDef("dateOfBirth", ColType.DateCol),
+        ColumnDef("timeOfDay", ColType.TimeCol),
+        ColumnDef("expiry", ColType.DateTimeTzCol)
       )
     )
 
-    val createString: String =
+    val postgresCreateString: String =
       """CREATE TABLE Users (
         |  id INT,
         |  bankBalance REAL,
@@ -33,6 +33,7 @@ package object database {
         |""".stripMargin
 
     val readStatement = Read(
+      "Users",
       List(
         Column("id"),
         Column("bankBalance"),
@@ -41,21 +42,11 @@ package object database {
         Column("dateOfBirth"),
         Column("timeOfDay"),
         Column("expiry")
-      ),
-      "Users"
+      )
     )
 
-    val readString: String =
-      """SELECT
-      |  id,
-      |  bankBalance,
-      |  name,
-      |  isStudent,
-      |  dateOfBirth,
-      |  timeOfDay,
-      |  expiry
-      |FROM
-      |  Users;
+    val postgresSelectString: String =
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users;
       |""".stripMargin
   }
 }

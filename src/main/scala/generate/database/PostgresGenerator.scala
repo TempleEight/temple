@@ -7,17 +7,16 @@ import utils.StringUtils._
 object PostgresGenerator extends DatabaseGenerator {
 
   /** Given a column, parse it into the type required by Postgres */
-  private def parseColumn(column: Column): String =
+  private def parseColumnDef(column: ColumnDef): String =
     indent(
       column.colType match {
-        case Some(ColType.IntCol)        => s"${column.name} INT"
-        case Some(ColType.FloatCol)      => s"${column.name} REAL"
-        case Some(ColType.StringCol)     => s"${column.name} TEXT"
-        case Some(ColType.BoolCol)       => s"${column.name} BOOLEAN"
-        case Some(ColType.DateCol)       => s"${column.name} DATE"
-        case Some(ColType.TimeCol)       => s"${column.name} TIME"
-        case Some(ColType.DateTimeTzCol) => s"${column.name} TIMESTAMPTZ"
-        case None                        => s"${column.name}"
+        case ColType.IntCol        => s"${column.name} INT"
+        case ColType.FloatCol      => s"${column.name} REAL"
+        case ColType.StringCol     => s"${column.name} TEXT"
+        case ColType.BoolCol       => s"${column.name} BOOLEAN"
+        case ColType.DateCol       => s"${column.name} DATE"
+        case ColType.TimeCol       => s"${column.name} TIME"
+        case ColType.DateTimeTzCol => s"${column.name} TIMESTAMPTZ"
       }
     )
 
@@ -27,13 +26,13 @@ object PostgresGenerator extends DatabaseGenerator {
     statement match {
       case Create(tableName, columns) =>
         sb.append(s"CREATE TABLE $tableName ")
-        val stringColumns = columns map parseColumn
+        val stringColumns = columns.map(parseColumnDef)
         sb.append(stringColumns.mkString("(\n", ",\n", "\n)"))
-      case Read(columns, tableName) =>
-        sb.append("SELECT")
-        val stringColumns = columns map parseColumn
-        sb.append(stringColumns.mkString("\n", ",\n", "\n"))
-        sb.append(s"FROM\n${indent(tableName)}")
+      case Read(tableName, columns) =>
+        sb.append("SELECT ")
+        val stringColumns = columns.map(_.name)
+        sb.append(stringColumns.mkString(", "))
+        sb.append(s" FROM $tableName")
     }
     sb.append(";\n")
     sb.mkString
