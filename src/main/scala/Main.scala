@@ -3,6 +3,7 @@ import generate.database.ast._
 import utils.utils // TODO: Rename
 
 object Main extends App {
+
   def square(x: Int): Int =
     x * x
 
