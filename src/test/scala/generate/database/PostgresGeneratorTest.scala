@@ -1,9 +1,8 @@
 package generate.database
-import org.scalatest.FunSuite
+import org.scalatest.{FlatSpec, Matchers}
 
-class PostgresGeneratorTest extends FunSuite {
-
-  test("Postgres Generation Simple Create Statement") {
-    assert(PostgresGenerator.generate(TestData.create_Statement) === TestData.create_String)
-  }
+class PostgresGeneratorTest extends FlatSpec with Matchers {
+    "PostgresGenerator" should "output correctly" in {
+      PostgresGenerator.generate(TestData.create_Statement) shouldBe TestData.create_String
+    }
 }
