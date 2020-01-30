@@ -28,7 +28,7 @@ object PostgresGenerator extends DatabaseGenerator {
       case Create(tableName, columns) =>
         sb.append(s"CREATE TABLE $tableName ")
         val stringColumns = columns map parseColumn
-        sb.append(wrap(stringColumns.mkString("", ",\n", ""), left = "(\n", right = ")\n"))
+        sb.append(wrap(stringColumns.mkString("", ",\n", "\n"), left = "(\n"))
         sb.append(";\n")
     }
     sb.mkString
