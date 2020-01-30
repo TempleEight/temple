@@ -8,7 +8,7 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
     PostgresGenerator.generate(TestData.createStatement) shouldBe TestData.createString
   }
 
-  "PostgresGenerator" should "handle column constrants correctly" in {
+  "PostgresGenerator" should "handle column constraints correctly" in {
     PostgresGenerator.generate(TestData.createStatement) shouldBe TestData.createString
   }
 }
