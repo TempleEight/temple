@@ -1,11 +1,11 @@
 package temple
 
+import utils.StringUtils._
+
 package object DSL {
-  // indent a multi-line string: insert two spaces at the start of the string and immediately following newline chars
-  // TODO: use global utils once merged
-  private def indentString(str: String, length: Int = 2): String = str.replaceAll("^|(?<=\n)", " " * length)
 
   case class FieldType(typeName: String, args: List[Arg] = List(), kwargs: List[(String, Arg)] = List()) {
+
     override def toString: String = {
       val kwargsStr = kwargs.map { case (str, arg) => s"$str: $arg" }
       val argsStr   = if (args.isEmpty && kwargs.isEmpty) "" else (args ++ kwargsStr).mkString("(", ",", ")")
@@ -46,11 +46,13 @@ package object DSL {
   sealed trait ServiceEntry extends Entry
 
   object Entry {
+
     case class Attribute(key: String, fieldType: FieldType, annotations: List[Annotation]) extends ServiceEntry {
       override def toString: String = s"$key: $fieldType${annotations.map(" " + _).mkString};"
     }
 
     case class Metadata(function: String, args: List[Arg], kwargs: List[(String, Arg)]) extends Entry {
+
       override def toString: String = {
         val kwargsStr = kwargs.map { case (str, arg) => s"$str: $arg" }
         s"#$function ${(args ++ kwargsStr).mkString("(", ", ", ")")};"
@@ -59,8 +61,9 @@ package object DSL {
   }
 
   case class DSLRootItem(key: String, tag: String, entries: List[Entry]) extends Entry {
+
     override def toString: String = {
-      val contents = indentString(entries.mkString("\n"))
+      val contents = indent(entries.mkString("\n"))
       s"$key: $tag {\n$contents\n}"
     }
   }
