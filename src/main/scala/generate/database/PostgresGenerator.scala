@@ -6,17 +6,38 @@ import utils.StringUtils._
 /** Implementation of [[DatabaseGenerator]] for generating PostgreSQL */
 object PostgresGenerator extends DatabaseGenerator {
 
+  private def parseComparison(comparison: Comparison): String =
+    comparison match {
+      case GreaterEqual => ">="
+      case Greater      => ">"
+      case Equal        => "=="
+      case NotEqual     => "!="
+      case Less         => "<"
+      case LessEqual    => "<="
+    }
+
+  private def parseConstraint(constraint: ColumnConstraint): String =
+    constraint match {
+      case NonNull                    => "NOT NULL"
+      case Null                       => "NULL"
+      case Check(left, comp, right)   => s"CHECK ($left " + parseComparison(comp) + s" $right)"
+      case Unique                     => "UNIQUE"
+      case PrimaryKey                 => "PRIMARY KEY"
+      case References(table, colName) => s"REFERENCES $table($colName)"
+    }
+
   /** Given a column, parse it into the type required by Postgres */
   private def parseColumn(column: Column): String =
     indent(
       column match {
-        case IntColumn(name)        => s"$name INT"
-        case FloatColumn(name)      => s"$name REAL"
-        case StringColumn(name)     => s"$name TEXT"
-        case BoolColumn(name)       => s"$name BOOLEAN"
-        case DateColumn(name)       => s"$name DATE"
-        case TimeColumn(name)       => s"$name TIME"
-        case DateTimeTzColumn(name) => s"$name TIMESTAMPTZ"
+        case IntColumn(name, constraints)    => s"$name INT" + constraints.map(parseConstraint).map(" " + _).mkString
+        case FloatColumn(name, constraints)  => s"$name REAL" + constraints.map(parseConstraint).map(" " + _).mkString
+        case StringColumn(name, constraints) => s"$name TEXT" + constraints.map(parseConstraint).map(" " + _).mkString
+        case BoolColumn(name, constraints)   => s"$name BOOLEAN" + constraints.map(parseConstraint).map(" " + _).mkString
+        case DateColumn(name, constraints)   => s"$name DATE" + constraints.map(parseConstraint).map(" " + _).mkString
+        case TimeColumn(name, constraints)   => s"$name TIME" + constraints.map(parseConstraint).map(" " + _).mkString
+        case DateTimeTzColumn(name, constraints) =>
+          s"$name TIMESTAMPTZ" + constraints.map(parseConstraint).map(" " + _).mkString
       },
       length = 4
     )

@@ -37,5 +37,24 @@ package object database {
         |    breakfastTime TIME
         |);
         |""".stripMargin
+
+    val createStatementWithConstraints = Create(
+      "Test",
+      List(
+        IntColumn("item_id", List(NonNull, PrimaryKey)),
+        DateTimeTzColumn("createdAt", List(Unique)),
+        TimeColumn("bookingTime", List(References("Bookings", "bookingTime"))),
+        IntColumn("value", List(Check("value", GreaterEqual, "1"), Null))
+      )
+    )
+
+    val createStringWithConstraints: String =
+      """CREATE TABLE Test (
+        |    item_id INT NOT NULL PRIMARY KEY,
+        |    createdAt TIMESTAMPTZ UNIQUE,
+        |    bookingTime TIME REFERENCES Bookings(bookingTime),
+        |    value INT CHECK (value >= 1) NULL
+        |);
+        |""".stripMargin
   }
 }
