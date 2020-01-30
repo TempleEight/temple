@@ -4,6 +4,6 @@ import org.scalatest.FunSuite
 class PostgresGeneratorTest extends FunSuite {
 
   test("Postgres Generation Simple Create Statement") {
-    assert(PostgresGenerator.generate(Assets.create_Statement) === Assets.create_String)
+    assert(PostgresGenerator.generate(TestData.create_Statement) === TestData.create_String)
   }
 }

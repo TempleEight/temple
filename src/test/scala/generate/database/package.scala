@@ -3,7 +3,7 @@ package generate
 import generate.database.ast._
 
 package object database {
-  object Assets {
+  object TestData {
 
     val create_Statement = Create(
       "Users",
@@ -20,6 +20,7 @@ package object database {
         TimeColumn("breakfastTime")
       )
     )
+
     val create_String: String =
       """CREATE TABLE Users (
         |    username TEXT,
@@ -34,6 +35,5 @@ package object database {
         |    breakfastTime TIME
         |);
         |""".stripMargin
-
   }
 }
