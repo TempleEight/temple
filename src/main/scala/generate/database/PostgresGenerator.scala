@@ -33,7 +33,7 @@ object PostgresGenerator extends DatabaseGenerator {
         sb.append("SELECT")
         val stringColumns = columns map parseColumn
         sb.append(stringColumns.mkString("\n", ",\n", "\n"))
-        sb.append(s"FROM $tableName")
+        sb.append(s"FROM\n${indent(tableName)}")
     }
     sb.append(";\n")
     sb.mkString
