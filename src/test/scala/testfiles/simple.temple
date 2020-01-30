@@ -1,0 +1,19 @@
+User: service {
+  username: string;
+  email: string(40,5);
+  firstName: string;
+  lastName: string;
+  createdAt: datetimetz;
+  numberOfDogs: int;
+  yeets: bool;
+  currentBankBalance: fixed(places: 2);
+  birthDate: date;
+  breakfastTime: time;
+
+  Fred: struct {
+    field: string;
+  };
+
+  #auth(login: username);
+  #uses [Booking, Events];
+}
