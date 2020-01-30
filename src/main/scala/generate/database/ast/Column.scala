@@ -3,8 +3,6 @@ package generate.database.ast
 /** AST implementation of database columns for all data types supported in Templefile */
 sealed trait Column
 
-case class GenericColumn(name: String) extends Column
-
 case class IntColumn(name: String, constraints: List[ColumnConstraint] = List()) extends Column
 
 case class FloatColumn(name: String, constraints: List[ColumnConstraint] = List()) extends Column
