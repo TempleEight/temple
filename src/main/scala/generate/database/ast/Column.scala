@@ -1,5 +1,6 @@
 package generate.database.ast
 
+/** AST implementation of database columns for all data types supported in Templefile */
 sealed trait Column {
   val colName: String
 }

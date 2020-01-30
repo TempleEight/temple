@@ -3,6 +3,8 @@ package generate
 import generate.database.ast._
 
 package object database {
+
+  /** Static testing assets for DB generation */
   object TestData {
 
     val create_Statement = Create(

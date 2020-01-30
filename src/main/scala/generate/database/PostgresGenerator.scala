@@ -2,8 +2,10 @@ package generate.database
 
 import generate.database.ast._
 
+/** Implementation of [[DatabaseGenerator]] for generating PostgreSQL */
 object PostgresGenerator extends DatabaseGenerator {
 
+  /** Given a column, parse it into the type required by Postgres */
   private def parseColumn(column: Column): String =
     column match {
       case IntColumn(name)        => s"    $name INT"
@@ -15,6 +17,7 @@ object PostgresGenerator extends DatabaseGenerator {
       case DateTimeTzColumn(name) => s"    $name TIMESTAMPTZ"
     }
 
+  /** Given a statement, parse it into a valid PostgresQL statement */
   override def generate(statement: Statement): String = {
     val sb = new StringBuilder()
     statement match {
@@ -26,5 +29,4 @@ object PostgresGenerator extends DatabaseGenerator {
     }
     sb.mkString
   }
-
 }
