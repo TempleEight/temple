@@ -10,32 +10,43 @@ package object database {
     val createStatement = Create(
       "Users",
       List(
-        StringColumn("username"),
-        StringColumn("email"),
-        StringColumn("firstName"),
-        StringColumn("lastName"),
-        DateTimeTzColumn("createdAt"),
-        IntColumn("numberOfDogs"),
-        BoolColumn("yeets"),
-        FloatColumn("currentBankBalance"),
-        DateColumn("birthDate"),
-        TimeColumn("breakfastTime")
+        ColumnDef("id", ColType.IntCol),
+        ColumnDef("bankBalance", ColType.FloatCol),
+        ColumnDef("name", ColType.StringCol),
+        ColumnDef("isStudent", ColType.BoolCol),
+        ColumnDef("dateOfBirth", ColType.DateCol),
+        ColumnDef("timeOfDay", ColType.TimeCol),
+        ColumnDef("expiry", ColType.DateTimeTzCol)
       )
     )
 
-    val createString: String =
+    val postgresCreateString: String =
       """CREATE TABLE Users (
-        |    username TEXT,
-        |    email TEXT,
-        |    firstName TEXT,
-        |    lastName TEXT,
-        |    createdAt TIMESTAMPTZ,
-        |    numberOfDogs INT,
-        |    yeets BOOLEAN,
-        |    currentBankBalance REAL,
-        |    birthDate DATE,
-        |    breakfastTime TIME
+        |  id INT,
+        |  bankBalance REAL,
+        |  name TEXT,
+        |  isStudent BOOLEAN,
+        |  dateOfBirth DATE,
+        |  timeOfDay TIME,
+        |  expiry TIMESTAMPTZ
         |);
         |""".stripMargin
+
+    val readStatement = Read(
+      "Users",
+      List(
+        Column("id"),
+        Column("bankBalance"),
+        Column("name"),
+        Column("isStudent"),
+        Column("dateOfBirth"),
+        Column("timeOfDay"),
+        Column("expiry")
+      )
+    )
+
+    val postgresSelectString: String =
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users;
+      |""".stripMargin
   }
 }
