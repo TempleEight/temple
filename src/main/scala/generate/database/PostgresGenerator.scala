@@ -20,7 +20,7 @@ object PostgresGenerator extends DatabaseGenerator {
       }
     )
 
-  /** Given a statement, parse it into a valid PostgresQL statement */
+  /** Given a statement, parse it into a valid PostgreSQL statement */
   override def generate(statement: Statement): String = {
     val sb = new StringBuilder()
     statement match {
