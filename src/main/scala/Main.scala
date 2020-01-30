@@ -1,4 +1,5 @@
-object Main extends App {
+import temple.DSL.parser.DSLParser
 
-  println("Hello, Temple!")
-}
+import scala.io.Source
+
+object Main extends App {}
