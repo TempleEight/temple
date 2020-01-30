@@ -6,6 +6,7 @@ import utils.StringUtils._
 /** Implementation of [[DatabaseGenerator]] for generating PostgreSQL */
 object PostgresGenerator extends DatabaseGenerator {
 
+  /** Given a comparison, parse it into the Postgres format */
   private def parseComparison(comparison: Comparison): String =
     comparison match {
       case GreaterEqual => ">="
@@ -16,6 +17,7 @@ object PostgresGenerator extends DatabaseGenerator {
       case LessEqual    => "<="
     }
 
+  /** Given a column constraint, parse it into the Postgres format */
   private def parseConstraint(constraint: ColumnConstraint): String =
     constraint match {
       case NonNull                    => "NOT NULL"

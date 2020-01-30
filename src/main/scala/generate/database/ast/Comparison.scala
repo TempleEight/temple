@@ -1,5 +1,6 @@
 package generate.database.ast
 
+/** AST representation for boolean comparisons */
 sealed trait Comparison
 
 case object GreaterEqual extends Comparison
