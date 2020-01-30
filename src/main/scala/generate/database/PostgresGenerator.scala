@@ -9,16 +9,16 @@ object PostgresGenerator extends DatabaseGenerator {
   /** Given a column, parse it into the type required by Postgres */
   private def parseColumn(column: Column): String =
     indent(
-      column match {
-        case IntColumn(name)        => s"$name INT"
-        case FloatColumn(name)      => s"$name REAL"
-        case StringColumn(name)     => s"$name TEXT"
-        case BoolColumn(name)       => s"$name BOOLEAN"
-        case DateColumn(name)       => s"$name DATE"
-        case TimeColumn(name)       => s"$name TIME"
-        case DateTimeTzColumn(name) => s"$name TIMESTAMPTZ"
-      },
-      length = 4
+      column.colType match {
+        case Some(ColType.IntCol)        => s"${column.name} INT"
+        case Some(ColType.FloatCol)      => s"${column.name} REAL"
+        case Some(ColType.StringCol)     => s"${column.name} TEXT"
+        case Some(ColType.BoolCol)       => s"${column.name} BOOLEAN"
+        case Some(ColType.DateCol)       => s"${column.name} DATE"
+        case Some(ColType.TimeCol)       => s"${column.name} TIME"
+        case Some(ColType.DateTimeTzCol) => s"${column.name} TIMESTAMPTZ"
+        case None                        => s"${column.name}"
+      }
     )
 
   /** Given a statement, parse it into a valid PostgresQL statement */
@@ -29,8 +29,13 @@ object PostgresGenerator extends DatabaseGenerator {
         sb.append(s"CREATE TABLE $tableName ")
         val stringColumns = columns map parseColumn
         sb.append(stringColumns.mkString("(\n", ",\n", "\n)"))
-        sb.append(";\n")
+      case Read(columns, tableName) =>
+        sb.append("SELECT")
+        val stringColumns = columns map parseColumn
+        sb.append(stringColumns.mkString("\n", ",\n", "\n"))
+        sb.append(s"FROM $tableName")
     }
+    sb.append(";\n")
     sb.mkString
   }
 }

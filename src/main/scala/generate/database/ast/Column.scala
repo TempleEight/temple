@@ -1,20 +1,16 @@
 package generate.database.ast
 
 /** AST implementation of database columns for all data types supported in Templefile */
-sealed trait Column {
-  def name: String
+sealed case class Column(name: String, colType: Option[ColType] = None)
+
+sealed trait ColType
+
+object ColType {
+  case object IntCol        extends ColType
+  case object FloatCol      extends ColType
+  case object StringCol     extends ColType
+  case object BoolCol       extends ColType
+  case object DateCol       extends ColType
+  case object TimeCol       extends ColType
+  case object DateTimeTzCol extends ColType
 }
-
-case class IntColumn(name: String) extends Column
-
-case class FloatColumn(name: String) extends Column
-
-case class StringColumn(name: String) extends Column
-
-case class BoolColumn(name: String) extends Column
-
-case class DateColumn(name: String) extends Column
-
-case class TimeColumn(name: String) extends Column
-
-case class DateTimeTzColumn(name: String) extends Column

@@ -10,31 +10,25 @@ package object database {
     val createStatement = Create(
       "Users",
       List(
-        StringColumn("username"),
-        StringColumn("email"),
-        StringColumn("firstName"),
-        StringColumn("lastName"),
-        DateTimeTzColumn("createdAt"),
-        IntColumn("numberOfDogs"),
-        BoolColumn("yeets"),
-        FloatColumn("currentBankBalance"),
-        DateColumn("birthDate"),
-        TimeColumn("breakfastTime")
+        Column("id", Some(ColType.IntCol)),
+        Column("bankBalance", Some(ColType.FloatCol)),
+        Column("name", Some(ColType.StringCol)),
+        Column("isStudent", Some(ColType.BoolCol)),
+        Column("dateOfBirth", Some(ColType.DateCol)),
+        Column("timeOfDay", Some(ColType.TimeCol)),
+        Column("expiry", Some(ColType.DateTimeTzCol))
       )
     )
 
     val createString: String =
       """CREATE TABLE Users (
-        |    username TEXT,
-        |    email TEXT,
-        |    firstName TEXT,
-        |    lastName TEXT,
-        |    createdAt TIMESTAMPTZ,
-        |    numberOfDogs INT,
-        |    yeets BOOLEAN,
-        |    currentBankBalance REAL,
-        |    birthDate DATE,
-        |    breakfastTime TIME
+        |  id INT,
+        |  bankBalance REAL,
+        |  name TEXT,
+        |  isStudent BOOLEAN,
+        |  dateOfBirth DATE,
+        |  timeOfDay TIME,
+        |  expiry TIMESTAMPTZ
         |);
         |""".stripMargin
   }
