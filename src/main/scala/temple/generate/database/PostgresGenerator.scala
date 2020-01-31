@@ -3,9 +3,11 @@ package temple.generate.database
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.Comparison._
+import temple.generate.database.ast.Modifier.Where
 import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
 import temple.utils.StringUtils._
+
 import scala.util.chaining._
 
 /** Implementation of [[DatabaseGenerator]] for generating PostgreSQL */
@@ -31,6 +33,12 @@ object PostgresGenerator extends DatabaseGenerator {
       case Unique                     => "UNIQUE"
       case PrimaryKey                 => "PRIMARY KEY"
       case References(table, colName) => s"REFERENCES $table($colName)"
+    }
+
+  /** Given a query modifier, generate the type required by PostgreSQL */
+  private def generateModifier(modifier: Modifier): String =
+    modifier match {
+      case Where(left, comp, right) => s"WHERE $left ${generateComparison(comp)} $right"
     }
 
   /** Given a column type, parse it into the type required by PostgreSQL */
@@ -61,8 +69,14 @@ object PostgresGenerator extends DatabaseGenerator {
             .mkString(",\n")
             .pipe(indent(_))
         s"CREATE TABLE $tableName (\n$stringColumns\n);"
-      case Read(tableName, columns) =>
-        val stringColumns = columns.map(_.name).mkString(", ")
-        s"SELECT $stringColumns FROM $tableName;"
+      case Read(tableName, columns, modifiers) =>
+        val stringColumns   = columns.map(_.name).mkString(", ")
+        val stringModifiers = modifiers.map(generateModifier)
+        (s"SELECT $stringColumns FROM $tableName" +: stringModifiers).mkString("", " ", ";")
+      case Insert(tableName, columns, modifiers) =>
+        val stringColumns   = columns.map(_.name).mkString(", ")
+        val stringModifiers = modifiers.map(generateModifier)
+        val values          = (for (i <- 1.to(columns.length)) yield s"$$$i").toList.mkString(", ")
+        (s"INSERT INTO $tableName ($stringColumns)" +: s"VALUES ($values)" +: stringModifiers).mkString("", "\n", ";")
     }
 }
