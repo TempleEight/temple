@@ -1,6 +1,8 @@
 package generate
 
 import generate.database.ast.ColType._
+import generate.database.ast.ColumnConstraint._
+import generate.database.ast.Comparison._
 import generate.database.ast._
 
 package object database {
