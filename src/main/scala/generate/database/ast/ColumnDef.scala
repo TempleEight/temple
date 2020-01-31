@@ -1,7 +1,7 @@
 package generate.database.ast
 
 /** AST implementation of database columns for all data types supported in Templefile */
-sealed case class ColumnDef(name: String, colType: ColType)
+sealed case class ColumnDef(name: String, colType: ColType, constraints: List[ColumnConstraint] = List())
 
 sealed trait ColType
 
