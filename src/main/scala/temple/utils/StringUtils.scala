@@ -1,4 +1,4 @@
-package utils
+package temple.utils
 
 /** Utility functions useful for performing operations on strings */
 object StringUtils {

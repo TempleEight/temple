@@ -1,6 +1,6 @@
-package generate.database
+package temple.generate.database
 
-import generate.database.ast.Statement
+import temple.generate.database.ast.Statement
 
 /** DatabaseGenerator provides an interface for generating DB specific query languages from an AST */
 trait DatabaseGenerator {

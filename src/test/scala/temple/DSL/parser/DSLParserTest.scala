@@ -1,7 +1,9 @@
+package temple.DSL.parser
+
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.DSLProcessor
-import utils.FileUtils._
-import utils.MonadUtils.FromEither
+import temple.utils.FileUtils._
+import temple.utils.MonadUtils.FromEither
 
 class DSLParserTest extends FlatSpec with Matchers {
   "Empty string" should "parse" in {
@@ -17,7 +19,7 @@ class DSLParserTest extends FlatSpec with Matchers {
   }
 
   "Simple.temple" should "parse" in {
-    val source      = readFile("src/test/scala/testfiles/simple.temple")
+    val source      = readFile("src/test/scala/temple/testfiles/simple.temple")
     val parseResult = DSLProcessor.parse(source).fromEither(msg => fail(s"first parse failed, $msg"))
     val reSourced   = parseResult.mkString("\n\n")
 

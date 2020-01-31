@@ -1,4 +1,4 @@
-package generate.database.ast
+package temple.generate.database.ast
 
 /** AST implementation of database columns for all data types supported in Templefile */
 sealed case class ColumnDef(name: String, colType: ColType, constraints: List[ColumnConstraint] = List())

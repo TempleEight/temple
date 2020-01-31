@@ -1,10 +1,10 @@
 package generate
 
-import generate.database.ast.ColType._
-import generate.database.ast.ColumnConstraint._
-import generate.database.ast.Comparison._
-import generate.database.ast.Statement._
-import generate.database.ast._
+import temple.generate.database.ast.ColType._
+import temple.generate.database.ast.ColumnConstraint._
+import temple.generate.database.ast.Comparison._
+import temple.generate.database.ast.Statement._
+import temple.generate.database.ast._
 
 package object database {
 

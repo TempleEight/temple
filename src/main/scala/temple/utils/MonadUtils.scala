@@ -1,4 +1,4 @@
-package utils
+package temple.utils
 
 object MonadUtils {
 

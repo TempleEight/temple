@@ -1,4 +1,4 @@
-package generate.database.ast
+package temple.generate.database.ast
 
 /** AST implementation of all the column constraints supported in Templefile */
 sealed trait ColumnConstraint
