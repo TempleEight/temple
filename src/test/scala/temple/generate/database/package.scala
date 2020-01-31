@@ -100,33 +100,11 @@ package object database {
         Column("dateOfBirth"),
         Column("timeOfDay"),
         Column("expiry")
-      ),
-      List()
+      )
     )
 
     val postgresInsertString: String =
       """INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry)
         |VALUES ($1, $2, $3, $4, $5, $6, $7);""".stripMargin
-
-    val insertStatementWithWhere = Insert(
-      "Users",
-      List(
-        Column("id"),
-        Column("bankBalance"),
-        Column("name"),
-        Column("isStudent"),
-        Column("dateOfBirth"),
-        Column("timeOfDay"),
-        Column("expiry")
-      ),
-      List(
-        Where("Users(id)", Equal, "1234")
-      )
-    )
-
-    val postgresInsertStringWithWhere: String =
-      """INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry)
-        |VALUES ($1, $2, $3, $4, $5, $6, $7)
-        |WHERE Users(id) == 1234;""".stripMargin
   }
 }

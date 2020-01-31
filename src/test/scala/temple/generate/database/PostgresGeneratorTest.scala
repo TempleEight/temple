@@ -19,7 +19,4 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
   "PostgresGenerator" should "generate correct INSERT statements" in {
     PostgresGenerator.generate(TestData.insertStatement) shouldBe TestData.postgresInsertString
   }
-  "PostgresGenerator" should "handle inserts with WHERE correctly" in {
-    PostgresGenerator.generate(TestData.insertStatementWithWhere) shouldBe TestData.postgresInsertStringWithWhere
-  }
 }

@@ -73,10 +73,9 @@ object PostgresGenerator extends DatabaseGenerator {
         val stringColumns   = columns.map(_.name).mkString(", ")
         val stringModifiers = modifiers.map(generateModifier)
         (s"SELECT $stringColumns FROM $tableName" +: stringModifiers).mkString("", " ", ";")
-      case Insert(tableName, columns, modifiers) =>
-        val stringColumns   = columns.map(_.name).mkString(", ")
-        val stringModifiers = modifiers.map(generateModifier)
-        val values          = (for (i <- 1.to(columns.length)) yield s"$$$i").toList.mkString(", ")
-        (s"INSERT INTO $tableName ($stringColumns)" +: s"VALUES ($values)" +: stringModifiers).mkString("", "\n", ";")
+      case Insert(tableName, columns) =>
+        val stringColumns = columns.map(_.name).mkString(", ")
+        val values        = (for (i <- 1.to(columns.length)) yield s"$$$i").toList.mkString(", ")
+        s"INSERT INTO $tableName ($stringColumns)\nVALUES ($values);"
     }
 }
