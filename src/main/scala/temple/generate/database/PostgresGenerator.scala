@@ -6,6 +6,7 @@ import temple.generate.database.ast.Comparison._
 import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
 import temple.utils.StringUtils._
+import scala.util.chaining._
 
 /** Implementation of [[DatabaseGenerator]] for generating PostgreSQL */
 object PostgresGenerator extends DatabaseGenerator {
@@ -32,9 +33,6 @@ object PostgresGenerator extends DatabaseGenerator {
       case References(table, colName) => s"REFERENCES $table($colName)"
     }
 
-  @inline private def generateColumnConstraints(constraints: List[ColumnConstraint]): String =
-    constraints.map(generateConstraint).map(" " + _).mkString
-
   /** Given a column type, parse it into the type required by PostgreSQL */
   private def generateColumnType(columnType: ColType): String =
     columnType match {
@@ -48,24 +46,23 @@ object PostgresGenerator extends DatabaseGenerator {
     }
 
   /** Parse a given column into PostgreSQL syntax */
-  private def generateColumnDef(column: ColumnDef) =
-    indent(s"${column.name} ${generateColumnType(column.colType)}${generateColumnConstraints(column.constraints)}")
+  private def generateColumnDef(column: ColumnDef): String = {
+    val columnConstraints = column.constraints.map(generateConstraint)
+    (column.name +: generateColumnType(column.colType) +: columnConstraints).mkString(" ")
+  }
 
   /** Given a statement, parse it into a valid PostgreSQL statement */
-  override def generate(statement: Statement): String = {
-    val sb = new StringBuilder()
+  override def generate(statement: Statement): String =
     statement match {
       case Create(tableName, columns) =>
-        sb.append(s"CREATE TABLE $tableName ")
-        val stringColumns = columns.map(generateColumnDef)
-        sb.append(stringColumns.mkString("(\n", ",\n", "\n)"))
+        val stringColumns =
+          columns
+            .map(generateColumnDef)
+            .mkString(",\n")
+            .pipe(indent(_))
+        s"CREATE TABLE $tableName (\n$stringColumns\n);"
       case Read(tableName, columns) =>
-        sb.append("SELECT ")
-        val stringColumns = columns.map(_.name)
-        sb.append(stringColumns.mkString(", "))
-        sb.append(s" FROM $tableName")
+        val stringColumns = columns.map(_.name).mkString(", ")
+        s"SELECT $stringColumns FROM $tableName;"
     }
-    sb.append(";\n")
-    sb.mkString
-  }
 }
