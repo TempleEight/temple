@@ -4,15 +4,10 @@ package generate.database.ast
 sealed trait ColumnConstraint
 
 object ColumnConstraint {
-
-  case object NonNull extends ColumnConstraint
-
+  case object NonNull                                             extends ColumnConstraint
   case object Null                                                extends ColumnConstraint
   case class Check(left: String, comp: Comparison, right: String) extends ColumnConstraint
-
-  case object Unique extends ColumnConstraint
-
-  case object PrimaryKey extends ColumnConstraint
-
-  case class References(table: String, colName: String) extends ColumnConstraint
+  case object Unique                                              extends ColumnConstraint
+  case object PrimaryKey                                          extends ColumnConstraint
+  case class References(table: String, colName: String)           extends ColumnConstraint
 }
