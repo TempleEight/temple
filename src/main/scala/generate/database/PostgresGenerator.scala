@@ -29,10 +29,8 @@ object PostgresGenerator extends DatabaseGenerator {
       case References(table, colName) => s"REFERENCES $table($colName)"
     }
 
-  @inline private def parseColumnConstraints(constraints: List[ColumnConstraint]): String = {
-    if (constraints.isEmpty) return ""
-    constraints.map(parseConstraint).mkString(" ", " ", "")
-  }
+  @inline private def parseColumnConstraints(constraints: List[ColumnConstraint]): String =
+    constraints.map(parseConstraint).mkString(" ", " ", "", "")
 
   /** Given a column type, parse it into the type required by PostgreSQL */
   private def parseColumnType(columnType: ColType): String =
