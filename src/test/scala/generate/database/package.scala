@@ -1,5 +1,6 @@
 package generate
 
+import generate.database.ast.ColType._
 import generate.database.ast._
 
 package object database {
@@ -10,51 +11,62 @@ package object database {
     val createStatement = Create(
       "Users",
       List(
-        StringColumn("username"),
-        StringColumn("email"),
-        StringColumn("firstName"),
-        StringColumn("lastName"),
-        DateTimeTzColumn("createdAt"),
-        IntColumn("numberOfDogs"),
-        BoolColumn("yeets"),
-        FloatColumn("currentBankBalance"),
-        DateColumn("birthDate"),
-        TimeColumn("breakfastTime")
+        ColumnDef("id", IntCol),
+        ColumnDef("bankBalance", FloatCol),
+        ColumnDef("name", StringCol),
+        ColumnDef("isStudent", BoolCol),
+        ColumnDef("dateOfBirth", DateCol),
+        ColumnDef("timeOfDay", TimeCol),
+        ColumnDef("expiry", DateTimeTzCol)
       )
     )
 
-    val createString: String =
+    val postgresCreateString: String =
       """CREATE TABLE Users (
-        |    username TEXT,
-        |    email TEXT,
-        |    firstName TEXT,
-        |    lastName TEXT,
-        |    createdAt TIMESTAMPTZ,
-        |    numberOfDogs INT,
-        |    yeets BOOLEAN,
-        |    currentBankBalance REAL,
-        |    birthDate DATE,
-        |    breakfastTime TIME
+        |  id INT,
+        |  bankBalance REAL,
+        |  name TEXT,
+        |  isStudent BOOLEAN,
+        |  dateOfBirth DATE,
+        |  timeOfDay TIME,
+        |  expiry TIMESTAMPTZ
         |);
         |""".stripMargin
 
     val createStatementWithConstraints = Create(
       "Test",
       List(
-        IntColumn("item_id", List(NonNull, PrimaryKey)),
-        DateTimeTzColumn("createdAt", List(Unique)),
-        TimeColumn("bookingTime", List(References("Bookings", "bookingTime"))),
-        IntColumn("value", List(Check("value", GreaterEqual, "1"), Null))
+        ColumnDef("item_id", IntCol, List(NonNull, PrimaryKey)),
+        ColumnDef("createdAt", DateTimeTzCol, List(Unique)),
+        ColumnDef("bookingTime", TimeCol, List(References("Bookings", "bookingTime"))),
+        ColumnDef("value", IntCol, List(Check("value", GreaterEqual, "1"), Null))
       )
     )
 
-    val createStringWithConstraints: String =
+    val postgresCreateStringWithConstraints: String =
       """CREATE TABLE Test (
-        |    item_id INT NOT NULL PRIMARY KEY,
-        |    createdAt TIMESTAMPTZ UNIQUE,
-        |    bookingTime TIME REFERENCES Bookings(bookingTime),
-        |    value INT CHECK (value >= 1) NULL
+        |  item_id INT NOT NULL PRIMARY KEY,
+        |  createdAt TIMESTAMPTZ UNIQUE,
+        |  bookingTime TIME REFERENCES Bookings(bookingTime),
+        |  value INT CHECK (value >= 1) NULL
         |);
+        |""".stripMargin
+
+    val readStatement = Read(
+      "Users",
+      List(
+        Column("id"),
+        Column("bankBalance"),
+        Column("name"),
+        Column("isStudent"),
+        Column("dateOfBirth"),
+        Column("timeOfDay"),
+        Column("expiry")
+      )
+    )
+
+    val postgresSelectString: String =
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users;
         |""".stripMargin
   }
 }

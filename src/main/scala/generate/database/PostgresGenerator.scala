@@ -1,5 +1,6 @@
 package generate.database
 
+import generate.database.ast.ColType._
 import generate.database.ast._
 import utils.StringUtils._
 
@@ -28,32 +29,42 @@ object PostgresGenerator extends DatabaseGenerator {
       case References(table, colName) => s"REFERENCES $table($colName)"
     }
 
-  /** Given a column, parse it into the type required by Postgres */
-  private def parseColumn(column: Column): String =
-    indent(
-      column match {
-        case IntColumn(name, constraints)    => s"$name INT" + constraints.map(parseConstraint).map(" " + _).mkString
-        case FloatColumn(name, constraints)  => s"$name REAL" + constraints.map(parseConstraint).map(" " + _).mkString
-        case StringColumn(name, constraints) => s"$name TEXT" + constraints.map(parseConstraint).map(" " + _).mkString
-        case BoolColumn(name, constraints)   => s"$name BOOLEAN" + constraints.map(parseConstraint).map(" " + _).mkString
-        case DateColumn(name, constraints)   => s"$name DATE" + constraints.map(parseConstraint).map(" " + _).mkString
-        case TimeColumn(name, constraints)   => s"$name TIME" + constraints.map(parseConstraint).map(" " + _).mkString
-        case DateTimeTzColumn(name, constraints) =>
-          s"$name TIMESTAMPTZ" + constraints.map(parseConstraint).map(" " + _).mkString
-      },
-      length = 4
-    )
+  @inline private def parseColumnConstraints(constraints: List[ColumnConstraint]): String = {
+    if (constraints.isEmpty) return ""
+    constraints.map(parseConstraint).mkString(" ", " ", "")
+  }
 
-  /** Given a statement, parse it into a valid PostgresQL statement */
+  /** Given a column type, parse it into the type required by PostgreSQL */
+  private def parseColumnType(columnType: ColType): String =
+    columnType match {
+      case IntCol        => s"INT"
+      case FloatCol      => s"REAL"
+      case StringCol     => s"TEXT"
+      case BoolCol       => s"BOOLEAN"
+      case DateCol       => s"DATE"
+      case TimeCol       => s"TIME"
+      case DateTimeTzCol => s"TIMESTAMPTZ"
+    }
+
+  /** Parse a given column into PostgreSQL syntax */
+  private def parseColumnDef(column: ColumnDef): String =
+    indent(s"${column.name} ${parseColumnType(column.colType)}${parseColumnConstraints(column.constraints)}")
+
+  /** Given a statement, parse it into a valid PostgreSQL statement */
   override def generate(statement: Statement): String = {
     val sb = new StringBuilder()
     statement match {
       case Create(tableName, columns) =>
         sb.append(s"CREATE TABLE $tableName ")
-        val stringColumns = columns map parseColumn
+        val stringColumns = columns.map(parseColumnDef)
         sb.append(stringColumns.mkString("(\n", ",\n", "\n)"))
-        sb.append(";\n")
+      case Read(tableName, columns) =>
+        sb.append("SELECT ")
+        val stringColumns = columns.map(_.name)
+        sb.append(stringColumns.mkString(", "))
+        sb.append(s" FROM $tableName")
     }
+    sb.append(";\n")
     sb.mkString
   }
 }
