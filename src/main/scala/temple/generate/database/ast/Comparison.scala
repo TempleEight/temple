@@ -1,4 +1,4 @@
-package generate.database.ast
+package temple.generate.database.ast
 
 /** AST representation for boolean comparisons */
 sealed trait Comparison

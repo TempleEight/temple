@@ -1,6 +1,6 @@
 package temple
 
-import utils.StringUtils._
+import temple.utils.StringUtils._
 
 /** Handles the internal representation of the DSL of the Templefile */
 package object DSL {

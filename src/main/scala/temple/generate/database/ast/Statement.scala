@@ -1,4 +1,4 @@
-package generate.database.ast
+package temple.generate.database.ast
 
 /** AST implementation of all basic database statements supported in Templefile */
 sealed trait Statement
