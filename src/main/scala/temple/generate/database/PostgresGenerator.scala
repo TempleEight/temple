@@ -33,9 +33,6 @@ object PostgresGenerator extends DatabaseGenerator {
       case References(table, colName) => s"REFERENCES $table($colName)"
     }
 
-  @inline private def generateColumnConstraints(constraints: List[ColumnConstraint]): List[String] =
-    constraints.map(generateConstraint)
-
   /** Given a column type, parse it into the type required by PostgreSQL */
   private def generateColumnType(columnType: ColType): String =
     columnType match {
@@ -49,9 +46,9 @@ object PostgresGenerator extends DatabaseGenerator {
     }
 
   /** Parse a given column into PostgreSQL syntax */
-  private def generateColumnDef(column: ColumnDef): List[String] = {
-    val columnConstraints = generateColumnConstraints(column.constraints)
-    List(column.name, generateColumnType(column.colType)) concat columnConstraints
+  private def generateColumnDef(column: ColumnDef): String = {
+    val columnConstraints = column.constraints.map(generateConstraint)
+    (column.name +: generateColumnType(column.colType) +: columnConstraints).mkString(" ")
   }
 
   /** Given a statement, parse it into a valid PostgreSQL statement */
@@ -61,9 +58,6 @@ object PostgresGenerator extends DatabaseGenerator {
         val stringColumns =
           columns
             .map(generateColumnDef)
-            .foldLeft(List[String]()) { (acc, elem) =>
-              acc :+ elem.mkString(" ")
-            }
             .mkString(",\n")
             .pipe(indent(_))
         s"CREATE TABLE $tableName (\n$stringColumns\n);\n"
