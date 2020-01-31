@@ -2,8 +2,8 @@ package temple.generate.database
 
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
-import temple.generate.database.ast.Comparison._
-import temple.generate.database.ast.Modifier.Where
+import temple.generate.database.ast.ComparisonOperator._
+import temple.generate.database.ast.Condition._
 import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
 import temple.utils.StringUtils._
@@ -14,7 +14,7 @@ import scala.util.chaining._
 object PostgresGenerator extends DatabaseGenerator {
 
   /** Given a comparison, parse it into the Postgres format */
-  private def generateComparison(comparison: Comparison) =
+  private def generateComparison(comparison: ComparisonOperator) =
     comparison match {
       case GreaterEqual => ">="
       case Greater      => ">"
@@ -36,9 +36,12 @@ object PostgresGenerator extends DatabaseGenerator {
     }
 
   /** Given a query modifier, generate the type required by PostgreSQL */
-  private def generateModifier(modifier: Modifier): String =
-    modifier match {
-      case Where(left, comp, right) => s"WHERE $left ${generateComparison(comp)} $right"
+  private def generateCondition(condition: Condition): String =
+    condition match {
+      case Comparison(left, comp, right) => s"$left ${generateComparison(comp)} $right"
+      case Disjunction(left, right)      => s"${generateCondition(left)} OR ${generateCondition(right)}"
+      case Conjunction(left, right)      => s"${generateCondition(left)} AND ${generateCondition(right)}"
+      case Inverse(condition)            => s"NOT ${generateCondition(condition)}"
     }
 
   /** Given a column type, parse it into the type required by PostgreSQL */
@@ -69,10 +72,13 @@ object PostgresGenerator extends DatabaseGenerator {
             .mkString(",\n")
             .pipe(indent(_))
         s"CREATE TABLE $tableName (\n$stringColumns\n);"
-      case Read(tableName, columns, modifiers) =>
-        val stringColumns   = columns.map(_.name).mkString(", ")
-        val stringModifiers = modifiers.map(generateModifier)
-        (s"SELECT $stringColumns FROM $tableName" +: stringModifiers).mkString("", " ", ";")
+      case Read(tableName, columns, condition) =>
+        val stringColumns = columns.map(_.name).mkString(", ")
+        val stringCondition = condition.map(generateCondition) match {
+          case Some(conditionString) => List(s"WHERE $conditionString")
+          case None                  => List()
+        }
+        (s"SELECT $stringColumns FROM $tableName" +: stringCondition).mkString("", " ", ";")
       case Insert(tableName, columns) =>
         val stringColumns = columns.map(_.name).mkString(", ")
         val values        = (for (i <- 1.to(columns.length)) yield s"$$$i").toList.mkString(", ")
