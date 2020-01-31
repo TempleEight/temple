@@ -1,4 +1,4 @@
-package generate
+package temple.generate
 
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
@@ -33,8 +33,7 @@ package object database {
         |  dateOfBirth DATE,
         |  timeOfDay TIME,
         |  expiry TIMESTAMPTZ
-        |);
-        |""".stripMargin
+        |);""".stripMargin
 
     val createStatementWithConstraints = Create(
       "Test",
@@ -52,8 +51,7 @@ package object database {
         |  createdAt TIMESTAMPTZ UNIQUE,
         |  bookingTime TIME REFERENCES Bookings(bookingTime),
         |  value INT CHECK (value >= 1) NULL
-        |);
-        |""".stripMargin
+        |);""".stripMargin
 
     val readStatement = Read(
       "Users",
@@ -69,7 +67,6 @@ package object database {
     )
 
     val postgresSelectString: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users;
-        |""".stripMargin
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users;""".stripMargin
   }
 }

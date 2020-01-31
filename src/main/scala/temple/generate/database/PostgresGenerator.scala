@@ -60,9 +60,9 @@ object PostgresGenerator extends DatabaseGenerator {
             .map(generateColumnDef)
             .mkString(",\n")
             .pipe(indent(_))
-        s"CREATE TABLE $tableName (\n$stringColumns\n);\n"
+        s"CREATE TABLE $tableName (\n$stringColumns\n);"
       case Read(tableName, columns) =>
         val stringColumns = columns.map(_.name).mkString(", ")
-        s"SELECT $stringColumns FROM $tableName;\n"
+        s"SELECT $stringColumns FROM $tableName;"
     }
 }
