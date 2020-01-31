@@ -4,7 +4,6 @@ package generate.database.ast
 sealed trait Comparison
 
 object Comparison {
-
   case object GreaterEqual extends Comparison
 
   case object Greater extends Comparison
@@ -16,5 +15,4 @@ object Comparison {
   case object Less extends Comparison
 
   case object LessEqual extends Comparison
-
 }
