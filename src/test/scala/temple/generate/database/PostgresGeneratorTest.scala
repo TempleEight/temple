@@ -28,4 +28,7 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
   "PostgresGenerator" should "handle inverse in WHERE correctly" in {
     PostgresGenerator.generate(TestData.readStatementWithWhereInverse) shouldBe TestData.postgresSelectStringWithWhereInverse
   }
+  "PostgresGenerator" should "handle complex SELECT statements" in {
+    PostgresGenerator.generate(TestData.readStatementComplex) shouldBe TestData.postgresSelectStringComplex
+  }
 }

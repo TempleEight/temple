@@ -3,7 +3,7 @@ package temple.generate
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.ComparisonOperator._
-import temple.generate.database.ast.Condition.{Comparison, Conjunction, Disjunction, Inverse}
+import temple.generate.database.ast.Condition.{Comparison, Conjunction, Disjunction, Inverse, IsNull}
 import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
 
@@ -153,6 +153,34 @@ package object database {
 
     val postgresSelectStringWithWhereInverse: String =
       """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE NOT (Users.id = 123456);"""
+
+    val readStatementComplex = Read(
+      "Users",
+      List(
+        Column("id"),
+        Column("bankBalance"),
+        Column("name"),
+        Column("isStudent"),
+        Column("dateOfBirth"),
+        Column("timeOfDay"),
+        Column("expiry")
+      ),
+      Some(
+        Conjunction(
+          Disjunction(
+            IsNull(Column("isStudent")),
+            Comparison("Users.id", GreaterEqual, "1")
+          ),
+          Disjunction(
+            Inverse(IsNull(Column("isStudent"))),
+            Inverse(Comparison("Users.expiry", Less, "2020-02-03 00:00:00+00"))
+          )
+        )
+      )
+    )
+
+    val postgresSelectStringComplex: String =
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE ((isStudent IS NULL) OR (Users.id >= 1)) AND ((isStudent IS NOT NULL) OR (NOT (Users.expiry < 2020-02-03 00:00:00+00)));"""
 
     val insertStatement = Insert(
       "Users",
