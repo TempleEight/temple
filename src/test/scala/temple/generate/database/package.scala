@@ -188,6 +188,9 @@ package object database {
       List(
         Assignment(Column("bankBalance"), Value("123.456")),
         Assignment(Column("name"), Value("Will"))
+      ),
+      Some(
+        Comparison("Users.id", Equal, "123456")
       )
     )
 
