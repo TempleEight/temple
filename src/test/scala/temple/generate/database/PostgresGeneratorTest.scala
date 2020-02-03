@@ -31,4 +31,7 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
   "PostgresGenerator" should "generate correct DELETE statements" in {
     PostgresGenerator.generate(TestData.deleteStatement) shouldBe TestData.postgresDeleteString
   }
+  "PostgresGenerator" should "handle deletes with WHERE correctly" in {
+    PostgresGenerator.generate(TestData.deleteStatementWithWhere) shouldBe TestData.postgresDeleteStringWithWhere
+  }
 }

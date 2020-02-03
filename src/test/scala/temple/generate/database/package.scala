@@ -185,7 +185,7 @@ package object database {
       )
     )
 
-    val deleteStringWithWhere: String =
+    val postgresDeleteStringWithWhere: String =
       """DELETE FROM Users WHERE Users.id = 123456;"""
   }
 }
