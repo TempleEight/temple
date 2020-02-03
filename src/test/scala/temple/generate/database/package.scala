@@ -170,5 +170,22 @@ package object database {
     val postgresInsertString: String =
       """INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry)
         |VALUES ($1, $2, $3, $4, $5, $6, $7);""".stripMargin
+
+    val deleteStatement = Delete(
+      "Users"
+    )
+
+    val postgresDeleteString: String =
+      """DELETE FROM Users;"""
+
+    val deleteStatementWithWhere = Delete(
+      "Users",
+      Some(
+        Comparison("Users.id", Equal, "123456")
+      )
+    )
+
+    val deleteStringWithWhere: String =
+      """DELETE FROM Users WHERE Users.id = 123456;"""
   }
 }

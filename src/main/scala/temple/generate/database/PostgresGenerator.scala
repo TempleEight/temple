@@ -85,5 +85,11 @@ object PostgresGenerator extends DatabaseGenerator {
         val stringColumns = columns.map(_.name).mkString(", ")
         val values        = (1 to columns.length).map(i => s"$$$i").mkString(", ")
         s"INSERT INTO $tableName ($stringColumns)\nVALUES ($values);"
+      case Delete(tableName, condition) =>
+        val stringCondition = condition.map(generateCondition) match {
+          case Some(conditionString) => List(s"WHERE $conditionString")
+          case None                  => List()
+        }
+        (s"DELETE FROM $tableName" +: stringCondition).mkString("", " ", ";")
     }
 }
