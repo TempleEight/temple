@@ -87,7 +87,7 @@ package object database {
     )
 
     val postgresSelectStringWithWhere: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE Users(id) == 123456;"""
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE Users(id) = 123456;"""
 
     val readStatementWithWhereConjunction = Read(
       "Users",
@@ -109,7 +109,7 @@ package object database {
     )
 
     val postgresSelectStringWithWhereConjunction: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE Users(id) == 123456 AND Users(expiry) <= 2;"""
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE (Users(id) = 123456) AND (Users(expiry) <= 2);"""
 
     val readStatementWithWhereDisjunction = Read(
       "Users",
@@ -131,7 +131,7 @@ package object database {
     )
 
     val postgresSelectStringWithWhereDisjunction: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE Users(id) == 123456 OR Users(expiry) <= 2;"""
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE (Users(id) = 123456) OR (Users(expiry) <= 2);"""
 
     val readStatementWithWhereInverse = Read(
       "Users",
@@ -152,7 +152,7 @@ package object database {
     )
 
     val postgresSelectStringWithWhereInverse: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE NOT Users(id) == 123456;"""
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE NOT (Users(id) = 123456);"""
 
     val insertStatement = Insert(
       "Users",
