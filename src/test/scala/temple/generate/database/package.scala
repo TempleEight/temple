@@ -64,8 +64,7 @@ package object database {
         Column("dateOfBirth"),
         Column("timeOfDay"),
         Column("expiry")
-      ),
-      None
+      )
     )
 
     val postgresSelectString: String =

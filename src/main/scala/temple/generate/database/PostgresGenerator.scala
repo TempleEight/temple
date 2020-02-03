@@ -18,8 +18,8 @@ object PostgresGenerator extends DatabaseGenerator {
     comparison match {
       case GreaterEqual => ">="
       case Greater      => ">"
-      case Equal        => "=="
-      case NotEqual     => "!="
+      case Equal        => "="
+      case NotEqual     => "<>"
       case Less         => "<"
       case LessEqual    => "<="
     }
@@ -38,13 +38,13 @@ object PostgresGenerator extends DatabaseGenerator {
   /** Given a query modifier, generate the type required by PostgreSQL */
   private def generateCondition(condition: Condition): String =
     condition match {
-      case Comparison(left, comp, right) => s"$left ${generateComparison(comp)} $right"
-      case Disjunction(left, right)      => s"${generateCondition(left)} OR ${generateCondition(right)}"
-      case Conjunction(left, right)      => s"${generateCondition(left)} AND ${generateCondition(right)}"
+      case Comparison(left, comp, right) => s"($left) ${generateComparison(comp)} ($right)"
+      case Disjunction(left, right)      => s"(${generateCondition(left)}) OR (${generateCondition(right)})"
+      case Conjunction(left, right)      => s"(${generateCondition(left)})AND (${generateCondition(right)})"
       case Inverse(condition) =>
         condition match {
           case IsNull(column) => s"${column.name} IS NOT NULL"
-          case _              => s"NOT ${generateCondition(condition)}"
+          case _              => s"NOT (${generateCondition(condition)})"
         }
       case IsNull(column) => s"${column.name} IS NULL"
     }
