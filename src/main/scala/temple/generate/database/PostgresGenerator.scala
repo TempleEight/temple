@@ -41,7 +41,12 @@ object PostgresGenerator extends DatabaseGenerator {
       case Comparison(left, comp, right) => s"$left ${generateComparison(comp)} $right"
       case Disjunction(left, right)      => s"${generateCondition(left)} OR ${generateCondition(right)}"
       case Conjunction(left, right)      => s"${generateCondition(left)} AND ${generateCondition(right)}"
-      case Inverse(condition)            => s"NOT ${generateCondition(condition)}"
+      case Inverse(condition) =>
+        condition match {
+          case IsNull(column) => s"${column.name} IS NOT NULL"
+          case _              => s"NOT ${generateCondition(condition)}"
+        }
+      case IsNull(column) => s"${column.name} IS NULL"
     }
 
   /** Given a column type, parse it into the type required by PostgreSQL */
@@ -81,7 +86,7 @@ object PostgresGenerator extends DatabaseGenerator {
         (s"SELECT $stringColumns FROM $tableName" +: stringCondition).mkString("", " ", ";")
       case Insert(tableName, columns) =>
         val stringColumns = columns.map(_.name).mkString(", ")
-        val values        = (for (i <- 1.to(columns.length)) yield s"$$$i").toList.mkString(", ")
+        val values        = (1 to columns.length).map(i => s"$$$i").mkString(", ")
         s"INSERT INTO $tableName ($stringColumns)\nVALUES ($values);"
     }
 }

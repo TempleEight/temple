@@ -8,4 +8,5 @@ object Condition {
   case class Conjunction(left: Condition, right: Condition)                          extends Condition
   case class Disjunction(left: Condition, right: Condition)                          extends Condition
   case class Inverse(condition: Condition)                                           extends Condition
+  case class IsNull(column: Column)                                                  extends Condition
 }
