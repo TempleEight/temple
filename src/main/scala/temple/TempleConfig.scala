@@ -2,6 +2,7 @@ package temple
 
 import org.rogach.scallop.{ScallopConf, ScallopOption, Subcommand}
 
+/** TempleConfig produces the application configuration from command line arguments */
 class TempleConfig(arguments: Seq[String]) extends ScallopConf(arguments) {
   version("temple 0.1 (c) 2020 TempleEight")
   banner("Usage:\ttemple [OPTIONS] SUBCOMMAND")
@@ -15,4 +16,8 @@ class TempleConfig(arguments: Seq[String]) extends ScallopConf(arguments) {
   }
   addSubcommand(generate)
   verify()
+}
+
+object TempleConfig {
+  class UnhandledArgumentException extends RuntimeException
 }
