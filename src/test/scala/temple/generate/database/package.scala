@@ -188,13 +188,27 @@ package object database {
       List(
         Assignment(Column("bankBalance"), Value("123.456")),
         Assignment(Column("name"), Value("Will"))
-      ),
-      Some(
-        Comparison("Users.id", Equal, "123456")
       )
     )
 
     val postgresUpdateStringWithWhere: String =
       """UPDATE Users SET bankBalance = 123.456, name = Will WHERE Users.id = 123456;"""
+
+    val deleteStatement = Delete(
+      "Users"
+    )
+
+    val postgresDeleteString: String =
+      """DELETE FROM Users;"""
+
+    val deleteStatementWithWhere = Delete(
+      "Users",
+      Some(
+        Comparison("Users.id", Equal, "123456")
+      )
+    )
+
+    val postgresDeleteStringWithWhere: String =
+      """DELETE FROM Users WHERE Users.id = 123456;"""
   }
 }

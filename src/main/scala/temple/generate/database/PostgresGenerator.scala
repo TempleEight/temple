@@ -92,10 +92,10 @@ object PostgresGenerator extends DatabaseGenerator {
             .mkString(",\n")
             .pipe(indent(_))
         s"CREATE TABLE $tableName (\n$stringColumns\n);"
-      case Read(tableName, columns, condition) =>
-        val stringColumns   = columns.map(_.name).mkString(", ")
-        val stringCondition = generateConditionString(condition)
-        (s"SELECT $stringColumns FROM $tableName" +: stringCondition).mkString("", " ", ";")
+      case Read(tableName, columns, conditions) =>
+        val stringColumns    = columns.map(_.name).mkString(", ")
+        val stringConditions = generateConditionString(conditions)
+        (s"SELECT $stringColumns FROM $tableName" +: stringConditions).mkString("", " ", ";")
       case Insert(tableName, columns) =>
         val stringColumns = columns.map(_.name).mkString(", ")
         val values        = (1 to columns.length).map(i => s"$$$i").mkString(", ")
@@ -104,5 +104,8 @@ object PostgresGenerator extends DatabaseGenerator {
         val stringAssignments = assignments.map(generateAssignment).mkString(", ")
         val stringConditions  = generateConditionString(conditions)
         (s"UPDATE $tableName SET ${stringAssignments}" +: stringConditions).mkString("", " ", ";")
+      case Delete(tableName, conditions) =>
+        val stringConditions = generateConditionString(conditions)
+        (s"DELETE FROM $tableName" +: stringConditions).mkString("", " ", ";")
     }
 }
