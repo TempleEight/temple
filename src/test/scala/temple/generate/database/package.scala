@@ -3,7 +3,7 @@ package temple.generate
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.ComparisonOperator._
-import temple.generate.database.ast.Condition.{Comparison, Conjunction, Disjunction, Inverse, IsNull}
+import temple.generate.database.ast.Condition._
 import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
 
@@ -124,14 +124,14 @@ package object database {
       ),
       Some(
         Disjunction(
-          Comparison("Users.id", Equal, "123456"),
-          Comparison("Users.expiry", LessEqual, "2")
+          Comparison("Users.id", NotEqual, "123456"),
+          Comparison("Users.expiry", Greater, "2")
         )
       )
     )
 
     val postgresSelectStringWithWhereDisjunction: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE (Users.id = 123456) OR (Users.expiry <= 2);"""
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE (Users.id <> 123456) OR (Users.expiry > 2);"""
 
     val readStatementWithWhereInverse = Read(
       "Users",
@@ -146,13 +146,13 @@ package object database {
       ),
       Some(
         Inverse(
-          Comparison("Users.id", Equal, "123456")
+          Comparison("Users.id", Less, "123456")
         )
       )
     )
 
     val postgresSelectStringWithWhereInverse: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE NOT (Users.id = 123456);"""
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE NOT (Users.id < 123456);"""
 
     val readStatementComplex = Read(
       "Users",
