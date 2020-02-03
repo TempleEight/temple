@@ -5,6 +5,7 @@ import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.ComparisonOperator._
 import temple.generate.database.ast.Condition.{Comparison, Conjunction, Disjunction, Inverse}
 import temple.generate.database.ast.Statement._
+import temple.generate.database.ast.Expression._
 import temple.generate.database.ast._
 
 package object database {
@@ -170,5 +171,30 @@ package object database {
     val postgresInsertString: String =
       """INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry)
         |VALUES ($1, $2, $3, $4, $5, $6, $7);""".stripMargin
+
+    val updateStatement = Update(
+      "Users",
+      List(
+        Assignment(Column("bankBalance"), Value("123.456")),
+        Assignment(Column("name"), Value("Will"))
+      )
+    )
+
+    val postgresUpdateString: String =
+      """UPDATE Users SET bankBalance = 123.456, name = Will;"""
+
+    val updateStatementWithWhere = Update(
+      "Users",
+      List(
+        Assignment(Column("bankBalance"), Value("123.456")),
+        Assignment(Column("name"), Value("Will"))
+      ),
+      Some(
+        Comparison("Users.id", Equal, "123456")
+      )
+    )
+
+    val postgresUpdateStringWithWhere: String =
+      """UPDATE Users SET bankBalance = 123.456, name = Will WHERE Users.id = 123456;"""
   }
 }
