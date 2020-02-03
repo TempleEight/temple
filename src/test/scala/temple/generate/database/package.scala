@@ -215,5 +215,20 @@ package object database {
 
     val postgresDeleteStringWithWhere: String =
       """DELETE FROM Users WHERE Users.id = 123456;"""
+
+    val dropStatement = Drop(
+      "Users",
+      ifExists = false
+    )
+
+    val postgresDropString: String =
+      """DROP TABLE Users;"""
+
+    val dropStatementIfExists = Drop(
+      "Users"
+    )
+
+    val postgresDropStringIfExists: String =
+      """DROP TABLE Users IF EXISTS;"""
   }
 }

@@ -91,5 +91,6 @@ object PostgresGenerator extends DatabaseGenerator {
           case None                   => List()
         }
         (s"DELETE FROM $tableName" +: stringConditions).mkString("", " ", ";")
+      case Drop(tableName, ifExists) => s"DROP TABLE $tableName" + { if (ifExists) " IF EXISTS;" else ";" }
     }
 }
