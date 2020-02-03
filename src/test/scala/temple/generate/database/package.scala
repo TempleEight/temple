@@ -82,12 +82,12 @@ package object database {
         Column("expiry")
       ),
       Some(
-        Comparison("Users(id)", Equal, "123456")
+        Comparison("Users.id", Equal, "123456")
       )
     )
 
     val postgresSelectStringWithWhere: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE Users(id) = 123456;"""
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE Users.id = 123456;"""
 
     val readStatementWithWhereConjunction = Read(
       "Users",
@@ -102,14 +102,14 @@ package object database {
       ),
       Some(
         Conjunction(
-          Comparison("Users(id)", Equal, "123456"),
-          Comparison("Users(expiry)", LessEqual, "2")
+          Comparison("Users.id", Equal, "123456"),
+          Comparison("Users.expiry", LessEqual, "2")
         )
       )
     )
 
     val postgresSelectStringWithWhereConjunction: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE (Users(id) = 123456) AND (Users(expiry) <= 2);"""
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE (Users.id = 123456) AND (Users.expiry <= 2);"""
 
     val readStatementWithWhereDisjunction = Read(
       "Users",
@@ -124,14 +124,14 @@ package object database {
       ),
       Some(
         Disjunction(
-          Comparison("Users(id)", Equal, "123456"),
-          Comparison("Users(expiry)", LessEqual, "2")
+          Comparison("Users.id", Equal, "123456"),
+          Comparison("Users.expiry", LessEqual, "2")
         )
       )
     )
 
     val postgresSelectStringWithWhereDisjunction: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE (Users(id) = 123456) OR (Users(expiry) <= 2);"""
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE (Users.id = 123456) OR (Users.expiry <= 2);"""
 
     val readStatementWithWhereInverse = Read(
       "Users",
@@ -146,13 +146,13 @@ package object database {
       ),
       Some(
         Inverse(
-          Comparison("Users(id)", Equal, "123456")
+          Comparison("Users.id", Equal, "123456")
         )
       )
     )
 
     val postgresSelectStringWithWhereInverse: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE NOT (Users(id) = 123456);"""
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE NOT (Users.id = 123456);"""
 
     val insertStatement = Insert(
       "Users",

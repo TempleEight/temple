@@ -41,12 +41,9 @@ object PostgresGenerator extends DatabaseGenerator {
       case Comparison(left, comp, right) => s"$left ${generateComparison(comp)} $right"
       case Disjunction(left, right)      => s"(${generateCondition(left)}) OR (${generateCondition(right)})"
       case Conjunction(left, right)      => s"(${generateCondition(left)}) AND (${generateCondition(right)})"
-      case Inverse(condition) =>
-        condition match {
-          case IsNull(column) => s"${column.name} IS NOT NULL"
-          case _              => s"NOT (${generateCondition(condition)})"
-        }
-      case IsNull(column) => s"${column.name} IS NULL"
+      case Inverse(IsNull(column))       => s"${column.name} IS NOT NULL"
+      case Inverse(condition)            => s"NOT (${generateCondition(condition)})"
+      case IsNull(column)                => s"${column.name} IS NULL"
     }
 
   /** Given a column type, parse it into the type required by PostgreSQL */
