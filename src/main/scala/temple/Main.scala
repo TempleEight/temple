@@ -13,10 +13,9 @@ object Main extends App {
       case None                  => config.printHelp()
     }
   } catch {
-    case error: IllegalArgumentException => {
+    case error: IllegalArgumentException =>
       System.err.println(error.getMessage)
       sys.exit(1)
-    }
   }
 
   def generate(config: TempleConfig): Unit = {
