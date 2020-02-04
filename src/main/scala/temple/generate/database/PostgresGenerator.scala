@@ -5,6 +5,7 @@ import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.ComparisonOperator._
 import temple.generate.database.ast.Condition._
 import temple.generate.database.ast.Statement._
+import temple.generate.database.ast.Expression._
 import temple.generate.database.ast._
 import temple.utils.StringUtils._
 
@@ -13,8 +14,18 @@ import scala.util.chaining._
 /** Implementation of [[DatabaseGenerator]] for generating PostgreSQL */
 object PostgresGenerator extends DatabaseGenerator {
 
+  /** Given an expression, parse it into the Postgres format */
+  private def generateExpression(expression: Expression): String =
+    expression match {
+      case Value(value) => value
+    }
+
+  /** Given an assignment, parse it into the Postgres format */
+  private def generateAssignment(assignment: Assignment): String =
+    s"${assignment.column.name} = ${generateExpression(assignment.expression)}"
+
   /** Given a comparison, parse it into the Postgres format */
-  private def generateComparison(comparison: ComparisonOperator) =
+  private def generateComparison(comparison: ComparisonOperator): String =
     comparison match {
       case GreaterEqual => ">="
       case Greater      => ">"
@@ -46,6 +57,13 @@ object PostgresGenerator extends DatabaseGenerator {
       case IsNull(column)                => s"${column.name} IS NULL"
     }
 
+  /** Given conditions, generate a Postgres WHERE clause  */
+  private def generateConditionString(conditions: Option[Condition]): List[String] =
+    conditions.map(generateCondition) match {
+      case Some(conditionsString) => List(s"WHERE $conditionsString")
+      case None                   => List()
+    }
+
   /** Given a column type, parse it into the type required by PostgreSQL */
   private def generateColumnType(columnType: ColType): String =
     columnType match {
@@ -75,21 +93,19 @@ object PostgresGenerator extends DatabaseGenerator {
             .pipe(indent(_))
         s"CREATE TABLE $tableName (\n$stringColumns\n);"
       case Read(tableName, columns, conditions) =>
-        val stringColumns = columns.map(_.name).mkString(", ")
-        val stringConditions = conditions.map(generateCondition) match {
-          case Some(conditionsString) => List(s"WHERE $conditionsString")
-          case None                   => List()
-        }
+        val stringColumns    = columns.map(_.name).mkString(", ")
+        val stringConditions = generateConditionString(conditions)
         (s"SELECT $stringColumns FROM $tableName" +: stringConditions).mkString("", " ", ";")
       case Insert(tableName, columns) =>
         val stringColumns = columns.map(_.name).mkString(", ")
         val values        = (1 to columns.length).map(i => s"$$$i").mkString(", ")
         s"INSERT INTO $tableName ($stringColumns)\nVALUES ($values);"
+      case Update(tableName, assignments, conditions) =>
+        val stringAssignments = assignments.map(generateAssignment).mkString(", ")
+        val stringConditions  = generateConditionString(conditions)
+        (s"UPDATE $tableName SET ${stringAssignments}" +: stringConditions).mkString("", " ", ";")
       case Delete(tableName, conditions) =>
-        val stringConditions = conditions.map(generateCondition) match {
-          case Some(conditionsString) => List(s"WHERE $conditionsString")
-          case None                   => List()
-        }
+        val stringConditions = generateConditionString(conditions)
         (s"DELETE FROM $tableName" +: stringConditions).mkString("", " ", ";")
       case Drop(tableName, ifExists) => s"DROP TABLE $tableName" + { if (ifExists) " IF EXISTS;" else ";" }
     }

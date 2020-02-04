@@ -7,6 +7,9 @@ object Statement {
   case class Create(tableName: String, columns: List[ColumnDef])                                 extends Statement
   case class Read(tableName: String, columns: List[Column], condition: Option[Condition] = None) extends Statement
   case class Insert(tableName: String, columns: List[Column])                                    extends Statement
-  case class Delete(tableName: String, condition: Option[Condition] = None)                      extends Statement
-  case class Drop(tableName: String, ifExists: Boolean = true)                                   extends Statement
+
+  case class Update(tableName: String, assignments: List[Assignment], condition: Option[Condition] = None)
+      extends Statement
+  case class Delete(tableName: String, condition: Option[Condition] = None) extends Statement
+  case class Drop(tableName: String, ifExists: Boolean = true)              extends Statement
 }

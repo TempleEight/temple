@@ -28,6 +28,12 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
   "PostgresGenerator" should "handle inverse in WHERE correctly" in {
     PostgresGenerator.generate(TestData.readStatementWithWhereInverse) shouldBe TestData.postgresSelectStringWithWhereInverse
   }
+  "PostgresGenerator" should "generate correct UPDATE statements" in {
+    PostgresGenerator.generate(TestData.updateStatement) shouldBe TestData.postgresUpdateString
+  }
+  "PostgresGenerator" should "handle updates with WHERE correctly" in {
+    PostgresGenerator.generate(TestData.updateStatementWithWhere) shouldBe TestData.postgresUpdateStringWithWhere
+  }
   "PostgresGenerator" should "generate correct DELETE statements" in {
     PostgresGenerator.generate(TestData.deleteStatement) shouldBe TestData.postgresDeleteString
   }
