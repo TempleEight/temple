@@ -21,6 +21,6 @@ object Main extends App {
   def generate(config: TempleConfig): Unit = {
     val fileContents = FileUtils.readFile(config.Generate.filename())
     val result       = DSLProcessor.parse(fileContents)
-    println(s"Generated... ${result}")
+    println(s"Generated... $result")
   }
 }
