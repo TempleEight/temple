@@ -20,3 +20,5 @@ lazy val root = (project in file("."))
       "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.9" % "it,test",
     )
   )
+
+scalacOptions ++= Seq("-deprecation", "-feature")
