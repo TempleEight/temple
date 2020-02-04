@@ -5,11 +5,18 @@ import temple.utils.FileUtils
 
 /** Main entry point into the application */
 object Main extends App {
-  val config = new TempleConfig(args)
-  config.subcommand match {
-    case Some(config.generate) => generate(config)
-    case Some(_)               => throw new TempleConfig.UnhandledArgumentException
-    case None                  => config.printHelp()
+  try {
+    val config = new TempleConfig(args)
+    config.subcommand match {
+      case Some(config.generate) => generate(config)
+      case Some(_)               => throw new TempleConfig.UnhandledArgumentException
+      case None                  => config.printHelp()
+    }
+  } catch {
+    case error: IllegalArgumentException => {
+      System.err.println(error.getMessage)
+      sys.exit(1)
+    }
   }
 
   def generate(config: TempleConfig): Unit = {
