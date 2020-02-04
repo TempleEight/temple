@@ -23,18 +23,16 @@ object DockerPostgresService {
     // Called by the ready checker, will only succeed when container has started
     override def apply(
       container: DockerContainerState
-    )(implicit docker: DockerCommandExecutor, ec: ExecutionContext): Future[Boolean] =
-      try {
-        val url = s"jdbc:postgresql://${docker.host}:$externalPort/"
-        Option(DriverManager.getConnection(url, databaseUsername, databasePassword))
-          .foreach { conn =>
-            try conn.createStatement().execute(s"CREATE DATABASE $databaseName")
-            finally conn.close()
-          }
-        Future.successful(true)
-      } catch {
-        case error: Throwable => Future.failed(error)
+    )(implicit docker: DockerCommandExecutor, ec: ExecutionContext): Future[Boolean] = {
+      val url = s"jdbc:postgresql://${docker.host}:$externalPort/"
+      Future {
+        Option(DriverManager.getConnection(url, databaseUsername, databasePassword)) map { conn =>
+          try conn.createStatement().execute(s"CREATE DATABASE $databaseName")
+          finally conn.close()
+        }
+        true
       }
+    }
   }
 }
 
