@@ -11,6 +11,7 @@ import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
 /** PostgresSpec offers additional methods to test commands using Postgres database */
 trait PostgresSpec extends FlatSpec with DockerTestKit with DockerPostgresService with BeforeAndAfterAll {
 
+  // Required to implement DockerTestKit: use the default configuration to create a docker client
   implicit override val dockerFactory: DockerFactory = new SpotifyDockerFactory(DefaultDockerClient.fromEnv().build())
 
   private def execute[T](fn: Connection => T): Option[T] =
@@ -20,7 +21,7 @@ trait PostgresSpec extends FlatSpec with DockerTestKit with DockerPostgresServic
         DockerPostgresService.databaseUsername,
         DockerPostgresService.databasePassword
       )
-    ).map { conn =>
+    ) map { conn =>
       try fn(conn)
       finally conn.close()
     }

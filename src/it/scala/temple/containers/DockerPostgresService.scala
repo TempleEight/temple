@@ -20,7 +20,7 @@ object DockerPostgresService {
 
   class PostgresReadyChecker extends DockerReadyChecker {
 
-    // Called when container has started
+    // Called by the ready checker, will only succeed when container has started
     override def apply(
       container: DockerContainerState
     )(implicit docker: DockerCommandExecutor, ec: ExecutionContext): Future[Boolean] =
@@ -42,7 +42,7 @@ object DockerPostgresService {
 trait DockerPostgresService extends DockerKit {
 
   val postgresContainer: DockerContainer = DockerContainer(DockerPostgresService.image)
-    .withPorts((DockerPostgresService.internalPort, Some(DockerPostgresService.externalPort)))
+    .withPorts(DockerPostgresService.internalPort -> Some(DockerPostgresService.externalPort))
     .withEnv(
       s"POSTGRES_USER=${DockerPostgresService.databaseUsername}",
       s"POSTGRES_PASSWORD=${DockerPostgresService.databasePassword}"
