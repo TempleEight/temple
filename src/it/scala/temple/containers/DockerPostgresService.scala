@@ -10,7 +10,7 @@ import scala.concurrent.duration._
 
 /** DockerPostgresService encapsulates all configuration for running a postgres docker container */
 object DockerPostgresService {
-  val image            = "postgres:9.6"
+  val image            = "postgres:12.1"
   val databaseUsername = "postgres"
   val databasePassword = ""
   val databaseName     = "temple_test"
