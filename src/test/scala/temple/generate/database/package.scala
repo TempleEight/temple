@@ -3,7 +3,7 @@ package temple.generate
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.ComparisonOperator._
-import temple.generate.database.ast.Condition.{Comparison, Conjunction, Disjunction, Inverse}
+import temple.generate.database.ast.Condition._
 import temple.generate.database.ast.Statement._
 import temple.generate.database.ast.Expression._
 import temple.generate.database.ast._
@@ -125,14 +125,14 @@ package object database {
       ),
       Some(
         Disjunction(
-          Comparison("Users.id", Equal, "123456"),
-          Comparison("Users.expiry", LessEqual, "2")
+          Comparison("Users.id", NotEqual, "123456"),
+          Comparison("Users.expiry", Greater, "2")
         )
       )
     )
 
     val postgresSelectStringWithWhereDisjunction: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE (Users.id = 123456) OR (Users.expiry <= 2);"""
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE (Users.id <> 123456) OR (Users.expiry > 2);"""
 
     val readStatementWithWhereInverse = Read(
       "Users",
@@ -147,13 +147,41 @@ package object database {
       ),
       Some(
         Inverse(
-          Comparison("Users.id", Equal, "123456")
+          Comparison("Users.id", Less, "123456")
         )
       )
     )
 
     val postgresSelectStringWithWhereInverse: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE NOT (Users.id = 123456);"""
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE NOT (Users.id < 123456);"""
+
+    val readStatementComplex = Read(
+      "Users",
+      List(
+        Column("id"),
+        Column("bankBalance"),
+        Column("name"),
+        Column("isStudent"),
+        Column("dateOfBirth"),
+        Column("timeOfDay"),
+        Column("expiry")
+      ),
+      Some(
+        Conjunction(
+          Disjunction(
+            IsNull(Column("isStudent")),
+            Comparison("Users.id", GreaterEqual, "1")
+          ),
+          Disjunction(
+            Inverse(IsNull(Column("isStudent"))),
+            Inverse(Comparison("Users.expiry", Less, "2020-02-03 00:00:00+00"))
+          )
+        )
+      )
+    )
+
+    val postgresSelectStringComplex: String =
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE ((isStudent IS NULL) OR (Users.id >= 1)) AND ((isStudent IS NOT NULL) OR (NOT (Users.expiry < 2020-02-03 00:00:00+00)));"""
 
     val insertStatement = Insert(
       "Users",
@@ -213,5 +241,20 @@ package object database {
 
     val postgresDeleteStringWithWhere: String =
       """DELETE FROM Users WHERE Users.id = 123456;"""
+
+    val dropStatement = Drop(
+      "Users",
+      ifExists = false
+    )
+
+    val postgresDropString: String =
+      """DROP TABLE Users;"""
+
+    val dropStatementIfExists = Drop(
+      "Users"
+    )
+
+    val postgresDropStringIfExists: String =
+      """DROP TABLE Users IF EXISTS;"""
   }
 }

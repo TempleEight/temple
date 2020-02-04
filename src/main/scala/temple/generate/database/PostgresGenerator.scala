@@ -107,5 +107,6 @@ object PostgresGenerator extends DatabaseGenerator {
       case Delete(tableName, conditions) =>
         val stringConditions = generateConditionString(conditions)
         (s"DELETE FROM $tableName" +: stringConditions).mkString("", " ", ";")
+      case Drop(tableName, ifExists) => s"DROP TABLE $tableName" + { if (ifExists) " IF EXISTS;" else ";" }
     }
 }

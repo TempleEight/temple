@@ -11,4 +11,5 @@ object Statement {
   case class Update(tableName: String, assignments: List[Assignment], condition: Option[Condition] = None)
       extends Statement
   case class Delete(tableName: String, condition: Option[Condition] = None) extends Statement
+  case class Drop(tableName: String, ifExists: Boolean = true)              extends Statement
 }
