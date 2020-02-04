@@ -1,12 +1,14 @@
+SimpleTempleTest: project {}
+
 User: service {
   username: string;
   email: string(40,5);
   firstName: string;
   lastName: string;
-  createdAt: datetimetz;
+  createdAt: datetime;
   numberOfDogs: int;
   yeets: bool;
-  currentBankBalance: fixed(places: 2);
+  currentBankBalance: float(precision: 2);
   birthDate: date;
   breakfastTime: time;
 

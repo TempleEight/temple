@@ -26,4 +26,6 @@ class DSLParserTest extends FlatSpec with Matchers {
     val reParsedResult = DSLProcessor.parse(reSourced).fromEither(msg => fail(s"second parse failed, $msg"))
     parseResult shouldEqual reParsedResult
   }
+
+  // TODO: add: two things parse to the same result
 }
