@@ -8,7 +8,7 @@ object Main extends App {
   try {
     val config = new TempleConfig(args)
     config.subcommand match {
-      case Some(config.generate) => generate(config)
+      case Some(config.Generate) => generate(config)
       case Some(_)               => throw new TempleConfig.UnhandledArgumentException
       case None                  => config.printHelp()
     }
@@ -19,7 +19,7 @@ object Main extends App {
   }
 
   def generate(config: TempleConfig): Unit = {
-    val fileContents = FileUtils.readFile(config.generate.filename())
+    val fileContents = FileUtils.readFile(config.Generate.filename())
     val result       = DSLProcessor.parse(fileContents)
     println(s"Generated... ${result}")
   }

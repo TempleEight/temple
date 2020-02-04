@@ -16,10 +16,10 @@ class TempleConfig(arguments: CSeq[String]) extends ScallopConf(arguments) {
   // Simplify output at the top level
   shortSubcommandsHelp(true)
 
-  val generate = new Subcommand("generate") {
-    var filename = trailArg[String]("filename", "Templefile to generate from")
+  object Generate extends Subcommand("generate") {
+    var filename: ScallopOption[String] = trailArg[String]("filename", "Templefile to generate from")
   }
-  addSubcommand(generate)
+  addSubcommand(Generate)
   verify()
 }
 
