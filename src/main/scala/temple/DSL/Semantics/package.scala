@@ -1,13 +1,11 @@
 package temple.DSL
 
 import temple.DSL.Semantics.ArgType._
-import temple.DSL.Semantics.MetadataParser
 import temple.DSL.Semantics.Templefile._
 import temple.DSL.Syntax.{Arg, Args, DSLRootItem, Entry}
 import utils.ListUtils._
 
 import scala.collection.immutable.ListMap
-import scala.collection.mutable.ListBuffer
 import scala.collection.{immutable, mutable}
 
 package object Semantics {
@@ -78,6 +76,18 @@ package object Semantics {
   // TODO: add more path
   private case class KeyName(keyName: String)  { override def toString: String = keyName  }
   private case class Context(function: String) { override def toString: String = function }
+
+  private case class BlockContext private (block: String, tag: String, context: Option[BlockContext]) {
+
+    override def toString: String = context.fold(s"$tag ($block)") { context =>
+      s"$tag ($block, inside $context)"
+    }
+  }
+
+  private object BlockContext {
+    def apply(block: String, tag: String, wrapper: BlockContext): BlockContext = BlockContext(block, tag, Some(wrapper))
+    def apply(block: String, tag: String): BlockContext                        = BlockContext(block, tag, None)
+  }
 
   // TODO: refactor for tidiness
   private def parseParameters(specs: (String, Option[Syntax.Arg])*)(args: Args)(implicit context: Context): ArgMap = {
@@ -238,27 +248,43 @@ package object Semantics {
     registerKeyword("auth", "services", ListArgType(TokenArgType), Metadata.TargetAuth)
   }
 
-  private def parseServiceBlock(entries: List[Entry]): ServiceBlock = {
+  private def parseStructBlock(entries: List[Entry])(implicit context: BlockContext): StructBlock = {
     val attributes = mutable.LinkedHashMap[String, AttributeType]()
-    val metadatas  = mutable.ListBuffer[ServiceMetadata]()
     entries.foreach {
       case Entry.Attribute(key, dataType, annotations) =>
         safeInsert(attributes, key -> parseAttributeType(dataType, annotations)(KeyName(key)))
-      case Entry.Metadata(metaKey, args)  => metadatas += parseServiceMetadata(metaKey, args)
-      case DSLRootItem(key, tag, entries) => // TODO: support structs
+      case otherEntry =>
+        // TODO: should this hardcode ${context.tag} as Project? Can we get a link to the relevant part of the docs
+        fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
     }
-    //TODO: remove this empty
-    ServiceBlock(attributes.to(ListMap), metadatas.toList, immutable.Map.empty)
+    StructBlock(attributes.toMap)
   }
 
-  private def parseProjectBlock(entries: List[Entry]): ProjectBlock = entries map {
+  private def parseServiceBlock(entries: List[Entry])(implicit context: BlockContext): ServiceBlock = {
+    val attributes = mutable.LinkedHashMap[String, AttributeType]()
+    val metadatas  = mutable.ListBuffer[ServiceMetadata]()
+    val structs    = mutable.LinkedHashMap[String, StructBlock]()
+    entries.foreach {
+      case Entry.Attribute(key, dataType, annotations) =>
+        safeInsert(attributes, key -> parseAttributeType(dataType, annotations)(KeyName(key)))
+      case Entry.Metadata(metaKey, args) => metadatas += parseServiceMetadata(metaKey, args)
+      case DSLRootItem(key, tag, entries) =>
+        safeInsert(structs, key -> parseStructBlock(entries)(BlockContext(key, tag, context))) // TODO: support structs
+    }
+    ServiceBlock(attributes.to(ListMap), metadatas.toList, structs.to(ListMap))
+  }
+
+  private def parseProjectBlock(entries: List[Entry])(implicit context: BlockContext): ProjectBlock = entries map {
     case Entry.Metadata(metaKey, args) => parseProjectMetadata(metaKey, args)
-    case _                             => fail("Found ") // TODO: better error message
+    case otherEntry                    =>
+      // TODO: should this hardcode ${context.tag} as Project? Can we get a link to the relevant part of the docs
+      fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
   }
 
-  private def parseTargetBlock(entries: List[Entry]): TargetBlock = entries map {
+  private def parseTargetBlock(entries: List[Entry])(implicit context: BlockContext): TargetBlock = entries map {
     case Entry.Metadata(metaKey, args) => parseTargetMetadata(metaKey, args)
-    case _                             => fail("Found ") // TODO: better error message
+    case otherEntry =>
+      fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
   }
 
   def parseSemantics(templefile: Syntax.Templefile): Semantics.Templefile = {
@@ -268,16 +294,20 @@ package object Semantics {
     val services = mutable.LinkedHashMap[String, ServiceBlock]()
 
     templefile.foreach {
-      // TODO: error message
-      case DSLRootItem(key, "service", entries) => safeInsert(services, key -> parseServiceBlock(entries))
-      // TODO: avoid `.get`?
-      case DSLRootItem(key, "project", entries) =>
-        if (projectNameBlock.isDefined) fail(s"Multiple projects found: ${projectNameBlock.get._1} and $key")
-        else projectNameBlock = Some(key -> parseProjectBlock(entries))
-      // TODO: error message
-      case DSLRootItem(key, "target", entries) => safeInsert(targets, key -> parseTargetBlock(entries))
+      case DSLRootItem(key, tag, entries) =>
+        implicit val blockContext: BlockContext = BlockContext(key, tag)
+        tag match {
+          // TODO: error message
+          case "service" => safeInsert(services, key -> parseServiceBlock(entries))
+          case "project" =>
+            projectNameBlock.fold { projectNameBlock = Some(key -> parseProjectBlock(entries)) } {
+              case (str, _) => fail(s"Multiple projects found: $str and $key")
+            }
+          // TODO: error message
+          case "target" => safeInsert(targets, key -> parseTargetBlock(entries))
 
-      case DSLRootItem(key, tag, _) => fail(s"Unknown block type $tag for $key")
+          case tag => fail(s"Unknown block type $tag for $key")
+        }
     }
 
     // TODO: better errors

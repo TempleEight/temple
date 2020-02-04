@@ -42,21 +42,22 @@ object Syntax {
   }
 
   /** Any element of a service/struct */
-  sealed trait Entry
+  sealed abstract class Entry(val typeName: String)
 
   object Entry {
 
-    case class Attribute(key: String, dataType: AttributeType, annotations: List[Annotation]) extends Entry {
+    case class Attribute(key: String, dataType: AttributeType, annotations: List[Annotation])
+        extends Entry("attribute") {
       override def toString: String = s"$key: $dataType${annotations.map(" " + _).mkString};"
     }
 
-    case class Metadata(metaKey: String, args: Args) extends Entry {
+    case class Metadata(metaKey: String, args: Args) extends Entry("metadata") {
       override def toString: String = s"#$metaKey ($args);"
     }
   }
 
   /** An item at the root of the Templefile, e.g. services and targets */
-  sealed case class DSLRootItem(key: String, tag: String, entries: List[Entry]) extends Entry {
+  sealed case class DSLRootItem(key: String, tag: String, entries: List[Entry]) extends Entry(s"$tag block ($key)") {
 
     override def toString: String = {
       val contents = indent(entries.mkString("\n"))
