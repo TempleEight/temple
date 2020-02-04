@@ -12,6 +12,7 @@ lazy val root = (project in file("."))
     libraryDependencies ++= Seq(
       "org.scala-lang.modules" %% "scala-parser-combinators" % "1.1.2",
       "org.scalatest" %% "scalatest" % "3.0.8" % "it,test",
+      "org.rogach" %% "scallop" % "3.3.2",
       "org.postgresql" % "postgresql" % "42.2.9",
       "com.sun.activation" % "javax.activation" % "1.2.0",
       "com.spotify" % "docker-client" % "8.9.1",
