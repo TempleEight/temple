@@ -4,6 +4,8 @@ import org.scalatest.{FlatSpec, Matchers}
 
 class PostgresGeneratorTest extends FlatSpec with Matchers {
 
+  implicit val context: PostgresContext = PostgresContext(PreparedType.DollarNumbers)
+
   "PostgresGenerator" should "generate correct CREATE statements" in {
     PostgresGenerator.generate(TestData.createStatement) shouldBe TestData.postgresCreateString
   }
