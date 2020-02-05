@@ -2,7 +2,7 @@ package temple.DSL.semantics
 
 import temple.DSL.Syntax
 import temple.DSL.Syntax.Arg
-import temple.utils.ListUtils._
+import temple.utils.SeqUtils._
 
 /** The type of an argument passed to any function-like item in the DSL, along with a method of extracting such a value
   * from an [[temple.DSL.Syntax.Arg]] */
@@ -44,9 +44,9 @@ object ArgType {
       arg match { case Arg.TokenArg(value) => Some(value); case _ => None }
   }
 
-  case class ListArgType[T](elemType: ArgType[T]) extends ArgType[List[T]](s"${elemType.stringRep} list") {
+  case class ListArgType[T](elemType: ArgType[T]) extends ArgType[Seq[T]](s"${elemType.stringRep} list") {
 
-    override def extractArg(arg: Arg): Option[List[T]] =
+    override def extractArg(arg: Arg): Option[Seq[T]] =
       arg match { case Arg.ListArg(elems) => elems.map(elemType.extractArg).sequence; case _ => None }
   }
 }

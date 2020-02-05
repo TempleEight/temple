@@ -5,6 +5,6 @@ import temple.DSL.semantics.Metadata.ServiceMetadata
 /** A service block, representing one microservice on its own isolated server */
 case class ServiceBlock(
   attributes: Map[String, Attribute],
-  metadata: List[ServiceMetadata],
-  structs: Map[String, StructBlock]
+  metadata: Seq[ServiceMetadata] = Nil,
+  structs: Map[String, StructBlock] = Map.empty
 )

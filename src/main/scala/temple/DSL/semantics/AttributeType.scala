@@ -4,13 +4,17 @@ package temple.DSL.semantics
 trait AttributeType
 
 object AttributeType {
-  case object BoolType                                                           extends AttributeType
-  case class StringType(max: Option[Long], min: Int)                             extends AttributeType
-  case class IntType(max: Option[Long], min: Option[Long], precision: Short = 4) extends AttributeType
-  case class FloatType(max: Double, min: Double, precision: Short = 8)           extends AttributeType
-  case object DateType                                                           extends AttributeType
-  case object DateTimeType                                                       extends AttributeType
-  case object TimeType                                                           extends AttributeType
-  case class BlobType(size: Option[Long])                                        extends AttributeType
-  case class ForeignKey()                                                        extends AttributeType
+  case class ForeignKey()  extends AttributeType
+  case object BoolType     extends AttributeType
+  case object DateType     extends AttributeType
+  case object DateTimeType extends AttributeType
+  case object TimeType     extends AttributeType
+
+  case class BlobType(size: Option[Long] = None)                extends AttributeType
+  case class StringType(max: Option[Long] = None, min: Int = 0) extends AttributeType
+
+  case class IntType(max: Option[Long] = None, min: Option[Long] = None, precision: Short = 4) extends AttributeType
+
+  case class FloatType(max: Double = Float.MaxValue, min: Double = Float.MinValue, precision: Short = 8)
+      extends AttributeType
 }

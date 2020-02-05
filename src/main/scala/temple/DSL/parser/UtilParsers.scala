@@ -15,22 +15,22 @@ trait UtilParsers extends RegexParsers {
     * @param q0 The parser marking the end of the sequence. Use `guard` to avoid consuming this input
     * @return A parser that returns a list of the successful parses of `p0`
     */
-  protected def repUntil[T](p0: => Parser[T], q0: => Parser[Any] = ""): Parser[List[T]] = Parser { in =>
+  protected def repUntil[T](p0: => Parser[T], q0: => Parser[Any] = ""): Parser[Seq[T]] = Parser { in =>
     lazy val p = p0
     lazy val q = q0
     val elems  = new ListBuffer[T]
 
     // run `p0` repeatedly
-    @tailrec def applyP(in0: Input): ParseResult[List[T]] = p(in0) match {
+    @tailrec def applyP(in0: Input): ParseResult[Seq[T]] = p(in0) match {
       case Success(x, rest) => elems += x; applyP(rest)
       case e: Error         => e // still have to propagate `p`’s parser error
       case Failure(str, input) =>
         q(in0) match {
-          case Success(_, next) => Success(elems.toList, next) // allow `q` to consume (use guard to avoid)
-          case _: Failure       => Failure(str, input)         // If both fail, propagate `p0`’s failure.
-          case e: Error         => e                           // still have to propagate `q0`’s parser error
+          case Success(_, next) => Success(elems.toSeq, next) // allow `q` to consume (use guard to avoid)
+          case _: Failure       => Failure(str, input)        // If both fail, propagate `p0`’s failure.
+          case e: Error         => e                          // still have to propagate `q0`’s parser error
         }
-      case _ => Success(elems.toList, in0)
+      case _ => Success(elems.toSeq, in0)
     }
 
     applyP(in)
@@ -45,5 +45,5 @@ trait UtilParsers extends RegexParsers {
     * @param p0 The parser that is repeated
     * @return A parser that returns a list of the successful parses of `p0`
     */
-  protected def repAll[T](p0: => Parser[T]): Parser[List[T]] = repUntil(p0, "$".r)
+  protected def repAll[T](p0: => Parser[T]): Parser[Seq[T]] = repUntil(p0, "$".r)
 }

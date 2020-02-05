@@ -197,7 +197,7 @@ object Analyser {
 
   def parseAttribute(
     dataType: Syntax.AttributeType,
-    annotations: List[Syntax.Annotation]
+    annotations: Seq[Syntax.Annotation]
   )(implicit keyNameContext: KeyName): Attribute = {
     var accessAnnotation: Option[Annotation.AccessAnnotation] = None
 
@@ -236,7 +236,7 @@ object Analyser {
     /**
       * Use a different parser as a fallback if none of the parsers defined here match
       * @param parser the alternative parser to use as a fallback
-      * @tparam A the type of metadata parsed by [[parser]], which must be equal to/a subtype of this parser’s metadata
+      * @tparam A the type of metadata parsed by `parser`, which must be equal to/a subtype of this parser’s metadata
       *           type
       */
     def inheritFrom[A <: T](parser: MetadataParser[A]): Unit =
@@ -324,7 +324,7 @@ object Analyser {
     * @param context The location in the AST, used for error messages
     * @return A semantic representation of a [[temple.DSL.semantics.ServiceBlock]]
     */
-  private def parseServiceBlock(entries: List[Entry])(implicit context: BlockContext): ServiceBlock = {
+  private def parseServiceBlock(entries: Seq[Entry])(implicit context: BlockContext): ServiceBlock = {
     val attributes = mutable.LinkedHashMap[String, Attribute]()
     val metadatas  = mutable.ListBuffer[ServiceMetadata]()
     val structs    = mutable.LinkedHashMap[String, StructBlock]()
@@ -338,25 +338,25 @@ object Analyser {
           case tag      => fail(s"Unknown block type $tag for $key in $context")
         }
     }
-    ServiceBlock(attributes.to(ListMap), metadatas.toList, structs.to(ListMap))
+    ServiceBlock(attributes.to(ListMap), metadatas.toSeq, structs.to(ListMap))
   }
 
   // TODO: these methods are very similar, can they be merged?
 
-  private def parseProjectBlock(entries: List[Entry])(implicit context: BlockContext): ProjectBlock = entries map {
+  private def parseProjectBlock(entries: Seq[Entry])(implicit context: BlockContext): ProjectBlock = entries map {
     case Entry.Metadata(metaKey, args) => parseProjectMetadata(metaKey, args)
     case otherEntry                    =>
       // TODO: should this hardcode ${context.tag} as Project? Can we get a link to the relevant part of the docs
       fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
   }
 
-  private def parseTargetBlock(entries: List[Entry])(implicit context: BlockContext): TargetBlock = entries map {
+  private def parseTargetBlock(entries: Seq[Entry])(implicit context: BlockContext): TargetBlock = entries map {
     case Entry.Metadata(metaKey, args) => parseTargetMetadata(metaKey, args)
     case otherEntry =>
       fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
   }
 
-  private def parseStructBlock(entries: List[Entry])(implicit context: BlockContext): StructBlock = {
+  private def parseStructBlock(entries: Seq[Entry])(implicit context: BlockContext): StructBlock = {
     val attributes = mutable.LinkedHashMap[String, Attribute]()
     entries.foreach {
       case Entry.Attribute(key, dataType, annotations) =>

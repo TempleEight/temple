@@ -12,6 +12,6 @@ case class Templefile(
 )
 
 object Templefile {
-  type ProjectBlock = List[ProjectMetadata]
-  type TargetBlock  = List[TargetMetadata]
+  type ProjectBlock = Seq[ProjectMetadata]
+  type TargetBlock  = Seq[TargetMetadata]
 }

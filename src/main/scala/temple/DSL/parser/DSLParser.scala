@@ -7,7 +7,7 @@ import scala.util.parsing.combinator.JavaTokenParsers
 class DSLParser extends JavaTokenParsers with UtilParsers {
 
   /** A parser generator for an entire Templefile */
-  protected def templefile: Parser[List[DSLRootItem]] = repAll(rootItem)
+  protected def templefile: Parser[Templefile] = repAll(rootItem)
 
   /** A parser generator for each item at the root level, i.e. a name, tag and block */
   protected def rootItem: Parser[DSLRootItem] = (ident <~ ":") ~ (ident <~ "{") ~ repUntil(entry, "}") ^^ {
@@ -35,7 +35,7 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   protected def listArg: Parser[Arg] = "[" ~> repUntil(arg <~ argsListSeparator, "]") ^^ (elems => Arg.ListArg(elems))
 
   /** A parser generator for a list of arguments in square brackets, when used in shorthand to replace the brackets */
-  protected def shorthandListArg[T]: Parser[List[Arg] ~ List[T]] = (listArg ^^ (list => List(list))) ~ success(List())
+  protected def shorthandListArg[T]: Parser[Seq[Arg] ~ Seq[T]] = (listArg ^^ (list => Seq(list))) ~ success(Nil)
 
   /**
     * A parser generator for any argument passed to a type or metadata
@@ -50,7 +50,7 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   protected def kwarg: Parser[(String, Arg)] = ((ident <~ ":") ~ arg) ^^ { case ident ~ arg => (ident, arg) }
 
   /** A parser generator for a sequence of arguments, starting positionally and subsequently keyed */
-  protected def allArgs: Parser[List[Arg] ~ List[(String, Arg)]] =
+  protected def allArgs: Parser[Seq[Arg] ~ Seq[(String, Arg)]] =
     "(" ~> (rep(arg <~ argsListSeparator) ~ repUntil(kwarg <~ argsListSeparator, ")"))
 
   /** A parser generator for the type of an attribute */
