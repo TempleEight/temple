@@ -4,8 +4,8 @@ import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.ComparisonOperator._
 import temple.generate.database.ast.Condition._
-import temple.generate.database.ast.Statement._
 import temple.generate.database.ast.Expression._
+import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
 
 package object database {
@@ -174,14 +174,14 @@ package object database {
           ),
           Disjunction(
             Inverse(IsNull(Column("isStudent"))),
-            Inverse(Comparison("Users.expiry", Less, "2020-02-03 00:00:00+00"))
+            Inverse(Comparison("Users.expiry", Less, "TIMESTAMP '2020-02-03 00:00:00+00'"))
           )
         )
       )
     )
 
     val postgresSelectStringComplex: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE ((isStudent IS NULL) OR (Users.id >= 1)) AND ((isStudent IS NOT NULL) OR (NOT (Users.expiry < 2020-02-03 00:00:00+00)));"""
+      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE ((isStudent IS NULL) OR (Users.id >= 1)) AND ((isStudent IS NOT NULL) OR (NOT (Users.expiry < TIMESTAMP '2020-02-03 00:00:00+00')));"""
 
     val insertStatement = Insert(
       "Users",
