@@ -7,7 +7,7 @@ User: service {
   lastName: string;
   createdAt: datetime;
   numberOfDogs: int;
-  yeets: bool;
+  yeets: bool @unique @server;
   currentBankBalance: float(precision: 2);
   birthDate: date;
   breakfastTime: time;

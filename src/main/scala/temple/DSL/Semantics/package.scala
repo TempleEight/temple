@@ -144,57 +144,77 @@ package object Semantics {
   }
 
   // TODO: is this too messy?
-  def parseAttributeType(
+  def parseAttributeType(dataType: Syntax.AttributeType)(implicit keyNameContext: KeyName): AttributeType = {
+    val Syntax.AttributeType(typeName, args) = dataType
+    implicit val context: Context            = Context(s"$typeName@$keyNameContext")
+
+    typeName match {
+      case "int" =>
+        val argMap = parseParameters(
+          "max"       -> Some(Arg.NoArg),
+          "min"       -> Some(Arg.NoArg),
+          "precision" -> Some(Arg.IntArg(4))
+        )(args)
+        AttributeType.IntType(
+          argMap.getOptionArg("min", IntArgType),
+          argMap.getOptionArg("max", IntArgType),
+          argMap.getArg("precision", IntArgType).toShort
+        )
+      case "string" =>
+        val argMap = parseParameters(
+          "maxLength" -> Some(Arg.NoArg),
+          "minLength" -> Some(Arg.IntArg(0))
+        )(args)
+        AttributeType.StringType(
+          argMap.getOptionArg("maxLength", IntArgType),
+          argMap.getArg("minLength", IntArgType).toInt
+        )
+      case "float" =>
+        val argMap = parseParameters(
+          "max"       -> Some(Arg.FloatingArg(Double.MaxValue)),
+          "min"       -> Some(Arg.FloatingArg(Double.MaxValue)),
+          "precision" -> Some(Arg.IntArg(8))
+        )(args)
+        AttributeType.FloatType(
+          argMap.getArg("max", FloatingArgType),
+          argMap.getArg("min", FloatingArgType),
+          argMap.getArg("precision", FloatingArgType).toShort
+        )
+      case "date"     => AttributeType.DateType
+      case "datetime" => AttributeType.DateTimeType
+      case "time"     => AttributeType.TimeType
+      case "data" =>
+        val argMap = parseParameters("maxSize" -> Some(Arg.NoArg))(args)
+        AttributeType.BlobType(
+          argMap.getOptionArg("maxSize", IntArgType)
+        )
+      case "bool"   => AttributeType.BoolType
+      case typeName => fail(s"Unknown type $typeName")
+    }
+  }
+
+  def parseAttribute(
     dataType: Syntax.AttributeType,
     annotations: List[Syntax.Annotation]
-  )(implicit keyNameContext: KeyName): AttributeType = dataType match {
-    case Syntax.AttributeType(typeName, args) =>
-      implicit val context: Context = Context(s"$typeName@$keyNameContext")
+  )(implicit keyNameContext: KeyName): Attribute = {
+    var accessAnnotation: Option[Annotation.AccessAnnotation] = None
 
-      typeName match {
-        case "int" =>
-          val argMap = parseParameters(
-            "max"       -> Some(Arg.NoArg),
-            "min"       -> Some(Arg.NoArg),
-            "precision" -> Some(Arg.IntArg(4))
-          )(args)
-          AttributeType.IntType(
-            argMap.getOptionArg("min", IntArgType),
-            argMap.getOptionArg("max", IntArgType),
-            argMap.getArg("precision", IntArgType).toShort
-          )
-        case "string" =>
-          val argMap = parseParameters(
-            "maxLength" -> Some(Arg.NoArg),
-            "minLength" -> Some(Arg.IntArg(0))
-          )(args)
-          AttributeType.StringType(
-            argMap.getOptionArg("maxLength", IntArgType),
-            argMap.getArg("minLength", IntArgType).toInt
-          )
-        case "float" =>
-          val argMap = parseParameters(
-            "max"       -> Some(Arg.FloatingArg(Double.MaxValue)),
-            "min"       -> Some(Arg.FloatingArg(Double.MaxValue)),
-            "precision" -> Some(Arg.IntArg(8))
-          )(args)
-          AttributeType.FloatType(
-            argMap.getArg("max", FloatingArgType),
-            argMap.getArg("min", FloatingArgType),
-            argMap.getArg("precision", FloatingArgType).toShort
-          )
-        case "date"     => AttributeType.DateType
-        case "datetime" => AttributeType.DateTimeType
-        case "time"     => AttributeType.TimeType
-        case "data" =>
-          val argMap = parseParameters("maxSize" -> Some(Arg.NoArg))(args)
-          AttributeType.BlobType(
-            argMap.getOptionArg("maxSize", IntArgType)
-          )
-        case "bool"   => AttributeType.BoolType
-        case typeName => fail(s"Unknown type $typeName")
-        //TODO: handle annotations
+    def setAccessAnnotation(annotation: Annotation.AccessAnnotation): Unit =
+      accessAnnotation.fold { accessAnnotation = Some(annotation) } { existingAnnotation =>
+        fail(
+          s"Two scope annotations found for ${keyNameContext.keyName}: " +
+          s"${annotation.render} is incompatible with ${existingAnnotation.render}"
+        )
       }
+    val valueAnnotations = mutable.HashSet[Annotation.ValueAnnotation]()
+    annotations.iterator.map(_.key) foreach {
+      case "unique"    => valueAnnotations += Annotation.Unique
+      case "server"    => setAccessAnnotation(Annotation.Server)
+      case "client"    => setAccessAnnotation(Annotation.Client)
+      case "serverSet" => setAccessAnnotation(Annotation.ServerSet)
+      case key         => fail(s"Unknown annotation @$key at ${keyNameContext.keyName}")
+    }
+    Attribute(parseAttributeType(dataType), accessAnnotation, valueAnnotations.toSet)
   }
 
   /**
@@ -301,12 +321,12 @@ package object Semantics {
     * @return A semantic representation of a [[temple.DSL.Semantics.ServiceBlock]]
     */
   private def parseServiceBlock(entries: List[Entry])(implicit context: BlockContext): ServiceBlock = {
-    val attributes = mutable.LinkedHashMap[String, AttributeType]()
+    val attributes = mutable.LinkedHashMap[String, Attribute]()
     val metadatas  = mutable.ListBuffer[ServiceMetadata]()
     val structs    = mutable.LinkedHashMap[String, StructBlock]()
     entries.foreach {
       case Entry.Attribute(key, dataType, annotations) =>
-        attributes.safeInsert(key -> parseAttributeType(dataType, annotations)(KeyName(key)))
+        attributes.safeInsert(key -> parseAttribute(dataType, annotations)(KeyName(key)))
       case Entry.Metadata(metaKey, args) => metadatas += parseServiceMetadata(metaKey, args)
       case DSLRootItem(key, tag, entries) =>
         tag match {
@@ -333,10 +353,10 @@ package object Semantics {
   }
 
   private def parseStructBlock(entries: List[Entry])(implicit context: BlockContext): StructBlock = {
-    val attributes = mutable.LinkedHashMap[String, AttributeType]()
+    val attributes = mutable.LinkedHashMap[String, Attribute]()
     entries.foreach {
       case Entry.Attribute(key, dataType, annotations) =>
-        attributes.safeInsert(key -> parseAttributeType(dataType, annotations)(KeyName(key)))
+        attributes.safeInsert(key -> parseAttribute(dataType, annotations)(KeyName(key)))
       case otherEntry =>
         // TODO: should this hardcode ${context.tag} as Project? Can we get a link to the relevant part of the docs
         fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
