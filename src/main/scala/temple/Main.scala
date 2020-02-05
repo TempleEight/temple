@@ -3,8 +3,6 @@ package temple
 import temple.DSL.DSLProcessor
 import temple.utils.FileUtils
 
-// $COVERAGE-OFF$
-
 /** Main entry point into the application */
 object Main extends App {
   try {

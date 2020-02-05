@@ -22,3 +22,6 @@ lazy val root = (project in file("."))
   )
 
 scalacOptions ++= Seq("-deprecation", "-feature")
+
+// https://github.com/scoverage/sbt-scoverage#exclude-classes-and-packages
+coverageExcludedPackages := "<empty>;temple\\.Main;"
