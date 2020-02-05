@@ -1,14 +1,15 @@
-package temple.DSL
+package temple.DSL.semantics
 
-import temple.DSL.Semantics.ArgType._
-import temple.DSL.Semantics.Metadata._
-import temple.DSL.Semantics.Templefile._
+import temple.DSL.semantics.ArgType._
+import temple.DSL.semantics.Metadata._
+import temple.DSL.semantics.Templefile._
+import temple.DSL.Syntax
 import temple.DSL.Syntax.{Arg, Args, DSLRootItem, Entry}
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
 
-package object Semantics {
+object Analyser {
 
   /**
     * Throws an exception about the semantic analysis.
@@ -110,8 +111,9 @@ package object Semantics {
   }
 
   /**
-    * A wrapper around a map of arguments, as produced by [[temple.DSL.Semantics#parseParameters]], with methods added
+    * A wrapper around a map of arguments, as produced by [[temple.DSL.semantics#parseParameters]], with methods added
     * to extract arguments of given types
+    *
     * @param argMap The underlying immutable map of names to argument values
     */
   private case class ArgMap(argMap: Map[String, Arg]) {
@@ -220,8 +222,9 @@ package object Semantics {
   /**
     * Build a metadata parser by building a list of function calls for each match
     *
-    * This is needed because each call to [[temple.DSL.Semantics.MetadataParser#registerKeyword]] is effectively
+    * This is needed because each call to [[temple.DSL.semantics.Analyser.MetadataParser#registerKeyword]] is effectively
     * dependently typed, so it cannot be encoded into a tuple, but instead must immediately be bundled into a function
+    *
     * @tparam T the subtype of metadata that we are specifically parsing. The “inheritance” (built up with
     *           `inherit from myMetadataParser`) runs in the opposite direction to the inheritance of classes: each
     *           parser extends parsers of a more specific type.
@@ -253,7 +256,7 @@ package object Semantics {
       *
       * @param metaKey The name of the metadata item to add
       * @param argKey The name of the single argument to the metadata. Note that there is also
-      *               [[temple.DSL.Semantics.MetadataParser#registerKeyword]]
+      *               [[temple.DSL.semantics.Analyser.MetadataParser#registerKeyword]]
       * @param argType The type of the field to expect
       * @param constructor The function to turn an input of type [[ArgType]] into a value of type [[T]]
       * @tparam A The underlying type of the field, inferred from `argType`
@@ -271,7 +274,7 @@ package object Semantics {
           constructor(argMap.getArg(argKey, argType))
         })
 
-    /** A shorthand for [[temple.DSL.Semantics.MetadataParser#registerKeyword]] with the same `key` used for both the
+    /** A shorthand for [[temple.DSL.semantics.Analyser.MetadataParser#registerKeyword]] with the same `key` used for both the
       * metadata name and its single argument */
     final protected def registerKeyword[A](key: String, argType: ArgType[A], constructor: A => T): Unit =
       registerKeyword(key, key, argType, constructor)
@@ -316,9 +319,10 @@ package object Semantics {
 
   /**
     * Parse a service block from a list of entries into the distinct attributes, metadatas and structs
+    *
     * @param entries The list of entries in the block from the AST
     * @param context The location in the AST, used for error messages
-    * @return A semantic representation of a [[temple.DSL.Semantics.ServiceBlock]]
+    * @return A semantic representation of a [[temple.DSL.semantics.ServiceBlock]]
     */
   private def parseServiceBlock(entries: List[Entry])(implicit context: BlockContext): ServiceBlock = {
     val attributes = mutable.LinkedHashMap[String, Attribute]()
@@ -372,7 +376,7 @@ package object Semantics {
     * @throws SemanticParsingException when there is no project information, as well as when any of the definitions are
     *                                  malformed
     */
-  def parseSemantics(templefile: Syntax.Templefile): Semantics.Templefile = {
+  def parseSemantics(templefile: Syntax.Templefile): Templefile = {
     var projectNameBlock: Option[(String, ProjectBlock)] = None
 
     val targets  = mutable.LinkedHashMap[String, TargetBlock]()

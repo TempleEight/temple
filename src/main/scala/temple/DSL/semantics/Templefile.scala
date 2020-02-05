@@ -1,7 +1,7 @@
-package temple.DSL.Semantics
+package temple.DSL.semantics
 
-import temple.DSL.Semantics.Metadata._
-import temple.DSL.Semantics.Templefile._
+import temple.DSL.semantics.Metadata._
+import temple.DSL.semantics.Templefile._
 
 /** The semantic representation of a Templefile */
 case class Templefile(

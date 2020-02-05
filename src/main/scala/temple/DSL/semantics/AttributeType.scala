@@ -1,4 +1,4 @@
-package temple.DSL.Semantics
+package temple.DSL.semantics
 
 /** The type of an attribute, i.e. a column in a database/field in a struct */
 trait AttributeType

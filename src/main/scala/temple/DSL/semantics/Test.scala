@@ -1,4 +1,4 @@
-package temple.DSL.Semantics
+package temple.DSL.semantics
 
 import temple.DSL.DSLProcessor
 import temple.utils.FileUtils.readFile
@@ -10,7 +10,7 @@ object Test {
   def main(args: Array[String]): Unit = {
     val source        = readFile("src/test/scala/temple/testfiles/simple.temple")
     val parseResult   = DSLProcessor.parse(source).fromEither(msg => throw new Exception(s"first parse failed, $msg"))
-    val semanticParse = parseSemantics(parseResult)
+    val semanticParse = Analyser.parseSemantics(parseResult)
 
     println(semanticParse)
   }

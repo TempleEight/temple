@@ -1,4 +1,4 @@
-package temple.DSL.Semantics
+package temple.DSL.semantics
 
 /** A piece of metadata modifying a service/project/target block */
 sealed trait Metadata

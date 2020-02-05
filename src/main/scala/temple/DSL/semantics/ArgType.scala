@@ -1,4 +1,4 @@
-package temple.DSL.Semantics
+package temple.DSL.semantics
 
 import temple.DSL.Syntax
 import temple.DSL.Syntax.Arg
@@ -9,8 +9,9 @@ import temple.utils.ListUtils._
 sealed abstract class ArgType[T](val stringRep: String) {
 
   /**
-    * Extract [[Some]] value of given [[temple.DSL.Semantics.ArgType]] from a [[temple.DSL.Syntax.Arg]], or [[None]] if
+    * Extract [[Some]] value of given [[temple.DSL.semantics.ArgType]] from a [[temple.DSL.Syntax.Arg]], or [[None]] if
     * a different type of value is present
+    *
     * @param arg the argument of unknown type from which to try to extract a value of this type
     * @return [[Some]] value of this type, or [[None]] if it is of a different type
     */
