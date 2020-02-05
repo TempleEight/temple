@@ -1,6 +1,6 @@
 package temple.generate.database
 
-case class PostgresContext(preparedType: PreparedType)
+case class PostgresContext(preparedType: PreparedType) extends DatabaseContext
 
 sealed trait PreparedType
 

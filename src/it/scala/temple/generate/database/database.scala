@@ -1,5 +1,7 @@
 package temple.generate
 
+import java.sql.{Date, Time, Timestamp}
+
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.ComparisonOperator._
@@ -195,6 +197,16 @@ package object database {
       )
     )
 
+    val insertData: List[PreparedVariable] = List(
+      PreparedVariable.IntVariable(3),
+      PreparedVariable.FloatVariable(100.1f),
+      PreparedVariable.StringVariable("John Smith"),
+      PreparedVariable.BoolVariable(true),
+      PreparedVariable.DateVariable(Date.valueOf("1998-03-05")),
+      PreparedVariable.TimeVariable(Time.valueOf("12:00:00")),
+      PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2020-01-01 00:00:00.0"))
+    )
+
     val postgresInsertString: String =
       """INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry)
         |VALUES ($1, $2, $3, $4, $5, $6, $7);""".stripMargin
@@ -230,5 +242,17 @@ package object database {
 
     val postgresDropStringIfExists: String =
       """DROP TABLE Users IF EXISTS;"""
+  }
+
+  sealed trait PreparedVariable
+
+  object PreparedVariable {
+    case class IntVariable(value: Int)              extends PreparedVariable
+    case class StringVariable(value: String)        extends PreparedVariable
+    case class FloatVariable(value: Float)          extends PreparedVariable
+    case class BoolVariable(value: Boolean)         extends PreparedVariable
+    case class DateVariable(value: Date)            extends PreparedVariable
+    case class TimeVariable(value: Time)            extends PreparedVariable
+    case class DateTimeTzVariable(value: Timestamp) extends PreparedVariable
   }
 }

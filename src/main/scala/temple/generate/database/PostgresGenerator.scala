@@ -11,7 +11,7 @@ import temple.utils.StringUtils._
 import scala.util.chaining._
 
 /** Implementation of [[DatabaseGenerator]] for generating PostgreSQL */
-object PostgresGenerator extends DatabaseGenerator {
+object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
 
   /** Given a comparison, parse it into the Postgres format */
   private def generateComparison(comparison: ComparisonOperator) =
@@ -93,7 +93,7 @@ object PostgresGenerator extends DatabaseGenerator {
         (s"SELECT $stringColumns FROM $tableName" +: stringConditions).mkString("", " ", ";")
       case Insert(tableName, columns) =>
         val stringColumns = columns.map(_.name).mkString(", ")
-        val values        = generatePreparedValues(stringColumns, PreparedType.DollarNumbers)
+        val values        = generatePreparedValues(columns)
         s"INSERT INTO $tableName ($stringColumns)\nVALUES ($values);"
       case Delete(tableName, conditions) =>
         val stringConditions = conditions.map(generateCondition) match {

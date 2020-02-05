@@ -42,7 +42,19 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
 
   "Insert statement" should "be executed correctly" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
-    executeWithoutResults(PostgresGenerator.generate(TestData.insertStatement))
-    //TODO: Finish implementing prepared statements and check it works
+    executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertData)
+    executeWithResults("SELECT * FROM USERS;") match {
+      case Some(result) =>
+        result.next()
+        result.getInt("id") shouldBe 3
+        result.getFloat("bankBalance") shouldBe 100.1f
+        result.getString("name") shouldBe "John Smith"
+        result.getBoolean("isStudent") shouldBe true
+        result.getDate("dateOfBirth").toString shouldBe "1998-03-05"
+        result.getTime("timeOfDay").toString shouldBe "12:00:00"
+        result.getTimestamp("expiry").toString shouldBe "2020-01-01 00:00:00.0"
+        result.isLast shouldBe true
+      case None => fail("Database connection could not be established")
+    }
   }
 }
