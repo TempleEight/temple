@@ -20,3 +20,8 @@ lazy val root = (project in file("."))
       "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.9" % "it,test",
     )
   )
+
+scalacOptions ++= Seq("-deprecation", "-feature")
+
+// https://github.com/scoverage/sbt-scoverage#exclude-classes-and-packages
+coverageExcludedPackages := "<empty>;temple\\.Main;"

@@ -10,8 +10,8 @@ class TempleConfigTest extends FlatSpec with Matchers {
 
   "Generate" should "correctly parse with a filename" in {
     val config = new TempleConfig(List("generate", "foo.temple"))
-    config.subcommand shouldBe Some(config.generate)
-    config.generate.filename.toOption shouldBe Some("foo.temple")
+    config.subcommand shouldBe Some(config.Generate)
+    config.Generate.filename.toOption shouldBe Some("foo.temple")
   }
 
   "Empty arguments" should "have no sub commands" in {
