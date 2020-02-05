@@ -1,6 +1,4 @@
-SimpleTempleTest: project {
-  username: string;
-}
+SimpleTempleTest: project {}
 
 User: service {
   username: string;

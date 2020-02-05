@@ -1,76 +1,51 @@
 package temple.DSL
 
 import temple.DSL.Semantics.ArgType._
+import temple.DSL.Semantics.Metadata._
 import temple.DSL.Semantics.Templefile._
 import temple.DSL.Syntax.{Arg, Args, DSLRootItem, Entry}
-import utils.ListUtils._
 
 import scala.collection.immutable.ListMap
-import scala.collection.{immutable, mutable}
+import scala.collection.mutable
 
 package object Semantics {
 
-  sealed trait Metadata
-  sealed trait TargetMetadata            extends Metadata
-  sealed trait ServiceMetadata           extends Metadata
-  sealed trait ProjectMetadata           extends Metadata
-  sealed trait ProjectAndServiceMetadata extends ServiceMetadata with ProjectMetadata
-  sealed trait GlobalMetadata            extends TargetMetadata with ProjectAndServiceMetadata
-
-  object Metadata {
-    // TODO: is string right here?
-    case class Language(name: String)             extends GlobalMetadata
-    case class Provider(name: String)             extends ProjectMetadata
-    case class Database(name: String)             extends ProjectAndServiceMetadata
-    case class ServiceAuth(services: String)      extends ServiceMetadata
-    case class TargetAuth(services: List[String]) extends TargetMetadata
-    case class Uses(services: List[String])       extends ServiceMetadata
-  }
-
+  /**
+    * Throws an exception about the semantic analysis.
+    * @param str A string representation of the error
+    * @return never returns
+    */
   // TODO: better error handling
-  def fail(str: String): Nothing = throw new Error(str)
+  //   When parsing into an AST, we could pass around a mutable context, which we use to log the location of each part
+  //   of the code. This could also be a good way of enforcing that each name is unique (at the moment there is no
+  //   checking that for example the names of structs and fields are distinct). A mutable Trie or HashMap would work
+  //   well for this
+  // TODO: This function could take the context as an implicit argument.
+  private def fail(str: String): Nothing = throw new SemanticParsingException(str)
 
-  def safeInsert[K, V](map: mutable.Map[K, V], kv: (K, V), f: => Nothing): Unit =
-    if (map.contains(kv._1)) f else map += kv
+  /**
+    * Add `safeInsert` function to a map, which throw an error when trying to overwrite an existing key
+    * @param map   the underlying mutable map
+    * @tparam K    the type of the keys contained in the map
+    * @tparam V    the type of the values assigned to keys in thw map
+    */
+  implicit class SafeInsertMap[K, V](map: mutable.Map[K, V]) {
 
-  def safeInsert[K, V](map: mutable.Map[K, V], kv: (K, V)): Unit =
-    safeInsert(map, kv, fail(s"Key ${kv._1} already exists in $map."))
+    /**
+      * Insert an entry into the map, performing action `f` on conflict
+      * @param kv a key-value pair to insert into the map
+      * @param f an action to run on conflict, instead of overwriting
+      */
+    def safeInsert(kv: (K, V), f: => Unit): Unit =
+      if (map.contains(kv._1)) f else map += kv
 
-  sealed abstract class ArgType[T](val stringRep: String) {
-    def extractArg(arg: Syntax.Arg): Option[T]
-  }
-
-  object ArgType {
-
-    case object IntArgType extends ArgType[Long]("integer") {
-
-      override def extractArg(arg: Arg): Option[Long] =
-        arg match { case Arg.IntArg(value) => Some(value); case _ => None }
-    }
-
-    case object FloatingArgType extends ArgType[Double]("floating point") {
-
-      override def extractArg(arg: Arg): Option[Double] =
-        arg match { case Arg.IntArg(value) => Some(value); case Arg.FloatingArg(value) => Some(value); case _ => None }
-    }
-
-    case object TokenArgType extends ArgType[String]("token") {
-
-      override def extractArg(arg: Arg): Option[String] =
-        arg match { case Arg.TokenArg(value) => Some(value); case _ => None }
-    }
-
-    case object StringArgType extends ArgType[String]("string") {
-
-      override def extractArg(arg: Arg): Option[String] =
-        arg match { case Arg.TokenArg(value) => Some(value); case _ => None }
-    }
-
-    case class ListArgType[T](elemType: ArgType[T]) extends ArgType[List[T]](s"${elemType.stringRep} list") {
-
-      override def extractArg(arg: Arg): Option[List[T]] =
-        arg match { case Arg.ListArg(elems) => elems.map(elemType.extractArg).sequence; case _ => None }
-    }
+    /**
+      * Insert an entry into the map, throwing on error
+      * @param kv a key-value pair to insert into the map
+      * @throws SemanticParsingException when a key already exists in the map
+      */
+    def safeInsert(kv: (K, V)): Unit =
+      safeInsert(kv, fail(s"Key ${kv._1} already exists in $map."))
   }
 
   // TODO: add more path
@@ -89,24 +64,38 @@ package object Semantics {
     def apply(block: String, tag: String): BlockContext                        = BlockContext(block, tag, None)
   }
 
-  // TODO: refactor for tidiness
+  /**
+    * Convert a sequence of arguments, some of which are named, into a map from name to value
+    * @param specs A signature of a sequence of argument names in order, with an optional default assigned to each
+    * @param args The argument list to match up with the signature
+    * @param context The path to this place in the tree, for use when reporting errors
+    * @return A map of named arguments to their values
+    * @throws SemanticParsingException when too many, too few, duplicate or unknown arguments are supplied
+    */
   private def parseParameters(specs: (String, Option[Syntax.Arg])*)(args: Args)(implicit context: Context): ArgMap = {
+    // A ListMap is an insertion-ordered immutable map
     val specsMap = specs.to(ListMap)
     val argc     = args.posargs.length
 
     if (specs.sizeIs < argc)
       fail(s"Too many arguments supplied to function $context (found $argc, expected at most ${specs.length})")
 
-    val map = new mutable.HashMap[String, Syntax.Arg]()
+    val map = mutable.HashMap[String, Syntax.Arg]()
+
+    // Add the positional arguments to the map
     (specsMap, args.posargs).zipped foreach {
       case ((name, _), arg) =>
-        safeInsert(map, name -> arg, fail(s"Programmer error: duplicate argument name $name in spec for $context?"))
+        map.safeInsert(name -> arg, fail(s"Programmer error: duplicate argument name $name in spec for $context?"))
     }
+
+    // Add the keyword arguments to the map
     args.kwargs foreach {
       case (name, arg) =>
         if (!specsMap.contains(name)) fail(s"Unknown keyword argument $name with value $arg for $context")
-        safeInsert(map, name -> arg, fail(s"Duplicate argument provided for $name for $context"))
+        map.safeInsert(name -> arg, fail(s"Duplicate argument provided for $name for $context"))
     }
+
+    // Add the default arguments to the map
     specsMap.iterator.drop(argc) foreach {
       case (name, default) =>
         // Ensure each key now exists in the argument map. If it does not, fall back to the default value.
@@ -116,21 +105,45 @@ package object Semantics {
           default.getOrElse { fail(s"Required argument $name not provided for $context") }
         )
     }
+
     ArgMap(map.toMap)
   }
 
-  implicit private class ArgMap(argMap: Map[String, Arg]) {
+  /**
+    * A wrapper around a map of arguments, as produced by [[temple.DSL.Semantics#parseParameters]], with methods added
+    * to extract arguments of given types
+    * @param argMap The underlying immutable map of names to argument values
+    */
+  private case class ArgMap(argMap: Map[String, Arg]) {
 
+    /**
+      * Type-safely extract an argument from the argument map
+      * @param key The name of the argument to extract
+      * @param argType The type of the argument to extract
+      * @param context The location of the function call, used in the error message
+      * @tparam T The type of the element to extract
+      * @return The typesafe extracted value
+      */
     def getArg[T](key: String, argType: ArgType[T])(implicit context: Context): T =
       argType.extractArg(argMap(key)).getOrElse {
         fail(s"${argType.stringRep.capitalize} expected at $key for $context, found ${argMap(key)}")
       }
 
+    /**
+      * Type-safely extract [[Some]] argument from the argument map, or [[None]] if the default value is
+      * [[temple.DSL.Syntax.Arg.NoArg]]
+      * @param key The name of the argument to extract
+      * @param argType The type of the argument to extract
+      * @param context The location of the function call, used in the error message
+      * @tparam T The type of the element to extract
+      * @return [[Some]] typesafe extracted value, or [[None]] if it was not provided and the default was
+      *         [[temple.DSL.Syntax.Arg.NoArg]]
+      */
     def getOptionArg[T](key: String, argType: ArgType[T])(implicit context: Context): Option[T] =
       argMap(key) match { case Arg.NoArg => None; case _ => Some(getArg(key, argType)) }
   }
 
-  // TODO: this is too messy
+  // TODO: is this too messy?
   def parseAttributeType(
     dataType: Syntax.AttributeType,
     annotations: List[Syntax.Annotation]
@@ -146,9 +159,9 @@ package object Semantics {
             "precision" -> Some(Arg.IntArg(4))
           )(args)
           AttributeType.IntType(
-            argMap.getOptionArg("min", ArgType.IntArgType),
-            argMap.getOptionArg("max", ArgType.IntArgType),
-            argMap.getArg("precision", ArgType.IntArgType).toShort
+            argMap.getOptionArg("min", IntArgType),
+            argMap.getOptionArg("max", IntArgType),
+            argMap.getArg("precision", IntArgType).toShort
           )
         case "string" =>
           val argMap = parseParameters(
@@ -156,8 +169,8 @@ package object Semantics {
             "minLength" -> Some(Arg.IntArg(0))
           )(args)
           AttributeType.StringType(
-            argMap.getOptionArg("maxLength", ArgType.IntArgType),
-            argMap.getArg("minLength", ArgType.IntArgType).toInt
+            argMap.getOptionArg("maxLength", IntArgType),
+            argMap.getArg("minLength", IntArgType).toInt
           )
         case "float" =>
           val argMap = parseParameters(
@@ -166,17 +179,15 @@ package object Semantics {
             "precision" -> Some(Arg.IntArg(8))
           )(args)
           AttributeType.FloatType(
-            argMap.getArg("max", ArgType.FloatingArgType),
-            argMap.getArg("min", ArgType.FloatingArgType),
-            argMap.getArg("precision", ArgType.FloatingArgType).toShort
+            argMap.getArg("max", FloatingArgType),
+            argMap.getArg("min", FloatingArgType),
+            argMap.getArg("precision", FloatingArgType).toShort
           )
         case "date"     => AttributeType.DateType
         case "datetime" => AttributeType.DateTimeType
         case "time"     => AttributeType.TimeType
         case "data" =>
-          val argMap = parseParameters(
-            "maxSize" -> Some(Arg.NoArg)
-          )(args)
+          val argMap = parseParameters("maxSize" -> Some(Arg.NoArg))(args)
           AttributeType.BlobType(
             argMap.getOptionArg("maxSize", IntArgType)
           )
@@ -186,93 +197,127 @@ package object Semantics {
       }
   }
 
+  /**
+    * Build a metadata parser by building a list of function calls for each match
+    *
+    * This is needed because each call to [[temple.DSL.Semantics.MetadataParser#registerKeyword]] is effectively
+    * dependently typed, so it cannot be encoded into a tuple, but instead must immediately be bundled into a function
+    * @tparam T the subtype of metadata that we are specifically parsing. The “inheritance” (built up with
+    *           `inherit from myMetadataParser`) runs in the opposite direction to the inheritance of classes: each
+    *           parser extends parsers of a more specific type.
+    */
   class MetadataParser[T <: Metadata]() {
-    private var matcher: (String, Args) => Option[T] = (_, _) => None
+    private type Matcher = Args => T
+    private var matchers = mutable.LinkedHashMap[String, Matcher]()
 
+    /**
+      * Use a different parser as a fallback if none of the parsers defined here match
+      * @param parser the alternative parser to use as a fallback
+      * @tparam A the type of metadata parsed by [[parser]], which must be equal to/a subtype of this parser’s metadata
+      *           type
+      */
+    def inheritFrom[A <: T](parser: MetadataParser[A]): Unit =
+      // insert, or no-op if they already exist as inheritance does not overwrite newly added values
+      parser.matchers.foreach(matchers.safeInsert(_, ()))
+
+    /** Used for a fluent API style: `inherit from myMetadataParser` as an alternative to
+      * `inheritFrom(myMetadataParser)` */
     final protected object inherit {
 
-      def from[A <: T](parser: MetadataParser[A]): Unit = {
-        val prevMatcher = matcher
-        matcher = { (metaKey, args) =>
-          prevMatcher(metaKey, args) orElse parser.matcher(metaKey, args)
-        }
-      }
+      /** An alias of [[MetadataParser#inheritFrom]], for a fluent API */
+      def from[A <: T](parser: MetadataParser[A]): Unit = inheritFrom(parser)
     }
 
+    /**
+      * Add a handler for a new type of metadata
+      *
+      * @param metaKey The name of the metadata item to add
+      * @param argKey The name of the single argument to the metadata. Note that there is also
+      *               [[temple.DSL.Semantics.MetadataParser#registerKeyword]]
+      * @param argType The type of the field to expect
+      * @param constructor The function to turn an input of type [[ArgType]] into a value of type [[T]]
+      * @tparam A The underlying type of the field, inferred from `argType`
+      */
+    // TODO: do we need to add support for multiple arguments in future?
     final protected def registerKeyword[A](
       metaKey: String,
       argKey: String,
       argType: ArgType[A],
       constructor: A => T
-    ): Unit = {
-      val prevMatcher = matcher
-      matcher = { (inputMetaKey, args) =>
-        implicit val context: Context = Context(metaKey)
-        if (inputMetaKey == metaKey) {
-          val argMap = parseParameters(argKey -> None)(args)
-          Some(constructor(argMap.getArg(argKey, argType)))
-        } else prevMatcher(inputMetaKey, args)
-      }
-    }
+    ): Unit =
+      matchers += (metaKey -> { args =>
+          implicit val context: Context = Context(metaKey)
+          val argMap                    = parseParameters(argKey -> None)(args)
+          constructor(argMap.getArg(argKey, argType))
+        })
 
+    /** A shorthand for [[temple.DSL.Semantics.MetadataParser#registerKeyword]] with the same `key` used for both the
+      * metadata name and its single argument */
     final protected def registerKeyword[A](key: String, argType: ArgType[A], constructor: A => T): Unit =
       registerKeyword(key, key, argType, constructor)
 
-    final def apply(metaKey: String, args: Args): T = matcher(metaKey, args).getOrElse {
-      fail("TODO: error message")
-    }
+    /** Perform parsing by looking up the relevant function and
+      * [[scala.collection.IterableOnceOps#foldRight(java.lang.Object, scala.Function2)]] supports */
+    final def apply(metaKey: String, args: Args)(implicit context: BlockContext): T =
+      matchers.get(metaKey).map(_(args)) getOrElse {
+        fail(s"No valid metadata $metaKey in $context")
+      }
   }
 
+  /** A parser of Metadata items that can occur in all the blocks */
   private val parseGlobalMetadata = new MetadataParser[GlobalMetadata] {
-    registerKeyword("language", TokenArgType, Metadata.Language)
+    registerKeyword("language", TokenArgType, Language)
   }
 
+  /** A parser of Metadata items that can occur in project and service blocks */
   private val parseProjectAndServiceMetadata = new MetadataParser[ProjectAndServiceMetadata] {
     inherit from parseGlobalMetadata
-    registerKeyword("database", TokenArgType, Metadata.Database)
+    registerKeyword("database", TokenArgType, Database)
   }
 
+  /** A parser of Metadata items that can occur in service blocks */
   private val parseServiceMetadata = new MetadataParser[ServiceMetadata] {
     inherit from parseProjectAndServiceMetadata
-    registerKeyword("auth", "login", TokenArgType, Metadata.ServiceAuth)
-    registerKeyword("uses", "services", ListArgType(TokenArgType), Metadata.Uses)
+    registerKeyword("auth", "login", TokenArgType, ServiceAuth)
+    registerKeyword("uses", "services", ListArgType(TokenArgType), Uses)
   }
 
+  /** A parser of Metadata items that can occur in project blocks */
   private val parseProjectMetadata = new MetadataParser[ProjectMetadata] {
     inherit from parseProjectAndServiceMetadata
-    registerKeyword("provider", TokenArgType, Metadata.Provider)
+    registerKeyword("provider", TokenArgType, Provider)
   }
 
+  /** A parser of Metadata items that can occur in target blocks */
   private val parseTargetMetadata = new MetadataParser[TargetMetadata] {
     inherit from parseGlobalMetadata
-    registerKeyword("auth", "services", ListArgType(TokenArgType), Metadata.TargetAuth)
+    registerKeyword("auth", "services", ListArgType(TokenArgType), TargetAuth)
   }
 
-  private def parseStructBlock(entries: List[Entry])(implicit context: BlockContext): StructBlock = {
-    val attributes = mutable.LinkedHashMap[String, AttributeType]()
-    entries.foreach {
-      case Entry.Attribute(key, dataType, annotations) =>
-        safeInsert(attributes, key -> parseAttributeType(dataType, annotations)(KeyName(key)))
-      case otherEntry =>
-        // TODO: should this hardcode ${context.tag} as Project? Can we get a link to the relevant part of the docs
-        fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
-    }
-    StructBlock(attributes.toMap)
-  }
-
+  /**
+    * Parse a service block from a list of entries into the distinct attributes, metadatas and structs
+    * @param entries The list of entries in the block from the AST
+    * @param context The location in the AST, used for error messages
+    * @return A semantic representation of a [[temple.DSL.Semantics.ServiceBlock]]
+    */
   private def parseServiceBlock(entries: List[Entry])(implicit context: BlockContext): ServiceBlock = {
     val attributes = mutable.LinkedHashMap[String, AttributeType]()
     val metadatas  = mutable.ListBuffer[ServiceMetadata]()
     val structs    = mutable.LinkedHashMap[String, StructBlock]()
     entries.foreach {
       case Entry.Attribute(key, dataType, annotations) =>
-        safeInsert(attributes, key -> parseAttributeType(dataType, annotations)(KeyName(key)))
+        attributes.safeInsert(key -> parseAttributeType(dataType, annotations)(KeyName(key)))
       case Entry.Metadata(metaKey, args) => metadatas += parseServiceMetadata(metaKey, args)
       case DSLRootItem(key, tag, entries) =>
-        safeInsert(structs, key -> parseStructBlock(entries)(BlockContext(key, tag, context))) // TODO: support structs
+        tag match {
+          case "struct" => structs.safeInsert(key -> parseStructBlock(entries)(BlockContext(key, tag, context)))
+          case tag      => fail(s"Unknown block type $tag for $key in $context")
+        }
     }
     ServiceBlock(attributes.to(ListMap), metadatas.toList, structs.to(ListMap))
   }
+
+  // TODO: these methods are very similar, can they be merged?
 
   private def parseProjectBlock(entries: List[Entry])(implicit context: BlockContext): ProjectBlock = entries map {
     case Entry.Metadata(metaKey, args) => parseProjectMetadata(metaKey, args)
@@ -287,6 +332,26 @@ package object Semantics {
       fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
   }
 
+  private def parseStructBlock(entries: List[Entry])(implicit context: BlockContext): StructBlock = {
+    val attributes = mutable.LinkedHashMap[String, AttributeType]()
+    entries.foreach {
+      case Entry.Attribute(key, dataType, annotations) =>
+        attributes.safeInsert(key -> parseAttributeType(dataType, annotations)(KeyName(key)))
+      case otherEntry =>
+        // TODO: should this hardcode ${context.tag} as Project? Can we get a link to the relevant part of the docs
+        fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
+    }
+    StructBlock(attributes.toMap)
+  }
+
+  /**
+    * Turns an AST of a Templefile into a semantic representation
+    * @param templefile the AST parsed from the Templefile
+    * @return A semantic representation of the project, as well as all the targets and services, defined in the
+    *         Templefile
+    * @throws SemanticParsingException when there is no project information, as well as when any of the definitions are
+    *                                  malformed
+    */
   def parseSemantics(templefile: Syntax.Templefile): Semantics.Templefile = {
     var projectNameBlock: Option[(String, ProjectBlock)] = None
 
@@ -298,21 +363,21 @@ package object Semantics {
         implicit val blockContext: BlockContext = BlockContext(key, tag)
         tag match {
           // TODO: error message
-          case "service" => safeInsert(services, key -> parseServiceBlock(entries))
+          case "service" => services.safeInsert(key -> parseServiceBlock(entries))
           case "project" =>
             projectNameBlock.fold { projectNameBlock = Some(key -> parseProjectBlock(entries)) } {
               case (str, _) => fail(s"Multiple projects found: $str and $key")
             }
           // TODO: error message
-          case "target" => safeInsert(targets, key -> parseTargetBlock(entries))
+          case "target" => targets.safeInsert(key -> parseTargetBlock(entries))
 
           case tag => fail(s"Unknown block type $tag for $key")
         }
     }
 
-    // TODO: better errors
-    val (projectName, projectBlock) = projectNameBlock.getOrElse { fail("no project block") }
+    val (projectName, projectBlock) = projectNameBlock.getOrElse { fail("Temple file has no project block") }
 
     Templefile(projectName, projectBlock, targets.to(ListMap), services.to(ListMap))
   }
+
 }

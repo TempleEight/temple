@@ -1,8 +1,7 @@
 package temple.DSL.Semantics
 
-import java.time.{LocalDate, OffsetDateTime}
-
-trait AttributeType {}
+/** The type of an attribute, i.e. a column in a database/field in a struct */
+trait AttributeType
 
 object AttributeType {
   case object BoolType                                                           extends AttributeType
