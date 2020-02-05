@@ -17,7 +17,7 @@ object Syntax {
   }
 
   /** The annotation of a struct’s attribute */
-  sealed case class Annotation(key: String)
+  sealed case class Annotation(key: String) { override def toString: String = s"@$key" }
 
   /** A value that can be passed as an argument to a type or metadata */
   sealed trait Arg
