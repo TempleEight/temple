@@ -30,7 +30,7 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
     }
 
   /** A parser generator for a comma or the end of the argument list */
-  def argsListSeparator: Parser[Unit] = ("," | guard("]" | ")" | "}")) ^^^ ()
+  def argsListSeparator: Parser[Unit] = (guard("]" | ")" | "}") | ",") ^^^ ()
 
   /** A parser generator for a list of arguments in square brackets */
   def listArg: Parser[Arg] = "[" ~> repUntil(arg <~ argsListSeparator, "]") ^^ (elems => Arg.ListArg(elems))
@@ -43,16 +43,18 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
     */
   def arg: Parser[Arg] =
     ident ^^ Arg.TokenArg |
-    wholeNumber ^^ (str => Arg.IntArg(str.toInt)) |
     floatingPointNumber ^^ (str => Arg.FloatingArg(str.toDouble)) |
+    wholeNumber ^^ (str => Arg.IntArg(str.toInt)) |
     listArg
 
   /** A parser generator for an argument keyed by a keyword */
   def kwarg: Parser[(String, Arg)] = ((ident <~ ":") ~ arg) ^^ { case ident ~ arg => (ident, arg) }
 
-  /** A parser generator for a sequence of arguments, starting positionally and subsequently keyed */
+  /** A parser generator for a sequence of arguments, starting positionally and subsequently keyed.
+    * If the parser fails after parsing the open bracket, commit is called to protect against being confused with nested
+    * rootitems */
   def allArgs: Parser[List[Arg] ~ List[(String, Arg)]] =
-    "(" ~> (rep(arg <~ argsListSeparator) ~ repUntil(kwarg <~ argsListSeparator, ")"))
+    "(" ~> commit(rep(arg <~ argsListSeparator) ~ repUntil(kwarg <~ argsListSeparator, ")"))
 
   /** A parser generator for the type of an attribute */
   def attributeType: Parser[AttributeType] = ident ~ allArgs.? ^^ {
