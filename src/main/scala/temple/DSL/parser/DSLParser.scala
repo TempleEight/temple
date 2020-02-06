@@ -19,7 +19,7 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
 
   /** A parser generator for a line of metadata */
   protected def metadata: Parser[Entry.Metadata] = "#" ~> ident ~ (allArgs | shorthandListArg) ^^ {
-    case function ~ (args ~ kwargs) => Entry.Metadata(function, Args(args, kwargs))
+    case function ~ args => Entry.Metadata(function, args)
   }
 
   /** A parser generator for a struct’s attribute */
@@ -35,11 +35,9 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   protected def listArg: Parser[Arg] = "[" ~> repUntil(arg <~ argsListSeparator, "]") ^^ (elems => Arg.ListArg(elems))
 
   /** A parser generator for a list of arguments in square brackets, when used in shorthand to replace the brackets */
-  protected def shorthandListArg[T]: Parser[Seq[Arg] ~ Seq[T]] = (listArg ^^ (list => Seq(list))) ~ success(Nil)
+  protected def shorthandListArg[T]: Parser[Args] = listArg ^^ (list => Args(Seq(list)))
 
-  /**
-    * A parser generator for any argument passed to a type or metadata
-    */
+  /** A parser generator for any argument passed to a type or metadata */
   protected def arg: Parser[Arg] =
     ident ^^ Arg.TokenArg |
     floatingPointNumber ^^ (str => Arg.FloatingArg(str.toDouble)) |

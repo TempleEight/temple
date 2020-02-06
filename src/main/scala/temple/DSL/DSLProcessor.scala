@@ -17,7 +17,7 @@ object DSLProcessor extends DSLParser {
     * @param contents the contents of a Templefile as a string
     * @return Right of the the parsed list of root elements, or Left of a string representing the error
     */
-  def parse(contents: String): Either[String, Seq[DSLRootItem]] =
+  def parse(contents: String): Either[String, Syntax.Templefile] =
     parseAll(templefile, contents) match {
       case Success(result, _)    => Right(result)
       case NoSuccess(str, input) => Left(str + '\n' + printError(input))
