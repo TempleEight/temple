@@ -4,11 +4,11 @@ package temple.generate.database.ast
 sealed trait Statement
 
 object Statement {
-  case class Create(tableName: String, columns: List[ColumnDef])                                 extends Statement
-  case class Read(tableName: String, columns: List[Column], condition: Option[Condition] = None) extends Statement
-  case class Insert(tableName: String, columns: List[Column])                                    extends Statement
+  case class Create(tableName: String, columns: Seq[ColumnDef])                                 extends Statement
+  case class Read(tableName: String, columns: Seq[Column], condition: Option[Condition] = None) extends Statement
+  case class Insert(tableName: String, columns: Seq[Column])                                    extends Statement
 
-  case class Update(tableName: String, assignments: List[Assignment], condition: Option[Condition] = None)
+  case class Update(tableName: String, assignments: Seq[Assignment], condition: Option[Condition] = None)
       extends Statement
   case class Delete(tableName: String, condition: Option[Condition] = None) extends Statement
   case class Drop(tableName: String, ifExists: Boolean = true)              extends Statement
