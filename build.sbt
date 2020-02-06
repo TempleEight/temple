@@ -14,7 +14,7 @@ lazy val root = (project in file("."))
       "org.scalatest" %% "scalatest" % "3.0.8" % "it,test",
       "org.rogach" %% "scallop" % "3.3.2",
       "org.postgresql" % "postgresql" % "42.2.9",
-      "com.sun.activation" % "javax.activation" % "1.2.0",
+      "com.sun.activation" % "javax.activaddSbtPlugination" % "1.2.0",
       "com.spotify" % "docker-client" % "8.9.1",
       "com.whisk" %% "docker-testkit-scalatest" % "0.9.9" % "it,test",
       "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.9" % "it,test",
