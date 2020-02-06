@@ -84,7 +84,7 @@ object Analyser {
     val map = mutable.HashMap[String, Syntax.Arg]()
 
     // Add the positional arguments to the map
-    (specsMap, args.posargs).zipped foreach {
+    specsMap.lazyZip(args.posargs) foreach {
       case ((name, _), arg) =>
         map.safeInsert(name -> arg, fail(s"Programmer error: duplicate argument name $name in spec for $context?"))
     }
