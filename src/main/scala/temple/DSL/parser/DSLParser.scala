@@ -8,7 +8,7 @@ import scala.util.parsing.combinator.JavaTokenParsers
 class DSLParser extends JavaTokenParsers with UtilParsers {
 
   /** A parser generator for an entire Templefile */
-  def templeFile: Parser[List[DSLRootItem]] = repAll(rootItem)
+  def templeFile: Parser[Seq[DSLRootItem]] = repAll(rootItem)
 
   /** A parser generator for each item at the root level, i.e. a name, tag and block */
   def rootItem: Parser[DSLRootItem] = (ident <~ ":") ~ (ident <~ "{") ~ repUntil(entry, "}") ^^ {
@@ -30,29 +30,31 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
     }
 
   /** A parser generator for a comma or the end of the argument list */
-  def argsListSeparator: Parser[Unit] = ("," | guard("]" | ")" | "}")) ^^^ ()
+  def argsListSeparator: Parser[Unit] = (guard("]" | ")" | "}") | ",") ^^^ ()
 
   /** A parser generator for a list of arguments in square brackets */
   def listArg: Parser[Arg] = "[" ~> repUntil(arg <~ argsListSeparator, "]") ^^ (elems => Arg.ListArg(elems))
 
   /** A parser generator for a list of arguments in square brackets, when used in shorthand to replace the brackets */
-  def shorthandListArg[T]: Parser[List[Arg] ~ List[T]] = (listArg ^^ (list => List(list))) ~ success(List())
+  def shorthandListArg[T]: Parser[Seq[Arg] ~ Seq[T]] = (listArg ^^ (list => Seq(list))) ~ success(Nil)
 
   /**
     * A parser generator for any argument passed to a type or metadata
     */
   def arg: Parser[Arg] =
     ident ^^ Arg.TokenArg |
-    wholeNumber ^^ (str => Arg.IntArg(str.toInt)) |
     floatingPointNumber ^^ (str => Arg.FloatingArg(str.toDouble)) |
+    wholeNumber ^^ (str => Arg.IntArg(str.toInt)) |
     listArg
 
   /** A parser generator for an argument keyed by a keyword */
   def kwarg: Parser[(String, Arg)] = ((ident <~ ":") ~ arg) ^^ { case ident ~ arg => (ident, arg) }
 
-  /** A parser generator for a sequence of arguments, starting positionally and subsequently keyed */
-  def allArgs: Parser[List[Arg] ~ List[(String, Arg)]] =
-    "(" ~> (rep(arg <~ argsListSeparator) ~ repUntil(kwarg <~ argsListSeparator, ")"))
+  /** A parser generator for a sequence of arguments, starting positionally and subsequently keyed.
+    * If the parser fails after parsing the open bracket, commit is called to protect against being confused with nested
+    * rootitems */
+  def allArgs: Parser[Seq[Arg] ~ Seq[(String, Arg)]] =
+    "(" ~> commit(rep(arg <~ argsListSeparator) ~ repUntil(kwarg <~ argsListSeparator, ")"))
 
   /** A parser generator for the type of an attribute */
   def attributeType: Parser[AttributeType] = ident ~ allArgs.? ^^ {

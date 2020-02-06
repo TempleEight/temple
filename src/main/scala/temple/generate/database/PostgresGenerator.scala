@@ -58,10 +58,10 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
     }
 
   /** Given conditions, generate a Postgres WHERE clause  */
-  private def generateConditionString(conditions: Option[Condition]): List[String] =
+  private def generateConditionString(conditions: Option[Condition]): Seq[String] =
     conditions.map(generateCondition) match {
-      case Some(conditionsString) => List(s"WHERE $conditionsString")
-      case None                   => List()
+      case Some(conditionsString) => Seq(s"WHERE $conditionsString")
+      case None                   => Nil
     }
 
   /** Given a column type, parse it into the type required by PostgreSQL */

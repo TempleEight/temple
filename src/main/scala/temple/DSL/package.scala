@@ -6,7 +6,7 @@ import temple.utils.StringUtils._
 package object DSL {
 
   /** The type of a struct’s attribute, complete with parameters */
-  case class AttributeType(typeName: String, args: List[Arg] = List(), kwargs: List[(String, Arg)] = List()) {
+  case class AttributeType(typeName: String, args: Seq[Arg] = Nil, kwargs: Seq[(String, Arg)] = Nil) {
 
     override def toString: String = {
       val kwargsStr = kwargs.map { case (str, arg) => s"$str: $arg" }
@@ -18,7 +18,7 @@ package object DSL {
 // TODO: move to the next step
 
 //  object FieldType {
-//    case class FieldType(typeName: String, args: List[Arg], kwargs: List[(String, Arg)]) extends FieldType
+//    case class FieldType(typeName: String, args: Seq[Arg], kwargs: Seq[(String, Arg)]) extends FieldType
 //    //    case object BoolType extends FieldType
 ////
 ////    case class IntType(max: Long, min: Long)                                        extends FieldType
@@ -44,7 +44,7 @@ package object DSL {
     case class TokenArg(name: String)     extends Arg { override def toString: String = name                           }
     case class IntArg(value: scala.Int)   extends Arg { override def toString: String = value.toString                 }
     case class FloatingArg(value: Double) extends Arg { override def toString: String = value.toString                 }
-    case class ListArg(elems: List[Arg])  extends Arg { override def toString: String = elems.mkString("[", ", ", "]") }
+    case class ListArg(elems: Seq[Arg])   extends Arg { override def toString: String = elems.mkString("[", ", ", "]") }
   }
 
   /** Any element of a service/struct */
@@ -52,11 +52,11 @@ package object DSL {
 
   object Entry {
 
-    case class Attribute(key: String, dataType: AttributeType, annotations: List[Annotation]) extends Entry {
+    case class Attribute(key: String, dataType: AttributeType, annotations: Seq[Annotation]) extends Entry {
       override def toString: String = s"$key: $dataType${annotations.map(" " + _).mkString};"
     }
 
-    case class Metadata(function: String, args: List[Arg], kwargs: List[(String, Arg)]) extends Entry {
+    case class Metadata(function: String, args: Seq[Arg], kwargs: Seq[(String, Arg)]) extends Entry {
 
       override def toString: String = {
         val kwargsStr = kwargs.map { case (str, arg) => s"$str: $arg" }
@@ -66,7 +66,7 @@ package object DSL {
   }
 
   /** An item at the root of the Templefile, e.g. services and targets */
-  case class DSLRootItem(key: String, tag: String, entries: List[Entry]) extends Entry {
+  case class DSLRootItem(key: String, tag: String, entries: Seq[Entry]) extends Entry {
 
     override def toString: String = {
       val contents = indent(entries.mkString("\n"))
