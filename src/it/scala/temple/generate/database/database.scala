@@ -17,7 +17,7 @@ package object database {
 
     val createStatement = Create(
       "Users",
-      List(
+      Seq(
         ColumnDef("id", IntCol),
         ColumnDef("bankBalance", FloatCol),
         ColumnDef("name", StringCol),
@@ -30,17 +30,17 @@ package object database {
 
     val createStatementWithConstraints = Create(
       "Test",
-      List(
-        ColumnDef("item_id", IntCol, List(NonNull, PrimaryKey)),
-        ColumnDef("createdAt", DateTimeTzCol, List(Unique)),
-        ColumnDef("bookingTime", TimeCol, List(References("Bookings", "bookingTime"))),
-        ColumnDef("value", IntCol, List(Check("value", GreaterEqual, "1"), Null))
+      Seq(
+        ColumnDef("item_id", IntCol, Seq(NonNull, PrimaryKey)),
+        ColumnDef("createdAt", DateTimeTzCol, Seq(Unique)),
+        ColumnDef("bookingTime", TimeCol, Seq(References("Bookings", "bookingTime"))),
+        ColumnDef("value", IntCol, Seq(Check("value", GreaterEqual, "1"), Null))
       )
     )
 
     val readStatement = Read(
       "Users",
-      List(
+      Seq(
         Column("id"),
         Column("bankBalance"),
         Column("name"),
@@ -53,7 +53,7 @@ package object database {
 
     val readStatementWithWhere = Read(
       "Users",
-      List(
+      Seq(
         Column("id"),
         Column("bankBalance"),
         Column("name"),
@@ -69,7 +69,7 @@ package object database {
 
     val readStatementWithWhereConjunction = Read(
       "Users",
-      List(
+      Seq(
         Column("id"),
         Column("bankBalance"),
         Column("name"),
@@ -88,7 +88,7 @@ package object database {
 
     val readStatementWithWhereDisjunction = Read(
       "Users",
-      List(
+      Seq(
         Column("id"),
         Column("bankBalance"),
         Column("name"),
@@ -107,7 +107,7 @@ package object database {
 
     val readStatementWithWhereInverse = Read(
       "Users",
-      List(
+      Seq(
         Column("id"),
         Column("bankBalance"),
         Column("name"),
@@ -125,7 +125,7 @@ package object database {
 
     val readStatementComplex = Read(
       "Users",
-      List(
+      Seq(
         Column("id"),
         Column("bankBalance"),
         Column("name"),
@@ -150,7 +150,7 @@ package object database {
 
     val insertStatement = Insert(
       "Users",
-      List(
+      Seq(
         Column("id"),
         Column("bankBalance"),
         Column("name"),
@@ -183,7 +183,7 @@ package object database {
 
     val updateStatement = Update(
       "Users",
-      List(
+      Seq(
         Assignment(Column("bankBalance"), Value("123.456")),
         Assignment(Column("name"), Value("'Will'"))
       )
@@ -191,7 +191,7 @@ package object database {
 
     val updateStatementWithWhere = Update(
       "Users",
-      List(
+      Seq(
         Assignment(Column("bankBalance"), Value("123.456")),
         Assignment(Column("name"), Value("'Will'"))
       ),
@@ -200,7 +200,7 @@ package object database {
       )
     )
 
-    val insertDataA: List[PreparedVariable] = List(
+    val insertDataA: Seq[PreparedVariable] = Seq(
       PreparedVariable.IntVariable(3),
       PreparedVariable.FloatVariable(100.1f),
       PreparedVariable.StringVariable("John Smith"),
@@ -210,7 +210,7 @@ package object database {
       PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2020-01-01 00:00:00.0"))
     )
 
-    val insertDataB: List[PreparedVariable] = List(
+    val insertDataB: Seq[PreparedVariable] = Seq(
       PreparedVariable.IntVariable(123456),
       PreparedVariable.FloatVariable(23.42f),
       PreparedVariable.StringVariable("Jane Doe"),
