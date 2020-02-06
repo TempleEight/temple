@@ -53,7 +53,7 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   /** A parser generator for a sequence of arguments, starting positionally and subsequently keyed.
     * If the parser fails after parsing the open bracket, commit is called to protect against being confused with nested
     * rootitems */
-  def allArgs: Parser[Seq[Arg] ~ Seq[(String, Arg)]] =
+  def allArgs: Parser[List[Arg] ~ List[(String, Arg)]] =
     "(" ~> commit(rep(arg <~ argsListSeparator) ~ repUntil(kwarg <~ argsListSeparator, ")"))
 
   /** A parser generator for the type of an attribute */
