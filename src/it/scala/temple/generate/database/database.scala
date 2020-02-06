@@ -6,6 +6,7 @@ import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.ComparisonOperator._
 import temple.generate.database.ast.Condition._
+import temple.generate.database.ast.Expression.Value
 import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
 
@@ -180,6 +181,25 @@ package object database {
       "Users"
     )
 
+    val updateStatement = Update(
+      "Users",
+      List(
+        Assignment(Column("bankBalance"), Value("123.456")),
+        Assignment(Column("name"), Value("'Will'"))
+      )
+    )
+
+    val updateStatementWithWhere = Update(
+      "Users",
+      List(
+        Assignment(Column("bankBalance"), Value("123.456")),
+        Assignment(Column("name"), Value("'Will'"))
+      ),
+      Some(
+        Comparison("Users.id", Equal, "123456")
+      )
+    )
+
     val insertDataA: List[PreparedVariable] = List(
       PreparedVariable.IntVariable(3),
       PreparedVariable.FloatVariable(100.1f),
@@ -200,17 +220,5 @@ package object database {
       PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2019-02-03 02:23:50.0"))
     )
 
-  }
-
-  sealed trait PreparedVariable
-
-  object PreparedVariable {
-    case class IntVariable(value: Int)              extends PreparedVariable
-    case class StringVariable(value: String)        extends PreparedVariable
-    case class FloatVariable(value: Float)          extends PreparedVariable
-    case class BoolVariable(value: Boolean)         extends PreparedVariable
-    case class DateVariable(value: Date)            extends PreparedVariable
-    case class TimeVariable(value: Time)            extends PreparedVariable
-    case class DateTimeTzVariable(value: Timestamp) extends PreparedVariable
   }
 }

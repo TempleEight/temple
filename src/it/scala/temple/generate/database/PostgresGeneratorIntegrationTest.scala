@@ -113,4 +113,62 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
       case None => fail("Database connection could not be established")
     }
   }
+
+  "Update statements" can "update all rows in a table" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
+    executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
+    executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
+    executeWithoutResults(PostgresGenerator.generate(TestData.updateStatement))
+    executeWithResults("SELECT * FROM Users;") match {
+      case (Some(result)) =>
+        result.next()
+        result.getInt("id") shouldBe 3
+        result.getFloat("bankBalance") shouldBe 123.456f
+        result.getString("name") shouldBe "Will"
+        result.getBoolean("isStudent") shouldBe true
+        result.getDate("dateOfBirth").toString shouldBe "1998-03-05"
+        result.getTime("timeOfDay").toString shouldBe "12:00:00"
+        result.getTimestamp("expiry").toString shouldBe "2020-01-01 00:00:00.0"
+        result.isLast shouldBe false
+        result.next()
+        result.getInt("id") shouldBe 123456
+        result.getFloat("bankBalance") shouldBe 123.456f
+        result.getString("name") shouldBe "Will"
+        result.getBoolean("isStudent") shouldBe false
+        result.getDate("dateOfBirth").toString shouldBe "1998-03-05"
+        result.getTime("timeOfDay").toString shouldBe "12:00:00"
+        result.getTimestamp("expiry").toString shouldBe "2019-02-03 02:23:50.0"
+        result.isLast shouldBe true
+      case None => fail("Database connection could not be established")
+    }
+  }
+
+  "Update statements" can "update some rows in a table using WHERE" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
+    executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
+    executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
+    executeWithoutResults(PostgresGenerator.generate(TestData.updateStatementWithWhere))
+    executeWithResults("SELECT * FROM Users;") match {
+      case (Some(result)) =>
+        result.next()
+        result.getInt("id") shouldBe 3
+        result.getFloat("bankBalance") shouldBe 100.1f
+        result.getString("name") shouldBe "John Smith"
+        result.getBoolean("isStudent") shouldBe true
+        result.getDate("dateOfBirth").toString shouldBe "1998-03-05"
+        result.getTime("timeOfDay").toString shouldBe "12:00:00"
+        result.getTimestamp("expiry").toString shouldBe "2020-01-01 00:00:00.0"
+        result.isLast shouldBe false
+        result.next()
+        result.getInt("id") shouldBe 123456
+        result.getFloat("bankBalance") shouldBe 123.456f
+        result.getString("name") shouldBe "Will"
+        result.getBoolean("isStudent") shouldBe false
+        result.getDate("dateOfBirth").toString shouldBe "1998-03-05"
+        result.getTime("timeOfDay").toString shouldBe "12:00:00"
+        result.getTimestamp("expiry").toString shouldBe "2019-02-03 02:23:50.0"
+        result.isLast shouldBe true
+      case None => fail("Database connection could not be established")
+    }
+  }
 }

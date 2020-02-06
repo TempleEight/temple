@@ -1,3 +1,3 @@
 package temple.generate.database
 
-trait DatabaseContext {}
+trait DatabaseContext

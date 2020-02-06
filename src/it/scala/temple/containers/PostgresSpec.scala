@@ -33,19 +33,19 @@ trait PostgresSpec extends FlatSpec with DockerTestKit with DockerPostgresServic
   // Execute a query that does not return a result
   def executeWithoutResults(query: String): Unit = execute { _.createStatement().execute(query) }
 
-  def executeWithoutResultsPrepared(preparedStatement: String, values: List[PreparedVariable]): Unit = execute { con =>
-    val prep = con.prepareStatement(preparedStatement)
+  def executeWithoutResultsPrepared(preparedStatement: String, values: List[PreparedVariable]): Unit = execute { conn =>
+    val prep = conn.prepareStatement(preparedStatement)
     values.view.zipWithIndex foreach {
       case (v, i) =>
-        val question_number = i + 1
+        val variable_number = i + 1
         v match {
-          case PreparedVariable.IntVariable(value)        => prep.setInt(question_number, value)
-          case PreparedVariable.BoolVariable(value)       => prep.setBoolean(question_number, value)
-          case PreparedVariable.StringVariable(value)     => prep.setString(question_number, value)
-          case PreparedVariable.FloatVariable(value)      => prep.setFloat(question_number, value)
-          case PreparedVariable.DateVariable(value)       => prep.setDate(question_number, value)
-          case PreparedVariable.TimeVariable(value)       => prep.setTime(question_number, value)
-          case PreparedVariable.DateTimeTzVariable(value) => prep.setTimestamp(question_number, value)
+          case PreparedVariable.IntVariable(value)        => prep.setInt(variable_number, value)
+          case PreparedVariable.BoolVariable(value)       => prep.setBoolean(variable_number, value)
+          case PreparedVariable.StringVariable(value)     => prep.setString(variable_number, value)
+          case PreparedVariable.FloatVariable(value)      => prep.setFloat(variable_number, value)
+          case PreparedVariable.DateVariable(value)       => prep.setDate(variable_number, value)
+          case PreparedVariable.TimeVariable(value)       => prep.setTime(variable_number, value)
+          case PreparedVariable.DateTimeTzVariable(value) => prep.setTimestamp(variable_number, value)
         }
     }
     prep.execute()
