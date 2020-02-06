@@ -11,57 +11,57 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   def templeFile: Parser[Seq[DSLRootItem]] = repAll(rootItem)
 
   /** A parser generator for each item at the root level, i.e. a name, tag and block */
-  def rootItem: Parser[DSLRootItem] = (ident <~ ":") ~ (ident <~ "{") ~ repUntil(entry, "}") ^^ {
+  protected def rootItem: Parser[DSLRootItem] = (ident <~ ":") ~ (ident <~ "{") ~ repUntil(entry, "}") ^^ {
     case key ~ tag ~ entries => DSLRootItem(key, tag, entries)
   }
 
   /** A parser generator for an entry within a block. */
-  def entry: Parser[Entry] = (attribute | metadata) <~ ";" | rootItem <~ ";".?
+  protected def entry: Parser[Entry] = (attribute | metadata) <~ ";" | rootItem <~ ";".?
 
   /** A parser generator for a line of metadata */
-  def metadata: Parser[Entry.Metadata] = "#" ~> ident ~ (allArgs | shorthandListArg) ^^ {
+  protected def metadata: Parser[Entry.Metadata] = "#" ~> ident ~ (allArgs | shorthandListArg) ^^ {
     case function ~ (args ~ kwargs) => Entry.Metadata(function, args, kwargs)
   }
 
   /** A parser generator for a struct’s attribute */
-  def attribute: Parser[Entry.Attribute] =
+  protected def attribute: Parser[Entry.Attribute] =
     (ident <~ ":") ~ attributeType ~ repUntil(annotation, guard("[;}]".r)) ^^ {
       case key ~ fieldType ~ annotations => Entry.Attribute(key, fieldType, annotations)
     }
 
   /** A parser generator for a comma or the end of the argument list */
-  def argsListSeparator: Parser[Unit] = (guard("]" | ")" | "}") | ",") ^^^ ()
+  protected def argsListSeparator: Parser[Unit] = (guard("]" | ")" | "}") | ",") ^^^ ()
 
   /** A parser generator for a list of arguments in square brackets */
-  def listArg: Parser[Arg] = "[" ~> repUntil(arg <~ argsListSeparator, "]") ^^ (elems => Arg.ListArg(elems))
+  protected def listArg: Parser[Arg] = "[" ~> repUntil(arg <~ argsListSeparator, "]") ^^ (elems => Arg.ListArg(elems))
 
   /** A parser generator for a list of arguments in square brackets, when used in shorthand to replace the brackets */
-  def shorthandListArg[T]: Parser[Seq[Arg] ~ Seq[T]] = (listArg ^^ (list => Seq(list))) ~ success(Nil)
+  protected def shorthandListArg[T]: Parser[Seq[Arg] ~ Seq[T]] = (listArg ^^ (list => Seq(list))) ~ success(Nil)
 
   /**
     * A parser generator for any argument passed to a type or metadata
     */
-  def arg: Parser[Arg] =
+  protected def arg: Parser[Arg] =
     ident ^^ Arg.TokenArg |
     floatingPointNumber ^^ (str => Arg.FloatingArg(str.toDouble)) |
     wholeNumber ^^ (str => Arg.IntArg(str.toInt)) |
     listArg
 
   /** A parser generator for an argument keyed by a keyword */
-  def kwarg: Parser[(String, Arg)] = ((ident <~ ":") ~ arg) ^^ { case ident ~ arg => (ident, arg) }
+  protected def kwarg: Parser[(String, Arg)] = ((ident <~ ":") ~ arg) ^^ { case ident ~ arg => (ident, arg) }
 
   /** A parser generator for a sequence of arguments, starting positionally and subsequently keyed.
     * If the parser fails after parsing the open bracket, commit is called to protect against being confused with nested
     * rootitems */
-  def allArgs: Parser[Seq[Arg] ~ Seq[(String, Arg)]] =
+  protected def allArgs: Parser[Seq[Arg] ~ Seq[(String, Arg)]] =
     "(" ~> commit(rep(arg <~ argsListSeparator) ~ repUntil(kwarg <~ argsListSeparator, ")"))
 
   /** A parser generator for the type of an attribute */
-  def attributeType: Parser[AttributeType] = ident ~ allArgs.? ^^ {
+  protected def attributeType: Parser[AttributeType] = ident ~ allArgs.? ^^ {
     case name ~ Some(args ~ kwargs) => AttributeType(name, args, kwargs)
     case name ~ None                => AttributeType(name)
   }
 
   /** A parser generator for an annotation on an attribute */
-  def annotation: Parser[Annotation] = "@" ~> ident ^^ Annotation
+  protected def annotation: Parser[Annotation] = "@" ~> ident ^^ Annotation
 }
