@@ -5,6 +5,7 @@ import temple.DSL.semantics.Metadata._
 import temple.DSL.semantics.Templefile._
 import temple.DSL.Syntax
 import temple.DSL.Syntax.{Arg, Args, DSLRootItem, Entry}
+import temple.utils.MapUtils._
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
@@ -22,32 +23,8 @@ object Analyser {
   //   checking that for example the names of structs and fields are distinct). A mutable Trie or HashMap would work
   //   well for this
   // TODO: This function could take the context as an implicit argument.
-  private def fail(str: String): Nothing = throw new SemanticParsingException(str)
-
-  /**
-    * Add `safeInsert` function to a map, which throw an error when trying to overwrite an existing key
-    * @param map   the underlying mutable map
-    * @tparam K    the type of the keys contained in the map
-    * @tparam V    the type of the values assigned to keys in thw map
-    */
-  implicit class SafeInsertMap[K, V](map: mutable.Map[K, V]) {
-
-    /**
-      * Insert an entry into the map, performing action `f` on conflict
-      * @param kv a key-value pair to insert into the map
-      * @param f an action to run on conflict, instead of overwriting
-      */
-    def safeInsert(kv: (K, V), f: => Unit): Unit =
-      if (map.contains(kv._1)) f else map += kv
-
-    /**
-      * Insert an entry into the map, throwing on error
-      * @param kv a key-value pair to insert into the map
-      * @throws SemanticParsingException when a key already exists in the map
-      */
-    def safeInsert(kv: (K, V)): Unit =
-      safeInsert(kv, fail(s"Key ${kv._1} already exists in $map."))
-  }
+  private def fail(str: String): Nothing        = throw new SemanticParsingException(str)
+  implicit private val failHandler: FailHandler = fail
 
   // TODO: add more path
   private case class KeyName(keyName: String)  { override def toString: String = keyName  }
