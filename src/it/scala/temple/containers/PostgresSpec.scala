@@ -8,6 +8,7 @@ import com.whisk.docker.impl.spotify.SpotifyDockerFactory
 import com.whisk.docker.scalatest.DockerTestKit
 import org.scalatest.{BeforeAndAfterAll, FlatSpec}
 import temple.generate.database.PreparedVariable
+import temple.generate.database.PreparedVariable._
 
 /** PostgresSpec offers additional methods to test commands using Postgres database */
 trait PostgresSpec extends FlatSpec with DockerTestKit with DockerPostgresService with BeforeAndAfterAll {
@@ -38,13 +39,13 @@ trait PostgresSpec extends FlatSpec with DockerTestKit with DockerPostgresServic
     values.view.zip(Iterator from 1) foreach {
       case (v, i) =>
         v match {
-          case PreparedVariable.IntVariable(value)        => prep.setInt(i, value)
-          case PreparedVariable.BoolVariable(value)       => prep.setBoolean(i, value)
-          case PreparedVariable.StringVariable(value)     => prep.setString(i, value)
-          case PreparedVariable.FloatVariable(value)      => prep.setFloat(i, value)
-          case PreparedVariable.DateVariable(value)       => prep.setDate(i, value)
-          case PreparedVariable.TimeVariable(value)       => prep.setTime(i, value)
-          case PreparedVariable.DateTimeTzVariable(value) => prep.setTimestamp(i, value)
+          case IntVariable(value)        => prep.setInt(i, value)
+          case BoolVariable(value)       => prep.setBoolean(i, value)
+          case StringVariable(value)     => prep.setString(i, value)
+          case FloatVariable(value)      => prep.setFloat(i, value)
+          case DateVariable(value)       => prep.setDate(i, value)
+          case TimeVariable(value)       => prep.setTime(i, value)
+          case DateTimeTzVariable(value) => prep.setTimestamp(i, value)
         }
     }
     prep.execute()
