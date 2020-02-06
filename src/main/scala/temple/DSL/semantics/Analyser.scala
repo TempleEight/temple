@@ -151,7 +151,7 @@ object Analyser {
       case "float" =>
         val argMap = parseParameters(
           "max"       -> Some(Arg.FloatingArg(Double.MaxValue)),
-          "min"       -> Some(Arg.FloatingArg(Double.MaxValue)),
+          "min"       -> Some(Arg.FloatingArg(Double.MinValue)),
           "precision" -> Some(Arg.IntArg(8))
         )(args)
         AttributeType.FloatType(

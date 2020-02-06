@@ -33,6 +33,36 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
       mkTemplefileASTWithUserService(
         Entry.Attribute("index", Syntax.AttributeType("int", Args()))
       )
-    ) shouldEqual mkTemplefileSemanticsWithUserService(ServiceBlock(Map("index" -> Attribute(AttributeType.IntType()))))
+    ) shouldEqual mkTemplefileSemanticsWithUserService(
+      ServiceBlock(Map("index" -> Attribute(AttributeType.IntType())))
+    )
+  }
+
+  "Semantic Analyser" should "parse each data type correctly" in {
+    parseSemantics(
+      mkTemplefileASTWithUserService(
+        Entry.Attribute("a", Syntax.AttributeType("int", Args())),
+        Entry.Attribute("b", Syntax.AttributeType("float", Args())),
+        Entry.Attribute("c", Syntax.AttributeType("bool", Args())),
+        Entry.Attribute("d", Syntax.AttributeType("date", Args())),
+        Entry.Attribute("e", Syntax.AttributeType("time", Args())),
+        Entry.Attribute("f", Syntax.AttributeType("datetime", Args())),
+        Entry.Attribute("g", Syntax.AttributeType("data", Args())),
+        Entry.Attribute("h", Syntax.AttributeType("string", Args()))
+      )
+    ) shouldEqual mkTemplefileSemanticsWithUserService(
+      ServiceBlock(
+        Map(
+          "a" -> Attribute(AttributeType.IntType()),
+          "b" -> Attribute(AttributeType.FloatType()),
+          "c" -> Attribute(AttributeType.BoolType),
+          "d" -> Attribute(AttributeType.DateType),
+          "e" -> Attribute(AttributeType.TimeType),
+          "f" -> Attribute(AttributeType.DateTimeType),
+          "g" -> Attribute(AttributeType.BlobType()),
+          "h" -> Attribute(AttributeType.StringType())
+        )
+      )
+    )
   }
 }

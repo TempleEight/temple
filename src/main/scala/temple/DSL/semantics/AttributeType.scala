@@ -15,6 +15,6 @@ object AttributeType {
 
   case class IntType(max: Option[Long] = None, min: Option[Long] = None, precision: Short = 4) extends AttributeType
 
-  case class FloatType(max: Double = Float.MaxValue, min: Double = Float.MinValue, precision: Short = 8)
+  case class FloatType(max: Double = Double.MaxValue, min: Double = Double.MinValue, precision: Short = 8)
       extends AttributeType
 }
