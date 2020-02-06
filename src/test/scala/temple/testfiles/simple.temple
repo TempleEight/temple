@@ -6,7 +6,7 @@ User: service {
   createdAt: datetimetz;
   numberOfDogs: int;
   yeets: bool;
-  currentBankBalance: fixed(places: 2);
+  currentBankBalance: float(min: 0.0, precision: 2);
   birthDate: date;
   breakfastTime: time;
 
