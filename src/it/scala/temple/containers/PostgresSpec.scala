@@ -6,7 +6,9 @@ import com.spotify.docker.client.DefaultDockerClient
 import com.whisk.docker.DockerFactory
 import com.whisk.docker.impl.spotify.SpotifyDockerFactory
 import com.whisk.docker.scalatest.DockerTestKit
-import org.scalatest.{BeforeAndAfterAll, FlatSpec, Matchers}
+import org.scalatest.{BeforeAndAfterAll, FlatSpec}
+import temple.generate.database.PreparedVariable
+import temple.generate.database.PreparedVariable._
 
 /** PostgresSpec offers additional methods to test commands using Postgres database */
 trait PostgresSpec extends FlatSpec with DockerTestKit with DockerPostgresService with BeforeAndAfterAll {
@@ -31,4 +33,23 @@ trait PostgresSpec extends FlatSpec with DockerTestKit with DockerPostgresServic
 
   // Execute a query that does not return a result
   def executeWithoutResults(query: String): Unit = execute { _.createStatement().execute(query) }
+
+  /** Execute a query that does not return a result, but takes a sequence of prepared values that need to be set */
+  def executeWithoutResultsPrepared(preparedStatement: String, values: Seq[PreparedVariable]): Unit = execute { conn =>
+    val prep = conn.prepareStatement(preparedStatement)
+    values.view.zip(Iterator from 1) foreach {
+      case (v, i) =>
+        v match {
+          case IntVariable(value)        => prep.setInt(i, value)
+          case BoolVariable(value)       => prep.setBoolean(i, value)
+          case StringVariable(value)     => prep.setString(i, value)
+          case FloatVariable(value)      => prep.setFloat(i, value)
+          case DateVariable(value)       => prep.setDate(i, value)
+          case TimeVariable(value)       => prep.setTime(i, value)
+          case DateTimeTzVariable(value) => prep.setTimestamp(i, value)
+        }
+    }
+    prep.execute()
+  }
+
 }
