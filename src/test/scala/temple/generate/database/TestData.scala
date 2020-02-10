@@ -1,4 +1,4 @@
-package temple.generate
+package temple.generate.database
 
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
@@ -9,7 +9,7 @@ import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
 
 /** Static testing assets for DB generation */
-object TestData {
+object IntegrationTestData {
 
   val createStatement: Create = Create(
     "Users",

@@ -8,6 +8,23 @@ import temple.containers.DockerPostgresService.PostgresReadyChecker
 import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
 
+/** DockerPostgresService configures a docker container for Postgres */
+trait DockerPostgresService extends DockerKit {
+
+  val postgresContainer: DockerContainer = DockerContainer(DockerPostgresService.image)
+    .withPorts(DockerPostgresService.internalPort -> Some(DockerPostgresService.externalPort))
+    .withEnv(
+      s"POSTGRES_USER=${DockerPostgresService.databaseUsername}",
+      s"POSTGRES_PASSWORD=${DockerPostgresService.databasePassword}"
+    )
+    .withReadyChecker(
+      new PostgresReadyChecker().looped(5, 10.seconds)
+    )
+
+  abstract override def dockerContainers: List[DockerContainer] =
+    postgresContainer +: super.dockerContainers
+}
+
 /** DockerPostgresService encapsulates all configuration for running a postgres docker container */
 object DockerPostgresService {
   val image            = "postgres:12.1"
@@ -34,21 +51,4 @@ object DockerPostgresService {
       }
     }
   }
-}
-
-/** DockerPostgresService configures a docker container for Postgres */
-trait DockerPostgresService extends DockerKit {
-
-  val postgresContainer: DockerContainer = DockerContainer(DockerPostgresService.image)
-    .withPorts(DockerPostgresService.internalPort -> Some(DockerPostgresService.externalPort))
-    .withEnv(
-      s"POSTGRES_USER=${DockerPostgresService.databaseUsername}",
-      s"POSTGRES_PASSWORD=${DockerPostgresService.databasePassword}"
-    )
-    .withReadyChecker(
-      new PostgresReadyChecker().looped(5, 10.seconds)
-    )
-
-  abstract override def dockerContainers: List[DockerContainer] =
-    postgresContainer +: super.dockerContainers
 }

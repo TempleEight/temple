@@ -1,4 +1,4 @@
-package temple.generate
+package temple.generate.database
 
 import java.sql.{Date, Time, Timestamp}
 
