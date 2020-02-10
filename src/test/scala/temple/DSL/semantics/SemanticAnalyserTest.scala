@@ -8,9 +8,6 @@ import temple.DSL.semantics.Analyser.parseSemantics
 import temple.DSL.semantics.AttributeType._
 
 class SemanticAnalyserTest extends FlatSpec with Matchers {
-  "Semantic Analyser" should "complain that there is no project block when parsing an Empty AST" in {
-    a[SemanticParsingException] should be thrownBy { parseSemantics(Nil) }
-  }
 
   private def mkTemplefileAST(rootItems: DSLRootItem*): Syntax.Templefile =
     DSLRootItem("test", "project", Nil) +: rootItems
@@ -26,7 +23,11 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
   private def mkTemplefileSemanticsWithUserService(serviceBlock: ServiceBlock): Templefile =
     Templefile("test", Nil, Map.empty, Map("User" -> serviceBlock))
 
-  "Semantic Analyser" should "parse an AST containing only an empty project block" in {
+  "Semantic Analyser" should "complain that there is no project block when parsing an Empty AST" in {
+    a[SemanticParsingException] should be thrownBy { parseSemantics(Nil) }
+  }
+
+  it should "parse an AST containing only an empty project block" in {
     parseSemantics(mkTemplefileAST()) shouldBe mkTemplefileSemantics()
   }
 

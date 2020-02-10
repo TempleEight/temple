@@ -5,6 +5,7 @@ import temple.DSL.semantics.SemanticParsingException
 import scala.collection.mutable
 
 object MapUtils {
+  type FailThrower = String => Nothing
   type FailHandler = String => Unit
 
   /**

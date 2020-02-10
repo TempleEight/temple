@@ -18,6 +18,7 @@ lazy val root = (project in file("."))
       "com.spotify" % "docker-client" % "8.9.1",
       "com.whisk" %% "docker-testkit-scalatest" % "0.9.9" % "it,test",
       "com.whisk" %% "docker-testkit-impl-spotify" % "0.9.9" % "it,test",
+      "com.beachape" %% "enumeratum" % "1.5.15"
     )
   )
 

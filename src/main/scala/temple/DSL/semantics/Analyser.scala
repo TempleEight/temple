@@ -25,6 +25,7 @@ object Analyser {
   //   well for this
   // TODO: This function could take the context as an implicit argument.
   private def fail(str: String): Nothing        = throw new SemanticParsingException(str)
+  implicit private val failThrower: FailThrower = fail
   implicit private val failHandler: FailHandler = fail
 
   // TODO: add more path
@@ -251,10 +252,7 @@ object Analyser {
       * @tparam A The underlying type of the field, inferred from `argType`
       */
     // TODO: do we need to add support for multiple arguments in future?
-    final protected def registerKeyword[A](
-      metaKey: String,
-      argKey: String,
-      argType: ArgType[A],
+    final protected def registerKeyword[A](metaKey: String, argKey: String, argType: ArgType[A])(
       constructor: A => T
     ): Unit =
       matchers += (metaKey -> { args =>
@@ -265,8 +263,8 @@ object Analyser {
 
     /** A shorthand for [[temple.DSL.semantics.Analyser.MetadataParser#registerKeyword]] with the same `key` used for both the
       * metadata name and its single argument */
-    final protected def registerKeyword[A](key: String, argType: ArgType[A], constructor: A => T): Unit =
-      registerKeyword(key, key, argType, constructor)
+    final protected def registerKeyword[A](key: String, argType: ArgType[A])(constructor: A => T): Unit =
+      registerKeyword(key, key, argType)(constructor)
 
     /** Perform parsing by looking up the relevant function and
       * [[scala.collection.IterableOnceOps#foldRight(java.lang.Object, scala.Function2)]] supports */
@@ -278,32 +276,32 @@ object Analyser {
 
   /** A parser of Metadata items that can occur in all the blocks */
   private val parseGlobalMetadata = new MetadataParser[GlobalMetadata] {
-    registerKeyword("language", TokenArgType, Language)
+    registerKeyword[String]("language", TokenArgType)(Language.parse(_))
   }
 
   /** A parser of Metadata items that can occur in project and service blocks */
   private val parseProjectAndServiceMetadata = new MetadataParser[ProjectAndServiceMetadata] {
     inherit from parseGlobalMetadata
-    registerKeyword("database", TokenArgType, Database)
+    registerKeyword("database", TokenArgType)(Database.parse(_))
   }
 
   /** A parser of Metadata items that can occur in service blocks */
   private val parseServiceMetadata = new MetadataParser[ServiceMetadata] {
     inherit from parseProjectAndServiceMetadata
-    registerKeyword("auth", "login", TokenArgType, ServiceAuth)
-    registerKeyword("uses", "services", ListArgType(TokenArgType), Uses)
+    registerKeyword("auth", "login", TokenArgType)(ServiceAuth)
+    registerKeyword("uses", "services", ListArgType(TokenArgType))(Uses)
   }
 
   /** A parser of Metadata items that can occur in project blocks */
   private val parseProjectMetadata = new MetadataParser[ProjectMetadata] {
     inherit from parseProjectAndServiceMetadata
-    registerKeyword("provider", TokenArgType, Provider)
+    registerKeyword("provider", TokenArgType)(Provider.parse(_))
   }
 
   /** A parser of Metadata items that can occur in target blocks */
   private val parseTargetMetadata = new MetadataParser[TargetMetadata] {
     inherit from parseGlobalMetadata
-    registerKeyword("auth", "services", ListArgType(TokenArgType), TargetAuth)
+    registerKeyword("auth", "services", ListArgType(TokenArgType))(TargetAuth)
   }
 
   /**
