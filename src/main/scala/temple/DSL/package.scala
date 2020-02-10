@@ -52,11 +52,11 @@ package object DSL {
 
   object Entry {
 
-    case class Attribute(key: String, dataType: AttributeType, annotations: Seq[Annotation]) extends Entry {
+    case class Attribute(key: String, dataType: AttributeType, annotations: Seq[Annotation] = Nil) extends Entry {
       override def toString: String = s"$key: $dataType${annotations.map(" " + _).mkString};"
     }
 
-    case class Metadata(function: String, args: Seq[Arg], kwargs: Seq[(String, Arg)]) extends Entry {
+    case class Metadata(function: String, args: Seq[Arg] = Nil, kwargs: Seq[(String, Arg)] = Nil) extends Entry {
 
       override def toString: String = {
         val kwargsStr = kwargs.map { case (str, arg) => s"$str: $arg" }
