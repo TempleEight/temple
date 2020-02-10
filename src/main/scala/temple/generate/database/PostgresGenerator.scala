@@ -82,6 +82,7 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
     (column.name +: generateColumnType(column.colType) +: columnConstraints).mkString(" ")
   }
 
+  /** Given the current PostgresContext, generate the prepared statement placeholders for each column */
   private def generatePreparedValues(columns: Seq[Any])(implicit context: PostgresContext): String =
     (1 to columns.length)
       .map(i =>

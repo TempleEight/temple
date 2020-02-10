@@ -31,7 +31,7 @@ package object database {
     val createStatementWithConstraints = Create(
       "Test",
       Seq(
-        ColumnDef("item_id", IntCol, Seq(NonNull, PrimaryKey)),
+        ColumnDef("itemID", IntCol, Seq(NonNull, PrimaryKey)),
         ColumnDef("createdAt", DateTimeTzCol, Seq(Unique)),
         ColumnDef("bookingTime", TimeCol, Seq(References("Bookings", "bookingTime"))),
         ColumnDef("value", IntCol, Seq(Check("value", GreaterEqual, "1"), Null))

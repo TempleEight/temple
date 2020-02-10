@@ -2,8 +2,11 @@ package temple.generate.database
 
 import java.sql.{Date, Time, Timestamp}
 
+/** Helper case class for holding values for prepared variables in SQL statements
+  * Used mainly in @containers.PostgresSpec */
 sealed trait PreparedVariable
 
+/** Enumerated case classes for each supported datatype in JDBC */
 object PreparedVariable {
   case class IntVariable(value: Int)              extends PreparedVariable
   case class StringVariable(value: String)        extends PreparedVariable
