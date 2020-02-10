@@ -5,6 +5,7 @@ import temple.DSL.semantics.Metadata._
 import temple.DSL.semantics.Templefile._
 import temple.DSL.Syntax
 import temple.DSL.Syntax.{Arg, Args, DSLRootItem, Entry}
+import temple.DSL.semantics.Analyser.ArgMap
 import temple.utils.MapUtils._
 
 import scala.collection.immutable.ListMap
@@ -41,6 +42,9 @@ object Analyser {
     def apply(block: String, tag: String, wrapper: BlockContext): BlockContext = BlockContext(block, tag, Some(wrapper))
     def apply(block: String, tag: String): BlockContext                        = BlockContext(block, tag, None)
   }
+
+  private def assertNoParameters(args: Args)(implicit context: Context): Unit =
+    if (!args.isEmpty) fail(s"Arguments supplied to function $context, which should take no parameters")
 
   /**
     * Convert a sequence of arguments, some of which are named, into a map from name to value
@@ -159,15 +163,23 @@ object Analyser {
           argMap.getArg("min", FloatingArgType),
           argMap.getArg("precision", FloatingArgType).toShort
         )
-      case "date"     => AttributeType.DateType
-      case "datetime" => AttributeType.DateTimeType
-      case "time"     => AttributeType.TimeType
       case "data" =>
         val argMap = parseParameters("maxSize" -> Some(Arg.NoArg))(args)
         AttributeType.BlobType(
           argMap.getOptionArg("maxSize", IntArgType)
         )
-      case "bool"   => AttributeType.BoolType
+      case "date" =>
+        assertNoParameters(args)
+        AttributeType.DateType
+      case "datetime" =>
+        assertNoParameters(args)
+        AttributeType.DateTimeType
+      case "time" =>
+        assertNoParameters(args)
+        AttributeType.TimeType
+      case "bool" =>
+        assertNoParameters(args)
+        AttributeType.BoolType
       case typeName => fail(s"Unknown type $typeName")
     }
   }

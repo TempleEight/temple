@@ -8,7 +8,7 @@ object Syntax {
   type Templefile = Seq[DSLRootItem]
 
   /** The type of a struct’s attribute, complete with parameters */
-  sealed case class AttributeType(typeName: String, args: Args) {
+  sealed case class AttributeType(typeName: String, args: Args = Args()) {
 
     override def toString: String = {
       val argsStr = if (args.isEmpty) "" else s"($args)"
@@ -32,7 +32,6 @@ object Syntax {
 
   /** A sequence of values, both positional and named */
   case class Args(posargs: Seq[Arg] = Nil, kwargs: Seq[(String, Arg)] = Nil) {
-    def size: Int        = posargs.size + kwargs.size
     def isEmpty: Boolean = posargs.isEmpty && kwargs.isEmpty
 
     override def toString: String = {
