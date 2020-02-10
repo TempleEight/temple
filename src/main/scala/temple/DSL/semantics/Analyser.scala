@@ -314,6 +314,7 @@ object Analyser {
     * @return A semantic representation of a [[temple.DSL.semantics.ServiceBlock]]
     */
   private def parseServiceBlock(entries: Seq[Entry])(implicit context: BlockContext): ServiceBlock = {
+    // LinkedHashMap is used to preserve order in the map
     val attributes = mutable.LinkedHashMap[String, Attribute]()
     val metadatas  = mutable.ListBuffer[ServiceMetadata]()
     val structs    = mutable.LinkedHashMap[String, StructBlock]()
