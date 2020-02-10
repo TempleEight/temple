@@ -40,7 +40,10 @@ object Syntax {
     }
   }
 
-  /** Any element of a service/struct */
+  /**
+    * Any element of a service/struct
+    * @param typeName The name of the type of entry, used for error messages
+    */
   sealed abstract class Entry(val typeName: String)
 
   object Entry {
