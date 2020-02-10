@@ -1,6 +1,7 @@
 package temple.DSL.semantics
 
 import temple.DSL.semantics.ArgType._
+import temple.DSL.semantics.ErrorHandling.{BlockContext, Context, KeyName, assertNoParameters, fail, failHandler, failThrower}
 import temple.DSL.semantics.Metadata._
 import temple.DSL.semantics.Templefile._
 import temple.DSL.syntax
@@ -13,40 +14,6 @@ import scala.collection.mutable
 object Analyser {
 
   /**
-    * Throws an exception about the semantic analysis.
-    * @param str A string representation of the error
-    * @return never returns
-    */
-  // TODO: better error handling
-  //   When parsing into an AST, we could pass around a mutable context, which we use to log the location of each part
-  //   of the code. This could also be a good way of enforcing that each name is unique (at the moment there is no
-  //   checking that for example the names of structs and fields are distinct). A mutable Trie or HashMap would work
-  //   well for this
-  // TODO: This function could take the context as an implicit argument.
-  private def fail(str: String): Nothing        = throw new SemanticParsingException(str)
-  implicit private val failThrower: FailThrower = fail
-  implicit private val failHandler: FailHandler = fail
-
-  // TODO: add more path
-  private case class KeyName(keyName: String)  { override def toString: String = keyName  }
-  private case class Context(function: String) { override def toString: String = function }
-
-  private case class BlockContext private (block: String, tag: String, context: Option[BlockContext]) {
-
-    override def toString: String = context.fold(s"$tag ($block)") { context =>
-      s"$tag ($block, inside $context)"
-    }
-  }
-
-  private object BlockContext {
-    def apply(block: String, tag: String, wrapper: BlockContext): BlockContext = BlockContext(block, tag, Some(wrapper))
-    def apply(block: String, tag: String): BlockContext                        = BlockContext(block, tag, None)
-  }
-
-  private def assertNoParameters(args: Args)(implicit context: Context): Unit =
-    if (!args.isEmpty) fail(s"Arguments supplied to function $context, which should take no parameters")
-
-  /**
     * Convert a sequence of arguments, some of which are named, into a map from name to value
     * @param specs A signature of a sequence of argument names in order, with an optional default assigned to each
     * @param args The argument list to match up with the signature
@@ -54,7 +21,9 @@ object Analyser {
     * @return A map of named arguments to their values
     * @throws SemanticParsingException when too many, too few, duplicate or unknown arguments are supplied
     */
-  private def parseParameters(specs: (String, Option[syntax.Arg])*)(args: Args)(implicit context: Context): ArgMap = {
+  private[semantics] def parseParameters(
+    specs: (String, Option[syntax.Arg])*
+  )(args: Args)(implicit context: Context): ArgMap = {
     // A ListMap is an insertion-ordered immutable map
     val specsMap = specs.to(ListMap)
     val argc     = args.posargs.length
@@ -89,41 +58,6 @@ object Analyser {
     }
 
     ArgMap(map.toMap)
-  }
-
-  /**
-    * A wrapper around a map of arguments, as produced by [[temple.DSL.semantics#parseParameters]], with methods added
-    * to extract arguments of given types
-    *
-    * @param argMap The underlying immutable map of names to argument values
-    */
-  private case class ArgMap(argMap: Map[String, Arg]) {
-
-    /**
-      * Type-safely extract an argument from the argument map
-      * @param key The name of the argument to extract
-      * @param argType The type of the argument to extract
-      * @param context The location of the function call, used in the error message
-      * @tparam T The type of the element to extract
-      * @return The typesafe extracted value
-      */
-    def getArg[T](key: String, argType: ArgType[T])(implicit context: Context): T =
-      argType.extractArg(argMap(key)).getOrElse {
-        fail(s"${argType.stringRep.capitalize} expected at $key for $context, found ${argMap(key)}")
-      }
-
-    /**
-      * Type-safely extract [[Some]] argument from the argument map, or [[None]] if the default value is
-      * [[temple.DSL.syntax.Arg.NoArg]]
-      * @param key The name of the argument to extract
-      * @param argType The type of the argument to extract
-      * @param context The location of the function call, used in the error message
-      * @tparam T The type of the element to extract
-      * @return [[Some]] typesafe extracted value, or [[None]] if it was not provided and the default was
-      *         [[temple.DSL.syntax.Arg.NoArg]]
-      */
-    def getOptionArg[T](key: String, argType: ArgType[T])(implicit context: Context): Option[T] =
-      argMap(key) match { case Arg.NoArg => None; case _ => Some(getArg(key, argType)) }
   }
 
   // TODO: is this too messy?
@@ -206,71 +140,6 @@ object Analyser {
       case key         => fail(s"Unknown annotation @$key at ${keyNameContext.keyName}")
     }
     Attribute(parseAttributeType(dataType), accessAnnotation, valueAnnotations.toSet)
-  }
-
-  /**
-    * Build a metadata parser by building a list of function calls for each match
-    *
-    * This is needed because each call to [[temple.DSL.semantics.Analyser.MetadataParser#registerKeyword]] is effectively
-    * dependently typed, so it cannot be encoded into a tuple, but instead must immediately be bundled into a function
-    *
-    * @tparam T the subtype of metadata that we are specifically parsing. The “inheritance” (built up with
-    *           `inherit from myMetadataParser`) runs in the opposite direction to the inheritance of classes: each
-    *           parser extends parsers of a more specific type.
-    */
-  class MetadataParser[T <: Metadata]() {
-    private type Matcher = Args => T
-    private var matchers = mutable.LinkedHashMap[String, Matcher]()
-
-    /**
-      * Use a different parser as a fallback if none of the parsers defined here match
-      * @param parser the alternative parser to use as a fallback
-      * @tparam A the type of metadata parsed by `parser`, which must be equal to/a subtype of this parser’s metadata
-      *           type
-      */
-    def inheritFrom[A <: T](parser: MetadataParser[A]): Unit =
-      // insert, or no-op if they already exist as inheritance does not overwrite newly added values
-      parser.matchers.foreach(matchers.safeInsert(_, ()))
-
-    /** Used for a fluent API style: `inherit from myMetadataParser` as an alternative to
-      * `inheritFrom(myMetadataParser)` */
-    final protected object inherit {
-
-      /** An alias of [[MetadataParser#inheritFrom]], for a fluent API */
-      def from[A <: T](parser: MetadataParser[A]): Unit = inheritFrom(parser)
-    }
-
-    /**
-      * Add a handler for a new type of metadata
-      *
-      * @param metaKey The name of the metadata item to add
-      * @param argKey The name of the single argument to the metadata. Note that there is also
-      *               [[temple.DSL.semantics.Analyser.MetadataParser#registerKeyword]]
-      * @param argType The type of the field to expect
-      * @param constructor The function to turn an input of type [[ArgType]] into a value of type [[T]]
-      * @tparam A The underlying type of the field, inferred from `argType`
-      */
-    // TODO: do we need to add support for multiple arguments in future?
-    final protected def registerKeyword[A](metaKey: String, argKey: String, argType: ArgType[A])(
-      constructor: A => T
-    ): Unit =
-      matchers += (metaKey -> { args =>
-          implicit val context: Context = Context(metaKey)
-          val argMap                    = parseParameters(argKey -> None)(args)
-          constructor(argMap.getArg(argKey, argType))
-        })
-
-    /** A shorthand for [[temple.DSL.semantics.Analyser.MetadataParser#registerKeyword]] with the same `key` used for both the
-      * metadata name and its single argument */
-    final protected def registerKeyword[A](key: String, argType: ArgType[A])(constructor: A => T): Unit =
-      registerKeyword(key, key, argType)(constructor)
-
-    /** Perform parsing by looking up the relevant function and
-      * [[scala.collection.IterableOnceOps#foldRight(java.lang.Object, scala.Function2)]] supports */
-    final def apply(metaKey: String, args: Args)(implicit context: BlockContext): T =
-      matchers.get(metaKey).map(_(args)) getOrElse {
-        fail(s"No valid metadata $metaKey in $context")
-      }
   }
 
   /** A parser of Metadata items that can occur in all the blocks */
