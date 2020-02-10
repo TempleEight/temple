@@ -1,4 +1,4 @@
-package temple.DSL.Syntax
+package temple.DSL.syntax
 
 /** A value that can be passed as an argument to a type or metadata */
 sealed trait Arg

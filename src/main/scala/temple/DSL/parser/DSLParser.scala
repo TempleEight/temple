@@ -1,6 +1,6 @@
 package temple.DSL.parser
 
-import temple.DSL.Syntax._
+import temple.DSL.syntax._
 import temple.DSL._
 
 import scala.util.parsing.combinator.JavaTokenParsers

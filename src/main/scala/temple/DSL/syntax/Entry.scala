@@ -1,4 +1,4 @@
-package temple.DSL.Syntax
+package temple.DSL.syntax
 
 /** Any element of a service/struct */
 trait Entry

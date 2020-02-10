@@ -1,5 +1,5 @@
 package temple.DSL
 
-package object Syntax {
+package object syntax {
   type Templefile = Seq[DSLRootItem]
 }

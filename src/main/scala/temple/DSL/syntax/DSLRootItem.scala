@@ -1,4 +1,4 @@
-package temple.DSL.Syntax
+package temple.DSL.syntax
 
 import temple.utils.StringUtils.indent
 

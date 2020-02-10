@@ -1,4 +1,4 @@
-package temple.DSL.Syntax
+package temple.DSL.syntax
 
 /** A sequence of values, both positional and named */
 case class Args(posargs: Seq[Arg] = Nil, kwargs: Seq[(String, Arg)] = Nil) {
