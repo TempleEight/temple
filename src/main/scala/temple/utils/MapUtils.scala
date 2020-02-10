@@ -1,7 +1,5 @@
 package temple.utils
 
-import temple.DSL.semantics.SemanticParsingException
-
 import scala.collection.mutable
 
 object MapUtils {
@@ -27,7 +25,6 @@ object MapUtils {
     /**
       * Insert an entry into the map, throwing on error
       * @param kv a key-value pair to insert into the map
-      * @throws SemanticParsingException when a key already exists in the map
       */
     def safeInsert(kv: (K, V))(implicit fail: FailHandler): Unit =
       safeInsert(kv, fail(s"Key ${kv._1} already exists in $map."))
