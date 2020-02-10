@@ -1,5 +1,6 @@
 package temple.DSL.parser
 
+import temple.DSL.Syntax._
 import temple.DSL._
 
 import scala.util.parsing.combinator.JavaTokenParsers
@@ -8,7 +9,7 @@ import scala.util.parsing.combinator.JavaTokenParsers
 class DSLParser extends JavaTokenParsers with UtilParsers {
 
   /** A parser generator for an entire Templefile */
-  def templeFile: Parser[Seq[DSLRootItem]] = repAll(rootItem)
+  protected def templefile: Parser[Templefile] = repAll(rootItem)
 
   /** A parser generator for each item at the root level, i.e. a name, tag and block */
   protected def rootItem: Parser[DSLRootItem] = (ident <~ ":") ~ (ident <~ "{") ~ repUntil(entry, "}") ^^ {
@@ -20,7 +21,7 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
 
   /** A parser generator for a line of metadata */
   protected def metadata: Parser[Entry.Metadata] = "#" ~> ident ~ (allArgs | shorthandListArg) ^^ {
-    case function ~ (args ~ kwargs) => Entry.Metadata(function, args, kwargs)
+    case function ~ args => Entry.Metadata(function, args)
   }
 
   /** A parser generator for a struct’s attribute */
@@ -36,7 +37,7 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   protected def listArg: Parser[Arg] = "[" ~> repUntil(arg <~ argsListSeparator, "]") ^^ (elems => Arg.ListArg(elems))
 
   /** A parser generator for a list of arguments in square brackets, when used in shorthand to replace the brackets */
-  protected def shorthandListArg[T]: Parser[Seq[Arg] ~ Seq[T]] = (listArg ^^ (list => Seq(list))) ~ success(Nil)
+  protected def shorthandListArg[T]: Parser[Args] = listArg ^^ (list => Args(Seq(list)))
 
   /** A parser generator for a floating point number other than an integer
     *
@@ -58,13 +59,14 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   /** A parser generator for a sequence of arguments, starting positionally and subsequently keyed.
     * If the parser fails after parsing the open bracket, commit is called to protect against being confused with nested
     * rootitems */
-  protected def allArgs: Parser[Seq[Arg] ~ Seq[(String, Arg)]] =
-    "(" ~> commit(rep(arg <~ argsListSeparator) ~ repUntil(kwarg <~ argsListSeparator, ")"))
+  protected def allArgs: Parser[Args] =
+    "(" ~> commit(rep(arg <~ argsListSeparator) ~ repUntil(kwarg <~ argsListSeparator, ")")) ^^ {
+      case posargs ~ kwargs => Args(posargs, kwargs)
+    }
 
   /** A parser generator for the type of an attribute */
   protected def attributeType: Parser[AttributeType] = ident ~ allArgs.? ^^ {
-    case name ~ Some(args ~ kwargs) => AttributeType(name, args, kwargs)
-    case name ~ None                => AttributeType(name)
+    case name ~ maybeArgs => AttributeType(name, maybeArgs.getOrElse(Args()))
   }
 
   /** A parser generator for an annotation on an attribute */

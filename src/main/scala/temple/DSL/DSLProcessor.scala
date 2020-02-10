@@ -1,5 +1,6 @@
 package temple.DSL
 
+import temple.DSL.Syntax.DSLRootItem
 import temple.DSL.parser.DSLParser
 
 object DSLProcessor extends DSLParser {
@@ -17,7 +18,7 @@ object DSLProcessor extends DSLParser {
     * @return Right of the the parsed list of root elements, or Left of a string representing the error
     */
   def parse(contents: String): Either[String, Seq[DSLRootItem]] =
-    parseAll(templeFile, contents) match {
+    parseAll(templefile, contents) match {
       case Success(result, _)    => Right(result)
       case NoSuccess(str, input) => Left(str + '\n' + printError(input))
     }
