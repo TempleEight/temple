@@ -3,9 +3,8 @@ package temple.DSL.semantics
 import temple.DSL.semantics.ArgType._
 import temple.DSL.semantics.Metadata._
 import temple.DSL.semantics.Templefile._
-import temple.DSL.Syntax
-import temple.DSL.Syntax.{Arg, Args, DSLRootItem, Entry}
-import temple.DSL.semantics.Analyser.ArgMap
+import temple.DSL.syntax
+import temple.DSL.syntax.{Arg, Args, DSLRootItem, Entry}
 import temple.utils.MapUtils._
 
 import scala.collection.immutable.ListMap
@@ -55,7 +54,7 @@ object Analyser {
     * @return A map of named arguments to their values
     * @throws SemanticParsingException when too many, too few, duplicate or unknown arguments are supplied
     */
-  private def parseParameters(specs: (String, Option[Syntax.Arg])*)(args: Args)(implicit context: Context): ArgMap = {
+  private def parseParameters(specs: (String, Option[syntax.Arg])*)(args: Args)(implicit context: Context): ArgMap = {
     // A ListMap is an insertion-ordered immutable map
     val specsMap = specs.to(ListMap)
     val argc     = args.posargs.length
@@ -63,7 +62,7 @@ object Analyser {
     if (specs.sizeIs < argc)
       fail(s"Too many arguments supplied to function $context (found $argc, expected at most ${specs.length})")
 
-    val map = mutable.HashMap[String, Syntax.Arg]()
+    val map = mutable.HashMap[String, syntax.Arg]()
 
     // Add the positional arguments to the map
     specsMap.lazyZip(args.posargs) foreach {
@@ -115,21 +114,21 @@ object Analyser {
 
     /**
       * Type-safely extract [[Some]] argument from the argument map, or [[None]] if the default value is
-      * [[temple.DSL.Syntax.Arg.NoArg]]
+      * [[temple.DSL.syntax.Arg.NoArg]]
       * @param key The name of the argument to extract
       * @param argType The type of the argument to extract
       * @param context The location of the function call, used in the error message
       * @tparam T The type of the element to extract
       * @return [[Some]] typesafe extracted value, or [[None]] if it was not provided and the default was
-      *         [[temple.DSL.Syntax.Arg.NoArg]]
+      *         [[temple.DSL.syntax.Arg.NoArg]]
       */
     def getOptionArg[T](key: String, argType: ArgType[T])(implicit context: Context): Option[T] =
       argMap(key) match { case Arg.NoArg => None; case _ => Some(getArg(key, argType)) }
   }
 
   // TODO: is this too messy?
-  def parseAttributeType(dataType: Syntax.AttributeType)(implicit keyNameContext: KeyName): AttributeType = {
-    val Syntax.AttributeType(typeName, args) = dataType
+  def parseAttributeType(dataType: syntax.AttributeType)(implicit keyNameContext: KeyName): AttributeType = {
+    val syntax.AttributeType(typeName, args) = dataType
     implicit val context: Context            = Context(s"$typeName@$keyNameContext")
 
     typeName match {
@@ -186,8 +185,8 @@ object Analyser {
   }
 
   def parseAttribute(
-    dataType: Syntax.AttributeType,
-    annotations: Seq[Syntax.Annotation]
+    dataType: syntax.AttributeType,
+    annotations: Seq[syntax.Annotation]
   )(implicit keyNameContext: KeyName): Attribute = {
     var accessAnnotation: Option[Annotation.AccessAnnotation] = None
 
@@ -364,7 +363,7 @@ object Analyser {
     * @throws SemanticParsingException when there is no project information, as well as when any of the definitions are
     *                                  malformed
     */
-  def parseSemantics(templefile: Syntax.Templefile): Templefile = {
+  def parseSemantics(templefile: syntax.Templefile): Templefile = {
     var projectNameBlock: Option[(String, ProjectBlock)] = None
 
     val targets  = mutable.LinkedHashMap[String, TargetBlock]()

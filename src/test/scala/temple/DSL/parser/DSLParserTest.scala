@@ -2,8 +2,8 @@ package temple.DSL.parser
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.DSLProcessor
-import temple.DSL.Syntax.{Annotation, Arg, Args, AttributeType, DSLRootItem}
-import temple.DSL.Syntax.Entry.{Attribute, Metadata}
+import temple.DSL.syntax.{Annotation, Arg, Args, AttributeType, DSLRootItem}
+import temple.DSL.syntax.Entry.{Attribute, Metadata}
 import temple.utils.FileUtils._
 import temple.utils.MonadUtils.FromEither
 

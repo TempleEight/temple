@@ -1,6 +1,7 @@
 package temple.DSL.parser
 
-import temple.DSL.Syntax._
+import temple.DSL.syntax._
+
 import scala.util.parsing.combinator.JavaTokenParsers
 
 /** A library of parser generators for the Templefile DSL */
