@@ -37,10 +37,17 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   /** A parser generator for a list of arguments in square brackets, when used in shorthand to replace the brackets */
   protected def shorthandListArg[T]: Parser[Args] = listArg ^^ (list => Args(Seq(list)))
 
+  /** A parser generator for a floating point number other than an integer
+    *
+    * This excludes integer literals, to avoid integers being misparsed as floating point numbers. */
+  protected def floatingNumber: Parser[String] =
+    """-?\d+(\.\d+)?([eE][+-]?\d+)""".r | // exponential
+    """-?\d+\.\d+""".r                    // decimal
+
   /** A parser generator for any argument passed to a type or metadata */
   protected def arg: Parser[Arg] =
     ident ^^ Arg.TokenArg |
-    floatingPointNumber ^^ (str => Arg.FloatingArg(str.toDouble)) |
+    floatingNumber ^^ (str => Arg.FloatingArg(str.toDouble)) |
     wholeNumber ^^ (str => Arg.IntArg(str.toInt)) |
     listArg
 

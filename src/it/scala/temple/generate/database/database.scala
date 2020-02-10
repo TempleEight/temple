@@ -1,10 +1,12 @@
 package temple.generate
 
+import java.sql.{Date, Time, Timestamp}
+
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.ComparisonOperator._
 import temple.generate.database.ast.Condition._
-import temple.generate.database.ast.Expression._
+import temple.generate.database.ast.Expression.Value
 import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
 
@@ -13,7 +15,7 @@ package object database {
   /** Static testing assets for DB generation */
   object TestData {
 
-    val createStatement: Create = Create(
+    val createStatement = Create(
       "Users",
       Seq(
         ColumnDef("id", IntCol),
@@ -26,36 +28,17 @@ package object database {
       )
     )
 
-    val postgresCreateString: String =
-      """CREATE TABLE Users (
-        |  id INT,
-        |  bankBalance REAL,
-        |  name TEXT,
-        |  isStudent BOOLEAN,
-        |  dateOfBirth DATE,
-        |  timeOfDay TIME,
-        |  expiry TIMESTAMPTZ
-        |);""".stripMargin
-
-    val createStatementWithConstraints: Create = Create(
+    val createStatementWithConstraints = Create(
       "Test",
       Seq(
-        ColumnDef("item_id", IntCol, Seq(NonNull, PrimaryKey)),
+        ColumnDef("itemID", IntCol, Seq(NonNull, PrimaryKey)),
         ColumnDef("createdAt", DateTimeTzCol, Seq(Unique)),
         ColumnDef("bookingTime", TimeCol, Seq(References("Bookings", "bookingTime"))),
         ColumnDef("value", IntCol, Seq(Check("value", GreaterEqual, "1"), Null))
       )
     )
 
-    val postgresCreateStringWithConstraints: String =
-      """CREATE TABLE Test (
-        |  item_id INT NOT NULL PRIMARY KEY,
-        |  createdAt TIMESTAMPTZ UNIQUE,
-        |  bookingTime TIME REFERENCES Bookings(bookingTime),
-        |  value INT CHECK (value >= 1) NULL
-        |);""".stripMargin
-
-    val readStatement: Read = Read(
+    val readStatement = Read(
       "Users",
       Seq(
         Column("id"),
@@ -68,10 +51,7 @@ package object database {
       )
     )
 
-    val postgresSelectString: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users;"""
-
-    val readStatementWithWhere: Read = Read(
+    val readStatementWithWhere = Read(
       "Users",
       Seq(
         Column("id"),
@@ -87,10 +67,7 @@ package object database {
       )
     )
 
-    val postgresSelectStringWithWhere: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE Users.id = 123456;"""
-
-    val readStatementWithWhereConjunction: Read = Read(
+    val readStatementWithWhereConjunction = Read(
       "Users",
       Seq(
         Column("id"),
@@ -109,10 +86,7 @@ package object database {
       )
     )
 
-    val postgresSelectStringWithWhereConjunction: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE (Users.id = 123456) AND (Users.expiry <= 2);"""
-
-    val readStatementWithWhereDisjunction: Read = Read(
+    val readStatementWithWhereDisjunction = Read(
       "Users",
       Seq(
         Column("id"),
@@ -131,10 +105,7 @@ package object database {
       )
     )
 
-    val postgresSelectStringWithWhereDisjunction: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE (Users.id <> 123456) OR (Users.expiry > 2);"""
-
-    val readStatementWithWhereInverse: Read = Read(
+    val readStatementWithWhereInverse = Read(
       "Users",
       Seq(
         Column("id"),
@@ -152,10 +123,7 @@ package object database {
       )
     )
 
-    val postgresSelectStringWithWhereInverse: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE NOT (Users.id < 123456);"""
-
-    val readStatementComplex: Read = Read(
+    val readStatementComplex = Read(
       "Users",
       Seq(
         Column("id"),
@@ -180,10 +148,7 @@ package object database {
       )
     )
 
-    val postgresSelectStringComplex: String =
-      """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE ((isStudent IS NULL) OR (Users.id >= 1)) AND ((isStudent IS NOT NULL) OR (NOT (Users.expiry < TIMESTAMP '2020-02-03 00:00:00+00')));"""
-
-    val insertStatement: Insert = Insert(
+    val insertStatement = Insert(
       "Users",
       Seq(
         Column("id"),
@@ -196,11 +161,27 @@ package object database {
       )
     )
 
-    val postgresInsertString: String =
-      """INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry)
-        |VALUES ($1, $2, $3, $4, $5, $6, $7);""".stripMargin
+    val deleteStatement = Delete(
+      "Users"
+    )
 
-    val updateStatement: Update = Update(
+    val deleteStatementWithWhere = Delete(
+      "Users",
+      Some(
+        Comparison("Users.id", Equal, "123456")
+      )
+    )
+
+    val dropStatement = Drop(
+      "Users",
+      ifExists = false
+    )
+
+    val dropStatementIfExists = Drop(
+      "Users"
+    )
+
+    val updateStatement = Update(
       "Users",
       Seq(
         Assignment(Column("bankBalance"), Value("123.456")),
@@ -208,10 +189,7 @@ package object database {
       )
     )
 
-    val postgresUpdateString: String =
-      """UPDATE Users SET bankBalance = 123.456, name = 'Will';"""
-
-    val updateStatementWithWhere: Update = Update(
+    val updateStatementWithWhere = Update(
       "Users",
       Seq(
         Assignment(Column("bankBalance"), Value("123.456")),
@@ -222,39 +200,25 @@ package object database {
       )
     )
 
-    val postgresUpdateStringWithWhere: String =
-      """UPDATE Users SET bankBalance = 123.456, name = 'Will' WHERE Users.id = 123456;"""
-
-    val deleteStatement: Delete = Delete(
-      "Users"
+    val insertDataA: Seq[PreparedVariable] = Seq(
+      PreparedVariable.IntVariable(3),
+      PreparedVariable.FloatVariable(100.1f),
+      PreparedVariable.StringVariable("John Smith"),
+      PreparedVariable.BoolVariable(true),
+      PreparedVariable.DateVariable(Date.valueOf("1998-03-05")),
+      PreparedVariable.TimeVariable(Time.valueOf("12:00:00")),
+      PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2020-01-01 00:00:00.0"))
     )
 
-    val postgresDeleteString: String =
-      """DELETE FROM Users;"""
-
-    val deleteStatementWithWhere: Delete = Delete(
-      "Users",
-      Some(
-        Comparison("Users.id", Equal, "123456")
-      )
+    val insertDataB: Seq[PreparedVariable] = Seq(
+      PreparedVariable.IntVariable(123456),
+      PreparedVariable.FloatVariable(23.42f),
+      PreparedVariable.StringVariable("Jane Doe"),
+      PreparedVariable.BoolVariable(false),
+      PreparedVariable.DateVariable(Date.valueOf("1998-03-05")),
+      PreparedVariable.TimeVariable(Time.valueOf("12:00:00")),
+      PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2019-02-03 02:23:50.0"))
     )
 
-    val postgresDeleteStringWithWhere: String =
-      """DELETE FROM Users WHERE Users.id = 123456;"""
-
-    val dropStatement: Drop = Drop(
-      "Users",
-      ifExists = false
-    )
-
-    val postgresDropString: String =
-      """DROP TABLE Users;"""
-
-    val dropStatementIfExists: Drop = Drop(
-      "Users"
-    )
-
-    val postgresDropStringIfExists: String =
-      """DROP TABLE Users IF EXISTS;"""
   }
 }

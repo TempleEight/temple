@@ -12,7 +12,7 @@ import temple.utils.StringUtils._
 import scala.util.chaining._
 
 /** Implementation of [[DatabaseGenerator]] for generating PostgreSQL */
-object PostgresGenerator extends DatabaseGenerator {
+object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
 
   /** Given an expression, parse it into the Postgres format */
   private def generateExpression(expression: Expression): String =
@@ -82,8 +82,19 @@ object PostgresGenerator extends DatabaseGenerator {
     (column.name +: generateColumnType(column.colType) +: columnConstraints).mkString(" ")
   }
 
+  /** Given the current PostgresContext, generate the prepared statement placeholders for each column */
+  private def generatePreparedValues(columns: Seq[Any])(implicit context: PostgresContext): String =
+    (1 to columns.length)
+      .map(i =>
+        context.preparedType match {
+          case PreparedType.DollarNumbers => s"$$$i"
+          case PreparedType.QuestionMarks => "?"
+        }
+      )
+      .mkString(", ")
+
   /** Given a statement, parse it into a valid PostgreSQL statement */
-  override def generate(statement: Statement): String =
+  override def generate(statement: Statement)(implicit context: PostgresContext): String =
     statement match {
       case Create(tableName, columns) =>
         val stringColumns =
@@ -98,7 +109,7 @@ object PostgresGenerator extends DatabaseGenerator {
         (s"SELECT $stringColumns FROM $tableName" +: stringConditions).mkString("", " ", ";")
       case Insert(tableName, columns) =>
         val stringColumns = columns.map(_.name).mkString(", ")
-        val values        = (1 to columns.length).map(i => s"$$$i").mkString(", ")
+        val values        = generatePreparedValues(columns)
         s"INSERT INTO $tableName ($stringColumns)\nVALUES ($values);"
       case Update(tableName, assignments, conditions) =>
         val stringAssignments = assignments.map(generateAssignment).mkString(", ")

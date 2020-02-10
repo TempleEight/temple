@@ -51,7 +51,7 @@ object Syntax {
       override def toString: String = s"$key: $dataType${annotations.map(" " + _).mkString};"
     }
 
-    case class Metadata(metaKey: String, args: Args) extends Entry("metadata") {
+    case class Metadata(metaKey: String, args: Args = Args()) extends Entry("metadata") {
       override def toString: String = s"#$metaKey ($args);"
     }
   }
