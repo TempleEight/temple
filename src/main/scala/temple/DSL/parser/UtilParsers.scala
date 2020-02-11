@@ -15,7 +15,7 @@ trait UtilParsers extends RegexParsers {
     * @param q0 The parser marking the end of the sequence. Use `guard` to avoid consuming this input
     * @return A parser that returns a list of the successful parses of `p0`
     */
-  def repUntil[T](p0: => Parser[T], q0: => Parser[Any] = ""): Parser[Seq[T]] = Parser { in =>
+  protected def repUntil[T](p0: => Parser[T], q0: => Parser[Any] = ""): Parser[Seq[T]] = Parser { in =>
     lazy val p = p0
     lazy val q = q0
     val elems  = new ListBuffer[T]
@@ -45,5 +45,5 @@ trait UtilParsers extends RegexParsers {
     * @param p0 The parser that is repeated
     * @return A parser that returns a list of the successful parses of `p0`
     */
-  def repAll[T](p0: => Parser[T]): Parser[Seq[T]] = repUntil(p0, "$".r)
+  protected def repAll[T](p0: => Parser[T]): Parser[Seq[T]] = repUntil(p0, "$".r)
 }
