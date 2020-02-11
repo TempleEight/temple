@@ -159,6 +159,7 @@ object Analyser {
 
   /** A parser of Metadata items that can occur in project blocks */
   private val parseProjectMetadata = new MetadataParser[ProjectMetadata] {
+    registerKeyword("language", TokenArgType)(Language.parse(_))
     registerKeyword("database", TokenArgType)(Database.parse(_))
     registerKeyword("provider", TokenArgType)(Provider.parse(_))
   }
