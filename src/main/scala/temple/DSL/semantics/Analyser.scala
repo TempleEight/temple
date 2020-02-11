@@ -60,6 +60,13 @@ object Analyser {
     ArgMap(map.toMap)
   }
 
+  /**
+    * Parse the type of an attribute from a raw AST to a meaningful data type
+    * @param dataType The raw AST entry, consisting of a type and optionally some arguments (both positional and named):
+    *                 `bool`, `int(max: 100)`, `string(20)`.
+    * @param keyNameContext Where this attribute is tagged
+    * @return A parsed attribute type
+    */
   // TODO: is this too messy?
   def parseAttributeType(dataType: syntax.AttributeType)(implicit keyNameContext: KeyName): AttributeType = {
     val syntax.AttributeType(typeName, args) = dataType
