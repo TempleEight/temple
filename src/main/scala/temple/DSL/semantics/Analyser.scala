@@ -197,20 +197,18 @@ object Analyser {
     ServiceBlock(attributes.to(ListMap), metadatas.toSeq, structs.to(ListMap))
   }
 
-  // TODO: these methods are very similar, can they be merged?
+  private def parseMetadataBlock[T](entries: Seq[Entry], f: MetadataParser[T])(implicit context: BlockContext): Seq[T] =
+    entries map {
+      case Entry.Metadata(metaKey, args) => f(metaKey, args)
+      case otherEntry =>
+        fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
+    }
 
-  private def parseProjectBlock(entries: Seq[Entry])(implicit context: BlockContext): ProjectBlock = entries map {
-    case Entry.Metadata(metaKey, args) => parseProjectMetadata(metaKey, args)
-    case otherEntry                    =>
-      // TODO: should this hardcode ${context.tag} as Project? Can we get a link to the relevant part of the docs
-      fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
-  }
+  private def parseProjectBlock(entries: Seq[Entry])(implicit context: BlockContext): ProjectBlock =
+    parseMetadataBlock(entries, parseProjectMetadata)
 
-  private def parseTargetBlock(entries: Seq[Entry])(implicit context: BlockContext): TargetBlock = entries map {
-    case Entry.Metadata(metaKey, args) => parseTargetMetadata(metaKey, args)
-    case otherEntry =>
-      fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
-  }
+  private def parseTargetBlock(entries: Seq[Entry])(implicit context: BlockContext): TargetBlock =
+    parseMetadataBlock(entries, parseTargetMetadata)
 
   private def parseStructBlock(entries: Seq[Entry])(implicit context: BlockContext): StructBlock = {
     val attributes = mutable.LinkedHashMap[String, Attribute]()
@@ -218,7 +216,7 @@ object Analyser {
       case Entry.Attribute(key, dataType, annotations) =>
         attributes.safeInsert(key -> parseAttribute(dataType, annotations)(KeyName(key)))
       case otherEntry =>
-        // TODO: should this hardcode ${context.tag} as Project? Can we get a link to the relevant part of the docs
+        // TODO: can we get a link to the relevant part of the docs
         fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
     }
     StructBlock(attributes.toMap)
