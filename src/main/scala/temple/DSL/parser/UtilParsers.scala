@@ -30,7 +30,6 @@ trait UtilParsers extends RegexParsers {
           case _: Failure       => Failure(str, input)        // If both fail, propagate `p0`’s failure.
           case e: Error         => e                          // still have to propagate `q0`’s parser error
         }
-      case _ => Success(elems.toSeq, in0)
     }
 
     applyP(in)
