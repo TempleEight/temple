@@ -4,8 +4,8 @@ import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.ComparisonOperator._
 import temple.generate.database.ast.Condition._
-import temple.generate.database.ast.Statement._
 import temple.generate.database.ast.Expression._
+import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
 import temple.utils.StringUtils._
 
@@ -89,7 +89,7 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
         context.preparedType match {
           case PreparedType.DollarNumbers => s"$$$i"
           case PreparedType.QuestionMarks => "?"
-        }
+        },
       )
       .mkString(", ")
 

@@ -1,7 +1,8 @@
 package temple
 
-import scala.collection.{Seq => CSeq}
 import org.rogach.scallop.{ScallopConf, ScallopOption, Subcommand}
+
+import scala.collection.{Seq => CSeq}
 
 /** TempleConfig produces the application configuration from command line arguments */
 class TempleConfig(arguments: CSeq[String]) extends ScallopConf(arguments) {

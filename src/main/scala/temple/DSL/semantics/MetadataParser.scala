@@ -1,8 +1,7 @@
 package temple.DSL.semantics
 
 import temple.DSL.semantics.Analyser.parseParameters
-import temple.DSL.semantics.ErrorHandling.fail
-import temple.DSL.semantics.ErrorHandling.{BlockContext, Context}
+import temple.DSL.semantics.ErrorHandling.{BlockContext, Context, fail}
 import temple.DSL.syntax.Args
 import temple.utils.MapUtils._
 
@@ -52,7 +51,7 @@ class MetadataParser[T <: Metadata]() {
     */
   // TODO: do we need to add support for multiple arguments in future?
   final protected def registerKeyword[A](metaKey: String, argKey: String, argType: ArgType[A])(
-    constructor: A => T
+    constructor: A => T,
   ): Unit =
     matchers += (metaKey -> { args =>
         implicit val context: Context = Context(metaKey)

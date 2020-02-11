@@ -8,7 +8,7 @@ case class Templefile(
   projectName: String,
   projectBlock: ProjectBlock,
   targets: Map[String, TargetBlock],
-  services: Map[String, ServiceBlock]
+  services: Map[String, ServiceBlock],
 )
 
 object Templefile {

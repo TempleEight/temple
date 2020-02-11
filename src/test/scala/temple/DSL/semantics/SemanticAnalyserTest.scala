@@ -1,11 +1,11 @@
 package temple.DSL.semantics
 
 import org.scalatest.{FlatSpec, Matchers}
+import temple.DSL.semantics.Analyser.parseSemantics
+import temple.DSL.semantics.AttributeType._
 import temple.DSL.syntax
 import temple.DSL.syntax.Arg._
 import temple.DSL.syntax.{Args, DSLRootItem, Entry}
-import temple.DSL.semantics.Analyser.parseSemantics
-import temple.DSL.semantics.AttributeType._
 
 class SemanticAnalyserTest extends FlatSpec with Matchers {
 
@@ -17,7 +17,7 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
 
   private def mkTemplefileASTWithUserService(entries: Entry*): syntax.Templefile = Seq(
     DSLRootItem("test", "project", Nil),
-    DSLRootItem("User", "service", entries)
+    DSLRootItem("User", "service", entries),
   )
 
   private def mkTemplefileSemanticsWithUserService(serviceBlock: ServiceBlock): Templefile =
@@ -34,10 +34,10 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
   it should "parse an AST containing a basic user service" in {
     parseSemantics(
       mkTemplefileASTWithUserService(
-        Entry.Attribute("index", syntax.AttributeType("int"))
-      )
+        Entry.Attribute("index", syntax.AttributeType("int")),
+      ),
     ) shouldEqual mkTemplefileSemanticsWithUserService(
-      ServiceBlock(Map("index" -> Attribute(IntType())))
+      ServiceBlock(Map("index" -> Attribute(IntType()))),
     )
   }
 
@@ -51,8 +51,8 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
         Entry.Attribute("e", syntax.AttributeType("time")),
         Entry.Attribute("f", syntax.AttributeType("datetime")),
         Entry.Attribute("g", syntax.AttributeType("data")),
-        Entry.Attribute("h", syntax.AttributeType("string"))
-      )
+        Entry.Attribute("h", syntax.AttributeType("string")),
+      ),
     ) shouldEqual mkTemplefileSemanticsWithUserService(
       ServiceBlock(
         Map(
@@ -63,9 +63,9 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
           "e" -> Attribute(TimeType),
           "f" -> Attribute(DateTimeType),
           "g" -> Attribute(BlobType()),
-          "h" -> Attribute(StringType())
-        )
-      )
+          "h" -> Attribute(StringType()),
+        ),
+      ),
     )
   }
 
@@ -73,32 +73,32 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
     noException should be thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
-          Entry.Attribute("a", syntax.AttributeType("bool"))
-        )
+          Entry.Attribute("a", syntax.AttributeType("bool")),
+        ),
       )
     }
 
     a[SemanticParsingException] should be thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
-          Entry.Attribute("a", syntax.AttributeType("bool", Args(Seq(IntArg(12)))))
-        )
+          Entry.Attribute("a", syntax.AttributeType("bool", Args(Seq(IntArg(12))))),
+        ),
       )
     }
 
     noException should be thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
-          Entry.Attribute("a", syntax.AttributeType("int", Args(Seq(IntArg(12), IntArg(12)))))
-        )
+          Entry.Attribute("a", syntax.AttributeType("int", Args(Seq(IntArg(12), IntArg(12))))),
+        ),
       )
     }
 
     a[SemanticParsingException] should be thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
-          Entry.Attribute("a", syntax.AttributeType("intArgs", Args(Seq(IntArg(12), IntArg(12), IntArg(12)))))
-        )
+          Entry.Attribute("a", syntax.AttributeType("intArgs", Args(Seq(IntArg(12), IntArg(12), IntArg(12))))),
+        ),
       )
     }
   }
@@ -108,8 +108,8 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute("a", syntax.AttributeType("int")),
-          Entry.Attribute("b", syntax.AttributeType("float"))
-        )
+          Entry.Attribute("b", syntax.AttributeType("float")),
+        ),
       )
     }
 
@@ -117,8 +117,8 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute("a", syntax.AttributeType("int")),
-          Entry.Attribute("a", syntax.AttributeType("float"))
-        )
+          Entry.Attribute("a", syntax.AttributeType("float")),
+        ),
       )
     }
 
@@ -130,10 +130,10 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
             "struct",
             Seq(
               Entry.Attribute("a", syntax.AttributeType("int")),
-              Entry.Attribute("b", syntax.AttributeType("float"))
-            )
-          )
-        )
+              Entry.Attribute("b", syntax.AttributeType("float")),
+            ),
+          ),
+        ),
       )
     }
 
@@ -145,10 +145,10 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
             "struct",
             Seq(
               Entry.Attribute("a", syntax.AttributeType("int")),
-              Entry.Attribute("a", syntax.AttributeType("float"))
-            )
-          )
-        )
+              Entry.Attribute("a", syntax.AttributeType("float")),
+            ),
+          ),
+        ),
       )
     }
   }
@@ -157,8 +157,8 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
     a[SemanticParsingException] should be thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
-          DSLRootItem("Neighbour", "badItem", Seq())
-        )
+          DSLRootItem("Neighbour", "badItem", Seq()),
+        ),
       )
     }
 
@@ -169,10 +169,10 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
             "Neighbour",
             "struct",
             Seq(
-              Entry.Metadata("language", Args(Seq(TokenArg("go"))))
-            )
-          )
-        )
+              Entry.Metadata("language", Args(Seq(TokenArg("go")))),
+            ),
+          ),
+        ),
       )
     }
   }
@@ -184,8 +184,8 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
           Entry.Attribute("a", syntax.AttributeType("int"), Seq(syntax.Annotation("unique"))),
           Entry.Attribute("b", syntax.AttributeType("float"), Seq(syntax.Annotation("serverSet"))),
           Entry.Attribute("c", syntax.AttributeType("float"), Seq(syntax.Annotation("client"))),
-          Entry.Attribute("d", syntax.AttributeType("float"), Seq(syntax.Annotation("server")))
-        )
+          Entry.Attribute("d", syntax.AttributeType("float"), Seq(syntax.Annotation("server"))),
+        ),
       )
     }
 
@@ -195,9 +195,9 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
           Entry.Attribute(
             "a",
             syntax.AttributeType("int"),
-            Seq(syntax.Annotation("unique"), syntax.Annotation("server"))
-          )
-        )
+            Seq(syntax.Annotation("unique"), syntax.Annotation("server")),
+          ),
+        ),
       )
     }
   }
@@ -209,9 +209,9 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
           Entry.Attribute(
             "a",
             syntax.AttributeType("int"),
-            Seq(syntax.Annotation("client"), syntax.Annotation("server"))
-          )
-        )
+            Seq(syntax.Annotation("client"), syntax.Annotation("server")),
+          ),
+        ),
       )
     }
   }
@@ -220,8 +220,8 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
     a[SemanticParsingException] should be thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
-          Entry.Attribute("a", syntax.AttributeType("int"), Seq(syntax.Annotation("something")))
-        )
+          Entry.Attribute("a", syntax.AttributeType("int"), Seq(syntax.Annotation("something"))),
+        ),
       )
     }
   }
@@ -236,11 +236,11 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
             Seq(
               Entry.Attribute("id", syntax.AttributeType("int")),
               Entry.Metadata("uses", Args(kwargs = Seq("services" -> ListArg(Seq(TokenArg("Box")))))),
-              Entry.Metadata("auth", Args(kwargs = Seq("login"    -> TokenArg("id"))))
-            )
+              Entry.Metadata("auth", Args(kwargs = Seq("login"    -> TokenArg("id")))),
+            ),
           ),
-          DSLRootItem("Box", "service", Seq())
-        )
+          DSLRootItem("Box", "service", Seq()),
+        ),
       )
     }
   }
@@ -250,24 +250,24 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute("id", syntax.AttributeType("int")),
-          Entry.Metadata("uses", Args(kwargs = Seq("badKey" -> ListArg(Seq()))))
-        )
+          Entry.Metadata("uses", Args(kwargs = Seq("badKey" -> ListArg(Seq())))),
+        ),
       )
     }
 
     a[SemanticParsingException] should be thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
-          Entry.Metadata("uses", Args(kwargs = Seq("services" -> IntArg(12))))
-        )
+          Entry.Metadata("uses", Args(kwargs = Seq("services" -> IntArg(12)))),
+        ),
       )
     }
 
     a[SemanticParsingException] should be thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
-          Entry.Metadata("uses", Args(kwargs = Seq("services" -> NoArg)))
-        )
+          Entry.Metadata("uses", Args(kwargs = Seq("services" -> NoArg))),
+        ),
       )
     }
 
@@ -275,8 +275,8 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute("id", syntax.AttributeType("int")),
-          Entry.Metadata("badMetadata")
-        )
+          Entry.Metadata("badMetadata"),
+        ),
       )
     }
   }
@@ -316,19 +316,19 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
   it should "parse target blocks correctly" in {
     noException should be thrownBy {
       parseSemantics(
-        mkTemplefileAST(DSLRootItem("mobile", "target", Seq(Entry.Metadata("language", Args(Seq(TokenArg("swift")))))))
+        mkTemplefileAST(DSLRootItem("mobile", "target", Seq(Entry.Metadata("language", Args(Seq(TokenArg("swift"))))))),
       )
     }
 
     a[SemanticParsingException] should be thrownBy {
       parseSemantics(
-        mkTemplefileAST(DSLRootItem("mobile", "target", Seq(Entry.Metadata("badKey", Args(Seq(TokenArg("swift")))))))
+        mkTemplefileAST(DSLRootItem("mobile", "target", Seq(Entry.Metadata("badKey", Args(Seq(TokenArg("swift"))))))),
       )
     }
 
     a[SemanticParsingException] should be thrownBy {
       parseSemantics(
-        mkTemplefileAST(DSLRootItem("mobile", "target", Seq(Entry.Attribute("field", syntax.AttributeType("int")))))
+        mkTemplefileAST(DSLRootItem("mobile", "target", Seq(Entry.Attribute("field", syntax.AttributeType("int"))))),
       )
     }
   }

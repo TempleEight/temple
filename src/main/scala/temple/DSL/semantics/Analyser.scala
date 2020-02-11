@@ -1,7 +1,7 @@
 package temple.DSL.semantics
 
 import temple.DSL.semantics.ArgType._
-import temple.DSL.semantics.ErrorHandling.{BlockContext, Context, KeyName, assertNoParameters, fail, failHandler, failThrower}
+import temple.DSL.semantics.ErrorHandling.{BlockContext, Context, KeyName, assertNoParameters, fail, failThrower}
 import temple.DSL.semantics.Metadata._
 import temple.DSL.semantics.Templefile._
 import temple.DSL.syntax
@@ -22,7 +22,7 @@ object Analyser {
     * @throws SemanticParsingException when too many, too few, duplicate or unknown arguments are supplied
     */
   private[semantics] def parseParameters(
-    specs: (String, Option[syntax.Arg])*
+    specs: (String, Option[syntax.Arg])*,
   )(args: Args)(implicit context: Context): ArgMap = {
     // A ListMap is an insertion-ordered immutable map
     val specsMap = specs.to(ListMap)
@@ -53,7 +53,7 @@ object Analyser {
         // If there is no default value, throw an error.
         map.getOrElseUpdate(
           name,
-          default.getOrElse { fail(s"Required argument $name not provided for $context") }
+          default.getOrElse { fail(s"Required argument $name not provided for $context") },
         )
     }
 
@@ -77,37 +77,37 @@ object Analyser {
         val argMap = parseParameters(
           "max"       -> Some(Arg.NoArg),
           "min"       -> Some(Arg.NoArg),
-          "precision" -> Some(Arg.IntArg(4))
+          "precision" -> Some(Arg.IntArg(4)),
         )(args)
         AttributeType.IntType(
           argMap.getOptionArg("min", IntArgType),
           argMap.getOptionArg("max", IntArgType),
-          argMap.getArg("precision", IntArgType).toShort
+          argMap.getArg("precision", IntArgType).toShort,
         )
       case "string" =>
         val argMap = parseParameters(
           "maxLength" -> Some(Arg.NoArg),
-          "minLength" -> Some(Arg.IntArg(0))
+          "minLength" -> Some(Arg.IntArg(0)),
         )(args)
         AttributeType.StringType(
           argMap.getOptionArg("maxLength", IntArgType),
-          argMap.getArg("minLength", IntArgType).toInt
+          argMap.getArg("minLength", IntArgType).toInt,
         )
       case "float" =>
         val argMap = parseParameters(
           "max"       -> Some(Arg.FloatingArg(Double.MaxValue)),
           "min"       -> Some(Arg.FloatingArg(Double.MinValue)),
-          "precision" -> Some(Arg.IntArg(8))
+          "precision" -> Some(Arg.IntArg(8)),
         )(args)
         AttributeType.FloatType(
           argMap.getArg("max", FloatingArgType),
           argMap.getArg("min", FloatingArgType),
-          argMap.getArg("precision", FloatingArgType).toShort
+          argMap.getArg("precision", FloatingArgType).toShort,
         )
       case "data" =>
         val argMap = parseParameters("maxSize" -> Some(Arg.NoArg))(args)
         AttributeType.BlobType(
-          argMap.getOptionArg("maxSize", IntArgType)
+          argMap.getOptionArg("maxSize", IntArgType),
         )
       case "date" =>
         assertNoParameters(args)
@@ -127,7 +127,7 @@ object Analyser {
 
   def parseAttribute(
     dataType: syntax.AttributeType,
-    annotations: Seq[syntax.Annotation]
+    annotations: Seq[syntax.Annotation],
   )(implicit keyNameContext: KeyName): Attribute = {
     var accessAnnotation: Option[Annotation.AccessAnnotation] = None
 
@@ -135,7 +135,7 @@ object Analyser {
       accessAnnotation.fold { accessAnnotation = Some(annotation) } { existingAnnotation =>
         fail(
           s"Two scope annotations found for ${keyNameContext.keyName}: " +
-          s"${annotation.render} is incompatible with ${existingAnnotation.render}"
+          s"${annotation.render} is incompatible with ${existingAnnotation.render}",
         )
       }
     val valueAnnotations = mutable.HashSet[Annotation.ValueAnnotation]()
@@ -206,7 +206,7 @@ object Analyser {
 
   private def parseMetadataBlock[T <: Metadata](
     entries: Seq[Entry],
-    f: MetadataParser[T]
+    f: MetadataParser[T],
   )(implicit context: BlockContext): Seq[T] =
     entries map {
       case Entry.Metadata(metaKey, args) => f(metaKey, args)
