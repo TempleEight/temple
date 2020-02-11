@@ -6,15 +6,15 @@ import temple.collection.enumeration._
 sealed trait Metadata
 
 object Metadata {
-  sealed trait TargetMetadata            extends Metadata
-  sealed trait ServiceMetadata           extends Metadata
-  sealed trait ProjectMetadata           extends Metadata
-  sealed trait ProjectAndServiceMetadata extends ServiceMetadata with ProjectMetadata
-  sealed trait GlobalMetadata            extends TargetMetadata with ProjectAndServiceMetadata
+  sealed trait TargetMetadata  extends Metadata
+  sealed trait ServiceMetadata extends Metadata
+  sealed trait ProjectMetadata extends Metadata
 
   sealed abstract class Language private (name: String, aliases: String*)
       extends EnumEntry(name, aliases)
-      with GlobalMetadata
+      with TargetMetadata
+      with ServiceMetadata
+      with ProjectMetadata
 
   object Language extends Enum[Language] {
     val values: IndexedSeq[Language] = findValues
@@ -34,7 +34,8 @@ object Metadata {
 
   sealed abstract class Database private (name: String, aliases: String*)
       extends EnumEntry(name, aliases)
-      with ProjectAndServiceMetadata
+      with ProjectMetadata
+      with ServiceMetadata
 
   object Database extends Enum[Database] {
     override def values: IndexedSeq[Database] = findValues
