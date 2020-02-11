@@ -4,7 +4,7 @@ package temple.DSL.semantics
 trait AttributeType
 
 object AttributeType {
-  case class ForeignKey()  extends AttributeType
+  case object ForeignKey   extends AttributeType
   case object BoolType     extends AttributeType
   case object DateType     extends AttributeType
   case object DateTimeType extends AttributeType

@@ -67,7 +67,6 @@ object Analyser {
     * @param keyNameContext Where this attribute is tagged
     * @return A parsed attribute type
     */
-  // TODO: is this too messy?
   def parseAttributeType(dataType: syntax.AttributeType)(implicit keyNameContext: KeyName): AttributeType = {
     val syntax.AttributeType(typeName, args) = dataType
     implicit val context: Context            = Context(s"$typeName@$keyNameContext")
