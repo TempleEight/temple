@@ -2,8 +2,8 @@ package temple.DSL.parser
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.DSLProcessor
-import temple.DSL.syntax.{Arg, Args, AttributeType, DSLRootItem}
 import temple.DSL.syntax.Entry.{Attribute, Metadata}
+import temple.DSL.syntax.{Arg, Args, AttributeType, DSLRootItem}
 import temple.utils.FileUtils._
 import temple.utils.MonadUtils.FromEither
 
@@ -38,15 +38,15 @@ class DSLParserTest extends FlatSpec with Matchers {
           Attribute("yeets", AttributeType("bool")),
           Attribute(
             "currentBankBalance",
-            AttributeType("float", Args(kwargs = Seq("min" -> Arg.FloatingArg(0), "precision" -> Arg.IntArg(2))))
+            AttributeType("float", Args(kwargs = Seq("min" -> Arg.FloatingArg(0), "precision" -> Arg.IntArg(2)))),
           ),
           Attribute("birthDate", AttributeType("date")),
           Attribute("breakfastTime", AttributeType("time")),
           DSLRootItem("Fred", "struct", Seq(Attribute("field", AttributeType("string")))),
           Metadata("auth", Args(kwargs = Seq("login" -> Arg.TokenArg("username")))),
-          Metadata("uses", Args(Seq(Arg.ListArg(Seq(Arg.TokenArg("Booking"), Arg.TokenArg("Events"))))))
-        )
-      )
+          Metadata("uses", Args(Seq(Arg.ListArg(Seq(Arg.TokenArg("Booking"), Arg.TokenArg("Events")))))),
+        ),
+      ),
     )
   }
 

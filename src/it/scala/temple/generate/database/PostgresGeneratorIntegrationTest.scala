@@ -33,7 +33,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     val createStatement = PostgresGenerator.generate(TestData.createStatement)
     executeWithoutResults(createStatement)
     val result = executeWithResults(
-      "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users');"
+      "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users');",
     ).getOrElse(fail("Database connection could not be established"))
     result.next()
     result.getBoolean("exists") shouldBe true
@@ -67,13 +67,13 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
   "Users table" should "be dropped successfully" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     var result = executeWithResults(
-      "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users');"
+      "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users');",
     ).getOrElse(fail("Database connection could not be established"))
     result.next()
     result.getBoolean("exists") shouldBe true
     executeWithoutResults(PostgresGenerator.generate(TestData.dropStatement))
     result = executeWithResults(
-      "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users');"
+      "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users');",
     ).getOrElse(fail("Database connection could not be established"))
     result.next()
     result.getBoolean("exists") shouldBe false

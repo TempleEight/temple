@@ -1,7 +1,6 @@
 package temple
 
 import org.scalatest.{FlatSpec, Matchers}
-import org.rogach.scallop.ScallopOption
 
 class TempleConfigTest extends FlatSpec with Matchers {
   "Generate" should "not correctly parse without a filename" in {
