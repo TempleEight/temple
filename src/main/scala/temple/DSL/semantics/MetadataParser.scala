@@ -13,31 +13,11 @@ import scala.collection.mutable
   * This is needed because each call to [[temple.DSL.semantics.MetadataParser#registerKeyword]] is effectively
   * dependently typed, so it cannot be encoded into a tuple, but instead must immediately be bundled into a function
   *
-  * @tparam T the subtype of metadata that we are specifically parsing. The “inheritance” (built up with
-  *           `inherit from myMetadataParser`) runs in the opposite direction to the inheritance of classes: each
-  *           parser extends parsers of a more specific type.
+  * @tparam T the subtype of metadata that we are specifically parsing.
   */
 class MetadataParser[T <: Metadata]() {
   private type Matcher = Args => T
   private var matchers = mutable.LinkedHashMap[String, Matcher]()
-
-  /**
-    * Use a different parser as a fallback if none of the parsers defined here match
-    * @param parser the alternative parser to use as a fallback
-    * @tparam A the type of metadata parsed by `parser`, which must be equal to/a subtype of this parser’s metadata
-    *           type
-    */
-  def inheritFrom[A <: T](parser: MetadataParser[A]): Unit =
-    // insert, or no-op if they already exist as inheritance does not overwrite newly added values
-    parser.matchers.foreach(matchers.safeInsert(_, ()))
-
-  /** Used for a fluent API style: `inherit from myMetadataParser` as an alternative to
-    * `inheritFrom(myMetadataParser)` */
-  final protected object inherit {
-
-    /** An alias of [[MetadataParser#inheritFrom]], for a fluent API */
-    def from[A <: T](parser: MetadataParser[A]): Unit = inheritFrom(parser)
-  }
 
   /**
     * Add a handler for a new type of metadata

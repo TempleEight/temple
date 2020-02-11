@@ -149,33 +149,24 @@ object Analyser {
     Attribute(parseAttributeType(dataType), accessAnnotation, valueAnnotations.toSet)
   }
 
-  /** A parser of Metadata items that can occur in all the blocks */
-  private val parseGlobalMetadata = new MetadataParser[GlobalMetadata] {
-    registerKeyword[String]("language", TokenArgType)(Language.parse(_))
-  }
-
-  /** A parser of Metadata items that can occur in project and service blocks */
-  private val parseProjectAndServiceMetadata = new MetadataParser[ProjectAndServiceMetadata] {
-    inherit from parseGlobalMetadata
-    registerKeyword("database", TokenArgType)(Database.parse(_))
-  }
-
   /** A parser of Metadata items that can occur in service blocks */
   private val parseServiceMetadata = new MetadataParser[ServiceMetadata] {
-    inherit from parseProjectAndServiceMetadata
+    registerKeyword("language", TokenArgType)(Language.parse(_))
+    registerKeyword("database", TokenArgType)(Database.parse(_))
     registerKeyword("auth", "login", TokenArgType)(ServiceAuth)
     registerKeyword("uses", "services", ListArgType(TokenArgType))(Uses)
   }
 
   /** A parser of Metadata items that can occur in project blocks */
   private val parseProjectMetadata = new MetadataParser[ProjectMetadata] {
-    inherit from parseProjectAndServiceMetadata
+    registerKeyword("language", TokenArgType)(Language.parse(_))
+    registerKeyword("database", TokenArgType)(Database.parse(_))
     registerKeyword("provider", TokenArgType)(Provider.parse(_))
   }
 
   /** A parser of Metadata items that can occur in target blocks */
   private val parseTargetMetadata = new MetadataParser[TargetMetadata] {
-    inherit from parseGlobalMetadata
+    registerKeyword("language", TokenArgType)(Language.parse(_))
     registerKeyword("auth", "services", ListArgType(TokenArgType))(TargetAuth)
   }
 
