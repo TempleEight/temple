@@ -1,7 +1,7 @@
 package temple.utils
 
 import org.scalatest.{FlatSpec, Matchers}
-import StringUtils.indent
+import temple.utils.StringUtils.indent
 
 class StringUtilsTest extends FlatSpec with Matchers {
   "indent" should "add spaces to an empty string" in {

@@ -22,8 +22,8 @@ object TestData {
       ColumnDef("isStudent", BoolCol),
       ColumnDef("dateOfBirth", DateCol),
       ColumnDef("timeOfDay", TimeCol),
-      ColumnDef("expiry", DateTimeTzCol)
-    )
+      ColumnDef("expiry", DateTimeTzCol),
+    ),
   )
 
   val createStatementWithConstraints = Create(
@@ -32,8 +32,8 @@ object TestData {
       ColumnDef("itemID", IntCol, Seq(NonNull, PrimaryKey)),
       ColumnDef("createdAt", DateTimeTzCol, Seq(Unique)),
       ColumnDef("bookingTime", TimeCol, Seq(References("Bookings", "bookingTime"))),
-      ColumnDef("value", IntCol, Seq(Check("value", GreaterEqual, "1"), Null))
-    )
+      ColumnDef("value", IntCol, Seq(Check("value", GreaterEqual, "1"), Null)),
+    ),
   )
 
   val readStatement = Read(
@@ -45,8 +45,8 @@ object TestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
-    )
+      Column("expiry"),
+    ),
   )
 
   val readStatementWithWhere = Read(
@@ -58,11 +58,11 @@ object TestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
+      Column("expiry"),
     ),
     Some(
-      Comparison("Users.id", Equal, "123456")
-    )
+      Comparison("Users.id", Equal, "123456"),
+    ),
   )
 
   val readStatementWithWhereConjunction = Read(
@@ -74,14 +74,14 @@ object TestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
+      Column("expiry"),
     ),
     Some(
       Conjunction(
         Comparison("Users.id", Equal, "123456"),
-        Comparison("Users.expiry", LessEqual, "2")
-      )
-    )
+        Comparison("Users.expiry", LessEqual, "2"),
+      ),
+    ),
   )
 
   val readStatementWithWhereDisjunction = Read(
@@ -93,14 +93,14 @@ object TestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
+      Column("expiry"),
     ),
     Some(
       Disjunction(
         Comparison("Users.id", NotEqual, "123456"),
-        Comparison("Users.expiry", Greater, "2")
-      )
-    )
+        Comparison("Users.expiry", Greater, "2"),
+      ),
+    ),
   )
 
   val readStatementWithWhereInverse = Read(
@@ -112,13 +112,13 @@ object TestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
+      Column("expiry"),
     ),
     Some(
       Inverse(
-        Comparison("Users.id", Less, "123456")
-      )
-    )
+        Comparison("Users.id", Less, "123456"),
+      ),
+    ),
   )
 
   val readStatementComplex = Read(
@@ -130,20 +130,20 @@ object TestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
+      Column("expiry"),
     ),
     Some(
       Conjunction(
         Disjunction(
           IsNull(Column("isStudent")),
-          Comparison("Users.id", GreaterEqual, "1")
+          Comparison("Users.id", GreaterEqual, "1"),
         ),
         Disjunction(
           Inverse(IsNull(Column("isStudent"))),
-          Inverse(Comparison("Users.expiry", Less, "TIMESTAMP '2020-02-03 00:00:00+00'"))
-        )
-      )
-    )
+          Inverse(Comparison("Users.expiry", Less, "TIMESTAMP '2020-02-03 00:00:00+00'")),
+        ),
+      ),
+    ),
   )
 
   val insertStatement = Insert(
@@ -155,47 +155,47 @@ object TestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
-    )
+      Column("expiry"),
+    ),
   )
 
   val deleteStatement = Delete(
-    "Users"
+    "Users",
   )
 
   val deleteStatementWithWhere = Delete(
     "Users",
     Some(
-      Comparison("Users.id", Equal, "123456")
-    )
+      Comparison("Users.id", Equal, "123456"),
+    ),
   )
 
   val dropStatement = Drop(
     "Users",
-    ifExists = false
+    ifExists = false,
   )
 
   val dropStatementIfExists = Drop(
-    "Users"
+    "Users",
   )
 
   val updateStatement = Update(
     "Users",
     Seq(
       Assignment(Column("bankBalance"), Value("123.456")),
-      Assignment(Column("name"), Value("'Will'"))
-    )
+      Assignment(Column("name"), Value("'Will'")),
+    ),
   )
 
   val updateStatementWithWhere = Update(
     "Users",
     Seq(
       Assignment(Column("bankBalance"), Value("123.456")),
-      Assignment(Column("name"), Value("'Will'"))
+      Assignment(Column("name"), Value("'Will'")),
     ),
     Some(
-      Comparison("Users.id", Equal, "123456")
-    )
+      Comparison("Users.id", Equal, "123456"),
+    ),
   )
 
   val insertDataA: Seq[PreparedVariable] = Seq(
@@ -205,7 +205,7 @@ object TestData {
     PreparedVariable.BoolVariable(true),
     PreparedVariable.DateVariable(Date.valueOf("1998-03-05")),
     PreparedVariable.TimeVariable(Time.valueOf("12:00:00")),
-    PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2020-01-01 00:00:00.0"))
+    PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2020-01-01 00:00:00.0")),
   )
 
   val insertDataB: Seq[PreparedVariable] = Seq(
@@ -215,7 +215,7 @@ object TestData {
     PreparedVariable.BoolVariable(false),
     PreparedVariable.DateVariable(Date.valueOf("1998-03-05")),
     PreparedVariable.TimeVariable(Time.valueOf("12:00:00")),
-    PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2019-02-03 02:23:50.0"))
+    PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2019-02-03 02:23:50.0")),
   )
 
 }

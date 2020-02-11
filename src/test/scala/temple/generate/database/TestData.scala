@@ -20,8 +20,8 @@ object IntegrationTestData {
       ColumnDef("isStudent", BoolCol),
       ColumnDef("dateOfBirth", DateCol),
       ColumnDef("timeOfDay", TimeCol),
-      ColumnDef("expiry", DateTimeTzCol)
-    )
+      ColumnDef("expiry", DateTimeTzCol),
+    ),
   )
 
   val postgresCreateString: String =
@@ -41,8 +41,8 @@ object IntegrationTestData {
       ColumnDef("item_id", IntCol, Seq(NonNull, PrimaryKey)),
       ColumnDef("createdAt", DateTimeTzCol, Seq(Unique)),
       ColumnDef("bookingTime", TimeCol, Seq(References("Bookings", "bookingTime"))),
-      ColumnDef("value", IntCol, Seq(Check("value", GreaterEqual, "1"), Null))
-    )
+      ColumnDef("value", IntCol, Seq(Check("value", GreaterEqual, "1"), Null)),
+    ),
   )
 
   val postgresCreateStringWithConstraints: String =
@@ -62,8 +62,8 @@ object IntegrationTestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
-    )
+      Column("expiry"),
+    ),
   )
 
   val postgresSelectString: String =
@@ -78,11 +78,11 @@ object IntegrationTestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
+      Column("expiry"),
     ),
     Some(
-      Comparison("Users.id", Equal, "123456")
-    )
+      Comparison("Users.id", Equal, "123456"),
+    ),
   )
 
   val postgresSelectStringWithWhere: String =
@@ -97,14 +97,14 @@ object IntegrationTestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
+      Column("expiry"),
     ),
     Some(
       Conjunction(
         Comparison("Users.id", Equal, "123456"),
-        Comparison("Users.expiry", LessEqual, "2")
-      )
-    )
+        Comparison("Users.expiry", LessEqual, "2"),
+      ),
+    ),
   )
 
   val postgresSelectStringWithWhereConjunction: String =
@@ -119,14 +119,14 @@ object IntegrationTestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
+      Column("expiry"),
     ),
     Some(
       Disjunction(
         Comparison("Users.id", NotEqual, "123456"),
-        Comparison("Users.expiry", Greater, "2")
-      )
-    )
+        Comparison("Users.expiry", Greater, "2"),
+      ),
+    ),
   )
 
   val postgresSelectStringWithWhereDisjunction: String =
@@ -141,13 +141,13 @@ object IntegrationTestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
+      Column("expiry"),
     ),
     Some(
       Inverse(
-        Comparison("Users.id", Less, "123456")
-      )
-    )
+        Comparison("Users.id", Less, "123456"),
+      ),
+    ),
   )
 
   val postgresSelectStringWithWhereInverse: String =
@@ -162,20 +162,20 @@ object IntegrationTestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
+      Column("expiry"),
     ),
     Some(
       Conjunction(
         Disjunction(
           IsNull(Column("isStudent")),
-          Comparison("Users.id", GreaterEqual, "1")
+          Comparison("Users.id", GreaterEqual, "1"),
         ),
         Disjunction(
           Inverse(IsNull(Column("isStudent"))),
-          Inverse(Comparison("Users.expiry", Less, "TIMESTAMP '2020-02-03 00:00:00+00'"))
-        )
-      )
-    )
+          Inverse(Comparison("Users.expiry", Less, "TIMESTAMP '2020-02-03 00:00:00+00'")),
+        ),
+      ),
+    ),
   )
 
   val postgresSelectStringComplex: String =
@@ -190,8 +190,8 @@ object IntegrationTestData {
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
-      Column("expiry")
-    )
+      Column("expiry"),
+    ),
   )
 
   val postgresInsertString: String =
@@ -202,8 +202,8 @@ object IntegrationTestData {
     "Users",
     Seq(
       Assignment(Column("bankBalance"), Value("123.456")),
-      Assignment(Column("name"), Value("'Will'"))
-    )
+      Assignment(Column("name"), Value("'Will'")),
+    ),
   )
 
   val postgresUpdateString: String =
@@ -213,18 +213,18 @@ object IntegrationTestData {
     "Users",
     Seq(
       Assignment(Column("bankBalance"), Value("123.456")),
-      Assignment(Column("name"), Value("'Will'"))
+      Assignment(Column("name"), Value("'Will'")),
     ),
     Some(
-      Comparison("Users.id", Equal, "123456")
-    )
+      Comparison("Users.id", Equal, "123456"),
+    ),
   )
 
   val postgresUpdateStringWithWhere: String =
     """UPDATE Users SET bankBalance = 123.456, name = 'Will' WHERE Users.id = 123456;"""
 
   val deleteStatement: Delete = Delete(
-    "Users"
+    "Users",
   )
 
   val postgresDeleteString: String =
@@ -233,8 +233,8 @@ object IntegrationTestData {
   val deleteStatementWithWhere: Delete = Delete(
     "Users",
     Some(
-      Comparison("Users.id", Equal, "123456")
-    )
+      Comparison("Users.id", Equal, "123456"),
+    ),
   )
 
   val postgresDeleteStringWithWhere: String =
@@ -242,14 +242,14 @@ object IntegrationTestData {
 
   val dropStatement: Drop = Drop(
     "Users",
-    ifExists = false
+    ifExists = false,
   )
 
   val postgresDropString: String =
     """DROP TABLE Users;"""
 
   val dropStatementIfExists: Drop = Drop(
-    "Users"
+    "Users",
   )
 
   val postgresDropStringIfExists: String =

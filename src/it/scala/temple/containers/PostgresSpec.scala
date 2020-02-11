@@ -21,8 +21,8 @@ trait PostgresSpec extends FlatSpec with DockerTestKit with DockerPostgresServic
       DriverManager.getConnection(
         DockerPostgresService.externalUrl,
         DockerPostgresService.databaseUsername,
-        DockerPostgresService.databasePassword
-      )
+        DockerPostgresService.databasePassword,
+      ),
     ) map { conn =>
       try fn(conn)
       finally conn.close()
