@@ -1,8 +1,9 @@
 package temple.DSL.parser
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.DSL.Entry.{Attribute, Metadata}
-import temple.DSL.{Arg, AttributeType, DSLProcessor, DSLRootItem}
+import temple.DSL.DSLProcessor
+import temple.DSL.syntax.{Arg, Args, AttributeType, DSLRootItem}
+import temple.DSL.syntax.Entry.{Attribute, Metadata}
 import temple.utils.FileUtils._
 import temple.utils.MonadUtils.FromEither
 
@@ -29,7 +30,7 @@ class DSLParserTest extends FlatSpec with Matchers {
         "service",
         Seq(
           Attribute("username", AttributeType("string")),
-          Attribute("email", AttributeType("string", Seq(Arg.IntArg(40), Arg.IntArg(5)))),
+          Attribute("email", AttributeType("string", Args(Seq(Arg.IntArg(40), Arg.IntArg(5))))),
           Attribute("firstName", AttributeType("string")),
           Attribute("lastName", AttributeType("string")),
           Attribute("createdAt", AttributeType("datetimetz")),
@@ -37,13 +38,13 @@ class DSLParserTest extends FlatSpec with Matchers {
           Attribute("yeets", AttributeType("bool")),
           Attribute(
             "currentBankBalance",
-            AttributeType("float", kwargs = Seq("min" -> Arg.FloatingArg(0), "precision" -> Arg.IntArg(2)))
+            AttributeType("float", Args(kwargs = Seq("min" -> Arg.FloatingArg(0), "precision" -> Arg.IntArg(2))))
           ),
           Attribute("birthDate", AttributeType("date")),
           Attribute("breakfastTime", AttributeType("time")),
           DSLRootItem("Fred", "struct", Seq(Attribute("field", AttributeType("string")))),
-          Metadata("auth", kwargs = Seq("login" -> Arg.TokenArg("username"))),
-          Metadata("uses", Seq(Arg.ListArg(Seq(Arg.TokenArg("Booking"), Arg.TokenArg("Events")))))
+          Metadata("auth", Args(kwargs = Seq("login" -> Arg.TokenArg("username")))),
+          Metadata("uses", Args(Seq(Arg.ListArg(Seq(Arg.TokenArg("Booking"), Arg.TokenArg("Events"))))))
         )
       )
     )
