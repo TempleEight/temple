@@ -1,4 +1,4 @@
-package temple.enumeration
+package temple.collection.enumeration
 
 import temple.utils.MapUtils.FailThrower
 
@@ -10,7 +10,7 @@ import temple.utils.MapUtils.FailThrower
 trait Enum[T <: EnumEntry] extends enumeratum.Enum[T] {
 
   /** Lookup an entry in the enum by name, returning None if not found */
-  def parseOption(name: String): Option[T] = values.find(_.allNames.contains(name))
+  def parseOption(name: String): Option[T] = values.find(_.allNames.contains(name.toLowerCase))
 
   /** Lookup an entry in the enum by name, using a [[FailThrower]] if not found. */
   def parse(name: String)(implicit failThrower: FailThrower): T =

@@ -1,4 +1,4 @@
-package temple.enumeration
+package temple.collection.enumeration
 
 /**
   * Create an enum with case-insensitive lookup by name and by aliases. This is applied to the class that the entries

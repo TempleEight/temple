@@ -1,6 +1,6 @@
 package temple.DSL.semantics
 
-import temple.enumeration._
+import temple.collection.enumeration._
 
 /** A piece of metadata modifying a service/project/target block */
 sealed trait Metadata
