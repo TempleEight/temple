@@ -3,7 +3,7 @@ package temple.DSL.parser
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.DSLProcessor
 import temple.DSL.syntax.Entry.{Attribute, Metadata}
-import temple.DSL.syntax.{Arg, Args, AttributeType, DSLRootItem}
+import temple.DSL.syntax._
 import temple.utils.FileUtils._
 import temple.utils.MonadUtils.FromEither
 
@@ -25,6 +25,7 @@ class DSLParserTest extends FlatSpec with Matchers {
     val parseResult = DSLProcessor.parse(source).fromEither(msg => fail(s"simple.temple did not parse, $msg"))
 
     parseResult shouldBe Seq(
+      DSLRootItem("SimpleTempleTest", "project", Nil),
       DSLRootItem(
         "User",
         "service",
@@ -33,9 +34,9 @@ class DSLParserTest extends FlatSpec with Matchers {
           Attribute("email", AttributeType("string", Args(Seq(Arg.IntArg(40), Arg.IntArg(5))))),
           Attribute("firstName", AttributeType("string")),
           Attribute("lastName", AttributeType("string")),
-          Attribute("createdAt", AttributeType("datetimetz")),
+          Attribute("createdAt", AttributeType("datetime")),
           Attribute("numberOfDogs", AttributeType("int")),
-          Attribute("yeets", AttributeType("bool")),
+          Attribute("yeets", AttributeType("bool"), Seq(Annotation("unique"), Annotation("server"))),
           Attribute(
             "currentBankBalance",
             AttributeType("float", Args(kwargs = Seq("min" -> Arg.FloatingArg(0), "precision" -> Arg.IntArg(2)))),
