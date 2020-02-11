@@ -197,7 +197,10 @@ object Analyser {
     ServiceBlock(attributes.to(ListMap), metadatas.toSeq, structs.to(ListMap))
   }
 
-  private def parseMetadataBlock[T](entries: Seq[Entry], f: MetadataParser[T])(implicit context: BlockContext): Seq[T] =
+  private def parseMetadataBlock[T <: Metadata](
+    entries: Seq[Entry],
+    f: MetadataParser[T]
+  )(implicit context: BlockContext): Seq[T] =
     entries map {
       case Entry.Metadata(metaKey, args) => f(metaKey, args)
       case otherEntry =>
