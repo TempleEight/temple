@@ -1,6 +1,5 @@
 package temple.DSL
 
-import temple.DSL.syntax.DSLRootItem
 import temple.DSL.parser.DSLParser
 
 object DSLProcessor extends DSLParser {
