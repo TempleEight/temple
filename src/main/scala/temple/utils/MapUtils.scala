@@ -1,10 +1,5 @@
 package temple.utils
 
-<<<<<<< HEAD
-import temple.DSL.semantics.SemanticParsingException
-
-=======
->>>>>>> origin/develop
 import scala.collection.mutable
 
 object MapUtils {
