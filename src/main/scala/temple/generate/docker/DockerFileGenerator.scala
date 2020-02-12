@@ -26,7 +26,8 @@ object DockerFileGenerator {
 
   /** Given a [ast.DockerfileRoot] object, build a valid Dockerfile string */
   def generate(dockerfileRoot: DockerfileRoot): String = {
-    val statementStrings = dockerfileRoot.statements.map(generateStatement)
+    //All valid Dockerfiles must begin with a FROM statement
+    val statementStrings = generateStatement(dockerfileRoot.from) +: dockerfileRoot.statements.map(generateStatement)
     statementStrings.mkString("\n\n")
   }
 }

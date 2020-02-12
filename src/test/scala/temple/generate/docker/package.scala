@@ -8,8 +8,8 @@ package object docker {
   object TestData {
 
     val basicDockerFileRoot: DockerfileRoot = DockerfileRoot(
+      From,
       Seq(
-        From,
         Copy,
         Run,
         Run,
