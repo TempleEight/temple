@@ -19,8 +19,9 @@ object Main extends App {
   }
 
   def generate(config: TempleConfig): Unit = {
-    val fileContents = FileUtils.readFile(config.Generate.filename())
-    val result       = DSLProcessor.parse(fileContents)
-    println(s"Generated... $result")
+    val outputDirectory = config.Generate.outputDirectory.getOrElse(System.getProperty("user.dir"))
+    val fileContents    = FileUtils.readFile(config.Generate.filename())
+    val result          = DSLProcessor.parse(fileContents)
+    println(s"Generated... $result - will place in $outputDirectory")
   }
 }
