@@ -22,28 +22,45 @@ object SQLTerm {
     override def flatIterator: Iterator[String] = Iterable.single(string).iterator
   }
 
-  class SQLTermList(strings: IterableOnce[SQLTerm], spacing: String = ",") extends SQLTerm {
+  /**
+    * Turns a list of items into a string with separators, constructed with
+    * [[temple.generate.database.SQLTerm.mkSQL#list(temple.generate.database.SQLTerm.SQLTermIterableString)]]
+    * @param strings a list of strings to be separated
+    * @param separator the separator between the items
+    */
+  class SQLTermList(strings: IterableOnce[String], separator: String = ",") extends SQLTerm {
 
     override def flatIterator: Iterator[String] = strings.iterator.zipWithIndex.map {
-      case (term, i) => mkSQL(when(i != 0)(spacing), term)
+      case (term, i) => mkSQL(when(i != 0)(separator), term)
     }
 
+    /** Add newlines after each separator */
     def spaced: SQLTermList = new SQLTermList(strings, ",\n")
   }
 
+  /** Turns a [[IterableOnce]] of [[SQLTerm]]s into a [[temple.generate.database.SQLTerm]], with an iterator that visits
+    * every child */
   implicit class SQLTermIterable(strings: IterableOnce[SQLTerm]) extends SQLTerm {
     override def flatIterator: Iterator[String] = strings.iterator.flatMap(_.flatIterator)
+  }
 
+  /** An iterable of strings can be treated as an iterable of SQLTerms, but can also be turned into a list. */
+  implicit class SQLTermIterableString(strings: IterableOnce[String])
+      extends SQLTermIterable(strings.iterator.map(SQLTermString)) {
+
+    /** Turn a list of SQL terms into a comma-separated list */
     def mkSQLList: SQLTermList = new SQLTermList(strings)
   }
 
-  implicit class SQLTermIterableString(strings: IterableOnce[String])
-      extends SQLTermIterable(strings.iterator.map(SQLTermString))
-
   object mkSQL {
-    def list(terms: SQLTermIterable): String       = mkSQL(terms.mkSQLList)
-    def spacedList(terms: SQLTermIterable): String = mkSQL(terms.mkSQLList.spaced)
 
+    /** Turn a list of terms into a comma-separated string */
+    def list(terms: SQLTermIterableString): String = mkSQL(terms.mkSQLList)
+
+    /** Turn a list of terms into a comma- and newline-separated string */
+    def spacedList(terms: SQLTermIterableString): String = mkSQL(terms.mkSQLList.spaced)
+
+    /** Combine a sequence of SQL terms into a single string, omitting spaces as necessary */
     def apply(strings: SQLTerm*): String = {
       val iterator: Iterator[String] = strings.iterator.flatMap(_.flatIterator)
       val (_, stringBuilder) = iterator
@@ -56,11 +73,17 @@ object SQLTerm {
       stringBuilder.toString()
     }
 
+    /** Construct a SQL statement, like in
+      * [[temple.generate.database.SQLTerm.mkSQL#apply(scala.collection.immutable.Seq)]] but ending in a semicolon */
     def stmt(string: SQLTerm*): String = mkSQL(string, ";")
   }
 
   object sqlParens {
-    def apply(string: SQLTerm*): String  = mkSQL("(", string, ")")
+
+    /** Wrap a SQL snippet in parentheses */
+    def apply(string: SQLTerm*): String = mkSQL("(", string, ")")
+
+    /** Wrap a SQL snippet in parentheses, with newlines inside them */
     def spaced(string: SQLTerm*): String = mkSQL("(", "\n", indent(mkSQL(string)), "\n", ")")
   }
 }
