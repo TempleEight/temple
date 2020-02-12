@@ -8,7 +8,7 @@ package object docker {
   object TestData {
 
     val basicDockerFileRoot: DockerfileRoot = DockerfileRoot(
-      From,
+      From("temple/base", Some("1.2.3")),
       Seq(
         Copy,
         Run,
@@ -18,7 +18,7 @@ package object docker {
     )
 
     val basicDockerFileString: String =
-      """|FROM
+      """|FROM temple/base:1.2.3
         |
         |COPY
         |

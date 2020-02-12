@@ -9,8 +9,12 @@ object DockerFileGenerator {
   /** Given a [ast.Statement], generate a valid string */
   private def generateStatement(statement: Statement): String =
     statement match {
-      case Env        => "ENV"
-      case From       => "FROM"
+      case Env => "ENV"
+      case From(image, tag) =>
+        s"FROM $image" + (tag match {
+          case Some(tagString) => s":$tagString"
+          case None            => ""
+        })
       case Run        => "RUN"
       case Cmd        => "CMD"
       case Label      => "LABEL"
