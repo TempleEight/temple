@@ -21,6 +21,7 @@ object IntegrationTestData {
       ColumnDef("dateOfBirth", DateCol),
       ColumnDef("timeOfDay", TimeCol),
       ColumnDef("expiry", DateTimeTzCol),
+      ColumnDef("picture", BlobCol),
     ),
   )
 
@@ -32,7 +33,8 @@ object IntegrationTestData {
         |  isStudent BOOLEAN,
         |  dateOfBirth DATE,
         |  timeOfDay TIME,
-        |  expiry TIMESTAMPTZ
+        |  expiry TIMESTAMPTZ,
+        |  picture BYTEA
         |);""".stripMargin
 
   val createStatementWithConstraints: Create = Create(

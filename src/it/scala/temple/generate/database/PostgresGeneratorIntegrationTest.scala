@@ -1,10 +1,13 @@
 package temple.generate.database
 
+import java.io.{File, FileInputStream}
 import java.sql.{Date, Time, Timestamp}
 
 import org.postgresql.util.PSQLException
 import org.scalatest.{BeforeAndAfter, Matchers}
 import temple.containers.PostgresSpec
+import temple.generate.database.ast.ColType.BlobCol
+import temple.generate.database.ast.{Column, ColumnDef, Statement}
 
 class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with BeforeAndAfter {
 
@@ -53,6 +56,29 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getTime("timeOfDay") shouldBe Time.valueOf("12:00:00")
     result.getTimestamp("expiry") shouldBe Timestamp.valueOf("2020-01-01 00:00:00.0")
     result.isLast shouldBe true
+  }
+
+  // Since Blobs require files, we open create a test dynamically
+  "Insert statement with blob" should "be executed correctly" in {
+    val testImage  = new File("src/it/scala/temple/testfiles/cat.jpeg")
+    val fileStream = new FileInputStream(testImage)
+    try {
+      val extendedCreateStatement = Statement
+        .Create(TestData.createStatement.tableName, TestData.createStatement.columns :+ ColumnDef("picture", BlobCol))
+      executeWithoutResults(PostgresGenerator.generate(extendedCreateStatement))
+
+      val extendedInsertStatement =
+        Statement.Insert(TestData.insertStatement.tableName, TestData.insertStatement.columns :+ Column("picture"))
+      val extendedInsertData = TestData.insertDataA :+ PreparedVariable.BlobVariable(fileStream, testImage.length())
+      executeWithoutResultsPrepared(PostgresGenerator.generate(extendedInsertStatement), extendedInsertData)
+
+      val result =
+        executeWithResults("SELECT * FROM USERS;").getOrElse(fail("Database connection could not be established"))
+      result.next()
+      result.getBytes("picture").length shouldBe testImage.length()
+    } finally {
+      fileStream.close()
+    }
   }
 
   "Users table" should "be empty after delete following insert" in {
