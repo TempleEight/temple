@@ -1,11 +1,15 @@
 package temple.utils
 
 import java.io.{File, PrintWriter}
+import java.nio.file.{Files, Paths}
 
 import scala.io.Source
 
 /** Helper functions useful for manipulating files */
 object FileUtils {
+
+  def createDirectory(directory: String): Unit =
+    Files.createDirectories(Paths.get(directory))
 
   /** Write a string to file */
   def writeToFile(filename: String, s: String): Unit = {
