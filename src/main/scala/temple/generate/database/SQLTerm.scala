@@ -63,14 +63,22 @@ object SQLTerm {
     /** Combine a sequence of SQL terms into a single string, omitting spaces as necessary */
     def apply(strings: SQLTerm*): String = {
       val iterator: Iterator[String] = strings.iterator.flatMap(_.flatIterator)
-      val (_, stringBuilder) = iterator
-        .foldLeft((true, new StringBuilder)) {
-          case ((noSpace, acc), term) =>
-            if (!noSpace && """^[^;,\s\)]""".r.unanchored.matches(term)) acc += ' '
-            acc ++= term
-            ("""[\s\(]$""".r.unanchored.matches(term), acc)
-        }
-      stringBuilder.toString()
+
+      // Iterate through the strings with a string builder, keeping track of whether the previous segment ends in a
+      // space/open-bracket, and so does not need a space inserted.
+      val (stringBuilder, _) = iterator.foldLeft((new StringBuilder, true)) {
+        case ((acc, noSpace), term) =>
+          // Only if the previous segment does not end in a space/open bracket, and the new segment does not start with
+          // a space/closing punctuation, do we insert a space
+          if (!noSpace && """^[^;,\s)]""".r.unanchored.matches(term)) acc += ' '
+
+          // Append the new string
+          acc ++= term
+
+          // Pass forward the string builder and whether we don't need a space next time
+          (acc, """[\s(]$""".r.unanchored.matches(term))
+      }
+      stringBuilder.toString
     }
 
     /** Construct a SQL statement, like in

@@ -84,7 +84,9 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
 
   /** Given the current PostgresContext, generate the prepared statement placeholders for each column */
   private def generatePreparedValues(columns: Seq[Any])(implicit context: PostgresContext): String =
+    // Make a comma-separated list
     mkSQL.list(
+      // Consisting of question marks or numbered question marks
       context.preparedType match {
         case PreparedType.QuestionMarks => Iterator.fill(columns.length)("?")
         case PreparedType.DollarNumbers => (1 to columns.length).map("$" + _)
