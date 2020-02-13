@@ -15,11 +15,12 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     executeWithoutResults("DROP TABLE IF EXISTS Users;")
   }
 
-  "Users table" should "not exist" in {
+  behavior of "PostgresService"
+  it should "not contain a users table" in {
     a[PSQLException] should be thrownBy executeWithResults("SELECT * FROM Users;")
   }
 
-  "Users table" should "be created, insert values, and return results" in {
+  it should "create a users table, insert values, and return these values later" in {
     executeWithoutResults("CREATE TABLE Users (id INT);")
     executeWithoutResults("INSERT INTO Users (id) VALUES (1);")
     val result =
@@ -29,7 +30,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.isLast shouldBe true
   }
 
-  "Users table" should "be created correctly" in {
+  it should "create a users table correctly" in {
     val createStatement = PostgresGenerator.generate(TestData.createStatement)
     executeWithoutResults(createStatement)
     val result = executeWithResults(
@@ -39,7 +40,8 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getBoolean("exists") shouldBe true
   }
 
-  "Insert statement" should "be executed correctly" in {
+  behavior of "InsertStatements"
+  it should "be executed correctly" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
     val result =
@@ -55,7 +57,8 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.isLast shouldBe true
   }
 
-  "Users table" should "be empty after delete following insert" in {
+  behavior of "DeleteStatements"
+  it should "clear the table following an insert" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
     executeWithoutResults(PostgresGenerator.generate(TestData.deleteStatement))
@@ -64,7 +67,8 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.isBeforeFirst shouldBe false
   }
 
-  "Users table" should "be dropped successfully" in {
+  behavior of "DropStatements"
+  it should "remove the table from the database" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     var result = executeWithResults(
       "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users');",
@@ -79,7 +83,8 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getBoolean("exists") shouldBe false
   }
 
-  "Complex select statements" should "be executed correctly" in {
+  behavior of "SelectStatements"
+  it should "be executed correctly" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     //The query should select both
     executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
@@ -106,7 +111,8 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.isLast shouldBe true
   }
 
-  "Update statements" can "update all rows in a table" in {
+  behavior of "UpdateStatements"
+  it should "update all rows in a table" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
     executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
@@ -133,7 +139,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.isLast shouldBe true
   }
 
-  "Update statements" can "update some rows in a table using WHERE" in {
+  it should "update some rows in a table using WHERE" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
     executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
