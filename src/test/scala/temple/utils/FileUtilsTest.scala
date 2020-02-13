@@ -9,7 +9,7 @@ import scala.util.Random
 class FileUtilsTest extends FlatSpec with Matchers {
 
   def randomString(length: Int): String = {
-    val r  = new scala.util.Random
+    val r  = new Random
     val sb = new StringBuilder
     for (_ <- 1 to length) {
       sb.append(r.nextPrintableChar)
