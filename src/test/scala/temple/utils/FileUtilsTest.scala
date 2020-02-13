@@ -1,10 +1,22 @@
 package temple.utils
 
-import java.nio.file.FileAlreadyExistsException
+import java.nio.file.{FileAlreadyExistsException, Files, Paths}
 
 import org.scalatest.{FlatSpec, Matchers}
 
+import scala.util.Random
+
 class FileUtilsTest extends FlatSpec with Matchers {
+
+  def randomString(length: Int): String = {
+    val r  = new scala.util.Random
+    val sb = new StringBuilder
+    for (_ <- 1 to length) {
+      sb.append(r.nextPrintableChar)
+    }
+    sb.toString
+  }
+
   "Creating a folder that already exists" should "not throw an exception" in {
     FileUtils.createDirectory("src")
     noException should be thrownBy FileUtils.createDirectory("src")
@@ -12,5 +24,14 @@ class FileUtilsTest extends FlatSpec with Matchers {
 
   "Creating a folder where a file with that name already exists" should "throw an exception" in {
     a[FileAlreadyExistsException] should be thrownBy FileUtils.createDirectory("build.sbt")
+  }
+
+  "Creating a file" should "succeed" in {
+    val filename = s"/tmp/test-${randomString(10)}"
+    Files.deleteIfExists(Paths.get(filename))
+
+    val fileContents = "example file contents"
+    FileUtils.writeToFile(filename, fileContents)
+    FileUtils.readFile(filename) shouldBe fileContents
   }
 }
