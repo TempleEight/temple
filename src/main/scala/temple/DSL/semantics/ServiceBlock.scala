@@ -7,4 +7,4 @@ case class ServiceBlock(
   attributes: Map[String, Attribute],
   metadata: Seq[ServiceMetadata] = Nil,
   structs: Map[String, StructBlock] = Map.empty,
-)
+) extends TempleBlock[ServiceMetadata]
