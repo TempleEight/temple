@@ -9,10 +9,10 @@ import scala.util.Random
 class FileUtilsTest extends FlatSpec with Matchers {
 
   def randomString(length: Int): String = {
-    val r  = new Random
+    val r  = new Random()
     val sb = new StringBuilder
     for (_ <- 1 to length) {
-      sb.append(r.nextPrintableChar)
+      sb.append(r.alphanumeric.head)
     }
     sb.toString
   }
@@ -27,10 +27,9 @@ class FileUtilsTest extends FlatSpec with Matchers {
   }
 
   "Creating a file" should "succeed" in {
-    val filename = s"/tmp/test-${randomString(10)}"
-    Files.deleteIfExists(Paths.get(filename))
+    val filename = Iterator.continually(s"/tmp/test-${randomString(10)}").find(x => !Files.exists(Paths.get(x))).get
 
-    val fileContents = "example file contents"
+    val fileContents = "Example file contents"
     FileUtils.writeToFile(filename, fileContents)
     FileUtils.readFile(filename) shouldBe fileContents
   }
