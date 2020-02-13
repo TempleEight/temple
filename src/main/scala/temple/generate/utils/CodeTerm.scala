@@ -24,7 +24,7 @@ object CodeTerm {
 
   /**
     * Turns a list of items into a string with separators, constructed with
-    * [[CodeTerm.mkCode#list(temple.generate.database.CodeTerm.CodeTermIterableString)]]
+    * [[temple.generate.utils.CodeTerm.mkCode#list(temple.generate.utils.CodeTerm.CodeTermIterableString)]]
     *
     * @param strings a list of strings to be separated
     * @param separator the separator between the items
@@ -83,7 +83,7 @@ object CodeTerm {
     }
 
     /** Construct a code statement, like in
-      * [[CodeTerm.mkCode#apply(scala.collection.immutable.Seq)]] but ending in a semicolon */
+      * [[temple.generate.utils.CodeTerm.mkCode#apply(scala.collection.immutable.Seq)]] but ending in a semicolon */
     def stmt(string: CodeTerm*): String = mkCode(string, ";")
   }
 
