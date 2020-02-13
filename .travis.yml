@@ -3,6 +3,8 @@ language: scala
 scala:
   - 2.13.1
 
+os: linux
+
 jdk:
   - oraclejdk11
 
@@ -12,16 +14,14 @@ services:
 jobs:
   include:
     - stage: test
-      script: sbt clean test
-    - stage: integration-test
-      script: sbt clean it:test
-    - stage: format
-      script: sbt clean scalafmtCheck test:scalafmtCheck it:scalafmtCheck
-    - stage: codecov
       script: sbt clean coverage test coverageReport
       after_success:
         # Requires CODECOV_TOKEN env var
         - bash <(curl -s https://codecov.io/bash)
+    - stage: integration-test
+      script: sbt clean it:test
+    - stage: format
+      script: sbt clean scalafmtCheck test:scalafmtCheck it:scalafmtCheck
 
 # Caching to speed up runs
 # https://www.scala-sbt.org/1.x/docs/Travis-CI-with-sbt.html
