@@ -4,6 +4,7 @@ import io.circe.Printer
 import io.circe.syntax._
 import temple.generate.docker.ast.Statement._
 import temple.generate.docker.ast.{DockerfileRoot, Statement}
+import temple.generate.utils.CodeTerm.mkCode
 
 /** Generator object for building Dockerfiles from the Dockerfile AST objects */
 object DockerFileGenerator {
@@ -15,13 +16,9 @@ object DockerFileGenerator {
   /** Given a [[temple.generate.docker.ast.Statement]], generate a valid string */
   private def generateStatement(statement: Statement): String =
     statement match {
-      case From(image, tag) =>
-        s"FROM $image" + (tag match {
-          case Some(tagString) => s":$tagString"
-          case None            => ""
-        })
-      case RunCmd(command)             => s"RUN $command"
-      case RunExec(executable, params) => s"RUN ${buildArrayString(executable +: params)}"
+      case From(image, tag)            => mkCode("FROM", image, tag.map(":" + _))
+      case RunCmd(command)             => mkCode("RUN", command)
+      case RunExec(executable, params) => mkCode("RUN", buildArrayString(executable +: params))
     }
 
   /** Given a [[temple.generate.docker.ast.DockerfileRoot]] object, build a valid Dockerfile string */
