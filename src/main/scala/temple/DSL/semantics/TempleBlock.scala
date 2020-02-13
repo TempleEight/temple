@@ -15,7 +15,7 @@ abstract class TempleBlock[M <: Metadata] {
   final def setParent(templefile: Templefile): Unit = parent = templefile
 
   /** Fall back to the default metadata for the project */
-  final protected def lookupDefaultMetadata[T: ClassTag]: Option[T] = {
+  final protected def lookupDefaultMetadata[T <: Metadata: ClassTag]: Option[T] = {
     if (parent == null)
       throw new NullPointerException(
         "Cannot lookup metadata: block not registered as part of a Templefile. " +
