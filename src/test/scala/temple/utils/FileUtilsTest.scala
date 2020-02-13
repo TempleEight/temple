@@ -20,6 +20,7 @@ class FileUtilsTest extends FlatSpec with Matchers {
   }
 
   "Creating a file" should "succeed" in {
+    // Generate a filename randomly, retrying if the file name already exists
     val filename = Iterator.continually(s"/tmp/test-${randomString(10)}").find(x => !Files.exists(Paths.get(x))).get
 
     val fileContents = "Example file contents"
