@@ -197,6 +197,9 @@ object IntegrationTestData {
   val postgresInsertString: String =
     "INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry) VALUES ($1, $2, $3, $4, $5, $6, $7);"
 
+  val postgresInsertStringWithQuestionMarks: String =
+    "INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry) VALUES (?, ?, ?, ?, ?, ?, ?);"
+
   val updateStatement: Update = Update(
     "Users",
     Seq(

@@ -22,6 +22,10 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
   "PostgresGenerator" should "generate correct INSERT statements" in {
     PostgresGenerator.generate(TestData.insertStatement) shouldBe TestData.postgresInsertString
   }
+  "PostgresGenerator" should "generate correct INSERT statements with question marks" in {
+    val questionMarkContext: PostgresContext = PostgresContext(PreparedType.QuestionMarks)
+    PostgresGenerator.generate(TestData.insertStatement)(questionMarkContext) shouldBe TestData.postgresInsertStringWithQuestionMarks
+  }
   "PostgresGenerator" should "handle conjunctions in WHERE correctly" in {
     PostgresGenerator.generate(TestData.readStatementWithWhereConjunction) shouldBe TestData.postgresSelectStringWithWhereConjunction
   }
