@@ -71,13 +71,13 @@ object CodeTerm {
         case ((acc, noSpace), term) =>
           // Only if the previous segment does not end in a space/open bracket, and the new segment does not start with
           // a space/closing punctuation, do we insert a space
-          if (!noSpace && """^[^;,:{\[\]}\s)]""".r.unanchored.matches(term)) acc += ' '
+          if (!noSpace && """^[^;,:\]}\s)]""".r.unanchored.matches(term)) acc += ' '
 
           // Append the new string
           acc ++= term
 
           // Pass forward the string builder and whether we don't need a space next time
-          (acc, """[\s(]$""".r.unanchored.matches(term))
+          (acc, """[\s({\[]$""".r.unanchored.matches(term))
       }
       stringBuilder.toString
     }
