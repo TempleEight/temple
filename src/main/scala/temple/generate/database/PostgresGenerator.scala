@@ -97,7 +97,7 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
   override def generate(statement: Statement)(implicit context: PostgresContext): String =
     statement match {
       case Create(tableName, columns) =>
-        val stringColumns = columns.map(generateColumnDef).mkSQLList.spaced
+        val stringColumns = mkSQL.spacedList(columns.map(generateColumnDef))
         mkSQL.stmt("CREATE TABLE", tableName, sqlParens.spaced(stringColumns))
       case Read(tableName, columns, conditions) =>
         val stringColumns    = columns.map(_.name).mkString(", ")
