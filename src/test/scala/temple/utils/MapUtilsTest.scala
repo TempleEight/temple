@@ -7,20 +7,22 @@ import scala.collection.mutable
 
 class MapUtilsTest extends FlatSpec with Matchers {
 
-  "SafeInsertMap" should "allow any insertion into an empty map" in {
+  behavior of "SafeInsertMap"
+
+  it should "allow any insertion into an empty map" in {
     val map: mutable.Map[Int, Boolean] = mutable.HashMap()
 
     map.safeInsert(1 -> true, fail("Conflict incorrectly found in map"))
   }
 
-  "SafeInsertMap" should "allow non-colliding insertions into a map" in {
+  it should "allow non-colliding insertions into a map" in {
     val map: mutable.Map[Int, Boolean] = mutable.HashMap(1 -> true, 2 -> false)
 
     map.safeInsert(3 -> true, fail("Conflict incorrectly found in map"))
     map.safeInsert(0 -> false, fail("Conflict incorrectly found in map"))
   }
 
-  "SafeInsertMap" should "fail on duplicate insertions into a map" in {
+  it should "fail on duplicate insertions into a map" in {
     var callbackCalled = 0
 
     val map: mutable.Map[Int, Boolean] = mutable.HashMap()
@@ -31,7 +33,7 @@ class MapUtilsTest extends FlatSpec with Matchers {
     callbackCalled shouldBe 1
   }
 
-  "SafeInsertMap" should "fail on conflicting insertions into a map" in {
+  it should "fail on conflicting insertions into a map" in {
     var callbackCalled = 0
 
     val map: mutable.Map[Int, Boolean] = mutable.HashMap(3 -> true)
@@ -41,7 +43,7 @@ class MapUtilsTest extends FlatSpec with Matchers {
     callbackCalled shouldBe 1
   }
 
-  "SafeInsertMap" should "fail using an implicit fail handler" in {
+  it should "fail using an implicit fail handler" in {
     var callbackCalled = 0
 
     val map: mutable.Map[Int, Boolean] = mutable.HashMap(3 -> true)
