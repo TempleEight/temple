@@ -63,14 +63,12 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     val testImage  = new File("src/it/scala/temple/testfiles/cat.jpeg")
     val fileStream = new FileInputStream(testImage)
     try {
-      val extendedCreateStatement = Statement
-        .Create(TestData.createStatement.tableName, TestData.createStatement.columns :+ ColumnDef("picture", BlobCol))
-      executeWithoutResults(PostgresGenerator.generate(extendedCreateStatement))
+      val createStatement = Statement.Create("Users", Seq(ColumnDef("picture", BlobCol)))
+      executeWithoutResults(PostgresGenerator.generate(createStatement))
 
-      val extendedInsertStatement =
-        Statement.Insert(TestData.insertStatement.tableName, TestData.insertStatement.columns :+ Column("picture"))
-      val extendedInsertData = TestData.insertDataA :+ PreparedVariable.BlobVariable(fileStream, testImage.length())
-      executeWithoutResultsPrepared(PostgresGenerator.generate(extendedInsertStatement), extendedInsertData)
+      val insertStatement = Statement.Insert("Users", Seq(Column("picture")))
+      val insertData      = Seq(PreparedVariable.BlobVariable(fileStream, testImage.length()))
+      executeWithoutResultsPrepared(PostgresGenerator.generate(insertStatement), insertData)
 
       val result =
         executeWithResults("SELECT * FROM USERS;").getOrElse(fail("Database connection could not be established"))
