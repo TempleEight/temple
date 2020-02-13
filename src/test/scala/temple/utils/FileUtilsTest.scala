@@ -8,14 +8,7 @@ import scala.util.Random
 
 class FileUtilsTest extends FlatSpec with Matchers {
 
-  def randomString(length: Int): String = {
-    val r  = new Random()
-    val sb = new StringBuilder
-    for (_ <- 1 to length) {
-      sb.append(r.alphanumeric.head)
-    }
-    sb.toString
-  }
+  def randomString(length: Int): String = new Random().alphanumeric.take(length).mkString
 
   "Creating a folder that already exists" should "not throw an exception" in {
     FileUtils.createDirectory("src")
