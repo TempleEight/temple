@@ -12,13 +12,11 @@ services:
 jobs:
   include:
     - stage: test
-      script: sbt clean test
+      script: sbt clean coverage test coverageReport
     - stage: integration-test
       script: sbt clean it:test
     - stage: format
       script: sbt clean scalafmtCheck test:scalafmtCheck it:scalafmtCheck
-    - stage: codecov
-      script: sbt clean coverage test coverageReport
       after_success:
         # Requires CODECOV_TOKEN env var
         - bash <(curl -s https://codecov.io/bash)
