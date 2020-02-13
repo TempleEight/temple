@@ -51,7 +51,7 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
     condition match {
       case Comparison(left, comp, right) => mkSQL(left, generateComparison(comp), right)
       case Inverse(IsNull(column))       => mkSQL(column.name, "IS NOT NULL")
-      case Inverse(condition)            => mkSQL("NOT", "(", generateCondition(condition), ")")
+      case Inverse(condition)            => mkSQL("NOT", sqlParens(generateCondition(condition)))
       case IsNull(column)                => mkSQL(column.name, "IS NULL")
 
       case Disjunction(left, right) =>
