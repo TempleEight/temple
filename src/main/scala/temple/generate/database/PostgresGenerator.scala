@@ -1,6 +1,6 @@
 package temple.generate.database
 
-import temple.generate.database.SQLTerm._
+import temple.generate.utils.CodeFormatter._
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.ComparisonOperator._
