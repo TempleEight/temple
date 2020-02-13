@@ -24,7 +24,7 @@ object CodeFormatter {
 
   /**
     * Turns a list of items into a string with separators, constructed with
-    * [[utils.CodeFormatter.mkSQL#list(temple.generate.database.CodeFormatter.CodeFormatterIterableString)]]
+    * [[CodeFormatter.mkSQL#list(temple.generate.database.CodeFormatter.CodeFormatterIterableString)]]
     *
     * @param strings a list of strings to be separated
     * @param separator the separator between the items
@@ -47,7 +47,7 @@ object CodeFormatter {
 
   /** An iterable of strings can be treated as an iterable of SQLTerms, but can also be turned into a list. */
   implicit class CodeFormatterIterableString(strings: IterableOnce[String])
-      extends CodeFormatterIterable(strings.iterator.map(SQLTermString)) {
+      extends CodeFormatterIterable(strings.iterator.map(CodeFormatterString)) {
 
     /** Turn a list of SQL terms into a comma-separated list */
     def mkSQLList: CodeFormatterList = new CodeFormatterList(strings)
@@ -83,7 +83,7 @@ object CodeFormatter {
     }
 
     /** Construct a SQL statement, like in
-      * [[utils.SQLTerm.mkSQL#apply(scala.collection.immutable.Seq)]] but ending in a semicolon */
+      * [[CodeFormatter.mkSQL#apply(scala.collection.immutable.Seq)]] but ending in a semicolon */
     def stmt(string: CodeFormatter*): String = mkSQL(string, ";")
   }
 
