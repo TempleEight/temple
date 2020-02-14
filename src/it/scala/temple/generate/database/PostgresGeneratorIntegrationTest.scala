@@ -12,6 +12,9 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
 
   // The Postgres container is persisted for every test in this spec: clean up any changes made by each test
   before {
+    executeWithoutResults("DROP TABLE IF EXISTS TestUnique;")
+    executeWithoutResults("DROP TABLE IF EXISTS TestReference;")
+    executeWithoutResults("DROP TABLE IF EXISTS TestCheck;")
     executeWithoutResults("DROP TABLE IF EXISTS Users;")
   }
 
@@ -55,6 +58,77 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getTime("timeOfDay") shouldBe Time.valueOf("12:00:00")
     result.getTimestamp("expiry") shouldBe Timestamp.valueOf("2020-01-01 00:00:00.0")
     result.isLast shouldBe true
+  }
+
+  it should "fail when inserting the same data into a column with unique constraint" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithUniqueConstraint))
+
+    noException should be thrownBy executeWithoutResultsPrepared(
+      PostgresGenerator.generate(TestData.insertStatementForUniqueConstraint),
+      TestData.insertDataUniqueConstraintA,
+    )
+
+    a[PSQLException] should be thrownBy executeWithoutResultsPrepared(
+      PostgresGenerator.generate(TestData.insertStatementForUniqueConstraint),
+      TestData.insertDataUniqueConstraintB,
+    )
+  }
+
+  it should "succeed when inserting data that references a valid row in another table" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithReferenceConstraint))
+
+    // Insert user into users table, has ID 3
+    executeWithoutResultsPrepared(
+      PostgresGenerator.generate(TestData.insertStatement),
+      TestData.insertDataA,
+    )
+
+    noException should be thrownBy executeWithoutResultsPrepared(
+      PostgresGenerator.generate(TestData.insertStatementForReferenceConstraint),
+      TestData.insertDataReferenceConstraintA,
+    )
+  }
+
+  it should "fail when inserting data that references a non-existent row in another table" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithReferenceConstraint))
+
+    // Insert user into users table, has ID 3
+    executeWithoutResultsPrepared(
+      PostgresGenerator.generate(TestData.insertStatement),
+      TestData.insertDataA,
+    )
+
+    a[PSQLException] should be thrownBy executeWithoutResultsPrepared(
+      PostgresGenerator.generate(TestData.insertStatementForReferenceConstraint),
+      TestData.insertDataReferenceConstraintB,
+    )
+  }
+
+  it should "fail when inserting data that doesn't satisfy the lower bound of a check constraint" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithCheckConstraint))
+    a[PSQLException] should be thrownBy executeWithoutResultsPrepared(
+      PostgresGenerator.generate(TestData.insertStatementForCheckConstraint),
+      TestData.insertDataCheckConstraintLowerFails,
+    )
+  }
+
+  it should "fail when inserting data that doesn't satisfy the upper bound of a check constraint" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithCheckConstraint))
+    a[PSQLException] should be thrownBy executeWithoutResultsPrepared(
+      PostgresGenerator.generate(TestData.insertStatementForCheckConstraint),
+      TestData.insertDataCheckConstraintUpperFails,
+    )
+  }
+
+  it should "succeed when inserting data that satisfies both check constraints" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithCheckConstraint))
+    noException should be thrownBy executeWithoutResultsPrepared(
+      PostgresGenerator.generate(TestData.insertStatementForCheckConstraint),
+      TestData.insertDataCheckConstraintPasses,
+    )
   }
 
   behavior of "DeleteStatements"
