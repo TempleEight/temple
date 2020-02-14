@@ -23,7 +23,9 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
   private def mkTemplefileSemanticsWithUserService(serviceBlock: ServiceBlock): Templefile =
     Templefile("test", ProjectBlock(Nil), Map.empty, Map("User" -> serviceBlock))
 
-  "Semantic Analyser" should "complain that there is no project block when parsing an Empty AST" in {
+  behavior of "Semantic Analyser"
+
+  it should "complain that there is no project block when parsing an Empty AST" in {
     a[SemanticParsingException] should be thrownBy { parseSemantics(Nil) }
   }
 

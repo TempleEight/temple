@@ -14,7 +14,9 @@ class EnumTest extends FlatSpec with Matchers {
     case object Case2 extends MyEnum("other")
   }
 
-  "Enums" should "have the correct values" in {
+  behavior of "Enums"
+
+  it should "have the correct values" in {
     MyEnum.values shouldBe IndexedSeq(MyEnum.Case1, MyEnum.Case2)
   }
 
