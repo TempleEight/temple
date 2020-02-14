@@ -51,7 +51,7 @@ object IntegrationTestData {
     """CREATE TABLE Test (
         |  item_id INT NOT NULL PRIMARY KEY,
         |  createdAt TIMESTAMPTZ UNIQUE,
-        |  bookingTime TIME REFERENCES Bookings(bookingTime),
+        |  bookingTime TIME REFERENCES Bookings (bookingTime),
         |  value INT CHECK (value >= 1) NULL
         |);""".stripMargin
 
@@ -181,7 +181,7 @@ object IntegrationTestData {
   )
 
   val postgresSelectStringComplex: String =
-    """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE ((isStudent IS NULL) OR (Users.id >= 1)) AND ((isStudent IS NOT NULL) OR (NOT (Users.expiry < TIMESTAMP '2020-02-03 00:00:00+00')));"""
+    "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE ((isStudent IS NULL) OR (Users.id >= 1)) AND ((isStudent IS NOT NULL) OR (NOT (Users.expiry < TIMESTAMP '2020-02-03 00:00:00+00')));"
 
   val insertStatement: Insert = Insert(
     "Users",
@@ -197,8 +197,10 @@ object IntegrationTestData {
   )
 
   val postgresInsertString: String =
-    """INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry)
-        |VALUES ($1, $2, $3, $4, $5, $6, $7);""".stripMargin
+    "INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry) VALUES ($1, $2, $3, $4, $5, $6, $7);"
+
+  val postgresInsertStringWithQuestionMarks: String =
+    "INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry) VALUES (?, ?, ?, ?, ?, ?, ?);"
 
   val updateStatement: Update = Update(
     "Users",

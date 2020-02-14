@@ -19,6 +19,9 @@ class TempleConfig(arguments: CSeq[String]) extends ScallopConf(arguments) {
 
   object Generate extends Subcommand("generate") {
     val filename: ScallopOption[String] = trailArg[String]("filename", "Templefile to generate from")
+
+    val outputDirectory: ScallopOption[String] =
+      opt[String]("output", 'o', "Output directory to place generated files")
   }
   addSubcommand(Generate)
   verify()

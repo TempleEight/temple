@@ -8,19 +8,21 @@ import temple.utils.FileUtils._
 import temple.utils.MonadUtils.FromEither
 
 class DSLParserTest extends FlatSpec with Matchers {
-  "Empty string" should "parse" in {
+  behavior of "DSLParser"
+
+  it should "parse an empty string" in {
     DSLProcessor.parse("").isRight shouldBe true
   }
 
-  "Empty service" should "parse" in {
+  it should "parse an empty service" in {
     DSLProcessor.parse("Test: service { }").isRight shouldBe true
   }
 
-  "Annotations" should "not parse at the top level" in {
+  it should "not parse annotation at the top level" in {
     DSLProcessor.parse("@server Test: service { }").isLeft shouldBe true
   }
 
-  "simple.temple" should "parse to the correct result" in {
+  it should "parse to the correct result for simple.temple" in {
     val source      = readFile("src/test/scala/temple/testfiles/simple.temple")
     val parseResult = DSLProcessor.parse(source).fromEither(msg => fail(s"simple.temple did not parse, $msg"))
 
@@ -51,7 +53,7 @@ class DSLParserTest extends FlatSpec with Matchers {
     )
   }
 
-  "Exporting a parsed structure to string" should "re-parse to the same result" in {
+  it should "re-parse to the same result if a parsed structure is exported to string" in {
     val source      = readFile("src/test/scala/temple/testfiles/simple.temple")
     val parseResult = DSLProcessor.parse(source).fromEither(msg => fail(s"first parse failed, $msg"))
     val reSourced   = parseResult.mkString("\n\n")

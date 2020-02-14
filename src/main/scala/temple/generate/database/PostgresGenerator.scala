@@ -7,9 +7,9 @@ import temple.generate.database.ast.Condition._
 import temple.generate.database.ast.Expression._
 import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
-import temple.utils.StringUtils._
+import temple.generate.utils.CodeTerm._
 
-import scala.util.chaining._
+import scala.Option.when
 
 /** Implementation of [[DatabaseGenerator]] for generating PostgreSQL */
 object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
@@ -40,85 +40,82 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
     constraint match {
       case NonNull                    => "NOT NULL"
       case Null                       => "NULL"
-      case Check(left, comp, right)   => s"CHECK ($left " + generateComparison(comp) + s" $right)"
+      case Check(left, comp, right)   => mkCode("CHECK", codeParens(left, generateComparison(comp), right))
       case Unique                     => "UNIQUE"
       case PrimaryKey                 => "PRIMARY KEY"
-      case References(table, colName) => s"REFERENCES $table($colName)"
+      case References(table, colName) => mkCode("REFERENCES", table, codeParens(colName))
     }
 
   /** Given a query modifier, generate the type required by PostgreSQL */
   private def generateCondition(condition: Condition): String =
     condition match {
-      case Comparison(left, comp, right) => s"$left ${generateComparison(comp)} $right"
-      case Disjunction(left, right)      => s"(${generateCondition(left)}) OR (${generateCondition(right)})"
-      case Conjunction(left, right)      => s"(${generateCondition(left)}) AND (${generateCondition(right)})"
-      case Inverse(IsNull(column))       => s"${column.name} IS NOT NULL"
-      case Inverse(condition)            => s"NOT (${generateCondition(condition)})"
-      case IsNull(column)                => s"${column.name} IS NULL"
+      case Comparison(left, comp, right) => mkCode(left, generateComparison(comp), right)
+      case Inverse(IsNull(column))       => mkCode(column.name, "IS NOT NULL")
+      case Inverse(condition)            => mkCode("NOT", codeParens(generateCondition(condition)))
+      case IsNull(column)                => mkCode(column.name, "IS NULL")
+
+      case Disjunction(left, right) =>
+        mkCode(codeParens(generateCondition(left)), "OR", codeParens(generateCondition(right)))
+      case Conjunction(left, right) =>
+        mkCode(codeParens(generateCondition(left)), "AND", codeParens(generateCondition(right)))
     }
 
   /** Given conditions, generate a Postgres WHERE clause  */
-  private def generateConditionString(conditions: Option[Condition]): Seq[String] =
-    conditions.map(generateCondition) match {
-      case Some(conditionsString) => Seq(s"WHERE $conditionsString")
-      case None                   => Nil
-    }
+  private def generateConditionString(conditions: Option[Condition]): Option[String] =
+    conditions.map(generateCondition).map(mkCode("WHERE", _))
 
   /** Given a column type, parse it into the type required by PostgreSQL */
   private def generateColumnType(columnType: ColType): String =
     columnType match {
-      case IntCol        => s"INT"
-      case FloatCol      => s"REAL"
-      case StringCol     => s"TEXT"
-      case BoolCol       => s"BOOLEAN"
-      case DateCol       => s"DATE"
-      case TimeCol       => s"TIME"
-      case DateTimeTzCol => s"TIMESTAMPTZ"
-      case BlobCol       => s"BYTEA"
+      case IntCol        => "INT"
+      case FloatCol      => "REAL"
+      case StringCol     => "TEXT"
+      case BoolCol       => "BOOLEAN"
+      case DateCol       => "DATE"
+      case TimeCol       => "TIME"
+      case DateTimeTzCol => "TIMESTAMPTZ"
+      case BlobCol       => "BYTEA"
     }
 
   /** Parse a given column into PostgreSQL syntax */
   private def generateColumnDef(column: ColumnDef): String = {
     val columnConstraints = column.constraints.map(generateConstraint)
-    (column.name +: generateColumnType(column.colType) +: columnConstraints).mkString(" ")
+    mkCode(column.name, generateColumnType(column.colType), columnConstraints)
   }
 
   /** Given the current PostgresContext, generate the prepared statement placeholders for each column */
   private def generatePreparedValues(columns: Seq[Any])(implicit context: PostgresContext): String =
-    (1 to columns.length)
-      .map(i =>
-        context.preparedType match {
-          case PreparedType.DollarNumbers => s"$$$i"
-          case PreparedType.QuestionMarks => "?"
-        },
-      )
-      .mkString(", ")
+    // Make a comma-separated list
+    mkCode.list(
+      // Consisting of question marks or numbered question marks
+      context.preparedType match {
+        case PreparedType.QuestionMarks => Iterator.fill(columns.length)("?")
+        case PreparedType.DollarNumbers => (1 to columns.length).map("$" + _)
+      },
+    )
 
   /** Given a statement, parse it into a valid PostgreSQL statement */
   override def generate(statement: Statement)(implicit context: PostgresContext): String =
     statement match {
       case Create(tableName, columns) =>
-        val stringColumns =
-          columns
-            .map(generateColumnDef)
-            .mkString(",\n")
-            .pipe(indent(_))
-        s"CREATE TABLE $tableName (\n$stringColumns\n);"
+        val stringColumns = mkCode.spacedList(columns.map(generateColumnDef))
+        mkCode.stmt("CREATE TABLE", tableName, codeParens.spaced(stringColumns))
       case Read(tableName, columns, conditions) =>
         val stringColumns    = columns.map(_.name).mkString(", ")
         val stringConditions = generateConditionString(conditions)
-        (s"SELECT $stringColumns FROM $tableName" +: stringConditions).mkString("", " ", ";")
+        mkCode.stmt("SELECT", stringColumns, "FROM", tableName, stringConditions)
       case Insert(tableName, columns) =>
         val stringColumns = columns.map(_.name).mkString(", ")
         val values        = generatePreparedValues(columns)
-        s"INSERT INTO $tableName ($stringColumns)\nVALUES ($values);"
+        mkCode.stmt("INSERT INTO", tableName, codeParens(stringColumns), "VALUES", codeParens(values))
       case Update(tableName, assignments, conditions) =>
         val stringAssignments = assignments.map(generateAssignment).mkString(", ")
         val stringConditions  = generateConditionString(conditions)
-        (s"UPDATE $tableName SET ${stringAssignments}" +: stringConditions).mkString("", " ", ";")
+        mkCode.stmt("UPDATE", tableName, "SET", stringAssignments, stringConditions)
       case Delete(tableName, conditions) =>
         val stringConditions = generateConditionString(conditions)
-        (s"DELETE FROM $tableName" +: stringConditions).mkString("", " ", ";")
-      case Drop(tableName, ifExists) => s"DROP TABLE $tableName" + { if (ifExists) " IF EXISTS;" else ";" }
+        mkCode.stmt("DELETE FROM", tableName, stringConditions)
+      case Drop(tableName, ifExists) =>
+        mkCode.stmt("DROP TABLE", tableName, when(ifExists)("IF EXISTS"))
     }
 }
