@@ -10,6 +10,7 @@ object UnitTestData {
     Seq(
       Run("/bin/python3", Seq("src/main.py", "--help")),
       Cmd("/bin/bash", Seq("/app/start.sh")),
+      Expose(1234),
     ),
   )
 
@@ -19,5 +20,7 @@ object UnitTestData {
        |RUN ["/bin/python3", "src/main.py", "--help"]
        |
        |CMD ["/bin/bash", "/app/start.sh"]
+       |
+       |EXPOSE 1234
        |""".stripMargin
 }
