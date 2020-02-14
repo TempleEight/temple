@@ -24,6 +24,8 @@ object DockerfileGenerator {
       case Add(src, dest)                 => mkCode("ADD", src, dest)
       case Copy(src, dest)                => mkCode("COPY", src, dest)
       case Entrypoint(executable, params) => mkCode("ENTRYPOINT", buildArrayString(executable +: params))
+      case Volume(volume)                 => mkCode("VOLUME", volume)
+      case WorkDir(dir)                   => mkCode("WORKDIR", dir)
     }
 
   /** Given a [[temple.generate.docker.ast.DockerfileRoot]] object, build a valid Dockerfile string */

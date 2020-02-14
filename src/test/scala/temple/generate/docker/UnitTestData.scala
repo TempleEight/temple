@@ -15,6 +15,8 @@ object UnitTestData {
       Add("src/*", "/app/"),
       Copy("bin/*", "/app/bin"),
       Entrypoint("/usr/bin/nginx", Seq("--help")),
+      Volume("/usr/postgres"),
+      WorkDir("/app/"),
     ),
   )
 
@@ -34,5 +36,9 @@ object UnitTestData {
        |COPY bin/* /app/bin
        |
        |ENTRYPOINT ["/usr/bin/nginx", "--help"]
+       |
+       |VOLUME /usr/postgres
+       |
+       |WORKDIR /app/
        |""".stripMargin
 }
