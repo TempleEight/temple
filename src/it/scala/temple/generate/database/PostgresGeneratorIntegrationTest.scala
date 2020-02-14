@@ -8,6 +8,7 @@ import org.scalatest.{BeforeAndAfter, Matchers}
 import temple.containers.PostgresSpec
 import temple.generate.database.ast.ColType.BlobCol
 import temple.generate.database.ast.{Column, ColumnDef, Statement}
+import temple.utils.FileUtils
 
 class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with BeforeAndAfter {
 
@@ -60,13 +61,10 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.isLast shouldBe true
   }
 
-  // Since Blobs require files, we open create a test dynamically
+  // Since Blobs require files, we create a test dynamically
   it should "correctly store blobs" in {
-    val testImage  = new File("src/it/scala/temple/testfiles/cat.jpeg")
-    val fileStream = new FileInputStream(testImage)
-    val fileContents =
-      try fileStream.readAllBytes()
-      finally fileStream.close()
+    val fileContents = FileUtils.readBinaryFile("src/it/scala/temple/testfiles/cat.jpeg")
+
     val createStatement = Statement.Create("Users", Seq(ColumnDef("picture", BlobCol)))
     executeWithoutResults(PostgresGenerator.generate(createStatement))
 
@@ -78,7 +76,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
       executeWithResults("SELECT * FROM USERS;").getOrElse(fail("Database connection could not be established"))
     result.next()
     val returnedFileContents = result.getBytes("picture")
-    returnedFileContents.length shouldBe testImage.length()
+    returnedFileContents.length shouldBe fileContents.length
     returnedFileContents shouldBe fileContents
   }
 
