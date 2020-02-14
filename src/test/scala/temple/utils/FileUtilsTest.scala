@@ -29,4 +29,10 @@ class FileUtilsTest extends FlatSpec with Matchers {
     FileUtils.writeToFile(filename, fileContents)
     FileUtils.readFile(filename) shouldBe fileContents
   }
+
+  it should "read a binary file successfully" in {
+    val expectedDogSize = 128166
+    val dog             = FileUtils.readBinaryFile("src/test/scala/temple/testfiles/dog.jpeg")
+    dog.length shouldBe expectedDogSize
+  }
 }

@@ -5,6 +5,9 @@ import java.sql.{Date, Time, Timestamp}
 import org.postgresql.util.PSQLException
 import org.scalatest.{BeforeAndAfter, Matchers}
 import temple.containers.PostgresSpec
+import temple.generate.database.ast.ColType.BlobCol
+import temple.generate.database.ast.{Column, ColumnDef, Statement}
+import temple.utils.FileUtils
 
 class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with BeforeAndAfter {
 
@@ -55,6 +58,25 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getTime("timeOfDay") shouldBe Time.valueOf("12:00:00")
     result.getTimestamp("expiry") shouldBe Timestamp.valueOf("2020-01-01 00:00:00.0")
     result.isLast shouldBe true
+  }
+
+  // Since Blobs require files, we create a test dynamically
+  it should "correctly store blobs" in {
+    val fileContents = FileUtils.readBinaryFile("src/it/scala/temple/testfiles/cat.jpeg")
+
+    val createStatement = Statement.Create("Users", Seq(ColumnDef("picture", BlobCol)))
+    executeWithoutResults(PostgresGenerator.generate(createStatement))
+
+    val insertStatement = Statement.Insert("Users", Seq(Column("picture")))
+    val insertData      = Seq(PreparedVariable.BlobVariable(fileContents))
+    executeWithoutResultsPrepared(PostgresGenerator.generate(insertStatement), insertData)
+
+    val result =
+      executeWithResults("SELECT * FROM USERS;").getOrElse(fail("Database connection could not be established"))
+    result.next()
+    val returnedFileContents = result.getBytes("picture")
+    returnedFileContents.length shouldBe fileContents.length
+    returnedFileContents shouldBe fileContents
   }
 
   behavior of "DeleteStatements"
