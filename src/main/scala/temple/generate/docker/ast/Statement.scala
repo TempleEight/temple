@@ -7,6 +7,8 @@ object Statement {
   case class Run(executable: String, params: Seq[String]) extends Statement
   case class Cmd(executable: String, params: Seq[String]) extends Statement
   case class Env(key: String, value: String)              extends Statement
+  case class Add(src: String, dest: String)               extends Statement
+  case class Copy(src: String, dest: String)              extends Statement
 
   case class Expose(port: Int) extends Statement {
     {

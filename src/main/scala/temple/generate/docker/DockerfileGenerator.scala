@@ -21,6 +21,8 @@ object DockerfileGenerator {
       case Cmd(executable, params) => mkCode("CMD", buildArrayString(executable +: params))
       case Expose(port)            => mkCode("EXPOSE", port.toString)
       case Env(key, value)         => mkCode("ENV", key, value)
+      case Add(src, dest)          => mkCode("ADD", src, dest)
+      case Copy(src, dest)         => mkCode("COPY", src, dest)
     }
 
   /** Given a [[temple.generate.docker.ast.DockerfileRoot]] object, build a valid Dockerfile string */

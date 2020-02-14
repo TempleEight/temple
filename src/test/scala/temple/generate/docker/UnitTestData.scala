@@ -12,6 +12,8 @@ object UnitTestData {
       Cmd("/bin/bash", Seq("/app/start.sh")),
       Expose(1234),
       Env("key", "value"),
+      Add("src/*", "/app/"),
+      Copy("bin/*", "/app/bin"),
     ),
   )
 
@@ -25,5 +27,9 @@ object UnitTestData {
        |EXPOSE 1234
        |
        |ENV key value
+       |
+       |ADD src/* /app/
+       |
+       |COPY bin/* /app/bin
        |""".stripMargin
 }
