@@ -1,6 +1,5 @@
 package temple.generate.database
 
-import java.io.InputStream
 import java.sql.{Date, Time, Timestamp}
 
 /** Helper case class for holding values for prepared variables in SQL statements
