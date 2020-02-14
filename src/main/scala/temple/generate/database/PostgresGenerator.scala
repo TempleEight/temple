@@ -67,14 +67,17 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
   /** Given a column type, parse it into the type required by PostgreSQL */
   private def generateColumnType(columnType: ColType): String =
     columnType match {
-      case IntCol        => "INT"
-      case FloatCol      => "REAL"
-      case StringCol     => "TEXT"
-      case BoolCol       => "BOOLEAN"
-      case DateCol       => "DATE"
-      case TimeCol       => "TIME"
-      case DateTimeTzCol => "TIMESTAMPTZ"
-      case BlobCol       => "BYTEA"
+      case IntCol(p) if p <= 2   => "SMALLINT"
+      case IntCol(p) if p <= 4   => "INT"
+      case IntCol(_)             => "BIGINT"
+      case FloatCol(p) if p <= 4 => "REAL"
+      case FloatCol(_)           => "DOUBLE PRECISION"
+      case StringCol             => "TEXT"
+      case BoolCol               => "BOOLEAN"
+      case DateCol               => "DATE"
+      case TimeCol               => "TIME"
+      case DateTimeTzCol         => "TIMESTAMPTZ"
+      case BlobCol               => "BYTEA"
     }
 
   /** Parse a given column into PostgreSQL syntax */

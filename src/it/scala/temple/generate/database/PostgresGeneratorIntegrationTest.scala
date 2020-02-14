@@ -53,8 +53,11 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     val result =
       executeWithResults("SELECT * FROM USERS;").getOrElse(fail("Database connection could not be established"))
     result.next()
-    result.getInt("id") shouldBe 3
+    result.getShort("id") shouldBe 3
+    result.getInt("anotherId") shouldBe 4
+    result.getLong("yetAnotherId") shouldBe 5
     result.getFloat("bankBalance") shouldBe 100.1f
+    result.getDouble("bigBankBalance") shouldBe 1000.2f
     result.getString("name") shouldBe "John Smith"
     result.getBoolean("isStudent") shouldBe true
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
@@ -188,8 +191,11 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     val result = executeWithResults(PostgresGenerator.generate(TestData.readStatementComplex))
       .getOrElse(fail("Database connection could not be established"))
     result.next()
-    result.getInt("id") shouldBe 3
+    result.getShort("id") shouldBe 3
+    result.getInt("anotherId") shouldBe 4
+    result.getLong("yetAnotherId") shouldBe 5
     result.getFloat("bankBalance") shouldBe 100.1f
+    result.getDouble("bigBankBalance") shouldBe 1000.2f
     result.getString("name") shouldBe "John Smith"
     result.getBoolean("isStudent") shouldBe true
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
@@ -197,8 +203,11 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getTimestamp("expiry") shouldBe Timestamp.valueOf("2020-01-01 00:00:00.0")
     result.isLast shouldBe false
     result.next()
-    result.getInt("id") shouldBe 123456
+    result.getShort("id") shouldBe 12345
+    result.getInt("anotherId") shouldBe 123456
+    result.getLong("yetAnotherId") shouldBe 1234567
     result.getFloat("bankBalance") shouldBe 23.42f
+    result.getDouble("bigBankBalance") shouldBe 3.141592f
     result.getString("name") shouldBe "Jane Doe"
     result.getBoolean("isStudent") shouldBe false
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
@@ -216,8 +225,11 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     val result =
       executeWithResults("SELECT * FROM Users;").getOrElse(fail("Database connection could not be established"))
     result.next()
-    result.getInt("id") shouldBe 3
+    result.getShort("id") shouldBe 3
+    result.getInt("anotherId") shouldBe 4
+    result.getLong("yetAnotherId") shouldBe 5
     result.getFloat("bankBalance") shouldBe 123.456f
+    result.getDouble("bigBankBalance") shouldBe 1000.2f
     result.getString("name") shouldBe "Will"
     result.getBoolean("isStudent") shouldBe true
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
@@ -225,8 +237,11 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getTimestamp("expiry") shouldBe Timestamp.valueOf("2020-01-01 00:00:00.0")
     result.isLast shouldBe false
     result.next()
-    result.getInt("id") shouldBe 123456
+    result.getShort("id") shouldBe 12345
+    result.getInt("anotherId") shouldBe 123456
+    result.getLong("yetAnotherId") shouldBe 1234567
     result.getFloat("bankBalance") shouldBe 123.456f
+    result.getDouble("bigBankBalance") shouldBe 3.141592f
     result.getString("name") shouldBe "Will"
     result.getBoolean("isStudent") shouldBe false
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
@@ -243,8 +258,11 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     val result =
       executeWithResults("SELECT * FROM Users;").getOrElse(fail("Database connection could not be established"))
     result.next()
-    result.getInt("id") shouldBe 3
+    result.getShort("id") shouldBe 3
+    result.getInt("anotherId") shouldBe 4
+    result.getLong("yetAnotherId") shouldBe 5
     result.getFloat("bankBalance") shouldBe 100.1f
+    result.getDouble("bigBankBalance") shouldBe 1000.2f
     result.getString("name") shouldBe "John Smith"
     result.getBoolean("isStudent") shouldBe true
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
@@ -252,8 +270,11 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getTimestamp("expiry") shouldBe Timestamp.valueOf("2020-01-01 00:00:00.0")
     result.isLast shouldBe false
     result.next()
-    result.getInt("id") shouldBe 123456
+    result.getShort("id") shouldBe 12345
+    result.getInt("anotherId") shouldBe 123456
+    result.getLong("yetAnotherId") shouldBe 1234567
     result.getFloat("bankBalance") shouldBe 123.456f
+    result.getDouble("bigBankBalance") shouldBe 3.141592f
     result.getString("name") shouldBe "Will"
     result.getBoolean("isStudent") shouldBe false
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
