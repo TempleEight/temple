@@ -14,8 +14,11 @@ object IntegrationTestData {
   val createStatement: Create = Create(
     "Users",
     Seq(
-      ColumnDef("id", IntCol),
-      ColumnDef("bankBalance", FloatCol),
+      ColumnDef("id", IntCol(2)),
+      ColumnDef("anotherId", IntCol(4)),
+      ColumnDef("yetAnotherId", IntCol(6)),
+      ColumnDef("bankBalance", FloatCol(4)),
+      ColumnDef("bigBankBalance", FloatCol(8)),
       ColumnDef("name", StringCol),
       ColumnDef("isStudent", BoolCol),
       ColumnDef("dateOfBirth", DateCol),
@@ -27,8 +30,11 @@ object IntegrationTestData {
 
   val postgresCreateString: String =
     """CREATE TABLE Users (
-        |  id INT,
+        |  id SMALLINT,
+        |  anotherId INT,
+        |  yetAnotherId BIGINT,
         |  bankBalance REAL,
+        |  bigBankBalance DOUBLE PRECISION,
         |  name TEXT,
         |  isStudent BOOLEAN,
         |  dateOfBirth DATE,
@@ -40,10 +46,10 @@ object IntegrationTestData {
   val createStatementWithConstraints: Create = Create(
     "Test",
     Seq(
-      ColumnDef("item_id", IntCol, Seq(NonNull, PrimaryKey)),
+      ColumnDef("item_id", IntCol(4), Seq(NonNull, PrimaryKey)),
       ColumnDef("createdAt", DateTimeTzCol, Seq(Unique)),
       ColumnDef("bookingTime", TimeCol, Seq(References("Bookings", "bookingTime"))),
-      ColumnDef("value", IntCol, Seq(Check("value", GreaterEqual, "1"), Null)),
+      ColumnDef("value", IntCol(4), Seq(Check("value", GreaterEqual, "1"), Null)),
     ),
   )
 
@@ -59,7 +65,10 @@ object IntegrationTestData {
     "Users",
     Seq(
       Column("id"),
+      Column("anotherId"),
+      Column("yetAnotherId"),
       Column("bankBalance"),
+      Column("bigBankBalance"),
       Column("name"),
       Column("isStudent"),
       Column("dateOfBirth"),
@@ -69,7 +78,7 @@ object IntegrationTestData {
   )
 
   val postgresSelectString: String =
-    """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users;"""
+    """SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users;"""
 
   val readStatementWithWhere: Read = Read(
     "Users",

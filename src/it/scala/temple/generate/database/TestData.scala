@@ -16,8 +16,11 @@ object TestData {
   val createStatement: Create = Create(
     "Users",
     Seq(
-      ColumnDef("id", IntCol, Seq(Unique)),
-      ColumnDef("bankBalance", FloatCol),
+      ColumnDef("id", IntCol(2), Seq(Unique)),
+      ColumnDef("anotherId", IntCol(4), Seq(Unique)),
+      ColumnDef("yetAnotherId", IntCol(6), Seq(Unique)),
+      ColumnDef("bankBalance", FloatCol(4)),
+      ColumnDef("bigBankBalance", FloatCol(8)),
       ColumnDef("name", StringCol),
       ColumnDef("isStudent", BoolCol),
       ColumnDef("dateOfBirth", DateCol),
@@ -29,7 +32,7 @@ object TestData {
   val createStatementWithUniqueConstraint: Create = Create(
     "UniqueTest",
     Seq(
-      ColumnDef("itemID", IntCol, Seq(NonNull, PrimaryKey)),
+      ColumnDef("itemID", IntCol(4), Seq(NonNull, PrimaryKey)),
       ColumnDef("createdAt", DateTimeTzCol, Seq(Unique)),
     ),
   )
@@ -37,16 +40,16 @@ object TestData {
   val createStatementWithReferenceConstraint: Create = Create(
     "ReferenceTest",
     Seq(
-      ColumnDef("itemID", IntCol, Seq(NonNull, PrimaryKey)),
-      ColumnDef("userID", IntCol, Seq(References("Users", "id"))),
+      ColumnDef("itemID", IntCol(4), Seq(NonNull, PrimaryKey)),
+      ColumnDef("userID", IntCol(4), Seq(References("Users", "id"))),
     ),
   )
 
   val createStatementWithCheckConstraint: Create = Create(
     "CheckTest",
     Seq(
-      ColumnDef("itemID", IntCol, Seq(NonNull, PrimaryKey)),
-      ColumnDef("value", IntCol, Seq(Check("value", GreaterEqual, "1"), Check("value", LessEqual, "10"))),
+      ColumnDef("itemID", IntCol(4), Seq(NonNull, PrimaryKey)),
+      ColumnDef("value", IntCol(4), Seq(Check("value", GreaterEqual, "1"), Check("value", LessEqual, "10"))),
     ),
   )
 
@@ -54,7 +57,10 @@ object TestData {
     "Users",
     Seq(
       Column("id"),
+      Column("anotherId"),
+      Column("yetAnotherId"),
       Column("bankBalance"),
+      Column("bigBankBalance"),
       Column("name"),
       Column("isStudent"),
       Column("dateOfBirth"),
@@ -67,7 +73,10 @@ object TestData {
     "Users",
     Seq(
       Column("id"),
+      Column("anotherId"),
+      Column("yetAnotherId"),
       Column("bankBalance"),
+      Column("bigBankBalance"),
       Column("name"),
       Column("isStudent"),
       Column("dateOfBirth"),
@@ -83,7 +92,10 @@ object TestData {
     "Users",
     Seq(
       Column("id"),
+      Column("anotherId"),
+      Column("yetAnotherId"),
       Column("bankBalance"),
+      Column("bigBankBalance"),
       Column("name"),
       Column("isStudent"),
       Column("dateOfBirth"),
@@ -102,7 +114,10 @@ object TestData {
     "Users",
     Seq(
       Column("id"),
+      Column("anotherId"),
+      Column("yetAnotherId"),
       Column("bankBalance"),
+      Column("bigBankBalance"),
       Column("name"),
       Column("isStudent"),
       Column("dateOfBirth"),
@@ -121,7 +136,10 @@ object TestData {
     "Users",
     Seq(
       Column("id"),
+      Column("anotherId"),
+      Column("yetAnotherId"),
       Column("bankBalance"),
+      Column("bigBankBalance"),
       Column("name"),
       Column("isStudent"),
       Column("dateOfBirth"),
@@ -139,7 +157,10 @@ object TestData {
     "Users",
     Seq(
       Column("id"),
+      Column("anotherId"),
+      Column("yetAnotherId"),
       Column("bankBalance"),
+      Column("bigBankBalance"),
       Column("name"),
       Column("isStudent"),
       Column("dateOfBirth"),
@@ -164,7 +185,10 @@ object TestData {
     "Users",
     Seq(
       Column("id"),
+      Column("anotherId"),
+      Column("yetAnotherId"),
       Column("bankBalance"),
+      Column("bigBankBalance"),
       Column("name"),
       Column("isStudent"),
       Column("dateOfBirth"),
@@ -232,13 +256,16 @@ object TestData {
       Assignment(Column("name"), Value("'Will'")),
     ),
     Some(
-      Comparison("Users.id", Equal, "123456"),
+      Comparison("Users.id", Equal, "12345"),
     ),
   )
 
   val insertDataA: Seq[PreparedVariable] = Seq(
-    PreparedVariable.IntVariable(3),
+    PreparedVariable.ShortVariable(3),
+    PreparedVariable.IntVariable(4),
+    PreparedVariable.LongVariable(5),
     PreparedVariable.FloatVariable(100.1f),
+    PreparedVariable.DoubleVariable(1000.2f),
     PreparedVariable.StringVariable("John Smith"),
     PreparedVariable.BoolVariable(true),
     PreparedVariable.DateVariable(Date.valueOf("1998-03-05")),
@@ -247,8 +274,11 @@ object TestData {
   )
 
   val insertDataB: Seq[PreparedVariable] = Seq(
+    PreparedVariable.ShortVariable(12345),
     PreparedVariable.IntVariable(123456),
+    PreparedVariable.LongVariable(1234567),
     PreparedVariable.FloatVariable(23.42f),
+    PreparedVariable.DoubleVariable(3.141592f),
     PreparedVariable.StringVariable("Jane Doe"),
     PreparedVariable.BoolVariable(false),
     PreparedVariable.DateVariable(Date.valueOf("1998-03-05")),
