@@ -7,7 +7,7 @@ import temple.generate.docker.ast.{DockerfileRoot, Statement}
 import temple.generate.utils.CodeTerm.mkCode
 
 /** Generator object for building Dockerfiles from the Dockerfile AST objects */
-object DockerFileGenerator {
+object DockerfileGenerator {
 
   /** Given a sequence of strings, build them in to a string of form ["a", "b", "c"] */
   private def buildArrayString(strs: Seq[String]): String =
