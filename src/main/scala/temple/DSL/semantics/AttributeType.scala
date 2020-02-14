@@ -10,11 +10,11 @@ object AttributeType {
   case object DateTimeType extends AttributeType
   case object TimeType     extends AttributeType
 
-  case class BlobType(size: Option[Long] = None)                extends AttributeType
-  case class StringType(max: Option[Long] = None, min: Int = 0) extends AttributeType
+  case class BlobType(size: Option[Long] = None)                           extends AttributeType
+  case class StringType(max: Option[Long] = None, min: Option[Int] = None) extends AttributeType
 
-  case class IntType(max: Option[Long] = None, min: Option[Long] = None, precision: Short = 4) extends AttributeType
+  case class IntType(max: Option[Long] = None, min: Option[Long] = None, precision: Byte = 4) extends AttributeType
 
-  case class FloatType(max: Double = Double.MaxValue, min: Double = Double.MinValue, precision: Short = 8)
+  case class FloatType(max: Option[Double] = None, min: Option[Double] = None, precision: Byte = 8)
       extends AttributeType
 }
