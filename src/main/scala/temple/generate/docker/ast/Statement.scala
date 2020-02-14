@@ -9,7 +9,7 @@ object Statement {
 
   case class Expose(port: Int) extends Statement {
     {
-      val MAX_PORT = 65500
+      val MAX_PORT = 65535
       if (!(0 to MAX_PORT contains port)) throw new IllegalArgumentException("EXPOSE requires a valid port")
     }
   }
