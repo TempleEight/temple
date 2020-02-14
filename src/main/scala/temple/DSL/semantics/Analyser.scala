@@ -205,10 +205,10 @@ object Analyser {
     }
 
   private def parseProjectBlock(entries: Seq[Entry])(implicit context: BlockContext): ProjectBlock =
-    parseMetadataBlock(entries, parseProjectMetadata)
+    ProjectBlock(parseMetadataBlock(entries, parseProjectMetadata))
 
   private def parseTargetBlock(entries: Seq[Entry])(implicit context: BlockContext): TargetBlock =
-    parseMetadataBlock(entries, parseTargetMetadata)
+    TargetBlock(parseMetadataBlock(entries, parseTargetMetadata))
 
   private def parseStructBlock(entries: Seq[Entry])(implicit context: BlockContext): StructBlock = {
     val attributes = mutable.LinkedHashMap[String, Attribute]()

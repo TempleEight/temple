@@ -1,17 +1,14 @@
 package temple.DSL.semantics
 
-import temple.DSL.semantics.Metadata._
-import temple.DSL.semantics.Templefile._
-
 /** The semantic representation of a Templefile */
 case class Templefile(
   projectName: String,
   projectBlock: ProjectBlock,
   targets: Map[String, TargetBlock],
   services: Map[String, ServiceBlock],
-)
-
-object Templefile {
-  type ProjectBlock = Seq[ProjectMetadata]
-  type TargetBlock  = Seq[TargetMetadata]
+) {
+  // Inform every child node of their parent, so that they can access the project information
+  for (block <- Iterator(projectBlock) ++ targets.valuesIterator ++ services.valuesIterator) {
+    block.setParent(this)
+  }
 }
