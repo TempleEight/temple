@@ -16,9 +16,8 @@ object DockerfileGenerator {
   /** Given a [[temple.generate.docker.ast.Statement]], generate a valid string */
   private def generateStatement(statement: Statement): String =
     statement match {
-      case From(image, tag)            => mkCode("FROM", image, tag.map(":" + _))
-      case RunCmd(command)             => mkCode("RUN", command)
-      case RunExec(executable, params) => mkCode("RUN", buildArrayString(executable +: params))
+      case From(image, tag)        => mkCode("FROM", image, tag.map(":" + _))
+      case Run(executable, params) => mkCode("RUN", buildArrayString(executable +: params))
     }
 
   /** Given a [[temple.generate.docker.ast.DockerfileRoot]] object, build a valid Dockerfile string */
