@@ -59,6 +59,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getFloat("bankBalance") shouldBe 100.1f
     result.getDouble("bigBankBalance") shouldBe 1000.2f
     result.getString("name") shouldBe "John Smith"
+    result.getString("initials") shouldBe "ABC"
     result.getBoolean("isStudent") shouldBe true
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
     result.getTime("timeOfDay") shouldBe Time.valueOf("12:00:00")
@@ -197,6 +198,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getFloat("bankBalance") shouldBe 100.1f
     result.getDouble("bigBankBalance") shouldBe 1000.2f
     result.getString("name") shouldBe "John Smith"
+    result.getString("initials") shouldBe "ABC"
     result.getBoolean("isStudent") shouldBe true
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
     result.getTime("timeOfDay") shouldBe Time.valueOf("12:00:00")
@@ -209,6 +211,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getFloat("bankBalance") shouldBe 23.42f
     result.getDouble("bigBankBalance") shouldBe 3.141592f
     result.getString("name") shouldBe "Jane Doe"
+    result.getString("initials") shouldBe "WJVS"
     result.getBoolean("isStudent") shouldBe false
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
     result.getTime("timeOfDay") shouldBe Time.valueOf("12:00:00")
@@ -231,6 +234,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getFloat("bankBalance") shouldBe 123.456f
     result.getDouble("bigBankBalance") shouldBe 1000.2f
     result.getString("name") shouldBe "Will"
+    result.getString("initials") shouldBe "ABC"
     result.getBoolean("isStudent") shouldBe true
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
     result.getTime("timeOfDay") shouldBe Time.valueOf("12:00:00")
@@ -243,6 +247,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getFloat("bankBalance") shouldBe 123.456f
     result.getDouble("bigBankBalance") shouldBe 3.141592f
     result.getString("name") shouldBe "Will"
+    result.getString("initials") shouldBe "WJVS"
     result.getBoolean("isStudent") shouldBe false
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
     result.getTime("timeOfDay") shouldBe Time.valueOf("12:00:00")
@@ -264,6 +269,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getFloat("bankBalance") shouldBe 100.1f
     result.getDouble("bigBankBalance") shouldBe 1000.2f
     result.getString("name") shouldBe "John Smith"
+    result.getString("initials") shouldBe "ABC"
     result.getBoolean("isStudent") shouldBe true
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
     result.getTime("timeOfDay") shouldBe Time.valueOf("12:00:00")
@@ -276,6 +282,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getFloat("bankBalance") shouldBe 123.456f
     result.getDouble("bigBankBalance") shouldBe 3.141592f
     result.getString("name") shouldBe "Will"
+    result.getString("initials") shouldBe "WJVS"
     result.getBoolean("isStudent") shouldBe false
     result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
     result.getTime("timeOfDay") shouldBe Time.valueOf("12:00:00")
