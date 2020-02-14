@@ -64,24 +64,22 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
   it should "correctly store blobs" in {
     val testImage  = new File("src/it/scala/temple/testfiles/cat.jpeg")
     val fileStream = new FileInputStream(testImage)
-    try {
-      val fileContents    = fileStream.readAllBytes()
-      val createStatement = Statement.Create("Users", Seq(ColumnDef("picture", BlobCol)))
-      executeWithoutResults(PostgresGenerator.generate(createStatement))
+    val fileContents =
+      try fileStream.readAllBytes()
+      finally fileStream.close()
+    val createStatement = Statement.Create("Users", Seq(ColumnDef("picture", BlobCol)))
+    executeWithoutResults(PostgresGenerator.generate(createStatement))
 
-      val insertStatement = Statement.Insert("Users", Seq(Column("picture")))
-      val insertData      = Seq(PreparedVariable.BlobVariable(fileContents))
-      executeWithoutResultsPrepared(PostgresGenerator.generate(insertStatement), insertData)
+    val insertStatement = Statement.Insert("Users", Seq(Column("picture")))
+    val insertData      = Seq(PreparedVariable.BlobVariable(fileContents))
+    executeWithoutResultsPrepared(PostgresGenerator.generate(insertStatement), insertData)
 
-      val result =
-        executeWithResults("SELECT * FROM USERS;").getOrElse(fail("Database connection could not be established"))
-      result.next()
-      val returnedFileContents = result.getBytes("picture")
-      returnedFileContents.length shouldBe testImage.length()
-      returnedFileContents shouldBe fileContents
-    } finally {
-      fileStream.close()
-    }
+    val result =
+      executeWithResults("SELECT * FROM USERS;").getOrElse(fail("Database connection could not be established"))
+    result.next()
+    val returnedFileContents = result.getBytes("picture")
+    returnedFileContents.length shouldBe testImage.length()
+    returnedFileContents shouldBe fileContents
   }
 
   behavior of "DeleteStatements"
