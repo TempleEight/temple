@@ -81,27 +81,27 @@ object Analyser {
         AttributeType.IntType(
           argMap.getOptionArg("min", IntArgType),
           argMap.getOptionArg("max", IntArgType),
-          argMap.getArg("precision", IntArgType).toShort,
+          argMap.getArg("precision", IntArgType).toByte,
         )
       case "string" =>
         val argMap = parseParameters(
           "maxLength" -> Some(Arg.NoArg),
-          "minLength" -> Some(Arg.IntArg(0)),
+          "minLength" -> Some(Arg.NoArg),
         )(args)
         AttributeType.StringType(
           argMap.getOptionArg("maxLength", IntArgType),
-          argMap.getArg("minLength", IntArgType).toInt,
+          argMap.getOptionArg("minLength", IntArgType).map(_.toInt),
         )
       case "float" =>
         val argMap = parseParameters(
-          "max"       -> Some(Arg.FloatingArg(Double.MaxValue)),
-          "min"       -> Some(Arg.FloatingArg(Double.MinValue)),
+          "max"       -> Some(Arg.NoArg),
+          "min"       -> Some(Arg.NoArg),
           "precision" -> Some(Arg.IntArg(8)),
         )(args)
         AttributeType.FloatType(
-          argMap.getArg("max", FloatingArgType),
-          argMap.getArg("min", FloatingArgType),
-          argMap.getArg("precision", FloatingArgType).toShort,
+          argMap.getOptionArg("max", FloatingArgType),
+          argMap.getOptionArg("min", FloatingArgType),
+          argMap.getArg("precision", FloatingArgType).toByte,
         )
       case "data" =>
         val argMap = parseParameters("maxSize" -> Some(Arg.NoArg))(args)
