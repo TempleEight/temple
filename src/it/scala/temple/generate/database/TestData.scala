@@ -13,10 +13,10 @@ import temple.generate.database.ast._
 /** Static testing assets for DB generation */
 object TestData {
 
-  val createStatement = Create(
+  val createStatement: Create = Create(
     "Users",
     Seq(
-      ColumnDef("id", IntCol),
+      ColumnDef("id", IntCol, Seq(Unique)),
       ColumnDef("bankBalance", FloatCol),
       ColumnDef("name", StringCol),
       ColumnDef("isStudent", BoolCol),
@@ -26,17 +26,31 @@ object TestData {
     ),
   )
 
-  val createStatementWithConstraints = Create(
-    "Test",
+  val createStatementWithUniqueConstraint: Create = Create(
+    "UniqueTest",
     Seq(
       ColumnDef("itemID", IntCol, Seq(NonNull, PrimaryKey)),
       ColumnDef("createdAt", DateTimeTzCol, Seq(Unique)),
-      ColumnDef("bookingTime", TimeCol, Seq(References("Bookings", "bookingTime"))),
-      ColumnDef("value", IntCol, Seq(Check("value", GreaterEqual, "1"), Null)),
     ),
   )
 
-  val readStatement = Read(
+  val createStatementWithReferenceConstraint: Create = Create(
+    "ReferenceTest",
+    Seq(
+      ColumnDef("itemID", IntCol, Seq(NonNull, PrimaryKey)),
+      ColumnDef("userID", IntCol, Seq(References("Users", "id"))),
+    ),
+  )
+
+  val createStatementWithCheckConstraint: Create = Create(
+    "CheckTest",
+    Seq(
+      ColumnDef("itemID", IntCol, Seq(NonNull, PrimaryKey)),
+      ColumnDef("value", IntCol, Seq(Check("value", GreaterEqual, "1"), Check("value", LessEqual, "10"))),
+    ),
+  )
+
+  val readStatement: Read = Read(
     "Users",
     Seq(
       Column("id"),
@@ -49,7 +63,7 @@ object TestData {
     ),
   )
 
-  val readStatementWithWhere = Read(
+  val readStatementWithWhere: Read = Read(
     "Users",
     Seq(
       Column("id"),
@@ -65,7 +79,7 @@ object TestData {
     ),
   )
 
-  val readStatementWithWhereConjunction = Read(
+  val readStatementWithWhereConjunction: Read = Read(
     "Users",
     Seq(
       Column("id"),
@@ -84,7 +98,7 @@ object TestData {
     ),
   )
 
-  val readStatementWithWhereDisjunction = Read(
+  val readStatementWithWhereDisjunction: Read = Read(
     "Users",
     Seq(
       Column("id"),
@@ -103,7 +117,7 @@ object TestData {
     ),
   )
 
-  val readStatementWithWhereInverse = Read(
+  val readStatementWithWhereInverse: Read = Read(
     "Users",
     Seq(
       Column("id"),
@@ -121,7 +135,7 @@ object TestData {
     ),
   )
 
-  val readStatementComplex = Read(
+  val readStatementComplex: Read = Read(
     "Users",
     Seq(
       Column("id"),
@@ -146,7 +160,7 @@ object TestData {
     ),
   )
 
-  val insertStatement = Insert(
+  val insertStatement: Insert = Insert(
     "Users",
     Seq(
       Column("id"),
@@ -159,27 +173,51 @@ object TestData {
     ),
   )
 
-  val deleteStatement = Delete(
+  val insertStatementForUniqueConstraint: Insert = Insert(
+    "UniqueTest",
+    Seq(
+      Column("itemID"),
+      Column("createdAt"),
+    ),
+  )
+
+  val insertStatementForReferenceConstraint: Insert = Insert(
+    "ReferenceTest",
+    Seq(
+      Column("itemID"),
+      Column("userID"),
+    ),
+  )
+
+  val insertStatementForCheckConstraint: Insert = Insert(
+    "CheckTest",
+    Seq(
+      Column("itemID"),
+      Column("value"),
+    ),
+  )
+
+  val deleteStatement: Delete = Delete(
     "Users",
   )
 
-  val deleteStatementWithWhere = Delete(
+  val deleteStatementWithWhere: Delete = Delete(
     "Users",
     Some(
       Comparison("Users.id", Equal, "123456"),
     ),
   )
 
-  val dropStatement = Drop(
+  val dropStatement: Drop = Drop(
     "Users",
     ifExists = false,
   )
 
-  val dropStatementIfExists = Drop(
+  val dropStatementIfExists: Drop = Drop(
     "Users",
   )
 
-  val updateStatement = Update(
+  val updateStatement: Update = Update(
     "Users",
     Seq(
       Assignment(Column("bankBalance"), Value("123.456")),
@@ -187,7 +225,7 @@ object TestData {
     ),
   )
 
-  val updateStatementWithWhere = Update(
+  val updateStatementWithWhere: Update = Update(
     "Users",
     Seq(
       Assignment(Column("bankBalance"), Value("123.456")),
@@ -216,6 +254,41 @@ object TestData {
     PreparedVariable.DateVariable(Date.valueOf("1998-03-05")),
     PreparedVariable.TimeVariable(Time.valueOf("12:00:00")),
     PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2019-02-03 02:23:50.0")),
+  )
+
+  val insertDataUniqueConstraintA: Seq[PreparedVariable] = Seq(
+    PreparedVariable.IntVariable(0),
+    PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2019-11-14 01:02:03.0")),
+  )
+
+  val insertDataUniqueConstraintB: Seq[PreparedVariable] = Seq(
+    PreparedVariable.IntVariable(1),
+    PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2019-11-14 01:02:03.0")),
+  )
+
+  val insertDataReferenceConstraintA: Seq[PreparedVariable] = Seq(
+    PreparedVariable.IntVariable(1),
+    PreparedVariable.IntVariable(3),
+  )
+
+  val insertDataReferenceConstraintB: Seq[PreparedVariable] = Seq(
+    PreparedVariable.IntVariable(1),
+    PreparedVariable.IntVariable(123456789),
+  )
+
+  val insertDataCheckConstraintLowerFails: Seq[PreparedVariable] = Seq(
+    PreparedVariable.IntVariable(1),
+    PreparedVariable.IntVariable(0),
+  )
+
+  val insertDataCheckConstraintUpperFails: Seq[PreparedVariable] = Seq(
+    PreparedVariable.IntVariable(1),
+    PreparedVariable.IntVariable(11),
+  )
+
+  val insertDataCheckConstraintPasses: Seq[PreparedVariable] = Seq(
+    PreparedVariable.IntVariable(1),
+    PreparedVariable.IntVariable(5),
   )
 
 }
