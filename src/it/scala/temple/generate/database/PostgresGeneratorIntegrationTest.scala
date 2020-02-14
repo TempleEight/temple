@@ -1,6 +1,5 @@
 package temple.generate.database
 
-import java.io.{File, FileInputStream}
 import java.sql.{Date, Time, Timestamp}
 
 import org.postgresql.util.PSQLException
