@@ -9,13 +9,13 @@ abstract class TempleBlock[M <: Metadata] {
   def metadata: Seq[M]
 
   /** The Templefile that this block is within */
-  protected var parent: Templefile = _
+  private var parent: Templefile = _
 
   /** Set the parent that this Templefile is within */
-  final def setParent(templefile: Templefile): Unit = parent = templefile
+  final private[semantics] def setParent(templefile: Templefile): Unit = parent = templefile
 
   /** Fall back to the default metadata for the project */
-  final protected def lookupDefaultMetadata[T <: Metadata: ClassTag]: Option[T] = {
+  final private def lookupDefaultMetadata[T <: Metadata: ClassTag]: Option[T] = {
     if (parent == null)
       throw new NullPointerException(
         "Cannot lookup metadata: block not registered as part of a Templefile. " +
