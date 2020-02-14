@@ -14,6 +14,7 @@ object UnitTestData {
       Env("key", "value"),
       Add("src/*", "/app/"),
       Copy("bin/*", "/app/bin"),
+      Entrypoint("/usr/bin/nginx", Seq("--help")),
     ),
   )
 
@@ -31,5 +32,7 @@ object UnitTestData {
        |ADD src/* /app/
        |
        |COPY bin/* /app/bin
+       |
+       |ENTRYPOINT ["/usr/bin/nginx", "--help"]
        |""".stripMargin
 }
