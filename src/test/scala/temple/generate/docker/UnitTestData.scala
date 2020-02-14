@@ -11,6 +11,7 @@ object UnitTestData {
       Run("/bin/python3", Seq("src/main.py", "--help")),
       Cmd("/bin/bash", Seq("/app/start.sh")),
       Expose(1234),
+      Env("key", "value"),
     ),
   )
 
@@ -22,5 +23,7 @@ object UnitTestData {
        |CMD ["/bin/bash", "/app/start.sh"]
        |
        |EXPOSE 1234
+       |
+       |ENV key value
        |""".stripMargin
 }

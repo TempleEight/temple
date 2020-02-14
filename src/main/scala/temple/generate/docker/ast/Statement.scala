@@ -6,6 +6,7 @@ object Statement {
   case class From(image: String, tag: Option[String])     extends Statement
   case class Run(executable: String, params: Seq[String]) extends Statement
   case class Cmd(executable: String, params: Seq[String]) extends Statement
+  case class Env(key: String, value: String)              extends Statement
 
   case class Expose(port: Int) extends Statement {
     {
