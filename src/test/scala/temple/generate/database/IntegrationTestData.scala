@@ -20,6 +20,7 @@ object IntegrationTestData {
       ColumnDef("bankBalance", FloatCol(4)),
       ColumnDef("bigBankBalance", FloatCol(8)),
       ColumnDef("name", StringCol),
+      ColumnDef("initials", BoundedStringCol(5)),
       ColumnDef("isStudent", BoolCol),
       ColumnDef("dateOfBirth", DateCol),
       ColumnDef("timeOfDay", TimeCol),
@@ -36,6 +37,7 @@ object IntegrationTestData {
         |  bankBalance REAL,
         |  bigBankBalance DOUBLE PRECISION,
         |  name TEXT,
+        |  initials VARCHAR(5),
         |  isStudent BOOLEAN,
         |  dateOfBirth DATE,
         |  timeOfDay TIME,
@@ -70,6 +72,7 @@ object IntegrationTestData {
       Column("bankBalance"),
       Column("bigBankBalance"),
       Column("name"),
+      Column("initials"),
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
@@ -78,7 +81,7 @@ object IntegrationTestData {
   )
 
   val postgresSelectString: String =
-    """SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users;"""
+    """SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry FROM Users;"""
 
   val readStatementWithWhere: Read = Read(
     "Users",
