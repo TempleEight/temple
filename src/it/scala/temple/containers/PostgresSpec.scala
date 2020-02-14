@@ -35,7 +35,7 @@ trait PostgresSpec extends FlatSpec with DockerTestKit with DockerPostgresServic
   def executeWithoutResults(query: String): Unit = execute { _.createStatement().execute(query) }
 
   /** Execute a query that does not return a result, but takes a sequence of prepared values that need to be set */
-  def executeWithoutResultsPrepared(preparedStatement: String, values: Seq[PreparedVariable]): Unit = execute { conn =>
+  def executePreparedWithoutResults(preparedStatement: String, values: Seq[PreparedVariable]): Unit = execute { conn =>
     val prep = conn.prepareStatement(preparedStatement)
     values.view.zip(Iterator from 1) foreach {
       case (v, i) =>

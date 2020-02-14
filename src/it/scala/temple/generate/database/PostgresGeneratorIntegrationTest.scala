@@ -12,9 +12,9 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
 
   // The Postgres container is persisted for every test in this spec: clean up any changes made by each test
   before {
-    executeWithoutResults("DROP TABLE IF EXISTS TestUnique;")
-    executeWithoutResults("DROP TABLE IF EXISTS TestReference;")
-    executeWithoutResults("DROP TABLE IF EXISTS TestCheck;")
+    executeWithoutResults("DROP TABLE IF EXISTS UniqueTest;")
+    executeWithoutResults("DROP TABLE IF EXISTS ReferenceTest;")
+    executeWithoutResults("DROP TABLE IF EXISTS CheckTest;")
     executeWithoutResults("DROP TABLE IF EXISTS Users;")
   }
 
@@ -46,7 +46,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
   behavior of "InsertStatements"
   it should "be executed correctly" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
-    executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
     val result =
       executeWithResults("SELECT * FROM USERS;").getOrElse(fail("Database connection could not be established"))
     result.next()
@@ -64,12 +64,12 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithUniqueConstraint))
 
-    noException should be thrownBy executeWithoutResultsPrepared(
+    noException should be thrownBy executePreparedWithoutResults(
       PostgresGenerator.generate(TestData.insertStatementForUniqueConstraint),
       TestData.insertDataUniqueConstraintA,
     )
 
-    a[PSQLException] should be thrownBy executeWithoutResultsPrepared(
+    a[PSQLException] should be thrownBy executePreparedWithoutResults(
       PostgresGenerator.generate(TestData.insertStatementForUniqueConstraint),
       TestData.insertDataUniqueConstraintB,
     )
@@ -80,12 +80,12 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithReferenceConstraint))
 
     // Insert user into users table, has ID 3
-    executeWithoutResultsPrepared(
+    executePreparedWithoutResults(
       PostgresGenerator.generate(TestData.insertStatement),
       TestData.insertDataA,
     )
 
-    noException should be thrownBy executeWithoutResultsPrepared(
+    noException should be thrownBy executePreparedWithoutResults(
       PostgresGenerator.generate(TestData.insertStatementForReferenceConstraint),
       TestData.insertDataReferenceConstraintA,
     )
@@ -96,12 +96,12 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithReferenceConstraint))
 
     // Insert user into users table, has ID 3
-    executeWithoutResultsPrepared(
+    executePreparedWithoutResults(
       PostgresGenerator.generate(TestData.insertStatement),
       TestData.insertDataA,
     )
 
-    a[PSQLException] should be thrownBy executeWithoutResultsPrepared(
+    a[PSQLException] should be thrownBy executePreparedWithoutResults(
       PostgresGenerator.generate(TestData.insertStatementForReferenceConstraint),
       TestData.insertDataReferenceConstraintB,
     )
@@ -109,7 +109,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
 
   it should "fail when inserting data that doesn't satisfy the lower bound of a check constraint" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithCheckConstraint))
-    a[PSQLException] should be thrownBy executeWithoutResultsPrepared(
+    a[PSQLException] should be thrownBy executePreparedWithoutResults(
       PostgresGenerator.generate(TestData.insertStatementForCheckConstraint),
       TestData.insertDataCheckConstraintLowerFails,
     )
@@ -117,7 +117,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
 
   it should "fail when inserting data that doesn't satisfy the upper bound of a check constraint" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithCheckConstraint))
-    a[PSQLException] should be thrownBy executeWithoutResultsPrepared(
+    a[PSQLException] should be thrownBy executePreparedWithoutResults(
       PostgresGenerator.generate(TestData.insertStatementForCheckConstraint),
       TestData.insertDataCheckConstraintUpperFails,
     )
@@ -125,7 +125,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
 
   it should "succeed when inserting data that satisfies both check constraints" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithCheckConstraint))
-    noException should be thrownBy executeWithoutResultsPrepared(
+    noException should be thrownBy executePreparedWithoutResults(
       PostgresGenerator.generate(TestData.insertStatementForCheckConstraint),
       TestData.insertDataCheckConstraintPasses,
     )
@@ -134,7 +134,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
   behavior of "DeleteStatements"
   it should "clear the table following an insert" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
-    executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
     executeWithoutResults(PostgresGenerator.generate(TestData.deleteStatement))
     val result =
       executeWithResults("SELECT * FROM USERS;").getOrElse(fail("Database connection could not be established"))
@@ -161,8 +161,8 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
   it should "be executed correctly" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     //The query should select both
-    executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
-    executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
     val result = executeWithResults(PostgresGenerator.generate(TestData.readStatementComplex))
       .getOrElse(fail("Database connection could not be established"))
     result.next()
@@ -188,8 +188,8 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
   behavior of "UpdateStatements"
   it should "update all rows in a table" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
-    executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
-    executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
     executeWithoutResults(PostgresGenerator.generate(TestData.updateStatement))
     val result =
       executeWithResults("SELECT * FROM Users;").getOrElse(fail("Database connection could not be established"))
@@ -215,8 +215,8 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
 
   it should "update some rows in a table using WHERE" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
-    executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
-    executeWithoutResultsPrepared(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
     executeWithoutResults(PostgresGenerator.generate(TestData.updateStatementWithWhere))
     val result =
       executeWithResults("SELECT * FROM Users;").getOrElse(fail("Database connection could not be established"))

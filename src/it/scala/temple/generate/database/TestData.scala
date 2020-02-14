@@ -27,7 +27,7 @@ object TestData {
   )
 
   val createStatementWithUniqueConstraint: Create = Create(
-    "TestUnique",
+    "UniqueTest",
     Seq(
       ColumnDef("itemID", IntCol, Seq(NonNull, PrimaryKey)),
       ColumnDef("createdAt", DateTimeTzCol, Seq(Unique)),
@@ -35,7 +35,7 @@ object TestData {
   )
 
   val createStatementWithReferenceConstraint: Create = Create(
-    "TestReference",
+    "ReferenceTest",
     Seq(
       ColumnDef("itemID", IntCol, Seq(NonNull, PrimaryKey)),
       ColumnDef("userID", IntCol, Seq(References("Users", "id"))),
@@ -43,7 +43,7 @@ object TestData {
   )
 
   val createStatementWithCheckConstraint: Create = Create(
-    "TestCheck",
+    "CheckTest",
     Seq(
       ColumnDef("itemID", IntCol, Seq(NonNull, PrimaryKey)),
       ColumnDef("value", IntCol, Seq(Check("value", GreaterEqual, "1"), Check("value", LessEqual, "10"))),
@@ -174,7 +174,7 @@ object TestData {
   )
 
   val insertStatementForUniqueConstraint: Insert = Insert(
-    "TestUnique",
+    "UniqueTest",
     Seq(
       Column("itemID"),
       Column("createdAt"),
@@ -182,7 +182,7 @@ object TestData {
   )
 
   val insertStatementForReferenceConstraint: Insert = Insert(
-    "TestReference",
+    "ReferenceTest",
     Seq(
       Column("itemID"),
       Column("userID"),
@@ -190,7 +190,7 @@ object TestData {
   )
 
   val insertStatementForCheckConstraint: Insert = Insert(
-    "TestCheck",
+    "CheckTest",
     Seq(
       Column("itemID"),
       Column("value"),
