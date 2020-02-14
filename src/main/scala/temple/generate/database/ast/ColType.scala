@@ -10,4 +10,5 @@ object ColType {
   case object DateCol       extends ColType
   case object TimeCol       extends ColType
   case object DateTimeTzCol extends ColType
+  case object BlobCol       extends ColType
 }

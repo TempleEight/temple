@@ -15,4 +15,5 @@ object PreparedVariable {
   case class DateVariable(value: Date)            extends PreparedVariable
   case class TimeVariable(value: Time)            extends PreparedVariable
   case class DateTimeTzVariable(value: Timestamp) extends PreparedVariable
+  case class BlobVariable(value: Array[Byte])     extends PreparedVariable
 }
