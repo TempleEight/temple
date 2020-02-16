@@ -11,6 +11,12 @@ object UnitTestData {
       Run("/bin/python3", Seq("src/main.py", "--help")),
       Cmd("/bin/bash", Seq("/app/start.sh")),
       Expose(1234),
+      Env("key", "value"),
+      Add("src/*", "/app/"),
+      Copy("bin/*", "/app/bin"),
+      Entrypoint("/usr/bin/nginx", Seq("--help")),
+      Volume("/usr/postgres"),
+      WorkDir("/app/"),
     ),
   )
 
@@ -22,5 +28,17 @@ object UnitTestData {
        |CMD ["/bin/bash", "/app/start.sh"]
        |
        |EXPOSE 1234
+       |
+       |ENV key value
+       |
+       |ADD src/* /app/
+       |
+       |COPY bin/* /app/bin
+       |
+       |ENTRYPOINT ["/usr/bin/nginx", "--help"]
+       |
+       |VOLUME /usr/postgres
+       |
+       |WORKDIR /app/
        |""".stripMargin
 }
