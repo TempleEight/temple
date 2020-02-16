@@ -19,21 +19,22 @@ object DatabaseBuilder {
     }.toSeq
 
     val (colType, constraints) = attribute.attributeType match {
-      case AttributeType.BoolType     => (ColType.BoolCol, valueConstraints)
-      case AttributeType.DateType     => (ColType.DateCol, valueConstraints)
-      case AttributeType.DateTimeType => (ColType.DateTimeTzCol, valueConstraints)
-      case AttributeType.TimeType     => (ColType.TimeCol, valueConstraints)
-      case AttributeType.ForeignKey   => (ColType.IntCol(4), valueConstraints)
-      case AttributeType.BlobType(_)  => (ColType.BlobCol, valueConstraints)
+      case AttributeType.BoolType     => (ColType.BoolCol, Nil)
+      case AttributeType.DateType     => (ColType.DateCol, Nil)
+      case AttributeType.DateTimeType => (ColType.DateTimeTzCol, Nil)
+      case AttributeType.TimeType     => (ColType.TimeCol, Nil)
+      case AttributeType.ForeignKey   => (ColType.IntCol(4), Nil)
+      case AttributeType.BlobType(max) =>
+        (ColType.BlobCol, generateMaxMinConstraints(s"octet_length($name)", max, None))
       case AttributeType.IntType(max, min, precision) =>
-        (ColType.IntCol(precision), valueConstraints ++ generateMaxMinConstraints(name, max, min))
+        (ColType.IntCol(precision), generateMaxMinConstraints(name, max, min))
       case AttributeType.FloatType(max, min, precision) =>
-        (ColType.FloatCol(precision), valueConstraints ++ generateMaxMinConstraints(name, max, min))
+        (ColType.FloatCol(precision), generateMaxMinConstraints(name, max, min))
       case AttributeType.StringType(max, min) =>
         val colType = if (max.isDefined) ColType.BoundedStringCol(max.get) else ColType.StringCol
-        (colType, valueConstraints ++ generateMaxMinConstraints(s"length($name)", None, min))
+        (colType, generateMaxMinConstraints(s"length($name)", None, min))
     }
-    ColumnDef(name, colType, constraints)
+    ColumnDef(name, colType, valueConstraints ++ constraints)
   }
 
   /**
@@ -47,11 +48,10 @@ object DatabaseBuilder {
     val allTables = service.structs.map(s => (s._1, s._2.attributes)).toSeq :+ (serviceName, service.attributes)
 
     // Generate the create statement for each table
-    allTables
-      .map {
-        case (tableName, attributes) =>
-          val columns = attributes.map(a => toColDef(a._1, a._2))
-          Statement.Create(tableName, columns.toSeq)
-      }
+    allTables.map {
+      case (tableName, attributes) =>
+        val columns = attributes.map { case (name, attributes) => toColDef(name, attributes) }
+        Statement.Create(tableName, columns.toSeq)
+    }
   }
 }
