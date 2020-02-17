@@ -1,7 +1,7 @@
 package temple.generate.database
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.generate.database.{IntegrationTestData => TestData}
+import temple.generate.database.{PostgresGeneratorTestData => TestData}
 
 class PostgresGeneratorTest extends FlatSpec with Matchers {
 
