@@ -38,8 +38,7 @@ before_deploy:
 
 deploy:
   provider: releases
-  api_key:
-    secure: Nuxm6jz9Hqy9jbzoMNBMMBLE+eWNUOu5dAcOuEuWorc76IvKh5Ae2Mwm+8RmOwlH0n5afZg6RZA7HTdv0rALvm/hc611WRksa22rDZsDFThTTuBhEzMTpOWxRG66jzaQAPl8I7RVCJVFidMt28GQuCfCNUbo919CMZmJ6MINGPWUn/NV2FJJ6kLQ7AvLstUqHmhb2143oktg7rtIqgEatIeJ7Yg3jo1HO18i8t0YXZSI7//KIpz9SmXtTqUq5Isi3cGE1eJiu6zhlwQHjirwo425S3QgB64ynCXoHWDJ0sjJezdRcPMA/j7d/SkuRUUq8zbEGsqqUxAbLKn7zd1J3yQZaXGaK54SswYpdTvJXH03cQ43E/Fywf7f+ORzPBBAt6Q7jfZe3IVlS64h0107P2a6+J3X7HW/ik5tFvlIwFV5VzqJMU39J3njQb1Eoe9yHLPWX6kY/L+b8aNZBAvdzxDwepgEgOpWCzbErbwZxZbgmcnw2uNtD4LxfiD48dIqEyyscWv1g4v60LuEKJD5zmw9BILn7O/Ayma8m5prlgz5JpmeXhmI4ZNMZVpCEYeSPS1q7/ENYz+MeOpuSiT8ExrxMJdzFgjY5bkpqfrY5AviAbnL/pujFIULvGq0DC5K8Vf8EPIq6mDFJDSp+5tF/qNR0RFLAHQ7HWjUoMzevN8=
+  api_key: $GITHUB_OAUTH
   file: "./target/scala-2.13/temple-latest.jar"
   on:
     branch: master
