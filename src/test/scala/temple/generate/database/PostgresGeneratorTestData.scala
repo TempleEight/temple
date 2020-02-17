@@ -9,7 +9,7 @@ import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
 
 /** Static testing assets for DB generation */
-object IntegrationTestData {
+object PostgresGeneratorTestData {
 
   val createStatement: Create = Create(
     "Users",
@@ -51,7 +51,7 @@ object IntegrationTestData {
       ColumnDef("item_id", IntCol(4), Seq(NonNull, PrimaryKey)),
       ColumnDef("createdAt", DateTimeTzCol, Seq(Unique)),
       ColumnDef("bookingTime", TimeCol, Seq(References("Bookings", "bookingTime"))),
-      ColumnDef("value", IntCol(4), Seq(Check("value", GreaterEqual, "1"), Null)),
+      ColumnDef("value", IntCol(4), Seq(Check("value", GreaterEqual, "1"), NonNull)),
     ),
   )
 
@@ -60,7 +60,7 @@ object IntegrationTestData {
         |  item_id INT NOT NULL PRIMARY KEY,
         |  createdAt TIMESTAMPTZ UNIQUE,
         |  bookingTime TIME REFERENCES Bookings (bookingTime),
-        |  value INT CHECK (value >= 1) NULL
+        |  value INT CHECK (value >= 1) NOT NULL
         |);""".stripMargin
 
   val readStatement: Read = Read(
