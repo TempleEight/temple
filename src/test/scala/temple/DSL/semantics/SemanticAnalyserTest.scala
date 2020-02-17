@@ -3,7 +3,6 @@ package temple.DSL.semantics
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.semantics.Analyser.parseSemantics
 import temple.DSL.semantics.AttributeType._
-import temple.DSL.semantics.Metadata.Language
 import temple.DSL.syntax
 import temple.DSL.syntax.Arg._
 import temple.DSL.syntax.{Args, DSLRootItem, Entry}
@@ -13,14 +12,8 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
   private def mkTemplefileAST(rootItems: DSLRootItem*): syntax.Templefile =
     DSLRootItem("Test", "project", Nil) +: rootItems
 
-  private def mkTemplefileSemanticsWithServiceBlocks(entries: (String, ServiceBlock)*): Templefile =
+  private def mkTemplefileSemantics(entries: (String, ServiceBlock)*): Templefile =
     Templefile("Test", ProjectBlock(Nil), Map.empty, entries.toMap)
-
-  private def mkTemplefileSemantics(
-    targetBlocks: Map[String, TargetBlock],
-    serviceBlocks: Map[String, ServiceBlock],
-  ): Templefile =
-    Templefile("Test", ProjectBlock(Nil), targetBlocks, serviceBlocks)
 
   private def mkTemplefileASTWithUserService(entries: Entry*): syntax.Templefile = Seq(
     DSLRootItem("Test", "project", Nil),
@@ -37,7 +30,7 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
   }
 
   it should "parse an AST containing only an empty project block" in {
-    parseSemantics(mkTemplefileAST()) shouldBe mkTemplefileSemanticsWithServiceBlocks()
+    parseSemantics(mkTemplefileAST()) shouldBe mkTemplefileSemantics()
   }
 
   it should "parse an AST containing a basic user service" in {
