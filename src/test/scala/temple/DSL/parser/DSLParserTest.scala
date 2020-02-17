@@ -28,6 +28,11 @@ class DSLParserTest extends FlatSpec with Matchers {
     DSLProcessor.parse("@server Test: service { }").shouldNotParse
   }
 
+  it should "not allow parameters for foreign keys" in {
+    DSLProcessor.parse("Test: service {age: int; Person: struct { test: Test }}").shouldParse
+    DSLProcessor.parse("Test: service {age: int; Person: struct { test: Test() }}").shouldNotParse
+  }
+
   it should "parse to the correct result for simple.temple" in {
     val source      = readFile("src/test/scala/temple/testfiles/simple.temple")
     val parseResult = DSLProcessor.parse(source).shouldParse
