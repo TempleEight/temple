@@ -13,7 +13,7 @@ User: service {
   breakfastTime: time;
 
   Fred: struct {
-    field: string;
+    field: string @nullable;
   };
 
   #auth(login: username);
