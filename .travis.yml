@@ -20,6 +20,8 @@ jobs:
         - bash <(curl -s https://codecov.io/bash)
     - stage: integration-test
       script: sbt clean it:test
+    - stage: e2e-test
+      script: sbt clean e2e:test
     - stage: format
       script: sbt clean scalafmtCheck test:scalafmtCheck it:scalafmtCheck
     - stage: deploy

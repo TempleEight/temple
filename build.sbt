@@ -12,8 +12,18 @@ test in assembly := {}
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(prependShellScript = Some(defaultShellScript))
 
 // https://www.scala-sbt.org/1.x/docs/Testing.html#Integration+Tests
+lazy val EndToEndTest = config("e2e") extend(Test)
+lazy val endToEndTestSettings: Seq[Def.Setting[_]] =
+  inConfig(EndToEndTest)(Defaults.testSettings) ++
+    Seq(
+      scalaSource in EndToEndTest := baseDirectory.value / "src/e2e/scala",
+      parallelExecution in EndToEndTest := false,
+      fork in EndToEndTest := true
+    )
+
 lazy val root = (project in file("."))
-  .configs(IntegrationTest)
+  .configs(IntegrationTest, EndToEndTest)
+  .settings(endToEndTestSettings)
   .settings(
     Defaults.itSettings,
     libraryDependencies ++= Seq(
@@ -35,7 +45,7 @@ lazy val root = (project in file("."))
 scalacOptions ++= Seq("-deprecation", "-feature")
 
 // https://github.com/scoverage/sbt-scoverage#exclude-classes-and-packages
-coverageExcludedPackages := "<empty>;temple\\.Main;"
+coverageExcludedPackages := "<empty>;temple\\.Main;temple\\.Application"
 
 // Enable formatting on integration tests
 inConfig(IntegrationTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings)
