@@ -46,7 +46,11 @@ class DSLParserTest extends FlatSpec with Matchers {
           ),
           Attribute("birthDate", AttributeType.Primitive("date")),
           Attribute("breakfastTime", AttributeType.Primitive("time")),
-          DSLRootItem("Fred", "struct", Seq(Attribute("field", AttributeType.Primitive("string")))),
+          DSLRootItem(
+            "Fred",
+            "struct",
+            Seq(Attribute("field", AttributeType.Primitive("string"), Seq(Annotation("nullable")))),
+          ),
           Metadata("auth", Args(kwargs = Seq("login" -> Arg.TokenArg("username")))),
           Metadata("uses", Args(Seq(Arg.ListArg(Seq(Arg.TokenArg("Booking"), Arg.TokenArg("Events")))))),
         ),

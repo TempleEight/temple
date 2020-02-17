@@ -39,7 +39,6 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
   private def generateConstraint(constraint: ColumnConstraint): String =
     constraint match {
       case NonNull                    => "NOT NULL"
-      case Null                       => "NULL"
       case Check(left, comp, right)   => mkCode("CHECK", codeParens(left, generateComparison(comp), right))
       case Unique                     => "UNIQUE"
       case PrimaryKey                 => "PRIMARY KEY"
