@@ -79,6 +79,7 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
 
   /** A parser generator for the type of a foreign key attribute */
   protected def foreignAttributeType: Parser[AttributeType.Foreign] =
+    // If there is an args list (so `not(allArgs)` fails), this parser will fail
     upperIdent <~ (not(allArgs) | failure("Foreign keys cannot have parameters")) ^^ AttributeType.Foreign
 
   /** A parser generator for an annotation on an attribute */
