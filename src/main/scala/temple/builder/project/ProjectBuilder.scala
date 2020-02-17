@@ -4,6 +4,8 @@ import temple.DSL.semantics.Metadata.Database
 import temple.DSL.semantics.Metadata.Database.Postgres
 import temple.DSL.semantics.Templefile
 import temple.builder.DatabaseBuilder
+import temple.builder.project.FileType.SQL
+import temple.builder.project.Project.File
 import temple.generate.database.PreparedType.QuestionMarks
 import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.database.ast.Statement
@@ -19,12 +21,12 @@ object ProjectBuilder {
     val databaseCreationScripts = templefile.services.map {
       case (name, service) =>
         val queries: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
-        val generatedScripts: Seq[String] = service.lookupMetadata[Database].getOrElse(Postgres) match {
+        service.lookupMetadata[Database].getOrElse(Postgres) match {
           case Postgres =>
             implicit val context: PostgresContext = PostgresContext(QuestionMarks)
-            queries.map(PostgresGenerator.generate)
+            val postgresStatements                = queries.map(PostgresGenerator.generate).mkString("\n")
+            (File(s"$name-db", "init", SQL), postgresStatements)
         }
-        (name, generatedScripts.mkString("\n"))
     }
 
     Project(databaseCreationScripts)

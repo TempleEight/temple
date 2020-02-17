@@ -1,9 +1,9 @@
 package temple.builder.project
 
-import temple.builder.project.Project.Filename
+import temple.builder.project.Project.File
 
-case class Project(databaseCreationScripts: Map[Filename, String])
+case class Project(databaseCreationScripts: Map[File, String])
 
 object Project {
-  type Filename = String
+  case class File(folder: String, filename: String, filetype: FileType)
 }
