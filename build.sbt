@@ -38,7 +38,7 @@ lazy val root = (project in file("."))
 scalacOptions ++= Seq("-deprecation", "-feature")
 
 // https://github.com/scoverage/sbt-scoverage#exclude-classes-and-packages
-coverageExcludedPackages := "<empty>;temple\\.Main;"
+coverageExcludedPackages := "<empty>;temple\\.Main;temple\\.Application"
 
 // Enable formatting on integration tests
 inConfig(IntegrationTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings)
