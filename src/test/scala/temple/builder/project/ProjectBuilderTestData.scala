@@ -99,6 +99,6 @@ object ProjectBuilderTestData {
       |  timeField TIME NOT NULL,
       |  dateTimeField TIMESTAMPTZ NOT NULL,
       |  blobField BYTEA NOT NULL
-      |);""".stripMargin + "\n" + simpleTemplefilePostgresCreateOutput
+      |);""".stripMargin + "\n\n" + simpleTemplefilePostgresCreateOutput
 
 }
