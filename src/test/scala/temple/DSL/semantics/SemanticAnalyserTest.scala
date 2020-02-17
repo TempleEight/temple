@@ -294,35 +294,35 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
 
   it should "parse project blocks correctly" in {
     noException should be thrownBy {
-      parseSemantics(Seq(DSLRootItem("test", "project", Seq(Entry.Metadata("language", Args(Seq(TokenArg("go"))))))))
+      parseSemantics(Seq(DSLRootItem("Test", "project", Seq(Entry.Metadata("language", Args(Seq(TokenArg("go"))))))))
     }
 
     a[SemanticParsingException] should be thrownBy {
-      parseSemantics(Seq(DSLRootItem("test", "project", Seq(Entry.Metadata("bad", Args(Seq(TokenArg("go"))))))))
+      parseSemantics(Seq(DSLRootItem("Test", "project", Seq(Entry.Metadata("bad", Args(Seq(TokenArg("go"))))))))
     }
 
     a[SemanticParsingException] should be thrownBy {
       parseSemantics(
-        Seq(DSLRootItem("test", "project", Seq(Entry.Attribute("field", syntax.AttributeType.Primitive("int"))))),
+        Seq(DSLRootItem("Test", "project", Seq(Entry.Attribute("field", syntax.AttributeType.Primitive("int"))))),
       )
     }
   }
 
   it should "fail to parse duplicate project blocks" in {
     a[SemanticParsingException] should be thrownBy {
-      parseSemantics(Seq(DSLRootItem("test", "project", Seq()), DSLRootItem("other", "project", Seq())))
+      parseSemantics(Seq(DSLRootItem("Test", "project", Seq()), DSLRootItem("other", "project", Seq())))
     }
   }
 
   it should "fail to parse metadata without required parameter" in {
     a[SemanticParsingException] should be thrownBy {
-      parseSemantics(Seq(DSLRootItem("test", "project", Seq(Entry.Metadata("language", Args())))))
+      parseSemantics(Seq(DSLRootItem("Test", "project", Seq(Entry.Metadata("language", Args())))))
     }
   }
 
   it should "fail to parse unknown root blocks" in {
     a[SemanticParsingException] should be thrownBy {
-      parseSemantics(Seq(DSLRootItem("test", "project", Seq()), DSLRootItem("other", "badItem", Seq())))
+      parseSemantics(Seq(DSLRootItem("Test", "project", Seq()), DSLRootItem("other", "badItem", Seq())))
     }
   }
 
