@@ -21,8 +21,11 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
     case key ~ tag ~ entries => DSLRootItem(key, tag, entries)
   }
 
+  /** A parser generator for a semicolon (optional at the end of a block). */
+  protected def semicolon: Parser[String] = ";" | guard("}" | """$""".r)
+
   /** A parser generator for an entry within a block. */
-  protected def entry: Parser[Entry] = (attribute | metadata) <~ ";" | rootItem <~ ";".?
+  protected def entry: Parser[Entry] = rootItem <~ semicolon.? | (attribute | metadata) <~ semicolon
 
   /** A parser generator for a line of metadata */
   protected def metadata: Parser[Entry.Metadata] = "#" ~> lowerIdent ~ (allArgs | shorthandListArg) ^^ {
