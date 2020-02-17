@@ -73,21 +73,6 @@ object DatabaseBuilderTestData {
   val sampleComplexServiceCreate: Seq[Statement.Create] =
     Seq(
       Create(
-        "Test",
-        Seq(
-          ColumnDef("favouriteColour", StringCol, Seq(Unique)),
-          ColumnDef("bedTime", TimeCol),
-          ColumnDef(
-            "favouriteNumber",
-            IntCol(4),
-            Seq(
-              Check("favouriteNumber", LessEqual, "10"),
-              Check("favouriteNumber", GreaterEqual, "0"),
-            ),
-          ),
-        ),
-      ),
-      Create(
         "Users",
         Seq(
           ColumnDef("id", IntCol(2), Seq(Check("id", LessEqual, "100"), Check("id", GreaterEqual, "10"))),
@@ -118,6 +103,21 @@ object DatabaseBuilderTestData {
           ColumnDef("timeOfDay", TimeCol),
           ColumnDef("expiry", DateTimeTzCol),
           ColumnDef("image", BlobCol),
+        ),
+      ),
+      Create(
+        "Test",
+        Seq(
+          ColumnDef("favouriteColour", StringCol, Seq(Unique)),
+          ColumnDef("bedTime", TimeCol),
+          ColumnDef(
+            "favouriteNumber",
+            IntCol(4),
+            Seq(
+              Check("favouriteNumber", LessEqual, "10"),
+              Check("favouriteNumber", GreaterEqual, "0"),
+            ),
+          ),
         ),
       ),
     )
