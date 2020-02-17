@@ -10,6 +10,11 @@ import temple.generate.database.ast.Statement
 
 object ProjectBuilder {
 
+  /**
+    * Converts a Templefile to an associated project, containing all generated code
+    * @param templefile The semantically correct Templefile
+    * @return the associated generated project
+    */
   def build(templefile: Templefile): Project = {
     val databaseCreationScripts = templefile.services.map {
       case (name, service) =>
