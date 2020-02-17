@@ -54,6 +54,7 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
         Entry.Attribute("f", syntax.AttributeType.Primitive("datetime")),
         Entry.Attribute("g", syntax.AttributeType.Primitive("data")),
         Entry.Attribute("h", syntax.AttributeType.Primitive("string")),
+        Entry.Attribute("i", syntax.AttributeType.Foreign("User")),
       ),
     ) shouldEqual mkTemplefileSemanticsWithUserService(
       ServiceBlock(
@@ -66,6 +67,7 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
           "f" -> Attribute(DateTimeType),
           "g" -> Attribute(BlobType()),
           "h" -> Attribute(StringType()),
+          "i" -> Attribute(ForeignKey("User")),
         ),
       ),
     )
