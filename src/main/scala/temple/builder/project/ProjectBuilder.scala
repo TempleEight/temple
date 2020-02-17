@@ -19,13 +19,8 @@ object ProjectBuilder {
     val databaseCreationScripts = templefile.services.map {
       case (name, service) =>
         val queries: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
-        val generatedScripts: Seq[String] = service.lookupMetadata[Database] match {
-          case Some(Postgres) =>
-            implicit val context: PostgresContext = PostgresContext(QuestionMarks)
-            queries.map(PostgresGenerator.generate)
-
-          // If no database is defined, default to Postgres
-          case None =>
+        val generatedScripts: Seq[String] = service.lookupMetadata[Database].getOrElse(Postgres) match {
+          case Postgres =>
             implicit val context: PostgresContext = PostgresContext(QuestionMarks)
             queries.map(PostgresGenerator.generate)
         }
