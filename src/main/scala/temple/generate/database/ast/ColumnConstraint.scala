@@ -5,7 +5,6 @@ sealed trait ColumnConstraint
 
 object ColumnConstraint {
   case object NonNull                                                     extends ColumnConstraint
-  case object Null                                                        extends ColumnConstraint
   case class Check(left: String, comp: ComparisonOperator, right: String) extends ColumnConstraint
   case object Unique                                                      extends ColumnConstraint
   case object PrimaryKey                                                  extends ColumnConstraint
