@@ -4,6 +4,8 @@ version := "0.1"
 
 scalaVersion := "2.13.1"
 
+mainClass in assembly := Some("temple.Main")
+
 // https://www.scala-sbt.org/1.x/docs/Testing.html#Integration+Tests
 lazy val root = (project in file("."))
   .configs(IntegrationTest)
@@ -21,7 +23,7 @@ lazy val root = (project in file("."))
       "com.beachape" %% "enumeratum" % "1.5.15",
       "io.circe" %% "circe-core" % "0.12.3",
       "io.circe" %% "circe-generic" % "0.12.3",
-      "io.circe" %% "circe-parser" % "0.12.3"
+      "io.circe" %% "circe-parser" % "0.12.3",
     )
   )
 
@@ -32,3 +34,12 @@ coverageExcludedPackages := "<empty>;temple\\.Main;"
 
 // Enable formatting on integration tests
 inConfig(IntegrationTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings)
+
+//https://stackoverflow.com/questions/28459333/how-to-build-an-uber-jar-fat-jar-using-sbt-within-intellij-idea
+// META-INF discarding
+assemblyMergeStrategy in assembly ~= { _ =>
+  {
+    case PathList("META-INF", _ @ _*) => MergeStrategy.discard
+    case _ => MergeStrategy.first
+  }
+}
