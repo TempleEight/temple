@@ -20,11 +20,11 @@ object ProjectBuilder {
   def build(templefile: Templefile): Project = {
     val databaseCreationScripts = templefile.services.map {
       case (name, service) =>
-        val createStatments: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
+        val createStatements: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
         service.lookupMetadata[Database].getOrElse(Postgres) match {
           case Postgres =>
             implicit val context: PostgresContext = PostgresContext(QuestionMarks)
-            val postgresStatements                = createStatments.map(PostgresGenerator.generate).mkString("\n")
+            val postgresStatements                = createStatements.map(PostgresGenerator.generate).mkString("\n")
             (File(s"${name.toLowerCase}-db", "init", SQL), postgresStatements)
         }
     }
