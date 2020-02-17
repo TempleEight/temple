@@ -14,6 +14,7 @@ User: service {
 
   Fred: struct {
     field: string @nullable;
+    friend: User;
   };
 
   #auth(login: username);

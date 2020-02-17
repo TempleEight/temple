@@ -49,7 +49,10 @@ class DSLParserTest extends FlatSpec with Matchers {
           DSLRootItem(
             "Fred",
             "struct",
-            Seq(Attribute("field", AttributeType.Primitive("string"), Seq(Annotation("nullable")))),
+            Seq(
+              Attribute("field", AttributeType.Primitive("string"), Seq(Annotation("nullable"))),
+              Attribute("friend", AttributeType.Foreign("User")),
+            ),
           ),
           Metadata("auth", Args(kwargs = Seq("login" -> Arg.TokenArg("username")))),
           Metadata("uses", Args(Seq(Arg.ListArg(Seq(Arg.TokenArg("Booking"), Arg.TokenArg("Events")))))),
