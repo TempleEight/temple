@@ -13,7 +13,8 @@ object AttributeType {
   case object DateTimeType extends PrimitiveAttributeType
   case object TimeType     extends PrimitiveAttributeType
 
-  case class BlobType(size: Option[Long] = None)                           extends PrimitiveAttributeType
+  case class BlobType(size: Option[Long] = None) extends PrimitiveAttributeType
+
   case class StringType(max: Option[Long] = None, min: Option[Int] = None) extends PrimitiveAttributeType
 
   case class IntType(max: Option[Long] = None, min: Option[Long] = None, precision: Byte = 4)
