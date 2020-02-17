@@ -1,40 +1,43 @@
 language: scala
 
 scala:
-- 2.13.1
+  - 2.13.1
 
 os: linux
 
 jdk:
-- oraclejdk11
+  - oraclejdk11
 
 services:
-- docker
+  - docker
 
 jobs:
   include:
-  - stage: test
-    script: sbt clean coverage test coverageReport
-    after_success:
-    - bash <(curl -s https://codecov.io/bash)
-  - stage: integration-test
-    script: sbt clean it:test
-  - stage: format
-    script: sbt clean scalafmtCheck test:scalafmtCheck it:scalafmtCheck
+    - stage: test
+        script: sbt clean coverage test coverageReport
+        after_success:
+          # Requires CODECOV_TOKEN env var
+          - bash <(curl -s https://codecov.io/bash)
+    - stage: integration-test
+      script: sbt clean it:test
+    - stage: format
+      script: sbt clean scalafmtCheck test:scalafmtCheck it:scalafmtCheck
 
+# Caching to speed up runs
+# https://www.scala-sbt.org/1.x/docs/Travis-CI-with-sbt.html
 before_cache:
-- rm -fv $HOME/.ivy2/.sbt.ivy.lock
-- find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
-- find $HOME/.sbt        -name "*.lock"               -print -delete
+  - rm -fv $HOME/.ivy2/.sbt.ivy.lock
+  - find $HOME/.ivy2/cache -name "ivydata-*.properties" -print -delete
+  - find $HOME/.sbt        -name "*.lock"               -print -delete
 
 cache:
   directories:
-  - "$HOME/.cache/coursier"
-  - "$HOME/.ivy2/cache"
-  - "$HOME/.sbt"
+    - "$HOME/.cache/coursier"
+    - "$HOME/.ivy2/cache"
+    - "$HOME/.sbt"
 
 before_deploy:
-- sbt clean assembly
+  - sbt clean assembly
 
 deploy:
   provider: releases
