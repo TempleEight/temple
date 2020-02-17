@@ -20,7 +20,8 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
     DSLRootItem("User", "service", entries),
   )
 
-  private def mkTemplefileSemanticsWithUserService(serviceBlock: ServiceBlock): Templefil("Test", ProjectBlock(Nil), Map.empty, Map("User" -> serviceBlock))
+  private def mkTemplefileSemanticsWithUserService(serviceBlock: ServiceBlock): Templefile =
+    Templefile("Test", ProjectBlock(Nil), Map.empty, Map("User" -> serviceBlock))
 
   behavior of "Semantic Analyser"
 
