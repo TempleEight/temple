@@ -36,7 +36,7 @@ coverageExcludedPackages := "<empty>;temple\\.Main;"
 // Enable formatting on integration tests
 inConfig(IntegrationTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings)
 
-//https://stackoverflow.com/questions/28459333/how-to-build-an-uber-jar-fat-jar-using-sbt-within-intellij-idea
+// https://stackoverflow.com/questions/28459333/how-to-build-an-uber-jar-fat-jar-using-sbt-within-intellij-idea
 // META-INF discarding
 assemblyMergeStrategy in assembly ~= { _ =>
   {
