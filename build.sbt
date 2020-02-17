@@ -40,7 +40,7 @@ inConfig(IntegrationTest)(org.scalafmt.sbt.ScalafmtPlugin.scalafmtConfigSettings
 // META-INF discarding
 assemblyMergeStrategy in assembly ~= { _ =>
   {
-    case PathList("META-INF", _ @ _*) => MergeStrategy.discard
+    case PathList("META-INF", _*) => MergeStrategy.discard
     case _ => MergeStrategy.first
   }
 }

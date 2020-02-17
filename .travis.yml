@@ -14,10 +14,10 @@ services:
 jobs:
   include:
     - stage: test
-        script: sbt clean coverage test coverageReport
-        after_success:
-          # Requires CODECOV_TOKEN env var
-          - bash <(curl -s https://codecov.io/bash)
+      script: sbt clean coverage test coverageReport
+      after_success:
+        # Requires CODECOV_TOKEN env var
+        - bash <(curl -s https://codecov.io/bash)
     - stage: integration-test
       script: sbt clean it:test
     - stage: format
