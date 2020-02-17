@@ -10,8 +10,14 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   /** A parser generator for an entire Templefile */
   protected def templefile: Parser[Templefile] = repAll(rootItem)
 
+  /** A parser generator for an identifier beginning in a lowercase letter */
+  protected def lowerIdent: Parser[String] = guard("""[a-z]""".r) ~> ident
+
+  /** A parser generator for an identifier beginning in an uppercase letter */
+  protected def upperIdent: Parser[String] = guard("""[A-Z]""".r) ~> ident
+
   /** A parser generator for each item at the root level, i.e. a name, tag and block */
-  protected def rootItem: Parser[DSLRootItem] = (ident <~ ":") ~ (ident <~ "{") ~ repUntil(entry, "}") ^^ {
+  protected def rootItem: Parser[DSLRootItem] = (upperIdent <~ ":") ~ (ident <~ "{") ~ repUntil(entry, "}") ^^ {
     case key ~ tag ~ entries => DSLRootItem(key, tag, entries)
   }
 
@@ -19,7 +25,7 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   protected def entry: Parser[Entry] = (attribute | metadata) <~ ";" | rootItem <~ ";".?
 
   /** A parser generator for a line of metadata */
-  protected def metadata: Parser[Entry.Metadata] = "#" ~> ident ~ (allArgs | shorthandListArg) ^^ {
+  protected def metadata: Parser[Entry.Metadata] = "#" ~> lowerIdent ~ (allArgs | shorthandListArg) ^^ {
     case function ~ args => Entry.Metadata(function, args)
   }
 
@@ -64,9 +70,16 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
     }
 
   /** A parser generator for the type of an attribute */
-  protected def attributeType: Parser[AttributeType] = ident ~ allArgs.? ^^ {
-    case name ~ maybeArgs => AttributeType(name, maybeArgs.getOrElse(Args()))
+  protected def attributeType: Parser[AttributeType] = primitiveAttributeType | foreignAttributeType
+
+  /** A parser generator for the type of a primitive attribute */
+  protected def primitiveAttributeType: Parser[AttributeType.Primitive] = lowerIdent ~ allArgs.? ^^ {
+    case name ~ maybeArgs => AttributeType.Primitive(name, maybeArgs.getOrElse(Args()))
   }
+
+  /** A parser generator for the type of a foreign key attribute */
+  protected def foreignAttributeType: Parser[AttributeType.Foreign] =
+    upperIdent <~ (not(allArgs.?) | failure("Foreign keys cannot have parameters")) ^^ AttributeType.Foreign
 
   /** A parser generator for an annotation on an attribute */
   protected def annotation: Parser[Annotation] = "@" ~> ident ^^ Annotation
