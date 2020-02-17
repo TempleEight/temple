@@ -1,3 +1,5 @@
+import sbtassembly.AssemblyPlugin.defaultShellScript
+
 name := "temple"
 
 version := "0.1"
@@ -5,7 +7,9 @@ version := "0.1"
 scalaVersion := "2.13.1"
 
 mainClass in assembly := Some("temple.Main")
-assemblyJarName in assembly := "temple-latest.jar"
+assemblyJarName in assembly := "temple-latest"
+test in assembly := {}
+assemblyOption in assembly := (assemblyOption in assembly).value.copy(prependShellScript = Some(defaultShellScript))
 
 // https://www.scala-sbt.org/1.x/docs/Testing.html#Integration+Tests
 lazy val root = (project in file("."))
