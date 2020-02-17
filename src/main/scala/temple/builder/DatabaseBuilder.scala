@@ -18,7 +18,7 @@ object DatabaseBuilder {
       case Annotation.Unique => ColumnConstraint.Unique
     }.toSeq
 
-    val (colType, constraints) = attribute.attributeType match {
+    val (colType, typeConstraints) = attribute.attributeType match {
       case AttributeType.BoolType     => (ColType.BoolCol, Nil)
       case AttributeType.DateType     => (ColType.DateCol, Nil)
       case AttributeType.DateTimeType => (ColType.DateTimeTzCol, Nil)
@@ -34,7 +34,7 @@ object DatabaseBuilder {
         val colType = if (max.isDefined) ColType.BoundedStringCol(max.get) else ColType.StringCol
         (colType, generateMaxMinConstraints(s"length($name)", None, min))
     }
-    ColumnDef(name, colType, valueConstraints ++ constraints)
+    ColumnDef(name, colType, valueConstraints ++ typeConstraints)
   }
 
   /**
