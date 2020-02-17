@@ -24,7 +24,7 @@ object ProjectBuilder {
         service.lookupMetadata[Database].getOrElse(Postgres) match {
           case Postgres =>
             implicit val context: PostgresContext = PostgresContext(QuestionMarks)
-            val postgresStatements                = createStatements.map(PostgresGenerator.generate).mkString("\n")
+            val postgresStatements                = createStatements.map(PostgresGenerator.generate).mkString("\n\n")
             (File(s"${name.toLowerCase}-db", "init", SQL), postgresStatements)
         }
     }
