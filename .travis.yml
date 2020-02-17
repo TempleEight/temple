@@ -35,3 +35,15 @@ cache:
     - $HOME/.cache/coursier
     - $HOME/.ivy2/cache
     - $HOME/.sbt
+
+before_deploy:
+  - sbt clean assembly
+
+deploy:
+  provider: releases
+  api_key: "GITHUB OAUTH TOKEN"
+  file: "./target/scala-2.13/temple--latest.jar"
+  skip_cleanup: true
+  on:
+    branch: master
+    tags: true

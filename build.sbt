@@ -5,6 +5,7 @@ version := "0.1"
 scalaVersion := "2.13.1"
 
 mainClass in assembly := Some("temple.Main")
+assemblyJarName in assembly := "temple-latest.jar"
 
 // https://www.scala-sbt.org/1.x/docs/Testing.html#Integration+Tests
 lazy val root = (project in file("."))
