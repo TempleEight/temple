@@ -1,34 +1,19 @@
 package temple
 
-import java.io.IOException
-import java.nio.file.attribute.BasicFileAttributes
-import java.nio.file.{FileVisitResult, Files, Path, Paths, SimpleFileVisitor}
+import java.nio.file.{Files, Paths}
 
 import org.scalatest.{FlatSpec, Matchers}
+
+import scala.reflect.io.Directory
 
 class SimpleEndToEndTest extends FlatSpec with Matchers {
   behavior of "Temple"
 
-  private def removeDirectory(path: Path): Unit =
-    Files.walkFileTree(
-      path,
-      new SimpleFileVisitor[Path] {
-
-        override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
-          Files.delete(file)
-          FileVisitResult.CONTINUE
-        }
-
-        override def postVisitDirectory(dir: Path, exc: IOException): FileVisitResult = {
-          Files.delete(dir)
-          FileVisitResult.CONTINUE
-        }
-      },
-    )
-
   it should "generate Postgres scripts" in {
-    val basePath = Paths.get("/tmp/temple-e2e-test-1")
-    removeDirectory(basePath)
+    // Clean up folder if exists
+    val basePath  = Paths.get("/tmp/temple-e2e-test-1")
+    val directory = new Directory(basePath.toFile)
+    directory.deleteRecursively()
 
     noException should be thrownBy Application.generate(
       new TempleConfig(
