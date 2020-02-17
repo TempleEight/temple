@@ -5,8 +5,18 @@ version := "0.1"
 scalaVersion := "2.13.1"
 
 // https://www.scala-sbt.org/1.x/docs/Testing.html#Integration+Tests
+lazy val EndToEndTest = config("e2e") extend(Test)
+lazy val endToEndTestSettings: Seq[Def.Setting[_]] =
+  inConfig(EndToEndTest)(Defaults.testSettings) ++
+    Seq(
+      scalaSource in EndToEndTest := baseDirectory.value / "src/e2e/scala",
+      parallelExecution in EndToEndTest := false,
+      fork in EndToEndTest := true
+    )
+
 lazy val root = (project in file("."))
-  .configs(IntegrationTest)
+  .configs(IntegrationTest, EndToEndTest)
+  .settings(endToEndTestSettings)
   .settings(
     Defaults.itSettings,
     libraryDependencies ++= Seq(
