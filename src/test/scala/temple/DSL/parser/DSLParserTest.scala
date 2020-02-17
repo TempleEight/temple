@@ -30,7 +30,7 @@ class DSLParserTest extends FlatSpec with Matchers {
 
   it should "parse to the correct result for simple.temple" in {
     val source      = readFile("src/test/scala/temple/testfiles/simple.temple")
-    val parseResult = DSLProcessor.parse(source).fromEither(msg => fail(s"simple.temple did not parse, $msg"))
+    val parseResult = DSLProcessor.parse(source).shouldParse
 
     parseResult shouldBe Seq(
       DSLRootItem("SimpleTempleTest", "project", Nil),
@@ -61,7 +61,7 @@ class DSLParserTest extends FlatSpec with Matchers {
 
   it should "re-parse to the same result if a parsed structure is exported to string" in {
     val source      = readFile("src/test/scala/temple/testfiles/simple.temple")
-    val parseResult = DSLProcessor.parse(source).fromEither(msg => fail(s"first parse failed, $msg"))
+    val parseResult = DSLProcessor.parse(source).shouldParse
     val reSourced   = parseResult.mkString("\n\n")
 
     val reParsedResult = DSLProcessor.parse(reSourced).fromEither(msg => fail(s"second parse failed, $msg"))
