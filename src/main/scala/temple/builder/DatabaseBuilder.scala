@@ -44,14 +44,10 @@ object DatabaseBuilder {
     * @return the associated create statement
     */
   def createServiceTables(serviceName: String, service: ServiceBlock): Seq[Statement.Create] = {
-    // Create a list of all tables to be created, using top level attributes and nested structs
-    val allTables = service.structs.map(s => (s._1, s._2.attributes)).toSeq :+ (serviceName, service.attributes)
-
-    // Generate the create statement for each table
-    allTables.map {
+    service.structIterator(serviceName).map {
       case (tableName, attributes) =>
         val columns = attributes.map { case (name, attributes) => toColDef(name, attributes) }
         Statement.Create(tableName, columns.toSeq)
     }
-  }
+  }.toSeq
 }
