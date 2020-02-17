@@ -1,12 +1,12 @@
 package temple.DSL.semantics
 
 /** The type of an attribute, i.e. a column in a database/field in a struct */
-trait AttributeType
+sealed trait AttributeType
 
 object AttributeType {
   case class ForeignKey(references: String) extends AttributeType
 
-  trait PrimitiveAttributeType extends AttributeType
+  sealed trait PrimitiveAttributeType extends AttributeType
 
   case object BoolType     extends PrimitiveAttributeType
   case object DateType     extends PrimitiveAttributeType
@@ -20,5 +20,5 @@ object AttributeType {
       extends PrimitiveAttributeType
 
   case class FloatType(max: Option[Double] = None, min: Option[Double] = None, precision: Byte = 8)
-      extends AttributeType
+      extends PrimitiveAttributeType
 }
