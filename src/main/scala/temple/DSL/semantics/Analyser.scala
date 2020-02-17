@@ -140,6 +140,7 @@ object Analyser {
     val valueAnnotations = mutable.HashSet[Annotation.ValueAnnotation]()
     annotations.iterator.map(_.key) foreach {
       case "unique"    => valueAnnotations += Annotation.Unique
+      case "nullable"  => valueAnnotations += Annotation.Nullable
       case "server"    => setAccessAnnotation(Annotation.Server)
       case "client"    => setAccessAnnotation(Annotation.Client)
       case "serverSet" => setAccessAnnotation(Annotation.ServerSet)
