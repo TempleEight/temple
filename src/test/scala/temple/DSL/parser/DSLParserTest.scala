@@ -8,23 +8,29 @@ import temple.utils.FileUtils._
 import temple.utils.MonadUtils.FromEither
 
 class DSLParserTest extends FlatSpec with Matchers {
+
+  implicit private class ParseResult(parsed: Either[String, Templefile]) {
+    def shouldParse: Templefile = parsed.fromEither(msg => fail(s"Parse error: $msg"))
+    def shouldNotParse: Unit    = parsed.isLeft shouldBe true
+  }
+
   behavior of "DSLParser"
 
   it should "parse an empty string" in {
-    DSLProcessor.parse("").isRight shouldBe true
+    DSLProcessor.parse("").shouldParse
   }
 
   it should "parse an empty service" in {
-    DSLProcessor.parse("Test: service { }").isRight shouldBe true
+    DSLProcessor.parse("Test: service { }").shouldParse
   }
 
   it should "not parse annotation at the top level" in {
-    DSLProcessor.parse("@server Test: service { }").isLeft shouldBe true
+    DSLProcessor.parse("@server Test: service { }").shouldNotParse
   }
 
   it should "parse to the correct result for simple.temple" in {
     val source      = readFile("src/test/scala/temple/testfiles/simple.temple")
-    val parseResult = DSLProcessor.parse(source).fromEither(msg => fail(s"simple.temple did not parse, $msg"))
+    val parseResult = DSLProcessor.parse(source).shouldParse
 
     parseResult shouldBe Seq(
       DSLRootItem("SimpleTempleTest", "project", Nil),
@@ -63,7 +69,7 @@ class DSLParserTest extends FlatSpec with Matchers {
 
   it should "re-parse to the same result if a parsed structure is exported to string" in {
     val source      = readFile("src/test/scala/temple/testfiles/simple.temple")
-    val parseResult = DSLProcessor.parse(source).fromEither(msg => fail(s"first parse failed, $msg"))
+    val parseResult = DSLProcessor.parse(source).shouldParse
     val reSourced   = parseResult.mkString("\n\n")
 
     val reParsedResult = DSLProcessor.parse(reSourced).fromEither(msg => fail(s"second parse failed, $msg"))
