@@ -3,6 +3,8 @@ package temple
 import java.nio.file.FileAlreadyExistsException
 
 import temple.DSL.DSLProcessor
+import temple.DSL.semantics.{Analyser, SemanticParsingException}
+import temple.builder.project.ProjectBuilder
 import temple.utils.FileUtils
 
 /** Main entry point into the application */
@@ -23,6 +25,7 @@ object Main extends App {
   } catch {
     case error: IllegalArgumentException   => exit(error.getMessage)
     case error: FileAlreadyExistsException => exit(s"File already exists: ${error.getMessage}")
+    case error: SemanticParsingException   => exit(error.getMessage)
   }
 
   def generate(config: TempleConfig): Unit = {
@@ -31,9 +34,20 @@ object Main extends App {
     DSLProcessor.parse(fileContents) match {
       case Left(error) => exit(error)
       case Right(data) =>
+        val analysedTemplefile = Analyser.parseSemantics(data)
+        val project            = ProjectBuilder.build(analysedTemplefile)
+
         FileUtils.createDirectory(outputDirectory)
-        FileUtils.writeToFile(outputDirectory + "/test.out", data.toString())
-        println(s"Generated file in $outputDirectory/test.out")
+        project.databaseCreationScripts.foreach {
+          case (file, contents) =>
+            val subfolder = s"$outputDirectory/${file.folder}"
+            FileUtils.createDirectory(subfolder)
+            FileUtils.writeToFile(
+              s"$subfolder/${file.filename}.${file.filetype.toString}",
+              contents,
+            )
+        }
+        println(s"Generated project in $outputDirectory")
     }
   }
 }

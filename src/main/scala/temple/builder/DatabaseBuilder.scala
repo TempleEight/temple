@@ -1,5 +1,6 @@
 package temple.builder
 
+import temple.DSL.semantics.Annotation.Nullable
 import temple.DSL.semantics.{Annotation, Attribute, AttributeType, ServiceBlock}
 import temple.generate.database.ast.ColumnConstraint.Check
 import temple.generate.database.ast._
@@ -14,9 +15,12 @@ object DatabaseBuilder {
   }
 
   private def toColDef(name: String, attribute: Attribute): ColumnDef = {
-    val valueConstraints = attribute.valueAnnotations.map {
-      case Annotation.Unique => ColumnConstraint.Unique
-    }.toSeq
+    val nonNullConstraint = Option.when(!attribute.valueAnnotations.contains(Nullable)) { ColumnConstraint.NonNull }
+
+    val valueConstraints = attribute.valueAnnotations.flatMap {
+        case Annotation.Unique   => Some(ColumnConstraint.Unique)
+        case Annotation.Nullable => None
+      } ++ nonNullConstraint
 
     val (colType, typeConstraints) = attribute.attributeType match {
       case AttributeType.BoolType     => (ColType.BoolCol, Nil)
@@ -34,7 +38,7 @@ object DatabaseBuilder {
         val colType = if (max.isDefined) ColType.BoundedStringCol(max.get) else ColType.StringCol
         (colType, generateMaxMinConstraints(s"length($name)", None, min))
     }
-    ColumnDef(name, colType, valueConstraints ++ typeConstraints)
+    ColumnDef(name, colType, typeConstraints ++ valueConstraints)
   }
 
   /**
@@ -44,14 +48,10 @@ object DatabaseBuilder {
     * @return the associated create statement
     */
   def createServiceTables(serviceName: String, service: ServiceBlock): Seq[Statement.Create] = {
-    // Create a list of all tables to be created, using top level attributes and nested structs
-    val allTables = service.structs.map(s => (s._1, s._2.attributes)).toSeq :+ (serviceName, service.attributes)
-
-    // Generate the create statement for each table
-    allTables.map {
+    service.structIterator(serviceName).map {
       case (tableName, attributes) =>
         val columns = attributes.map { case (name, attributes) => toColDef(name, attributes) }
         Statement.Create(tableName, columns.toSeq)
     }
-  }
+  }.toSeq
 }
