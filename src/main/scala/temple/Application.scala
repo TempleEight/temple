@@ -22,7 +22,7 @@ object Application {
             val subfolder = s"$outputDirectory/${file.folder}"
             FileUtils.createDirectory(subfolder)
             FileUtils.writeToFile(
-              s"$subfolder/${file.filename}.${file.filetype.toString}",
+              s"$subfolder/${file.filename}",
               contents,
             )
         }
