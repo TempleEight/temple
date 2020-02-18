@@ -22,7 +22,7 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   }
 
   /** A parser generator for a semicolon (optional at the end of a block). */
-  protected def semicolon: Parser[String] = ";" | guard("""$""".r | "}")
+  protected def semicolon: Parser[String] = guard("""$""".r | "}") | ";"
 
   /** A parser generator for an entry within a block. */
   protected def entry: Parser[Entry] = rootItem <~ semicolon.? | (attribute | metadata) <~ semicolon
