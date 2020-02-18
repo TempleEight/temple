@@ -27,9 +27,7 @@ jobs:
       script: sbt clean scalafmtCheck test:scalafmtCheck it:scalafmtCheck
     - stage: deploy
       script: skip
-      on:
-        tags: true
-        repo: TempleEight/temple
+      if: tag IS present
       before_deploy:
         - sbt clean assembly
       deploy:
@@ -37,6 +35,9 @@ jobs:
         skip_cleanup: true
         token: $GH_OAUTH
         file: "$TRAVIS_BUILD_DIR/target/scala-2.13/temple-latest"
+        on:
+          tags: true
+          repo: TempleEight/temple
 
 
 # Caching to speed up runs
