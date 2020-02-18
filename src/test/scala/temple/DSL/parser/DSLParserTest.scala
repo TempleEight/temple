@@ -63,10 +63,10 @@ class DSLParserTest extends FlatSpec with Matchers {
             Seq(
               Attribute("field", AttributeType.Primitive("string"), Seq(Annotation("nullable"))),
               Attribute("friend", AttributeType.Foreign("User")),
-              Metadata("enumerate", Args(kwargs = Seq("by" -> Arg.TokenArg("User")))),
+              Metadata("enumerable", Args(kwargs = Seq("by" -> Arg.TokenArg("friend")))),
             ),
           ),
-          Metadata("enumerate"),
+          Metadata("enumerable"),
           Metadata("auth", Args(kwargs = Seq("login" -> Arg.TokenArg("username")))),
           Metadata("uses", Args(Seq(Arg.ListArg(Seq(Arg.TokenArg("Booking"), Arg.TokenArg("Events")))))),
         ),
