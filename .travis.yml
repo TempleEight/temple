@@ -26,6 +26,7 @@ jobs:
     - name: Linting
       script: sbt clean scalafmtCheck test:scalafmtCheck it:scalafmtCheck
     - stage: deploy
+      script: skip
       on:
         tags: true
         repo: TempleEight/temple
