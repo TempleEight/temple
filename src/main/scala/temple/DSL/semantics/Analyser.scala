@@ -68,59 +68,61 @@ object Analyser {
     * @return A parsed attribute type
     */
   def parseAttributeType(dataType: syntax.AttributeType)(implicit keyNameContext: KeyName): AttributeType = {
-    val syntax.AttributeType(typeName, args) = dataType
-    implicit val context: Context            = Context(s"$typeName@$keyNameContext")
-
-    typeName match {
-      case "int" =>
-        val argMap = parseParameters(
-          "max"       -> Some(Arg.NoArg),
-          "min"       -> Some(Arg.NoArg),
-          "precision" -> Some(Arg.IntArg(4)),
-        )(args)
-        AttributeType.IntType(
-          argMap.getOptionArg("min", IntArgType),
-          argMap.getOptionArg("max", IntArgType),
-          argMap.getArg("precision", IntArgType).toByte,
-        )
-      case "string" =>
-        val argMap = parseParameters(
-          "maxLength" -> Some(Arg.NoArg),
-          "minLength" -> Some(Arg.NoArg),
-        )(args)
-        AttributeType.StringType(
-          argMap.getOptionArg("maxLength", IntArgType),
-          argMap.getOptionArg("minLength", IntArgType).map(_.toInt),
-        )
-      case "float" =>
-        val argMap = parseParameters(
-          "max"       -> Some(Arg.NoArg),
-          "min"       -> Some(Arg.NoArg),
-          "precision" -> Some(Arg.IntArg(8)),
-        )(args)
-        AttributeType.FloatType(
-          argMap.getOptionArg("max", FloatingArgType),
-          argMap.getOptionArg("min", FloatingArgType),
-          argMap.getArg("precision", FloatingArgType).toByte,
-        )
-      case "data" =>
-        val argMap = parseParameters("maxSize" -> Some(Arg.NoArg))(args)
-        AttributeType.BlobType(
-          argMap.getOptionArg("maxSize", IntArgType),
-        )
-      case "date" =>
-        assertNoParameters(args)
-        AttributeType.DateType
-      case "datetime" =>
-        assertNoParameters(args)
-        AttributeType.DateTimeType
-      case "time" =>
-        assertNoParameters(args)
-        AttributeType.TimeType
-      case "bool" =>
-        assertNoParameters(args)
-        AttributeType.BoolType
-      case typeName => fail(s"Unknown type $typeName")
+    implicit val context: Context = Context(s"${dataType.typeName}@$keyNameContext")
+    dataType match {
+      case syntax.AttributeType.Foreign(typeName) => AttributeType.ForeignKey(typeName)
+      case syntax.AttributeType.Primitive(typeName, args) =>
+        typeName match {
+          case "int" =>
+            val argMap = parseParameters(
+              "max"       -> Some(Arg.NoArg),
+              "min"       -> Some(Arg.NoArg),
+              "precision" -> Some(Arg.IntArg(4)),
+            )(args)
+            AttributeType.IntType(
+              argMap.getOptionArg("min", IntArgType),
+              argMap.getOptionArg("max", IntArgType),
+              argMap.getArg("precision", IntArgType).toByte,
+            )
+          case "string" =>
+            val argMap = parseParameters(
+              "maxLength" -> Some(Arg.NoArg),
+              "minLength" -> Some(Arg.NoArg),
+            )(args)
+            AttributeType.StringType(
+              argMap.getOptionArg("maxLength", IntArgType),
+              argMap.getOptionArg("minLength", IntArgType).map(_.toInt),
+            )
+          case "float" =>
+            val argMap = parseParameters(
+              "max"       -> Some(Arg.NoArg),
+              "min"       -> Some(Arg.NoArg),
+              "precision" -> Some(Arg.IntArg(8)),
+            )(args)
+            AttributeType.FloatType(
+              argMap.getOptionArg("max", FloatingArgType),
+              argMap.getOptionArg("min", FloatingArgType),
+              argMap.getArg("precision", FloatingArgType).toByte,
+            )
+          case "data" =>
+            val argMap = parseParameters("maxSize" -> Some(Arg.NoArg))(args)
+            AttributeType.BlobType(
+              argMap.getOptionArg("maxSize", IntArgType),
+            )
+          case "date" =>
+            assertNoParameters(args)
+            AttributeType.DateType
+          case "datetime" =>
+            assertNoParameters(args)
+            AttributeType.DateTimeType
+          case "time" =>
+            assertNoParameters(args)
+            AttributeType.TimeType
+          case "bool" =>
+            assertNoParameters(args)
+            AttributeType.BoolType
+          case typeName => fail(s"Unknown type $typeName")
+        }
     }
   }
 
