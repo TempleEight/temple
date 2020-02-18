@@ -15,10 +15,10 @@ User: service {
   Fred: struct {
     field: string @nullable;
     friend: User;
-    #enumerable(by: User);
+    #enumerate(by: User);
   };
 
-  #enumerable;
+  #enumerate;
 
   #auth(login: username);
   #uses [Booking, Events];
