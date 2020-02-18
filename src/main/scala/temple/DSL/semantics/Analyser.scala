@@ -153,7 +153,7 @@ object Analyser {
 
   /** A parser of Metadata items that can occur in service blocks */
   private val parseServiceMetadata = new MetadataParser[ServiceMetadata] {
-    registerKeyword("language", TokenArgType)(Language.parse(_))
+    registerKeyword("language", TokenArgType)(ServiceLanguage.parse(_))
     registerKeyword("database", TokenArgType)(Database.parse(_))
     registerKeyword("auth", "login", TokenArgType)(ServiceAuth)
     registerKeyword("uses", "services", ListArgType(TokenArgType))(Uses)
@@ -161,14 +161,14 @@ object Analyser {
 
   /** A parser of Metadata items that can occur in project blocks */
   private val parseProjectMetadata = new MetadataParser[ProjectMetadata] {
-    registerKeyword("language", TokenArgType)(Language.parse(_))
+    registerKeyword("language", TokenArgType)(ServiceLanguage.parse(_))
     registerKeyword("database", TokenArgType)(Database.parse(_))
     registerKeyword("provider", TokenArgType)(Provider.parse(_))
   }
 
   /** A parser of Metadata items that can occur in target blocks */
   private val parseTargetMetadata = new MetadataParser[TargetMetadata] {
-    registerKeyword("language", TokenArgType)(Language.parse(_))
+    registerKeyword("language", TokenArgType)(TargetLanguage.parse(_))
     registerKeyword("auth", "services", ListArgType(TokenArgType))(TargetAuth)
   }
 
