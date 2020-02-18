@@ -26,6 +26,8 @@ jobs:
     - name: Linting
       script: sbt clean scalafmtCheck test:scalafmtCheck it:scalafmtCheck
     - stage: deploy
+      script: skip
+      if: tag IS present
       before_deploy:
         - sbt clean assembly
       deploy:
