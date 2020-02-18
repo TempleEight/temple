@@ -26,15 +26,12 @@ jobs:
     - name: Linting
       script: sbt clean scalafmtCheck test:scalafmtCheck it:scalafmtCheck
     - stage: deploy
-      on:
-        tags: true
-      script: skip
       before_deploy:
         - sbt clean assembly
       deploy:
         provider: releases
         skip_cleanup: true
-        api_key: $GH_OAUTH
+        token: $GH_OAUTH
         file: "$TRAVIS_BUILD_DIR/target/scala-2.13/temple-latest"
         on:
           tags: true
