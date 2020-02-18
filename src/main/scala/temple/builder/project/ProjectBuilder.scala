@@ -4,7 +4,6 @@ import temple.DSL.semantics.Metadata.Database
 import temple.DSL.semantics.Metadata.Database.Postgres
 import temple.DSL.semantics.Templefile
 import temple.builder.DatabaseBuilder
-import temple.builder.project.FileType.SQL
 import temple.builder.project.Project.File
 import temple.generate.database.PreparedType.QuestionMarks
 import temple.generate.database.{PostgresContext, PostgresGenerator}
@@ -25,7 +24,7 @@ object ProjectBuilder {
           case Postgres =>
             implicit val context: PostgresContext = PostgresContext(QuestionMarks)
             val postgresStatements                = createStatements.map(PostgresGenerator.generate).mkString("\n\n")
-            (File(s"${name.toLowerCase}-db", "init", SQL), postgresStatements)
+            (File(s"${name.toLowerCase}-db", "init.sql"), postgresStatements)
         }
     }
 
