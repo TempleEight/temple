@@ -19,7 +19,6 @@ object ErrorHandling {
   private[semantics] def fail(str: String): Nothing = throw new SemanticParsingException(str)
 
   implicit private[semantics] val failThrower: FailThrower = fail
-  implicit private[semantics] val failHandler: FailHandler = fail
 
   // TODO: add more path
   private[semantics] case class KeyName(keyName: String)  { override def toString: String = keyName  }
