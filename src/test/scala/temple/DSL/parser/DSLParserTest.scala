@@ -11,7 +11,7 @@ class DSLParserTest extends FlatSpec with Matchers {
 
   implicit private class ParseResult(parsed: Either[String, Templefile]) {
     def shouldParse: Templefile = parsed.fromEither(msg => fail(s"Parse error: $msg"))
-    def shouldNotParse: Unit    = parsed.isLeft shouldBe true
+    def shouldNotParse: String  = parsed.swap.fromEither(res => fail(s"Unexpected successful parse to $res"))
   }
 
   behavior of "DSLParser"
@@ -28,6 +28,11 @@ class DSLParserTest extends FlatSpec with Matchers {
     DSLProcessor.parse("@server Test: service { }").shouldNotParse
   }
 
+  it should "not allow parameters for foreign keys" in {
+    DSLProcessor.parse("Test: service {age: int; Person: struct { test: Test }}").shouldParse
+    DSLProcessor.parse("Test: service {age: int; Person: struct { test: Test() }}").shouldNotParse
+  }
+
   it should "parse to the correct result for simple.temple" in {
     val source      = readFile("src/test/scala/temple/testfiles/simple.temple")
     val parseResult = DSLProcessor.parse(source).shouldParse
@@ -38,20 +43,28 @@ class DSLParserTest extends FlatSpec with Matchers {
         "User",
         "service",
         Seq(
-          Attribute("username", AttributeType("string")),
-          Attribute("email", AttributeType("string", Args(Seq(Arg.IntArg(40), Arg.IntArg(5))))),
-          Attribute("firstName", AttributeType("string")),
-          Attribute("lastName", AttributeType("string")),
-          Attribute("createdAt", AttributeType("datetime")),
-          Attribute("numberOfDogs", AttributeType("int")),
-          Attribute("yeets", AttributeType("bool"), Seq(Annotation("unique"), Annotation("server"))),
+          Attribute("username", AttributeType.Primitive("string")),
+          Attribute("email", AttributeType.Primitive("string", Args(Seq(Arg.IntArg(40), Arg.IntArg(5))))),
+          Attribute("firstName", AttributeType.Primitive("string")),
+          Attribute("lastName", AttributeType.Primitive("string")),
+          Attribute("createdAt", AttributeType.Primitive("datetime")),
+          Attribute("numberOfDogs", AttributeType.Primitive("int")),
+          Attribute("yeets", AttributeType.Primitive("bool"), Seq(Annotation("unique"), Annotation("server"))),
           Attribute(
             "currentBankBalance",
-            AttributeType("float", Args(kwargs = Seq("min" -> Arg.FloatingArg(0), "precision" -> Arg.IntArg(2)))),
+            AttributeType
+              .Primitive("float", Args(kwargs = Seq("min" -> Arg.FloatingArg(0), "precision" -> Arg.IntArg(2)))),
           ),
-          Attribute("birthDate", AttributeType("date")),
-          Attribute("breakfastTime", AttributeType("time")),
-          DSLRootItem("Fred", "struct", Seq(Attribute("field", AttributeType("string"), Seq(Annotation("nullable"))))),
+          Attribute("birthDate", AttributeType.Primitive("date")),
+          Attribute("breakfastTime", AttributeType.Primitive("time")),
+          DSLRootItem(
+            "Fred",
+            "struct",
+            Seq(
+              Attribute("field", AttributeType.Primitive("string"), Seq(Annotation("nullable"))),
+              Attribute("friend", AttributeType.Foreign("User")),
+            ),
+          ),
           Metadata("auth", Args(kwargs = Seq("login" -> Arg.TokenArg("username")))),
           Metadata("uses", Args(Seq(Arg.ListArg(Seq(Arg.TokenArg("Booking"), Arg.TokenArg("Events")))))),
         ),
