@@ -14,15 +14,16 @@ services:
 jobs:
   include:
     - stage: test
+      name: Unit tests
       script: sbt clean coverage test coverageReport
       after_success:
         # Requires CODECOV_TOKEN env var
         - bash <(curl -s https://codecov.io/bash)
-    - stage: integration-test
+    - name: Integration tests
       script: sbt clean it:test
-    - stage: e2e-test
+    - name: End-to-end tests
       script: sbt clean e2e:test
-    - stage: format
+    - name: Linting
       script: sbt clean scalafmtCheck test:scalafmtCheck it:scalafmtCheck
 
 # Caching to speed up runs
