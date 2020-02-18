@@ -28,9 +28,10 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   protected def entry: Parser[Entry] = rootItem <~ semicolon.? | (attribute | metadata) <~ semicolon
 
   /** A parser generator for a line of metadata */
-  protected def metadata: Parser[Entry.Metadata] = "#" ~> lowerIdent ~ (allArgs | shorthandListArg) ^^ {
-    case function ~ args => Entry.Metadata(function, args)
-  }
+  protected def metadata: Parser[Entry.Metadata] =
+    "#" ~> lowerIdent ~ (allArgs | shorthandListArg | success(Args())) ^^ {
+      case function ~ args => Entry.Metadata(function, args)
+    }
 
   /** A parser generator for a struct’s attribute */
   protected def attribute: Parser[Entry.Attribute] =
