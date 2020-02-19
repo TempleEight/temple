@@ -2,6 +2,7 @@ package temple.DSL.parser
 
 import temple.DSL.syntax._
 
+import scala.util.matching.Regex
 import scala.util.parsing.combinator.JavaTokenParsers
 
 /** A library of parser generators for the Templefile DSL */
@@ -88,4 +89,20 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
 
   /** A parser generator for an annotation on an attribute */
   protected def annotation: Parser[Annotation] = "@" ~> ident ^^ Annotation
+
+  /** The updated whitespace parser, allowing for comments */
+  // (\s+|//[^\n]*\n|/\*(\*(?!/)|[^\*])*\*/)+
+  // (   |          |                      )+     any sequence of permutations of the following:
+  //  \s+                                         - genuine whitespace
+  //      //[^\n]*\n                              - a one-line comment, made of:
+  //      //                                        - a double-slash
+  //        [^\n]*                                  - zero or more characters other than newlines
+  //              \n                                - a new line
+  //                 /\*(\*(?!/)|[^\*])*\*/       - a multi-line comment, made of:
+  //                 /\*                            - a slash-star
+  //                    (       |     )*            - any number of characters that:
+  //                     \*(?!/)                      - are a star not followed by a slash
+  //                             [^\*]                - are not a star
+  //                                    \*/           - a star-slash
+  override protected val whiteSpace: Regex = """(\s+|//[^\n]*\n|/\*(\*(?!/)|[^\*])*\*/)+""".r
 }
