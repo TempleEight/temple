@@ -50,9 +50,7 @@ class MetadataParser[T <: Metadata]() {
     * Add a handler for a new type of metadata, with an optional argument.
     *
     * @param metaKey The name of the metadata item to add
-    * @param argKey The name of the single argument to the metadata. Note that there is also
-    *               [[temple.DSL.semantics.MetadataParser#registerOptionalKeyword(java.lang.String, java.lang.String, temple.DSL.semantics.ArgType, scala.Function1)]]
-    *               if this is the same as `metaKey`.
+    * @param argKey The name of the single argument to the metadata.
     * @param argType The type of the field to expect
     * @param constructor The function to turn an optional input of type [[ArgType]] into a value of type [[T]]
     * @tparam A The underlying type of the field, inferred from `argType`
@@ -65,12 +63,6 @@ class MetadataParser[T <: Metadata]() {
         val argMap                    = parseParameters(argKey -> Some(NoArg))(args)
         constructor(argMap.getOptionArg(argKey, argType))
       })
-
-  /** A shorthand for
-    * [[temple.DSL.semantics.MetadataParser#registerOptionalKeyword(java.lang.String, temple.DSL.semantics.ArgType, scala.Function1)]]
-    * with the same `key` used for both the metadata name and its single argument */
-  final protected def registerOptionalKeyword[A](key: String, argType: ArgType[A])(constructor: Option[A] => T): Unit =
-    registerOptionalKeyword(key, key, argType)(constructor)
 
   /** Perform parsing by looking up the relevant function and passing it the argument list */
   final def apply(metaKey: String, args: Args)(implicit context: BlockContext): T =
