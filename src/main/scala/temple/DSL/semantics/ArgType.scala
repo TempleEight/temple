@@ -38,12 +38,6 @@ object ArgType {
       arg match { case Arg.TokenArg(value) => Some(value); case _ => None }
   }
 
-  case object StringArgType extends ArgType[String]("string") {
-
-    override def extractArg(arg: Arg): Option[String] =
-      arg match { case Arg.TokenArg(value) => Some(value); case _ => None }
-  }
-
   case class ListArgType[T](elemType: ArgType[T]) extends ArgType[Seq[T]](s"${elemType.stringRep} list") {
 
     override def extractArg(arg: Arg): Option[Seq[T]] =

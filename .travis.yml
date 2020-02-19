@@ -25,6 +25,20 @@ jobs:
       script: sbt clean e2e:test
     - name: Linting
       script: sbt clean scalafmtCheck test:scalafmtCheck it:scalafmtCheck
+    - stage: deploy
+      script: skip
+      if: tag IS present
+      before_deploy:
+        - sbt clean assembly
+      deploy:
+        provider: releases
+        skip_cleanup: true
+        token: $GH_OAUTH
+        file: "$TRAVIS_BUILD_DIR/target/scala-2.13/temple-latest"
+        on:
+          tags: true
+          repo: TempleEight/temple
+
 
 # Caching to speed up runs
 # https://www.scala-sbt.org/1.x/docs/Travis-CI-with-sbt.html
@@ -35,6 +49,6 @@ before_cache:
 
 cache:
   directories:
-    - $HOME/.cache/coursier
-    - $HOME/.ivy2/cache
-    - $HOME/.sbt
+    - "$HOME/.cache/coursier"
+    - "$HOME/.ivy2/cache"
+    - "$HOME/.sbt"
