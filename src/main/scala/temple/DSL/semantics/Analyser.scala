@@ -155,6 +155,7 @@ object Analyser {
   private val parseServiceMetadata = new MetadataParser[ServiceMetadata] {
     registerKeyword("language", TokenArgType)(ServiceLanguage.parse(_))
     registerKeyword("database", TokenArgType)(Database.parse(_))
+    registerOptionalKeyword("enumerable", "by", TokenArgType)(ServiceEnumerable)
     registerKeyword("auth", "login", TokenArgType)(ServiceAuth)
     registerKeyword("uses", "services", ListArgType(TokenArgType))(Uses)
   }
