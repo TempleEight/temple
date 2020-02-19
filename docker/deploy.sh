@@ -1,3 +1,5 @@
+#!/usr/bin/env sh
+
 BASE_REPO_URL=jaylees/templeeight
 SERVICE="hadolint"
 SERVICE_VERSION="1.0"
