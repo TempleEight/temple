@@ -31,7 +31,8 @@ lazy val root = (project in file("."))
       "com.beachape" %% "enumeratum" % "1.5.15",
       "io.circe" %% "circe-core" % "0.12.3",
       "io.circe" %% "circe-generic" % "0.12.3",
-      "io.circe" %% "circe-parser" % "0.12.3"
+      "io.circe" %% "circe-parser" % "0.12.3",
+      "org.scalaj" %% "scalaj-http" % "2.4.2" % "it"
     )
   )
 
