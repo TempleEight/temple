@@ -3,11 +3,11 @@ package temple.utils
 import java.nio.file.{FileAlreadyExistsException, Files, Paths}
 
 import org.scalatest.{FlatSpec, Matchers}
+import temple.utils.FileUtilsTest._
 
 import scala.util.Random
 
 class FileUtilsTest extends FlatSpec with Matchers {
-  import FileUtilsTest._
 
   behavior of "FileUtils"
 

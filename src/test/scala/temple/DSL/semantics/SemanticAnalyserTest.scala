@@ -7,9 +7,9 @@ import temple.DSL.syntax
 import temple.DSL.syntax.Arg._
 import temple.DSL.syntax.{Args, DSLRootItem, Entry}
 import temple.DSL.syntax.Entry.{Attribute => AttributeEntry}
+import SemanticAnalyserTest._
 
 class SemanticAnalyserTest extends FlatSpec with Matchers {
-  import SemanticAnalyserTest._
 
   behavior of "Semantic Analyser"
 
