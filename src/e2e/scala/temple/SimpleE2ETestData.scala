@@ -1,6 +1,6 @@
 package temple
 
-object SimpleEndToEndTestData {
+object SimpleE2ETestData {
 
   val createStatement: String =
     """CREATE TABLE User (
