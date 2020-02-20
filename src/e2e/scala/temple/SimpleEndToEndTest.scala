@@ -17,7 +17,7 @@ class SimpleEndToEndTest extends FlatSpec with Matchers {
 
     noException should be thrownBy Application.generate(
       new TempleConfig(
-        Seq("generate", "-o", basePath.toAbsolutePath.toString, "src/e2e/scala/temple/testfiles/simple.temple"),
+        Seq("generate", "-o", basePath.toAbsolutePath.toString, "src/test/scala/temple/testfiles/simple.temple"),
       ),
     )
 
