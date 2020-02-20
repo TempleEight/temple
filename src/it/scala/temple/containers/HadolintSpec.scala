@@ -13,7 +13,7 @@ trait HadolintSpec extends FlatSpec with DockerTestKit with DockerHadolintServic
 
   // https://github.com/hadolint/hadolint#rules
   object Rules {
-    val useLatest = "DL3007"
+    val useLatest: String = "DL3007"
   }
 
   // Validate a given Dockerfile, returning the output of Hadolint
