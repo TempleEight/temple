@@ -7,12 +7,7 @@ import temple.DSL.syntax._
 import temple.utils.FileUtils._
 import temple.utils.MonadUtils.FromEither
 
-class DSLParserTest extends FlatSpec with Matchers {
-
-  implicit private class ParseResult(parsed: Either[String, Templefile]) {
-    def shouldParse: Templefile = parsed.fromEither(msg => fail(s"Parse error: $msg"))
-    def shouldNotParse: String  = parsed.swap.fromEither(res => fail(s"Unexpected successful parse to $res"))
-  }
+class DSLParserTest extends FlatSpec with Matchers with DSLParserMatchers {
 
   behavior of "DSLParser"
 

@@ -1,6 +1,6 @@
 package temple
 
-object SimpleEndToEndTestData {
+object SimpleE2ETestData {
 
   val createStatement: String =
     """CREATE TABLE User (
@@ -17,6 +17,7 @@ object SimpleEndToEndTestData {
       |);
       |
       |CREATE TABLE Fred (
-      |  field TEXT NOT NULL
+      |  field TEXT,
+      |  friend INT NOT NULL
       |);""".stripMargin
 }

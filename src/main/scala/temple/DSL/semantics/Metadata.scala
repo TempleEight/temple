@@ -9,6 +9,7 @@ object Metadata {
   sealed trait TargetMetadata  extends Metadata
   sealed trait ServiceMetadata extends Metadata
   sealed trait ProjectMetadata extends Metadata
+  sealed trait StructMetadata  extends Metadata
 
   sealed abstract class TargetLanguage private (name: String, aliases: String*)
       extends EnumEntry(name, aliases)
@@ -50,9 +51,9 @@ object Metadata {
     case object Postgres extends Database("postgres", "PostgreSQL")
   }
 
-  case class ServiceAuth(login: String)            extends ServiceMetadata
-  case class ServiceEnumerable(by: Option[String]) extends ServiceMetadata
-  case class TargetAuth(services: Seq[String])     extends TargetMetadata
-  case class Uses(services: Seq[String])           extends ServiceMetadata
+  case class ServiceAuth(login: String)                   extends ServiceMetadata
+  case class ServiceEnumerable(by: Option[String] = None) extends ServiceMetadata with StructMetadata
+  case class TargetAuth(services: Seq[String])            extends TargetMetadata
+  case class Uses(services: Seq[String])                  extends ServiceMetadata
 
 }
