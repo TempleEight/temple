@@ -6,22 +6,9 @@ import temple.DSL.semantics.AttributeType._
 import temple.DSL.syntax
 import temple.DSL.syntax.Arg._
 import temple.DSL.syntax.{Args, DSLRootItem, Entry}
+import SemanticAnalyserTest._
 
 class SemanticAnalyserTest extends FlatSpec with Matchers {
-
-  private def mkTemplefileAST(rootItems: DSLRootItem*): syntax.Templefile =
-    DSLRootItem("Test", "project", Nil) +: rootItems
-
-  private def mkTemplefileSemantics(entries: (String, ServiceBlock)*): Templefile =
-    Templefile("Test", ProjectBlock(), Map.empty, entries.toMap)
-
-  private def mkTemplefileASTWithUserService(entries: Entry*): syntax.Templefile = Seq(
-    DSLRootItem("Test", "project", Nil),
-    DSLRootItem("User", "service", entries),
-  )
-
-  private def mkTemplefileSemanticsWithUserService(serviceBlock: ServiceBlock): Templefile =
-    Templefile("Test", ProjectBlock(), Map.empty, Map("User" -> serviceBlock))
 
   behavior of "Semantic Analyser"
 
@@ -73,6 +60,24 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
     )
   }
 
+  it should "fail on an unknown type" in {
+    noException should be thrownBy {
+      parseSemantics(
+        mkTemplefileASTWithUserService(
+          Entry.Attribute("a", syntax.AttributeType.Primitive("bool")),
+        ),
+      )
+    }
+
+    a[SemanticParsingException] should be thrownBy {
+      parseSemantics(
+        mkTemplefileASTWithUserService(
+          Entry.Attribute("a", syntax.AttributeType.Primitive("wat")),
+        ),
+      )
+    }
+  }
+
   it should "fail on too many arguments" in {
     noException should be thrownBy {
       parseSemantics(
@@ -93,7 +98,7 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
     noException should be thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
-          Entry.Attribute("a", syntax.AttributeType.Primitive("int", Args(Seq(IntArg(12), IntArg(12))))),
+          Entry.Attribute("a", syntax.AttributeType.Primitive("int", Args(Seq(IntArg(12), IntArg(12), IntArg(4))))),
         ),
       )
     }
@@ -101,8 +106,10 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
     a[SemanticParsingException] should be thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
-          Entry
-            .Attribute("a", syntax.AttributeType.Primitive("intArgs", Args(Seq(IntArg(12), IntArg(12), IntArg(12))))),
+          Entry.Attribute(
+            "a",
+            syntax.AttributeType.Primitive("int", Args(Seq(IntArg(12), IntArg(12), IntArg(4), IntArg(12)))),
+          ),
         ),
       )
     }
@@ -343,4 +350,21 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
       )
     }
   }
+}
+
+object SemanticAnalyserTest {
+
+  private def mkTemplefileAST(rootItems: DSLRootItem*): syntax.Templefile =
+    DSLRootItem("Test", "project", Nil) +: rootItems
+
+  private def mkTemplefileSemantics(entries: (String, ServiceBlock)*): Templefile =
+    Templefile("Test", ProjectBlock(), Map.empty, entries.toMap)
+
+  private def mkTemplefileASTWithUserService(entries: Entry*): syntax.Templefile = Seq(
+    DSLRootItem("Test", "project", Nil),
+    DSLRootItem("User", "service", entries),
+  )
+
+  private def mkTemplefileSemanticsWithUserService(serviceBlock: ServiceBlock): Templefile =
+    Templefile("Test", ProjectBlock(), Map.empty, Map("User" -> serviceBlock))
 }

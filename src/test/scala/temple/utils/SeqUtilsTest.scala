@@ -1,9 +1,9 @@
 package temple.utils
 
 import org.scalatest.{FlatSpec, Matchers}
+import temple.utils.SeqUtils.SeqOptionExtras
 
 class SeqUtilsTest extends FlatSpec with Matchers {
-  import SeqUtils.SeqOptionExtras
 
   behavior of "sequence"
 
