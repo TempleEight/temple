@@ -3,7 +3,6 @@ package temple.DSL.semantics
 import temple.DSL.semantics.ArgType._
 import temple.DSL.semantics.ErrorHandling.{BlockContext, Context, KeyName, assertNoParameters, fail, failThrower}
 import temple.DSL.semantics.Metadata._
-import temple.DSL.semantics.Templefile._
 import temple.DSL.syntax
 import temple.DSL.syntax.{Arg, Args, DSLRootItem, Entry}
 import temple.utils.MapUtils._

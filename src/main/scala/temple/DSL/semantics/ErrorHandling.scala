@@ -1,7 +1,7 @@
 package temple.DSL.semantics
 
 import temple.DSL.syntax.Args
-import temple.utils.MapUtils.{FailHandler, FailThrower}
+import temple.utils.MapUtils.FailThrower
 
 object ErrorHandling {
 

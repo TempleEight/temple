@@ -1,6 +1,5 @@
 package temple.utils
 
-import java.io.{File, FileInputStream}
 import java.nio.charset.Charset
 import java.nio.file.{Files, Paths}
 
