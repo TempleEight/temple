@@ -8,20 +8,7 @@ import temple.DSL.syntax.Arg._
 import temple.DSL.syntax.{Args, DSLRootItem, Entry}
 
 class SemanticAnalyserTest extends FlatSpec with Matchers {
-
-  private def mkTemplefileAST(rootItems: DSLRootItem*): syntax.Templefile =
-    DSLRootItem("Test", "project", Nil) +: rootItems
-
-  private def mkTemplefileSemantics(entries: (String, ServiceBlock)*): Templefile =
-    Templefile("Test", ProjectBlock(Nil), Map.empty, entries.toMap)
-
-  private def mkTemplefileASTWithUserService(entries: Entry*): syntax.Templefile = Seq(
-    DSLRootItem("Test", "project", Nil),
-    DSLRootItem("User", "service", entries),
-  )
-
-  private def mkTemplefileSemanticsWithUserService(serviceBlock: ServiceBlock): Templefile =
-    Templefile("Test", ProjectBlock(Nil), Map.empty, Map("User" -> serviceBlock))
+  import SemanticAnalyserTest._
 
   behavior of "Semantic Analyser"
 
@@ -343,4 +330,21 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
       )
     }
   }
+}
+
+object SemanticAnalyserTest {
+
+  private def mkTemplefileAST(rootItems: DSLRootItem*): syntax.Templefile =
+    DSLRootItem("Test", "project", Nil) +: rootItems
+
+  private def mkTemplefileSemantics(entries: (String, ServiceBlock)*): Templefile =
+    Templefile("Test", ProjectBlock(Nil), Map.empty, entries.toMap)
+
+  private def mkTemplefileASTWithUserService(entries: Entry*): syntax.Templefile = Seq(
+    DSLRootItem("Test", "project", Nil),
+    DSLRootItem("User", "service", entries),
+  )
+
+  private def mkTemplefileSemanticsWithUserService(serviceBlock: ServiceBlock): Templefile =
+    Templefile("Test", ProjectBlock(Nil), Map.empty, Map("User" -> serviceBlock))
 }

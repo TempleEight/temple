@@ -7,8 +7,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.util.Random
 
 class FileUtilsTest extends FlatSpec with Matchers {
-
-  def randomString(length: Int): String = new Random().alphanumeric.take(length).mkString
+  import FileUtilsTest._
 
   behavior of "FileUtils"
 
@@ -35,4 +34,8 @@ class FileUtilsTest extends FlatSpec with Matchers {
     val dog             = FileUtils.readBinaryFile("src/test/scala/temple/testfiles/dog.jpeg")
     dog.length shouldBe expectedDogSize
   }
+}
+
+object FileUtilsTest {
+  def randomString(length: Int): String = new Random().alphanumeric.take(length).mkString
 }
