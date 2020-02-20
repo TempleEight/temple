@@ -102,7 +102,7 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry
-            .Attribute("a", syntax.AttributeType.Primitive("intArgs", Args(Seq(IntArg(12), IntArg(12), IntArg(12))))),
+            .Attribute("a", syntax.AttributeType.Primitive("int", Args(Seq(IntArg(12), IntArg(12), IntArg(12))))),
         ),
       )
     }
