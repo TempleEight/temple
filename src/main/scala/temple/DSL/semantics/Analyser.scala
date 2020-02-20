@@ -159,6 +159,11 @@ object Analyser {
     registerKeyword("uses", "services", ListArgType(TokenArgType))(Uses)
   }
 
+  /** A parser of Metadata items that can occur in struct blocks */
+  private val parseStructMetadata = new MetadataParser[StructMetadata] {
+    registerOptionalKeyword("enumerable", "by", TokenArgType)(ServiceEnumerable)
+  }
+
   /** A parser of Metadata items that can occur in project blocks */
   private val parseProjectMetadata = new MetadataParser[ProjectMetadata] {
     registerKeyword("language", TokenArgType)(ServiceLanguage.parse(_))
@@ -197,15 +202,32 @@ object Analyser {
     ServiceBlock(attributes.to(ListMap), metadatas.toSeq, structs.to(ListMap))
   }
 
+  /** Parse a block consisting solely of metadata */
   private def parseMetadataBlock[T <: Metadata](
     entries: Seq[Entry],
     f: MetadataParser[T],
-  )(implicit context: BlockContext): Seq[T] =
-    entries map {
-      case Entry.Metadata(metaKey, args) => f(metaKey, args)
-      case otherEntry =>
-        fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
+  )(implicit context: BlockContext): Seq[T] = parseBlockWithMetdata(entries, f)()
+
+  /** Parse a block containing metadata, among other things */
+  private def parseBlockWithMetdata[T <: Metadata](entries: Seq[Entry], f: MetadataParser[T])(
+    parser: PartialFunction[Entry, Unit] = PartialFunction.empty,
+  )(implicit context: BlockContext): Seq[T] = entries flatMap { entry =>
+    // When the custom handlers are performed, succeed with no result
+    val customParser = parser.andThen(_ => None)
+
+    // When metadata is encountered, succeed with the result of passing it to `f`
+    val metadataParser: PartialFunction[Entry, Option[T]] = {
+      case Entry.Metadata(metaKey, args) => Some(f(metaKey, args))
     }
+
+    // Combine the custom and metadata parsers
+    val combinedParser = customParser.orElse(metadataParser)
+
+    // Pass the entry to either the metadata or the test parser
+    combinedParser.lift(entry).getOrElse {
+      fail(s"Found ${entry.typeName} in ${context.tag} block (${context.block}): `$entry`")
+    }
+  }
 
   private def parseProjectBlock(entries: Seq[Entry])(implicit context: BlockContext): ProjectBlock =
     ProjectBlock(parseMetadataBlock(entries, parseProjectMetadata))
@@ -215,14 +237,12 @@ object Analyser {
 
   private def parseStructBlock(entries: Seq[Entry])(implicit context: BlockContext): StructBlock = {
     val attributes = mutable.LinkedHashMap[String, Attribute]()
-    entries.foreach {
+    val metadata = parseBlockWithMetdata(entries, parseStructMetadata) {
       case Entry.Attribute(key, dataType, annotations) =>
         attributes.safeInsert(key -> parseAttribute(dataType, annotations)(KeyName(key)))
-      case otherEntry =>
-        // TODO: can we get a link to the relevant part of the docs
-        fail(s"Found ${otherEntry.typeName} in ${context.tag} block (${context.block}): `$otherEntry`")
     }
-    StructBlock(attributes.toMap)
+
+    StructBlock(attributes.toMap, metadata)
   }
 
   /**
