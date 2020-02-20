@@ -1,6 +1,6 @@
-FROM hadolint/hadolint:latest AS hadolint
+FROM hadolint/hadolint:v1.17.5-4-g8db7482-debian AS hadolint
 
-FROM msoap/shell2http
+FROM msoap/shell2http:1.13
 
 COPY --from=hadolint /bin/hadolint /bin/hadolint
 
