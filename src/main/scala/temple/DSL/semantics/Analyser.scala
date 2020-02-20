@@ -223,7 +223,7 @@ object Analyser {
     // Combine the custom and metadata parsers
     val combinedParser = customParser.orElse(metadataParser)
 
-    // Pass the entry to either the metadata or the test parser
+    // Pass the entry to either the combined parser, or fail with a relevant message
     combinedParser.lift(entry).getOrElse {
       fail(s"Found ${entry.typeName} in ${context.tag} block (${context.block}): `$entry`")
     }
