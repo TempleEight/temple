@@ -6,7 +6,7 @@ import org.scalatest.{FlatSpec, Matchers}
 
 import scala.reflect.io.Directory
 
-class SimpleEndToEndTest extends FlatSpec with Matchers {
+class SimpleE2ETest extends FlatSpec with Matchers {
   behavior of "Temple"
 
   it should "generate Postgres scripts" in {
@@ -17,7 +17,7 @@ class SimpleEndToEndTest extends FlatSpec with Matchers {
 
     noException should be thrownBy Application.generate(
       new TempleConfig(
-        Seq("generate", "-o", basePath.toAbsolutePath.toString, "src/e2e/scala/temple/testfiles/simple.temple"),
+        Seq("generate", "-o", basePath.toAbsolutePath.toString, "src/test/scala/temple/testfiles/simple.temple"),
       ),
     )
 
@@ -30,6 +30,6 @@ class SimpleEndToEndTest extends FlatSpec with Matchers {
     Files.exists(basePath.resolve("user-db").resolve("init.sql")) shouldBe true
 
     val initSql = Files.readString(basePath.resolve("user-db").resolve("init.sql"))
-    initSql shouldBe SimpleEndToEndTestData.createStatement
+    initSql shouldBe SimpleE2ETestData.createStatement
   }
 }
