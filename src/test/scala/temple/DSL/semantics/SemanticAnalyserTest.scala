@@ -61,6 +61,24 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
     )
   }
 
+  it should "fail on an unknown type" in {
+    noException should be thrownBy {
+      parseSemantics(
+        mkTemplefileASTWithUserService(
+          AttributeEntry("a", syntax.AttributeType.Primitive("bool")),
+        ),
+      )
+    }
+
+    a[SemanticParsingException] should be thrownBy {
+      parseSemantics(
+        mkTemplefileASTWithUserService(
+          AttributeEntry("a", syntax.AttributeType.Primitive("wat")),
+        ),
+      )
+    }
+  }
+
   it should "fail on too many arguments" in {
     noException should be thrownBy {
       parseSemantics(
