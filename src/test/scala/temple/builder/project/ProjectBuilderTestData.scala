@@ -1,8 +1,8 @@
 package temple.builder.project
 
-import temple.DSL.semantics.AttributeType.{BlobType, BoolType, DateTimeType, DateType, FloatType, IntType, StringType, TimeType}
+import temple.DSL.semantics.AttributeType._
 import temple.DSL.semantics.Metadata.Database
-import temple.DSL.semantics.{Attribute, ProjectBlock, ServiceBlock, StructBlock, Templefile}
+import temple.DSL.semantics._
 
 import scala.collection.immutable.ListMap
 

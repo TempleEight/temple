@@ -6,8 +6,8 @@ import temple.DSL.semantics.Templefile
 import temple.builder.DatabaseBuilder
 import temple.builder.project.Project.File
 import temple.generate.database.PreparedType.QuestionMarks
-import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.database.ast.Statement
+import temple.generate.database.{PostgresContext, PostgresGenerator}
 
 object ProjectBuilder {
 
