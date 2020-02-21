@@ -3,7 +3,7 @@ package temple
 object SimpleE2ETestData {
 
   val createStatement: String =
-    """CREATE TABLE User (
+    """CREATE TABLE temple_user (
       |  username TEXT NOT NULL,
       |  email VARCHAR(40) CHECK (length(email) >= 5) NOT NULL,
       |  firstName TEXT NOT NULL,
@@ -16,7 +16,7 @@ object SimpleE2ETestData {
       |  breakfastTime TIME NOT NULL
       |);
       |
-      |CREATE TABLE Fred (
+      |CREATE TABLE fred (
       |  field TEXT,
       |  friend INT NOT NULL
       |);""".stripMargin

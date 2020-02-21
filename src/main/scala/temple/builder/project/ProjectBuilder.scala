@@ -20,7 +20,7 @@ object ProjectBuilder {
     val databaseCreationScripts = templefile.services.map {
       case (name, service) =>
         val createStatements: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
-        service.lookupMetadata[Database].getOrElse(Postgres) match {
+        service.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase) match {
           case Postgres =>
             implicit val context: PostgresContext = PostgresContext(QuestionMarks)
             val postgresStatements                = createStatements.map(PostgresGenerator.generate).mkString("\n\n")

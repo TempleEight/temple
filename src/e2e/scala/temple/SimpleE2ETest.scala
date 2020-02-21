@@ -23,13 +23,13 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
     // Only one folder should have been generated
     Files.list(basePath).count() shouldBe 1
-    Files.exists(basePath.resolve("user-db")) shouldBe true
+    Files.exists(basePath.resolve("templeuser-db")) shouldBe true
 
     // Only one file should be present in the user-db folder
-    Files.list(basePath.resolve("user-db")).count() shouldBe 1
-    Files.exists(basePath.resolve("user-db").resolve("init.sql")) shouldBe true
+    Files.list(basePath.resolve("templeuser-db")).count() shouldBe 1
+    Files.exists(basePath.resolve("templeuser-db").resolve("init.sql")) shouldBe true
 
-    val initSql = Files.readString(basePath.resolve("user-db").resolve("init.sql"))
+    val initSql = Files.readString(basePath.resolve("templeuser-db").resolve("init.sql"))
     initSql shouldBe SimpleE2ETestData.createStatement
   }
 }

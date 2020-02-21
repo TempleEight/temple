@@ -30,7 +30,7 @@ object DatabaseBuilderTestData {
   val sampleServiceCreate: Seq[Statement.Create] =
     Seq(
       Create(
-        "Users",
+        "temple_user",
         Seq(
           ColumnDef("id", IntCol(4), Seq(NonNull)),
           ColumnDef("bankBalance", FloatCol(8), Seq(NonNull)),
@@ -73,7 +73,7 @@ object DatabaseBuilderTestData {
   val sampleComplexServiceCreate: Seq[Statement.Create] =
     Seq(
       Create(
-        "Users",
+        "temple_user",
         Seq(
           ColumnDef("id", IntCol(2), Seq(Check("id", LessEqual, "100"), Check("id", GreaterEqual, "10"), NonNull)),
           ColumnDef(
@@ -106,7 +106,7 @@ object DatabaseBuilderTestData {
         ),
       ),
       Create(
-        "Test",
+        "test",
         Seq(
           ColumnDef("favouriteColour", StringCol, Seq(Unique, NonNull)),
           ColumnDef("bedTime", TimeCol),
