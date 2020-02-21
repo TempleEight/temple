@@ -165,6 +165,54 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
     }
   }
 
+  it should "pass kwargs in any order" in {
+    noException should be thrownBy {
+      parseSemantics(
+        mkTemplefileASTWithUserService(
+          Entry.Attribute(
+            "a",
+            syntax.AttributeType.Primitive("int", Args(kwargs = Seq("max" -> IntArg(5), "min" -> IntArg(1)))),
+          ),
+        ),
+      )
+    }
+
+    noException should be thrownBy {
+      parseSemantics(
+        mkTemplefileASTWithUserService(
+          Entry.Attribute(
+            "a",
+            syntax.AttributeType.Primitive("int", Args(kwargs = Seq("min" -> IntArg(1), "max" -> IntArg(5)))),
+          ),
+        ),
+      )
+    }
+  }
+
+  it should "fail to parse repeated kwargs" in {
+    a[SemanticParsingException] should be thrownBy {
+      parseSemantics(
+        mkTemplefileASTWithUserService(
+          Entry.Attribute(
+            "a",
+            syntax.AttributeType.Primitive("int", Args(Seq(IntArg(5)), kwargs = Seq("max" -> IntArg(1)))),
+          ),
+        ),
+      )
+    }
+
+    a[SemanticParsingException] should be thrownBy {
+      parseSemantics(
+        mkTemplefileASTWithUserService(
+          Entry.Attribute(
+            "a",
+            syntax.AttributeType.Primitive("int", Args(kwargs = Seq("max" -> IntArg(1), "max" -> IntArg(5)))),
+          ),
+        ),
+      )
+    }
+  }
+
   it should "fail to parse a bad nested item in a service" in {
     a[SemanticParsingException] should be thrownBy {
       parseSemantics(
