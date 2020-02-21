@@ -10,8 +10,8 @@ import temple.generate.docker.ast.{DockerfileRoot, Statement}
 object DockerfileBuilder {
 
   def createServiceDockerfile(serviceName: String, service: ServiceBlock, port: Int): DockerfileRoot = {
-    val language                               = service.lookupMetadata[Metadata.ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
-    val dockerImage: ProjectConfig.DockerImage = ProjectConfig.dockerImage(language)
+    val language    = service.lookupMetadata[Metadata.ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
+    val dockerImage = ProjectConfig.dockerImage(language)
 
     val commands: Seq[Statement] = language match {
       case ServiceLanguage.Go =>
