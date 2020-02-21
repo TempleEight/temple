@@ -1,7 +1,7 @@
 package temple.utils
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.utils.StringUtils.indent
+import temple.utils.StringUtils.{indent, snakeCase}
 
 class StringUtilsTest extends FlatSpec with Matchers {
   behavior of "indent"
@@ -23,5 +23,23 @@ class StringUtilsTest extends FlatSpec with Matchers {
   it should "add spaces on each line" in {
     indent("abcd\nefg", 1) shouldEqual " abcd\n efg"
     indent("abcd\nefg\n", 1) shouldEqual " abcd\n efg\n "
+  }
+
+  behavior of "snakeCase"
+
+  it should "convert an all upper case string to lower case" in {
+    snakeCase("ABCDEFG") shouldBe "abcdefg"
+  }
+
+  it should "correctly convert from camel case to snake case" in {
+    snakeCase("someRandomCamelCase") shouldBe "some_random_camel_case"
+  }
+
+  it should "ignore random capitalised words" in {
+    snakeCase("someRANDOMCamelCaseCHARACTERS") shouldBe "some_random_camel_case_characters"
+  }
+
+  it should "numbers" in {
+    snakeCase("some1917Numbers") shouldBe "some1917_numbers"
   }
 }

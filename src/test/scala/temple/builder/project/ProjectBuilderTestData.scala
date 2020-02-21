@@ -39,7 +39,7 @@ object ProjectBuilderTestData {
     ProjectBlock(),
     Map(),
     Map(
-      "Users" -> ServiceBlock(simpleServiceAttributes),
+      "TempleUser" -> ServiceBlock(simpleServiceAttributes),
     ),
   )
 
@@ -48,7 +48,7 @@ object ProjectBuilderTestData {
     ProjectBlock(Seq(Database.Postgres)),
     Map(),
     Map(
-      "Users" -> ServiceBlock(simpleServiceAttributes),
+      "TempleUser" -> ServiceBlock(simpleServiceAttributes),
     ),
   )
 
@@ -57,12 +57,12 @@ object ProjectBuilderTestData {
     ProjectBlock(),
     Map(),
     Map(
-      "Users" -> ServiceBlock(simpleServiceAttributes, metadata = Seq(Database.Postgres)),
+      "TempleUser" -> ServiceBlock(simpleServiceAttributes, metadata = Seq(Database.Postgres)),
     ),
   )
 
   val simpleTemplefilePostgresCreateOutput: String =
-    """CREATE TABLE Users (
+    """CREATE TABLE temple_user (
       |  intField INT NOT NULL,
       |  doubleField DOUBLE PRECISION NOT NULL,
       |  stringField TEXT NOT NULL,
@@ -78,15 +78,15 @@ object ProjectBuilderTestData {
     ProjectBlock(),
     Map(),
     Map(
-      "ComplexUsers" -> ServiceBlock(
+      "ComplexUser" -> ServiceBlock(
         complexServiceAttributes,
-        structs = Map("Users" -> StructBlock(simpleServiceAttributes)),
+        structs = Map("TempleUser" -> StructBlock(simpleServiceAttributes)),
       ),
     ),
   )
 
   val complexTemplefilePostgresCreateOutput: String =
-    """CREATE TABLE ComplexUsers (
+    """CREATE TABLE complex_user (
       |  smallIntField SMALLINT CHECK (smallIntField <= 100) CHECK (smallIntField >= 10) NOT NULL,
       |  intField INT CHECK (intField <= 100) CHECK (intField >= 10) NOT NULL,
       |  bigIntField BIGINT CHECK (bigIntField <= 100) CHECK (bigIntField >= 10) NOT NULL,

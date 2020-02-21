@@ -4,6 +4,7 @@ import temple.DSL.semantics.Annotation.Nullable
 import temple.DSL.semantics.{Annotation, Attribute, AttributeType, ServiceBlock}
 import temple.generate.database.ast.ColumnConstraint.Check
 import temple.generate.database.ast._
+import temple.utils.StringUtils
 
 /** Construct database queries from a Templefile structure */
 object DatabaseBuilder {
@@ -51,7 +52,7 @@ object DatabaseBuilder {
     service.structIterator(serviceName).map {
       case (tableName, attributes) =>
         val columns = attributes.map { case (name, attributes) => toColDef(name, attributes) }
-        Statement.Create(tableName, columns.toSeq)
+        Statement.Create(StringUtils.snakeCase(tableName), columns.toSeq)
     }
   }.toSeq
 }
