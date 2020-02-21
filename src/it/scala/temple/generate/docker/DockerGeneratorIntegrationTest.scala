@@ -32,6 +32,7 @@ class DockerGeneratorIntegrationTest extends HadolintSpec with Matchers with Bef
         Expose(8080),
       ),
     )
-    validate(DockerfileGenerator.generate(content)) shouldBe empty
+    val validationErrors = validate(DockerfileGenerator.generate(content))
+    validationErrors shouldBe empty
   }
 }
