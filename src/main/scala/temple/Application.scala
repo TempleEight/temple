@@ -17,7 +17,7 @@ object Application {
         val project            = ProjectBuilder.build(analysedTemplefile)
 
         FileUtils.createDirectory(outputDirectory)
-        project.databaseCreationScripts.foreach {
+        project.files.foreach {
           case (file, contents) =>
             val subfolder = s"$outputDirectory/${file.folder}"
             FileUtils.createDirectory(subfolder)
