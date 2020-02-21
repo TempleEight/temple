@@ -1,14 +1,10 @@
 package temple.builder
 
-import temple.DSL.semantics.AttributeType._
-import temple.DSL.semantics.{Annotation, Attribute, ServiceBlock, StructBlock}
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint.{Check, NonNull, Unique}
 import temple.generate.database.ast.ComparisonOperator.{GreaterEqual, LessEqual}
 import temple.generate.database.ast.Statement.Create
 import temple.generate.database.ast.{ColumnDef, Statement}
-
-import scala.collection.immutable.ListMap
 
 object DatabaseBuilderTestData {
 
