@@ -15,32 +15,32 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
 
   // The Postgres container is persisted for every test in this spec: clean up any changes made by each test
   before {
-    executeWithoutResults("DROP TABLE IF EXISTS UniqueTest;")
-    executeWithoutResults("DROP TABLE IF EXISTS ReferenceTest;")
-    executeWithoutResults("DROP TABLE IF EXISTS CheckTest;")
-    executeWithoutResults("DROP TABLE IF EXISTS Users;")
+    executeWithoutResults("DROP TABLE IF EXISTS unique_test;")
+    executeWithoutResults("DROP TABLE IF EXISTS reference_test;")
+    executeWithoutResults("DROP TABLE IF EXISTS check_test;")
+    executeWithoutResults("DROP TABLE IF EXISTS temple_user;")
   }
 
   behavior of "PostgresService"
-  it should "not contain a users table" in {
-    a[PSQLException] should be thrownBy executeWithResults("SELECT * FROM Users;")
+  it should "not contain a temple_user table" in {
+    a[PSQLException] should be thrownBy executeWithResults("SELECT * FROM temple_user;")
   }
 
-  it should "create a users table, insert values, and return these values later" in {
-    executeWithoutResults("CREATE TABLE Users (id INT);")
-    executeWithoutResults("INSERT INTO Users (id) VALUES (1);")
+  it should "create a temple_user table, insert values, and return these values later" in {
+    executeWithoutResults("CREATE TABLE temple_user (id INT);")
+    executeWithoutResults("INSERT INTO temple_user (id) VALUES (1);")
     val result =
-      executeWithResults("SELECT * FROM Users;").getOrElse(fail("Database connection could not be established"))
+      executeWithResults("SELECT * FROM temple_user;").getOrElse(fail("Database connection could not be established"))
     result.next()
     result.getInt("id") shouldBe 1
     result.isLast shouldBe true
   }
 
-  it should "create a users table correctly" in {
+  it should "create a temple_user table correctly" in {
     val createStatement = PostgresGenerator.generate(TestData.createStatement)
     executeWithoutResults(createStatement)
     val result = executeWithResults(
-      "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users');",
+      "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'temple_user');",
     ).getOrElse(fail("Database connection could not be established"))
     result.next()
     result.getBoolean("exists") shouldBe true
@@ -51,7 +51,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
     val result =
-      executeWithResults("SELECT * FROM USERS;").getOrElse(fail("Database connection could not be established"))
+      executeWithResults("SELECT * FROM temple_user;").getOrElse(fail("Database connection could not be established"))
     result.next()
     result.getShort("id") shouldBe 3
     result.getInt("anotherId") shouldBe 4
@@ -86,7 +86,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithReferenceConstraint))
 
-    // Insert user into users table, has ID 3
+    // Insert user into temple_user table, has ID 3
     executePreparedWithoutResults(
       PostgresGenerator.generate(TestData.insertStatement),
       TestData.insertDataA,
@@ -102,7 +102,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatementWithReferenceConstraint))
 
-    // Insert user into users table, has ID 3
+    // Insert user into temple_users table, has ID 3
     executePreparedWithoutResults(
       PostgresGenerator.generate(TestData.insertStatement),
       TestData.insertDataA,
@@ -142,15 +142,15 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
   it should "correctly store blobs" in {
     val fileContents = FileUtils.readBinaryFile("src/it/scala/temple/testfiles/cat.jpeg")
 
-    val createStatement = Statement.Create("Users", Seq(ColumnDef("picture", BlobCol)))
+    val createStatement = Statement.Create("temple_user", Seq(ColumnDef("picture", BlobCol)))
     executeWithoutResults(PostgresGenerator.generate(createStatement))
 
-    val insertStatement = Statement.Insert("Users", Seq(Column("picture")))
+    val insertStatement = Statement.Insert("temple_user", Seq(Column("picture")))
     val insertData      = Seq(PreparedVariable.BlobVariable(fileContents))
     executePreparedWithoutResults(PostgresGenerator.generate(insertStatement), insertData)
 
     val result =
-      executeWithResults("SELECT * FROM USERS;").getOrElse(fail("Database connection could not be established"))
+      executeWithResults("SELECT * FROM temple_user;").getOrElse(fail("Database connection could not be established"))
     result.next()
     val returnedFileContents = result.getBytes("picture")
     returnedFileContents.length shouldBe fileContents.length
@@ -163,7 +163,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
     executeWithoutResults(PostgresGenerator.generate(TestData.deleteStatement))
     val result =
-      executeWithResults("SELECT * FROM USERS;").getOrElse(fail("Database connection could not be established"))
+      executeWithResults("SELECT * FROM temple_user;").getOrElse(fail("Database connection could not be established"))
     result.isBeforeFirst shouldBe false
   }
 
@@ -171,13 +171,13 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
   it should "remove the table from the database" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     var result = executeWithResults(
-      "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users');",
+      "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'temple_user');",
     ).getOrElse(fail("Database connection could not be established"))
     result.next()
     result.getBoolean("exists") shouldBe true
     executeWithoutResults(PostgresGenerator.generate(TestData.dropStatement))
     result = executeWithResults(
-      "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'users');",
+      "SELECT EXISTS (SELECT 1 FROM information_schema.tables WHERE table_name = 'temple_users');",
     ).getOrElse(fail("Database connection could not be established"))
     result.next()
     result.getBoolean("exists") shouldBe false
@@ -226,7 +226,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
     executeWithoutResults(PostgresGenerator.generate(TestData.updateStatement))
     val result =
-      executeWithResults("SELECT * FROM Users;").getOrElse(fail("Database connection could not be established"))
+      executeWithResults("SELECT * FROM temple_user;").getOrElse(fail("Database connection could not be established"))
     result.next()
     result.getShort("id") shouldBe 3
     result.getInt("anotherId") shouldBe 4
@@ -261,7 +261,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
     executeWithoutResults(PostgresGenerator.generate(TestData.updateStatementWithWhere))
     val result =
-      executeWithResults("SELECT * FROM Users;").getOrElse(fail("Database connection could not be established"))
+      executeWithResults("SELECT * FROM temple_user;").getOrElse(fail("Database connection could not be established"))
     result.next()
     result.getShort("id") shouldBe 3
     result.getInt("anotherId") shouldBe 4

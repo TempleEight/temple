@@ -23,7 +23,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
       projectBlock = ProjectBlock(),
       targets = Map.empty,
       services = Map(
-        "User" -> ServiceBlock(
+        "TempleUser" -> ServiceBlock(
           attributes = ListMap(
             "username"           -> Attribute(StringType()),
             "email"              -> Attribute(StringType(Some(40), Some(5))),

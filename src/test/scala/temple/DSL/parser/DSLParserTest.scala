@@ -35,7 +35,7 @@ class DSLParserTest extends FlatSpec with Matchers with DSLParserMatchers {
     parseResult shouldBe Seq(
       DSLRootItem("SimpleTempleTest", "project", Nil),
       DSLRootItem(
-        "User",
+        "TempleUser",
         "service",
         Seq(
           Attribute("username", AttributeType.Primitive("string")),

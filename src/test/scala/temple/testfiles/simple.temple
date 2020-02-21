@@ -1,6 +1,6 @@
 SimpleTempleTest: project {}
 
-User: service {
+TempleUser: service {
   username: string;
   email: string(40,5);
   firstName: string;

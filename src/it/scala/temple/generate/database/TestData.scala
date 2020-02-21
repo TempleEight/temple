@@ -14,7 +14,7 @@ import temple.generate.database.ast._
 object TestData {
 
   val createStatement: Create = Create(
-    "Users",
+    "temple_user",
     Seq(
       ColumnDef("id", IntCol(2), Seq(Unique)),
       ColumnDef("anotherId", IntCol(4), Seq(Unique)),
@@ -31,7 +31,7 @@ object TestData {
   )
 
   val createStatementWithUniqueConstraint: Create = Create(
-    "UniqueTest",
+    "unique_test",
     Seq(
       ColumnDef("itemID", IntCol(4), Seq(NonNull, PrimaryKey)),
       ColumnDef("createdAt", DateTimeTzCol, Seq(Unique)),
@@ -39,15 +39,15 @@ object TestData {
   )
 
   val createStatementWithReferenceConstraint: Create = Create(
-    "ReferenceTest",
+    "reference_test",
     Seq(
       ColumnDef("itemID", IntCol(4), Seq(NonNull, PrimaryKey)),
-      ColumnDef("userID", IntCol(4), Seq(References("Users", "id"))),
+      ColumnDef("userID", IntCol(4), Seq(References("temple_user", "id"))),
     ),
   )
 
   val createStatementWithCheckConstraint: Create = Create(
-    "CheckTest",
+    "check_test",
     Seq(
       ColumnDef("itemID", IntCol(4), Seq(NonNull, PrimaryKey)),
       ColumnDef("value", IntCol(4), Seq(Check("value", GreaterEqual, "1"), Check("value", LessEqual, "10"))),
@@ -55,7 +55,7 @@ object TestData {
   )
 
   val readStatement: Read = Read(
-    "Users",
+    "temple_user",
     Seq(
       Column("id"),
       Column("anotherId"),
@@ -72,7 +72,7 @@ object TestData {
   )
 
   val readStatementWithWhere: Read = Read(
-    "Users",
+    "temple_user",
     Seq(
       Column("id"),
       Column("anotherId"),
@@ -87,12 +87,12 @@ object TestData {
       Column("expiry"),
     ),
     Some(
-      Comparison("Users.id", Equal, "123456"),
+      Comparison("user.id", Equal, "123456"),
     ),
   )
 
   val readStatementWithWhereConjunction: Read = Read(
-    "Users",
+    "temple_user",
     Seq(
       Column("id"),
       Column("anotherId"),
@@ -108,14 +108,14 @@ object TestData {
     ),
     Some(
       Conjunction(
-        Comparison("Users.id", Equal, "123456"),
-        Comparison("Users.expiry", LessEqual, "2"),
+        Comparison("temple_user.id", Equal, "123456"),
+        Comparison("temple_user.expiry", LessEqual, "2"),
       ),
     ),
   )
 
   val readStatementWithWhereDisjunction: Read = Read(
-    "Users",
+    "temple_user",
     Seq(
       Column("id"),
       Column("anotherId"),
@@ -131,14 +131,14 @@ object TestData {
     ),
     Some(
       Disjunction(
-        Comparison("Users.id", NotEqual, "123456"),
-        Comparison("Users.expiry", Greater, "2"),
+        Comparison("temple_user.id", NotEqual, "123456"),
+        Comparison("temple_user.expiry", Greater, "2"),
       ),
     ),
   )
 
   val readStatementWithWhereInverse: Read = Read(
-    "Users",
+    "temple_user",
     Seq(
       Column("id"),
       Column("anotherId"),
@@ -154,13 +154,13 @@ object TestData {
     ),
     Some(
       Inverse(
-        Comparison("Users.id", Less, "123456"),
+        Comparison("temple_user.id", Less, "123456"),
       ),
     ),
   )
 
   val readStatementComplex: Read = Read(
-    "Users",
+    "temple_user",
     Seq(
       Column("id"),
       Column("anotherId"),
@@ -178,18 +178,18 @@ object TestData {
       Conjunction(
         Disjunction(
           IsNull(Column("isStudent")),
-          Comparison("Users.id", GreaterEqual, "1"),
+          Comparison("temple_user.id", GreaterEqual, "1"),
         ),
         Disjunction(
           Inverse(IsNull(Column("isStudent"))),
-          Inverse(Comparison("Users.expiry", Less, "TIMESTAMP '2020-02-03 00:00:00+00'")),
+          Inverse(Comparison("temple_user.expiry", Less, "TIMESTAMP '2020-02-03 00:00:00+00'")),
         ),
       ),
     ),
   )
 
   val insertStatement: Insert = Insert(
-    "Users",
+    "temple_user",
     Seq(
       Column("id"),
       Column("anotherId"),
@@ -206,7 +206,7 @@ object TestData {
   )
 
   val insertStatementForUniqueConstraint: Insert = Insert(
-    "UniqueTest",
+    "unique_test",
     Seq(
       Column("itemID"),
       Column("createdAt"),
@@ -214,7 +214,7 @@ object TestData {
   )
 
   val insertStatementForReferenceConstraint: Insert = Insert(
-    "ReferenceTest",
+    "reference_test",
     Seq(
       Column("itemID"),
       Column("userID"),
@@ -222,7 +222,7 @@ object TestData {
   )
 
   val insertStatementForCheckConstraint: Insert = Insert(
-    "CheckTest",
+    "check_test",
     Seq(
       Column("itemID"),
       Column("value"),
@@ -230,27 +230,27 @@ object TestData {
   )
 
   val deleteStatement: Delete = Delete(
-    "Users",
+    "temple_user",
   )
 
   val deleteStatementWithWhere: Delete = Delete(
-    "Users",
+    "temple_user",
     Some(
-      Comparison("Users.id", Equal, "123456"),
+      Comparison("temple_user.id", Equal, "123456"),
     ),
   )
 
   val dropStatement: Drop = Drop(
-    "Users",
+    "temple_user",
     ifExists = false,
   )
 
   val dropStatementIfExists: Drop = Drop(
-    "Users",
+    "temple_user",
   )
 
   val updateStatement: Update = Update(
-    "Users",
+    "temple_user",
     Seq(
       Assignment(Column("bankBalance"), Value("123.456")),
       Assignment(Column("name"), Value("'Will'")),
@@ -258,13 +258,13 @@ object TestData {
   )
 
   val updateStatementWithWhere: Update = Update(
-    "Users",
+    "temple_user",
     Seq(
       Assignment(Column("bankBalance"), Value("123.456")),
       Assignment(Column("name"), Value("'Will'")),
     ),
     Some(
-      Comparison("Users.id", Equal, "12345"),
+      Comparison("temple_user.id", Equal, "12345"),
     ),
   )
 
