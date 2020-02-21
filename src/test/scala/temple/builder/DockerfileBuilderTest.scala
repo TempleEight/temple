@@ -4,8 +4,8 @@ import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.semantics.Metadata.ServiceLanguage
 import temple.DSL.semantics.{ProjectBlock, Templefile}
 
-class DockerBuilderTest extends FlatSpec with Matchers {
-  behavior of "DockerBuilder"
+class DockerfileBuilderTest extends FlatSpec with Matchers {
+  behavior of "DockerfileBuilder"
 
   it should "generate a Dockerfile for simple Go project" in {
     // We _have_ to include the service in a Templefile structure, so that the project can be correctly registered
@@ -21,7 +21,7 @@ class DockerBuilderTest extends FlatSpec with Matchers {
       case (name, service) => DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, 80)
     }
 
-    dockerfile shouldBe DockerBuilderTestData.sampleServiceDockerfile
+    dockerfile shouldBe DockerfileBuilderTestData.sampleServiceDockerfile
   }
 
   it should "generate a Dockerfile for complex Go project" in {
@@ -36,7 +36,7 @@ class DockerBuilderTest extends FlatSpec with Matchers {
       case (name, service) => DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, 80)
     }
 
-    dockerfile shouldBe DockerBuilderTestData.sampleComplexServiceDockerfile
+    dockerfile shouldBe DockerfileBuilderTestData.sampleComplexServiceDockerfile
   }
 
   it should "generate a Dockerfile for Go if no language is specified" in {
@@ -51,6 +51,6 @@ class DockerBuilderTest extends FlatSpec with Matchers {
       case (name, service) => DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, 80)
     }
 
-    dockerfile shouldBe DockerBuilderTestData.sampleComplexServiceDockerfile
+    dockerfile shouldBe DockerfileBuilderTestData.sampleComplexServiceDockerfile
   }
 }

@@ -3,7 +3,7 @@ package temple.builder
 import temple.generate.docker.ast.DockerfileRoot
 import temple.generate.docker.ast.Statement.{Copy, Entrypoint, Expose, From, Run, WorkDir}
 
-object DockerBuilderTestData {
+object DockerfileBuilderTestData {
 
   val sampleServiceDockerfile: DockerfileRoot = DockerfileRoot(
     From("golang", Some("1.13.7-alpine")),
