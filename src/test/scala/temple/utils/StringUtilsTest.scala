@@ -54,4 +54,8 @@ class StringUtilsTest extends FlatSpec with Matchers {
   it should "not remove leading underscores" in {
     snakeCase("_fooBarBaz") shouldBe "_foo_bar_baz"
   }
+
+  it should "correctly convert a capitalised phrase" in {
+    snakeCase("CustomerID") shouldBe "customer_id"
+  }
 }
