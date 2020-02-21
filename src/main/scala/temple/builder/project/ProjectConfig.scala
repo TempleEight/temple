@@ -7,9 +7,7 @@ object ProjectConfig {
   val defaultLanguage: ServiceLanguage = ServiceLanguage.Go
   val defaultDatabase: Database        = Database.Postgres
 
-  def dockerImage(language: ServiceLanguage): DockerImage =
-    language match {
-      case ServiceLanguage.Go    => DockerImage("golang", "1.13.7-alpine")
-      case ServiceLanguage.Scala => DockerImage("mozilla/sbt", "8u232_1.3.8")
-    }
+  def dockerImage(language: ServiceLanguage): DockerImage = language match {
+    case ServiceLanguage.Go => DockerImage("golang", "1.13.7-alpine")
+  }
 }

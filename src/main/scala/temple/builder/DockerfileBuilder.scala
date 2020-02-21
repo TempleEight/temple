@@ -1,12 +1,10 @@
 package temple.builder
 
-import temple.DSL.semantics.Metadata.Database.Postgres
-import temple.DSL.semantics.Metadata.{Database, ServiceLanguage}
-import temple.DSL.semantics.Metadata.ServiceLanguage.Go
+import temple.DSL.semantics.Metadata.ServiceLanguage
 import temple.DSL.semantics.{Metadata, ServiceBlock}
 import temple.builder.project.ProjectConfig
+import temple.generate.docker.ast.Statement._
 import temple.generate.docker.ast.{DockerfileRoot, Statement}
-import temple.generate.docker.ast.Statement.{Copy, Entrypoint, Expose, From, Run, WorkDir}
 
 /** Construct a Dockerfile from a Templefile service */
 object DockerfileBuilder {
@@ -27,8 +25,6 @@ object DockerfileBuilder {
           Entrypoint(s"./$serviceName", Seq()),
           Expose(port),
         )
-      case ServiceLanguage.Scala =>
-        Seq()
     }
 
     DockerfileRoot(From(dockerImage.image, Some(dockerImage.version)), commands)
