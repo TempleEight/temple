@@ -43,8 +43,8 @@ object GoServiceGenerator extends ServiceGenerator {
     Map(File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString)
     /**
     * TODO:
-    * user.go
-    * dao/user-dao.go
+    * <>.go
+    * dao/<>-dao.go
     * dao/errors.go
     * utils/utils.go
     * utils/config.go
