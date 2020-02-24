@@ -2,7 +2,7 @@ package temple.generate.language.service.go
 
 import temple.generate.language.service.ServiceGenerator
 import temple.generate.language.service.adt._
-import temple.generate.utils.CodeTerm
+import temple.generate.utils.CodeTerm._
 import temple.utils.FileUtils.{File, FileContent}
 import temple.utils.StringUtils.tabIndent
 
@@ -14,25 +14,26 @@ object GoServiceGenerator extends ServiceGenerator {
   /** Given a service name, module name and whether the service uses inter-service communication, return the import block */
   private def generateImports(serviceName: String, module: String, comms: Boolean): String = {
     val sb = new StringBuilder
+    sb.append("import ")
 
-    sb.append("import (" + "\n")
-    sb.append(tabIndent(""""encoding/json"""") + "\n")
-    sb.append(tabIndent(""""flag"""") + "\n")
-    sb.append(tabIndent(""""fmt"""") + "\n")
-    sb.append(tabIndent(""""log"""") + "\n")
-    sb.append(tabIndent(""""net/http"""") + "\n")
-    sb.append("\n")
+    val standardImports = Seq("encoding/json", "flag", "fmt", "log", "net/http")
+      .map(codeWrap.doubleQuotes(_))
+      .map(tabIndent(_))
+      .map(_ + "\n")
 
+    var customImports: Seq[String] = Seq.empty
     if (comms) {
-      sb.append(tabIndent(s"""${serviceName}Comm "${module}/comm"""") + "\n")
+      customImports = customImports :+ s"${serviceName}Comm ${codeWrap.doubleQuotes(s"${module}/comm")}"
     }
+    customImports = customImports ++ Seq(
+        s"${serviceName}DAO ${codeWrap.doubleQuotes(s"${module}/dao")}",
+        codeWrap.doubleQuotes(s"${module}/util"),
+        s"valid ${codeWrap.doubleQuotes("github.com/asaskevich/govalidator")}",
+        codeWrap.doubleQuotes("github.com/gorilla/mux"),
+      )
+    customImports = customImports.map(tabIndent(_)).map(_ + "\n")
 
-    sb.append(tabIndent(s"""${serviceName}DAO "${module}/dao"""") + "\n")
-    sb.append(tabIndent(s""""${module}/util"""") + "\n")
-
-    sb.append(tabIndent("""valid "github.com/asaskevich/govalidator"""") + "\n")
-    sb.append(tabIndent(""""github.com/gorilla/mux"""") + "\n")
-    sb.append(")" + "\n")
+    sb.append(codeWrap.parens.block(Seq(standardImports.mkString, "\n", customImports.mkString).mkString))
     sb.append("\n")
 
     sb.toString
