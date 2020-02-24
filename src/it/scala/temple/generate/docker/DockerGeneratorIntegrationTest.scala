@@ -8,6 +8,7 @@ import temple.generate.docker.ast.Statement._
 class DockerGeneratorIntegrationTest extends HadolintSpec with Matchers with BeforeAndAfter {
 
   behavior of "DockerValidator"
+
   it should "succeed when a versioned tag is used" in {
     validate("FROM golang:123\nEXPOSE 80") shouldBe empty
   }
@@ -17,6 +18,7 @@ class DockerGeneratorIntegrationTest extends HadolintSpec with Matchers with Bef
   }
 
   behavior of "DockerfileGenerator"
+
   it should "generate valid Dockerfile" in {
     val content = DockerfileRoot(
       From("golang", Some("123")),
