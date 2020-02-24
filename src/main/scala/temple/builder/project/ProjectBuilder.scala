@@ -4,7 +4,7 @@ import temple.DSL.semantics.Metadata.Database
 import temple.DSL.semantics.Metadata.Database.Postgres
 import temple.DSL.semantics.Templefile
 import temple.builder.DatabaseBuilder
-import temple.utils.FileUtils.{File}
+import temple.utils.FileUtils.File
 import temple.generate.database.PreparedType.QuestionMarks
 import temple.generate.database.ast.Statement
 import temple.generate.database.{PostgresContext, PostgresGenerator}
