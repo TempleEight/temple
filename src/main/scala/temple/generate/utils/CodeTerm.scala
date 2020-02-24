@@ -106,7 +106,7 @@ object CodeTerm {
       object block extends codeWrap("{\n", "}\n")
     }
 
-    object square extends codeWrap("[" ush, "]") {
+    object square extends codeWrap("[", "]") {
       object block extends codeWrap("[\n", "]\n")
     }
   }
