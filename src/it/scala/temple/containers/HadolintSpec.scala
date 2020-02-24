@@ -5,10 +5,10 @@ import com.whisk.docker.DockerFactory
 import com.whisk.docker.impl.spotify.SpotifyDockerFactory
 import com.whisk.docker.scalatest.DockerTestKit
 import io.circe.syntax._
-import org.scalatest.{BeforeAndAfterAll, FlatSpec}
+import org.scalatest.BeforeAndAfterAll
 import scalaj.http.Http
 
-trait HadolintSpec extends FlatSpec with DockerTestKit with DockerHadolintService with BeforeAndAfterAll {
+abstract class HadolintSpec extends DockerShell2HttpService(8080) with DockerTestKit with BeforeAndAfterAll {
   implicit override val dockerFactory: DockerFactory = new SpotifyDockerFactory(DefaultDockerClient.fromEnv().build())
 
   // https://github.com/hadolint/hadolint#rules
@@ -19,7 +19,6 @@ trait HadolintSpec extends FlatSpec with DockerTestKit with DockerHadolintServic
   // Validate a given Dockerfile, returning the output of Hadolint
   def validate(dockerfile: String): String = {
     val json = Map("contents" -> dockerfile).asJson.toString()
-    Http(DockerHadolintService.externalVerifyUrl).params(Map("dockerfile" -> json)).asString.body
+    Http(hadolintVerifyUrl).params(Map("dockerfile" -> json)).asString.body
   }
-
 }
