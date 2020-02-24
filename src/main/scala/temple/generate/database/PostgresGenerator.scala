@@ -39,10 +39,10 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
   private def generateConstraint(constraint: ColumnConstraint): String =
     constraint match {
       case NonNull                    => "NOT NULL"
-      case Check(left, comp, right)   => mkCode("CHECK", codeParens(left, generateComparison(comp), right))
+      case Check(left, comp, right)   => mkCode("CHECK", codeWrap.parens(left, generateComparison(comp), right))
       case Unique                     => "UNIQUE"
       case PrimaryKey                 => "PRIMARY KEY"
-      case References(table, colName) => mkCode("REFERENCES", table, codeParens(colName))
+      case References(table, colName) => mkCode("REFERENCES", table, codeWrap.parens(colName))
     }
 
   /** Given a query modifier, generate the type required by PostgreSQL */
@@ -50,13 +50,13 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
     condition match {
       case Comparison(left, comp, right) => mkCode(left, generateComparison(comp), right)
       case Inverse(IsNull(column))       => mkCode(column.name, "IS NOT NULL")
-      case Inverse(condition)            => mkCode("NOT", codeParens(generateCondition(condition)))
+      case Inverse(condition)            => mkCode("NOT", codeWrap.parens(generateCondition(condition)))
       case IsNull(column)                => mkCode(column.name, "IS NULL")
 
       case Disjunction(left, right) =>
-        mkCode(codeParens(generateCondition(left)), "OR", codeParens(generateCondition(right)))
+        mkCode(codeWrap.parens(generateCondition(left)), "OR", codeWrap.parens(generateCondition(right)))
       case Conjunction(left, right) =>
-        mkCode(codeParens(generateCondition(left)), "AND", codeParens(generateCondition(right)))
+        mkCode(codeWrap.parens(generateCondition(left)), "AND", codeWrap.parens(generateCondition(right)))
     }
 
   /** Given conditions, generate a Postgres WHERE clause  */
@@ -102,7 +102,7 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
     statement match {
       case Create(tableName, columns) =>
         val stringColumns = mkCode.spacedList(columns.map(generateColumnDef))
-        mkCode.stmt("CREATE TABLE", tableName, codeParens.spaced(stringColumns))
+        mkCode.stmt("CREATE TABLE", tableName, codeWrap.parens.spaced(stringColumns))
       case Read(tableName, columns, conditions) =>
         val stringColumns    = columns.map(_.name).mkString(", ")
         val stringConditions = generateConditionString(conditions)
@@ -110,7 +110,7 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
       case Insert(tableName, columns) =>
         val stringColumns = columns.map(_.name).mkString(", ")
         val values        = generatePreparedValues(columns)
-        mkCode.stmt("INSERT INTO", tableName, codeParens(stringColumns), "VALUES", codeParens(values))
+        mkCode.stmt("INSERT INTO", tableName, codeWrap.parens(stringColumns), "VALUES", codeWrap.parens(values))
       case Update(tableName, assignments, conditions) =>
         val stringAssignments = assignments.map(generateAssignment).mkString(", ")
         val stringConditions  = generateConditionString(conditions)
