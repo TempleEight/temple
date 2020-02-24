@@ -3,8 +3,11 @@ package temple.utils
 /** Utility functions useful for performing operations on strings */
 object StringUtils {
 
+  /** Match the position at the start of a line, excluding blank lines */
+  private val startOfLinePattern = """^|(?<=\n)(?!\n)(?!$)""".r
+
   /** Given a string, indent it by a given number of spaces */
-  def indent(str: String, length: Int = 2): String = str.replaceAll("^|(?<=\n)", " " * length)
+  def indent(str: String, length: Int = 2): String = startOfLinePattern.replaceAllIn(str, " " * length)
 
   /** Given a string, convert it to snake case */
   // https://github.com/lift/framework/blob/f1b450db2dd6a22cf9ffe5576ec34c8e87118319/core/util/src/main/scala/net/liftweb/util/StringHelpers.scala#L91
