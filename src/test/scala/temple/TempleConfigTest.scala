@@ -3,6 +3,7 @@ package temple
 import org.scalatest.{FlatSpec, Matchers}
 
 class TempleConfigTest extends FlatSpec with Matchers {
+
   behavior of "TempleConfig"
 
   it should "not parse the generate command correctly without a filename" in {

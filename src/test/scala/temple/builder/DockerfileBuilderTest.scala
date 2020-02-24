@@ -5,6 +5,7 @@ import temple.DSL.semantics.Metadata.ServiceLanguage
 import temple.DSL.semantics.{ProjectBlock, Templefile}
 
 class DockerfileBuilderTest extends FlatSpec with Matchers {
+
   behavior of "DockerfileBuilder"
 
   it should "generate a Dockerfile for simple Go project" in {

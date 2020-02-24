@@ -4,6 +4,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import temple.builder.project.Project.File
 
 class ProjectBuilderTest extends FlatSpec with Matchers {
+
   behavior of "ProjectBuilder"
 
   it should "correctly create a simple project using postgres as the default" in {

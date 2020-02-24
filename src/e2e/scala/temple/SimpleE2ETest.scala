@@ -7,6 +7,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import scala.reflect.io.Directory
 
 class SimpleE2ETest extends FlatSpec with Matchers {
+
   behavior of "Temple"
 
   it should "generate Postgres scripts" in {
