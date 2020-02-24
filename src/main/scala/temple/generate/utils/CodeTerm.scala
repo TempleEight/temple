@@ -97,11 +97,8 @@ object CodeTerm {
   }
 
   object CodeWrap {
-    val parens       = new CodeWrap("(", ")")
-    val curly        = new CodeWrap("{", "}")
-    val square       = new CodeWrap("[", "]")
-    val singleQuotes = new CodeWrap("'", "'")
-    val doubleQuotes = new CodeWrap("\"", "\"")
-    val españolQue   = new CodeWrap("¿", "?")
+    val parens = new CodeWrap("(", ")")
+    val curly  = new CodeWrap("{", "}")
+    val square = new CodeWrap("[", "]")
   }
 }
