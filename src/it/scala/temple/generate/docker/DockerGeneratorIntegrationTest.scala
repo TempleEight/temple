@@ -1,7 +1,10 @@
 package temple.generate.docker
 
 import org.scalatest.{BeforeAndAfter, Matchers}
+import temple.DSL.semantics.{ProjectBlock, ServiceBlock, Templefile}
+import temple.builder.DockerfileBuilder
 import temple.containers.HadolintSpec
+import temple.generate.DockerGeneratorIntegrationTestData
 import temple.generate.docker.ast.DockerfileRoot
 import temple.generate.docker.ast.Statement._
 
@@ -34,5 +37,25 @@ class DockerGeneratorIntegrationTest extends HadolintSpec with Matchers with Bef
     )
     val validationErrors = validate(DockerfileGenerator.generate(content))
     validationErrors shouldBe empty
+  }
+
+  behavior of "DockerfileBuilderGenerator"
+  it should "generate a valid dockerfile for a sample service" in {
+    // We _have_ to include the service in a Templefile structure, so that the project can be correctly registered
+    // and therefore allowing calls to lookupMetadata to function correctly.
+    val templefile = Templefile(
+      "ExampleProject",
+      ProjectBlock(),
+      targets = Map(),
+      services = Map("ComplexService" -> DockerGeneratorIntegrationTestData.sampleService),
+    )
+
+    templefile.services.foreach {
+      case (name, service) =>
+        val dockerfile          = DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, 80)
+        val generatedDockerfile = DockerfileGenerator.generate(dockerfile)
+        val validationErrors    = validate(generatedDockerfile)
+        validationErrors shouldBe empty
+    }
   }
 }

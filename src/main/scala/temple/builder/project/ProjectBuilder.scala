@@ -3,11 +3,12 @@ package temple.builder.project
 import temple.DSL.semantics.Metadata.Database
 import temple.DSL.semantics.Metadata.Database.Postgres
 import temple.DSL.semantics.Templefile
-import temple.builder.DatabaseBuilder
+import temple.builder.{DatabaseBuilder, DockerfileBuilder}
 import temple.builder.project.Project.File
 import temple.generate.database.PreparedType.QuestionMarks
 import temple.generate.database.ast.Statement
 import temple.generate.database.{PostgresContext, PostgresGenerator}
+import temple.generate.docker.DockerfileGenerator
 
 object ProjectBuilder {
 
@@ -28,6 +29,13 @@ object ProjectBuilder {
         }
     }
 
-    Project(databaseCreationScripts)
+    val dockerfiles = templefile.services.zip(80 until Int.MaxValue).map {
+      case ((name, service), port) =>
+        val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, port)
+        val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)
+        (File(s"${name.toLowerCase}", "Dockerfile"), dockerfileContents)
+    }
+
+    Project(databaseCreationScripts ++ dockerfiles)
   }
 }
