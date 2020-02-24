@@ -4,6 +4,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import temple.utils.StringUtils.{indent, snakeCase}
 
 class StringUtilsTest extends FlatSpec with Matchers {
+
   behavior of "indent"
 
   it should "add spaces to an empty string" in {

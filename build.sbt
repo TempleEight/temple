@@ -43,6 +43,12 @@ lazy val root = (project in file("."))
         "org.scalaj"             %% "scalaj-http"                 % "2.4.2" % "it",
       ),
   )
+  .enablePlugins(BuildInfoPlugin)
+  .settings(
+    buildInfoKeys := Seq[BuildInfoKey](name, version, scalaVersion, sbtVersion),
+    buildInfoPackage := "temple",
+    buildInfoUsePackageAsPath := true,
+  )
 
 scalacOptions ++= Seq("-deprecation", "-feature")
 
