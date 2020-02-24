@@ -8,6 +8,7 @@ import temple.generate.docker.ast.Statement._
 class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAndAfter {
 
   behavior of "GolangValidator"
+
   it should "fail when an empty file is provided" in {
     val validationErrors = validate("")
     validationErrors should not be empty
