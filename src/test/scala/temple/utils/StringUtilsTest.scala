@@ -7,13 +7,13 @@ class StringUtilsTest extends FlatSpec with Matchers {
 
   behavior of "indent"
 
-  it should "add spaces to an empty string" in {
-    indent("") shouldEqual "  "
+  it should "not add change an empty string" in {
+    indent("") shouldEqual ""
   }
 
-  it should "add n spaces to an empty string" in {
-    indent("", 1) shouldEqual " "
-    indent("", 3) shouldEqual "   "
+  it should "add n spaces to a string" in {
+    indent("x", 1) shouldEqual " x"
+    indent("x", 3) shouldEqual "   x"
   }
 
   it should "add spaces to a single line" in {
@@ -23,7 +23,7 @@ class StringUtilsTest extends FlatSpec with Matchers {
 
   it should "add spaces on each line except for blank lines" in {
     indent("abcd\nefg", 1) shouldEqual " abcd\n efg"
-    indent("abcd\nefg\n", 1) shouldEqual " abcd\n efg\n"
+    indent("abcd\n\nefg\n", 1) shouldEqual " abcd\n\n efg\n"
   }
 
   behavior of "snakeCase"
