@@ -6,6 +6,9 @@ object StringUtils {
   /** Given a string, indent it by a given number of spaces */
   def indent(str: String, length: Int = 2): String = str.replaceAll("^|(?<=\n)", " " * length)
 
+  /** Given a string, indent it by a given number of tabs */
+  def tabIndent(str: String, length: Int = 1): String = str.replaceAll("^|(?<=\n)", "	" * length)
+
   /** Given a string, convert it to snake case */
   // https://github.com/lift/framework/blob/f1b450db2dd6a22cf9ffe5576ec34c8e87118319/core/util/src/main/scala/net/liftweb/util/StringHelpers.scala#L91
   def snakeCase(str: String): String =
