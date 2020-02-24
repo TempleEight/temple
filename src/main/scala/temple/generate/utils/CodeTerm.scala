@@ -102,5 +102,6 @@ object CodeTerm {
     val square       = new CodeWrap("[", "]")
     val singleQuotes = new CodeWrap("'", "'")
     val doubleQuotes = new CodeWrap("\"", "\"")
+    val españolQue   = new CodeWrap("¿", "?")
   }
 }
