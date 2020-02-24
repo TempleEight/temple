@@ -22,7 +22,7 @@ class TempleBlockTest extends FlatSpec with Matchers {
   }
 
   it should "lookupMetadata when in a project file" in {
-    val projectBlock = ProjectBlock(Seq(Metadata.ServiceLanguage.Scala, Metadata.Database.Postgres))
+    val projectBlock = ProjectBlock(Seq(Metadata.Database.Postgres))
     val serviceBlock = ServiceBlock(Map.empty, Seq(Metadata.ServiceLanguage.Go))
 
     Templefile("TestProject", projectBlock, Map.empty, Map("Users" -> serviceBlock))

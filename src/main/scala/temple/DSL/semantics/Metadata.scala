@@ -30,8 +30,7 @@ object Metadata {
   object ServiceLanguage extends Enum[ServiceLanguage] {
     val values: IndexedSeq[ServiceLanguage] = findValues
 
-    case object Go    extends ServiceLanguage("Go", "golang")
-    case object Scala extends ServiceLanguage("Scala")
+    case object Go extends ServiceLanguage("Go", "golang")
   }
 
   sealed abstract class Provider private (name: String) extends EnumEntry(name) with ProjectMetadata
