@@ -90,7 +90,7 @@ object ProjectBuilderTestData {
       |
       |ENTRYPOINT ["./templeuser"]
       |
-      |EXPOSE 80
+      |EXPOSE 1024
       |""".stripMargin
 
   val complexTemplefile: Templefile = Templefile(
@@ -138,6 +138,6 @@ object ProjectBuilderTestData {
       |
       |ENTRYPOINT ["./complexuser"]
       |
-      |EXPOSE 80
+      |EXPOSE 1024
       |""".stripMargin
 }

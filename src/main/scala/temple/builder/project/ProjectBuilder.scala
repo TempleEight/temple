@@ -29,7 +29,7 @@ object ProjectBuilder {
         }
     }
 
-    val dockerfiles = templefile.services.zip(80 until Int.MaxValue).map {
+    val dockerfiles = templefile.services.zip(1024 until Int.MaxValue).map {
       case ((name, service), port) =>
         val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, port)
         val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)

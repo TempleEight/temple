@@ -1,8 +1,10 @@
 package temple
 
 import java.nio.file.{Files, Paths}
+import java.util.stream.Collectors
 
 import org.scalatest.{FlatSpec, Matchers}
+import scala.jdk.StreamConverters._
 
 import scala.reflect.io.Directory
 
@@ -22,9 +24,8 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     )
 
     // Two folders should have been generated
-    Files.list(basePath).count() shouldBe 2
-    Files.exists(basePath.resolve("templeuser-db")) shouldBe true
-    Files.exists(basePath.resolve("templeuser")) shouldBe true
+    val expectedFolders = Set("templeuser-db", "templeuser").map(dir => basePath.resolve(dir))
+    Files.list(basePath).toScala(Set) shouldBe expectedFolders
 
     // Only one file should be present in the templeuser-db folder
     Files.list(basePath.resolve("templeuser-db")).count() shouldBe 1

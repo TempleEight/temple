@@ -38,6 +38,6 @@ object SimpleE2ETestData {
       |
       |ENTRYPOINT ["./templeuser"]
       |
-      |EXPOSE 80
+      |EXPOSE 1024
       |""".stripMargin
 }
