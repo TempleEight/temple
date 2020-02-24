@@ -21,9 +21,9 @@ class StringUtilsTest extends FlatSpec with Matchers {
     indent("efgh", 4) shouldEqual "    efgh"
   }
 
-  it should "add spaces on each line" in {
+  it should "add spaces on each line except for blank lines" in {
     indent("abcd\nefg", 1) shouldEqual " abcd\n efg"
-    indent("abcd\nefg\n", 1) shouldEqual " abcd\n efg\n "
+    indent("abcd\nefg\n", 1) shouldEqual " abcd\n efg\n"
   }
 
   behavior of "snakeCase"
