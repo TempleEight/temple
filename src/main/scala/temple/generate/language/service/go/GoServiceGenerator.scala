@@ -18,19 +18,19 @@ object GoServiceGenerator extends ServiceGenerator {
     sb.append("import ")
 
     val standardImports = Seq("encoding/json", "flag", "fmt", "log", "net/http")
-      .map(enquote)
+      .map(doubleQuote)
       .map(tabIndent(_))
       .map(_ + "\n")
 
     var customImports: ListBuffer[String] = ListBuffer.empty
     if (comms) {
-      customImports += s"${serviceName}Comm ${enquote(s"${module}/comm")}"
+      customImports += s"${serviceName}Comm ${doubleQuote(s"${module}/comm")}"
     }
     customImports ++= Seq(
-      s"${serviceName}DAO ${enquote(s"${module}/dao")}",
-      enquote(s"${module}/util"),
-      s"valid ${enquote("github.com/asaskevich/govalidator")}",
-      enquote("github.com/gorilla/mux"),
+      s"${serviceName}DAO ${doubleQuote(s"${module}/dao")}",
+      doubleQuote(s"${module}/util"),
+      s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
+      doubleQuote("github.com/gorilla/mux"),
     )
     customImports = customImports.map(tabIndent(_)).map(_ + "\n")
 
