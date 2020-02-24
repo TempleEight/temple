@@ -106,12 +106,16 @@ object CodeTerm {
       object block extends codeWrap("{\n", "}\n")
     }
 
-    object square extends codeWrap("[", "]") {
+    object square extends codeWrap("[" ush, "]") {
       object block extends codeWrap("[\n", "]\n")
     }
+  }
 
-    object singleQuotes extends codeWrap("'", "'")
-    object doubleQuotes extends codeWrap("\"", "\"")
-    object españolQue   extends codeWrap("¿", "?")
+  /** JSON-encode a string, wrapping it in quotes with suitable escaping */
+  def enquote(string: String): String = {
+    import io.circe.syntax._
+    import io.circe.Printer
+
+    string.asJson.printWith(Printer(dropNullValues = false, indent = ""))
   }
 }
