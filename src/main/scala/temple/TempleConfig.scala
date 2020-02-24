@@ -10,7 +10,7 @@ class TempleConfig(arguments: CSeq[String]) extends ScallopConf(arguments) {
     throw new IllegalArgumentException(error)
   }
 
-  version("temple " + BuildInfo.version + " (c) 2020 TempleEight")
+  version(s"temple ${BuildInfo.version} (c) 2020 TempleEight")
   banner("Usage:\ttemple [OPTIONS] SUBCOMMAND")
   footer("Run 'temple SUBCOMMAND --help' for more information on a command.")
 
