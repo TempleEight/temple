@@ -111,11 +111,13 @@ object CodeTerm {
     }
   }
 
-  /** JSON-encode a string, wrapping it in quotes with suitable escaping */
-  def enquote(string: String): String = {
-    import io.circe.syntax._
-    import io.circe.Printer
+  type StringWrap = String => String
+  private def stringWrap(start: String, end: String)(string: String): String = start + string + end
+  private def stringWrap(start: String): StringWrap                          = stringWrap(start, start)
 
-    string.asJson.printWith(Printer(dropNullValues = false, indent = ""))
-  }
+  /** Wrap a string in double quotes. Note that this does not perform any escaping */
+  val doubleQuote: StringWrap = stringWrap("\"")
+
+  /** Wrap a string in single quotes. Note that this does not perform any escaping */
+  val singleQuote: StringWrap = stringWrap("\'")
 }
