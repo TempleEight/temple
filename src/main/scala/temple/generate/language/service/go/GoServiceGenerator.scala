@@ -41,23 +41,23 @@ object GoServiceGenerator extends ServiceGenerator {
   }
 
   override def generate(serviceRoot: ServiceRoot): Map[File, FileContent] = {
-    val usesComms = serviceRoot.comms.length > 0
+    val usesComms = serviceRoot.comms.nonEmpty
     val serviceString = generatePackage("main") + generateImports(
         serviceRoot.name,
         serviceRoot.module,
         usesComms,
       )
     Map(File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString)
-    /**
-    * TODO:
-    * <>.go
-    * dao/<>-dao.go
-    * dao/errors.go
-    * utils/utils.go
-    * utils/config.go
-    * go.mod
-    * go.sum
-    * config.json
-    */
+    /*
+   * TODO:
+   * <>.go
+   * dao/<>-dao.go
+   * dao/errors.go
+   * utils/utils.go
+   * utils/config.go
+   * go.mod
+   * go.sum
+   * config.json
+   */
   }
 }

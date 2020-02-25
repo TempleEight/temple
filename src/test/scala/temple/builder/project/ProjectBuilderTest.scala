@@ -11,6 +11,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
     val project = ProjectBuilder.build(ProjectBuilderTestData.simpleTemplefile)
     project.files shouldBe Map(
       File("templeuser-db", "init.sql") -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
+      File("templeuser", "Dockerfile")  -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
     )
   }
 
@@ -18,6 +19,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
     val project = ProjectBuilder.build(ProjectBuilderTestData.simpleTemplefilePostgresProject)
     project.files shouldBe Map(
       File("templeuser-db", "init.sql") -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
+      File("templeuser", "Dockerfile")  -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
     )
   }
 
@@ -25,6 +27,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
     val project = ProjectBuilder.build(ProjectBuilderTestData.simpleTemplefilePostgresService)
     project.files shouldBe Map(
       File("templeuser-db", "init.sql") -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
+      File("templeuser", "Dockerfile")  -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
     )
   }
 
@@ -32,6 +35,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
     val project = ProjectBuilder.build(ProjectBuilderTestData.complexTemplefile)
     project.files shouldBe Map(
       File("complexuser-db", "init.sql") -> ProjectBuilderTestData.complexTemplefilePostgresCreateOutput,
+      File("complexuser", "Dockerfile")  -> ProjectBuilderTestData.complexTemplefileUsersDockerfile,
     )
   }
 }
