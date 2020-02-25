@@ -1,7 +1,7 @@
 package temple.builder.project
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.builder.project.Project.File
+import temple.utils.FileUtils.File
 
 class ProjectBuilderTest extends FlatSpec with Matchers {
 
