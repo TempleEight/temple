@@ -7,7 +7,7 @@ class StringUtilsTest extends FlatSpec with Matchers {
 
   behavior of "indent"
 
-  it should "not add change an empty string" in {
+  it should "not change an empty string" in {
     indent("") shouldEqual ""
   }
 
