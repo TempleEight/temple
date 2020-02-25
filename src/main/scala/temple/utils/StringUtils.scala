@@ -24,4 +24,18 @@ object StringUtils {
       .replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2")
       .replaceAll("([a-z\\d])([A-Z])", "$1_$2")
       .toLowerCase
+
+  type StringWrap = String => String
+  private def stringWrap(start: String, end: String)(string: String): String = start + string + end
+  private def stringWrap(start: String): StringWrap                          = stringWrap(start, start)
+
+  /** Wrap a string in double quotes, note that this does not perform any escaping */
+  val doubleQuote: StringWrap = stringWrap("\"")
+
+  /** Wrap a string in single quotes, note that this does not perform any escaping */
+  val singleQuote: StringWrap = stringWrap("\'")
+
+  /** Wrap a string in Spanish question marks, tenga en cuenta que esto no realiza ningún escape */
+  val españolQue: StringWrap = stringWrap("¿", "?")
+
 }
