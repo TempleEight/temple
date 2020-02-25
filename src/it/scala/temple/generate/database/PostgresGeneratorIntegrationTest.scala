@@ -22,6 +22,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
   }
 
   behavior of "PostgresService"
+
   it should "not contain a temple_user table" in {
     a[PSQLException] should be thrownBy executeWithResults("SELECT * FROM temple_user;")
   }
@@ -47,6 +48,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
   }
 
   behavior of "InsertStatements"
+
   it should "be executed correctly" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
     executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)

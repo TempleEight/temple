@@ -9,6 +9,7 @@ import scala.jdk.StreamConverters._
 import scala.reflect.io.Directory
 
 class SimpleE2ETest extends FlatSpec with Matchers {
+
   behavior of "Temple"
 
   it should "generate Postgres scripts" in {

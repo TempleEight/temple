@@ -1,7 +1,7 @@
 #!/usr/bin/env sh
 
 BASE_REPO_URL=jaylees/templeeight
-SERVICE="hadolint"
+SERVICE="shell2http"
 SERVICE_VERSION="1.0"
 REPO_URL=${BASE_REPO_URL}-${SERVICE}
 

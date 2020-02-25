@@ -1,7 +1,7 @@
 package temple.DSL.syntax
 
 import temple.DSL.syntax.Arg.ListArg
-import temple.generate.utils.CodeTerm.{codeParens, mkCode}
+import temple.generate.utils.CodeTerm.{codeWrap, mkCode}
 
 /** Any element of a service/struct */
 abstract class Entry(val typeName: String)
@@ -18,7 +18,7 @@ object Entry {
     private def argsToString: String = args match {
       case Args(Seq(list: ListArg), Seq()) => list.toString
       case Args(Seq(), Seq())              => ""
-      case args                            => codeParens(args.toString)
+      case args                            => codeWrap.parens(args.toString)
     }
     override def toString: String = mkCode.stmt("#" + metaKey, argsToString)
   }
