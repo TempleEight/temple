@@ -2,9 +2,9 @@ package temple.generate.language.service.go
 
 import temple.generate.language.service.ServiceGenerator
 import temple.generate.language.service.adt._
-import temple.generate.utils.CodeTerm._
+import temple.generate.utils.CodeTerm.CodeWrap
 import temple.utils.FileUtils.{File, FileContent}
-import temple.utils.StringUtils.tabIndent
+import temple.utils.StringUtils.{doubleQuote, tabIndent}
 import scala.collection.mutable.ListBuffer
 
 /** Implementation of [[ServiceGenerator]] for generating Go */
@@ -34,7 +34,7 @@ object GoServiceGenerator extends ServiceGenerator {
     )
     customImports = customImports.map(tabIndent(_)).map(_ + "\n")
 
-    sb.append(codeWrap.parens.block(Seq(standardImports.mkString, "\n", customImports.mkString).mkString))
+    sb.append(CodeWrap.parens(Seq(standardImports.mkString, "\n", customImports.mkString).mkString))
     sb.append("\n")
 
     sb.toString

@@ -102,13 +102,4 @@ object CodeTerm {
     val square = new CodeWrap("[", "]")
   }
 
-  type StringWrap = String => String
-  private def stringWrap(start: String, end: String)(string: String): String = start + string + end
-  private def stringWrap(start: String): StringWrap                          = stringWrap(start, start)
-
-  /** Wrap a string in double quotes. Note that this does not perform any escaping */
-  val doubleQuote: StringWrap = stringWrap("\"")
-
-  /** Wrap a string in single quotes. Note that this does not perform any escaping */
-  val singleQuote: StringWrap = stringWrap("\'")
 }
