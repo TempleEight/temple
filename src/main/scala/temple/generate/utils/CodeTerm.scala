@@ -1,6 +1,6 @@
 package temple.generate.utils
 
-import temple.utils.StringUtils.indent
+import temple.utils.StringUtils.{indent, tabIndent}
 
 import scala.Option.when
 
@@ -92,8 +92,11 @@ object CodeTerm {
     /** Wrap a code snippet in parentheses */
     def apply(string: CodeTerm*): String = mkCode(start, string, end)
 
-    /** Wrap a code snippet in parentheses, with newlines inside them */
+    /** Wrap a code snippet in parentheses with newlines inside them, indenting with spaces */
     def spaced(string: CodeTerm*): String = mkCode(start, "\n", indent(mkCode(string)), "\n", end)
+
+    /** Wrap a code snippet in parentheses with newlines inside them, indenting with tabs */
+    def tabbed(string: CodeTerm*): String = mkCode(start, "\n", tabIndent(mkCode(string)), "\n", end)
   }
 
   object CodeWrap {
