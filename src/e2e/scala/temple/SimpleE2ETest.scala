@@ -1,8 +1,10 @@
 package temple
 
 import java.nio.file.{Files, Paths}
+import java.util.stream.Collectors
 
 import org.scalatest.{FlatSpec, Matchers}
+import scala.jdk.StreamConverters._
 
 import scala.reflect.io.Directory
 
@@ -22,15 +24,24 @@ class SimpleE2ETest extends FlatSpec with Matchers {
       ),
     )
 
-    // Only one folder should have been generated
-    Files.list(basePath).count() shouldBe 1
-    Files.exists(basePath.resolve("templeuser-db")) shouldBe true
+    // Two folders should have been generated
+    val expectedFolders = Set("templeuser-db", "templeuser").map(dir => basePath.resolve(dir))
+    Files.list(basePath).toScala(Set) shouldBe expectedFolders
 
-    // Only one file should be present in the user-db folder
-    Files.list(basePath.resolve("templeuser-db")).count() shouldBe 1
-    Files.exists(basePath.resolve("templeuser-db").resolve("init.sql")) shouldBe true
+    // Only one file should be present in the templeuser-db folder
+    val expectedTempleUserDbFiles = Set("init.sql").map(dir => basePath.resolve("templeuser-db").resolve(dir))
+    Files.list(basePath.resolve("templeuser-db")).toScala(Set) shouldBe expectedTempleUserDbFiles
 
+    // The content of the templeuser-db/init.sql file should be correct
     val initSql = Files.readString(basePath.resolve("templeuser-db").resolve("init.sql"))
     initSql shouldBe SimpleE2ETestData.createStatement
+
+    // Only one file should be present in the templeuser folder
+    val expectedTempleUserFiles = Set("Dockerfile").map(dir => basePath.resolve("templeuser").resolve(dir))
+    Files.list(basePath.resolve("templeuser")).toScala(Set) shouldBe expectedTempleUserFiles
+
+    // The content of the templeuser/Dockerfile file should be correct
+    val templeUserDockerfile = Files.readString(basePath.resolve("templeuser").resolve("Dockerfile"))
+    templeUserDockerfile shouldBe SimpleE2ETestData.dockerfile
   }
 }
