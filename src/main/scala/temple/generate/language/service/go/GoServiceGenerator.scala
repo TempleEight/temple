@@ -33,9 +33,8 @@ object GoServiceGenerator extends ServiceGenerator {
     )
     val customImports = customImportsBuffer.mkString("\n")
 
-    sb.append(CodeWrap.parens.tabbed(Seq(standardImports, "\n\n", customImports).mkString))
+    sb.append(CodeWrap.parens.tabbed(standardImports + "\n\n" + customImports))
     sb.append("\n\n")
-
     sb.toString
   }
 
