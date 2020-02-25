@@ -29,16 +29,16 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     Files.list(basePath).toScala(Set) shouldBe expectedFolders
 
     // Only one file should be present in the templeuser-db folder
-    Files.list(basePath.resolve("templeuser-db")).count() shouldBe 1
-    Files.exists(basePath.resolve("templeuser-db").resolve("init.sql")) shouldBe true
+    val expectedTempleUserDbFiles = Set("init.sql").map(dir => basePath.resolve("templeuser-db").resolve(dir))
+    Files.list(basePath.resolve("templeuser-db")).toScala(Set) shouldBe expectedTempleUserDbFiles
 
     // The content of the templeuser-db/init.sql file should be correct
     val initSql = Files.readString(basePath.resolve("templeuser-db").resolve("init.sql"))
     initSql shouldBe SimpleE2ETestData.createStatement
 
     // Only one file should be present in the templeuser folder
-    Files.list(basePath.resolve("templeuser")).count() shouldBe 1
-    Files.exists(basePath.resolve("templeuser").resolve("Dockerfile")) shouldBe true
+    val expectedTempleUserFiles = Set("Dockerfile").map(dir => basePath.resolve("templeuser").resolve(dir))
+    Files.list(basePath.resolve("templeuser")).toScala(Set) shouldBe expectedTempleUserFiles
 
     // The content of the templeuser/Dockerfile file should be correct
     val templeUserDockerfile = Files.readString(basePath.resolve("templeuser").resolve("Dockerfile"))
