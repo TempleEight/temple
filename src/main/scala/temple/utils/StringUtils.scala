@@ -3,8 +3,16 @@ package temple.utils
 /** Utility functions useful for performing operations on strings */
 object StringUtils {
 
+  private def indentLine(line: String, indent: String): String = if (line.isBlank) line else indent + line
+
   /** Given a string, indent it by a given number of spaces */
-  def indent(str: String, length: Int = 2): String = str.replaceAll("^|(?<=\n)", " " * length)
+  def indent(str: String, length: Int = 2): String =
+    str
+    // limit is -1 to avoid gobbling trailing newlines
+    // https://stackoverflow.com/questions/27689065/how-to-split-string-with-trailing-empty-strings-in-result
+      .split("\n", -1)
+      .map(indentLine(_, " " * length))
+      .mkString("\n")
 
   /** Given a string, indent it by a given number of tabs */
   def tabIndent(str: String, length: Int = 1): String = str.replaceAll("^|(?<=\n)", "\t" * length)
