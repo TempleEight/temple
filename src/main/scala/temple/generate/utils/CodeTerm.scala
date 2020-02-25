@@ -87,7 +87,7 @@ object CodeTerm {
     def stmt(string: CodeTerm*): String = mkCode(string, ";")
   }
 
-  sealed class codeWrap private (start: String, end: String) {
+  sealed class CodeWrap private (start: String, end: String) {
 
     /** Wrap a code snippet in parentheses */
     def apply(string: CodeTerm*): String = mkCode(start, string, end)
@@ -96,22 +96,9 @@ object CodeTerm {
     def spaced(string: CodeTerm*): String = mkCode(start, "\n", indent(mkCode(string)), "\n", end)
   }
 
-  object codeWrap {
-
-    object parens extends codeWrap("(", ")") {
-      object block extends codeWrap("(\n", ")\n")
-    }
-
-    object curly extends codeWrap("{", "}") {
-      object block extends codeWrap("{\n", "}\n")
-    }
-
-    object square extends codeWrap("[", "]") {
-      object block extends codeWrap("[\n", "]\n")
-    }
-
-    object singleQuotes extends codeWrap("'", "'")
-    object doubleQuotes extends codeWrap("\"", "\"")
-    object españolQue   extends codeWrap("¿", "?")
+  object CodeWrap {
+    val parens = new CodeWrap("(", ")")
+    val curly  = new CodeWrap("{", "}")
+    val square = new CodeWrap("[", "]")
   }
 }
