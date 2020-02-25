@@ -73,6 +73,26 @@ object ProjectBuilderTestData {
       |  blobField BYTEA NOT NULL
       |);""".stripMargin
 
+  val simpleTemplefileUsersDockerfile: String =
+    """FROM golang:1.13.7-alpine
+      |
+      |WORKDIR /templeuser
+      |
+      |COPY go.mod go.sum ./
+      |
+      |RUN ["go", "mod", "download"]
+      |
+      |COPY . .
+      |
+      |COPY config.json /etc/templeuser-service
+      |
+      |RUN ["go", "build", "-o", "templeuser"]
+      |
+      |ENTRYPOINT ["./templeuser"]
+      |
+      |EXPOSE 1024
+      |""".stripMargin
+
   val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
     ProjectBlock(),
@@ -101,4 +121,23 @@ object ProjectBuilderTestData {
       |  blobField BYTEA NOT NULL
       |);""".stripMargin + "\n\n" + simpleTemplefilePostgresCreateOutput
 
+  val complexTemplefileUsersDockerfile: String =
+    """FROM golang:1.13.7-alpine
+      |
+      |WORKDIR /complexuser
+      |
+      |COPY go.mod go.sum ./
+      |
+      |RUN ["go", "mod", "download"]
+      |
+      |COPY . .
+      |
+      |COPY config.json /etc/complexuser-service
+      |
+      |RUN ["go", "build", "-o", "complexuser"]
+      |
+      |ENTRYPOINT ["./complexuser"]
+      |
+      |EXPOSE 1024
+      |""".stripMargin
 }
