@@ -6,7 +6,6 @@ import temple.generate.utils.CodeTerm.CodeWrap
 import temple.utils.FileUtils._
 import temple.utils.StringUtils.{doubleQuote, tabIndent}
 import scala.collection.mutable.ListBuffer
-import temple.utils.FileUtils
 
 /** Implementation of [[ServiceGenerator]] for generating Go */
 object GoServiceGenerator extends ServiceGenerator {
@@ -108,7 +107,7 @@ object GoServiceGenerator extends ServiceGenerator {
   }
 
   private def generateJsonMiddleware(): String =
-    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/JsonMiddleware.go")
+    readFile("src/main/scala/temple/generate/language/service/go/genFiles/JsonMiddleware.go")
 
   private def generateHandler(serviceName: String, endpoint: Endpoint): String =
     s"func ${serviceName + endpoint}Handler(w http.ResponseWriter, r *http.Request) {}\n\n"
