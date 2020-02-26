@@ -13,6 +13,8 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var dao userDAO.DAO
+
 func main() {
 	configPtr := flag.String("config", "/etc/user-service/config.json", "configuration filepath")
 	flag.Parse()

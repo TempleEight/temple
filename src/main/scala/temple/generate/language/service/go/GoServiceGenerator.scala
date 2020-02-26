@@ -39,6 +39,15 @@ object GoServiceGenerator extends ServiceGenerator {
     sb.toString
   }
 
+  /** Given a service name and whether the service uses inter-service communication, return global statements */
+  private def generateGlobals(serviceName: String, usesComms: Boolean): String = {
+    val sb = new StringBuilder
+    sb.append(s"var dao ${serviceName}DAO.DAO\n")
+    if (usesComms) sb.append(s"var comm ${serviceName}Comm.Handler\n")
+    sb.append("\n")
+    sb.toString
+  }
+
   /** Given a service name, whether the service uses inter-service communication, the endpoints desired and the port
     * number, generate the main function */
   private def generateMain(serviceName: String, usesComms: Boolean, endpoints: Set[Endpoint], port: Int): String = {
@@ -101,6 +110,9 @@ object GoServiceGenerator extends ServiceGenerator {
     val serviceString = generatePackage("main") + generateImports(
         serviceRoot.name,
         serviceRoot.module,
+        usesComms,
+      ) + generateGlobals(
+        serviceRoot.name,
         usesComms,
       ) + generateMain(
         serviceRoot.name,

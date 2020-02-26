@@ -14,6 +14,9 @@ import (
 	"github.com/gorilla/mux"
 )
 
+var dao matchDAO.DAO
+var comm matchComm.Handler
+
 func main() {
 	configPtr := flag.String("config", "/etc/match-service/config.json", "configuration filepath")
 	flag.Parse()
