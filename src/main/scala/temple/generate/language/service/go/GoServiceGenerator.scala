@@ -127,7 +127,7 @@ object GoServiceGenerator extends ServiceGenerator {
       "",
       s"func (e Err${serviceName.capitalize}NotFound) Error() string ${CodeWrap.curly
         .tabbed(s"""return fmt.Sprintf("${serviceName} not found with ID %d", e)""")}",
-    ).mkString("\n")
+    ).mkString("", "\n", "\n")
 
   override def generate(serviceRoot: ServiceRoot): Map[FileUtils.File, FileUtils.FileContent] = {
     val usesComms = serviceRoot.comms.nonEmpty
