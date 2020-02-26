@@ -110,7 +110,7 @@ object GoServiceGenerator extends ServiceGenerator {
     readFile("src/main/scala/temple/generate/language/service/go/genFiles/JsonMiddleware.go")
 
   private def generateHandler(serviceName: String, endpoint: Endpoint): String =
-    s"func ${serviceName + endpoint}Handler(w http.ResponseWriter, r *http.Request) {}\n"
+    s"func ${serviceName}${endpoint}Handler(w http.ResponseWriter, r *http.Request) {}\n"
 
   private def generateHandlers(serviceName: String, endpoints: Set[Endpoint]): String = {
     val handlers: ListBuffer[String] = ListBuffer.empty
