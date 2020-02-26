@@ -3,7 +3,7 @@ package temple.generate.language.service.go
 import temple.generate.language.service.ServiceGenerator
 import temple.generate.language.service.adt._
 import temple.generate.utils.CodeTerm.CodeWrap
-import temple.utils.FileUtils._
+import temple.utils.FileUtils
 import temple.utils.StringUtils.{doubleQuote, tabIndent}
 import scala.collection.mutable.ListBuffer
 
@@ -107,7 +107,7 @@ object GoServiceGenerator extends ServiceGenerator {
   }
 
   private def generateJsonMiddleware(): String =
-    readFile("src/main/scala/temple/generate/language/service/go/genFiles/JsonMiddleware.go")
+    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/JsonMiddleware.go")
 
   private def generateHandler(serviceName: String, endpoint: Endpoint): String =
     s"func $serviceName${endpoint}Handler(w http.ResponseWriter, r *http.Request) {}\n"
@@ -133,7 +133,7 @@ object GoServiceGenerator extends ServiceGenerator {
         .tabbed(s"""return fmt.Sprintf("${serviceName} not found with ID %d", e)""") + "\n",
     ).mkString("\n")
 
-  override def generate(serviceRoot: ServiceRoot): Map[File, FileContent] = {
+  override def generate(serviceRoot: ServiceRoot): Map[FileUtils.File, FileUtils.FileContent] = {
     val usesComms = serviceRoot.comms.nonEmpty
     val serviceString = Seq(
       generatePackage("main"),
@@ -160,8 +160,8 @@ object GoServiceGenerator extends ServiceGenerator {
     ).mkString("\n")
     val errorsString = generateErrors(serviceRoot.name)
     Map(
-      File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString,
-      File(s"${serviceRoot.name}/dao", "errors.go")     -> errorsString,
+      FileUtils.File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString,
+      FileUtils.File(s"${serviceRoot.name}/dao", "errors.go")     -> errorsString,
     )
     /*
    * TODO:
