@@ -61,6 +61,9 @@ object CodeTerm {
     /** Turn a list of terms into a comma- and newline-separated string */
     def spacedList(terms: CodeTermIterableString): String = mkCode(terms.mkCodeList.spaced)
 
+    /** Turn a list of terms into newlines */
+    def lines(terms: CodeTerm*): String = mkCode(new CodeTermList(terms.flatIterator, "\n"))
+
     /** Combine a sequence of code terms into a single string, omitting spaces as necessary */
     def apply(strings: CodeTerm*): String = {
       val iterator: Iterator[String] = strings.iterator.flatMap(_.flatIterator)
