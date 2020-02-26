@@ -112,13 +112,9 @@ object GoServiceGenerator extends ServiceGenerator {
   private def generateHandler(serviceName: String, endpoint: Endpoint): String =
     s"func $serviceName${endpoint}Handler(w http.ResponseWriter, r *http.Request) {}\n"
 
-  private def generateHandlers(serviceName: String, endpoints: Set[Endpoint]): String = {
-    val handlers: ListBuffer[String] = ListBuffer.empty
-    for (endpoint <- Endpoint.values if endpoints.contains(endpoint)) {
-      handlers += generateHandler(serviceName, endpoint)
-    }
-    handlers.mkString("\n")
-  }
+  private def generateHandlers(serviceName: String, endpoints: Set[Endpoint]): String =
+    (for (endpoint <- Endpoint.values if endpoints.contains(endpoint))
+      yield generateHandler(serviceName, endpoint)).mkString("\n")
 
   private def generateErrors(serviceName: String): String = {
     val errors: ListBuffer[String] = ListBuffer(
