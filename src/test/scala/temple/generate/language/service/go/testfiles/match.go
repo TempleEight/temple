@@ -14,3 +14,36 @@ import (
 	"github.com/gorilla/mux"
 )
 
+func main() {
+	configPtr := flag.String("config", "/etc/match-service/config.json", "configuration filepath")
+	flag.Parse()
+
+	// Require all struct fields by default
+	valid.SetFieldsRequiredByDefault(true)
+
+	config, err := utils.GetConfig(*configPtr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	dao = matchDAO.DAO{}
+	err = dao.Init(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	comm = matchComm.Handler{}
+	comm.Init(config)
+
+	r := mux.NewRouter()
+	// Mux directs to first matching route, i.e. the order matters
+	r.HandleFunc("/match/all", matchListHandler).Methods(http.MethodGet)
+	r.HandleFunc("/match", matchCreateHandler).Methods(http.MethodPost)
+	r.HandleFunc("/match/{id}", matchReadHandler).Methods(http.MethodGet)
+	r.HandleFunc("/match/{id}", matchUpdateHandler).Methods(http.MethodPut)
+	r.HandleFunc("/match/{id}", matchDeleteHandler).Methods(http.MethodDelete)
+	r.Use(jsonMiddleware)
+
+	log.Fatal(http.ListenAndServe(":81", r))
+}
+
