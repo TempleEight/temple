@@ -51,3 +51,10 @@ func jsonMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func userCreateHandler(w http.ResponseWriter, r *http.Request) {}
+
+func userReadHandler(w http.ResponseWriter, r *http.Request) {}
+
+func userUpdateHandler(w http.ResponseWriter, r *http.Request) {}
+
+func userDeleteHandler(w http.ResponseWriter, r *http.Request) {}

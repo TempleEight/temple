@@ -58,3 +58,12 @@ func jsonMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func matchListHandler(w http.ResponseWriter, r *http.Request) {}
+
+func matchCreateHandler(w http.ResponseWriter, r *http.Request) {}
+
+func matchReadHandler(w http.ResponseWriter, r *http.Request) {}
+
+func matchUpdateHandler(w http.ResponseWriter, r *http.Request) {}
+
+func matchDeleteHandler(w http.ResponseWriter, r *http.Request) {}

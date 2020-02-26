@@ -109,6 +109,29 @@ object GoServiceGenerator extends ServiceGenerator {
   private def generateJsonMiddleware(): String =
     FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/JsonMiddleware.go")
 
+  private def generateHandler(serviceName: String, endpoint: Endpoint): String =
+    s"func ${serviceName + endpoint}Handler(w http.ResponseWriter, r *http.Request) {}\n\n"
+
+  private def generateHandlers(serviceName: String, endpoints: Set[Endpoint]): String = {
+    val sb = new StringBuilder
+    if (endpoints.contains(Endpoint.ReadAll)) {
+      sb.append(generateHandler(serviceName, Endpoint.ReadAll))
+    }
+    if (endpoints.contains(Endpoint.Create)) {
+      sb.append(generateHandler(serviceName, Endpoint.Create))
+    }
+    if (endpoints.contains(Endpoint.Read)) {
+      sb.append(generateHandler(serviceName, Endpoint.Read))
+    }
+    if (endpoints.contains(Endpoint.Update)) {
+      sb.append(generateHandler(serviceName, Endpoint.Update))
+    }
+    if (endpoints.contains(Endpoint.Delete)) {
+      sb.append(generateHandler(serviceName, Endpoint.Delete))
+    }
+    sb.toString
+  }
+
   override def generate(serviceRoot: ServiceRoot): Map[File, FileContent] = {
     val usesComms = serviceRoot.comms.nonEmpty
     val serviceString = generatePackage("main") + generateImports(
@@ -123,11 +146,14 @@ object GoServiceGenerator extends ServiceGenerator {
         usesComms,
         serviceRoot.endpoints,
         serviceRoot.port,
-      ) + generateJsonMiddleware()
+      ) + generateJsonMiddleware() + generateHandlers(
+        serviceRoot.name,
+        serviceRoot.endpoints,
+      ).stripLineEnd
     Map(File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString)
     /*
    * TODO:
-   * <>.go
+   * Handler generation in <>.go
    * dao/<>-dao.go
    * dao/errors.go
    * utils/utils.go
