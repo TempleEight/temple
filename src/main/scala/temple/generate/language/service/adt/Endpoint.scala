@@ -23,4 +23,6 @@ object Endpoint {
   case object Delete extends Endpoint {
     override def toString = "Delete"
   }
+
+  val values = Seq(ReadAll, Create, Read, Update, Delete)
 }

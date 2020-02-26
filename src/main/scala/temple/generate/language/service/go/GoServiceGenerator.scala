@@ -114,20 +114,8 @@ object GoServiceGenerator extends ServiceGenerator {
 
   private def generateHandlers(serviceName: String, endpoints: Set[Endpoint]): String = {
     val handlers: ListBuffer[String] = ListBuffer.empty
-    if (endpoints.contains(Endpoint.ReadAll)) {
-      handlers += generateHandler(serviceName, Endpoint.ReadAll)
-    }
-    if (endpoints.contains(Endpoint.Create)) {
-      handlers += generateHandler(serviceName, Endpoint.Create)
-    }
-    if (endpoints.contains(Endpoint.Read)) {
-      handlers += generateHandler(serviceName, Endpoint.Read)
-    }
-    if (endpoints.contains(Endpoint.Update)) {
-      handlers += generateHandler(serviceName, Endpoint.Update)
-    }
-    if (endpoints.contains(Endpoint.Delete)) {
-      handlers += generateHandler(serviceName, Endpoint.Delete)
+    for (endpoint <- Endpoint.values if endpoints.contains(endpoint)) {
+      handlers += generateHandler(serviceName, endpoint)
     }
     handlers.mkString("\n")
   }
