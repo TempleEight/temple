@@ -9,7 +9,7 @@ object GoServiceGeneratorTestData {
     "user",
     "github.com/TempleEight/spec-golang/user",
     Seq.empty,
-    Seq(Endpoint.Create, Endpoint.Read, Endpoint.Update, Endpoint.Delete),
+    Set(Endpoint.Create, Endpoint.Read, Endpoint.Update, Endpoint.Delete),
     80,
   )
 
@@ -22,7 +22,7 @@ object GoServiceGeneratorTestData {
       "match",
       "github.com/TempleEight/spec-golang/match",
       Seq("user"),
-      Seq(Endpoint.All, Endpoint.Create, Endpoint.Read, Endpoint.Update, Endpoint.Delete),
+      Set(Endpoint.ReadAll, Endpoint.Create, Endpoint.Read, Endpoint.Update, Endpoint.Delete),
       81,
     )
 
