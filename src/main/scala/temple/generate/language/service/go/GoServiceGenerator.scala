@@ -3,9 +3,10 @@ package temple.generate.language.service.go
 import temple.generate.language.service.ServiceGenerator
 import temple.generate.language.service.adt._
 import temple.generate.utils.CodeTerm.CodeWrap
-import temple.utils.FileUtils.{File, FileContent}
+import temple.utils.FileUtils._
 import temple.utils.StringUtils.{doubleQuote, tabIndent}
 import scala.collection.mutable.ListBuffer
+import temple.utils.FileUtils
 
 /** Implementation of [[ServiceGenerator]] for generating Go */
 object GoServiceGenerator extends ServiceGenerator {
@@ -105,6 +106,9 @@ object GoServiceGenerator extends ServiceGenerator {
     sb.toString
   }
 
+  private def generateJsonMiddleware(): String =
+    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/JsonMiddleware.go")
+
   override def generate(serviceRoot: ServiceRoot): Map[File, FileContent] = {
     val usesComms = serviceRoot.comms.nonEmpty
     val serviceString = generatePackage("main") + generateImports(
@@ -119,7 +123,7 @@ object GoServiceGenerator extends ServiceGenerator {
         usesComms,
         serviceRoot.endpoints,
         serviceRoot.port,
-      )
+      ) + generateJsonMiddleware()
     Map(File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString)
     /*
    * TODO:
