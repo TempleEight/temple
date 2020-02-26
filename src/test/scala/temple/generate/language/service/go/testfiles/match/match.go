@@ -7,12 +7,15 @@ import (
 	"log"
 	"net/http"
 
-	matchComm "github.com/TempleEight/spec-golang/match/comm"
 	matchDAO "github.com/TempleEight/spec-golang/match/dao"
+	matchComm "github.com/TempleEight/spec-golang/match/comm"
 	"github.com/TempleEight/spec-golang/match/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/gorilla/mux"
 )
+
+var dao matchDAO.DAO
+var comm matchComm.Handler
 
 func main() {
 	configPtr := flag.String("config", "/etc/match-service/config.json", "configuration filepath")
@@ -47,3 +50,20 @@ func main() {
 	log.Fatal(http.ListenAndServe(":81", r))
 }
 
+func jsonMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// All responses are JSON, set header accordingly
+		w.Header().Set("Content-Type", "application/json")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func matchListHandler(w http.ResponseWriter, r *http.Request) {}
+
+func matchCreateHandler(w http.ResponseWriter, r *http.Request) {}
+
+func matchReadHandler(w http.ResponseWriter, r *http.Request) {}
+
+func matchUpdateHandler(w http.ResponseWriter, r *http.Request) {}
+
+func matchDeleteHandler(w http.ResponseWriter, r *http.Request) {}
