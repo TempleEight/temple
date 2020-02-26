@@ -133,6 +133,19 @@ object GoServiceGenerator extends ServiceGenerator {
     sb.toString
   }
 
+  private def generateErrors(serviceName: String): String =
+    Seq(
+      "package dao",
+      "",
+      """import "fmt"""",
+      "",
+      s"// Err${serviceName.capitalize}NotFound is returned when a ${serviceName} for the provided ID was not found",
+      s"type Err${serviceName.capitalize}NotFound int64",
+      "",
+      s"func (e Err${serviceName.capitalize}NotFound) Error() string " + CodeWrap.curly
+        .tabbed(s"""return fmt.Sprintf("${serviceName} not found with ID %d", e)""") + "\n",
+    ).mkString("\n")
+
   override def generate(serviceRoot: ServiceRoot): Map[File, FileContent] = {
     val usesComms = serviceRoot.comms.nonEmpty
     val serviceString = generatePackage("main") + generateImports(
@@ -151,7 +164,11 @@ object GoServiceGenerator extends ServiceGenerator {
         serviceRoot.name,
         serviceRoot.endpoints,
       ).stripLineEnd
-    Map(File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString)
+    val errorsString = generateErrors(serviceRoot.name)
+    Map(
+      File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString,
+      File(s"${serviceRoot.name}/dao", "errors.go")     -> errorsString,
+    )
     /*
    * TODO:
    * Handler generation in <>.go
