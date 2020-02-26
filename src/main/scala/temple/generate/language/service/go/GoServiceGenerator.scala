@@ -10,7 +10,7 @@ import scala.collection.mutable.ListBuffer
 /** Implementation of [[ServiceGenerator]] for generating Go */
 object GoServiceGenerator extends ServiceGenerator {
 
-  private def generatePackage(packageName: String): String = s"package $packageName\n\n"
+  private def generatePackage(packageName: String): String = s"package $packageName\n"
 
   /** Given a service name, module name and whether the service uses inter-service communication, return the import
     * block */
@@ -36,7 +36,7 @@ object GoServiceGenerator extends ServiceGenerator {
     val customImports = customImportsBuffer.mkString("\n")
 
     sb.append(CodeWrap.parens.tabbed(standardImports + "\n\n" + customImports))
-    sb.append("\n\n")
+    sb.append("\n")
     sb.toString
   }
 
@@ -46,7 +46,7 @@ object GoServiceGenerator extends ServiceGenerator {
       s"var dao ${serviceName}DAO.DAO",
     )
     if (usesComms) globals += s"var comm ${serviceName}Comm.Handler"
-    globals.mkString("", "\n", "\n\n")
+    globals.mkString("", "\n", "\n")
   }
 
   /** Given a service name, whether the service uses inter-service communication, the endpoints desired and the port
@@ -102,7 +102,7 @@ object GoServiceGenerator extends ServiceGenerator {
     )
 
     sb.append(CodeWrap.curly.tabbed(bodyBuffer.mkString("\n")))
-    sb.append("\n\n")
+    sb.append("\n")
     sb.toString
   }
 
@@ -110,26 +110,26 @@ object GoServiceGenerator extends ServiceGenerator {
     readFile("src/main/scala/temple/generate/language/service/go/genFiles/JsonMiddleware.go")
 
   private def generateHandler(serviceName: String, endpoint: Endpoint): String =
-    s"func ${serviceName + endpoint}Handler(w http.ResponseWriter, r *http.Request) {}\n\n"
+    s"func ${serviceName + endpoint}Handler(w http.ResponseWriter, r *http.Request) {}\n"
 
   private def generateHandlers(serviceName: String, endpoints: Set[Endpoint]): String = {
-    val sb = new StringBuilder
+    val handlers: ListBuffer[String] = ListBuffer.empty
     if (endpoints.contains(Endpoint.ReadAll)) {
-      sb.append(generateHandler(serviceName, Endpoint.ReadAll))
+      handlers += generateHandler(serviceName, Endpoint.ReadAll)
     }
     if (endpoints.contains(Endpoint.Create)) {
-      sb.append(generateHandler(serviceName, Endpoint.Create))
+      handlers += generateHandler(serviceName, Endpoint.Create)
     }
     if (endpoints.contains(Endpoint.Read)) {
-      sb.append(generateHandler(serviceName, Endpoint.Read))
+      handlers += generateHandler(serviceName, Endpoint.Read)
     }
     if (endpoints.contains(Endpoint.Update)) {
-      sb.append(generateHandler(serviceName, Endpoint.Update))
+      handlers += generateHandler(serviceName, Endpoint.Update)
     }
     if (endpoints.contains(Endpoint.Delete)) {
-      sb.append(generateHandler(serviceName, Endpoint.Delete))
+      handlers += generateHandler(serviceName, Endpoint.Delete)
     }
-    sb.toString
+    handlers.mkString("\n")
   }
 
   private def generateErrors(serviceName: String): String =
@@ -147,22 +147,29 @@ object GoServiceGenerator extends ServiceGenerator {
 
   override def generate(serviceRoot: ServiceRoot): Map[File, FileContent] = {
     val usesComms = serviceRoot.comms.nonEmpty
-    val serviceString = generatePackage("main") + generateImports(
+    val serviceString = Seq(
+      generatePackage("main"),
+      generateImports(
         serviceRoot.name,
         serviceRoot.module,
         usesComms,
-      ) + generateGlobals(
+      ),
+      generateGlobals(
         serviceRoot.name,
         usesComms,
-      ) + generateMain(
+      ),
+      generateMain(
         serviceRoot.name,
         usesComms,
         serviceRoot.endpoints,
         serviceRoot.port,
-      ) + generateJsonMiddleware() + generateHandlers(
+      ),
+      generateJsonMiddleware(),
+      generateHandlers(
         serviceRoot.name,
         serviceRoot.endpoints,
-      ).stripLineEnd
+      ),
+    ).mkString("\n")
     val errorsString = generateErrors(serviceRoot.name)
     Map(
       File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString,
