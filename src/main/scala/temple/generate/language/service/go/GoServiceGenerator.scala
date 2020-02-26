@@ -116,8 +116,8 @@ object GoServiceGenerator extends ServiceGenerator {
     (for (endpoint <- Endpoint.values if endpoints.contains(endpoint))
       yield generateHandler(serviceName, endpoint)).mkString("\n")
 
-  private def generateErrors(serviceName: String): String = {
-    val errors: ListBuffer[String] = ListBuffer(
+  private def generateErrors(serviceName: String): String =
+    Seq(
       "package dao",
       "",
       """import "fmt"""",
@@ -125,13 +125,9 @@ object GoServiceGenerator extends ServiceGenerator {
       s"// Err${serviceName.capitalize}NotFound is returned when a ${serviceName} for the provided ID was not found",
       s"type Err${serviceName.capitalize}NotFound int64",
       "",
-    )
-    errors += Seq(
-      s"func (e Err${serviceName.capitalize}NotFound) Error() string ",
-      CodeWrap.curly.tabbed(s"""return fmt.Sprintf("${serviceName} not found with ID %d", e)"""),
-    ).mkString("", "", "\n")
-    errors.mkString("\n")
-  }
+      s"func (e Err${serviceName.capitalize}NotFound) Error() string ${CodeWrap.curly
+        .tabbed(s"""return fmt.Sprintf("${serviceName} not found with ID %d", e)""")}",
+    ).mkString("\n")
 
   override def generate(serviceRoot: ServiceRoot): Map[FileUtils.File, FileUtils.FileContent] = {
     val usesComms = serviceRoot.comms.nonEmpty
