@@ -22,7 +22,7 @@ object GoServiceGenerator extends ServiceGenerator {
       .map(doubleQuote)
       .mkString("\n")
 
-    var customImportsBuffer: ListBuffer[String] = ListBuffer(
+    val customImportsBuffer: ListBuffer[String] = ListBuffer(
       s"${serviceName}DAO ${doubleQuote(s"${module}/dao")}",
     )
     if (usesComms) {
@@ -42,11 +42,11 @@ object GoServiceGenerator extends ServiceGenerator {
 
   /** Given a service name and whether the service uses inter-service communication, return global statements */
   private def generateGlobals(serviceName: String, usesComms: Boolean): String = {
-    val sb = new StringBuilder
-    sb.append(s"var dao ${serviceName}DAO.DAO\n")
-    if (usesComms) sb.append(s"var comm ${serviceName}Comm.Handler\n")
-    sb.append("\n")
-    sb.toString
+    val globals: ListBuffer[String] = ListBuffer(
+      s"var dao ${serviceName}DAO.DAO",
+    )
+    if (usesComms) globals += s"var comm ${serviceName}Comm.Handler"
+    globals.mkString("", "\n", "\n\n")
   }
 
   /** Given a service name, whether the service uses inter-service communication, the endpoints desired and the port
@@ -55,7 +55,7 @@ object GoServiceGenerator extends ServiceGenerator {
     val sb = new StringBuilder
     sb.append("func main() ")
 
-    var bodyBuffer: ListBuffer[String] = ListBuffer(
+    val bodyBuffer: ListBuffer[String] = ListBuffer(
       s"""configPtr := flag.String("config", "/etc/${serviceName}-service/config.json", "configuration filepath")""",
       "flag.Parse()",
       "",
