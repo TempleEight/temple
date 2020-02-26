@@ -13,8 +13,7 @@ object GoServiceGenerator extends ServiceGenerator {
   private def generatePackage(packageName: String): String = s"package $packageName\n\n"
 
   /** Given a service name, module name and whether the service uses inter-service communication, return the import
-    * block
-    */
+    * block */
   private def generateImports(serviceName: String, module: String, usesComms: Boolean): String = {
     val sb = new StringBuilder
     sb.append("import ")
@@ -40,10 +39,8 @@ object GoServiceGenerator extends ServiceGenerator {
     sb.toString
   }
 
-  /**
-    * Given a service name, whether the service uses inter-service communication, the endpoints desired and the port
-    * number, generate the main function
-    */
+  /** Given a service name, whether the service uses inter-service communication, the endpoints desired and the port
+    * number, generate the main function */
   private def generateMain(serviceName: String, usesComms: Boolean, endpoints: Set[Endpoint], port: Int): String = {
     val sb = new StringBuilder
     sb.append("func main() ")
