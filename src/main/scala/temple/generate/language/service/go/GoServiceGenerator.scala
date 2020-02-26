@@ -23,12 +23,13 @@ object GoServiceGenerator extends ServiceGenerator {
       .map(doubleQuote)
       .mkString("\n")
 
-    var customImportsBuffer: ListBuffer[String] = ListBuffer.empty
+    var customImportsBuffer: ListBuffer[String] = ListBuffer(
+      s"${serviceName}DAO ${doubleQuote(s"${module}/dao")}",
+    )
     if (usesComms) {
       customImportsBuffer += s"${serviceName}Comm ${doubleQuote(s"${module}/comm")}"
     }
     customImportsBuffer ++= Seq(
-      s"${serviceName}DAO ${doubleQuote(s"${module}/dao")}",
       doubleQuote(s"${module}/util"),
       s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
       doubleQuote("github.com/gorilla/mux"),
