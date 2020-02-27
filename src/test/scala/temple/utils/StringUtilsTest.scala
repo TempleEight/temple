@@ -1,7 +1,7 @@
 package temple.utils
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.utils.StringUtils.{indent, snakeCase}
+import temple.utils.StringUtils.{indent, snakeCase, españolQue}
 
 class StringUtilsTest extends FlatSpec with Matchers {
 
@@ -58,5 +58,11 @@ class StringUtilsTest extends FlatSpec with Matchers {
 
   it should "correctly convert a capitalised phrase" in {
     snakeCase("CustomerID") shouldBe "customer_id"
+  }
+
+  behavior of "españolQue"
+
+  it should "wrap a string as a Spanish question" in {
+    españolQue("x") shouldEqual ("¿x?")
   }
 }
