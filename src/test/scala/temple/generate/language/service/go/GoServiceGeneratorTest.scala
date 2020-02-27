@@ -1,7 +1,6 @@
 package temple.generate.language.service.go
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.utils.FileUtils._
 
 class GoServiceGeneratorTest extends FlatSpec with Matchers {
 
