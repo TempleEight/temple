@@ -8,6 +8,7 @@ import temple.utils.StringUtils.{doubleQuote, tabIndent}
 
 import scala.collection.mutable.ListBuffer
 import scala.Option.when
+import java.io.File
 
 /** Implementation of [[ServiceGenerator]] for generating Go */
 object GoServiceGenerator extends ServiceGenerator {
@@ -41,6 +42,24 @@ object GoServiceGenerator extends ServiceGenerator {
     sb.append("\n")
     sb.toString
   }
+
+  private def generateDAOImports(serviceName: String): String =
+    s"import ${CodeWrap.parens.tabbed(
+      Seq(
+        """"database/sql"""",
+        """"fmt"""",
+        "",
+        s""""github.com/TempleEight/spec-golang/${serviceName}/utils"""",
+        "// pq acts as the driver for SQL requests",
+        """_ "github.com/lib/pq"""",
+      ).mkString("\n"),
+    )}\n"
+
+  private def generateDAOStructs(): String =
+    Seq(
+      "// DAO encapsulates access to the database",
+      s"type DAO struct ${CodeWrap.curly.tabbed("DB *sql.DB")}",
+    ).mkString("", "\n", "\n")
 
   /** Given a service name and whether the service uses inter-service communication, return global statements */
   private def generateGlobals(serviceName: String, usesComms: Boolean): String = {
@@ -109,7 +128,7 @@ object GoServiceGenerator extends ServiceGenerator {
   }
 
   private def generateJsonMiddleware(): String =
-    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/JsonMiddleware.go")
+    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/json_middleware.go")
 
   private def generateHandler(serviceName: String, endpoint: Endpoint): String =
     s"func $serviceName${endpoint.verb}Handler(w http.ResponseWriter, r *http.Request) {}\n"
@@ -130,6 +149,9 @@ object GoServiceGenerator extends ServiceGenerator {
       s"func (e Err${serviceName.capitalize}NotFound) Error() string ${CodeWrap.curly
         .tabbed(s"""return fmt.Sprintf("${serviceName} not found with ID %d", e)""")}",
     ).mkString("", "\n", "\n")
+
+  private def generateDAOInit(): String =
+    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/dao_init.go")
 
   private def generateConfig(): String =
     FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/config.go")
@@ -162,21 +184,23 @@ object GoServiceGenerator extends ServiceGenerator {
         serviceRoot.endpoints,
       ),
     ).mkString("\n")
-    val errorsString = generateErrors(serviceRoot.name)
-    val configString = generateConfig()
-    val utilString   = generateUtil()
+    val daoString = Seq(
+      generatePackage("dao"),
+      generateDAOImports(serviceRoot.name),
+      generateDAOStructs(),
+      generateDAOInit(),
+    ).mkString("\n")
     Map(
       FileUtils.File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString,
-      FileUtils.File(s"${serviceRoot.name}/dao", "errors.go")     -> errorsString,
-      FileUtils.File(s"${serviceRoot.name}/util", "config.go")    -> configString,
-      FileUtils.File(s"${serviceRoot.name}/util", "util.go")      -> utilString,
+      FileUtils.File(s"${serviceRoot.name}/dao", "errors.go")     -> generateErrors(serviceRoot.name),
+      FileUtils.File(s"${serviceRoot.name}/dao", "dao.go")        -> daoString,
+      FileUtils.File(s"${serviceRoot.name}/util", "config.go")    -> generateConfig(),
+      FileUtils.File(s"${serviceRoot.name}/util", "util.go")      -> generateUtil(),
     )
     /*
    * TODO:
    * Handler generation in <>.go
    * dao/<>-dao.go
-   * utils/utils.go
-   * utils/config.go
    * go.mod
    * go.sum
    * config.json
