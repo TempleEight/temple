@@ -63,6 +63,6 @@ class StringUtilsTest extends FlatSpec with Matchers {
   behavior of "españolQue"
 
   it should "wrap a string as a Spanish question" in {
-    españolQue("x") shouldEqual ("¿x?")
+    españolQue("Are we having paella tonight") shouldEqual ("¿Are we having paella tonight?")
   }
 }
