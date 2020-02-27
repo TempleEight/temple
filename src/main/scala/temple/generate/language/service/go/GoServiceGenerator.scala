@@ -5,7 +5,9 @@ import temple.generate.language.service.adt._
 import temple.generate.utils.CodeTerm.CodeWrap
 import temple.utils.FileUtils
 import temple.utils.StringUtils.{doubleQuote, tabIndent}
+
 import scala.collection.mutable.ListBuffer
+import scala.Option.when
 
 /** Implementation of [[ServiceGenerator]] for generating Go */
 object GoServiceGenerator extends ServiceGenerator {
@@ -129,6 +131,9 @@ object GoServiceGenerator extends ServiceGenerator {
         .tabbed(s"""return fmt.Sprintf("${serviceName} not found with ID %d", e)""")}",
     ).mkString("", "\n", "\n")
 
+  private def generateConfig(usesComms: Boolean): String =
+    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/config.go")
+
   override def generate(serviceRoot: ServiceRoot): Map[FileUtils.File, FileUtils.FileContent] = {
     val usesComms = serviceRoot.comms.nonEmpty
     val serviceString = Seq(
@@ -155,15 +160,16 @@ object GoServiceGenerator extends ServiceGenerator {
       ),
     ).mkString("\n")
     val errorsString = generateErrors(serviceRoot.name)
+    val configString = generateConfig(usesComms)
     Map(
       FileUtils.File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString,
       FileUtils.File(s"${serviceRoot.name}/dao", "errors.go")     -> errorsString,
+      FileUtils.File(s"${serviceRoot.name}/util", "config.go")    -> configString,
     )
     /*
    * TODO:
    * Handler generation in <>.go
    * dao/<>-dao.go
-   * dao/errors.go
    * utils/utils.go
    * utils/config.go
    * go.mod
