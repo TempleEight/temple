@@ -131,8 +131,11 @@ object GoServiceGenerator extends ServiceGenerator {
         .tabbed(s"""return fmt.Sprintf("${serviceName} not found with ID %d", e)""")}",
     ).mkString("", "\n", "\n")
 
-  private def generateConfig(usesComms: Boolean): String =
+  private def generateConfig(): String =
     FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/config.go")
+
+  private def generateUtil(): String =
+    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/util.go")
 
   override def generate(serviceRoot: ServiceRoot): Map[FileUtils.File, FileUtils.FileContent] = {
     val usesComms = serviceRoot.comms.nonEmpty
@@ -160,11 +163,13 @@ object GoServiceGenerator extends ServiceGenerator {
       ),
     ).mkString("\n")
     val errorsString = generateErrors(serviceRoot.name)
-    val configString = generateConfig(usesComms)
+    val configString = generateConfig()
+    val utilString   = generateUtil()
     Map(
       FileUtils.File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString,
       FileUtils.File(s"${serviceRoot.name}/dao", "errors.go")     -> errorsString,
       FileUtils.File(s"${serviceRoot.name}/util", "config.go")    -> configString,
+      FileUtils.File(s"${serviceRoot.name}/util", "util.go")      -> utilString,
     )
     /*
    * TODO:
