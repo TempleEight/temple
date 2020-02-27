@@ -7,8 +7,6 @@ import temple.utils.FileUtils
 import temple.utils.StringUtils.{doubleQuote, tabIndent}
 
 import scala.collection.mutable.ListBuffer
-import scala.Option.when
-import java.io.File
 
 /** Implementation of [[ServiceGenerator]] for generating Go */
 object GoServiceGenerator extends ServiceGenerator {
@@ -43,15 +41,24 @@ object GoServiceGenerator extends ServiceGenerator {
     sb.toString
   }
 
-  private def generateDAOImports(serviceName: String): String =
+  private def generateDAOImports(module: String): String =
     s"import ${CodeWrap.parens.tabbed(
       Seq(
         """"database/sql"""",
         """"fmt"""",
         "",
-        s""""github.com/TempleEight/spec-golang/${serviceName}/utils"""",
+        s""""${module}/util"""",
         "// pq acts as the driver for SQL requests",
         """_ "github.com/lib/pq"""",
+      ).mkString("\n"),
+    )}\n"
+
+  private def generateCommImports(module: String): String =
+    s"import ${CodeWrap.parens.tabbed(
+      Seq(
+        """"fmt"""",
+        s""""${module}/util"""",
+        """"net/http"""",
       ).mkString("\n"),
     )}\n"
 
@@ -59,6 +66,12 @@ object GoServiceGenerator extends ServiceGenerator {
     Seq(
       "// DAO encapsulates access to the database",
       s"type DAO struct ${CodeWrap.curly.tabbed("DB *sql.DB")}",
+    ).mkString("", "\n", "\n")
+
+  private def generateCommStructs(): String =
+    Seq(
+      "// Handler maintains the list of services and their associated hostnames",
+      s"type Handler struct ${CodeWrap.curly.tabbed("Services map[string]string")}",
     ).mkString("", "\n", "\n")
 
   /** Given a service name and whether the service uses inter-service communication, return global statements */
@@ -153,6 +166,9 @@ object GoServiceGenerator extends ServiceGenerator {
   private def generateDAOInit(): String =
     FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/dao_init.go")
 
+  private def generateCommInit(): String =
+    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/comm_init.go")
+
   private def generateConfig(): String =
     FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/config.go")
 
@@ -160,50 +176,55 @@ object GoServiceGenerator extends ServiceGenerator {
     FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/util.go")
 
   override def generate(serviceRoot: ServiceRoot): Map[FileUtils.File, FileUtils.FileContent] = {
+    /* TODO
+     * handlers in <>.go
+     * structs and methods in dao.go
+     * config.json
+     * go.mod
+     * go.sum
+     */
     val usesComms = serviceRoot.comms.nonEmpty
-    val serviceString = Seq(
-      generatePackage("main"),
-      generateImports(
-        serviceRoot.name,
-        serviceRoot.module,
-        usesComms,
-      ),
-      generateGlobals(
-        serviceRoot.name,
-        usesComms,
-      ),
-      generateMain(
-        serviceRoot.name,
-        usesComms,
-        serviceRoot.endpoints,
-        serviceRoot.port,
-      ),
-      generateJsonMiddleware(),
-      generateHandlers(
-        serviceRoot.name,
-        serviceRoot.endpoints,
-      ),
-    ).mkString("\n")
-    val daoString = Seq(
-      generatePackage("dao"),
-      generateDAOImports(serviceRoot.name),
-      generateDAOStructs(),
-      generateDAOInit(),
-    ).mkString("\n")
-    Map(
-      FileUtils.File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString,
-      FileUtils.File(s"${serviceRoot.name}/dao", "errors.go")     -> generateErrors(serviceRoot.name),
-      FileUtils.File(s"${serviceRoot.name}/dao", "dao.go")        -> daoString,
-      FileUtils.File(s"${serviceRoot.name}/util", "config.go")    -> generateConfig(),
-      FileUtils.File(s"${serviceRoot.name}/util", "util.go")      -> generateUtil(),
+    var result = Map(
+      FileUtils.File(serviceRoot.name, s"${serviceRoot.name}.go") -> Seq(
+        generatePackage("main"),
+        generateImports(
+          serviceRoot.name,
+          serviceRoot.module,
+          usesComms,
+        ),
+        generateGlobals(
+          serviceRoot.name,
+          usesComms,
+        ),
+        generateMain(
+          serviceRoot.name,
+          usesComms,
+          serviceRoot.endpoints,
+          serviceRoot.port,
+        ),
+        generateJsonMiddleware(),
+        generateHandlers(
+          serviceRoot.name,
+          serviceRoot.endpoints,
+        ),
+      ).mkString("\n"),
+      FileUtils.File(s"${serviceRoot.name}/dao", "errors.go") -> generateErrors(serviceRoot.name),
+      FileUtils.File(s"${serviceRoot.name}/dao", "dao.go") -> Seq(
+        generatePackage("dao"),
+        generateDAOImports(serviceRoot.module),
+        generateDAOStructs(),
+        generateDAOInit(),
+      ).mkString("\n"),
+      FileUtils.File(s"${serviceRoot.name}/util", "config.go") -> generateConfig(),
+      FileUtils.File(s"${serviceRoot.name}/util", "util.go")   -> generateUtil(),
     )
-    /*
-   * TODO:
-   * Handler generation in <>.go
-   * dao/<>-dao.go
-   * go.mod
-   * go.sum
-   * config.json
-   */
+    if (usesComms)
+      result += FileUtils.File(s"${serviceRoot.name}/comm", "handler.go") -> Seq(
+        generatePackage("comm"),
+        generateCommImports(serviceRoot.module),
+        generateCommStructs(),
+        generateCommInit(),
+      ).mkString("\n")
+    result
   }
 }

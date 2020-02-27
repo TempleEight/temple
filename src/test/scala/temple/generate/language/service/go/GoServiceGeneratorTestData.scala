@@ -54,5 +54,8 @@ object GoServiceGeneratorTestData {
     File("match/util", "util.go") -> readFile(
       "src/test/scala/temple/generate/language/service/go/testfiles/match/util/util.go",
     ),
+    File("match/comm", "handler.go") -> readFile(
+      "src/test/scala/temple/generate/language/service/go/testfiles/match/comm/handler.go",
+    ),
   )
 }
