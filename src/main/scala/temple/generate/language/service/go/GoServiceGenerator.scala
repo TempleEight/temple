@@ -23,13 +23,12 @@ object GoServiceGenerator extends ServiceGenerator {
       .map(doubleQuote)
       .mkString("\n")
 
-    val customImportsBuffer: ListBuffer[String] = ListBuffer(
-      s"${serviceName}DAO ${doubleQuote(s"${module}/dao")}",
-    )
+    val customImportsBuffer: ListBuffer[String] = ListBuffer.empty
     if (usesComms) {
       customImportsBuffer += s"${serviceName}Comm ${doubleQuote(s"${module}/comm")}"
     }
     customImportsBuffer ++= Seq(
+      s"${serviceName}DAO ${doubleQuote(s"${module}/dao")}",
       doubleQuote(s"${module}/util"),
       s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
       doubleQuote("github.com/gorilla/mux"),
@@ -57,8 +56,9 @@ object GoServiceGenerator extends ServiceGenerator {
     s"import ${CodeWrap.parens.tabbed(
       Seq(
         """"fmt"""",
-        s""""${module}/util"""",
         """"net/http"""",
+        "",
+        s""""${module}/util"""",
       ).mkString("\n"),
     )}\n"
 
@@ -96,7 +96,7 @@ object GoServiceGenerator extends ServiceGenerator {
       "// Require all struct fields by default",
       "valid.SetFieldsRequiredByDefault(true)",
       "",
-      "config, err := utils.GetConfig(*configPtr)",
+      "config, err := util.GetConfig(*configPtr)",
       "if err != nil " + CodeWrap.curly.tabbed("log.Fatal(err)"),
       "",
       s"dao = ${serviceName}DAO.DAO{}",
