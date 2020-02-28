@@ -2,8 +2,9 @@ package comm
 
 import (
 	"fmt"
-	"github.com/TempleEight/spec-golang/match/util"
 	"net/http"
+
+	"github.com/TempleEight/spec-golang/match/util"
 )
 
 // Handler maintains the list of services and their associated hostnames
