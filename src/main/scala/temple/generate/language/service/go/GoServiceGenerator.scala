@@ -12,12 +12,14 @@ import scala.Option.when
 /** Implementation of [[ServiceGenerator]] for generating Go */
 object GoServiceGenerator extends ServiceGenerator {
 
+  private def generateMod(module: String): String = mkCode.doubleLines(s"module ${module}", "go 1.13")
+
   private def generatePackage(packageName: String): String = s"package $packageName"
 
   /** Given a service name, module name and whether the service uses inter-service communication, return the import
     * block */
   private def generateImports(serviceName: String, module: String, usesComms: Boolean): String = {
-    val standardImports = Seq("encoding/json", "flag", "fmt", "log", "net/http").map(doubleQuote)
+    val standardImports = Seq("flag", "log", "net/http").map(doubleQuote)
 
     val customImports = Seq[CodeTerm](
       when(usesComms) { s"${serviceName}Comm ${doubleQuote(s"$module/comm")}" },
@@ -45,9 +47,6 @@ object GoServiceGenerator extends ServiceGenerator {
   private def generateCommImports(module: String): String = mkCode(
     "import",
     CodeWrap.parens.tabbed(
-      """"fmt"""",
-      """"net/http"""",
-      "",
       s""""$module/util"""",
     ),
   )
@@ -170,32 +169,32 @@ object GoServiceGenerator extends ServiceGenerator {
      * go.sum
      */
     val usesComms = serviceRoot.comms.nonEmpty
-    val serviceString = mkCode.doubleLines(
-      generatePackage("main"),
-      generateImports(
-        serviceRoot.name,
-        serviceRoot.module,
-        usesComms,
-      ),
-      generateGlobals(
-        serviceRoot.name,
-        usesComms,
-      ),
-      generateMain(
-        serviceRoot.name,
-        usesComms,
-        serviceRoot.endpoints,
-        serviceRoot.port,
-      ),
-      generateJsonMiddleware(),
-      generateHandlers(
-        serviceRoot.name,
-        serviceRoot.endpoints,
-      ),
-    )
     (Map(
-      FileUtils.File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString,
-      FileUtils.File(s"${serviceRoot.name}/dao", "errors.go")     -> generateErrors(serviceRoot.name),
+      FileUtils.File(s"${serviceRoot.name}", "go.mod") -> generateMod(serviceRoot.module),
+      FileUtils.File(serviceRoot.name, s"${serviceRoot.name}.go") -> mkCode.doubleLines(
+        generatePackage("main"),
+        generateImports(
+          serviceRoot.name,
+          serviceRoot.module,
+          usesComms,
+        ),
+        generateGlobals(
+          serviceRoot.name,
+          usesComms,
+        ),
+        generateMain(
+          serviceRoot.name,
+          usesComms,
+          serviceRoot.endpoints,
+          serviceRoot.port,
+        ),
+        generateJsonMiddleware(),
+        generateHandlers(
+          serviceRoot.name,
+          serviceRoot.endpoints,
+        ),
+      ),
+      FileUtils.File(s"${serviceRoot.name}/dao", "errors.go") -> generateErrors(serviceRoot.name),
       FileUtils.File(s"${serviceRoot.name}/dao", "dao.go") -> mkCode.doubleLines(
         generatePackage("dao"),
         generateDAOImports(serviceRoot.module),
