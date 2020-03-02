@@ -1,9 +1,6 @@
 package comm
 
 import (
-	"fmt"
-	"net/http"
-
 	"github.com/TempleEight/spec-golang/match/util"
 )
 

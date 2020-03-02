@@ -74,6 +74,15 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
       FileUtils.File("user", "user.go"),
     )
 
+    validationErrors shouldBe empty
+  }
+
+  it should "generate compilable simple services with inter-service communication" in {
+    val validationErrors = validateAll(
+      GoServiceGenerator.generate(GoGeneratorIntegrationTestData.simpleServiceRootWithComms),
+      FileUtils.File("match", "match.go"),
+    )
+
     validationErrors shouldBe ""
   }
 }

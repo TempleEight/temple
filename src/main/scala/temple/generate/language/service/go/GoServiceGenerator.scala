@@ -47,9 +47,6 @@ object GoServiceGenerator extends ServiceGenerator {
   private def generateCommImports(module: String): String = mkCode(
     "import",
     CodeWrap.parens.tabbed(
-      """"fmt"""",
-      """"net/http"""",
-      "",
       s""""$module/util"""",
     ),
   )
