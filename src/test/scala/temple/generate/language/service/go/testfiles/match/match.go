@@ -7,8 +7,8 @@ import (
 	"log"
 	"net/http"
 
-	matchDAO "github.com/TempleEight/spec-golang/match/dao"
 	matchComm "github.com/TempleEight/spec-golang/match/comm"
+	matchDAO "github.com/TempleEight/spec-golang/match/dao"
 	"github.com/TempleEight/spec-golang/match/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/gorilla/mux"
@@ -24,7 +24,7 @@ func main() {
 	// Require all struct fields by default
 	valid.SetFieldsRequiredByDefault(true)
 
-	config, err := utils.GetConfig(*configPtr)
+	config, err := util.GetConfig(*configPtr)
 	if err != nil {
 		log.Fatal(err)
 	}
