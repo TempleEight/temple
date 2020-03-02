@@ -20,8 +20,8 @@ object GoServiceGenerator extends ServiceGenerator {
     val standardImports = Seq("encoding/json", "flag", "fmt", "log", "net/http").map(doubleQuote)
 
     val customImports = Seq[CodeTerm](
-      s"${serviceName}DAO ${doubleQuote(s"$module/dao")}",
       when(usesComms) { s"${serviceName}Comm ${doubleQuote(s"$module/comm")}" },
+      s"${serviceName}DAO ${doubleQuote(s"$module/dao")}",
       doubleQuote(s"$module/util"),
       s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
       doubleQuote("github.com/gorilla/mux"),
@@ -29,6 +29,39 @@ object GoServiceGenerator extends ServiceGenerator {
 
     mkCode("import", CodeWrap.parens.tabbed(standardImports, "", customImports))
   }
+
+  private def generateDAOImports(module: String): String = mkCode(
+    "import",
+    CodeWrap.parens.tabbed(
+      """"database/sql"""",
+      """"fmt"""",
+      "",
+      s""""$module/util"""",
+      "// pq acts as the driver for SQL requests",
+      """_ "github.com/lib/pq"""",
+    ),
+  )
+
+  private def generateCommImports(module: String): String = mkCode(
+    "import",
+    CodeWrap.parens.tabbed(
+      """"fmt"""",
+      """"net/http"""",
+      "",
+      s""""$module/util"""",
+    ),
+  )
+
+  private def generateDAOStructs(): String =
+    mkCode.lines(
+      "// DAO encapsulates access to the database",
+      s"type DAO struct ${CodeWrap.curly.tabbed("DB *sql.DB")}",
+    )
+
+  private def generateCommStructs(): String = mkCode.lines(
+    "// Handler maintains the list of services and their associated hostnames",
+    s"type Handler struct ${CodeWrap.curly.tabbed("Services map[string]string")}",
+  )
 
   /** Given a service name and whether the service uses inter-service communication, return global statements */
   private def generateGlobals(serviceName: String, usesComms: Boolean): String =
@@ -50,7 +83,7 @@ object GoServiceGenerator extends ServiceGenerator {
       "// Require all struct fields by default",
       "valid.SetFieldsRequiredByDefault(true)",
       "",
-      "config, err := utils.GetConfig(*configPtr)",
+      "config, err := util.GetConfig(*configPtr)",
       "if err != nil " + CodeWrap.curly.tabbed("log.Fatal(err)"),
       "",
       s"dao = ${serviceName}DAO.DAO{}",
@@ -92,7 +125,7 @@ object GoServiceGenerator extends ServiceGenerator {
   }
 
   private def generateJsonMiddleware(): String =
-    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/JsonMiddleware.go").stripLineEnd
+    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/json_middleware.go").stripLineEnd
 
   private def generateHandler(serviceName: String, endpoint: Endpoint): String =
     s"func $serviceName${endpoint.verb}Handler(w http.ResponseWriter, r *http.Request) {}"
@@ -116,7 +149,26 @@ object GoServiceGenerator extends ServiceGenerator {
         .tabbed(s"""return fmt.Sprintf("$serviceName not found with ID %d", e)""")}",
     )
 
+  private def generateDAOInit(): String =
+    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/dao_init.go").stripLineEnd
+
+  private def generateCommInit(): String =
+    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/comm_init.go").stripLineEnd
+
+  private def generateConfig(): String =
+    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/config.go").stripLineEnd
+
+  private def generateUtil(): String =
+    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/util.go").stripLineEnd
+
   override def generate(serviceRoot: ServiceRoot): Map[FileUtils.File, FileUtils.FileContent] = {
+    /* TODO
+     * handlers in <>.go
+     * structs and methods in dao.go
+     * config.json
+     * go.mod
+     * go.sum
+     */
     val usesComms = serviceRoot.comms.nonEmpty
     val serviceString = mkCode.doubleLines(
       generatePackage("main"),
@@ -141,21 +193,24 @@ object GoServiceGenerator extends ServiceGenerator {
         serviceRoot.endpoints,
       ),
     )
-    val errorsString = generateErrors(serviceRoot.name)
-    Map(
-      FileUtils.File(serviceRoot.name, s"${serviceRoot.name}.go") -> (serviceString + "\n"),
-      FileUtils.File(s"${serviceRoot.name}/dao", "errors.go")     -> (errorsString + "\n"),
-    )
-    /*
-   * TODO:
-   * Handler generation in <>.go
-   * dao/<>-dao.go
-   * dao/errors.go
-   * utils/utils.go
-   * utils/config.go
-   * go.mod
-   * go.sum
-   * config.json
-   */
+    (Map(
+      FileUtils.File(serviceRoot.name, s"${serviceRoot.name}.go") -> serviceString,
+      FileUtils.File(s"${serviceRoot.name}/dao", "errors.go")     -> generateErrors(serviceRoot.name),
+      FileUtils.File(s"${serviceRoot.name}/dao", "dao.go") -> mkCode.doubleLines(
+        generatePackage("dao"),
+        generateDAOImports(serviceRoot.module),
+        generateDAOStructs(),
+        generateDAOInit(),
+      ),
+      FileUtils.File(s"${serviceRoot.name}/util", "config.go") -> generateConfig(),
+      FileUtils.File(s"${serviceRoot.name}/util", "util.go")   -> generateUtil(),
+    ) ++ when(usesComms)(
+      FileUtils.File(s"${serviceRoot.name}/comm", "handler.go") -> mkCode.doubleLines(
+        generatePackage("comm"),
+        generateCommImports(serviceRoot.module),
+        generateCommStructs(),
+        generateCommInit(),
+      ),
+    )).map { case (path, contents) => path -> (contents + "\n") }
   }
 }
