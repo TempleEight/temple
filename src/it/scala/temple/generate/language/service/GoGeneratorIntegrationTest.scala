@@ -3,6 +3,7 @@ package temple.generate.language.service
 import org.scalatest.{BeforeAndAfter, Matchers}
 import temple.containers.GolangSpec
 import temple.utils.FileUtils
+import temple.generate.language.service.go.GoServiceGenerator
 
 class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAndAfter {
 
@@ -63,5 +64,16 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
     )
 
     validationErrors shouldBe empty
+  }
+
+  behavior of "GoServiceGenerator"
+
+  it should "generate compilable simple services" in {
+    val validationErrors = validateAll(
+      GoServiceGenerator.generate(GoGeneratorIntegrationTestData.simpleServiceRoot),
+      FileUtils.File("user", "user.go"),
+    )
+
+    validationErrors shouldBe ""
   }
 }

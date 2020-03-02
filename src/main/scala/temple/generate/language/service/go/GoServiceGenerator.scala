@@ -11,6 +11,8 @@ import scala.collection.mutable.ListBuffer
 /** Implementation of [[ServiceGenerator]] for generating Go */
 object GoServiceGenerator extends ServiceGenerator {
 
+  private def generateMod(module: String): String = Seq(s"module ${module}", "", "go 1.13").mkString("\n")
+
   private def generatePackage(packageName: String): String = s"package $packageName\n"
 
   /** Given a service name, module name and whether the service uses inter-service communication, return the import
@@ -19,7 +21,7 @@ object GoServiceGenerator extends ServiceGenerator {
     val sb = new StringBuilder
     sb.append("import ")
 
-    val standardImports = Seq("encoding/json", "flag", "fmt", "log", "net/http")
+    val standardImports = Seq("flag", "log", "net/http")
       .map(doubleQuote)
       .mkString("\n")
 
@@ -185,6 +187,7 @@ object GoServiceGenerator extends ServiceGenerator {
      */
     val usesComms = serviceRoot.comms.nonEmpty
     var result = Map(
+      FileUtils.File(s"${serviceRoot.name}", "go.mod") -> generateMod(serviceRoot.module),
       FileUtils.File(serviceRoot.name, s"${serviceRoot.name}.go") -> Seq(
         generatePackage("main"),
         generateImports(
