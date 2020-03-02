@@ -23,4 +23,4 @@ COPY configure_go.py configure_go.py
 
 ENTRYPOINT /app/shell2http -show-errors\
  -form GET:/hadolint "echo \$v_dockerfile | ./jq-linux64 -r .contents > Dockerfile && hadolint Dockerfile"\
- GET:/go "python3 configure_go.py && cd \$v_root && go build \$v_entrypoint 2>&1"
+ GET:/go "python3 configure_go.py && cd \$v_root && go mod tidy &>/dev/null; go build \$v_entrypoint 2>&1"
