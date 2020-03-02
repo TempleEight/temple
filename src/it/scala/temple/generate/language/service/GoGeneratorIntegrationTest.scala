@@ -11,7 +11,7 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
 
   it should "fail when an empty file is provided" in {
     val validationErrors = validate("")
-    validationErrors should not be empty
+    validationErrors should not be ""
   }
 
   it should "succeed when a sample Go file is validated" in {
@@ -25,7 +25,7 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
         |}
         |""".stripMargin
     val validationErrors = validate(sampleFile)
-    validationErrors shouldBe empty
+    validationErrors shouldBe ""
   }
 
   it should "succeed when referencing other files" in {
@@ -63,7 +63,7 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
       FileUtils.File("sample-proj", "main.go"),
     )
 
-    validationErrors shouldBe empty
+    validationErrors shouldBe ""
   }
 
   behavior of "GoServiceGenerator"
@@ -74,7 +74,7 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
       FileUtils.File("user", "user.go"),
     )
 
-    validationErrors shouldBe empty
+    validationErrors shouldBe ""
   }
 
   it should "generate compilable simple services with inter-service communication" in {
