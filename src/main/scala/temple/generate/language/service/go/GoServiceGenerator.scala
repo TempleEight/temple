@@ -124,7 +124,7 @@ object GoServiceGenerator extends ServiceGenerator {
   }
 
   private def generateJsonMiddleware(): String =
-    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/json_middleware.go").stripLineEnd
+    FileUtils.readResources("go/genFiles/json_middleware.go").stripLineEnd
 
   private def generateHandler(serviceName: String, endpoint: Endpoint): String =
     s"func $serviceName${endpoint.verb}Handler(w http.ResponseWriter, r *http.Request) {}"
@@ -149,16 +149,16 @@ object GoServiceGenerator extends ServiceGenerator {
     )
 
   private def generateDAOInit(): String =
-    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/dao_init.go").stripLineEnd
+    FileUtils.readResources("go/genFiles/dao_init.go").stripLineEnd
 
   private def generateCommInit(): String =
-    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/comm_init.go").stripLineEnd
+    FileUtils.readResources("go/genFiles/comm_init.go").stripLineEnd
 
   private def generateConfig(): String =
-    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/config.go").stripLineEnd
+    FileUtils.readResources("go/genFiles/config.go").stripLineEnd
 
   private def generateUtil(): String =
-    FileUtils.readFile("src/main/scala/temple/generate/language/service/go/genFiles/util.go").stripLineEnd
+    FileUtils.readResources("go/genFiles/util.go").stripLineEnd
 
   override def generate(serviceRoot: ServiceRoot): Map[FileUtils.File, FileUtils.FileContent] = {
     /* TODO
