@@ -212,12 +212,4 @@ object GoServiceGenerator extends ServiceGenerator {
       ),
     )).map { case (path, contents) => path -> (contents + "\n") }
   }
-
-  private def verb(endpoint: Endpoint): String = endpoint match {
-    case Endpoint.ReadAll => "List"
-    case Endpoint.Create  => "Create"
-    case Endpoint.Read    => "Read"
-    case Endpoint.Update  => "Update"
-    case Endpoint.Delete  => "Delete"
-  }
 }
