@@ -12,7 +12,7 @@ import scala.Option.when
 /** Implementation of [[ServiceGenerator]] for generating Go */
 object GoServiceGenerator extends ServiceGenerator {
 
-  private def generateMod(module: String): String = mkCode.doubleLines(s"module ${module}", "go 1.13")
+  private def generateMod(module: String): String = mkCode.doubleLines(s"module $module", "go 1.13")
 
   private def generatePackage(packageName: String): String = s"package $packageName"
 
