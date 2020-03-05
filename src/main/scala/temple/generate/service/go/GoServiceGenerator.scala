@@ -1,7 +1,7 @@
-package temple.generate.language.service.go
+package temple.generate.service.go
 
-import temple.generate.language.service.ServiceGenerator
-import temple.generate.language.service.adt._
+import temple.generate.Endpoint
+import temple.generate.service.{ServiceGenerator, ServiceRoot}
 import temple.generate.utils.CodeTerm
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.FileUtils
@@ -12,7 +12,7 @@ import scala.Option.when
 /** Implementation of [[ServiceGenerator]] for generating Go */
 object GoServiceGenerator extends ServiceGenerator {
 
-  private def generateMod(module: String): String = mkCode.doubleLines(s"module ${module}", "go 1.13")
+  private def generateMod(module: String): String = mkCode.doubleLines(s"module $module", "go 1.13")
 
   private def generatePackage(packageName: String): String = s"package $packageName"
 
@@ -127,7 +127,7 @@ object GoServiceGenerator extends ServiceGenerator {
     FileUtils.readResources("go/genFiles/json_middleware.go").stripLineEnd
 
   private def generateHandler(serviceName: String, endpoint: Endpoint): String =
-    s"func $serviceName${endpoint.verb}Handler(w http.ResponseWriter, r *http.Request) {}"
+    s"func $serviceName${verb(endpoint)}Handler(w http.ResponseWriter, r *http.Request) {}"
 
   private def generateHandlers(serviceName: String, endpoints: Set[Endpoint]): String =
     mkCode.doubleLines(

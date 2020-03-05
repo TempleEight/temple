@@ -1,9 +1,9 @@
-package temple.generate.language.service
+package temple.generate.service
 
 import org.scalatest.{BeforeAndAfter, Matchers}
 import temple.containers.GolangSpec
 import temple.utils.FileUtils
-import temple.generate.language.service.go.GoServiceGenerator
+import temple.generate.service.go.GoServiceGenerator
 
 class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAndAfter {
 
