@@ -7,9 +7,6 @@ import scala.io.Source
 /** Helper functions useful for manipulating files */
 object FileUtils {
 
-  type FileContent = String
-  case class File(folder: String, filename: String)
-
   def createDirectory(directory: String): Unit =
     Files.createDirectories(Paths.get(directory))
 

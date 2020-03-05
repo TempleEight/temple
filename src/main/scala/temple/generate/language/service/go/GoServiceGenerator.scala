@@ -2,6 +2,7 @@ package temple.generate.language.service.go
 
 import temple.generate.language.service.ServiceGenerator
 import temple.generate.language.service.adt._
+import temple.generate.FileSystem._
 import temple.generate.utils.CodeTerm
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.FileUtils
@@ -160,7 +161,7 @@ object GoServiceGenerator extends ServiceGenerator {
   private def generateUtil(): String =
     FileUtils.readResources("go/genFiles/util.go").stripLineEnd
 
-  override def generate(serviceRoot: ServiceRoot): Map[FileUtils.File, FileUtils.FileContent] = {
+  override def generate(serviceRoot: ServiceRoot): Map[File, FileContent] = {
     /* TODO
      * handlers in <>.go
      * structs and methods in dao.go
@@ -170,8 +171,8 @@ object GoServiceGenerator extends ServiceGenerator {
      */
     val usesComms = serviceRoot.comms.nonEmpty
     (Map(
-      FileUtils.File(s"${serviceRoot.name}", "go.mod") -> generateMod(serviceRoot.module),
-      FileUtils.File(serviceRoot.name, s"${serviceRoot.name}.go") -> mkCode.doubleLines(
+      File(s"${serviceRoot.name}", "go.mod") -> generateMod(serviceRoot.module),
+      File(serviceRoot.name, s"${serviceRoot.name}.go") -> mkCode.doubleLines(
         generatePackage("main"),
         generateImports(
           serviceRoot.name,
@@ -194,17 +195,17 @@ object GoServiceGenerator extends ServiceGenerator {
           serviceRoot.endpoints,
         ),
       ),
-      FileUtils.File(s"${serviceRoot.name}/dao", "errors.go") -> generateErrors(serviceRoot.name),
-      FileUtils.File(s"${serviceRoot.name}/dao", "dao.go") -> mkCode.doubleLines(
+      File(s"${serviceRoot.name}/dao", "errors.go") -> generateErrors(serviceRoot.name),
+      File(s"${serviceRoot.name}/dao", "dao.go") -> mkCode.doubleLines(
         generatePackage("dao"),
         generateDAOImports(serviceRoot.module),
         generateDAOStructs(),
         generateDAOInit(),
       ),
-      FileUtils.File(s"${serviceRoot.name}/util", "config.go") -> generateConfig(),
-      FileUtils.File(s"${serviceRoot.name}/util", "util.go")   -> generateUtil(),
+      File(s"${serviceRoot.name}/util", "config.go") -> generateConfig(),
+      File(s"${serviceRoot.name}/util", "util.go")   -> generateUtil(),
     ) ++ when(usesComms)(
-      FileUtils.File(s"${serviceRoot.name}/comm", "handler.go") -> mkCode.doubleLines(
+      File(s"${serviceRoot.name}/comm", "handler.go") -> mkCode.doubleLines(
         generatePackage("comm"),
         generateCommImports(serviceRoot.module),
         generateCommStructs(),

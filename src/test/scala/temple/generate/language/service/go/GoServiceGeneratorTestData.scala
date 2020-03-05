@@ -1,6 +1,7 @@
 package temple.generate.language.service.go
 
 import temple.generate.language.service.adt._
+import temple.generate.FileSystem._
 import temple.utils.FileUtils._
 
 object GoServiceGeneratorTestData {
