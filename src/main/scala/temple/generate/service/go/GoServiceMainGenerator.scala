@@ -36,57 +36,56 @@ object GoServiceMainGenerator {
 
   /** Given a service name, whether the service uses inter-service communication, the endpoints desired and the port
     * number, generate the main function */
-  private[go] def generateMain(serviceName: String, usesComms: Boolean, endpoints: Set[Endpoint], port: Int): String = {
-    val sb = new StringBuilder
-    sb.append("func main() ")
-
-    val body = mkCode.lines(
-      s"""configPtr := flag.String("config", "/etc/$serviceName-service/config.json", "configuration filepath")""",
-      "flag.Parse()",
-      "",
-      "// Require all struct fields by default",
-      "valid.SetFieldsRequiredByDefault(true)",
-      "",
-      "config, err := util.GetConfig(*configPtr)",
-      "if err != nil " + CodeWrap.curly.tabbed("log.Fatal(err)"),
-      "",
-      s"dao = ${serviceName}DAO.DAO{}",
-      "err = dao.Init(config)",
-      "if err != nil " + CodeWrap.curly.tabbed("log.Fatal(err)"),
-      "",
-      when[CodeTerm](usesComms) {
+  private[go] def generateMain(serviceName: String, usesComms: Boolean, endpoints: Set[Endpoint], port: Int): String =
+    mkCode(
+      "func main() ",
+      CodeWrap.curly.tabbed(
         mkCode.lines(
-          s"comm = ${serviceName}Comm.Handler{}",
-          "comm.Init(config)",
+          s"""configPtr := flag.String("config", "/etc/$serviceName-service/config.json", "configuration filepath")""",
+          "flag.Parse()",
           "",
-        )
-      },
-      "r := mux.NewRouter()",
-      when[CodeTerm](endpoints.contains(Endpoint.ReadAll)) {
-        mkCode.lines(
-          "// Mux directs to first matching route, i.e. the order matters",
-          s"""r.HandleFunc("/$serviceName/all", ${serviceName}ListHandler).Methods(http.MethodGet)""",
-        )
-      },
-      when(endpoints.contains(Endpoint.Create)) {
-        s"""r.HandleFunc("/$serviceName", ${serviceName}CreateHandler).Methods(http.MethodPost)"""
-      },
-      when(endpoints.contains(Endpoint.Read)) {
-        s"""r.HandleFunc("/$serviceName/{id}", ${serviceName}ReadHandler).Methods(http.MethodGet)"""
-      },
-      when(endpoints.contains(Endpoint.Update)) {
-        s"""r.HandleFunc("/$serviceName/{id}", ${serviceName}UpdateHandler).Methods(http.MethodPut)"""
-      },
-      when(endpoints.contains(Endpoint.Delete)) {
-        s"""r.HandleFunc("/$serviceName/{id}", ${serviceName}DeleteHandler).Methods(http.MethodDelete)"""
-      },
-      "r.Use(jsonMiddleware)",
-      "",
-      s"""log.Fatal(http.ListenAndServe(":$port", r))""",
+          "// Require all struct fields by default",
+          "valid.SetFieldsRequiredByDefault(true)",
+          "",
+          "config, err := util.GetConfig(*configPtr)",
+          "if err != nil " + CodeWrap.curly.tabbed("log.Fatal(err)"),
+          "",
+          s"dao = ${serviceName}DAO.DAO{}",
+          "err = dao.Init(config)",
+          "if err != nil " + CodeWrap.curly.tabbed("log.Fatal(err)"),
+          "",
+          when(usesComms) {
+            mkCode.lines(
+              s"comm = ${serviceName}Comm.Handler{}",
+              "comm.Init(config)",
+              "",
+            )
+          },
+          "r := mux.NewRouter()",
+          when(endpoints.contains(Endpoint.ReadAll)) {
+            mkCode.lines(
+              "// Mux directs to first matching route, i.e. the order matters",
+              s"""r.HandleFunc("/$serviceName/all", ${serviceName}ListHandler).Methods(http.MethodGet)""",
+            )
+          },
+          when(endpoints.contains(Endpoint.Create)) {
+            s"""r.HandleFunc("/$serviceName", ${serviceName}CreateHandler).Methods(http.MethodPost)"""
+          },
+          when(endpoints.contains(Endpoint.Read)) {
+            s"""r.HandleFunc("/$serviceName/{id}", ${serviceName}ReadHandler).Methods(http.MethodGet)"""
+          },
+          when(endpoints.contains(Endpoint.Update)) {
+            s"""r.HandleFunc("/$serviceName/{id}", ${serviceName}UpdateHandler).Methods(http.MethodPut)"""
+          },
+          when(endpoints.contains(Endpoint.Delete)) {
+            s"""r.HandleFunc("/$serviceName/{id}", ${serviceName}DeleteHandler).Methods(http.MethodDelete)"""
+          },
+          "r.Use(jsonMiddleware)",
+          "",
+          s"""log.Fatal(http.ListenAndServe(":$port", r))""",
+        ),
+      ),
     )
-
-    mkCode("func main()", CodeWrap.curly.tabbed(body))
-  }
 
   private[go] def generateJsonMiddleware(): String =
     FileUtils.readResources("go/genFiles/json_middleware.go").stripLineEnd
