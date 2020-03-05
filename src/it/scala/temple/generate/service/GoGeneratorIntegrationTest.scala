@@ -2,7 +2,7 @@ package temple.generate.service
 
 import org.scalatest.{BeforeAndAfter, Matchers}
 import temple.containers.GolangSpec
-import temple.utils.FileUtils
+import temple.generate.FileSystem._
 import temple.generate.service.go.GoServiceGenerator
 
 class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAndAfter {
@@ -56,11 +56,11 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
 
     val validationErrors = validateAll(
       Map(
-        FileUtils.File("sample-proj", "main.go")      -> sampleMain,
-        FileUtils.File("sample-proj/pkg2", "pkg2.go") -> sampleOtherPkg,
-        FileUtils.File("sample-proj", "go.mod")       -> goMod,
+        File("sample-proj", "main.go")      -> sampleMain,
+        File("sample-proj/pkg2", "pkg2.go") -> sampleOtherPkg,
+        File("sample-proj", "go.mod")       -> goMod,
       ),
-      FileUtils.File("sample-proj", "main.go"),
+      File("sample-proj", "main.go"),
     )
 
     validationErrors shouldBe ""
@@ -71,7 +71,7 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
   it should "generate compilable simple services" in {
     val validationErrors = validateAll(
       GoServiceGenerator.generate(GoGeneratorIntegrationTestData.simpleServiceRoot),
-      FileUtils.File("user", "user.go"),
+      File("user", "user.go"),
     )
 
     validationErrors shouldBe ""
@@ -80,7 +80,7 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
   it should "generate compilable simple services with inter-service communication" in {
     val validationErrors = validateAll(
       GoServiceGenerator.generate(GoGeneratorIntegrationTestData.simpleServiceRootWithComms),
-      FileUtils.File("match", "match.go"),
+      File("match", "match.go"),
     )
 
     validationErrors shouldBe ""

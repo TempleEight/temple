@@ -1,7 +1,7 @@
 package temple.generate.service
 
 import temple.generate.Endpoint
-import temple.utils.FileUtils.{File, FileContent}
+import temple.generate.FileSystem._
 
 /** ServiceGenerator provides an interface for generating service boilerplate from an ADT */
 trait ServiceGenerator {

@@ -1,5 +1,5 @@
 package temple.builder.project
 
-import temple.utils.FileUtils.{File, FileContent}
+import temple.generate.FileSystem._
 
 case class Project(files: Map[File, FileContent])

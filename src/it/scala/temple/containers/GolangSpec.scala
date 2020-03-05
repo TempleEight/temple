@@ -7,18 +7,18 @@ import com.whisk.docker.scalatest.DockerTestKit
 import io.circe.syntax._
 import org.scalatest.BeforeAndAfterAll
 import scalaj.http.Http
-import temple.utils.FileUtils
+import temple.generate.FileSystem._
 
 abstract class GolangSpec extends DockerShell2HttpService(8081) with DockerTestKit with BeforeAndAfterAll {
   implicit override val dockerFactory: DockerFactory = new SpotifyDockerFactory(DefaultDockerClient.fromEnv().build())
 
   // Validate a given Go file, returning the output of the Go compiler
   def validate(gofile: String): String = {
-    val file = FileUtils.File("sampleDir", "main.go")
+    val file = File("sampleDir", "main.go")
     validateAll(Map(file -> gofile), file)
   }
 
-  def validateAll(files: Map[FileUtils.File, FileUtils.FileContent], entryFile: FileUtils.File): String = {
+  def validateAll(files: Map[File, FileContent], entryFile: File): String = {
     val json = files.map { case (file, contents) => (file.folder + "/" + file.filename, contents) }.asJson.toString()
     Http(golangVerifyUrl)
       .params(Map("src" -> json, "root" -> entryFile.folder, "entrypoint" -> entryFile.filename))

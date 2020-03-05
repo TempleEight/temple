@@ -2,6 +2,7 @@ package temple.generate.service.go
 
 import temple.generate.Endpoint
 import temple.generate.service.ServiceRoot
+import temple.generate.FileSystem._
 import temple.utils.FileUtils._
 
 object GoServiceGeneratorTestData {
