@@ -8,9 +8,12 @@ trait ServiceGenerator {
 
   /** Given a ServiceRoot ADT, generate the service boilerplate in a specific language */
   def generate(serviceRoot: ServiceRoot): Map[File, FileContent]
+}
+
+object ServiceGenerator {
 
   /** Get the string representation of an endpoint, for use in the generated function name */
-  protected def verb(endpoint: Endpoint): String = endpoint match {
+  private[service] def verb(endpoint: Endpoint): String = endpoint match {
     case Endpoint.ReadAll => "List"
     case Endpoint.Create  => "Create"
     case Endpoint.Read    => "Read"
