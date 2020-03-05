@@ -1,6 +1,5 @@
-package temple.generate.language.service
+package temple.generate.service
 
-import temple.generate.language.service.adt._
 import temple.utils.FileUtils.{File, FileContent}
 
 /** ServiceGenerator provides an interface for generating service boilerplate from an ADT */

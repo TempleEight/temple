@@ -1,6 +1,7 @@
-package temple.generate.language.service.go
+package temple.generate.service.go
 
-import temple.generate.language.service.adt._
+import temple.generate.Endpoint
+import temple.generate.service.ServiceRoot
 import temple.utils.FileUtils._
 
 object GoServiceGeneratorTestData {

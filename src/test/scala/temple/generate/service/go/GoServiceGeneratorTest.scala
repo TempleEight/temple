@@ -1,4 +1,4 @@
-package temple.generate.language.service.go
+package temple.generate.service.go
 
 import org.scalatest.{FlatSpec, Matchers}
 
