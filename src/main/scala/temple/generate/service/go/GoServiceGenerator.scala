@@ -91,7 +91,7 @@ object GoServiceGenerator extends ServiceGenerator {
       "if err != nil " + CodeWrap.curly.tabbed("log.Fatal(err)"),
       "",
       when[CodeTerm](usesComms) {
-        Seq(
+        mkCode.lines(
           s"comm = ${serviceName}Comm.Handler{}",
           "comm.Init(config)",
           "",
@@ -99,7 +99,7 @@ object GoServiceGenerator extends ServiceGenerator {
       },
       "r := mux.NewRouter()",
       when[CodeTerm](endpoints.contains(Endpoint.ReadAll)) {
-        Seq(
+        mkCode.lines(
           "// Mux directs to first matching route, i.e. the order matters",
           s"""r.HandleFunc("/$serviceName/all", ${serviceName}ListHandler).Methods(http.MethodGet)""",
         )
