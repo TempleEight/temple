@@ -12,7 +12,7 @@ test in assembly := {}
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(prependShellScript = Some(defaultShellScript))
 
 // https://www.scala-sbt.org/1.x/docs/Testing.html#Integration+Tests
-lazy val EndToEndTest = config("e2e") extend (Test)
+lazy val EndToEndTest = config("e2e") extend Test
 
 lazy val endToEndTestSettings: Seq[Def.Setting[_]] =
   inConfig(EndToEndTest)(Defaults.testSettings) ++
