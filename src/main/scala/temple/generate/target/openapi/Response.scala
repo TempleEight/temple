@@ -29,6 +29,6 @@ private[openapi] object Response {
     override def toJsonMap: Map[String, Option[Json]] =
       ListMap(
         "schema" -> Some(schema.asJson),
-      ) ++ customFields.view.mapValues(value => Some(value.asJson))
+      ) ++ customFields.view.mapValues(Some(_))
   }
 }

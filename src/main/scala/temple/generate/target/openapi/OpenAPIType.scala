@@ -16,7 +16,7 @@ sealed abstract private[openapi] class OpenAPIType(fieldEntries: Seq[(String, Js
       "type"       -> Some(typeString.asJson),
       "properties" -> this.matchPartial { case openAPIType: OpenAPIObject => openAPIType.properties.asJson },
       "items"      -> this.matchPartial { case openAPIType: OpenAPIArray => openAPIType.items.asJson },
-    ) ++ customFields.view.mapValues(value => Some(value.asJson))
+    ) ++ customFields.view.mapValues(Some(_))
 }
 
 private[openapi] object OpenAPIType {
