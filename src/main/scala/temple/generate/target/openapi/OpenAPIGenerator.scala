@@ -8,7 +8,7 @@ import scala.collection.immutable.ListMap
 object OpenAPIGenerator {
 
   /** Create a Response representation for an error */
-  private[openapi] def generateError(description: String, code: Int, example: String): Response =
+  private[openapi] def generateError(description: String, example: String): Response =
     Response(
       description,
       ListMap(

@@ -11,7 +11,7 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
 
   it should "generate error descriptions correctly" in {
 
-    val errorDescription: Response = generateError("this", 500, "This is bad")
+    val errorDescription: Response = generateError("this", "This is bad")
 
     errorDescription.asJson.asYaml.spaces2 shouldBe {
       """description: this
