@@ -12,7 +12,7 @@ test in assembly := {}
 assemblyOption in assembly := (assemblyOption in assembly).value.copy(prependShellScript = Some(defaultShellScript))
 
 // https://www.scala-sbt.org/1.x/docs/Testing.html#Integration+Tests
-lazy val EndToEndTest = config("e2e") extend (Test)
+lazy val EndToEndTest = config("e2e") extend Test
 
 lazy val endToEndTestSettings: Seq[Def.Setting[_]] =
   inConfig(EndToEndTest)(Defaults.testSettings) ++
@@ -40,6 +40,7 @@ lazy val root = (project in file("."))
         "io.circe"               %% "circe-core"                  % "0.12.3",
         "io.circe"               %% "circe-generic"               % "0.12.3",
         "io.circe"               %% "circe-parser"                % "0.12.3",
+        "io.circe"               %% "circe-yaml"                  % "0.12.0",
         "org.scalaj"             %% "scalaj-http"                 % "2.4.2" % "it",
       ),
   )
