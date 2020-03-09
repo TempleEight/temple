@@ -11,7 +11,7 @@ private[openapi] case class Response(
   description: String,
   content: Map[String, Response.MediaTypeObject],
   required: Option[Boolean] = None,
-) extends Jsonable {
+) extends JsonEncodable {
 
   override def toJsonMap: Map[String, Option[Json]] = ListMap(
     "description" -> Some(description.asJson),
@@ -23,12 +23,11 @@ private[openapi] case class Response(
 private[openapi] object Response {
 
   /** https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#mediaTypeObject */
-  private[openapi] case class MediaTypeObject(schema: OpenAPIType, fieldEntries: (String, Json)*) extends Jsonable {
+  private[openapi] case class MediaTypeObject(schema: OpenAPIType, fieldEntries: (String, Json)*)
+      extends JsonEncodable {
     final lazy val customFields: Map[String, Json] = fieldEntries.to(ListMap)
 
     override def toJsonMap: Map[String, Option[Json]] =
-      ListMap(
-        "schema" -> Some(schema.asJson),
-      ) ++ customFields.view.mapValues(Some(_))
+      ListMap("schema" -> Some(schema.asJson)) ++ customFields.view.mapValues(Some(_))
   }
 }

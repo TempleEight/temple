@@ -7,7 +7,7 @@ import temple.utils.MonadUtils.MatchPartial
 
 import scala.collection.immutable.ListMap
 
-sealed abstract private[openapi] class OpenAPIType(fieldEntries: Seq[(String, Json)]) extends Jsonable {
+sealed abstract private[openapi] class OpenAPIType(fieldEntries: Seq[(String, Json)]) extends JsonEncodable {
   def typeString: String
   final lazy val customFields: Map[String, Json] = fieldEntries.to(ListMap)
 
