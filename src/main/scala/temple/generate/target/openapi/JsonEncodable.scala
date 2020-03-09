@@ -14,8 +14,16 @@ private[openapi] trait JsonEncodable {
 private[openapi] object JsonEncodable {
 
   /** Create an encoder for JSON objects by providing a function to map them to options of values */
-  private def mapSequenceEncoder[T](f: T => Map[String, Option[Json]]): Encoder[T] =
-    (a: T) => Json.obj(f(a).iterator.flatMap { case (str, maybeJson) => maybeJson.map(str -> _) }.toSeq: _*)
+  private def mapSequenceEncoder[T](toJsonMap: T => Map[String, Option[Json]]): Encoder[T] =
+    (obj: T) => {
+      val jsonMap = toJsonMap(obj)
+
+      // collect only the entries that are present
+      val somes = jsonMap.iterator.collect { case (str, Some(json)) => (str, json) }.toSeq
+
+      // construct a JSON object from them
+      Json.obj(somes: _*)
+    }
 
   implicit def encodeToJson[T <: JsonEncodable]: Encoder[T] = mapSequenceEncoder(_.toJsonMap)
 }
