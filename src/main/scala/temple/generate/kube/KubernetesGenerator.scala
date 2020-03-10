@@ -15,7 +15,7 @@ object KubernetesGenerator {
   private def generateHeader(service: Service, genType: GenType, isDb: Boolean): String = {
     val version: String = genType match {
       case GenType.Deployment => "apps/v1"
-      case _ => "v1"
+      case _                  => "v1"
     }
     val kind: String = genType match {
       case GenType.Service      => "Service"
@@ -36,7 +36,7 @@ object KubernetesGenerator {
     )
 
   private def generateDbService(service: Service): String =
-    generateHeader(service, GenType.Service, isDb = true)
+    generateHeader(service, GenType.Service, isDb = true) -
 
   private def generateDbDeployment(service: Service): String =
     generateHeader(service, GenType.Deployment, isDb = true)
@@ -51,11 +51,11 @@ object KubernetesGenerator {
   def generate(orchestrationRoot: OrchestrationRoot): Map[File, FileContent] =
     orchestrationRoot.services.flatMap { service =>
       Seq(
-        File(s"kube/${service.name}", "deployment.yaml") -> generateDeployment(service),
-        File(s"kube/${service.name}", "service.yaml") -> generateService(service),
+        File(s"kube/${service.name}", "deployment.yaml")    -> generateDeployment(service),
+        File(s"kube/${service.name}", "service.yaml")       -> generateService(service),
         File(s"kube/${service.name}", "db-deployment.yaml") -> generateDbDeployment(service),
-        File(s"kube/${service.name}", "db-service.yaml") -> generateDbService(service),
-        File(s"kube/${service.name}", "db-storage.yaml") -> generateDbStorage(service),
+        File(s"kube/${service.name}", "db-service.yaml")    -> generateDbService(service),
+        File(s"kube/${service.name}", "db-storage.yaml")    -> generateDbStorage(service),
       )
     }.toMap
 }
