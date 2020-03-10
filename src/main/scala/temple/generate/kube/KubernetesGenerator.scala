@@ -33,7 +33,7 @@ object KubernetesGenerator {
     mkCode.lines(
       generateHeader(service, GenType.StorageMount, isDb = true),
       "---",
-      generateHeader(service, GenType.StorageClaim, isDb = true)
+      generateHeader(service, GenType.StorageClaim, isDb = true),
     )
 
   private def generateDbService(service: Service): String =
