@@ -7,8 +7,11 @@ import temple.generate.FileSystem._
 import temple.generate.kube.ast.gen._
 import temple.generate.kube.ast.{OrchestrationRoot, Service}
 
+/** Generates the kubernetes config files
+ * for each microservice */
 object KubernetesGenerator {
 
+  /** Generate the header of a Kubernetes yaml config */
   private def generateHeader(service: Service, genType: GenType, isDb: Boolean): String = {
     val version: String = genType match {
       case GenType.Deployment => "apps/v1"
@@ -44,6 +47,7 @@ object KubernetesGenerator {
   private def generateDeployment(service: Service): String =
     generateHeader(service, GenType.Deployment, isDb = false)
 
+  /** Given an [[OrchestrationRoot]], check the services inside it and generate deployment scripts */
   def generate(orchestrationRoot: OrchestrationRoot): Map[File, FileContent] = {
     var files: Map[File, FileContent] = Map()
     orchestrationRoot.services foreach { service =>

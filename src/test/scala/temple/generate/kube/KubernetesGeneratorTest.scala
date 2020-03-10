@@ -5,13 +5,6 @@ import temple.generate.FileSystem.File
 
 class KubernetesGeneratorTest extends FlatSpec with Matchers {
 
-  /** Check that all information in baseMap is also in targetMap - targetMap
-    * can also contain other things */
-  def checkMapContains[A, B](baseMap: Map[A, B], targetMap: Map[A, B]): Unit =
-    for ((k, v) <- baseMap) {
-      targetMap should contain(k -> v)
-    }
-
   behavior of "KubernetesGenerator"
 
   it should "generate correct Deployment headers" in {

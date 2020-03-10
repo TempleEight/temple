@@ -1,5 +1,6 @@
 package temple.generate.kube
 
+/** Case class to encapsulate which Kubernetes object kind being generated */
 sealed trait GenType
 
 private[kube] object GenType {
