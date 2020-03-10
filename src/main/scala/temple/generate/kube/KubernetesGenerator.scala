@@ -50,14 +50,14 @@ object KubernetesGenerator {
 
   /** Given an [[OrchestrationRoot]], check the services inside it and generate deployment scripts */
   def generate(orchestrationRoot: OrchestrationRoot): Map[File, FileContent] = {
-    var files: Map[File, FileContent] = Map()
-    orchestrationRoot.services foreach { service =>
-      files += (File(s"kube/${service.name}", "deployment.yaml")    -> generateDeployment(service))
-      files += (File(s"kube/${service.name}", "service.yaml")       -> generateService(service))
-      files += (File(s"kube/${service.name}", "db-deployment.yaml") -> generateDbDeployment(service))
-      files += (File(s"kube/${service.name}", "db-service.yaml")    -> generateDbService(service))
-      files += (File(s"kube/${service.name}", "db-storage.yaml")    -> generateDbStorage(service))
-    }
-    files
+    orchestrationRoot.services.flatMap { service =>
+      Seq(
+        File(s"kube/${service.name}", "deployment.yaml")    -> generateDeployment(service),
+        File(s"kube/${service.name}", "service.yaml")       -> generateService(service),
+        File(s"kube/${service.name}", "db-deployment.yaml") -> generateDbDeployment(service),
+        File(s"kube/${service.name}", "db-service.yaml")    -> generateDbService(service),
+        File(s"kube/${service.name}", "db-storage.yaml")    -> generateDbStorage(service),
+      )
+    }.toMap
   }
 }
