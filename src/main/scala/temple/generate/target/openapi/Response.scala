@@ -1,10 +1,7 @@
 package temple.generate.target.openapi
 
 import io.circe.syntax._
-
 import io.circe.{Encoder, Json}
-
-import scala.collection.immutable.ListMap
 
 /** https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#responseObject */
 private[openapi] case class Response(

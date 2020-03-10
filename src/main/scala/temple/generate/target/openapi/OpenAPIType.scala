@@ -3,8 +3,6 @@ package temple.generate.target.openapi
 import io.circe.Json
 import io.circe.syntax._
 
-import scala.collection.immutable.ListMap
-
 sealed abstract private[openapi] class OpenAPIType(val typeString: String, customFields: Seq[(String, Json)])
     extends JsonEncodable {
 
