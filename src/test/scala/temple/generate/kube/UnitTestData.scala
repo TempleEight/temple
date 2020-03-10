@@ -42,7 +42,7 @@ object UnitTestData {
       |  labels:
       |    app: user-db""".stripMargin
 
-  val userDbStorageHeader: String =
+  val userDbStorageVolumeHeader: String =
     """apiVersion: v1
       |kind: PersistentVolume
       |metadata:
@@ -50,4 +50,12 @@ object UnitTestData {
       |  labels:
       |    app: user-db
       |    type: local""".stripMargin
+
+  val userDbStorageClaimHeader: String =
+    """apiVersion: v1
+      |kind: PersistentVolumeClaim
+      |metadata:
+      |  name: user-db
+      |  labels:
+      |    app: user-db""".stripMargin
 }

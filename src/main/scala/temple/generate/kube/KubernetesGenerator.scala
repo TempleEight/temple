@@ -6,6 +6,7 @@ import io.circe.yaml.syntax.AsYaml
 import temple.generate.FileSystem._
 import temple.generate.kube.ast.gen._
 import temple.generate.kube.ast.{OrchestrationRoot, Service}
+import temple.generate.utils.CodeTerm.mkCode
 
 /** Generates the Kubernetes config files
   * for each microservice */
@@ -29,7 +30,11 @@ object KubernetesGenerator {
   }
 
   private def generateDbStorage(service: Service): String =
-    generateHeader(service, GenType.StorageMount, isDb = true)
+    mkCode.lines(
+      generateHeader(service, GenType.StorageMount, isDb = true),
+      "---",
+      generateHeader(service, GenType.StorageClaim, isDb = true)
+    )
 
   private def generateDbService(service: Service): String =
     generateHeader(service, GenType.Service, isDb = true)
