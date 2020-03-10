@@ -7,7 +7,7 @@ import temple.generate.FileSystem._
 import temple.generate.kube.ast.gen._
 import temple.generate.kube.ast.{OrchestrationRoot, Service}
 
-/** Generates the kubernetes config files
+/** Generates the Kubernetes config files
  * for each microservice */
 object KubernetesGenerator {
 

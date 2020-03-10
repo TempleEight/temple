@@ -11,7 +11,7 @@ case class Header(apiVersion: String, kind: String, metadata: Metadata)
 /** A Kubernetes yaml file metadata block */
 case class Metadata(name: String, labels: Labels)
 
-/** A kubernetes yaml file labels block */
+/** A Kubernetes yaml file labels block */
 case class Labels(name: String, genType: GenType) extends JsonEncodable.Partial {
 
   /** Turn a case class into some key-value pairs in preparation for conversion to a JSON object
