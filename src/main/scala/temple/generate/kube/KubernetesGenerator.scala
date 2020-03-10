@@ -4,19 +4,18 @@ import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.yaml.syntax.AsYaml
 import temple.generate.FileSystem._
-import temple.generate.kube.ast.gen._
-import temple.generate.kube.ast.{OrchestrationRoot, Service}
+import temple.generate.kube.ast.OrchestrationType._
+import temple.generate.kube.ast.gen.KubeType._
 import temple.generate.utils.CodeTerm.mkCode
 
-/** Generates the Kubernetes config files
-  * for each microservice */
+/** Generates the Kubernetes config files for each microservice */
 object KubernetesGenerator {
 
   /** Generate the header of a Kubernetes yaml config */
   private def generateHeader(service: Service, genType: GenType, isDb: Boolean): String = {
     val version: String = genType match {
       case GenType.Deployment => "apps/v1"
-      case _                  => "v1"
+      case _ => "v1"
     }
     val kind: String = genType match {
       case GenType.Service      => "Service"

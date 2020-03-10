@@ -1,6 +1,6 @@
 package temple.generate.kube
 
-import temple.generate.kube.ast.{OrchestrationRoot, Service}
+import temple.generate.kube.ast.OrchestrationType._
 
 object UnitTestData {
 
