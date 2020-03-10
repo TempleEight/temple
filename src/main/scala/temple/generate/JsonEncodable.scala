@@ -1,4 +1,4 @@
-package temple.generate.target.openapi
+package temple.generate
 
 import io.circe.{Encoder, Json}
 
@@ -20,8 +20,7 @@ private[openapi] object JsonEncodable {
 
   implicit def encodeToJson[T <: JsonEncodable]: Encoder[T] = mapSequenceEncoder(_.jsonEntryIterator)
 
-  /** Like [[temple.generate.target.openapi.JsonEncodable]] but by providing optional values, causing the entries not
-    * to render */
+  /** Like [[temple.generate.JsonEncodable]] but by providing optional values, causing the entries not to render */
   trait Partial extends JsonEncodable {
     def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])]
 
