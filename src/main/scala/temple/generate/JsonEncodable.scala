@@ -2,7 +2,7 @@ package temple.generate
 
 import io.circe.{Encoder, Json}
 
-private[openapi] trait JsonEncodable {
+private[generate] trait JsonEncodable {
 
   /** Turn a case class into some key-value pairs in preparation for conversion to a JSON object */
   def jsonEntryIterator: IterableOnce[(String, Json)]
@@ -11,7 +11,7 @@ private[openapi] trait JsonEncodable {
   implicit final protected def encodeToJson[T <: JsonEncodable]: Encoder[T] = JsonEncodable.encodeToJson
 }
 
-private[openapi] object JsonEncodable {
+private[generate] object JsonEncodable {
 
   /** Create an encoder for JSON objects by providing a function to map them to key-value pairs */
   private def mapSequenceEncoder[T](toJsonMap: T => IterableOnce[(String, Json)]): Encoder[T] = (obj: T) => {
