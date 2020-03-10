@@ -1,7 +1,7 @@
 package temple.generate.target.openapi
 
-import temple.generate.target.openapi.OpenAPIType._
 import io.circe.syntax._
+import temple.generate.target.openapi.OpenAPIType._
 
 import scala.collection.immutable.ListMap
 

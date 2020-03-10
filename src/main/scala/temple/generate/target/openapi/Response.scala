@@ -1,19 +1,17 @@
 package temple.generate.target.openapi
 
 import io.circe.syntax._
-
 import io.circe.{Encoder, Json}
-
-import scala.collection.immutable.ListMap
+import temple.generate.JsonEncodable
 
 /** https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#responseObject */
 private[openapi] case class Response(
   description: String,
   content: Map[String, Response.MediaTypeObject],
   required: Option[Boolean] = None,
-) extends JsonEncodable {
+) extends JsonEncodable.Partial {
 
-  override def toJsonMap: Map[String, Option[Json]] = ListMap(
+  override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
     "description" -> Some(description.asJson),
     "required"    -> required.map(_.asJson),
     "content"     -> Some(content.asJson(Encoder.encodeMapLike)),
@@ -23,11 +21,9 @@ private[openapi] case class Response(
 private[openapi] object Response {
 
   /** https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#mediaTypeObject */
-  private[openapi] case class MediaTypeObject(schema: OpenAPIType, fieldEntries: (String, Json)*)
+  private[openapi] case class MediaTypeObject(schema: OpenAPIType, customFields: (String, Json)*)
       extends JsonEncodable {
-    final lazy val customFields: Map[String, Json] = fieldEntries.to(ListMap)
 
-    override def toJsonMap: Map[String, Option[Json]] =
-      ListMap("schema" -> Some(schema.asJson)) ++ customFields.view.mapValues(Some(_))
+    override def jsonEntryIterator: Seq[(String, Json)] = ("schema" -> schema.asJson) +: customFields
   }
 }

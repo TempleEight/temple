@@ -2,14 +2,12 @@ package temple.generate.target.openapi
 
 import io.circe.Json
 import io.circe.syntax._
-
-import scala.collection.immutable.ListMap
+import temple.generate.JsonEncodable
 
 sealed abstract private[openapi] class OpenAPIType(val typeString: String, customFields: Seq[(String, Json)])
     extends JsonEncodable {
 
-  override def toJsonMap: Map[String, Option[Json]] =
-    ListMap("type" -> Some(typeString.asJson)) ++ customFields.to(ListMap).view.mapValues(Some(_))
+  override def jsonEntryIterator: Seq[(String, Json)] = ("type" -> typeString.asJson) +: customFields
 }
 
 private[openapi] object OpenAPIType {
