@@ -36,7 +36,7 @@ object KubernetesGenerator {
     )
 
   private def generateDbService(service: Service): String =
-    generateHeader(service, GenType.Service, isDb = true) -
+    generateHeader(service, GenType.Service, isDb = true)
 
   private def generateDbDeployment(service: Service): String =
     generateHeader(service, GenType.Deployment, isDb = true)
