@@ -15,10 +15,10 @@ case class Metadata(name: String, labels: Labels)
 case class Labels(name: String, genType: GenType) extends JsonEncodable.Partial {
 
   /** Turn a case class into some key-value pairs in preparation for conversion to a JSON object
-   * The `type` label should only be set on PersistentVolume objects*/
+    * The `type` label should only be set on PersistentVolume objects*/
   override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] =
     Seq(
-    ("app" -> Some(name.asJson))
-    ,"type" -> Option.when(genType == GenType.StorageMount)("local".asJson)
-  )
+      ("app" -> Some(name.asJson)),
+      "type" -> Option.when(genType == GenType.StorageMount)("local".asJson),
+    )
 }

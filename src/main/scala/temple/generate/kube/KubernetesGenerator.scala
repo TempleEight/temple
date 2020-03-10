@@ -8,7 +8,7 @@ import temple.generate.kube.ast.gen._
 import temple.generate.kube.ast.{OrchestrationRoot, Service}
 
 /** Generates the Kubernetes config files
- * for each microservice */
+  * for each microservice */
 object KubernetesGenerator {
 
   /** Generate the header of a Kubernetes yaml config */
@@ -25,11 +25,7 @@ object KubernetesGenerator {
     }
     val name = service.name + { if (isDb) "-db" else "" }
 
-    Header(version, kind,
-      Metadata(name,
-        Labels(name, genType)
-      )
-    ).asJson.asYaml.spaces2
+    Header(version, kind, Metadata(name, Labels(name, genType))).asJson.asYaml.spaces2
   }
 
   private def generateDbStorage(service: Service): String =
