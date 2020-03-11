@@ -49,17 +49,11 @@ class FlagMapView[K, +V] private (val basis: Map[K, V], keyDesc: String = "flag"
     this
   }
 
-  /** Get a view of the underlying map, containing only the enabled keys */
-  override def view: MapView[K, V] = basis.view.filterKeys(flags.contains)
-
-  /** Export a map containing only the enabled keys */
-  def toMap: Map[K, V] = view.toMap
-
   /** Safely lookup a value in the map, only returning successfully if the key is enabled */
-  def get(key: K): Option[V] = view.get(key)
+  def get(key: K): Option[V] = if (flags contains key) basis.get(key) else None
 
   /** Get an iterator for the enabled keys */
-  def iterator: Iterator[(K, V)] = view.iterator
+  def iterator: Iterator[(K, V)] = flags.iterator.map(flag => flag -> basis(flag))
 
   /** The keys that have been enabled */
   override def keys: Iterable[K] = flags.toSet
