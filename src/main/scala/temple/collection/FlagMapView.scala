@@ -28,7 +28,7 @@ class FlagMapView[K, +V] private (val basis: Map[K, V], keyDesc: String = "flag"
   def flag(keys: K*): FlagMapView[K, V] = {
     keys.foreach { key =>
       if (!basis.contains(key))
-        throw new NoSuchElementException(s"The $keyDesc $key has not been defined")
+        throw new NoSuchElementException(s"$keyDesc $key has not been defined")
       flags += key
     }
     this
@@ -43,7 +43,7 @@ class FlagMapView[K, +V] private (val basis: Map[K, V], keyDesc: String = "flag"
   def unflag(keys: K*): FlagMapView[K, V] = {
     keys.foreach { key =>
       if (!basis.contains(key))
-        throw new NoSuchElementException(s"The $keyDesc $key has not been defined")
+        throw new NoSuchElementException(s"$keyDesc $key has not been defined")
       flags -= key
     }
     this

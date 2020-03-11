@@ -48,4 +48,14 @@ class FlagMapViewTest extends FlatSpec with Matchers {
     map.toMap shouldBe Map("x" -> 5)
   }
 
+  it should "give good error messages" in {
+    val map = FlagMapView("error")(
+      400 -> "Client error",
+      500 -> "Server error",
+    )
+
+    the[NoSuchElementException] thrownBy map.flag(300) should have message "error 300 has not been defined"
+    the[NoSuchElementException] thrownBy map.unflag(410) should have message "error 410 has not been defined"
+  }
+
 }
