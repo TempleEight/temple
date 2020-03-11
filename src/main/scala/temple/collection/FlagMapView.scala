@@ -74,5 +74,5 @@ object FlagMapView {
   def apply[K, V](basis: (K, V)*): FlagMapView[K, V] = new FlagMapView(Map(basis: _*))
 
   /** Create a [[temple.collection.FlagMapView]] given a key description and key-value pairs */
-  def apply[K, V](keyDesc: String, basis: (K, V)*): FlagMapView[K, V] = new FlagMapView(Map(basis: _*), keyDesc)
+  def apply[K, V](keyDesc: String)(basis: (K, V)*): FlagMapView[K, V] = new FlagMapView(Map(basis: _*), keyDesc)
 }
