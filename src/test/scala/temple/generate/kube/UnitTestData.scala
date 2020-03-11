@@ -7,7 +7,7 @@ object UnitTestData {
 
   val basicOrchestrationRoot: OrchestrationRoot = OrchestrationRoot(
     Seq(
-      Service("user", "temple-user-service", Seq(80), 1, "regcred"),
+      Service(name = "user", image = "temple-user-service", ports = Seq(80), replicas = 1, secretName = "regcred"),
     ),
   )
 
