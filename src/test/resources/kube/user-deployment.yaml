@@ -20,10 +20,10 @@ spec:
     spec:
       hostname: user
       containers:
-        - image: temple-user-service
-          name: user
-          ports:
-            - containerPort: 80
+      - image: temple-user-service
+        name: user
+        ports:
+        - containerPort: 80
       imagePullSecrets:
-        - name: regcred
+      - name: regcred
       restartPolicy: Always
