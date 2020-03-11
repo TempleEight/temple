@@ -9,13 +9,12 @@ object OpenAPIGenerator {
 
   /** Create a Response representation for an error */
   private[openapi] def generateError(description: String, example: String): Response =
-    Response(
-      description,
-      ListMap(
-        "application/json" -> Response.MediaTypeObject(
+    Literal(
+      description = description,
+      content = ListMap(
+        "application/json" -> MediaTypeObject(
           OpenAPIObject(ListMap("error" -> OpenAPISimpleType("string", "example" -> example.asJson))),
         ),
       ),
     )
-
 }
