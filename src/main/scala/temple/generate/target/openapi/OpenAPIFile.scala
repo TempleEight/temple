@@ -4,7 +4,7 @@ import io.circe.Json
 import io.circe.generic.auto._
 import io.circe.syntax._
 import temple.generate.JsonEncodable
-import temple.generate.target.openapi.HTTPVerb.{HTTPVerb, httpVerbKeyEncoder}
+import temple.generate.target.openapi.HTTPVerb.httpVerbKeyEncoder
 import temple.generate.target.openapi.OpenAPIFile._
 
 case class OpenAPIFile(

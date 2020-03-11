@@ -2,13 +2,14 @@ package temple.generate.target.openapi
 
 import io.circe.KeyEncoder
 
-object HTTPVerb extends Enumeration {
-  type HTTPVerb = Value
-  val Get: HTTPVerb    = Value("get")
-  val Put: HTTPVerb    = Value("put")
-  val Post: HTTPVerb   = Value("post")
-  val Patch: HTTPVerb  = Value("patch")
-  val Delete: HTTPVerb = Value("delete")
+sealed abstract class HTTPVerb(val verb: String)
 
-  implicit def httpVerbKeyEncoder: KeyEncoder[HTTPVerb] = _.toString
+object HTTPVerb {
+  case object Get    extends HTTPVerb("get")
+  case object Put    extends HTTPVerb("put")
+  case object Post   extends HTTPVerb("post")
+  case object Patch  extends HTTPVerb("patch")
+  case object Delete extends HTTPVerb("delete")
+
+  implicit def httpVerbKeyEncoder: KeyEncoder[HTTPVerb] = _.verb
 }
