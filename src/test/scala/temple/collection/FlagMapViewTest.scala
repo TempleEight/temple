@@ -48,6 +48,13 @@ class FlagMapViewTest extends FlatSpec with Matchers {
     map.toMap shouldBe Map("x" -> 5)
   }
 
+  it should "keys" in {
+    val map = FlagMapView(Map("x" -> 5, "y" -> 4))
+    map.flag("y")
+
+    map.keys shouldBe Set("y")
+  }
+
   it should "give good error messages" in {
     val map = FlagMapView("error")(
       400 -> "Client error",
