@@ -43,4 +43,11 @@ class KubernetesGeneratorTest extends FlatSpec with Matchers {
     output(file) should include(UnitTestData.userDbStorageClaimHeader)
   }
 
+  it should "generate correct deployments" in {
+    val output = KubernetesGenerator.generate(UnitTestData.basicOrchestrationRoot)
+    val file   = File("kube/user", "deployment.yaml")
+    output.keys should contain(file)
+    output(file) should be(UnitTestData.userDeployment)
+  }
+
 }

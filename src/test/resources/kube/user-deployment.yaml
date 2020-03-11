@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user
+  labels:
+    app: user
+    kind: service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user
+      kind: service
+  template:
+    metadata:
+      name: user
+      labels:
+        app: user
+        kind: service
+    spec:
+      hostname: user
+      containers:
+        - image: temple-user-service
+          name: user
+          ports:
+            - containerPort: 80
+      imagePullSecrets:
+        - name: regcred
+      restartPolicy: Always

@@ -1,12 +1,13 @@
 package temple.generate.kube
 
 import temple.generate.kube.ast.OrchestrationType._
+import temple.utils.FileUtils
 
 object UnitTestData {
 
   val basicOrchestrationRoot: OrchestrationRoot = OrchestrationRoot(
     Seq(
-      Service("user", "temple-user-service", Seq(80)),
+      Service("user", "temple-user-service", Seq(80), 1, "regcred"),
     ),
   )
 
@@ -58,4 +59,6 @@ object UnitTestData {
       |  name: user-db
       |  labels:
       |    app: user-db""".stripMargin
+
+  val userDeployment: String = FileUtils.readResources("kube/user-deployment.yaml")
 }
