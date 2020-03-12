@@ -65,9 +65,10 @@ private class OpenAPIBuilder private (name: String, version: String, description
   )
 
   private def generateItemInputType(attributes: Map[String, Attribute]): OpenAPIObject = OpenAPIObject(
-    attributes
-      .withFilter { case _ -> attribute => isClientAttribute(attribute) }
-      .map { case str -> attribute => str -> attributeToOpenAPIType(attribute) },
+    attributes.iterator
+      .filter { case _ -> attribute => isClientAttribute(attribute) }
+      .map { case str -> attribute => str -> attributeToOpenAPIType(attribute) }
+      .to(attributes.mapFactory),
   )
 
   private def jsonContent(mediaTypeObject: MediaTypeObject) = Map("application/json" -> mediaTypeObject)
