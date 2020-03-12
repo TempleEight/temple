@@ -10,6 +10,8 @@ sealed trait Spec
 object Spec {
   case class DeploymentSpec(replicas: Int, selector: Selector, template: Template) extends Spec
 
+  case class ServiceSpec(ports: Seq[ServicePort], selector: Labels) extends Spec
+
   case class Selector(matchLabels: Labels)
 
   case class Template(metadata: Metadata, spec: PodSpec)
@@ -21,9 +23,11 @@ object Spec {
     restartPolicy: String,
   ) extends Spec
 
-  case class Container(image: String, name: String, ports: Seq[Port])
+  case class Container(image: String, name: String, ports: Seq[ContainerPort])
 
-  case class Port(containerPort: Int)
+  case class ContainerPort(containerPort: Int)
+
+  case class ServicePort(name: String, port: Int, targetPort: Int)
 
   case class Secret(name: String) extends JsonEncodable {
 

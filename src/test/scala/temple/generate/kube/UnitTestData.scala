@@ -7,7 +7,13 @@ object UnitTestData {
 
   val basicOrchestrationRoot: OrchestrationRoot = OrchestrationRoot(
     Seq(
-      Service(name = "user", image = "temple-user-service", ports = Seq(80), replicas = 1, secretName = "regcred"),
+      Service(
+        name = "user",
+        image = "temple-user-service",
+        ports = Seq("api" -> 80),
+        replicas = 1,
+        secretName = "regcred",
+      ),
     ),
   )
 
@@ -61,4 +67,6 @@ object UnitTestData {
       |    app: user-db""".stripMargin
 
   val userDeployment: String = FileUtils.readResources("kube/user-deployment.yaml")
+
+  val userService: String = FileUtils.readResources("kube/user-service.yaml")
 }

@@ -42,8 +42,18 @@ object KubernetesGenerator {
   private def generateDbDeployment(service: Service): String =
     generateHeader(service, GenType.Deployment, isDb = true)
 
-  private def generateService(service: Service): String =
-    generateHeader(service, GenType.Service, isDb = false)
+  private def generateService(service: Service): String = {
+    val serviceBody = Body(
+      ServiceSpec(
+        service.ports.map { case name -> port => ServicePort(name, port, port) },
+        Labels(service.name, GenType.Service, isDb = false),
+      ),
+    ).asJson.asYaml.spaces2
+    mkCode(
+      generateHeader(service, GenType.Service, isDb = false),
+      serviceBody,
+    )
+  }
 
   private def generateDeployment(service: Service): String = {
     val deploymentBody = Body(
@@ -54,7 +64,7 @@ object KubernetesGenerator {
           Metadata(service.name, Labels(service.name, GenType.Deployment, isDb = false)),
           PodSpec(
             service.name,
-            Seq(Container(service.image, service.name, service.ports.map(Port))),
+            Seq(Container(service.image, service.name, service.ports.map(x => ContainerPort(x._2)))),
             Seq(Secret(service.secretName)),
             restartPolicy = "Always",
           ),
