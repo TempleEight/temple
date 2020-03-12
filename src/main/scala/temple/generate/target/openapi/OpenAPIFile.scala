@@ -24,5 +24,12 @@ case class OpenAPIFile(
 object OpenAPIFile {
   case class Components(responses: Map[String, Response] = Map.empty)
 
-  case class Info(title: String, version: String, description: Option[String])
+  case class Info(title: String, version: String, description: String) extends JsonEncodable.Partial {
+
+    override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
+      "title"       -> Some(title.asJson),
+      "version"     -> Option.when(version.nonEmpty)(version.asJson),
+      "description" -> Option.when(description.nonEmpty)(description.asJson),
+    )
+  }
 }
