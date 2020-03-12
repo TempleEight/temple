@@ -6,6 +6,7 @@ import io.circe.yaml.syntax.AsYaml
 import temple.generate.FileSystem._
 import temple.generate.kube.ast.OrchestrationType._
 import temple.generate.kube.ast.gen.KubeType._
+import temple.generate.kube.ast.gen.Spec._
 import temple.generate.utils.CodeTerm.mkCode
 
 /** Generates the Kubernetes config files for each microservice */
