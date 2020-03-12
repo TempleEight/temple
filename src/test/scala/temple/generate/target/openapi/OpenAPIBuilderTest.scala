@@ -44,9 +44,10 @@ class OpenAPIBuilderTest extends FlatSpec with Matchers {
           "d" -> Attribute(DateType),
           "e" -> Attribute(TimeType),
           "f" -> Attribute(DateTimeType, accessAnnotation = Some(Annotation.Server)),
-          "g" -> Attribute(BlobType(), accessAnnotation = Some(Annotation.ServerSet)),
-          "h" -> Attribute(StringType(), accessAnnotation = Some(Annotation.Client)),
-          "i" -> Attribute(ForeignKey("User")),
+          "g" -> Attribute(DateTimeType),
+          "h" -> Attribute(BlobType(), accessAnnotation = Some(Annotation.ServerSet)),
+          "i" -> Attribute(StringType(), accessAnnotation = Some(Annotation.Client)),
+          "j" -> Attribute(ForeignKey("User")),
         ),
       ),
     )
@@ -81,9 +82,12 @@ class OpenAPIBuilderTest extends FlatSpec with Matchers {
         |                e:
         |                  type: string
         |                  format: time
-        |                h:
+        |                g:
         |                  type: string
+        |                  format: date-time
         |                i:
+        |                  type: string
+        |                j:
         |                  type: number
         |                  format: int32
         |                  description: Reference to User ID
@@ -111,9 +115,12 @@ class OpenAPIBuilderTest extends FlatSpec with Matchers {
         |                    format: time
         |                  g:
         |                    type: string
+        |                    format: date-time
         |                  h:
         |                    type: string
         |                  i:
+        |                    type: string
+        |                  j:
         |                    type: number
         |                    format: int32
         |                    description: Reference to User ID
@@ -152,9 +159,12 @@ class OpenAPIBuilderTest extends FlatSpec with Matchers {
         |                      format: time
         |                    g:
         |                      type: string
+        |                      format: date-time
         |                    h:
         |                      type: string
         |                    i:
+        |                      type: string
+        |                    j:
         |                      type: number
         |                      format: int32
         |                      description: Reference to User ID
