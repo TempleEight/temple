@@ -11,7 +11,7 @@ case class OpenAPIFile(
   info: Info,
   paths: Map[String, Map[HTTPVerb, Path]] = Map.empty,
   components: Components = Components(),
-) extends JsonEncodable {
+) extends JsonEncodable.Object {
 
   override def jsonEntryIterator: IterableOnce[(String, Json)] = Seq(
     "openapi"    -> "3.0.0".asJson,
