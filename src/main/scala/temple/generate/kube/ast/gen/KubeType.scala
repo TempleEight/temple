@@ -1,9 +1,10 @@
 package temple.generate.kube.ast.gen
 
 import io.circe.Json
-import io.circe.syntax._
 import temple.generate.JsonEncodable
 import temple.generate.kube.GenType
+
+import scala.Option.when
 
 private[kube] object KubeType {
 
@@ -22,11 +23,9 @@ private[kube] object KubeType {
       * The `type` label should only be set on PersistentVolume objects */
     override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] =
       Seq(
-        "app"  -> Some(name.asJson),
-        "type" -> Option.when(genType == GenType.StorageMount)("local".asJson),
-        "kind" -> Option.when(genType == GenType.Deployment || genType == GenType.Service)(
-          if (isDb) "db".asJson else "service".asJson,
-        ),
+        "app" ~~> Some(name),
+        "type" ~~> when(genType == GenType.StorageMount)("local"),
+        "kind" ~~> when(genType == GenType.Deployment || genType == GenType.Service) { if (isDb) "db" else "service" },
       )
   }
 }
