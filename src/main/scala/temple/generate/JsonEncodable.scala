@@ -1,5 +1,6 @@
 package temple.generate
 
+import io.circe.syntax._
 import io.circe.{Encoder, Json}
 
 /** Any class that can be encoded to JSON, at least partially using custom functions
@@ -26,6 +27,10 @@ private[generate] object JsonEncodable {
 
     // Required so that nested JsonEncodable interfaces always call the correct nested version
     implicit final protected def toJson: Json = Json.obj(jsonEntryIterator.iterator.toSeq: _*)
+
+    implicit final protected class JsonArrow(key: String) {
+      def ~>[T](x: T)(implicit encoder: Encoder[T]): (String, Json) = key -> x.asJson
+    }
   }
 
   /** Like [[temple.generate.JsonEncodable.Object]] but by providing optional values, causing the entries not to render
@@ -35,5 +40,9 @@ private[generate] object JsonEncodable {
 
     final override def jsonEntryIterator: IterableOnce[(String, Json)] =
       jsonOptionEntryIterator.iterator.collect { case (str, Some(json)) => (str, json) }
+
+    implicit final protected class JsonOptionArrow(key: String) {
+      def ~~>[T](x: Option[T])(implicit encoder: Encoder[T]): (String, Option[Json]) = key -> x.map(_.asJson)
+    }
   }
 }

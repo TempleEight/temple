@@ -6,13 +6,13 @@ import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.semantics.AttributeType._
 import temple.DSL.semantics.{Annotation, Attribute}
 import temple.generate.Endpoint
-import temple.generate.target.openapi.OpenAPIBuilder.generateError
+import temple.generate.target.openapi.OpenAPIGenerator.generateError
 
 import scala.collection.immutable.ListMap
 
-class OpenAPIBuilderTest extends FlatSpec with Matchers {
+class OpenAPIGeneratorTest extends FlatSpec with Matchers {
 
-  behavior of "OpenAPIBuilder"
+  behavior of "OpenAPIGenerator"
 
   it should "generate error descriptions correctly" in {
 
@@ -33,7 +33,7 @@ class OpenAPIBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "generate OpenAPI specs correctly" in {
-    val openAPI = OpenAPIBuilder.render("x", "0.1.2")(
+    val openAPI = OpenAPIGenerator.render("x", "0.1.2")(
       Service(
         "match",
         Endpoint.values.toSet,
