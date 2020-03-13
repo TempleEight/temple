@@ -52,10 +52,10 @@ object KubernetesGenerator {
       ports = Seq(),
       env = service.envVars.map(x => EnvVar(x._1, x._2)),
       volumeMounts = Seq(
-        VolumeMount("/var/lib/postgresql/data", None, name + "-claim"),
-        VolumeMount("/docker-entrypoint-initdb.d/init.sql", Some("init.sql"), name + "-init"),
+        VolumeMount(service.dbStorage.dataMount, None, name + "-claim"),
+        VolumeMount(service.dbStorage.initMount, Some(service.dbStorage.initFile), name + "-init"),
       ),
-      lifecycle = Some(Lifecycle("echo done")),
+      lifecycle = Some(Lifecycle(service.dbLifecycleCommand)),
     )
 
     val podSpec = PodSpec(

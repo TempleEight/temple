@@ -1,6 +1,7 @@
 package temple.generate.kube
 
 import temple.generate.kube.ast.OrchestrationType._
+import temple.generate.kube.ast.gen.LifecycleCommand
 import temple.utils.FileUtils
 
 object UnitTestData {
@@ -15,6 +16,12 @@ object UnitTestData {
         replicas = 1,
         secretName = "regcred",
         envVars = Seq("PGUSER" -> "postgres"),
+        dbStorage = DbStorage(
+          dataMount = "/var/lib/postgresql/data",
+          initMount = "/docker-entrypoint-initdb.d/init.sql",
+          initFile = "init.sql",
+        ),
+        dbLifecycleCommand = LifecycleCommand.echoDone,
       ),
     ),
   )
