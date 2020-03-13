@@ -7,17 +7,18 @@ import temple.DSL.semantics.{Annotation, Attribute}
 import temple.collection.FlagMapView
 import temple.generate.Endpoint._
 import temple.generate.target.openapi.OpenAPIFile.{Components, Info}
+import temple.generate.target.openapi.OpenAPIGenerator._
 import temple.generate.target.openapi.OpenAPIType._
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
 
-private class OpenAPIBuilder private (name: String, version: String, description: String = "") {
+private class OpenAPIGenerator private (name: String, version: String, description: String = "") {
 
   private val errorTracker = FlagMapView(
-    400 -> OpenAPIBuilder.generateError("Invalid request", "Invalid request parameters: name"),
-    404 -> OpenAPIBuilder.generateError("ID not found", "Object not found with ID 1"),
-    500 -> OpenAPIBuilder.generateError(
+    400 -> generateError("Invalid request", "Invalid request parameters: name"),
+    404 -> generateError("ID not found", "Object not found with ID 1"),
+    500 -> generateError(
       "The server encountered an error while serving this request",
       "Unable to reach user service: connection timeout",
     ),
@@ -71,8 +72,6 @@ private class OpenAPIBuilder private (name: String, version: String, description
       .to(attributes.mapFactory),
   )
 
-  private def jsonContent(mediaTypeObject: MediaTypeObject) = Map("application/json" -> mediaTypeObject)
-
   def addPaths(service: Service): this.type = {
     val lowerName       = service.name.toLowerCase
     val capitalizedName = service.name.capitalize
@@ -83,7 +82,7 @@ private class OpenAPIBuilder private (name: String, version: String, description
             s"Get a list of every $lowerName",
             tags = tags,
             responses = Map(
-              200 -> Literal(
+              200 -> BodyLiteral(
                 jsonContent(MediaTypeObject(OpenAPIArray(generateItemType(service.attributes)))),
                 s"$capitalizedName list successfully fetched",
               ),
@@ -94,9 +93,9 @@ private class OpenAPIBuilder private (name: String, version: String, description
         path(s"/$lowerName") += HTTPVerb.Post -> Path(
             s"Register a new $lowerName",
             tags = tags,
-            requestBody = Some(Literal(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
+            requestBody = Some(BodyLiteral(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
             responses = Map(
-              200 -> Literal(
+              200 -> BodyLiteral(
                 jsonContent(MediaTypeObject(generateItemType(service.attributes))),
                 s"$capitalizedName successfully created",
               ),
@@ -125,10 +124,10 @@ private class OpenAPIBuilder private (name: String, version: String, description
   )
 }
 
-object OpenAPIBuilder {
+object OpenAPIGenerator {
 
   private def build(name: String, version: String, description: String = "")(services: Service*): OpenAPIFile = {
-    val builder = new OpenAPIBuilder(name, version, description)
+    val builder = new OpenAPIGenerator(name, version, description)
     services.foreach(builder.addPaths)
     builder.toOpenAPI
   }
@@ -136,12 +135,14 @@ object OpenAPIBuilder {
   def render(name: String, version: String, description: String = "")(services: Service*): String =
     Printer(preserveOrder = true, dropNullKeys = true).pretty(build(name, version, description)(services: _*).asJson)
 
+  private def jsonContent(mediaTypeObject: MediaTypeObject) = Map("application/json" -> mediaTypeObject)
+
   /** Create a Response representation for an error */
   private[openapi] def generateError(description: String, example: String): Response =
-    Literal(
+    BodyLiteral(
       description = description,
-      content = ListMap(
-        "application/json" -> MediaTypeObject(
+      content = jsonContent(
+        MediaTypeObject(
           OpenAPIObject(ListMap("error" -> OpenAPISimpleType("string", "example" -> example.asJson))),
         ),
       ),
