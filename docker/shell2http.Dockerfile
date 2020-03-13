@@ -6,6 +6,7 @@ FROM msoap/shell2http:1.13
 RUN apk update
 RUN apk upgrade
 RUN apk add python3
+RUN apk add --update nodejs
 
 # Handolint config
 COPY --from=hadolint /bin/hadolint /bin/hadolint
@@ -13,6 +14,9 @@ COPY --from=hadolint /bin/hadolint /bin/hadolint
 # Golang config
 COPY --from=golang /usr/local/go/ /usr/local/go/
 ENV PATH /usr/local/go/bin:$PATH
+
+# Swagger config
+RUN npm install -g swagger-cli
 
 # Install jq for json parsing
 RUN wget https://github.com/stedolan/jq/releases/download/jq-1.6/jq-linux64
@@ -23,4 +27,5 @@ COPY configure_go.py configure_go.py
 
 ENTRYPOINT /app/shell2http -show-errors\
  -form GET:/hadolint "echo \$v_dockerfile | ./jq-linux64 -r .contents > Dockerfile && hadolint Dockerfile"\
- GET:/go "python3 configure_go.py && cd \$v_root && go mod tidy &>/dev/null; go build \$v_entrypoint 2>&1"
+ GET:/go "python3 configure_go.py && cd \$v_root && go mod tidy &>/dev/null; go build \$v_entrypoint 2>&1"\
+ GET:/swagger "echo \"\${v_openapi}\" | ./jq-linux64 -r .contents > openapi.yaml && swagger-cli validate openapi.yaml 2>&1"
