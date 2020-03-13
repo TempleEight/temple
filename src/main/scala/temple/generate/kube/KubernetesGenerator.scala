@@ -107,7 +107,7 @@ object KubernetesGenerator {
     val container = Container(
       service.image,
       service.name,
-      service.ports.map(x => ContainerPort(x._2)),
+      service.ports.map { case (_, port) => ContainerPort(port) },
       env = Seq(),
       volumeMounts = Seq(),
     )
