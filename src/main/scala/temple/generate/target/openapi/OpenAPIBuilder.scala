@@ -23,9 +23,9 @@ private class OpenAPIBuilder private (name: String, version: String, description
     ),
   )
 
-  private val paths = mutable.Map[String, mutable.Map[HTTPVerb, Path]]()
+  private val paths = mutable.Map[String, mutable.Map[HTTPVerb, Handler]]()
 
-  private def path(url: String): mutable.Map[HTTPVerb, Path] =
+  private def path(url: String): mutable.Map[HTTPVerb, Handler] =
     paths.getOrElseUpdate(url, mutable.Map())
 
   private def isServerAttribute(attribute: Attribute): Boolean = attribute.accessAnnotation contains Annotation.Server
@@ -79,7 +79,7 @@ private class OpenAPIBuilder private (name: String, version: String, description
     val tags            = Seq(capitalizedName)
     service.endpoints.foreach {
       case ReadAll =>
-        path(s"/$lowerName/all") += HTTPVerb.Get -> Path(
+        path(s"/$lowerName/all") += HTTPVerb.Get -> Handler(
             s"Get a list of every $lowerName",
             tags = tags,
             responses = Map(
@@ -91,7 +91,7 @@ private class OpenAPIBuilder private (name: String, version: String, description
             ),
           )
       case Create =>
-        path(s"/$lowerName") += HTTPVerb.Post -> Path(
+        path(s"/$lowerName") += HTTPVerb.Post -> Handler(
             s"Register a new $lowerName",
             tags = tags,
             requestBody = Some(Literal(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
