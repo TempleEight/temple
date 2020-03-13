@@ -5,7 +5,7 @@ import io.circe.syntax._
 import temple.generate.JsonEncodable
 
 sealed abstract private[openapi] class OpenAPIType(val typeString: String, customFields: Seq[(String, Json)])
-    extends JsonEncodable {
+    extends JsonEncodable.Object {
 
   override def jsonEntryIterator: Seq[(String, Json)] = ("type" -> typeString.asJson) +: customFields
 }
