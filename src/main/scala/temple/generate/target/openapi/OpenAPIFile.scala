@@ -2,7 +2,6 @@ package temple.generate.target.openapi
 
 import io.circe.Json
 import io.circe.generic.auto._
-import io.circe.syntax._
 import temple.generate.JsonEncodable
 import temple.generate.target.openapi.HTTPVerb.httpVerbKeyEncoder
 import temple.generate.target.openapi.OpenAPIFile._
@@ -14,10 +13,10 @@ case class OpenAPIFile(
 ) extends JsonEncodable.Object {
 
   override def jsonEntryIterator: IterableOnce[(String, Json)] = Seq(
-    "openapi"    -> "3.0.0".asJson,
-    "info"       -> info.asJson,
-    "paths"      -> paths.asJson,
-    "components" -> components.asJson,
+    "openapi" ~> "3.0.0",
+    "info" ~> info,
+    "paths" ~> paths,
+    "components" ~> components,
   )
 }
 
