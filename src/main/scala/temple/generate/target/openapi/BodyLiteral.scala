@@ -5,7 +5,7 @@ import io.circe.syntax._
 import temple.generate.JsonEncodable
 
 /** https://github.com/OAI/OpenAPI-Specification/blob/master/versions/3.0.2.md#requestBodyObject */
-case class Literal(
+case class BodyLiteral(
   content: Map[String, MediaTypeObject],
   description: String = "",
   required: Option[Boolean] = None,
