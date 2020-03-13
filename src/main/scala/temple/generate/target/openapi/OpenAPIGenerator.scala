@@ -65,6 +65,13 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
       .to(attributes.mapFactory),
   )
 
+  private def generateItemInputType(attributes: Map[String, Attribute]): OpenAPIObject = OpenAPIObject(
+    attributes.iterator
+      .filter { case _ -> attribute => isClientAttribute(attribute) }
+      .map { case str -> attribute => str -> attributeToOpenAPIType(attribute) }
+      .to(attributes.mapFactory),
+  )
+
   def addPaths(service: Service): this.type = {
     val lowerName       = service.name.toLowerCase
     val capitalizedName = service.name.capitalize
@@ -82,7 +89,20 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
               500 -> Response.Ref(useError(500)),
             ),
           )
-      case Create => // TODO in future PR
+      case Create =>
+        path(s"/$lowerName") += HTTPVerb.Post -> Path(
+            s"Register a new $lowerName",
+            tags = tags,
+            requestBody = Some(BodyLiteral(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
+            responses = Map(
+              200 -> BodyLiteral(
+                jsonContent(MediaTypeObject(generateItemType(service.attributes))),
+                s"$capitalizedName successfully created",
+              ),
+              400 -> Response.Ref(useError(400)),
+              500 -> Response.Ref(useError(500)),
+            ),
+          )
       case Read   => // TODO in future PR
       case Update => // TODO in future PR
       case Delete => // TODO in future PR

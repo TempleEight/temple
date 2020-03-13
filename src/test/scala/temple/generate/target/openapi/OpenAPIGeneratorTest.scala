@@ -57,6 +57,77 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |  title: x
         |  version: 0.1.2
         |paths:
+        |  /match:
+        |    post:
+        |      summary: Register a new match
+        |      tags:
+        |      - Match
+        |      requestBody:
+        |        content:
+        |          application/json:
+        |            schema:
+        |              type: object
+        |              properties:
+        |                a:
+        |                  type: number
+        |                  format: int32
+        |                b:
+        |                  type: number
+        |                  format: double
+        |                c:
+        |                  type: boolean
+        |                d:
+        |                  type: string
+        |                  format: date
+        |                e:
+        |                  type: string
+        |                  format: time
+        |                g:
+        |                  type: string
+        |                  format: date-time
+        |                i:
+        |                  type: string
+        |                j:
+        |                  type: number
+        |                  format: int32
+        |                  description: Reference to User ID
+        |      responses:
+        |        '200':
+        |          description: Match successfully created
+        |          content:
+        |            application/json:
+        |              schema:
+        |                type: object
+        |                properties:
+        |                  a:
+        |                    type: number
+        |                    format: int32
+        |                  b:
+        |                    type: number
+        |                    format: double
+        |                  c:
+        |                    type: boolean
+        |                  d:
+        |                    type: string
+        |                    format: date
+        |                  e:
+        |                    type: string
+        |                    format: time
+        |                  g:
+        |                    type: string
+        |                    format: date-time
+        |                  h:
+        |                    type: string
+        |                  i:
+        |                    type: string
+        |                  j:
+        |                    type: number
+        |                    format: int32
+        |                    description: Reference to User ID
+        |        '400':
+        |          $ref: '#/components/responses/Error400'
+        |        '500':
+        |          $ref: '#/components/responses/Error500'
         |  /match/all:
         |    get:
         |      summary: Get a list of every match
@@ -101,6 +172,16 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |          $ref: '#/components/responses/Error500'
         |components:
         |  responses:
+        |    Error400:
+        |      description: Invalid request
+        |      content:
+        |        application/json:
+        |          schema:
+        |            type: object
+        |            properties:
+        |              error:
+        |                type: string
+        |                example: 'Invalid request parameters: name'
         |    Error500:
         |      description: The server encountered an error while serving this request
         |      content:
