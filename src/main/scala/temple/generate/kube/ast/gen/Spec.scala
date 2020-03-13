@@ -29,7 +29,7 @@ object Spec {
 
   case class ServicePort(name: String, port: Int, targetPort: Int)
 
-  case class Secret(name: String) extends JsonEncodable {
+  case class Secret(name: String) extends JsonEncodable.Object {
 
     /** Turn a case class into some key-value pairs in preparation for conversion to a JSON object */
     override def jsonEntryIterator: IterableOnce[(String, Json)] = Seq("name" -> name.asJson)
