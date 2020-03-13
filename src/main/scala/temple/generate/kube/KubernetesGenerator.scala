@@ -2,6 +2,7 @@ package temple.generate.kube
 
 import io.circe.generic.auto._
 import io.circe.syntax._
+import io.circe.yaml.Printer
 import io.circe.yaml.syntax.AsYaml
 import temple.generate.FileSystem._
 import temple.generate.kube.ast.OrchestrationType._
@@ -26,7 +27,7 @@ object KubernetesGenerator {
     }
     val name = service.name + { if (isDb) "-db" else "" }
 
-    Header(version, kind, Metadata(name, Labels(name, genType, isDb))).asJson.asYaml.spaces2
+    Header(version, kind, Metadata(name, Labels(service.name, genType, isDb))).asJson.asYaml.spaces2
   }
 
   private def generateDbStorage(service: Service): String =
@@ -39,8 +40,46 @@ object KubernetesGenerator {
   private def generateDbService(service: Service): String =
     generateHeader(service, GenType.Service, isDb = true)
 
-  private def generateDbDeployment(service: Service): String =
-    generateHeader(service, GenType.Deployment, isDb = true)
+  private def generateDbDeployment(service: Service): String = {
+    val name = service.name + "-db"
+    val deploymentBody = Body(
+      DeploymentSpec(
+        1,
+        Selector(Labels(service.name, GenType.Deployment, isDb = true)),
+        strategy = Some(Strategy("Recreate")),
+        Template(
+          Metadata(name, Labels(service.name, GenType.Deployment, isDb = true)),
+          PodSpec(
+            name,
+            Seq(
+              Container(
+                service.dbImage,
+                name,
+                ports = Seq(),
+                env = service.envVars.map(x => EnvVar(x._1, x._2)),
+                volumeMounts = Seq(
+                  VolumeMount("/var/lib/postgresql/data", None, name + "-claim"),
+                  VolumeMount("/docker-entrypoint-initdb.d/init.sql", Some("init.sql"), name + "-init"),
+                ),
+                lifecycle = Some(Lifecycle("echo done")),
+              ),
+            ),
+            imagePullSecrets = Seq(),
+            restartPolicy = "Always",
+            volumes = Seq(
+              Volume(name + "-init", ConfigMap(name + "-config")),
+              Volume(name + "-claim", PersistentVolume(name + "-claim")),
+            ),
+          ),
+        ),
+      ),
+    ).asJson
+    val printer = Printer(preserveOrder = true, dropNullKeys = true)
+    mkCode(
+      generateHeader(service, GenType.Deployment, isDb = true),
+      printer.pretty(deploymentBody),
+    )
+  }
 
   private def generateService(service: Service): String = {
     val serviceBody = Body(
@@ -60,13 +99,23 @@ object KubernetesGenerator {
       DeploymentSpec(
         service.replicas,
         Selector(Labels(service.name, GenType.Deployment, isDb = false)),
+        strategy = None,
         Template(
           Metadata(service.name, Labels(service.name, GenType.Deployment, isDb = false)),
           PodSpec(
             service.name,
-            Seq(Container(service.image, service.name, service.ports.map(x => ContainerPort(x._2)))),
+            Seq(
+              Container(
+                service.image,
+                service.name,
+                service.ports.map(x => ContainerPort(x._2)),
+                env = Seq(),
+                volumeMounts = Seq(),
+              ),
+            ),
             Seq(Secret(service.secretName)),
             restartPolicy = "Always",
+            volumes = Seq(),
           ),
         ),
       ),
