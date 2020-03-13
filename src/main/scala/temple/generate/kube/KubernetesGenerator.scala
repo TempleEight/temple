@@ -2,15 +2,19 @@ package temple.generate.kube
 
 import io.circe.generic.auto._
 import io.circe.syntax._
-import io.circe.yaml.syntax.AsYaml
+import io.circe.yaml.Printer
 import temple.generate.FileSystem._
 import temple.generate.kube.ast.OrchestrationType._
 import temple.generate.kube.ast.gen.KubeType._
 import temple.generate.kube.ast.gen.Spec._
+import temple.generate.kube.ast.gen.{PlacementStrategy, RestartPolicy}
 import temple.generate.utils.CodeTerm.mkCode
 
 /** Generates the Kubernetes config files for each microservice */
 object KubernetesGenerator {
+
+  /** Used for outputting correct yaml in the right format */
+  private val printer = Printer(preserveOrder = true, dropNullKeys = true)
 
   /** Generate the header of a Kubernetes yaml config */
   private def generateHeader(service: Service, genType: GenType, isDb: Boolean): String = {
@@ -26,7 +30,7 @@ object KubernetesGenerator {
     }
     val name = service.name + { if (isDb) "-db" else "" }
 
-    Header(version, kind, Metadata(name, Labels(name, genType, isDb))).asJson.asYaml.spaces2
+    this.printer.pretty(Header(version, kind, Metadata(name, Labels(service.name, genType, isDb))).asJson)
   }
 
   private def generateDbStorage(service: Service): String =
@@ -39,8 +43,51 @@ object KubernetesGenerator {
   private def generateDbService(service: Service): String =
     generateHeader(service, GenType.Service, isDb = true)
 
-  private def generateDbDeployment(service: Service): String =
-    generateHeader(service, GenType.Deployment, isDb = true)
+  private def generateDbDeployment(service: Service): String = {
+    val name = service.name + "-db"
+
+    val dbContainer = Container(
+      service.dbImage,
+      name,
+      ports = Seq(),
+      env = service.envVars.map(x => EnvVar(x._1, x._2)),
+      volumeMounts = Seq(
+        VolumeMount(service.dbStorage.dataMount, None, name + "-claim"),
+        VolumeMount(service.dbStorage.initMount, Some(service.dbStorage.initFile), name + "-init"),
+      ),
+      lifecycle = Some(Lifecycle(service.dbLifecycleCommand)),
+    )
+
+    val podSpec = PodSpec(
+      name,
+      Seq(
+        dbContainer,
+      ),
+      imagePullSecrets = Seq(),
+      restartPolicy = RestartPolicy.Always,
+      volumes = Seq(
+        Volume(name + "-init", ConfigMap(name + "-config")),
+        Volume(name + "-claim", PersistentVolume(name + "-claim")),
+      ),
+    )
+
+    val deploymentBody = Body(
+      DeploymentSpec(
+        1,
+        Selector(Labels(service.name, GenType.Deployment, isDb = true)),
+        strategy = Some(Strategy(PlacementStrategy.Recreate)),
+        Template(
+          Metadata(name, Labels(service.name, GenType.Deployment, isDb = true)),
+          podSpec,
+        ),
+      ),
+    ).asJson
+
+    mkCode(
+      generateHeader(service, GenType.Deployment, isDb = true),
+      printer.pretty(deploymentBody),
+    )
+  }
 
   private def generateService(service: Service): String = {
     val serviceBody = Body(
@@ -48,33 +95,49 @@ object KubernetesGenerator {
         service.ports.map { case name -> port => ServicePort(name, port, port) },
         Labels(service.name, GenType.Service, isDb = false),
       ),
-    ).asJson.asYaml.spaces2
+    ).asJson
     mkCode(
       generateHeader(service, GenType.Service, isDb = false),
-      serviceBody,
+      this.printer.pretty(serviceBody),
     )
   }
 
   private def generateDeployment(service: Service): String = {
+
+    val container = Container(
+      service.image,
+      service.name,
+      service.ports.map { case (_, port) => ContainerPort(port) },
+      env = Seq(),
+      volumeMounts = Seq(),
+    )
+
+    val podSpec = PodSpec(
+      service.name,
+      Seq(
+        container,
+      ),
+      Seq(Secret(service.secretName)),
+      restartPolicy = RestartPolicy.Always,
+      volumes = Seq(),
+    )
+
     val deploymentBody = Body(
       DeploymentSpec(
         service.replicas,
         Selector(Labels(service.name, GenType.Deployment, isDb = false)),
+        strategy = None,
         Template(
           Metadata(service.name, Labels(service.name, GenType.Deployment, isDb = false)),
-          PodSpec(
-            service.name,
-            Seq(Container(service.image, service.name, service.ports.map(x => ContainerPort(x._2)))),
-            Seq(Secret(service.secretName)),
-            restartPolicy = "Always",
-          ),
+          podSpec,
         ),
       ),
-    ).asJson.asYaml.spaces2
-    //Note: .spaces2 Adds a newline on the end of the string, so just mkCode suffices without .spaces
+    ).asJson
+
+    //Note: printer.pretty Adds a newline on the end of the string, so just mkCode suffices without .spaces
     mkCode(
       generateHeader(service, GenType.Deployment, isDb = false),
-      deploymentBody,
+      this.printer.pretty(deploymentBody),
     )
   }
 
