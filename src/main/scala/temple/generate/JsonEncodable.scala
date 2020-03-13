@@ -1,30 +1,48 @@
 package temple.generate
 
+import io.circe.syntax._
 import io.circe.{Encoder, Json}
 
+/** Any class that can be encoded to JSON, at least partially using custom functions
+  *
+  * This trait should be implemented by any root traits, [[temple.generate.JsonEncodable.Object]] and
+  * [[temple.generate.JsonEncodable.Partial]] should be implemented by any concrete implementations.
+  */
 private[generate] trait JsonEncodable {
-
-  /** Turn a case class into some key-value pairs in preparation for conversion to a JSON object */
-  def jsonEntryIterator: IterableOnce[(String, Json)]
+  protected def toJson: Json
 
   // Required so that nested JsonEncodable interfaces always call the correct nested version
-  implicit final protected def encodeToJson[T <: JsonEncodable]: Encoder[T] = JsonEncodable.encodeToJson
+  implicit final protected def jsonEncoder[T <: JsonEncodable]: Encoder[T] = a => a.toJson
 }
 
 private[generate] object JsonEncodable {
 
-  /** Create an encoder for JSON objects by providing a function to map them to key-value pairs */
-  private def mapSequenceEncoder[T](toJsonMap: T => IterableOnce[(String, Json)]): Encoder[T] = (obj: T) => {
-    Json.obj(toJsonMap(obj).iterator.toSeq: _*)
+  implicit def encodeToJson[T <: JsonEncodable]: Encoder[T] = _.toJson
+
+  /** Implement JsonEncodable by providing a map/key-value-sequence to go in the Json map */
+  trait Object extends JsonEncodable {
+
+    /** Turn a case class into some key-value pairs in preparation for conversion to a JSON object */
+    def jsonEntryIterator: IterableOnce[(String, Json)]
+
+    // Required so that nested JsonEncodable interfaces always call the correct nested version
+    implicit final protected def toJson: Json = Json.obj(jsonEntryIterator.iterator.toSeq: _*)
+
+    implicit final protected class JsonArrow(key: String) {
+      def ~>[T](x: T)(implicit encoder: Encoder[T]): (String, Json) = key -> x.asJson
+    }
   }
 
-  implicit def encodeToJson[T <: JsonEncodable]: Encoder[T] = mapSequenceEncoder(_.jsonEntryIterator)
-
-  /** Like [[temple.generate.JsonEncodable]] but by providing optional values, causing the entries not to render */
-  trait Partial extends JsonEncodable {
+  /** Like [[temple.generate.JsonEncodable.Object]] but by providing optional values, causing the entries not to render
+    * if None is given */
+  trait Partial extends Object {
     def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])]
 
     final override def jsonEntryIterator: IterableOnce[(String, Json)] =
       jsonOptionEntryIterator.iterator.collect { case (str, Some(json)) => (str, json) }
+
+    implicit final protected class JsonOptionArrow(key: String) {
+      def ~~>[T](x: Option[T])(implicit encoder: Encoder[T]): (String, Option[Json]) = key -> x.map(_.asJson)
+    }
   }
 }
