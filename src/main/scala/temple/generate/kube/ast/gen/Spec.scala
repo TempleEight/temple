@@ -32,6 +32,7 @@ object Spec {
   }
 
   case class Selector(matchLabels: Labels) extends JsonEncodable.Object {
+
     override def jsonEntryIterator: IterableOnce[(String, Json)] = Seq("matchLabels" ~> matchLabels)
   }
 

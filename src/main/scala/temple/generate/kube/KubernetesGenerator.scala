@@ -7,6 +7,7 @@ import temple.generate.FileSystem._
 import temple.generate.kube.ast.OrchestrationType._
 import temple.generate.kube.ast.gen.KubeType._
 import temple.generate.kube.ast.gen.Spec._
+import temple.generate.kube.ast.gen.{PlacementStrategy, RestartPolicy}
 import temple.generate.utils.CodeTerm.mkCode
 
 /** Generates the Kubernetes config files for each microservice */
@@ -63,7 +64,7 @@ object KubernetesGenerator {
         dbContainer,
       ),
       imagePullSecrets = Seq(),
-      restartPolicy = "Always",
+      restartPolicy = RestartPolicy.Always,
       volumes = Seq(
         Volume(name + "-init", ConfigMap(name + "-config")),
         Volume(name + "-claim", PersistentVolume(name + "-claim")),
@@ -74,7 +75,7 @@ object KubernetesGenerator {
       DeploymentSpec(
         1,
         Selector(Labels(service.name, GenType.Deployment, isDb = true)),
-        strategy = Some(Strategy("Recreate")),
+        strategy = Some(Strategy(PlacementStrategy.Recreate)),
         Template(
           Metadata(name, Labels(service.name, GenType.Deployment, isDb = true)),
           podSpec,
@@ -117,7 +118,7 @@ object KubernetesGenerator {
         container,
       ),
       Seq(Secret(service.secretName)),
-      restartPolicy = "Always",
+      restartPolicy = RestartPolicy.Always,
       volumes = Seq(),
     )
 
