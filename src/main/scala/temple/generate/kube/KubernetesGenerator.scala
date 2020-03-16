@@ -43,7 +43,7 @@ object KubernetesGenerator {
     val volumeBody = Body(
       PersistentVolumeSpec(
         storageClass = StorageClass.Manual,
-        capacity = 1, //Gi,
+        capacityGb = 1.0f, //Gi,
         accessModes = Seq(AccessMode.ReadWriteMany),
         reclaimPolicy = ReclaimPolicy.Delete,
         hostPath = service.dbStorage.hostPath,
@@ -55,7 +55,7 @@ object KubernetesGenerator {
         accessModes = Seq(AccessMode.ReadWriteMany),
         volumeName = s"${service.name}-db-volume",
         storageClassName = StorageClass.Manual,
-        storageResourceRequestAmount = 100,
+        storageResourceRequestAmountMb = 100.0f,
       ),
     ).asJson
 

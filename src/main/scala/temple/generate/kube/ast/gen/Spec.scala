@@ -36,7 +36,7 @@ object Spec {
 
   case class PersistentVolumeSpec(
     storageClass: StorageClass,
-    capacity: Int,
+    capacityGb: Float,
     accessModes: Seq[AccessMode],
     reclaimPolicy: ReclaimPolicy,
     hostPath: String,
@@ -55,7 +55,7 @@ object Spec {
     accessModes: Seq[AccessMode],
     volumeName: String,
     storageClassName: StorageClass,
-    storageResourceRequestAmount: Int,
+    storageResourceRequestAmountMb: Float,
   ) extends Spec {
 
     override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
