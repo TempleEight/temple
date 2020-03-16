@@ -55,7 +55,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonGenerator.generatePackage("comm"),
         GoServiceCommGenerator.generateImports(serviceRoot.module),
         GoServiceCommGenerator.generateStructs(),
-        GoServiceCommGenerator.generateInit(),
+        GoCommonGenerator.generateCommInit(),
       ),
     )).map { case (path, contents) => path -> (contents + "\n") }
   }
