@@ -11,6 +11,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
     /* TODO
      * auth.go main
      * auth.go handlers
+     * handler.go init
      */
     Map(
       File("auth", "go.mod") -> GoCommonGenerator.generateMod(authServiceRoot.module),
@@ -25,6 +26,13 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoCommonGenerator.generateJsonMiddleware(),
         GoAuthServiceMainGenerator.generateHandlers(),
         GoAuthServiceMainGenerator.generateCreateToken(),
+      ),
+      File("auth/comm", "handler.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("comm"),
+        GoAuthServiceCommGenerator.generateImports(authServiceRoot.module),
+        GoAuthServiceCommGenerator.generateStructs(),
+        //GoCommonGenerator.generateCommInit(),
+        GoAuthServiceCommGenerator.generateCreateJWTCredential(),
       ),
     ).map { case (path, contents) => path -> (contents + "\n") }
 }
