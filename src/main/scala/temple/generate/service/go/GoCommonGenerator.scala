@@ -1,6 +1,6 @@
 package temple.generate.service.go
 
-import temple.generate.utils.CodeTerm.{mkCode}
+import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.FileUtils
 
 object GoCommonGenerator {

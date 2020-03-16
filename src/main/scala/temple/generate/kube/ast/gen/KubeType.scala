@@ -25,7 +25,7 @@ private[kube] object KubeType {
       * The `type` label should only be set on PersistentVolume objects */
     override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] =
       Seq(
-        "app" ~~> Some(name),
+        "app"  ~~> Some(name),
         "type" ~~> when(genType == GenType.StorageMount)("local"),
         "kind" ~~> when(genType == GenType.Deployment || genType == GenType.Service) { if (isDb) "db" else "service" },
       )

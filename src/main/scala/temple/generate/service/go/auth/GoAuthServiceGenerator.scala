@@ -1,10 +1,9 @@
 package temple.generate.service.go.auth
 
-import temple.generate.service.{AuthServiceGenerator, AuthServiceRoot}
-import temple.generate.service.go.GoCommonGenerator
-import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.FileSystem._
-import temple.utils.StringUtils.doubleQuote
+import temple.generate.service.go.GoCommonGenerator
+import temple.generate.service.{AuthServiceGenerator, AuthServiceRoot}
+import temple.generate.utils.CodeTerm.mkCode
 
 object GoAuthServiceGenerator extends AuthServiceGenerator {
 

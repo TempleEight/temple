@@ -15,10 +15,10 @@ case class Parameter(
 ) extends JsonEncodable.Partial {
 
   override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
-    "in" ~~> Some(in),
-    "name" ~~> Some(name),
-    "schema" ~~> Some(schema),
-    "required" ~~> required,
+    "in"          ~~> Some(in),
+    "name"        ~~> Some(name),
+    "schema"      ~~> Some(schema),
+    "required"    ~~> required,
     "description" ~~> when(description.nonEmpty) { description },
   )
 }

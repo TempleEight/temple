@@ -14,7 +14,7 @@ case class BodyLiteral(
 
   override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
     "description" ~~> Option.when(description.nonEmpty)(description),
-    "required" ~~> required,
-    "content" ~~> Some(content),
+    "required"    ~~> required,
+    "content"     ~~> Some(content),
   )
 }
