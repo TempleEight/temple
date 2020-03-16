@@ -13,10 +13,11 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
       File("auth", "go.mod") -> GoCommonGenerator.generateMod(authServiceRoot.module),
       File("auth", "auth.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoAuthServiceMainGenerator.generateAuthImports(
+        GoAuthServiceMainGenerator.generateImports(
           authServiceRoot.module,
         ),
         GoAuthServiceMainGenerator.generateStructs(),
+        GoAuthServiceMainGenerator.generateRouter(),
       ),
     ).map { case (path, contents) => path -> (contents + "\n") }
 }

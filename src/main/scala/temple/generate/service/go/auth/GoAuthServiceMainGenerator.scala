@@ -6,7 +6,7 @@ import temple.utils.StringUtils.doubleQuote
 
 object GoAuthServiceMainGenerator {
 
-  private[auth] def generateAuthImports(module: String): String = {
+  private[auth] def generateImports(module: String): String = {
     val standardImports = Seq("encoding/json", "flag", "fmt", "log", "net/http", "time").map(doubleQuote)
 
     val officialImports = doubleQuote("golang.org/x/crypto/bcrypt")
@@ -26,4 +26,7 @@ object GoAuthServiceMainGenerator {
 
   private[auth] def generateStructs(): String =
     FileUtils.readResources("go/genFiles/auth/auth_structs.go").stripLineEnd
+
+  private[auth] def generateRouter(): String =
+    FileUtils.readResources("go/genFiles/auth/auth_router.go").stripLineEnd
 }
