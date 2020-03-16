@@ -16,6 +16,7 @@ object OrchestrationType {
     * @param envVars A sequence of key -> value to set as environment variables in the container
     * @param dbStorage Object that defines how the service db should store data
     * @param dbLifecycleCommand The command to be ran in the database container on startup e.g to init the db
+    * @param usesAuth Whether this service requires authentication with the API Gateway before requests
     */
   case class Service(
     name: String,
@@ -27,6 +28,7 @@ object OrchestrationType {
     envVars: Seq[(String, String)],
     dbStorage: DbStorage,
     dbLifecycleCommand: String,
+    usesAuth: Boolean,
   )
 
   /**

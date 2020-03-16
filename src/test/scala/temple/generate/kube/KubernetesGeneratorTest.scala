@@ -78,13 +78,18 @@ class KubernetesGeneratorTest extends FlatSpec with Matchers {
     output(file) should be(UnitTestData.userDbStorage)
   }
 
-  it should "contain all the required kong files" in {
+  it should "generate all the required kong files" in {
     val output = KubernetesGenerator.generate(UnitTestData.basicOrchestrationRoot)
     output.keys should contain(File("kube/kong", "kong-deployment.yaml"))
     output.keys should contain(File("kube/kong", "kong-db-deployment.yaml"))
     output.keys should contain(File("kube/kong", "kong-db-service.yaml"))
     output.keys should contain(File("kube/kong", "kong-service.yaml"))
     output.keys should contain(File("kube/kong", "kong-migration-job.yaml"))
+  }
+
+  it should "generate a kong config" in {
+    val output = KubernetesGenerator.generate(UnitTestData.basicOrchestrationRoot)
+    output.keys should contain(File("kong", "configure-kong.sh"))
   }
 
 }
