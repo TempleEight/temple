@@ -24,7 +24,7 @@ case class Parameter(
 }
 
 object Parameter {
-  sealed trait In extends JsonEncodable
+  sealed abstract class In(string: String) extends JsonEncodable { protected def toJson: Json = string.asJson }
 
-  case object InPath extends In { protected def toJson: Json = "path".asJson }
+  case object InPath extends In("path")
 }
