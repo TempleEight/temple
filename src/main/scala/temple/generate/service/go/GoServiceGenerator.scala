@@ -1,8 +1,8 @@
 package temple.generate.service.go
 
-import temple.generate.service.{ServiceGenerator, ServiceRoot}
-import temple.generate.utils.CodeTerm.{mkCode}
 import temple.generate.FileSystem._
+import temple.generate.service.{ServiceGenerator, ServiceRoot}
+import temple.generate.utils.CodeTerm.mkCode
 
 import scala.Option.when
 
@@ -32,13 +32,13 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainGenerator.generateMain(
           serviceRoot.name,
           usesComms,
-          serviceRoot.endpoints,
+          serviceRoot.operations,
           serviceRoot.port,
         ),
         GoServiceMainGenerator.generateJsonMiddleware(),
         GoServiceMainGenerator.generateHandlers(
           serviceRoot.name,
-          serviceRoot.endpoints,
+          serviceRoot.operations,
         ),
       ),
       File(s"${serviceRoot.name}/dao", "errors.go") -> GoServiceDaoGenerator.generateErrors(serviceRoot.name),

@@ -1,6 +1,6 @@
 package temple.generate.service
 
-import temple.generate.Endpoint
+import temple.generate.Crud
 
 object GoGeneratorIntegrationTestData {
 
@@ -8,7 +8,7 @@ object GoGeneratorIntegrationTestData {
     "user",
     "github.com/TempleEight/spec-golang/user",
     Seq.empty,
-    Set(Endpoint.Create, Endpoint.Read, Endpoint.Update, Endpoint.Delete),
+    Set(Crud.Create, Crud.Read, Crud.Update, Crud.Delete),
     80,
   )
 
@@ -17,7 +17,7 @@ object GoGeneratorIntegrationTestData {
       "match",
       "github.com/TempleEight/spec-golang/match",
       Seq("user"),
-      Set(Endpoint.ReadAll, Endpoint.Create, Endpoint.Read, Endpoint.Update, Endpoint.Delete),
+      Set(Crud.ReadAll, Crud.Create, Crud.Read, Crud.Update, Crud.Delete),
       81,
     )
 }

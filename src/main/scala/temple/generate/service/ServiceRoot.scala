@@ -1,5 +1,5 @@
 package temple.generate.service
 
-import temple.generate.Endpoint
+import temple.generate.Crud
 
-case class ServiceRoot(name: String, module: String, comms: Seq[String], endpoints: Set[Endpoint], port: Int)
+case class ServiceRoot(name: String, module: String, comms: Seq[String], operations: Set[Crud], port: Int)

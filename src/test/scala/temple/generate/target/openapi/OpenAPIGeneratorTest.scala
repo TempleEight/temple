@@ -5,7 +5,7 @@ import io.circe.yaml.syntax.AsYaml
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.semantics.AttributeType._
 import temple.DSL.semantics.{Annotation, Attribute}
-import temple.generate.Endpoint
+import temple.generate.Crud
 import temple.generate.target.openapi.OpenAPIGenerator.generateError
 
 import scala.collection.immutable.ListMap
@@ -36,7 +36,7 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
     val openAPI = OpenAPIGenerator.render("x", "0.1.2")(
       Service(
         "match",
-        Endpoint.values.toSet,
+        Crud.values.toSet,
         ListMap(
           "a" -> Attribute(IntType()),
           "b" -> Attribute(FloatType()),

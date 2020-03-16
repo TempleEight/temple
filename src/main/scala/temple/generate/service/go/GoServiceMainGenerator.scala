@@ -1,6 +1,6 @@
 package temple.generate.service.go
 
-import temple.generate.Endpoint
+import temple.generate.Crud
 import temple.generate.service.ServiceGenerator
 import temple.generate.utils.CodeTerm
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -34,9 +34,9 @@ object GoServiceMainGenerator {
       when(usesComms) { s"var comm ${serviceName}Comm.Handler" },
     )
 
-  /** Given a service name, whether the service uses inter-service communication, the endpoints desired and the port
+  /** Given a service name, whether the service uses inter-service communication, the operations desired and the port
     * number, generate the main function */
-  private[go] def generateMain(serviceName: String, usesComms: Boolean, endpoints: Set[Endpoint], port: Int): String =
+  private[go] def generateMain(serviceName: String, usesComms: Boolean, operations: Set[Crud], port: Int): String =
     mkCode(
       "func main() ",
       CodeWrap.curly.tabbed(
@@ -62,22 +62,22 @@ object GoServiceMainGenerator {
             )
           },
           "r := mux.NewRouter()",
-          when(endpoints.contains(Endpoint.ReadAll)) {
+          when(operations.contains(Crud.ReadAll)) {
             mkCode.lines(
               "// Mux directs to first matching route, i.e. the order matters",
               s"""r.HandleFunc("/$serviceName/all", ${serviceName}ListHandler).Methods(http.MethodGet)""",
             )
           },
-          when(endpoints.contains(Endpoint.Create)) {
+          when(operations.contains(Crud.Create)) {
             s"""r.HandleFunc("/$serviceName", ${serviceName}CreateHandler).Methods(http.MethodPost)"""
           },
-          when(endpoints.contains(Endpoint.Read)) {
+          when(operations.contains(Crud.Read)) {
             s"""r.HandleFunc("/$serviceName/{id}", ${serviceName}ReadHandler).Methods(http.MethodGet)"""
           },
-          when(endpoints.contains(Endpoint.Update)) {
+          when(operations.contains(Crud.Update)) {
             s"""r.HandleFunc("/$serviceName/{id}", ${serviceName}UpdateHandler).Methods(http.MethodPut)"""
           },
-          when(endpoints.contains(Endpoint.Delete)) {
+          when(operations.contains(Crud.Delete)) {
             s"""r.HandleFunc("/$serviceName/{id}", ${serviceName}DeleteHandler).Methods(http.MethodDelete)"""
           },
           "r.Use(jsonMiddleware)",
@@ -90,12 +90,12 @@ object GoServiceMainGenerator {
   private[go] def generateJsonMiddleware(): String =
     FileUtils.readResources("go/genFiles/json_middleware.go").stripLineEnd
 
-  private[go] def generateHandler(serviceName: String, endpoint: Endpoint): String =
+  private[go] def generateHandler(serviceName: String, endpoint: Crud): String =
     s"func $serviceName${ServiceGenerator.verb(endpoint)}Handler(w http.ResponseWriter, r *http.Request) {}"
 
-  private[go] def generateHandlers(serviceName: String, endpoints: Set[Endpoint]): String =
+  private[go] def generateHandlers(serviceName: String, operations: Set[Crud]): String =
     mkCode.doubleLines(
-      for (endpoint <- Endpoint.values if endpoints.contains(endpoint))
-        yield generateHandler(serviceName, endpoint),
+      for (operation <- Crud.values if operations.contains(operation))
+        yield generateHandler(serviceName, operation),
     )
 }
