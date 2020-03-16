@@ -9,6 +9,7 @@ import temple.generate.Endpoint._
 import temple.generate.target.openapi.OpenAPIFile.{Components, Info}
 import temple.generate.target.openapi.OpenAPIGenerator._
 import temple.generate.target.openapi.OpenAPIType._
+import temple.generate.target.openapi.Parameter.InPath
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
@@ -103,7 +104,29 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
               500 -> Response.Ref(useError(500)),
             ),
           )
-      case Read   => // TODO in future PR
+      case Read =>
+        path(s"/$lowerName/{id}") += HTTPVerb.Get -> Handler(
+            s"Look up a single $lowerName",
+            tags = tags,
+            parameters = Seq(
+              Parameter(
+                InPath,
+                name = "id",
+                required = Some(true),
+                schema = OpenAPISimpleType("number", "int32"),
+                description = s"ID of the $lowerName to get",
+              ),
+            ),
+            requestBody = Some(BodyLiteral(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
+            responses = Map(
+              200 -> BodyLiteral(
+                jsonContent(MediaTypeObject(generateItemType(service.attributes))),
+                s"$capitalizedName details",
+              ),
+              400 -> Response.Ref(useError(400)),
+              500 -> Response.Ref(useError(500)),
+            ),
+          )
       case Update => // TODO in future PR
       case Delete => // TODO in future PR
     }
