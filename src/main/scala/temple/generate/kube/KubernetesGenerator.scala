@@ -10,6 +10,7 @@ import temple.generate.kube.ast.gen.Spec._
 import temple.generate.kube.ast.gen.volume.{AccessMode, ReclaimPolicy, StorageClass}
 import temple.generate.kube.ast.gen.{PlacementStrategy, RestartPolicy}
 import temple.generate.utils.CodeTerm.mkCode
+import temple.utils.FileUtils
 
 /** Generates the Kubernetes config files for each microservice */
 object KubernetesGenerator {
@@ -181,15 +182,25 @@ object KubernetesGenerator {
     )
   }
 
+  private val kongFiles: Map[File, FileContent] = Map(
+    File("kube/kong", "kong-db-deployment.yaml") -> FileUtils.readResources("kube/kong/kong-db-deployment.yaml"),
+    File("kube/kong", "kong-db-service.yaml")    -> FileUtils.readResources("kube/kong/kong-db-service.yaml"),
+    File("kube/kong", "kong-deployment.yaml")    -> FileUtils.readResources("kube/kong/kong-deployment.yaml"),
+    File("kube/kong", "kong-migration-job.yaml") -> FileUtils.readResources("kube/kong/kong-migration-job.yaml"),
+    File("kube/kong", "kong-service.yaml")       -> FileUtils.readResources("kube/kong/kong-service.yaml"),
+  )
+
+  private def buildKubeFiles(service: Service) =
+    Seq(
+      File(s"kube/${service.name}", "deployment.yaml")    -> generateDeployment(service),
+      File(s"kube/${service.name}", "service.yaml")       -> generateService(service),
+      File(s"kube/${service.name}", "db-deployment.yaml") -> generateDbDeployment(service),
+      File(s"kube/${service.name}", "db-service.yaml")    -> generateDbService(service),
+      File(s"kube/${service.name}", "db-storage.yaml")    -> generateDbStorage(service),
+    )
+
   /** Given an [[OrchestrationRoot]], check the services inside it and generate deployment scripts */
   def generate(orchestrationRoot: OrchestrationRoot): Map[File, FileContent] =
-    orchestrationRoot.services.flatMap { service =>
-      Seq(
-        File(s"kube/${service.name}", "deployment.yaml")    -> generateDeployment(service),
-        File(s"kube/${service.name}", "service.yaml")       -> generateService(service),
-        File(s"kube/${service.name}", "db-deployment.yaml") -> generateDbDeployment(service),
-        File(s"kube/${service.name}", "db-service.yaml")    -> generateDbService(service),
-        File(s"kube/${service.name}", "db-storage.yaml")    -> generateDbStorage(service),
-      )
-    }.toMap
+    orchestrationRoot.services.flatMap(buildKubeFiles).toMap ++ kongFiles
+
 }
