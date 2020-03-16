@@ -27,5 +27,9 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceMainGenerator.generateHandlers(),
         GoAuthServiceMainGenerator.generateCreateToken(),
       ),
+      File("auth/comm", "handler.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("comm"),
+        GoAuthServiceCommGenerator.generateImports(authServiceRoot.module),
+      ),
     ).map { case (path, contents) => path -> (contents + "\n") }
 }
