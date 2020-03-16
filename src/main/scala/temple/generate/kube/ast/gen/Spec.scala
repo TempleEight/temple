@@ -44,7 +44,7 @@ object Spec {
 
     override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
       "storageClassName" ~~> Some(storageClass),
-      "capacity" ~~> Some(Map("storage" -> s"${capacity}Gi")),
+      "capacity" ~~> Some(Map("storage" -> s"${capacityGb}Gi")),
       "accessModes" ~~> Some(accessModes),
       "persistentVolumeReclaimPolicy" ~~> Some(reclaimPolicy),
       "hostPath" ~~> Some(Map("path" -> hostPath)),
@@ -65,7 +65,7 @@ object Spec {
       "resources" ~~> Some(
         Map(
           "requests" -> Map(
-            "storage" -> s"${storageResourceRequestAmount}Mi",
+            "storage" -> s"${storageResourceRequestAmountMb}Mi",
           ),
         ),
       ),
