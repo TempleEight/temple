@@ -18,6 +18,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         ),
         GoAuthServiceMainGenerator.generateStructs(),
         GoAuthServiceMainGenerator.generateRouter(),
+        GoAuthServiceMainGenerator.generateMain(),
       ),
     ).map { case (path, contents) => path -> (contents + "\n") }
 }

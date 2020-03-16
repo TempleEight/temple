@@ -56,3 +56,7 @@ func (env *env) router() *mux.Router {
 	r.Use(jsonMiddleware)
 	return r
 }
+
+func main() {
+
+}

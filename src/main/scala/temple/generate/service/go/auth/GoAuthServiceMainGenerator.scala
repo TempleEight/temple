@@ -29,4 +29,14 @@ object GoAuthServiceMainGenerator {
 
   private[auth] def generateRouter(): String =
     FileUtils.readResources("go/genFiles/auth/auth_router.go").stripLineEnd
+
+  private[auth] def generateMain(): String =
+    mkCode(
+      "func main() ",
+      CodeWrap.curly.tabbed(
+        mkCode.lines(
+          "",
+        ),
+      ),
+    )
 }
