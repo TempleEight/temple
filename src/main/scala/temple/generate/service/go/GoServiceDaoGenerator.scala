@@ -24,7 +24,7 @@ object GoServiceDaoGenerator {
     )
 
   private[go] def generateInit(): String =
-    FileUtils.readResources("go/genFiles/dao_init.go").stripLineEnd
+    FileUtils.readResources("go/genFiles/common/dao_init.go").stripLineEnd
 
   private[go] def generateErrors(serviceName: String): String =
     mkCode.lines(

@@ -5,7 +5,7 @@ import temple.utils.FileUtils
 object GoServiceUtilGenerator {
 
   private[go] def generateConfig(): String =
-    FileUtils.readResources("go/genFiles/config.go").stripLineEnd
+    FileUtils.readResources("go/genFiles/common/config.go").stripLineEnd
 
   private[go] def generateUtil(): String =
     FileUtils.readResources("go/genFiles/util.go").stripLineEnd
