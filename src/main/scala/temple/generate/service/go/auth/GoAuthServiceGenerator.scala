@@ -9,14 +9,12 @@ import temple.utils.StringUtils.doubleQuote
 object GoAuthServiceGenerator extends AuthServiceGenerator {
 
   override def generate(authServiceRoot: AuthServiceRoot): Map[File, FileContent] =
-    (
-      Map(
-        File("auth", "go.mod") -> GoCommonGenerator.generateMod(authServiceRoot.module),
-        File("auth", "auth.go") -> mkCode.doubleLines(
-          GoCommonGenerator.generatePackage("main"),
-          GoAuthServiceMainGenerator.generateAuthImports(
-            authServiceRoot.module,
-          ),
+    Map(
+      File("auth", "go.mod") -> GoCommonGenerator.generateMod(authServiceRoot.module),
+      File("auth", "auth.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("main"),
+        GoAuthServiceMainGenerator.generateAuthImports(
+          authServiceRoot.module,
         ),
       ),
     ).map { case (path, contents) => path -> (contents + "\n") }
