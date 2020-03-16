@@ -71,4 +71,11 @@ class KubernetesGeneratorTest extends FlatSpec with Matchers {
     output(file) should be(UnitTestData.userDbService)
   }
 
+  it should "generate correct database storage" in {
+    val output = KubernetesGenerator.generate(UnitTestData.basicOrchestrationRoot)
+    val file   = File("kube/user", "db-storage.yaml")
+    output.keys should contain(file)
+    output(file) should be(UnitTestData.userDbStorage)
+  }
+
 }

@@ -3,6 +3,9 @@ package temple.generate.kube.ast.gen
 import io.circe.Json
 import temple.generate.JsonEncodable
 import temple.generate.kube.ast.gen.KubeType.{Labels, Metadata}
+import temple.generate.kube.ast.gen.volume.AccessMode.AccessMode
+import temple.generate.kube.ast.gen.volume.ReclaimPolicy.ReclaimPolicy
+import temple.generate.kube.ast.gen.volume.StorageClass.StorageClass
 
 import scala.Option.when
 
@@ -28,6 +31,44 @@ object Spec {
     override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
       "ports" ~~> when(ports.nonEmpty)(ports),
       "selector" ~~> Some(selector),
+    )
+  }
+
+  case class PersistentVolumeSpec(
+    storageClass: StorageClass,
+    capacity: Int,
+    accessModes: Seq[AccessMode],
+    reclaimPolicy: ReclaimPolicy,
+    hostPath: String,
+  ) extends Spec {
+
+    override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
+      "storageClassName" ~~> Some(storageClass),
+      "capacity" ~~> Some(Map("storage" -> s"${capacity}Gi")),
+      "accessModes" ~~> Some(accessModes),
+      "persistentVolumeReclaimPolicy" ~~> Some(reclaimPolicy),
+      "hostPath" ~~> Some(Map("path" -> hostPath)),
+    )
+  }
+
+  case class PersistentVolumeClaimSpec(
+    accessModes: Seq[AccessMode],
+    volumeName: String,
+    storageClassName: StorageClass,
+    storageResourceRequestAmount: Int,
+  ) extends Spec {
+
+    override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
+      "accessModes" ~~> Some(accessModes),
+      "volumeName" ~~> Some(volumeName),
+      "storageClassName" ~~> Some(storageClassName),
+      "resources" ~~> Some(
+        Map(
+          "requests" -> Map(
+            "storage" -> s"${storageResourceRequestAmount}Mi",
+          ),
+        ),
+      ),
     )
   }
 
