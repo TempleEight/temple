@@ -82,4 +82,6 @@ object UnitTestData {
   val userService: String = FileUtils.readResources("kube/user-service.yaml")
 
   val userDbDeployment: String = FileUtils.readResources("kube/user-db-deployment.yaml")
+
+  val userDbService: String = FileUtils.readResources("kube/user-db-service.yaml")
 }

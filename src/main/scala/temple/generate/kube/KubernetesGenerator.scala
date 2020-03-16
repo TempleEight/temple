@@ -40,8 +40,18 @@ object KubernetesGenerator {
       generateHeader(service, GenType.StorageClaim, isDb = true),
     )
 
-  private def generateDbService(service: Service): String =
-    generateHeader(service, GenType.Service, isDb = true)
+  private def generateDbService(service: Service): String = {
+    val serviceBody = Body(
+      ServiceSpec(
+        ports = Seq(ServicePort("db", 5432, 5432)), //TODO: Make a Postgres data class that stores port info etc
+        selector = Labels(service.name, GenType.Service, isDb = true),
+      ),
+    ).asJson
+    mkCode(
+      generateHeader(service, GenType.Service, isDb = true),
+      this.printer.pretty(serviceBody),
+    )
+  }
 
   private def generateDbDeployment(service: Service): String = {
     val name = service.name + "-db"
@@ -85,7 +95,7 @@ object KubernetesGenerator {
 
     mkCode(
       generateHeader(service, GenType.Deployment, isDb = true),
-      printer.pretty(deploymentBody),
+      this.printer.pretty(deploymentBody),
     )
   }
 
