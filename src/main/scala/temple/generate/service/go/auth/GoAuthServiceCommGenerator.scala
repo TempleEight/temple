@@ -13,8 +13,8 @@ object GoAuthServiceCommGenerator {
   }
 
   private[auth] def generateStructs(): String =
-    FileUtils.readResources("go/genFiles/auth/comm/structs.go").stripLineEnd
+    FileUtils.readResources("go/genFiles/auth/comm/structs.go.snippet").stripLineEnd
 
   private[auth] def generateCreateJWTCredential(): String =
-    FileUtils.readResources("go/genFiles/auth/comm/create_jwt_credential.go").stripLineEnd
+    FileUtils.readResources("go/genFiles/auth/comm/create_jwt_credential.go.snippet").stripLineEnd
 }
