@@ -128,6 +128,56 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |          $ref: '#/components/responses/Error400'
         |        '500':
         |          $ref: '#/components/responses/Error500'
+        |  /match/{id}:
+        |    get:
+        |      summary: Look up a single match
+        |      tags:
+        |      - Match
+        |      parameters:
+        |      - in: path
+        |        name: id
+        |        schema:
+        |          type: number
+        |          format: int32
+        |        required: true
+        |        description: ID of the match to get
+        |      responses:
+        |        '200':
+        |          description: Match details
+        |          content:
+        |            application/json:
+        |              schema:
+        |                type: object
+        |                properties:
+        |                  a:
+        |                    type: number
+        |                    format: int32
+        |                  b:
+        |                    type: number
+        |                    format: double
+        |                  c:
+        |                    type: boolean
+        |                  d:
+        |                    type: string
+        |                    format: date
+        |                  e:
+        |                    type: string
+        |                    format: time
+        |                  g:
+        |                    type: string
+        |                    format: date-time
+        |                  h:
+        |                    type: string
+        |                  i:
+        |                    type: string
+        |                  j:
+        |                    type: number
+        |                    format: int32
+        |                    description: Reference to User ID
+        |        '400':
+        |          $ref: '#/components/responses/Error400'
+        |        '500':
+        |          $ref: '#/components/responses/Error500'
         |  /match/all:
         |    get:
         |      summary: Get a list of every match
