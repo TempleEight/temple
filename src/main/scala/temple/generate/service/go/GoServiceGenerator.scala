@@ -1,8 +1,8 @@
 package temple.generate.service.go
 
-import temple.generate.service.{ServiceGenerator, ServiceRoot}
-import temple.generate.utils.CodeTerm.{mkCode}
 import temple.generate.FileSystem._
+import temple.generate.service.{ServiceGenerator, ServiceRoot}
+import temple.generate.utils.CodeTerm.mkCode
 
 import scala.Option.when
 
@@ -55,7 +55,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonGenerator.generatePackage("comm"),
         GoServiceCommGenerator.generateImports(serviceRoot.module),
         GoServiceCommGenerator.generateStructs(),
-        GoServiceCommGenerator.generateInit(),
+        GoCommonGenerator.generateCommInit(),
       ),
     )).map { case (path, contents) => path -> (contents + "\n") }
   }

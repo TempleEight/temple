@@ -1,6 +1,6 @@
 package temple.generate.service.go
 
-import temple.generate.utils.CodeTerm.{mkCode}
+import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.FileUtils
 
 object GoCommonGenerator {
@@ -11,4 +11,7 @@ object GoCommonGenerator {
 
   private[go] def generateJsonMiddleware(): String =
     FileUtils.readResources("go/genFiles/json_middleware.go").stripLineEnd
+
+  private[go] def generateCommInit(): String =
+    FileUtils.readResources("go/genFiles/comm_init.go").stripLineEnd
 }
