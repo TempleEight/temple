@@ -1,8 +1,6 @@
 package temple.generate.target.openapi
 
 import io.circe.Json
-import io.circe.syntax._
-import io.circe.generic.auto._
 import temple.generate.JsonEncodable
 
 import scala.Option.when
@@ -18,11 +16,11 @@ case class Handler(
 ) extends JsonEncodable.Partial {
 
   override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
-    "summary"     -> Some(summary.asJson),
-    "description" -> when(description.nonEmpty) { description.asJson },
-    "tags"        -> when(tags.nonEmpty) { tags.asJson },
-    "parameters"  -> when(parameters.nonEmpty) { parameters.asJson },
-    "requestBody" -> when(requestBody.nonEmpty) { requestBody.asJson },
-    "responses"   -> when(responses.nonEmpty) { responses.asJson },
+    "summary" ~~> Some(summary),
+    "description" ~~> when(description.nonEmpty) { description },
+    "tags" ~~> when(tags.nonEmpty) { tags },
+    "parameters" ~~> when(parameters.nonEmpty) { parameters },
+    "requestBody" ~~> when(requestBody.nonEmpty) { requestBody },
+    "responses" ~~> when(responses.nonEmpty) { responses },
   )
 }
