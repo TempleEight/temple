@@ -91,7 +91,7 @@ func requestCredential(hostname string, consumer *consumerResponse) (*JWTCredent
 func (comm *Handler) CreateJWTCredential() (*JWTCredential, error) {
 	hostname, ok := comm.Services["kong-admin"]
 	if !ok {
-		return nil, fmt.Errorf("service %s's hostname not in config file", "kong-admin")
+		return nil, errors.New("service kong-admin's hostname not in config file")
 	}
 
 	// Create a consumer
