@@ -35,7 +35,7 @@ object GoServiceGenerator extends ServiceGenerator {
           serviceRoot.endpoints,
           serviceRoot.port,
         ),
-        GoServiceMainGenerator.generateJsonMiddleware(),
+        GoCommonGenerator.generateJsonMiddleware(),
         GoServiceMainGenerator.generateHandlers(
           serviceRoot.name,
           serviceRoot.endpoints,

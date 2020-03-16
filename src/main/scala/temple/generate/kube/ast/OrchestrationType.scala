@@ -1,7 +1,5 @@
 package temple.generate.kube.ast
 
-import temple.generate.kube.ast.gen.LifecycleCommand.LifecycleCommand
-
 object OrchestrationType {
 
   /** Input information to generate kubernetes scripts */
@@ -28,7 +26,7 @@ object OrchestrationType {
     secretName: String,
     envVars: Seq[(String, String)],
     dbStorage: DbStorage,
-    dbLifecycleCommand: LifecycleCommand,
+    dbLifecycleCommand: String,
   )
 
   /**
@@ -36,7 +34,8 @@ object OrchestrationType {
     * @param dataMount the file system location for the db container to store data at
     * @param initMount Where to mount the db init script (i.e schema) to
     * @param initFile The filename of the db init script
+    * @param hostPath Where on the *database host* to store the data
     */
-  case class DbStorage(dataMount: String, initMount: String, initFile: String)
+  case class DbStorage(dataMount: String, initMount: String, initFile: String, hostPath: String)
 
 }

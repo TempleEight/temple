@@ -4,7 +4,6 @@ import temple.generate.Endpoint
 import temple.generate.service.ServiceGenerator
 import temple.generate.utils.CodeTerm
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
-import temple.utils.FileUtils
 import temple.utils.StringUtils.doubleQuote
 
 import scala.Option.when
@@ -86,9 +85,6 @@ object GoServiceMainGenerator {
         ),
       ),
     )
-
-  private[go] def generateJsonMiddleware(): String =
-    FileUtils.readResources("go/genFiles/json_middleware.go").stripLineEnd
 
   private[go] def generateHandler(serviceName: String, endpoint: Endpoint): String =
     s"func $serviceName${ServiceGenerator.verb(endpoint)}Handler(w http.ResponseWriter, r *http.Request) {}"
