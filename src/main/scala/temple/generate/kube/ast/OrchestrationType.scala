@@ -1,7 +1,5 @@
 package temple.generate.kube.ast
 
-import temple.generate.kube.ast.gen.LifecycleCommand.LifecycleCommand
-
 object OrchestrationType {
 
   /** Input information to generate kubernetes scripts */
@@ -28,7 +26,7 @@ object OrchestrationType {
     secretName: String,
     envVars: Seq[(String, String)],
     dbStorage: DbStorage,
-    dbLifecycleCommand: LifecycleCommand,
+    dbLifecycleCommand: String,
   )
 
   /**

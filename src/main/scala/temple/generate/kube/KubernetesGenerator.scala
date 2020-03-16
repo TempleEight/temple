@@ -29,11 +29,14 @@ object KubernetesGenerator {
       case GenType.StorageClaim => "PersistentVolumeClaim"
       case GenType.StorageMount => "PersistentVolume"
     }
-    val name = service.name + (genType match {
-        case GenType.StorageClaim => "-db-claim"
-        case GenType.StorageMount => "-db-volume"
-        case _                    => if (isDb) "-db" else ""
-      })
+    val suffix = genType match {
+      case GenType.StorageClaim => "-db-claim"
+      case GenType.StorageMount => "-db-volume"
+      case _ if isDb            => "-db"
+      case _                    => ""
+    }
+
+    val name = service.name + suffix
 
     this.printer.pretty(Header(version, kind, Metadata(name, Labels(service.name, genType, isDb))).asJson)
   }
@@ -42,7 +45,7 @@ object KubernetesGenerator {
     val volumeBody = Body(
       PersistentVolumeSpec(
         storageClass = StorageClass.Manual,
-        capacityGb = 1.0f, //Gi,
+        capacityGB = 1.0f,
         accessModes = Seq(AccessMode.ReadWriteMany),
         reclaimPolicy = ReclaimPolicy.Delete,
         hostPath = service.dbStorage.hostPath,
@@ -54,7 +57,7 @@ object KubernetesGenerator {
         accessModes = Seq(AccessMode.ReadWriteMany),
         volumeName = s"${service.name}-db-volume",
         storageClassName = StorageClass.Manual,
-        storageResourceRequestAmountMb = 100.0f,
+        storageResourceRequestAmountMB = 100.0f,
       ),
     ).asJson
 
