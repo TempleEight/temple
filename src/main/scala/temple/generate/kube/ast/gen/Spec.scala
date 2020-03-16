@@ -26,7 +26,7 @@ object Spec {
   case class ServiceSpec(ports: Seq[ServicePort], selector: Labels) extends Spec {
 
     override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
-      "ports" ~~> when(ports.nonEmpty)(ports),
+      "ports"    ~~> when(ports.nonEmpty)(ports),
       "selector" ~~> Some(selector),
     )
   }
@@ -40,7 +40,7 @@ object Spec {
 
     override def jsonEntryIterator: IterableOnce[(String, Json)] = Seq(
       "metadata" ~> metadata,
-      "spec" ~> spec,
+      "spec"     ~> spec,
     )
   }
 
@@ -59,11 +59,11 @@ object Spec {
 
     override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] =
       Seq(
-        "hostname" ~~> Some(hostname),
-        "containers" ~~> when(containers.nonEmpty)(containers),
+        "hostname"         ~~> Some(hostname),
+        "containers"       ~~> when(containers.nonEmpty)(containers),
         "imagePullSecrets" ~~> when(imagePullSecrets.nonEmpty)(imagePullSecrets),
-        "restartPolicy" ~~> Some(restartPolicy),
-        "volumes" ~~> when(volumes.nonEmpty)(volumes),
+        "restartPolicy"    ~~> Some(restartPolicy),
+        "volumes"          ~~> when(volumes.nonEmpty)(volumes),
       )
   }
 
@@ -97,12 +97,12 @@ object Spec {
 
     override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] =
       Seq(
-        "env" ~~> when(env.nonEmpty)(env),
-        "image" ~~> Some(image),
-        "name" ~~> Some(name),
-        "ports" ~~> when(ports.nonEmpty)(ports),
+        "env"          ~~> when(env.nonEmpty)(env),
+        "image"        ~~> Some(image),
+        "name"         ~~> Some(name),
+        "ports"        ~~> when(ports.nonEmpty)(ports),
         "volumeMounts" ~~> when(volumeMounts.nonEmpty)(volumeMounts),
-        "lifecycle" ~~> lifecycle,
+        "lifecycle"    ~~> lifecycle,
       )
   }
 
@@ -133,8 +133,8 @@ object Spec {
 
     override def jsonEntryIterator: IterableOnce[(String, Json)] =
       Seq(
-        "name" ~> name,
-        "port" ~> port,
+        "name"       ~> name,
+        "port"       ~> port,
         "targetPort" ~> targetPort,
       )
   }
