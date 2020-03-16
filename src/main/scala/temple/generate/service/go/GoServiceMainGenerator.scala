@@ -87,9 +87,6 @@ object GoServiceMainGenerator {
       ),
     )
 
-  private[go] def generateJsonMiddleware(): String =
-    FileUtils.readResources("go/genFiles/json_middleware.go").stripLineEnd
-
   private[go] def generateHandler(serviceName: String, endpoint: Endpoint): String =
     s"func $serviceName${ServiceGenerator.verb(endpoint)}Handler(w http.ResponseWriter, r *http.Request) {}"
 

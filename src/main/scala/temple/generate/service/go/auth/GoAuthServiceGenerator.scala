@@ -19,6 +19,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceMainGenerator.generateStructs(),
         GoAuthServiceMainGenerator.generateRouter(),
         GoAuthServiceMainGenerator.generateMain(),
+        GoCommonGenerator.generateJsonMiddleware(),
       ),
     ).map { case (path, contents) => path -> (contents + "\n") }
 }
