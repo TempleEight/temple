@@ -1,6 +1,6 @@
 package temple.generate.kube.ast.gen
 
-object RestartPolicy {
-  type RestartPolicy = String
-  val Always: RestartPolicy = "Always"
+object RestartPolicy extends Enumeration {
+  type RestartPolicy = Value
+  val Always: RestartPolicy = Value("Always")
 }

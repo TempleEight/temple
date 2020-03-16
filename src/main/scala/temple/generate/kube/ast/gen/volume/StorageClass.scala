@@ -1,6 +1,6 @@
 package temple.generate.kube.ast.gen.volume
 
-object StorageClass {
-  type StorageClass = String
-  val Manual: StorageClass = "manual"
+object StorageClass extends Enumeration {
+  type StorageClass = Value
+  val Manual: StorageClass = Value("manual")
 }

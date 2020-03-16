@@ -8,7 +8,7 @@ metadata:
 spec:
   storageClassName: manual
   capacity:
-    storage: 1Gi
+    storage: 1.0Gi
   accessModes:
   - ReadWriteMany
   persistentVolumeReclaimPolicy: Delete
@@ -28,4 +28,4 @@ spec:
   storageClassName: manual
   resources:
     requests:
-      storage: 100Mi
+      storage: 100.0Mi

@@ -1,6 +1,6 @@
 package temple.generate.kube.ast.gen.volume
 
-object AccessMode {
-  type AccessMode = String
-  val ReadWriteMany: AccessMode = "ReadWriteMany"
+object AccessMode extends Enumeration {
+  type AccessMode = Value
+  val ReadWriteMany: AccessMode = Value("ReadWriteMany")
 }

@@ -22,7 +22,7 @@ object UnitTestData {
           initFile = "init.sql",
           hostPath = "/data/user-db",
         ),
-        dbLifecycleCommand = LifecycleCommand.echoDone,
+        dbLifecycleCommand = LifecycleCommand.echoDone.toString,
       ),
     ),
   )

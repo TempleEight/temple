@@ -1,6 +1,6 @@
 package temple.generate.kube.ast.gen.volume
 
-object ReclaimPolicy {
-  type ReclaimPolicy = String
-  val Delete: ReclaimPolicy = "Delete"
+object ReclaimPolicy extends Enumeration {
+  type ReclaimPolicy = Value
+  val Delete: ReclaimPolicy = Value("Delete")
 }

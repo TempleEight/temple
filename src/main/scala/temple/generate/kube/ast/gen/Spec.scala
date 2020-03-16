@@ -36,17 +36,17 @@ object Spec {
 
   case class PersistentVolumeSpec(
     storageClass: StorageClass,
-    capacityGb: Float,
+    capacityGB: Float,
     accessModes: Seq[AccessMode],
     reclaimPolicy: ReclaimPolicy,
     hostPath: String,
   ) extends Spec {
 
     override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
-      "storageClassName" ~~> Some(storageClass),
-      "capacity" ~~> Some(Map("storage" -> s"${capacity}Gi")),
-      "accessModes" ~~> Some(accessModes),
-      "persistentVolumeReclaimPolicy" ~~> Some(reclaimPolicy),
+      "storageClassName" ~~> Some(storageClass.toString),
+      "capacity" ~~> Some(Map("storage" -> s"${capacityGB}Gi")),
+      "accessModes" ~~> when(accessModes.nonEmpty)(accessModes.map(_.toString)),
+      "persistentVolumeReclaimPolicy" ~~> Some(reclaimPolicy.toString),
       "hostPath" ~~> Some(Map("path" -> hostPath)),
     )
   }
@@ -55,17 +55,17 @@ object Spec {
     accessModes: Seq[AccessMode],
     volumeName: String,
     storageClassName: StorageClass,
-    storageResourceRequestAmountMb: Float,
+    storageResourceRequestAmountMB: Float,
   ) extends Spec {
 
     override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
-      "accessModes" ~~> Some(accessModes),
+      "accessModes" ~~> when(accessModes.nonEmpty)(accessModes.map(_.toString)),
       "volumeName" ~~> Some(volumeName),
-      "storageClassName" ~~> Some(storageClassName),
+      "storageClassName" ~~> Some(storageClassName.toString),
       "resources" ~~> Some(
         Map(
           "requests" -> Map(
-            "storage" -> s"${storageResourceRequestAmount}Mi",
+            "storage" -> s"${storageResourceRequestAmountMB}Mi",
           ),
         ),
       ),
@@ -85,16 +85,16 @@ object Spec {
     )
   }
 
-  case class Strategy(strategy: String) extends JsonEncodable.Object {
+  case class Strategy(strategy: PlacementStrategy.Strategy) extends JsonEncodable.Object {
 
-    override def jsonEntryIterator: IterableOnce[(String, Json)] = Seq("type" ~> strategy)
+    override def jsonEntryIterator: IterableOnce[(String, Json)] = Seq("type" ~> strategy.toString)
   }
 
   case class PodSpec(
     hostname: String,
     containers: Seq[Container],
     imagePullSecrets: Seq[Secret],
-    restartPolicy: String,
+    restartPolicy: RestartPolicy.RestartPolicy,
     volumes: Seq[Volume],
   ) extends Spec {
 
@@ -103,7 +103,7 @@ object Spec {
         "hostname" ~~> Some(hostname),
         "containers" ~~> when(containers.nonEmpty)(containers),
         "imagePullSecrets" ~~> when(imagePullSecrets.nonEmpty)(imagePullSecrets),
-        "restartPolicy" ~~> Some(restartPolicy),
+        "restartPolicy" ~~> Some(restartPolicy.toString),
         "volumes" ~~> when(volumes.nonEmpty)(volumes),
       )
   }

@@ -1,6 +1,6 @@
 package temple.generate.kube.ast.gen
 
-object PlacementStrategy {
-  type Strategy = String
-  val Recreate: Strategy = "Recreate"
+object PlacementStrategy extends Enumeration {
+  type Strategy = Value
+  val Recreate: Strategy = Value("Recreate")
 }
