@@ -16,6 +16,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceMainGenerator.generateAuthImports(
           authServiceRoot.module,
         ),
+        GoAuthServiceMainGenerator.generateStructs(),
       ),
     ).map { case (path, contents) => path -> (contents + "\n") }
 }

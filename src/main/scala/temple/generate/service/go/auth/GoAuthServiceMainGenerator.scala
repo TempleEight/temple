@@ -1,6 +1,7 @@
 package temple.generate.service.go.auth
 
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
+import temple.utils.FileUtils
 import temple.utils.StringUtils.doubleQuote
 
 object GoAuthServiceMainGenerator {
@@ -22,4 +23,7 @@ object GoAuthServiceMainGenerator {
 
     mkCode("import", CodeWrap.parens.tabbed(standardImports, "", officialImports, "", customImports))
   }
+
+  private[auth] def generateStructs(): String =
+    FileUtils.readResources("go/genFiles/auth/auth_structs.go").stripLineEnd
 }
