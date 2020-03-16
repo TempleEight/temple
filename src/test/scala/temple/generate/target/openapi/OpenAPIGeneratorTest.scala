@@ -141,35 +141,6 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |          format: int32
         |        required: true
         |        description: ID of the match to get
-        |      requestBody:
-        |        content:
-        |          application/json:
-        |            schema:
-        |              type: object
-        |              properties:
-        |                a:
-        |                  type: number
-        |                  format: int32
-        |                b:
-        |                  type: number
-        |                  format: double
-        |                c:
-        |                  type: boolean
-        |                d:
-        |                  type: string
-        |                  format: date
-        |                e:
-        |                  type: string
-        |                  format: time
-        |                g:
-        |                  type: string
-        |                  format: date-time
-        |                i:
-        |                  type: string
-        |                j:
-        |                  type: number
-        |                  format: int32
-        |                  description: Reference to User ID
         |      responses:
         |        '200':
         |          description: Match details

@@ -117,7 +117,6 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
                 description = s"ID of the $lowerName to get",
               ),
             ),
-            requestBody = Some(BodyLiteral(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
             responses = Map(
               200 -> BodyLiteral(
                 jsonContent(MediaTypeObject(generateItemType(service.attributes))),
