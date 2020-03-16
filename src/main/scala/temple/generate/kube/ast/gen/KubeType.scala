@@ -14,7 +14,9 @@ private[kube] object KubeType {
   case class Body[T <: Spec](spec: T)
 
   /** A Kubernetes yaml file metadata block */
-  case class Metadata(name: String, labels: Labels)
+  case class Metadata(name: String, labels: Labels) extends JsonEncodable.Object {
+    override def jsonEntryIterator: IterableOnce[(String, Json)] = Seq("name" ~> name, "labels" ~> labels)
+  }
 
   /** A Kubernetes yaml file labels block */
   case class Labels(name: String, genType: GenType, isDb: Boolean) extends JsonEncodable.Partial {

@@ -1,6 +1,7 @@
 package temple.generate.kube
 
 import temple.generate.kube.ast.OrchestrationType._
+import temple.generate.kube.ast.gen.LifecycleCommand
 import temple.utils.FileUtils
 
 object UnitTestData {
@@ -10,9 +11,17 @@ object UnitTestData {
       Service(
         name = "user",
         image = "temple-user-service",
+        dbImage = "postgres:12.1",
         ports = Seq("api" -> 80),
         replicas = 1,
         secretName = "regcred",
+        envVars = Seq("PGUSER" -> "postgres"),
+        dbStorage = DbStorage(
+          dataMount = "/var/lib/postgresql/data",
+          initMount = "/docker-entrypoint-initdb.d/init.sql",
+          initFile = "init.sql",
+        ),
+        dbLifecycleCommand = LifecycleCommand.echoDone,
       ),
     ),
   )
@@ -39,7 +48,8 @@ object UnitTestData {
       |metadata:
       |  name: user-db
       |  labels:
-      |    app: user-db""".stripMargin
+      |    app: user
+      |    kind: db""".stripMargin
 
   val userDbServiceHeader: String =
     """apiVersion: v1
@@ -47,7 +57,8 @@ object UnitTestData {
       |metadata:
       |  name: user-db
       |  labels:
-      |    app: user-db""".stripMargin
+      |    app: user
+      |    kind: db""".stripMargin
 
   val userDbStorageVolumeHeader: String =
     """apiVersion: v1
@@ -55,7 +66,7 @@ object UnitTestData {
       |metadata:
       |  name: user-db
       |  labels:
-      |    app: user-db
+      |    app: user
       |    type: local""".stripMargin
 
   val userDbStorageClaimHeader: String =
@@ -64,9 +75,11 @@ object UnitTestData {
       |metadata:
       |  name: user-db
       |  labels:
-      |    app: user-db""".stripMargin
+      |    app: user""".stripMargin
 
   val userDeployment: String = FileUtils.readResources("kube/user-deployment.yaml")
 
   val userService: String = FileUtils.readResources("kube/user-service.yaml")
+
+  val userDbDeployment: String = FileUtils.readResources("kube/user-db-deployment.yaml")
 }
