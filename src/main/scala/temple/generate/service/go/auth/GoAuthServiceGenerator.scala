@@ -30,6 +30,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
       File("auth/comm", "handler.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("comm"),
         GoAuthServiceCommGenerator.generateImports(authServiceRoot.module),
+        GoAuthServiceCommGenerator.generateStructs(),
       ),
     ).map { case (path, contents) => path -> (contents + "\n") }
 }
