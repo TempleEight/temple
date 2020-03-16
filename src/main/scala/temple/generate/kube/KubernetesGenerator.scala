@@ -7,6 +7,7 @@ import temple.generate.FileSystem._
 import temple.generate.kube.ast.OrchestrationType._
 import temple.generate.kube.ast.gen.KubeType._
 import temple.generate.kube.ast.gen.Spec._
+import temple.generate.kube.ast.gen.volume.{AccessMode, ReclaimPolicy, StorageClass}
 import temple.generate.kube.ast.gen.{PlacementStrategy, RestartPolicy}
 import temple.generate.utils.CodeTerm.mkCode
 
@@ -28,20 +29,59 @@ object KubernetesGenerator {
       case GenType.StorageClaim => "PersistentVolumeClaim"
       case GenType.StorageMount => "PersistentVolume"
     }
-    val name = service.name + { if (isDb) "-db" else "" }
+    val suffix = genType match {
+      case GenType.StorageClaim => "-db-claim"
+      case GenType.StorageMount => "-db-volume"
+      case _ if isDb            => "-db"
+      case _                    => ""
+    }
+
+    val name = service.name + suffix
 
     this.printer.pretty(Header(version, kind, Metadata(name, Labels(service.name, genType, isDb))).asJson)
   }
 
-  private def generateDbStorage(service: Service): String =
-    mkCode.lines(
-      generateHeader(service, GenType.StorageMount, isDb = true),
-      "---",
-      generateHeader(service, GenType.StorageClaim, isDb = true),
-    )
+  private def generateDbStorage(service: Service): String = {
+    val volumeBody = Body(
+      PersistentVolumeSpec(
+        storageClass = StorageClass.Manual,
+        capacityGB = 1.0f,
+        accessModes = Seq(AccessMode.ReadWriteMany),
+        reclaimPolicy = ReclaimPolicy.Delete,
+        hostPath = service.dbStorage.hostPath,
+      ),
+    ).asJson
 
-  private def generateDbService(service: Service): String =
-    generateHeader(service, GenType.Service, isDb = true)
+    val claimBody = Body(
+      PersistentVolumeClaimSpec(
+        accessModes = Seq(AccessMode.ReadWriteMany),
+        volumeName = s"${service.name}-db-volume",
+        storageClassName = StorageClass.Manual,
+        storageResourceRequestAmountMB = 100.0f,
+      ),
+    ).asJson
+
+    mkCode(
+      generateHeader(service, GenType.StorageMount, isDb = true),
+      this.printer.pretty(volumeBody),
+      "---\n",
+      generateHeader(service, GenType.StorageClaim, isDb = true),
+      this.printer.pretty(claimBody),
+    )
+  }
+
+  private def generateDbService(service: Service): String = {
+    val serviceBody = Body(
+      ServiceSpec(
+        ports = Seq(ServicePort("db", 5432, 5432)), //TODO: Make a Postgres data class that stores port info etc
+        selector = Labels(service.name, GenType.Service, isDb = true),
+      ),
+    ).asJson
+    mkCode(
+      generateHeader(service, GenType.Service, isDb = true),
+      this.printer.pretty(serviceBody),
+    )
+  }
 
   private def generateDbDeployment(service: Service): String = {
     val name = service.name + "-db"
@@ -85,7 +125,7 @@ object KubernetesGenerator {
 
     mkCode(
       generateHeader(service, GenType.Deployment, isDb = true),
-      printer.pretty(deploymentBody),
+      this.printer.pretty(deploymentBody),
     )
   }
 
