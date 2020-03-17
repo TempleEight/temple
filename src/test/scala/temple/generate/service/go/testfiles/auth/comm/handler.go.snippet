@@ -33,6 +33,11 @@ type consumerResponse struct {
 	Username string `json:"username"`
 }
 
+// Init sets up the Handler object with a list of services from the config
+func Init(config *util.Config) *Handler {
+	return &Handler{config.Services}
+}
+
 func createKongConsumer(hostname string) (*consumerResponse, error) {
 	postData := url.Values{}
 	postData.Set("username", "auth-service")
