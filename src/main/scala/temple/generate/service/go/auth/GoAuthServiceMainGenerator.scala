@@ -25,10 +25,10 @@ object GoAuthServiceMainGenerator {
   }
 
   private[auth] def generateStructs(): String =
-    FileUtils.readResources("go/genFiles/auth/structs.go.snippet").stripLineEnd
+    FileUtils.readResources("go/genFiles/auth/main/structs.go.snippet").stripLineEnd
 
   private[auth] def generateRouter(): String =
-    FileUtils.readResources("go/genFiles/auth/router.go.snippet").stripLineEnd
+    FileUtils.readResources("go/genFiles/auth/main/router.go.snippet").stripLineEnd
 
   private[auth] def generateMain(): String =
     mkCode(
@@ -41,8 +41,8 @@ object GoAuthServiceMainGenerator {
     )
 
   private[auth] def generateHandlers(): String =
-    FileUtils.readResources("go/genFiles/auth/handlers.go.snippet").stripLineEnd
+    FileUtils.readResources("go/genFiles/auth/main/handlers.go.snippet").stripLineEnd
 
   private[auth] def generateCreateToken(): String =
-    FileUtils.readResources("go/genFiles/auth/create_token.go.snippet").stripLineEnd
+    FileUtils.readResources("go/genFiles/auth/main/create_token.go.snippet").stripLineEnd
 }
