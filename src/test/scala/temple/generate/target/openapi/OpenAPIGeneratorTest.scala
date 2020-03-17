@@ -7,6 +7,7 @@ import temple.DSL.semantics.AttributeType._
 import temple.DSL.semantics.{Annotation, Attribute}
 import temple.generate.CRUD
 import temple.generate.target.openapi.OpenAPIGenerator.generateError
+import temple.generate.target.openapi.ast.{Response, Service}
 
 import scala.collection.immutable.ListMap
 

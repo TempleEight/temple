@@ -6,10 +6,11 @@ import temple.DSL.semantics.AttributeType._
 import temple.DSL.semantics.{Annotation, Attribute}
 import temple.collection.FlagMapView
 import temple.generate.CRUD._
-import temple.generate.target.openapi.OpenAPIFile.{Components, Info}
 import temple.generate.target.openapi.OpenAPIGenerator._
-import temple.generate.target.openapi.OpenAPIType._
-import temple.generate.target.openapi.Parameter.InPath
+import temple.generate.target.openapi.ast.OpenAPIFile.{Components, Info}
+import temple.generate.target.openapi.ast.OpenAPIType._
+import temple.generate.target.openapi.ast.Parameter.InPath
+import temple.generate.target.openapi.ast.{BodyLiteral, HTTPVerb, Handler, MediaTypeObject, OpenAPIFile, Parameter, Response, Service}
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
@@ -94,10 +95,10 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         path(s"/$lowerName") += HTTPVerb.Post -> Handler(
             s"Register a new $lowerName",
             tags = tags,
-            requestBody = Some(BodyLiteral(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
+            requestBody = Some(BodyLiteral(jsonContent(ast.MediaTypeObject(generateItemInputType(service.attributes))))),
             responses = Map(
               200 -> BodyLiteral(
-                jsonContent(MediaTypeObject(generateItemType(service.attributes))),
+                jsonContent(ast.MediaTypeObject(generateItemType(service.attributes))),
                 s"$capitalizedName successfully created",
               ),
               400 -> Response.Ref(useError(400)),
@@ -164,7 +165,7 @@ object OpenAPIGenerator {
     BodyLiteral(
       description = description,
       content = jsonContent(
-        MediaTypeObject(
+        ast.MediaTypeObject(
           OpenAPIObject(ListMap("error" -> OpenAPISimpleType("string", "example" -> example.asJson))),
         ),
       ),

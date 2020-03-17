@@ -1,4 +1,4 @@
-package temple.generate.target.openapi
+package temple.generate.target.openapi.ast
 
 import io.circe.Json
 import io.circe.syntax._

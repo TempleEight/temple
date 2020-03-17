@@ -1,10 +1,9 @@
-package temple.generate.target.openapi
+package temple.generate.target.openapi.ast
 
 import io.circe.Json
-import io.circe.generic.auto._
 import temple.generate.JsonEncodable
-import temple.generate.target.openapi.HTTPVerb.httpVerbKeyEncoder
-import temple.generate.target.openapi.OpenAPIFile._
+import temple.generate.target.openapi.ast.OpenAPIFile.{Components, Info}
+import io.circe.generic.auto._
 
 import scala.Option.when
 
