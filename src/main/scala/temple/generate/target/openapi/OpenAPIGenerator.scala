@@ -5,7 +5,7 @@ import io.circe.yaml.Printer
 import temple.DSL.semantics.AttributeType._
 import temple.DSL.semantics.{Annotation, Attribute}
 import temple.collection.FlagMapView
-import temple.generate.Endpoint._
+import temple.generate.CRUD._
 import temple.generate.target.openapi.OpenAPIFile.{Components, Info}
 import temple.generate.target.openapi.OpenAPIGenerator._
 import temple.generate.target.openapi.OpenAPIType._
@@ -77,7 +77,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     val lowerName       = service.name.toLowerCase
     val capitalizedName = service.name.capitalize
     val tags            = Seq(capitalizedName)
-    service.endpoints.foreach {
+    service.operations.foreach {
       case ReadAll =>
         path(s"/$lowerName/all") += HTTPVerb.Get -> Handler(
             s"Get a list of every $lowerName",
