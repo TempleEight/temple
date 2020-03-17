@@ -33,13 +33,13 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainGenerator.generateMain(
           serviceRoot.name,
           usesComms,
-          serviceRoot.endpoints,
+          serviceRoot.operations,
           serviceRoot.port,
         ),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoServiceMainGenerator.generateHandlers(
           serviceRoot.name,
-          serviceRoot.endpoints,
+          serviceRoot.operations,
         ),
       ),
       File(s"${serviceRoot.name}/dao", "errors.go") -> GoServiceDaoGenerator.generateErrors(serviceRoot.name),
