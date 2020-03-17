@@ -5,7 +5,7 @@ import io.circe.yaml.Printer
 import temple.DSL.semantics.AttributeType._
 import temple.DSL.semantics.{Annotation, Attribute}
 import temple.collection.FlagMapView
-import temple.generate.Crud._
+import temple.generate.CRUD._
 import temple.generate.target.openapi.OpenAPIFile.{Components, Info}
 import temple.generate.target.openapi.OpenAPIGenerator._
 import temple.generate.target.openapi.OpenAPIType._

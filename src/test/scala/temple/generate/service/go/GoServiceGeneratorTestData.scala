@@ -1,6 +1,6 @@
 package temple.generate.service.go
 
-import temple.generate.Crud
+import temple.generate.CRUD
 import temple.generate.FileSystem._
 import temple.generate.service.ServiceRoot
 import temple.utils.FileUtils._
@@ -11,7 +11,7 @@ object GoServiceGeneratorTestData {
     "user",
     "github.com/TempleEight/spec-golang/user",
     Seq.empty,
-    Set(Crud.Create, Crud.Read, Crud.Update, Crud.Delete),
+    Set(CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
     80,
   )
 
@@ -37,7 +37,7 @@ object GoServiceGeneratorTestData {
       "match",
       "github.com/TempleEight/spec-golang/match",
       Seq("user"),
-      Set(Crud.ReadAll, Crud.Create, Crud.Read, Crud.Update, Crud.Delete),
+      Set(CRUD.ReadAll, CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
       81,
     )
 
