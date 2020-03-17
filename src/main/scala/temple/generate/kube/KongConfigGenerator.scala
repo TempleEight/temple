@@ -17,7 +17,7 @@ object KongConfigGenerator {
         case (_, port) => s"--data 'url=http://${service.name}:$port/${service.name}'"
       }
 
-    mkCode.escapedList(
+    mkCode.shellLines(
       "curl -X POST",
       "--url $KONG_ADMIN/services/",
       s"--data 'name=${service.name}-service'",
@@ -27,7 +27,7 @@ object KongConfigGenerator {
 
   /** Generate a kong route to the service for a Temple service */
   private def generateServiceRoute(service: Service): String =
-    mkCode.escapedList(
+    mkCode.shellLines(
       "curl -X POST",
       s"--url $$KONG_ADMIN/services/${service.name}-service/routes",
       """--data "hosts[]=$KONG_ENTRY"""",
@@ -36,7 +36,7 @@ object KongConfigGenerator {
 
   /** Given an auth-enabled Temple service, generate the kong auth request */
   private def generateAuthRequirement(service: Service): String =
-    mkCode.escapedList(
+    mkCode.shellLines(
       "curl -X POST",
       s"--url $$KONG_ADMIN/services/${service.name}-service/plugins",
       "--data 'name=jwt'",

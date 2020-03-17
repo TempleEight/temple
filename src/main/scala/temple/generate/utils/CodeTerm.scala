@@ -42,8 +42,6 @@ object CodeTerm {
     /** Add newlines after each separator */
     def spaced: CodeTermList = new CodeTermList(strings, ",\n")
 
-    /** Escape the newlines */
-    def escaped: CodeTermList = new CodeTermList(strings, " \\\n  ")
   }
 
   /** Turns a [[IterableOnce]] of [[CodeTerm]]s into a [[CodeTerm]], with an iterator that visits
@@ -65,7 +63,7 @@ object CodeTerm {
     def spacedList(terms: CodeTerm*): String = mkCode(terms.mkCodeList.spaced)
 
     /** Turn a list of terms into an escaped newline-seperated string */
-    def escapedList(terms: CodeTerm*): String = mkCode(terms.mkCodeList.escaped)
+    def shellLines(terms: CodeTerm*): String = mkCode(new CodeTermList(terms.flatIterator, " \\\n  "))
 
     /** Turn a list of terms into newlines */
     def lines(terms: CodeTerm*): String = mkCode(new CodeTermList(terms.flatIterator, "\n"))
