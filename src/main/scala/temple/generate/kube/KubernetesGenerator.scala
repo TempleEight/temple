@@ -200,7 +200,10 @@ object KubernetesGenerator {
     )
 
   /** Given an [[OrchestrationRoot]], check the services inside it and generate deployment scripts */
-  def generate(orchestrationRoot: OrchestrationRoot): Map[File, FileContent] =
-    orchestrationRoot.services.flatMap(buildKubeFiles).toMap ++ kongFiles
+  def generate(orchestrationRoot: OrchestrationRoot): Map[File, FileContent] = {
+    val kubeFiles: Map[File, FileContent] = orchestrationRoot.services.flatMap(buildKubeFiles).toMap
+    val kongConfig: (File, FileContent)   = KongConfigGenerator.generate(orchestrationRoot)
+    (kubeFiles + kongConfig) ++ kongFiles
+  }
 
 }

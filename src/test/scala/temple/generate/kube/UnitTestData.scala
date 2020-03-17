@@ -23,6 +23,7 @@ object UnitTestData {
           hostPath = "/data/user-db",
         ),
         dbLifecycleCommand = LifecycleCommand.echoDone.toString,
+        usesAuth = true,
       ),
     ),
   )
@@ -87,4 +88,6 @@ object UnitTestData {
   val userDbService: String = FileUtils.readResources("kube/user-db-service.yaml")
 
   val userDbStorage: String = FileUtils.readResources("kube/user-db-storage.yaml")
+
+  val userKongConfig: String = FileUtils.readResources("kong/configure-kong.sh")
 }
