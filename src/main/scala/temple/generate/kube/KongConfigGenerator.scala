@@ -3,7 +3,6 @@ package temple.generate.kube
 import temple.generate.FileSystem.{File, FileContent}
 import temple.generate.kube.ast.OrchestrationType.{OrchestrationRoot, Service}
 import temple.generate.utils.CodeTerm.mkCode
-import temple.utils.StringUtils.indent
 
 /**
   * Generator for kong config scripts - a series of curl commands to kong to configure service routing
@@ -19,29 +18,29 @@ object KongConfigGenerator {
       }
 
     mkCode.escapedList(
-      "curl -i -X POST",
-      indent("--url $KONG_ADMIN/services/"),
-      indent(s"--data 'name=${service.name}-service'"),
-      urls.map(indent(_)),
+      "curl -X POST",
+      "--url $KONG_ADMIN/services/",
+      s"--data 'name=${service.name}-service'",
+      urls,
     )
   }
 
   /** Generate a kong route to the service for a Temple service */
   private def generateServiceRoute(service: Service): String =
     mkCode.escapedList(
-      "curl -i -X POST",
-      indent(s"--url $$KONG_ADMIN/services/${service.name}-service/routes"),
-      indent("--data \"hosts[]=$KONG_ENTRY\""),
-      indent(s"--data 'paths[]=/api/${service.name}'"),
+      "curl -X POST",
+      s"--url $$KONG_ADMIN/services/${service.name}-service/routes",
+      """--data "hosts[]=$KONG_ENTRY"""",
+      s"--data 'paths[]=/api/${service.name}'",
     )
 
   /** Given an auth-enabled Temple service, generate the kong auth request */
   private def generateAuthRequirement(service: Service): String =
     mkCode.escapedList(
       "curl -X POST",
-      indent(s"--url $$KONG_ADMIN/services/${service.name}-service/plugins"),
-      indent("--data 'name=jwt'"),
-      indent("--data 'config.claims_to_verify=exp'"),
+      s"--url $$KONG_ADMIN/services/${service.name}-service/plugins",
+      "--data 'name=jwt'",
+      "--data 'config.claims_to_verify=exp'",
     )
 
   /**
@@ -51,7 +50,7 @@ object KongConfigGenerator {
     */
   def generate(orchestrationRoot: OrchestrationRoot): (File, FileContent) = {
     val config = mkCode.doubleLines(
-      this.shebang,
+      shebang,
       orchestrationRoot.services.map(generateServiceDef),
       orchestrationRoot.services.map(generateServiceRoute),
       orchestrationRoot.services.filter(_.usesAuth).map(generateAuthRequirement),

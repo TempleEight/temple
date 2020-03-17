@@ -43,7 +43,7 @@ object CodeTerm {
     def spaced: CodeTermList = new CodeTermList(strings, ",\n")
 
     /** Escape the newlines */
-    def escaped: CodeTermList = new CodeTermList(strings, " \\\n")
+    def escaped: CodeTermList = new CodeTermList(strings, " \\\n  ")
   }
 
   /** Turns a [[IterableOnce]] of [[CodeTerm]]s into a [[CodeTerm]], with an iterator that visits
