@@ -7,8 +7,10 @@ import temple.generate.FileSystem._
 import temple.generate.kube.ast.OrchestrationType._
 import temple.generate.kube.ast.gen.KubeType._
 import temple.generate.kube.ast.gen.Spec._
+import temple.generate.kube.ast.gen.volume.{AccessMode, ReclaimPolicy, StorageClass}
 import temple.generate.kube.ast.gen.{PlacementStrategy, RestartPolicy}
 import temple.generate.utils.CodeTerm.mkCode
+import temple.utils.FileUtils
 
 /** Generates the Kubernetes config files for each microservice */
 object KubernetesGenerator {
@@ -28,20 +30,59 @@ object KubernetesGenerator {
       case GenType.StorageClaim => "PersistentVolumeClaim"
       case GenType.StorageMount => "PersistentVolume"
     }
-    val name = service.name + { if (isDb) "-db" else "" }
+    val suffix = genType match {
+      case GenType.StorageClaim => "-db-claim"
+      case GenType.StorageMount => "-db-volume"
+      case _ if isDb            => "-db"
+      case _                    => ""
+    }
+
+    val name = service.name + suffix
 
     this.printer.pretty(Header(version, kind, Metadata(name, Labels(service.name, genType, isDb))).asJson)
   }
 
-  private def generateDbStorage(service: Service): String =
-    mkCode.lines(
-      generateHeader(service, GenType.StorageMount, isDb = true),
-      "---",
-      generateHeader(service, GenType.StorageClaim, isDb = true),
-    )
+  private def generateDbStorage(service: Service): String = {
+    val volumeBody = Body(
+      PersistentVolumeSpec(
+        storageClass = StorageClass.Manual,
+        capacityGB = 1.0f,
+        accessModes = Seq(AccessMode.ReadWriteMany),
+        reclaimPolicy = ReclaimPolicy.Delete,
+        hostPath = service.dbStorage.hostPath,
+      ),
+    ).asJson
 
-  private def generateDbService(service: Service): String =
-    generateHeader(service, GenType.Service, isDb = true)
+    val claimBody = Body(
+      PersistentVolumeClaimSpec(
+        accessModes = Seq(AccessMode.ReadWriteMany),
+        volumeName = s"${service.name}-db-volume",
+        storageClassName = StorageClass.Manual,
+        storageResourceRequestAmountMB = 100.0f,
+      ),
+    ).asJson
+
+    mkCode(
+      generateHeader(service, GenType.StorageMount, isDb = true),
+      this.printer.pretty(volumeBody),
+      "---\n",
+      generateHeader(service, GenType.StorageClaim, isDb = true),
+      this.printer.pretty(claimBody),
+    )
+  }
+
+  private def generateDbService(service: Service): String = {
+    val serviceBody = Body(
+      ServiceSpec(
+        ports = Seq(ServicePort("db", 5432, 5432)), //TODO: Make a Postgres data class that stores port info etc
+        selector = Labels(service.name, GenType.Service, isDb = true),
+      ),
+    ).asJson
+    mkCode(
+      generateHeader(service, GenType.Service, isDb = true),
+      this.printer.pretty(serviceBody),
+    )
+  }
 
   private def generateDbDeployment(service: Service): String = {
     val name = service.name + "-db"
@@ -85,7 +126,7 @@ object KubernetesGenerator {
 
     mkCode(
       generateHeader(service, GenType.Deployment, isDb = true),
-      printer.pretty(deploymentBody),
+      this.printer.pretty(deploymentBody),
     )
   }
 
@@ -141,15 +182,28 @@ object KubernetesGenerator {
     )
   }
 
+  private val kongFiles: Map[File, FileContent] = Map(
+    File("kube/kong", "kong-db-deployment.yaml") -> FileUtils.readResources("kube/kong/kong-db-deployment.yaml"),
+    File("kube/kong", "kong-db-service.yaml")    -> FileUtils.readResources("kube/kong/kong-db-service.yaml"),
+    File("kube/kong", "kong-deployment.yaml")    -> FileUtils.readResources("kube/kong/kong-deployment.yaml"),
+    File("kube/kong", "kong-migration-job.yaml") -> FileUtils.readResources("kube/kong/kong-migration-job.yaml"),
+    File("kube/kong", "kong-service.yaml")       -> FileUtils.readResources("kube/kong/kong-service.yaml"),
+  )
+
+  private def buildKubeFiles(service: Service) =
+    Seq(
+      File(s"kube/${service.name}", "deployment.yaml")    -> generateDeployment(service),
+      File(s"kube/${service.name}", "service.yaml")       -> generateService(service),
+      File(s"kube/${service.name}", "db-deployment.yaml") -> generateDbDeployment(service),
+      File(s"kube/${service.name}", "db-service.yaml")    -> generateDbService(service),
+      File(s"kube/${service.name}", "db-storage.yaml")    -> generateDbStorage(service),
+    )
+
   /** Given an [[OrchestrationRoot]], check the services inside it and generate deployment scripts */
-  def generate(orchestrationRoot: OrchestrationRoot): Map[File, FileContent] =
-    orchestrationRoot.services.flatMap { service =>
-      Seq(
-        File(s"kube/${service.name}", "deployment.yaml")    -> generateDeployment(service),
-        File(s"kube/${service.name}", "service.yaml")       -> generateService(service),
-        File(s"kube/${service.name}", "db-deployment.yaml") -> generateDbDeployment(service),
-        File(s"kube/${service.name}", "db-service.yaml")    -> generateDbService(service),
-        File(s"kube/${service.name}", "db-storage.yaml")    -> generateDbStorage(service),
-      )
-    }.toMap
+  def generate(orchestrationRoot: OrchestrationRoot): Map[File, FileContent] = {
+    val kubeFiles: Map[File, FileContent] = orchestrationRoot.services.flatMap(buildKubeFiles).toMap
+    val kongConfig: (File, FileContent)   = KongConfigGenerator.generate(orchestrationRoot)
+    (kubeFiles + kongConfig) ++ kongFiles
+  }
+
 }

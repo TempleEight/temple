@@ -1,7 +1,5 @@
 package temple.generate.kube.ast
 
-import temple.generate.kube.ast.gen.LifecycleCommand.LifecycleCommand
-
 object OrchestrationType {
 
   /** Input information to generate kubernetes scripts */
@@ -18,6 +16,7 @@ object OrchestrationType {
     * @param envVars A sequence of key -> value to set as environment variables in the container
     * @param dbStorage Object that defines how the service db should store data
     * @param dbLifecycleCommand The command to be ran in the database container on startup e.g to init the db
+    * @param usesAuth Whether this service requires authentication with the API Gateway before requests
     */
   case class Service(
     name: String,
@@ -28,7 +27,8 @@ object OrchestrationType {
     secretName: String,
     envVars: Seq[(String, String)],
     dbStorage: DbStorage,
-    dbLifecycleCommand: LifecycleCommand,
+    dbLifecycleCommand: String,
+    usesAuth: Boolean,
   )
 
   /**
@@ -36,7 +36,8 @@ object OrchestrationType {
     * @param dataMount the file system location for the db container to store data at
     * @param initMount Where to mount the db init script (i.e schema) to
     * @param initFile The filename of the db init script
+    * @param hostPath Where on the *database host* to store the data
     */
-  case class DbStorage(dataMount: String, initMount: String, initFile: String)
+  case class DbStorage(dataMount: String, initMount: String, initFile: String, hostPath: String)
 
 }

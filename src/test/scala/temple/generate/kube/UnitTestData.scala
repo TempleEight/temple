@@ -20,8 +20,10 @@ object UnitTestData {
           dataMount = "/var/lib/postgresql/data",
           initMount = "/docker-entrypoint-initdb.d/init.sql",
           initFile = "init.sql",
+          hostPath = "/data/user-db",
         ),
-        dbLifecycleCommand = LifecycleCommand.echoDone,
+        dbLifecycleCommand = LifecycleCommand.echoDone.toString,
+        usesAuth = true,
       ),
     ),
   )
@@ -64,7 +66,7 @@ object UnitTestData {
     """apiVersion: v1
       |kind: PersistentVolume
       |metadata:
-      |  name: user-db
+      |  name: user-db-volume
       |  labels:
       |    app: user
       |    type: local""".stripMargin
@@ -73,7 +75,7 @@ object UnitTestData {
     """apiVersion: v1
       |kind: PersistentVolumeClaim
       |metadata:
-      |  name: user-db
+      |  name: user-db-claim
       |  labels:
       |    app: user""".stripMargin
 
@@ -82,4 +84,10 @@ object UnitTestData {
   val userService: String = FileUtils.readResources("kube/user-service.yaml")
 
   val userDbDeployment: String = FileUtils.readResources("kube/user-db-deployment.yaml")
+
+  val userDbService: String = FileUtils.readResources("kube/user-db-service.yaml")
+
+  val userDbStorage: String = FileUtils.readResources("kube/user-db-storage.yaml")
+
+  val userKongConfig: String = FileUtils.readResources("kong/configure-kong.sh")
 }

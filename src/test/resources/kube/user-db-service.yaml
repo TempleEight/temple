@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: user-db
+  labels:
+    app: user
+    kind: db
+spec:
+  ports:
+  - name: db
+    port: 5432
+    targetPort: 5432
+  selector:
+    app: user
+    kind: db

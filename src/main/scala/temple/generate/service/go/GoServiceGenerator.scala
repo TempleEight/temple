@@ -1,5 +1,6 @@
 package temple.generate.service.go
 
+import temple.generate.service.go.common._
 import temple.generate.FileSystem._
 import temple.generate.service.{ServiceGenerator, ServiceRoot}
 import temple.generate.utils.CodeTerm.mkCode
@@ -35,7 +36,7 @@ object GoServiceGenerator extends ServiceGenerator {
           serviceRoot.operations,
           serviceRoot.port,
         ),
-        GoServiceMainGenerator.generateJsonMiddleware(),
+        GoCommonMainGenerator.generateJsonMiddleware(),
         GoServiceMainGenerator.generateHandlers(
           serviceRoot.name,
           serviceRoot.operations,
@@ -55,7 +56,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonGenerator.generatePackage("comm"),
         GoServiceCommGenerator.generateImports(serviceRoot.module),
         GoServiceCommGenerator.generateStructs(),
-        GoServiceCommGenerator.generateInit(),
+        GoCommonCommGenerator.generateInit(),
       ),
     )).map { case (path, contents) => path -> (contents + "\n") }
   }

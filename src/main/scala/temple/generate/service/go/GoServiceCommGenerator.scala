@@ -16,7 +16,4 @@ object GoServiceCommGenerator {
     "// Handler maintains the list of services and their associated hostnames",
     s"type Handler struct ${CodeWrap.curly.tabbed("Services map[string]string")}",
   )
-
-  private[go] def generateInit(): String =
-    FileUtils.readResources("go/genFiles/comm_init.go").stripLineEnd
 }

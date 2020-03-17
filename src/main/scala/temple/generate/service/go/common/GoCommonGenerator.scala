@@ -1,6 +1,6 @@
-package temple.generate.service.go
+package temple.generate.service.go.common
 
-import temple.generate.utils.CodeTerm.{mkCode}
+import temple.generate.utils.CodeTerm.mkCode
 
 object GoCommonGenerator {
 
