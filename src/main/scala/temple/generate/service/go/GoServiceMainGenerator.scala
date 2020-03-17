@@ -13,14 +13,18 @@ object GoServiceMainGenerator {
   /** Given a service name, module name and whether the service uses inter-service communication, return the import
     * block */
   private[go] def generateImports(serviceName: String, module: String, usesComms: Boolean): String = {
-    val standardImports = Seq("flag", "log", "net/http").map(doubleQuote)
+    val standardImports = Seq(
+      //"flag",
+      //"log",
+      "net/http",
+    ).map(doubleQuote)
 
     val customImports = Seq[CodeTerm](
       when(usesComms) { s"${serviceName}Comm ${doubleQuote(s"$module/comm")}" },
       s"${serviceName}DAO ${doubleQuote(s"$module/dao")}",
-      doubleQuote(s"$module/util"),
-      s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
-      doubleQuote("github.com/gorilla/mux"),
+      //doubleQuote(s"$module/util"),
+      //s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
+      //doubleQuote("github.com/gorilla/mux"),
     )
 
     mkCode("import", CodeWrap.parens.tabbed(standardImports, "", customImports))
@@ -40,6 +44,8 @@ object GoServiceMainGenerator {
       "func main() ",
       CodeWrap.curly.tabbed(
         mkCode.lines(
+          "",
+          /*
           s"""configPtr := flag.String("config", "/etc/$serviceName-service/config.json", "configuration filepath")""",
           "flag.Parse()",
           "",
@@ -82,6 +88,7 @@ object GoServiceMainGenerator {
           "r.Use(jsonMiddleware)",
           "",
           s"""log.Fatal(http.ListenAndServe(":$port", r))""",
+         */
         ),
       ),
     )
