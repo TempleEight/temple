@@ -1,6 +1,5 @@
 package temple.builder.project
 
-import temple.ast
 import temple.ast.AttributeType._
 import temple.ast.Metadata.Database
 import temple.ast._
@@ -11,31 +10,31 @@ object ProjectBuilderTestData {
 
   private val simpleServiceAttributes = ListMap(
     "intField"      -> Attribute(IntType()),
-    "doubleField"   -> ast.Attribute(FloatType()),
-    "stringField"   -> ast.Attribute(StringType()),
-    "boolField"     -> ast.Attribute(BoolType),
-    "dateField"     -> ast.Attribute(DateType),
-    "timeField"     -> ast.Attribute(TimeType),
-    "dateTimeField" -> ast.Attribute(DateTimeType),
-    "blobField"     -> ast.Attribute(BlobType()),
+    "doubleField"   -> Attribute(FloatType()),
+    "stringField"   -> Attribute(StringType()),
+    "boolField"     -> Attribute(BoolType),
+    "dateField"     -> Attribute(DateType),
+    "timeField"     -> Attribute(TimeType),
+    "dateTimeField" -> Attribute(DateTimeType),
+    "blobField"     -> Attribute(BlobType()),
   )
 
   private val complexServiceAttributes = ListMap(
-    "smallIntField"      -> ast.Attribute(IntType(max = Some(100), min = Some(10), precision = 2)),
-    "intField"           -> ast.Attribute(IntType(max = Some(100), min = Some(10))),
-    "bigIntField"        -> ast.Attribute(IntType(max = Some(100), min = Some(10), precision = 8)),
-    "floatField"         -> ast.Attribute(FloatType(max = Some(300), min = Some(0), precision = 4)),
-    "doubleField"        -> ast.Attribute(FloatType(max = Some(123), min = Some(0))),
-    "stringField"        -> ast.Attribute(StringType(max = None, min = Some(1))),
-    "boundedStringField" -> ast.Attribute(StringType(max = Some(5), min = Some(0))),
-    "boolField"          -> ast.Attribute(BoolType),
-    "dateField"          -> ast.Attribute(DateType),
-    "timeField"          -> ast.Attribute(TimeType),
-    "dateTimeField"      -> ast.Attribute(DateTimeType),
-    "blobField"          -> ast.Attribute(BlobType()),
+    "smallIntField"      -> Attribute(IntType(max = Some(100), min = Some(10), precision = 2)),
+    "intField"           -> Attribute(IntType(max = Some(100), min = Some(10))),
+    "bigIntField"        -> Attribute(IntType(max = Some(100), min = Some(10), precision = 8)),
+    "floatField"         -> Attribute(FloatType(max = Some(300), min = Some(0), precision = 4)),
+    "doubleField"        -> Attribute(FloatType(max = Some(123), min = Some(0))),
+    "stringField"        -> Attribute(StringType(max = None, min = Some(1))),
+    "boundedStringField" -> Attribute(StringType(max = Some(5), min = Some(0))),
+    "boolField"          -> Attribute(BoolType),
+    "dateField"          -> Attribute(DateType),
+    "timeField"          -> Attribute(TimeType),
+    "dateTimeField"      -> Attribute(DateTimeType),
+    "blobField"          -> Attribute(BlobType()),
   )
 
-  val simpleTemplefile: Templefile = ast.Templefile(
+  val simpleTemplefile: Templefile = Templefile(
     "SampleProject",
     ProjectBlock(),
     Map(),
@@ -44,7 +43,7 @@ object ProjectBuilderTestData {
     ),
   )
 
-  val simpleTemplefilePostgresProject: Templefile = ast.Templefile(
+  val simpleTemplefilePostgresProject: Templefile = Templefile(
     "SampleProject",
     ProjectBlock(Seq(Database.Postgres)),
     Map(),
@@ -53,7 +52,7 @@ object ProjectBuilderTestData {
     ),
   )
 
-  val simpleTemplefilePostgresService: Templefile = ast.Templefile(
+  val simpleTemplefilePostgresService: Templefile = Templefile(
     "SampleProject",
     ProjectBlock(),
     Map(),
@@ -94,7 +93,7 @@ object ProjectBuilderTestData {
       |EXPOSE 1024
       |""".stripMargin
 
-  val complexTemplefile: Templefile = ast.Templefile(
+  val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
     ProjectBlock(),
     Map(),

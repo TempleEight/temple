@@ -1,7 +1,6 @@
 package temple.builder
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.ast
 import temple.ast.Metadata.ServiceLanguage
 import temple.ast.{ProjectBlock, Templefile}
 
@@ -27,7 +26,7 @@ class DockerfileBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "generate a Dockerfile for complex Go project" in {
-    val templefile = ast.Templefile(
+    val templefile = Templefile(
       "ExampleProject",
       ProjectBlock(Seq(ServiceLanguage.Go)),
       targets = Map(),
@@ -42,7 +41,7 @@ class DockerfileBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "generate a Dockerfile for Go if no language is specified" in {
-    val templefile = ast.Templefile(
+    val templefile = Templefile(
       "ExampleProject",
       ProjectBlock(),
       targets = Map(),

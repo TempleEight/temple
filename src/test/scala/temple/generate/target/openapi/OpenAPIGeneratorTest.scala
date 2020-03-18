@@ -3,7 +3,6 @@ package temple.generate.target.openapi
 import io.circe.syntax._
 import io.circe.yaml.syntax.AsYaml
 import org.scalatest.{FlatSpec, Matchers}
-import temple.ast
 import temple.ast.AttributeType._
 import temple.ast.{Annotation, Attribute}
 import temple.generate.CRUD
@@ -41,15 +40,15 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         CRUD.values.toSet,
         ListMap(
           "a" -> Attribute(IntType()),
-          "b" -> ast.Attribute(FloatType()),
-          "c" -> ast.Attribute(BoolType),
-          "d" -> ast.Attribute(DateType),
-          "e" -> ast.Attribute(TimeType),
-          "f" -> ast.Attribute(DateTimeType, accessAnnotation = Some(Annotation.Server)),
-          "g" -> ast.Attribute(DateTimeType),
-          "h" -> ast.Attribute(BlobType(), accessAnnotation = Some(Annotation.ServerSet)),
-          "i" -> ast.Attribute(StringType(), accessAnnotation = Some(Annotation.Client)),
-          "j" -> ast.Attribute(ForeignKey("User")),
+          "b" -> Attribute(FloatType()),
+          "c" -> Attribute(BoolType),
+          "d" -> Attribute(DateType),
+          "e" -> Attribute(TimeType),
+          "f" -> Attribute(DateTimeType, accessAnnotation = Some(Annotation.Server)),
+          "g" -> Attribute(DateTimeType),
+          "h" -> Attribute(BlobType(), accessAnnotation = Some(Annotation.ServerSet)),
+          "i" -> Attribute(StringType(), accessAnnotation = Some(Annotation.Client)),
+          "j" -> Attribute(ForeignKey("User")),
         ),
       ),
     )

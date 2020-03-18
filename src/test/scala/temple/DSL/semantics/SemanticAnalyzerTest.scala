@@ -7,7 +7,6 @@ import temple.DSL.syntax
 import temple.DSL.syntax.Arg._
 import temple.DSL.syntax.{Args, DSLRootItem, Entry}
 import SemanticAnalyzerTest._
-import temple.ast
 import temple.ast.{Attribute, ProjectBlock, ServiceBlock, Templefile}
 
 class SemanticAnalyzerTest extends FlatSpec with Matchers {
@@ -48,15 +47,15 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
     ) shouldEqual mkTemplefileSemanticsWithUserService(
       ServiceBlock(
         Map(
-          "a" -> ast.Attribute(IntType()),
-          "b" -> ast.Attribute(FloatType()),
-          "c" -> ast.Attribute(BoolType),
-          "d" -> ast.Attribute(DateType),
-          "e" -> ast.Attribute(TimeType),
-          "f" -> ast.Attribute(DateTimeType),
-          "g" -> ast.Attribute(BlobType()),
-          "h" -> ast.Attribute(StringType()),
-          "i" -> ast.Attribute(ForeignKey("User")),
+          "a" -> Attribute(IntType()),
+          "b" -> Attribute(FloatType()),
+          "c" -> Attribute(BoolType),
+          "d" -> Attribute(DateType),
+          "e" -> Attribute(TimeType),
+          "f" -> Attribute(DateTimeType),
+          "g" -> Attribute(BlobType()),
+          "h" -> Attribute(StringType()),
+          "i" -> Attribute(ForeignKey("User")),
         ),
       ),
     )
@@ -408,7 +407,7 @@ object SemanticAnalyzerTest {
     DSLRootItem("Test", "project", Nil) +: rootItems
 
   private def mkTemplefileSemantics(entries: (String, ServiceBlock)*): Templefile =
-    ast.Templefile("Test", ProjectBlock(), Map.empty, entries.toMap)
+    Templefile("Test", ProjectBlock(), Map.empty, entries.toMap)
 
   private def mkTemplefileASTWithUserService(entries: Entry*): syntax.Templefile = Seq(
     DSLRootItem("Test", "project", Nil),
@@ -416,5 +415,5 @@ object SemanticAnalyzerTest {
   )
 
   private def mkTemplefileSemanticsWithUserService(serviceBlock: ServiceBlock): Templefile =
-    ast.Templefile("Test", ProjectBlock(), Map.empty, Map("User" -> serviceBlock))
+    Templefile("Test", ProjectBlock(), Map.empty, Map("User" -> serviceBlock))
 }
