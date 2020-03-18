@@ -4,6 +4,7 @@ import io.circe.Json
 import io.circe.syntax._
 import temple.generate.JsonEncodable
 
+import scala.collection.immutable.ListMap
 import scala.collection.mutable
 
 case class Path(handlers: Map[HTTPVerb, Handler], parameters: Seq[Parameter] = Seq()) extends JsonEncodable.Object {
@@ -14,7 +15,10 @@ case class Path(handlers: Map[HTTPVerb, Handler], parameters: Seq[Parameter] = S
 
 object Path {
 
-  case class Mutable(handlers: mutable.Map[HTTPVerb, Handler] = mutable.Map(), parameters: Seq[Parameter] = Seq()) {
-    def toPath: Path = Path(handlers.toMap, parameters)
+  case class Mutable(
+    handlers: mutable.Map[HTTPVerb, Handler] = mutable.LinkedHashMap(),
+    parameters: Seq[Parameter] = Seq(),
+  ) {
+    def toPath: Path = Path(handlers.to(ListMap), parameters)
   }
 }
