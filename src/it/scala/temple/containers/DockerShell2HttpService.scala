@@ -4,16 +4,17 @@ import com.whisk.docker.{DockerCommandExecutor, DockerContainer, DockerContainer
 import org.scalatest.FlatSpec
 import scalaj.http.Http
 
-import scala.concurrent.{ExecutionContext, Future}
 import scala.concurrent.duration._
+import scala.concurrent.{ExecutionContext, Future}
 
 /** DockerShell2HttpService configures a docker container for our custom Shell2Http container */
 abstract class DockerShell2HttpService(externalPort: Int) extends FlatSpec with DockerKit {
-  val image             = "jaylees/templeeight-shell2http:1.3"
+  val image             = "jaylees/templeeight-shell2http:1.4"
   val internalPort      = 8080
   val hadolintVerifyUrl = s"http://localhost:$externalPort/hadolint"
   val golangVerifyUrl   = s"http://localhost:$externalPort/go"
   val swaggerVerifyUrl  = s"http://localhost:$externalPort/swagger"
+  val kubeVerifyUrl     = s"http://localhost:$externalPort/kube"
 
   val shell2HttpContainer: DockerContainer = DockerContainer(image)
     .withPorts(internalPort -> Some(externalPort))
