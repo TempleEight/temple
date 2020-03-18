@@ -1,9 +1,9 @@
 package temple.DSL.semantics
 
+import temple.DSL.semantics.ErrorHandling._
 import temple.DSL.syntax
 import temple.DSL.syntax.{Arg, Args, DSLRootItem, Entry}
 import temple.ast.ArgType._
-import ErrorHandling.{BlockContext, Context, KeyName, assertNoParameters, fail, failThrower}
 import temple.ast.Metadata._
 import temple.ast._
 import temple.utils.MapUtils._
