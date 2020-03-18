@@ -14,6 +14,9 @@ object GoAuthServiceGeneratorTestData {
   val authServiceFiles: Map[File, FileContent] = Map(
     File("auth", "go.mod")  -> readFile("src/test/scala/temple/generate/server/go/testfiles/auth/go.mod.snippet"),
     File("auth", "auth.go") -> readFile("src/test/scala/temple/generate/server/go/testfiles/auth/auth.go.snippet"),
+    File("auth/dao", "errors.go") -> readFile(
+      "src/test/scala/temple/generate/server/go/testfiles/auth/dao/errors.go.snippet",
+    ),
     File("auth/comm", "handler.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/auth/comm/handler.go.snippet",
     ),
