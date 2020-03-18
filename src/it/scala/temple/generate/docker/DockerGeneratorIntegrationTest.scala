@@ -1,10 +1,9 @@
 package temple.generate.docker
 
 import org.scalatest.{BeforeAndAfter, Matchers}
-import temple.DSL.semantics.{ProjectBlock, ServiceBlock, Templefile}
+import temple.ast.{ProjectBlock, Templefile}
 import temple.builder.DockerfileBuilder
 import temple.containers.HadolintSpec
-import temple.generate.DockerGeneratorIntegrationTestData
 import temple.generate.docker.ast.DockerfileRoot
 import temple.generate.docker.ast.Statement._
 

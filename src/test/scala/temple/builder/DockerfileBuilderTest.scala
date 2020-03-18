@@ -1,8 +1,8 @@
 package temple.builder
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.DSL.semantics.Metadata.ServiceLanguage
-import temple.DSL.semantics.{ProjectBlock, Templefile}
+import temple.ast.Metadata.ServiceLanguage
+import temple.ast.{ProjectBlock, Templefile}
 
 class DockerfileBuilderTest extends FlatSpec with Matchers {
 

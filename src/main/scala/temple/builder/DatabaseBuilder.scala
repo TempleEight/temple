@@ -1,7 +1,7 @@
 package temple.builder
 
-import temple.DSL.semantics.Annotation.Nullable
-import temple.DSL.semantics.{Annotation, Attribute, AttributeType, ServiceBlock}
+import temple.ast.Annotation.Nullable
+import temple.ast.{Annotation, Attribute, AttributeType, ServiceBlock}
 import temple.generate.database.ast.ColumnConstraint.Check
 import temple.generate.database.ast._
 import temple.utils.StringUtils

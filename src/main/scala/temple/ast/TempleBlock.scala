@@ -1,4 +1,4 @@
-package temple.DSL.semantics
+package temple.ast
 
 import scala.reflect.ClassTag
 
@@ -12,15 +12,16 @@ abstract class TempleBlock[M <: Metadata] {
   private var parent: Templefile = _
 
   /** Set the parent that this Templefile is within */
-  final private[semantics] def setParent(templefile: Templefile): Unit = parent = templefile
+  final private[temple] def setParent(templefile: Templefile): Unit = parent = templefile
 
   /** Fall back to the default metadata for the project */
   final private def lookupDefaultMetadata[T <: Metadata: ClassTag]: Option[T] = {
-    if (parent == null)
+    if (parent == null) {
       throw new NullPointerException(
         "Cannot lookup metadata: block not registered as part of a Templefile. " +
         "Use lookupLocalMetadata if this was intentional",
       )
+    }
     Option.when(parent.projectBlock != this)(parent) flatMap { _.projectBlock.lookupMetadata[T] }
   }
 

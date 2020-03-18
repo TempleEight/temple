@@ -1,16 +1,17 @@
 package temple.DSL.semantics
 
-import temple.DSL.semantics.ArgType._
-import temple.DSL.semantics.ErrorHandling.{BlockContext, Context, KeyName, assertNoParameters, fail, failThrower}
-import temple.DSL.semantics.Metadata._
+import temple.DSL.semantics.ErrorHandling._
 import temple.DSL.syntax
 import temple.DSL.syntax.{Arg, Args, DSLRootItem, Entry}
+import temple.ast.ArgType._
+import temple.ast.Metadata._
+import temple.ast._
 import temple.utils.MapUtils._
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
 
-object Analyser {
+object Analyzer {
 
   /**
     * Convert a sequence of arguments, some of which are named, into a map from name to value
@@ -182,7 +183,7 @@ object Analyser {
     *
     * @param entries The list of entries in the block from the AST
     * @param context The location in the AST, used for error messages
-    * @return A semantic representation of a [[temple.DSL.semantics.ServiceBlock]]
+    * @return A semantic representation of a [[temple.ast.ServiceBlock]]
     */
   private def parseServiceBlock(entries: Seq[Entry])(implicit context: BlockContext): ServiceBlock = {
     // LinkedHashMap is used to preserve order in the map
