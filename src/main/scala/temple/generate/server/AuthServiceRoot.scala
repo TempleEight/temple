@@ -1,3 +1,3 @@
-package temple.generate.service
+package temple.generate.server
 
 case class AuthServiceRoot(module: String, port: Int)

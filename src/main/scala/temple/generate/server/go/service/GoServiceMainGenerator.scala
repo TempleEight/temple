@@ -1,7 +1,7 @@
-package temple.generate.service.go
+package temple.generate.server.go.service
 
 import temple.generate.CRUD
-import temple.generate.service.ServiceGenerator
+import temple.generate.server.ServiceGenerator
 import temple.generate.utils.CodeTerm
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote

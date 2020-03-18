@@ -1,4 +1,4 @@
-package temple.generate.service.go
+package temple.generate.server.go.service
 
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.FileUtils

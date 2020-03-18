@@ -1,4 +1,4 @@
-package temple.generate.service.go.auth
+package temple.generate.server.go.auth
 
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote

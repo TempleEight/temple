@@ -1,4 +1,4 @@
-package temple.generate.service
+package temple.generate.server
 
 import temple.generate.CRUD
 

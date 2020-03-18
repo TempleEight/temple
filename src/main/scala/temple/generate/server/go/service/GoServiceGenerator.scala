@@ -1,8 +1,8 @@
-package temple.generate.service.go
+package temple.generate.server.go.service
 
-import temple.generate.service.go.common._
 import temple.generate.FileSystem._
-import temple.generate.service.{ServiceGenerator, ServiceRoot}
+import temple.generate.server.go.common._
+import temple.generate.server.{ServiceGenerator, ServiceRoot}
 import temple.generate.utils.CodeTerm.mkCode
 
 import scala.Option.when
