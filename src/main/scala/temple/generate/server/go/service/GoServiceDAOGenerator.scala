@@ -3,7 +3,7 @@ package temple.generate.server.go.service
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.FileUtils
 
-object GoServiceDaoGenerator {
+object GoServiceDAOGenerator {
 
   private[go] def generateImports(module: String): String = mkCode(
     "import",

@@ -42,12 +42,12 @@ object GoServiceGenerator extends ServiceGenerator {
           serviceRoot.operations,
         ),
       ),
-      File(s"${serviceRoot.name}/dao", "errors.go") -> GoServiceDaoGenerator.generateErrors(serviceRoot.name),
+      File(s"${serviceRoot.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(serviceRoot.name),
       File(s"${serviceRoot.name}/dao", "dao.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("dao"),
-        GoServiceDaoGenerator.generateImports(serviceRoot.module),
-        GoServiceDaoGenerator.generateStructs(),
-        GoServiceDaoGenerator.generateInit(),
+        GoServiceDAOGenerator.generateImports(serviceRoot.module),
+        GoServiceDAOGenerator.generateStructs(),
+        GoServiceDAOGenerator.generateInit(),
       ),
       File(s"${serviceRoot.name}/util", "util.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("util"),
