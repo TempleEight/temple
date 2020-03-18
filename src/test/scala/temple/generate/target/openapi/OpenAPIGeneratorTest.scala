@@ -6,8 +6,9 @@ import org.scalatest.{FlatSpec, Matchers}
 import temple.ast
 import temple.ast.AttributeType._
 import temple.ast.{Annotation, Attribute}
-import temple.generate.Endpoint
+import temple.generate.CRUD
 import temple.generate.target.openapi.OpenAPIGenerator.generateError
+import temple.generate.target.openapi.ast.{Response, Service}
 
 import scala.collection.immutable.ListMap
 
@@ -37,7 +38,7 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
     val openAPI = OpenAPIGenerator.render("x", "0.1.2")(
       Service(
         "match",
-        Endpoint.values.toSet,
+        CRUD.values.toSet,
         ListMap(
           "a" -> Attribute(IntType()),
           "b" -> ast.Attribute(FloatType()),
@@ -130,18 +131,18 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |        '500':
         |          $ref: '#/components/responses/Error500'
         |  /match/{id}:
+        |    parameters:
+        |    - in: path
+        |      name: id
+        |      schema:
+        |        type: number
+        |        format: int32
+        |      required: true
+        |      description: ID of the match to perform operations on
         |    get:
         |      summary: Look up a single match
         |      tags:
         |      - Match
-        |      parameters:
-        |      - in: path
-        |        name: id
-        |        schema:
-        |          type: number
-        |          format: int32
-        |        required: true
-        |        description: ID of the match to get
         |      responses:
         |        '200':
         |          description: Match details

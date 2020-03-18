@@ -6,11 +6,12 @@ import temple.ast.AttributeType._
 import temple.ast.Annotation
 import temple.ast.Attribute
 import temple.collection.FlagMapView
-import temple.generate.Endpoint._
-import temple.generate.target.openapi.OpenAPIFile.{Components, Info}
+import temple.generate.CRUD._
 import temple.generate.target.openapi.OpenAPIGenerator._
-import temple.generate.target.openapi.OpenAPIType._
-import temple.generate.target.openapi.Parameter.InPath
+import temple.generate.target.openapi.ast.OpenAPIFile.{Components, Info}
+import temple.generate.target.openapi.ast.OpenAPIType._
+import temple.generate.target.openapi.ast.Parameter.InPath
+import temple.generate.target.openapi.ast._
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
@@ -26,10 +27,21 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     ),
   )
 
-  private val paths = mutable.Map[String, mutable.Map[HTTPVerb, Handler]]()
+  private val paths = mutable.Map[String, Path.Mutable]()
 
   private def path(url: String): mutable.Map[HTTPVerb, Handler] =
-    paths.getOrElseUpdate(url, mutable.Map())
+    paths.getOrElseUpdate(url, Path.Mutable()).handlers
+
+  private def pathWithID(url: String, lowerName: String): mutable.Map[HTTPVerb, Handler] = {
+    val parameter = Parameter(
+      InPath,
+      name = "id",
+      required = Some(true),
+      schema = OpenAPISimpleType("number", "int32"),
+      description = s"ID of the $lowerName to perform operations on",
+    )
+    paths.getOrElseUpdate(url, Path.Mutable(parameters = Seq(parameter))).handlers
+  }
 
   private def isServerAttribute(attribute: Attribute): Boolean = attribute.accessAnnotation contains Annotation.Server
 
@@ -78,7 +90,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     val lowerName       = service.name.toLowerCase
     val capitalizedName = service.name.capitalize
     val tags            = Seq(capitalizedName)
-    service.endpoints.foreach {
+    service.operations.foreach {
       case ReadAll =>
         path(s"/$lowerName/all") += HTTPVerb.Get -> Handler(
             s"Get a list of every $lowerName",
@@ -106,18 +118,9 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             ),
           )
       case Read =>
-        path(s"/$lowerName/{id}") += HTTPVerb.Get -> Handler(
+        pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Get -> Handler(
             s"Look up a single $lowerName",
             tags = tags,
-            parameters = Seq(
-              Parameter(
-                InPath,
-                name = "id",
-                required = Some(true),
-                schema = OpenAPISimpleType("number", "int32"),
-                description = s"ID of the $lowerName to get",
-              ),
-            ),
             responses = Map(
               200 -> BodyLiteral(
                 jsonContent(MediaTypeObject(generateItemType(service.attributes))),
@@ -142,7 +145,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
 
   def toOpenAPI: OpenAPIFile = OpenAPIFile(
     info = Info(name, version, description),
-    paths = paths.view.mapValues(_.toMap).toMap,
+    paths = paths.view.mapValues(_.toPath).toMap,
     components = Components(responses = errorBlock),
   )
 }
