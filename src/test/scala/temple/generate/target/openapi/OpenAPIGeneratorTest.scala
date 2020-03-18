@@ -130,18 +130,18 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |        '500':
         |          $ref: '#/components/responses/Error500'
         |  /match/{id}:
+        |    parameters:
+        |    - in: path
+        |      name: id
+        |      schema:
+        |        type: number
+        |        format: int32
+        |      required: true
+        |      description: ID of the match to perform operations on
         |    get:
         |      summary: Look up a single match
         |      tags:
         |      - Match
-        |      parameters:
-        |      - in: path
-        |        name: id
-        |        schema:
-        |          type: number
-        |          format: int32
-        |        required: true
-        |        description: ID of the match to get
         |      responses:
         |        '200':
         |          description: Match details
