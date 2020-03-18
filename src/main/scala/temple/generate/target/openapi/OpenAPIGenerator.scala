@@ -19,6 +19,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
 
   private val errorTracker = FlagMapView(
     400 -> generateError("Invalid request", "Invalid request parameters: name"),
+    401 -> generateError("Valid request but forbidden by server", "Not authorised to create this object"),
     404 -> generateError("ID not found", "Object not found with ID 1"),
     500 -> generateError(
       "The server encountered an error while serving this request",
@@ -113,6 +114,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
                 s"$capitalizedName successfully created",
               ),
               400 -> Response.Ref(useError(400)),
+              401 -> Response.Ref(useError(401)),
               500 -> Response.Ref(useError(500)),
             ),
           )
@@ -126,11 +128,42 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
                 s"$capitalizedName details",
               ),
               400 -> Response.Ref(useError(400)),
+              401 -> Response.Ref(useError(401)),
+              404 -> Response.Ref(useError(404)),
               500 -> Response.Ref(useError(500)),
             ),
           )
-      case Update => // TODO in future PR
-      case Delete => // TODO in future PR
+      case Update =>
+        pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Put -> Handler(
+            s"Update a single $lowerName",
+            tags = tags,
+            requestBody = Some(BodyLiteral(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
+            responses = Map(
+              200 -> BodyLiteral(
+                jsonContent(MediaTypeObject(generateItemType(service.attributes))),
+                s"$capitalizedName successfully updated",
+              ),
+              400 -> Response.Ref(useError(400)),
+              401 -> Response.Ref(useError(401)),
+              404 -> Response.Ref(useError(404)),
+              500 -> Response.Ref(useError(500)),
+            ),
+          )
+      case Delete =>
+        pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Delete -> Handler(
+            s"Delete a single $lowerName",
+            tags = tags,
+            responses = Map(
+              200 -> BodyLiteral(
+                jsonContent(MediaTypeObject(OpenAPIObject(Map()))),
+                s"$capitalizedName successfully deleted",
+              ),
+              400 -> Response.Ref(useError(400)),
+              401 -> Response.Ref(useError(401)),
+              404 -> Response.Ref(useError(404)),
+              500 -> Response.Ref(useError(500)),
+            ),
+          )
     }
     this
   }
