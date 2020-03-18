@@ -17,5 +17,8 @@ object GoAuthServiceGeneratorTestData {
     File("auth/comm", "handler.go") -> readFile(
       "src/test/scala/temple/generate/service/go/testfiles/auth/comm/handler.go.snippet",
     ),
+    File("auth/util", "util.go") -> readFile(
+      "src/test/scala/temple/generate/service/go/testfiles/auth/util/util.go.snippet",
+    ),
   )
 }

@@ -33,5 +33,12 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoCommonCommGenerator.generateInit(),
         GoAuthServiceCommGenerator.generateCreateJWTCredential(),
       ),
+      File("auth/util", "util.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("util"),
+        GoAuthServiceUtilGenerator.generateImports(),
+        GoCommonUtilGenerator.generateStructs(),
+        GoCommonUtilGenerator.generateGetConfig(),
+        GoCommonUtilGenerator.generateCreateErrorJSON(),
+      ),
     ).map { case (path, contents) => path -> (contents + "\n") }
 }
