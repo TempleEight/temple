@@ -37,7 +37,7 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
     val openAPI = OpenAPIGenerator.render("x", "0.1.2")(
       Service(
         "match",
-        CRUD.values.toSet,
+        CRUD.values,
         ListMap(
           "a" -> Attribute(IntType()),
           "b" -> Attribute(FloatType()),
@@ -58,6 +58,48 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |  title: x
         |  version: 0.1.2
         |paths:
+        |  /match/all:
+        |    get:
+        |      summary: Get a list of every match
+        |      tags:
+        |      - Match
+        |      responses:
+        |        '200':
+        |          description: Match list successfully fetched
+        |          content:
+        |            application/json:
+        |              schema:
+        |                type: array
+        |                items:
+        |                  type: object
+        |                  properties:
+        |                    a:
+        |                      type: number
+        |                      format: int32
+        |                    b:
+        |                      type: number
+        |                      format: double
+        |                    c:
+        |                      type: boolean
+        |                    d:
+        |                      type: string
+        |                      format: date
+        |                    e:
+        |                      type: string
+        |                      format: time
+        |                    g:
+        |                      type: string
+        |                      format: date-time
+        |                    h:
+        |                      type: string
+        |                    i:
+        |                      type: string
+        |                    j:
+        |                      type: number
+        |                      format: int32
+        |                      description: Reference to User ID
+        |        '500':
+        |          $ref: '#/components/responses/Error500'
         |  /match:
         |    post:
         |      summary: Register a new match
@@ -140,39 +182,11 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |        format: int32
         |      required: true
         |      description: ID of the match to perform operations on
-        |    delete:
-        |      summary: Delete a single match
-        |      tags:
-        |      - Match
-        |      responses:
-        |        '500':
-        |          $ref: '#/components/responses/Error500'
-        |        '404':
-        |          $ref: '#/components/responses/Error404'
-        |        '401':
-        |          $ref: '#/components/responses/Error401'
-        |        '400':
-        |          $ref: '#/components/responses/Error400'
-        |        '200':
-        |          description: Match successfully deleted
-        |          content:
-        |            application/json:
-        |              schema:
-        |                type: object
-        |                properties: {}
         |    get:
         |      summary: Look up a single match
         |      tags:
         |      - Match
         |      responses:
-        |        '500':
-        |          $ref: '#/components/responses/Error500'
-        |        '404':
-        |          $ref: '#/components/responses/Error404'
-        |        '401':
-        |          $ref: '#/components/responses/Error401'
-        |        '400':
-        |          $ref: '#/components/responses/Error400'
         |        '200':
         |          description: Match details
         |          content:
@@ -205,6 +219,14 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                    type: number
         |                    format: int32
         |                    description: Reference to User ID
+        |        '400':
+        |          $ref: '#/components/responses/Error400'
+        |        '401':
+        |          $ref: '#/components/responses/Error401'
+        |        '404':
+        |          $ref: '#/components/responses/Error404'
+        |        '500':
+        |          $ref: '#/components/responses/Error500'
         |    put:
         |      summary: Update a single match
         |      tags:
@@ -239,14 +261,6 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                  format: int32
         |                  description: Reference to User ID
         |      responses:
-        |        '500':
-        |          $ref: '#/components/responses/Error500'
-        |        '404':
-        |          $ref: '#/components/responses/Error404'
-        |        '401':
-        |          $ref: '#/components/responses/Error401'
-        |        '400':
-        |          $ref: '#/components/responses/Error400'
         |        '200':
         |          description: Match successfully updated
         |          content:
@@ -279,46 +293,32 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                    type: number
         |                    format: int32
         |                    description: Reference to User ID
-        |  /match/all:
-        |    get:
-        |      summary: Get a list of every match
+        |        '400':
+        |          $ref: '#/components/responses/Error400'
+        |        '401':
+        |          $ref: '#/components/responses/Error401'
+        |        '404':
+        |          $ref: '#/components/responses/Error404'
+        |        '500':
+        |          $ref: '#/components/responses/Error500'
+        |    delete:
+        |      summary: Delete a single match
         |      tags:
         |      - Match
         |      responses:
         |        '200':
-        |          description: Match list successfully fetched
+        |          description: Match successfully deleted
         |          content:
         |            application/json:
         |              schema:
-        |                type: array
-        |                items:
-        |                  type: object
-        |                  properties:
-        |                    a:
-        |                      type: number
-        |                      format: int32
-        |                    b:
-        |                      type: number
-        |                      format: double
-        |                    c:
-        |                      type: boolean
-        |                    d:
-        |                      type: string
-        |                      format: date
-        |                    e:
-        |                      type: string
-        |                      format: time
-        |                    g:
-        |                      type: string
-        |                      format: date-time
-        |                    h:
-        |                      type: string
-        |                    i:
-        |                      type: string
-        |                    j:
-        |                      type: number
-        |                      format: int32
-        |                      description: Reference to User ID
+        |                type: object
+        |                properties: {}
+        |        '400':
+        |          $ref: '#/components/responses/Error400'
+        |        '401':
+        |          $ref: '#/components/responses/Error401'
+        |        '404':
+        |          $ref: '#/components/responses/Error404'
         |        '500':
         |          $ref: '#/components/responses/Error500'
         |components:

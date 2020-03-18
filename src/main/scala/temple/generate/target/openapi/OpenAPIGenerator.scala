@@ -28,7 +28,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     ),
   )
 
-  private val paths = mutable.Map[String, Path.Mutable]()
+  private val paths = mutable.LinkedHashMap[String, Path.Mutable]()
 
   private def path(url: String): mutable.Map[HTTPVerb, Handler] =
     paths.getOrElseUpdate(url, Path.Mutable()).handlers
@@ -96,7 +96,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         path(s"/$lowerName/all") += HTTPVerb.Get -> Handler(
             s"Get a list of every $lowerName",
             tags = tags,
-            responses = Map(
+            responses = Seq(
               200 -> BodyLiteral(
                 jsonContent(MediaTypeObject(OpenAPIArray(generateItemType(service.attributes)))),
                 s"$capitalizedName list successfully fetched",
@@ -109,7 +109,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             s"Register a new $lowerName",
             tags = tags,
             requestBody = Some(BodyLiteral(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
-            responses = Map(
+            responses = Seq(
               200 -> BodyLiteral(
                 jsonContent(MediaTypeObject(generateItemType(service.attributes))),
                 s"$capitalizedName successfully created",
@@ -123,7 +123,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Get -> Handler(
             s"Look up a single $lowerName",
             tags = tags,
-            responses = Map(
+            responses = Seq(
               200 -> BodyLiteral(
                 jsonContent(MediaTypeObject(generateItemType(service.attributes))),
                 s"$capitalizedName details",
@@ -139,7 +139,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             s"Update a single $lowerName",
             tags = tags,
             requestBody = Some(BodyLiteral(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
-            responses = Map(
+            responses = Seq(
               200 -> BodyLiteral(
                 jsonContent(MediaTypeObject(generateItemType(service.attributes))),
                 s"$capitalizedName successfully updated",
@@ -154,7 +154,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Delete -> Handler(
             s"Delete a single $lowerName",
             tags = tags,
-            responses = Map(
+            responses = Seq(
               200 -> BodyLiteral(
                 jsonContent(MediaTypeObject(OpenAPIObject(Map()))),
                 s"$capitalizedName successfully deleted",
@@ -178,7 +178,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
 
   def toOpenAPI: OpenAPIFile = OpenAPIFile(
     info = Info(name, version, description),
-    paths = paths.view.mapValues(_.toPath).toMap,
+    paths = paths.view.mapValues(_.toPath).to(ListMap),
     components = Components(responses = errorBlock),
   )
 }
