@@ -10,6 +10,8 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
   override def generate(authServiceRoot: AuthServiceRoot): Map[File, FileContent] =
     /* TODO
      * auth.go main
+     * dao.go
+     * config.json
      */
     Map(
       File("auth", "go.mod") -> GoCommonGenerator.generateMod(authServiceRoot.module),

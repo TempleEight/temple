@@ -12,8 +12,10 @@ object GoServiceGenerator extends ServiceGenerator {
 
   override def generate(serviceRoot: ServiceRoot): Map[File, FileContent] = {
     /* TODO
+     * main in <>.go
      * handlers in <>.go
-     * structs and methods in dao.go
+     * dao.go
+     * handler.go
      * config.json
      */
     val usesComms = serviceRoot.comms.nonEmpty
