@@ -1,6 +1,6 @@
 package temple.generate.service.go
 
-import temple.generate.Endpoint
+import temple.generate.CRUD
 import temple.generate.service.ServiceGenerator
 import temple.generate.utils.CodeTerm
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -13,14 +13,18 @@ object GoServiceMainGenerator {
   /** Given a service name, module name and whether the service uses inter-service communication, return the import
     * block */
   private[go] def generateImports(serviceName: String, module: String, usesComms: Boolean): String = {
-    val standardImports = Seq("flag", "log", "net/http").map(doubleQuote)
+    val standardImports = Seq(
+      //"flag",
+      //"log",
+      "net/http",
+    ).map(doubleQuote)
 
     val customImports = Seq[CodeTerm](
       when(usesComms) { s"${serviceName}Comm ${doubleQuote(s"$module/comm")}" },
       s"${serviceName}DAO ${doubleQuote(s"$module/dao")}",
-      doubleQuote(s"$module/util"),
-      s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
-      doubleQuote("github.com/gorilla/mux"),
+      //doubleQuote(s"$module/util"),
+      //s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
+      //doubleQuote("github.com/gorilla/mux"),
     )
 
     mkCode("import", CodeWrap.parens.tabbed(standardImports, "", customImports))
@@ -33,13 +37,15 @@ object GoServiceMainGenerator {
       when(usesComms) { s"var comm ${serviceName}Comm.Handler" },
     )
 
-  /** Given a service name, whether the service uses inter-service communication, the endpoints desired and the port
+  /** Given a service name, whether the service uses inter-service communication, the operations desired and the port
     * number, generate the main function */
-  private[go] def generateMain(serviceName: String, usesComms: Boolean, endpoints: Set[Endpoint], port: Int): String =
+  private[go] def generateMain(serviceName: String, usesComms: Boolean, operations: Set[CRUD], port: Int): String =
     mkCode(
       "func main() ",
       CodeWrap.curly.tabbed(
         mkCode.lines(
+          "",
+          /*
           s"""configPtr := flag.String("config", "/etc/$serviceName-service/config.json", "configuration filepath")""",
           "flag.Parse()",
           "",
@@ -61,37 +67,38 @@ object GoServiceMainGenerator {
             )
           },
           "r := mux.NewRouter()",
-          when(endpoints.contains(Endpoint.ReadAll)) {
+          when(operations.contains(CRUD.ReadAll)) {
             mkCode.lines(
               "// Mux directs to first matching route, i.e. the order matters",
               s"""r.HandleFunc("/$serviceName/all", ${serviceName}ListHandler).Methods(http.MethodGet)""",
             )
           },
-          when(endpoints.contains(Endpoint.Create)) {
+          when(operations.contains(CRUD.Create)) {
             s"""r.HandleFunc("/$serviceName", ${serviceName}CreateHandler).Methods(http.MethodPost)"""
           },
-          when(endpoints.contains(Endpoint.Read)) {
+          when(operations.contains(CRUD.Read)) {
             s"""r.HandleFunc("/$serviceName/{id}", ${serviceName}ReadHandler).Methods(http.MethodGet)"""
           },
-          when(endpoints.contains(Endpoint.Update)) {
+          when(operations.contains(CRUD.Update)) {
             s"""r.HandleFunc("/$serviceName/{id}", ${serviceName}UpdateHandler).Methods(http.MethodPut)"""
           },
-          when(endpoints.contains(Endpoint.Delete)) {
+          when(operations.contains(CRUD.Delete)) {
             s"""r.HandleFunc("/$serviceName/{id}", ${serviceName}DeleteHandler).Methods(http.MethodDelete)"""
           },
           "r.Use(jsonMiddleware)",
           "",
           s"""log.Fatal(http.ListenAndServe(":$port", r))""",
+         */
         ),
       ),
     )
 
-  private[go] def generateHandler(serviceName: String, endpoint: Endpoint): String =
+  private[go] def generateHandler(serviceName: String, endpoint: CRUD): String =
     s"func $serviceName${ServiceGenerator.verb(endpoint)}Handler(w http.ResponseWriter, r *http.Request) {}"
 
-  private[go] def generateHandlers(serviceName: String, endpoints: Set[Endpoint]): String =
+  private[go] def generateHandlers(serviceName: String, operations: Set[CRUD]): String =
     mkCode.doubleLines(
-      for (endpoint <- Endpoint.values if endpoints.contains(endpoint))
-        yield generateHandler(serviceName, endpoint),
+      for (operation <- CRUD.values if operations.contains(operation))
+        yield generateHandler(serviceName, operation),
     )
 }
