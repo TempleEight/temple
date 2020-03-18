@@ -6,7 +6,7 @@ import temple.utils.MapUtils.FailThrower
 object ErrorHandling {
 
   /**
-    * Throws an exception about the semantic analyzis.
+    * Throws an exception about the semantic analysis.
     * @param str A string representation of the error
     * @return never returns
     */
