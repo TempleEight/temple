@@ -1,7 +1,7 @@
 package temple.generate.server.go.auth
 
-import temple.generate.server.AuthServiceRoot
 import temple.generate.FileSystem._
+import temple.generate.server.AuthServiceRoot
 import temple.utils.FileUtils._
 
 object GoAuthServiceGeneratorTestData {
