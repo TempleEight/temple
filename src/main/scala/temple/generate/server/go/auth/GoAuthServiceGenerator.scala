@@ -10,7 +10,8 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
   override def generate(authServiceRoot: AuthServiceRoot): Map[File, FileContent] =
     /* TODO
      * auth.go main
-     * auth.go handlers
+     * dao.go
+     * config.json
      */
     Map(
       File("auth", "go.mod") -> GoCommonGenerator.generateMod(authServiceRoot.module),
@@ -26,6 +27,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceMainGenerator.generateHandlers(),
         GoAuthServiceMainGenerator.generateCreateToken(),
       ),
+      File("auth/dao", "errors.go") -> GoAuthServiceDAOGenerator.generateErrors(),
       File("auth/comm", "handler.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("comm"),
         GoAuthServiceCommGenerator.generateImports(authServiceRoot.module),
