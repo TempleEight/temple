@@ -5,5 +5,5 @@ import temple.utils.FileUtils
 object GoCommonCommGenerator {
 
   private[go] def generateInit(): String =
-    FileUtils.readResources("go/genFiles/common/comm_init.go.snippet").stripLineEnd
+    FileUtils.readResources("go/genFiles/common/comm/init.go.snippet").stripLineEnd
 }
