@@ -1,4 +1,4 @@
-package temple.DSL.semantics
+package temple.ast
 
 /** The semantic representation of a Templefile */
 case class Templefile(

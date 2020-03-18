@@ -1,6 +1,6 @@
-package temple.DSL.semantics
+package temple.ast
 
-import temple.DSL.semantics.Metadata.StructMetadata
+import temple.ast.Metadata.StructMetadata
 
 /** A nested struct within a service, representing a second table/domain in the same datastore */
 case class StructBlock(

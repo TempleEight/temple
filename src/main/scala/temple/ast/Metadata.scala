@@ -1,4 +1,4 @@
-package temple.DSL.semantics
+package temple.ast
 
 import temple.collection.enumeration._
 

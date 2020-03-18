@@ -2,11 +2,13 @@ package temple.DSL.semantics
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.semantics.Analyser.parseSemantics
-import temple.DSL.semantics.AttributeType._
+import temple.ast.AttributeType._
 import temple.DSL.syntax
 import temple.DSL.syntax.Arg._
 import temple.DSL.syntax.{Args, DSLRootItem, Entry}
 import SemanticAnalyserTest._
+import temple.ast
+import temple.ast.{Attribute, ProjectBlock, ServiceBlock, Templefile}
 
 class SemanticAnalyserTest extends FlatSpec with Matchers {
 
@@ -46,15 +48,15 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
     ) shouldEqual mkTemplefileSemanticsWithUserService(
       ServiceBlock(
         Map(
-          "a" -> Attribute(IntType()),
-          "b" -> Attribute(FloatType()),
-          "c" -> Attribute(BoolType),
-          "d" -> Attribute(DateType),
-          "e" -> Attribute(TimeType),
-          "f" -> Attribute(DateTimeType),
-          "g" -> Attribute(BlobType()),
-          "h" -> Attribute(StringType()),
-          "i" -> Attribute(ForeignKey("User")),
+          "a" -> ast.Attribute(IntType()),
+          "b" -> ast.Attribute(FloatType()),
+          "c" -> ast.Attribute(BoolType),
+          "d" -> ast.Attribute(DateType),
+          "e" -> ast.Attribute(TimeType),
+          "f" -> ast.Attribute(DateTimeType),
+          "g" -> ast.Attribute(BlobType()),
+          "h" -> ast.Attribute(StringType()),
+          "i" -> ast.Attribute(ForeignKey("User")),
         ),
       ),
     )
@@ -406,7 +408,7 @@ object SemanticAnalyserTest {
     DSLRootItem("Test", "project", Nil) +: rootItems
 
   private def mkTemplefileSemantics(entries: (String, ServiceBlock)*): Templefile =
-    Templefile("Test", ProjectBlock(), Map.empty, entries.toMap)
+    ast.Templefile("Test", ProjectBlock(), Map.empty, entries.toMap)
 
   private def mkTemplefileASTWithUserService(entries: Entry*): syntax.Templefile = Seq(
     DSLRootItem("Test", "project", Nil),
@@ -414,5 +416,5 @@ object SemanticAnalyserTest {
   )
 
   private def mkTemplefileSemanticsWithUserService(serviceBlock: ServiceBlock): Templefile =
-    Templefile("Test", ProjectBlock(), Map.empty, Map("User" -> serviceBlock))
+    ast.Templefile("Test", ProjectBlock(), Map.empty, Map("User" -> serviceBlock))
 }

@@ -1,6 +1,6 @@
-package temple.DSL.semantics
+package temple.ast
 
-import temple.DSL.semantics.Metadata.ProjectMetadata
+import temple.ast.Metadata.ProjectMetadata
 
 /** The project information at the root level */
 case class ProjectBlock(

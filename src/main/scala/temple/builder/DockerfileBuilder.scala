@@ -1,7 +1,6 @@
 package temple.builder
 
-import temple.DSL.semantics.Metadata.ServiceLanguage
-import temple.DSL.semantics.{Metadata, ServiceBlock}
+import temple.ast.{Metadata, ServiceBlock}
 import temple.builder.project.ProjectConfig
 import temple.generate.docker.ast.Statement._
 import temple.generate.docker.ast.{DockerfileRoot, Statement}
@@ -14,7 +13,7 @@ object DockerfileBuilder {
     val dockerImage = ProjectConfig.dockerImage(language)
 
     val commands: Seq[Statement] = language match {
-      case ServiceLanguage.Go =>
+      case Metadata.ServiceLanguage.Go =>
         Seq(
           WorkDir(s"/$serviceName"),
           Copy("go.mod go.sum", "./"),

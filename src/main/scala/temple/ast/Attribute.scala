@@ -1,4 +1,4 @@
-package temple.DSL.semantics
+package temple.ast
 
 case class Attribute(
   attributeType: AttributeType,

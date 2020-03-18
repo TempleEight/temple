@@ -1,6 +1,6 @@
-package temple.DSL.semantics
+package temple.ast
 
-import temple.DSL.semantics.Metadata.TargetMetadata
+import temple.ast.Metadata.TargetMetadata
 
 /** A block describing one client to generate code for */
 case class TargetBlock(

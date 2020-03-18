@@ -1,4 +1,4 @@
-package temple.DSL.semantics
+package temple.ast
 
 abstract class Annotation(val render: String)
 

@@ -1,6 +1,6 @@
-package temple.DSL.semantics
+package temple.ast
 
-import temple.DSL.semantics.Metadata.ServiceMetadata
+import temple.ast.Metadata.ServiceMetadata
 
 /** A service block, representing one microservice on its own isolated server */
 case class ServiceBlock(
