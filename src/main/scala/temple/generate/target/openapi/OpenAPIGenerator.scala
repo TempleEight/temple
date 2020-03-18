@@ -2,8 +2,9 @@ package temple.generate.target.openapi
 
 import io.circe.syntax._
 import io.circe.yaml.Printer
-import temple.DSL.semantics.AttributeType._
-import temple.DSL.semantics.{Annotation, Attribute}
+import temple.ast.AttributeType._
+import temple.ast.Annotation
+import temple.ast.Attribute
 import temple.collection.FlagMapView
 import temple.generate.CRUD._
 import temple.generate.target.openapi.OpenAPIGenerator._

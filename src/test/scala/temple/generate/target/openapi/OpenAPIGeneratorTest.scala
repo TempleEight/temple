@@ -3,8 +3,8 @@ package temple.generate.target.openapi
 import io.circe.syntax._
 import io.circe.yaml.syntax.AsYaml
 import org.scalatest.{FlatSpec, Matchers}
-import temple.DSL.semantics.AttributeType._
-import temple.DSL.semantics.{Annotation, Attribute}
+import temple.ast.AttributeType._
+import temple.ast.{Annotation, Attribute}
 import temple.generate.CRUD
 import temple.generate.target.openapi.OpenAPIGenerator.generateError
 import temple.generate.target.openapi.ast.{Response, Service}

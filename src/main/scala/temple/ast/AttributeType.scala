@@ -1,4 +1,4 @@
-package temple.DSL.semantics
+package temple.ast
 
 /** The type of an attribute, i.e. a column in a database/field in a struct */
 sealed trait AttributeType

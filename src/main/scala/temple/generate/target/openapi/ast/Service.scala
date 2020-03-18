@@ -1,6 +1,6 @@
 package temple.generate.target.openapi.ast
 
-import temple.DSL.semantics.Attribute
+import temple.ast.Attribute
 import temple.generate.CRUD
 
 case class Service(

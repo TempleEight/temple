@@ -1,7 +1,7 @@
-package temple.DSL.semantics
+package temple.ast
 
-import temple.DSL.semantics.ErrorHandling.{Context, fail}
 import temple.DSL.syntax.Arg
+import temple.DSL.semantics.ErrorHandling._
 
 /**
   * A wrapper around a map of arguments, as produced by [[temple.DSL.semantics#parseParameters]], with methods added
@@ -9,7 +9,7 @@ import temple.DSL.syntax.Arg
   *
   * @param argMap The underlying immutable map of names to argument values
   */
-private[semantics] case class ArgMap(argMap: Map[String, Arg]) {
+case class ArgMap(argMap: Map[String, Arg]) {
 
   /**
     * Type-safely extract an argument from the argument map
