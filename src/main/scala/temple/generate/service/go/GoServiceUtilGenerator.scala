@@ -1,12 +1,21 @@
 package temple.generate.service.go
 
+import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.FileUtils
+import temple.utils.StringUtils.doubleQuote
 
 object GoServiceUtilGenerator {
 
-  private[go] def generateConfig(): String =
-    FileUtils.readResources("go/genFiles/common/util/config.go.snippet").stripLineEnd
+  private[go] def generateImports(): String = {
+    val standardImports = Seq("encoding/json", "errors", "net/http", "os", "strings").map(doubleQuote)
+    val customImports   = Seq("github.com/dgrijalva/jwt-go", "github.com/google/uuid").map(doubleQuote)
 
-  private[go] def generateUtil(): String =
-    FileUtils.readResources("go/genFiles/util/util.go.snippet").stripLineEnd
+    mkCode("import", CodeWrap.parens.tabbed(standardImports, "", customImports))
+  }
+
+  private[go] def generateAuthStruct(): String =
+    FileUtils.readResources("go/genFiles/util/auth_struct.go.snippet").stripLineEnd
+
+  private[go] def generateIDsFromRequest(): String =
+    FileUtils.readResources("go/genFiles/util/ids_from_request.go.snippet").stripLineEnd
 }

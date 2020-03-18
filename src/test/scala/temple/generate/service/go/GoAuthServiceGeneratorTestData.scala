@@ -1,4 +1,4 @@
-package temple.generate.service.go
+package temple.generate.service.go.auth
 
 import temple.generate.service.AuthServiceRoot
 import temple.generate.FileSystem._

@@ -4,8 +4,8 @@ import temple.utils.FileUtils
 
 object GoCommonUtilGenerator {
 
-  private[go] def generateStructs(): String =
-    FileUtils.readResources("go/genFiles/common/util/structs.go.snippet").stripLineEnd
+  private[go] def generateConfigStruct(): String =
+    FileUtils.readResources("go/genFiles/common/util/config_struct.go.snippet").stripLineEnd
 
   private[go] def generateGetConfig(): String =
     FileUtils.readResources("go/genFiles/common/util/get_config.go.snippet").stripLineEnd

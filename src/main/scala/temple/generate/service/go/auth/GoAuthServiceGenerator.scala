@@ -36,7 +36,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
       File("auth/util", "util.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("util"),
         GoAuthServiceUtilGenerator.generateImports(),
-        GoCommonUtilGenerator.generateStructs(),
+        GoCommonUtilGenerator.generateConfigStruct(),
         GoCommonUtilGenerator.generateGetConfig(),
         GoCommonUtilGenerator.generateCreateErrorJSON(),
       ),
