@@ -1,4 +1,4 @@
-package temple.generate.service.go.common
+package temple.generate.server.go.common
 
 import temple.generate.utils.CodeTerm.mkCode
 

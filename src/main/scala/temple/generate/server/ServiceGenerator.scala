@@ -1,4 +1,4 @@
-package temple.generate.service
+package temple.generate.server
 
 import temple.generate.CRUD
 import temple.generate.FileSystem._
@@ -13,7 +13,7 @@ trait ServiceGenerator {
 object ServiceGenerator {
 
   /** Get the string representation of an endpoint, for use in the generated function name */
-  private[service] def verb(endpoint: CRUD): String = endpoint match {
+  private[server] def verb(endpoint: CRUD): String = endpoint match {
     case CRUD.ReadAll => "List"
     case CRUD.Create  => "Create"
     case CRUD.Read    => "Read"

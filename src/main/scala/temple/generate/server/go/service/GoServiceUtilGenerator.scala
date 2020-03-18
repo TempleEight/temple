@@ -1,4 +1,4 @@
-package temple.generate.service.go
+package temple.generate.server.go.service
 
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.FileUtils
@@ -14,8 +14,8 @@ object GoServiceUtilGenerator {
   }
 
   private[go] def generateAuthStruct(): String =
-    FileUtils.readResources("go/genFiles/util/auth_struct.go.snippet").stripLineEnd
+    FileUtils.readResources("go/genFiles/service/util/auth_struct.go.snippet").stripLineEnd
 
   private[go] def generateIDsFromRequest(): String =
-    FileUtils.readResources("go/genFiles/util/ids_from_request.go.snippet").stripLineEnd
+    FileUtils.readResources("go/genFiles/service/util/ids_from_request.go.snippet").stripLineEnd
 }
