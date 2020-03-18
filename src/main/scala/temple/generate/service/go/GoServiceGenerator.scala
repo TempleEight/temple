@@ -49,8 +49,15 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceDaoGenerator.generateStructs(),
         GoServiceDaoGenerator.generateInit(),
       ),
-      File(s"${serviceRoot.name}/util", "config.go") -> GoServiceUtilGenerator.generateConfig(),
-      File(s"${serviceRoot.name}/util", "util.go")   -> GoServiceUtilGenerator.generateUtil(),
+      File(s"${serviceRoot.name}/util", "util.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("util"),
+        GoServiceUtilGenerator.generateImports(),
+        GoCommonUtilGenerator.generateConfigStruct(),
+        GoServiceUtilGenerator.generateAuthStruct(),
+        GoCommonUtilGenerator.generateGetConfig(),
+        GoCommonUtilGenerator.generateCreateErrorJSON(),
+        GoServiceUtilGenerator.generateIDsFromRequest(),
+      ),
     ) ++ when(usesComms)(
       File(s"${serviceRoot.name}/comm", "handler.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("comm"),

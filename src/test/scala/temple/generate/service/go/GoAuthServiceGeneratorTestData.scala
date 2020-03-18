@@ -1,4 +1,4 @@
-package temple.generate.service.go
+package temple.generate.service.go.auth
 
 import temple.generate.service.AuthServiceRoot
 import temple.generate.FileSystem._
@@ -16,6 +16,9 @@ object GoAuthServiceGeneratorTestData {
     File("auth", "auth.go") -> readFile("src/test/scala/temple/generate/service/go/testfiles/auth/auth.go.snippet"),
     File("auth/comm", "handler.go") -> readFile(
       "src/test/scala/temple/generate/service/go/testfiles/auth/comm/handler.go.snippet",
+    ),
+    File("auth/util", "util.go") -> readFile(
+      "src/test/scala/temple/generate/service/go/testfiles/auth/util/util.go.snippet",
     ),
   )
 }

@@ -1,7 +1,6 @@
-package temple.generate.service.go
+package temple.generate.service.go.auth
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.generate.service.go.auth.GoAuthServiceGenerator
 
 class GoAuthServiceGeneratorTest extends FlatSpec with Matchers {
 
