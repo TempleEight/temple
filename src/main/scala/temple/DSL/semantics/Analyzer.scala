@@ -11,7 +11,7 @@ import temple.utils.MapUtils._
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
 
-object Analyser {
+object Analyzer {
 
   /**
     * Convert a sequence of arguments, some of which are named, into a map from name to value

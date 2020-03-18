@@ -1,18 +1,18 @@
 package temple.DSL.semantics
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.DSL.semantics.Analyser.parseSemantics
+import temple.DSL.semantics.Analyzer.parseSemantics
 import temple.ast.AttributeType._
 import temple.DSL.syntax
 import temple.DSL.syntax.Arg._
 import temple.DSL.syntax.{Args, DSLRootItem, Entry}
-import SemanticAnalyserTest._
+import SemanticAnalyzerTest._
 import temple.ast
 import temple.ast.{Attribute, ProjectBlock, ServiceBlock, Templefile}
 
-class SemanticAnalyserTest extends FlatSpec with Matchers {
+class SemanticAnalyzerTest extends FlatSpec with Matchers {
 
-  behavior of "Semantic Analyser"
+  behavior of "Semantic Analyzer"
 
   it should "complain that there is no project block when parsing an Empty AST" in {
     a[SemanticParsingException] should be thrownBy { parseSemantics(Nil) }
@@ -402,7 +402,7 @@ class SemanticAnalyserTest extends FlatSpec with Matchers {
   }
 }
 
-object SemanticAnalyserTest {
+object SemanticAnalyzerTest {
 
   private def mkTemplefileAST(rootItems: DSLRootItem*): syntax.Templefile =
     DSLRootItem("Test", "project", Nil) +: rootItems

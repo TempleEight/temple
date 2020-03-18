@@ -9,7 +9,7 @@ import scala.collection.immutable.ListMap
 object BuilderTestData {
 
   // TODO: This test doesn't include a `ForeignKey` attribute, since it is not yet supported
-  //  by the parser/semantic analysis. Once it is, please update these tests!
+  //  by the parser/semantic analyzis. Once it is, please update these tests!
   val sampleService: ServiceBlock = ServiceBlock(
     ListMap(
       "id"          -> Attribute(IntType()),

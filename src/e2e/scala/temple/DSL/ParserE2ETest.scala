@@ -2,7 +2,7 @@ package temple.DSL
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.parser.DSLParserMatchers
-import temple.DSL.semantics.Analyser.parseSemantics
+import temple.DSL.semantics.Analyzer.parseSemantics
 import temple.ast
 import temple.ast.Annotation.{Nullable, Server, Unique}
 import temple.ast.AttributeType._
@@ -15,7 +15,7 @@ import scala.collection.immutable.ListMap
 class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
   behavior of "Temple parser"
 
-  it should "parse and analyse simple.temple correctly" in {
+  it should "parse and analyze simple.temple correctly" in {
     val source      = readFile("src/test/scala/temple/testfiles/simple.temple")
     val parseResult = DSLProcessor.parse(source).shouldParse
     val semantics   = parseSemantics(parseResult)

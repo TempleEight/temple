@@ -1,6 +1,6 @@
 package temple.DSL.semantics
 
-import temple.DSL.semantics.Analyser.parseParameters
+import temple.DSL.semantics.Analyzer.parseParameters
 import temple.DSL.semantics.ErrorHandling.{BlockContext, Context, fail}
 import temple.DSL.syntax.Arg.NoArg
 import temple.DSL.syntax.Args
