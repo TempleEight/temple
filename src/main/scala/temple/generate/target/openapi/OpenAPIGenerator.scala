@@ -10,7 +10,7 @@ import temple.generate.target.openapi.OpenAPIGenerator._
 import temple.generate.target.openapi.ast.OpenAPIFile.{Components, Info}
 import temple.generate.target.openapi.ast.OpenAPIType._
 import temple.generate.target.openapi.ast.Parameter.InPath
-import temple.generate.target.openapi.ast.{BodyLiteral, HTTPVerb, Handler, MediaTypeObject, OpenAPIFile, Parameter, Response, Service}
+import temple.generate.target.openapi.ast._
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
@@ -26,10 +26,21 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     ),
   )
 
-  private val paths = mutable.Map[String, mutable.Map[HTTPVerb, Handler]]()
+  private val paths = mutable.Map[String, Path.Mutable]()
 
   private def path(url: String): mutable.Map[HTTPVerb, Handler] =
-    paths.getOrElseUpdate(url, mutable.Map())
+    paths.getOrElseUpdate(url, Path.Mutable()).handlers
+
+  private def pathWithID(url: String, lowerName: String): mutable.Map[HTTPVerb, Handler] = {
+    val parameter = Parameter(
+      InPath,
+      name = "id",
+      required = Some(true),
+      schema = OpenAPISimpleType("number", "int32"),
+      description = s"ID of the $lowerName to perform operations on",
+    )
+    paths.getOrElseUpdate(url, Path.Mutable(parameters = Seq(parameter))).handlers
+  }
 
   private def isServerAttribute(attribute: Attribute): Boolean = attribute.accessAnnotation contains Annotation.Server
 
@@ -95,10 +106,10 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         path(s"/$lowerName") += HTTPVerb.Post -> Handler(
             s"Register a new $lowerName",
             tags = tags,
-            requestBody = Some(BodyLiteral(jsonContent(ast.MediaTypeObject(generateItemInputType(service.attributes))))),
+            requestBody = Some(BodyLiteral(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
             responses = Map(
               200 -> BodyLiteral(
-                jsonContent(ast.MediaTypeObject(generateItemType(service.attributes))),
+                jsonContent(MediaTypeObject(generateItemType(service.attributes))),
                 s"$capitalizedName successfully created",
               ),
               400 -> Response.Ref(useError(400)),
@@ -106,18 +117,9 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             ),
           )
       case Read =>
-        path(s"/$lowerName/{id}") += HTTPVerb.Get -> Handler(
+        pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Get -> Handler(
             s"Look up a single $lowerName",
             tags = tags,
-            parameters = Seq(
-              Parameter(
-                InPath,
-                name = "id",
-                required = Some(true),
-                schema = OpenAPISimpleType("number", "int32"),
-                description = s"ID of the $lowerName to get",
-              ),
-            ),
             responses = Map(
               200 -> BodyLiteral(
                 jsonContent(MediaTypeObject(generateItemType(service.attributes))),
@@ -142,7 +144,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
 
   def toOpenAPI: OpenAPIFile = OpenAPIFile(
     info = Info(name, version, description),
-    paths = paths.view.mapValues(_.toMap).toMap,
+    paths = paths.view.mapValues(_.toPath).toMap,
     components = Components(responses = errorBlock),
   )
 }
@@ -165,7 +167,7 @@ object OpenAPIGenerator {
     BodyLiteral(
       description = description,
       content = jsonContent(
-        ast.MediaTypeObject(
+        MediaTypeObject(
           OpenAPIObject(ListMap("error" -> OpenAPISimpleType("string", "example" -> example.asJson))),
         ),
       ),

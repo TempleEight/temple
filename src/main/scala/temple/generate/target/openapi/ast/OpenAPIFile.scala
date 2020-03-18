@@ -9,7 +9,7 @@ import scala.Option.when
 
 case class OpenAPIFile(
   info: Info,
-  paths: Map[String, Map[HTTPVerb, Handler]] = Map.empty,
+  paths: Map[String, Path] = Map.empty,
   components: Components = Components(),
 ) extends JsonEncodable.Object {
 

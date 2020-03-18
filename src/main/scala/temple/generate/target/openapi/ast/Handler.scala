@@ -12,14 +12,12 @@ case class Handler(
   tags: Seq[String] = Nil,
   requestBody: Option[RequestBody] = None,
   responses: Map[Int, Response] = Map.empty,
-  parameters: Seq[Parameter] = Seq(),
 ) extends JsonEncodable.Partial {
 
   override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
     "summary"     ~~> Some(summary),
     "description" ~~> when(description.nonEmpty) { description },
     "tags"        ~~> when(tags.nonEmpty) { tags },
-    "parameters"  ~~> when(parameters.nonEmpty) { parameters },
     "requestBody" ~~> when(requestBody.nonEmpty) { requestBody },
     "responses"   ~~> when(responses.nonEmpty) { responses },
   )
