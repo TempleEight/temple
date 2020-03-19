@@ -1,6 +1,7 @@
 package temple.DSL.semantics
 
 import org.scalatest.{FlatSpec, Matchers}
+import temple.ast.{Metadata, ProjectBlock, ServiceBlock, TargetBlock, Templefile}
 
 class TempleBlockTest extends FlatSpec with Matchers {
 

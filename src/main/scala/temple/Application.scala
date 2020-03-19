@@ -1,7 +1,7 @@
 package temple
 
 import temple.DSL.DSLProcessor
-import temple.DSL.semantics.Analyser
+import temple.DSL.semantics.Analyzer
 import temple.builder.project.ProjectBuilder
 import temple.utils.FileUtils
 
@@ -13,8 +13,8 @@ object Application {
     DSLProcessor.parse(fileContents) match {
       case Left(error) => throw new RuntimeException(error)
       case Right(data) =>
-        val analysedTemplefile = Analyser.parseSemantics(data)
-        val project            = ProjectBuilder.build(analysedTemplefile)
+        val analyzedTemplefile = Analyzer.parseSemantics(data)
+        val project            = ProjectBuilder.build(analyzedTemplefile)
 
         FileUtils.createDirectory(outputDirectory)
         project.files.foreach {

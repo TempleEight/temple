@@ -2,14 +2,16 @@ package temple.generate.target.openapi
 
 import io.circe.syntax._
 import io.circe.yaml.Printer
-import temple.DSL.semantics.AttributeType._
-import temple.DSL.semantics.{Annotation, Attribute}
+import temple.ast.AttributeType._
+import temple.ast.Annotation
+import temple.ast.Attribute
 import temple.collection.FlagMapView
 import temple.generate.CRUD._
-import temple.generate.target.openapi.OpenAPIFile.{Components, Info}
 import temple.generate.target.openapi.OpenAPIGenerator._
-import temple.generate.target.openapi.OpenAPIType._
-import temple.generate.target.openapi.Parameter.InPath
+import temple.generate.target.openapi.ast.OpenAPIFile.{Components, Info}
+import temple.generate.target.openapi.ast.OpenAPIType._
+import temple.generate.target.openapi.ast.Parameter.InPath
+import temple.generate.target.openapi.ast._
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
@@ -18,6 +20,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
 
   private val errorTracker = FlagMapView(
     400 -> generateError("Invalid request", "Invalid request parameters: name"),
+    401 -> generateError("Valid request but forbidden by server", "Not authorised to create this object"),
     404 -> generateError("ID not found", "Object not found with ID 1"),
     500 -> generateError(
       "The server encountered an error while serving this request",
@@ -25,10 +28,21 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     ),
   )
 
-  private val paths = mutable.Map[String, mutable.Map[HTTPVerb, Handler]]()
+  private val paths = mutable.LinkedHashMap[String, Path.Mutable]()
 
   private def path(url: String): mutable.Map[HTTPVerb, Handler] =
-    paths.getOrElseUpdate(url, mutable.Map())
+    paths.getOrElseUpdate(url, Path.Mutable()).handlers
+
+  private def pathWithID(url: String, lowerName: String): mutable.Map[HTTPVerb, Handler] = {
+    val parameter = Parameter(
+      InPath,
+      name = "id",
+      required = Some(true),
+      schema = OpenAPISimpleType("number", "int32"),
+      description = s"ID of the $lowerName to perform operations on",
+    )
+    paths.getOrElseUpdate(url, Path.Mutable(parameters = Seq(parameter))).handlers
+  }
 
   private def isServerAttribute(attribute: Attribute): Boolean = attribute.accessAnnotation contains Annotation.Server
 
@@ -82,7 +96,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         path(s"/$lowerName/all") += HTTPVerb.Get -> Handler(
             s"Get a list of every $lowerName",
             tags = tags,
-            responses = Map(
+            responses = Seq(
               200 -> BodyLiteral(
                 jsonContent(MediaTypeObject(OpenAPIArray(generateItemType(service.attributes)))),
                 s"$capitalizedName list successfully fetched",
@@ -95,39 +109,62 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             s"Register a new $lowerName",
             tags = tags,
             requestBody = Some(BodyLiteral(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
-            responses = Map(
+            responses = Seq(
               200 -> BodyLiteral(
                 jsonContent(MediaTypeObject(generateItemType(service.attributes))),
                 s"$capitalizedName successfully created",
               ),
               400 -> Response.Ref(useError(400)),
+              401 -> Response.Ref(useError(401)),
               500 -> Response.Ref(useError(500)),
             ),
           )
       case Read =>
-        path(s"/$lowerName/{id}") += HTTPVerb.Get -> Handler(
+        pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Get -> Handler(
             s"Look up a single $lowerName",
             tags = tags,
-            parameters = Seq(
-              Parameter(
-                InPath,
-                name = "id",
-                required = Some(true),
-                schema = OpenAPISimpleType("number", "int32"),
-                description = s"ID of the $lowerName to get",
-              ),
-            ),
-            responses = Map(
+            responses = Seq(
               200 -> BodyLiteral(
                 jsonContent(MediaTypeObject(generateItemType(service.attributes))),
                 s"$capitalizedName details",
               ),
               400 -> Response.Ref(useError(400)),
+              401 -> Response.Ref(useError(401)),
+              404 -> Response.Ref(useError(404)),
               500 -> Response.Ref(useError(500)),
             ),
           )
-      case Update => // TODO in future PR
-      case Delete => // TODO in future PR
+      case Update =>
+        pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Put -> Handler(
+            s"Update a single $lowerName",
+            tags = tags,
+            requestBody = Some(BodyLiteral(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
+            responses = Seq(
+              200 -> BodyLiteral(
+                jsonContent(MediaTypeObject(generateItemType(service.attributes))),
+                s"$capitalizedName successfully updated",
+              ),
+              400 -> Response.Ref(useError(400)),
+              401 -> Response.Ref(useError(401)),
+              404 -> Response.Ref(useError(404)),
+              500 -> Response.Ref(useError(500)),
+            ),
+          )
+      case Delete =>
+        pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Delete -> Handler(
+            s"Delete a single $lowerName",
+            tags = tags,
+            responses = Seq(
+              200 -> BodyLiteral(
+                jsonContent(MediaTypeObject(OpenAPIObject(Map()))),
+                s"$capitalizedName successfully deleted",
+              ),
+              400 -> Response.Ref(useError(400)),
+              401 -> Response.Ref(useError(401)),
+              404 -> Response.Ref(useError(404)),
+              500 -> Response.Ref(useError(500)),
+            ),
+          )
     }
     this
   }
@@ -141,7 +178,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
 
   def toOpenAPI: OpenAPIFile = OpenAPIFile(
     info = Info(name, version, description),
-    paths = paths.view.mapValues(_.toMap).toMap,
+    paths = paths.view.mapValues(_.toPath).to(ListMap),
     components = Components(responses = errorBlock),
   )
 }

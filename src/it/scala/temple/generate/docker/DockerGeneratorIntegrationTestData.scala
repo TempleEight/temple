@@ -1,7 +1,8 @@
-package temple.generate
+package temple.generate.docker
 
-import temple.DSL.semantics.AttributeType.{BlobType, BoolType, DateTimeType, DateType, FloatType, IntType, StringType, TimeType}
-import temple.DSL.semantics.{Annotation, Attribute, ServiceBlock, StructBlock}
+import temple.ast.AttributeType._
+import temple.ast.Annotation
+import temple.ast.{Attribute, ServiceBlock, StructBlock}
 
 import scala.collection.immutable.ListMap
 

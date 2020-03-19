@@ -16,7 +16,6 @@ abstract class SwaggerSpec extends DockerShell2HttpService(8082) with DockerTest
   // Validate a given OpenAPI specification, returning the output of swagger-cli
   def validate(openapi: String): String = {
     val json = Map("contents" -> openapi).asJson.toString()
-    println(json)
     Http(swaggerVerifyUrl).params(Map("openapi" -> json)).asString.body
   }
 }

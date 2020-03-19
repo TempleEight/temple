@@ -1,7 +1,8 @@
 package temple.builder.project
 
-import temple.DSL.semantics.Metadata.{Database, ServiceLanguage}
 import temple.generate.kube.ast.OrchestrationType.DbStorage
+import temple.ast.Metadata._
+
 
 object ProjectConfig {
 

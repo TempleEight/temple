@@ -1,8 +1,8 @@
 package temple.builder.project
 
-import temple.DSL.semantics.Metadata.Database
-import temple.DSL.semantics.Metadata.Database.Postgres
-import temple.DSL.semantics.Templefile
+import temple.ast.Metadata.Database
+import temple.ast.Metadata.Database.Postgres
+import temple.ast.Templefile
 import temple.builder.{DatabaseBuilder, DockerfileBuilder, KubernetesBuilder}
 import temple.generate.FileSystem._
 import temple.generate.database.PreparedType.QuestionMarks
@@ -23,7 +23,7 @@ object ProjectBuilder {
       case (name, service) =>
         val createStatements: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
         service.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase) match {
-          case Postgres =>
+          case Database.Postgres =>
             implicit val context: PostgresContext = PostgresContext(QuestionMarks)
             val postgresStatements                = createStatements.map(PostgresGenerator.generate).mkString("\n\n")
             (File(s"${name.toLowerCase}-db", "init.sql"), postgresStatements)
