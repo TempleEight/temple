@@ -127,7 +127,7 @@ object ProjectBuilderTestData {
         |    spec:
         |      hostname: TempleUser
         |      containers:
-        |      - image: golang:1.13.7-alpine
+        |      - image: temple-SampleProject-TempleUser
         |        name: TempleUser
         |        ports:
         |        - containerPort: 1024
@@ -345,7 +345,7 @@ object ProjectBuilderTestData {
         |    spec:
         |      hostname: ComplexUser
         |      containers:
-        |      - image: golang:1.13.7-alpine
+        |      - image: temple-SampleComplexProject-ComplexUser
         |        name: ComplexUser
         |        ports:
         |        - containerPort: 1024

@@ -8,12 +8,11 @@ import temple.generate.kube.ast.gen.LifecycleCommand
 
 object KubernetesBuilder {
 
-  def createServiceKubeFiles(services: Seq[(String, ServiceBlock, Int)]): OrchestrationRoot =
+  def createServiceKubeFiles(projectName: String, services: Seq[(String, ServiceBlock, Int)]): OrchestrationRoot =
     OrchestrationRoot(
       services map {
         case (name, service, port) =>
-          val language    = service.lookupMetadata[Metadata.ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
-          val dockerImage = ProjectConfig.dockerImage(language)
+          val dockerImage = s"temple-$projectName-$name"
           val dbLanguage  = service.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
           val dbImage     = ProjectConfig.dockerImage(dbLanguage)
           Service(
@@ -21,7 +20,8 @@ object KubernetesBuilder {
             image = dockerImage.toString,
             dbImage = dbImage.toString,
             ports = Seq(("api", port)),
-            replicas = 1, //TODO: Make this less static - requires Templefile change?
+            //This value assumed to be one
+            replicas = 1,
             secretName = "regcred",
             appEnvVars = Seq(), //TODO: This
             dbEnvVars = dbLanguage match {

@@ -40,6 +40,7 @@ object ProjectBuilder {
     val kubeFiles = KubernetesGenerator.generate(
       KubernetesBuilder
         .createServiceKubeFiles(
+          templefile.projectName,
           (templefile.services.zip(1024 until Int.MaxValue) map {
             case ((name, service), port) => (name, service, port)
           }).toSeq,
