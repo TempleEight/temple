@@ -1,7 +1,7 @@
 package temple.builder
 
-import temple.DSL.semantics.Metadata.Database
-import temple.DSL.semantics.{Metadata, ServiceBlock}
+import temple.ast.Metadata.Database
+import temple.ast.{Metadata, ServiceBlock}
 import temple.builder.project.ProjectConfig
 import temple.generate.kube.ast.OrchestrationType.{OrchestrationRoot, Service}
 import temple.generate.kube.ast.gen.LifecycleCommand
@@ -17,7 +17,7 @@ object KubernetesBuilder {
           val dbImage     = ProjectConfig.dockerImage(dbLanguage)
           Service(
             name = name,
-            image = dockerImage.toString,
+            image = dockerImage,
             dbImage = dbImage.toString,
             ports = Seq(("api", port)),
             //This value assumed to be one
