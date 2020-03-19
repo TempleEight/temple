@@ -8,23 +8,23 @@ metadata:
 spec:
   type: NodePort
   ports:
-    - name: "ingress"
-      port: 8000
-      targetPort: 8000
-      # Kubernetes exposes a certain subset of ports externally through nodePorts
-      # Starting at 30000
-      nodePort: 30000
-    - name: "admin"
-      port: 8001
-      targetPort: 8001
-      nodePort: 30001
-    - name: "ingress-tls"
-      port: 8443
-      targetPort: 8443
-      nodePort: 30443
-    - name: "admin-tls"
-      port: 8444
-      targetPort: 8444
-      nodePort: 30444
+  - name: "ingress"
+    port: 8000
+    targetPort: 8000
+    # Kubernetes exposes a certain subset of ports externally through nodePorts
+    # Starting at 30000
+    nodePort: 30000
+  - name: "admin"
+    port: 8001
+    targetPort: 8001
+    nodePort: 30001
+  - name: "ingress-tls"
+    port: 8443
+    targetPort: 8443
+    nodePort: 30443
+  - name: "admin-tls"
+    port: 8444
+    targetPort: 8444
+    nodePort: 30444
   selector:
     app: kong

@@ -8,8 +8,8 @@ metadata:
 spec:
   # Exposes an internal NodePort service for communicating within the cluster
   ports:
-    - name: "database"
-      port: 5432
-      targetPort: 5432
+  - name: "database"
+    port: 5432
+    targetPort: 5432
   selector:
     app: kong-db

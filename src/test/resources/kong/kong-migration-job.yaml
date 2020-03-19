@@ -9,19 +9,19 @@ spec:
   template:
     spec:
       containers:
-        - command: ["/bin/sh"]
-          args: ["-c", "kong migrations bootstrap && kong migrations up && kong migrations finish"]
-          env:
-            - name: KONG_DATABASE
-              value: postgres
-            - name: KONG_PG_DATABASE
-              value: kong
-            - name: KONG_PG_HOST
-              value: kong-db
-            - name: KONG_PG_PASSWORD
-              value: kong
-            - name: KONG_PG_USER
-              value: kong
-          image: kong:2.0.1
-          name: kong-migrations
+      - command: ["/bin/sh"]
+        args: ["-c", "kong migrations bootstrap && kong migrations up && kong migrations finish"]
+        env:
+        - name: KONG_DATABASE
+          value: postgres
+        - name: KONG_PG_DATABASE
+          value: kong
+        - name: KONG_PG_HOST
+          value: kong-db
+        - name: KONG_PG_PASSWORD
+          value: kong
+        - name: KONG_PG_USER
+          value: kong
+        image: kong:2.0.1
+        name: kong-migrations
       restartPolicy: OnFailure
