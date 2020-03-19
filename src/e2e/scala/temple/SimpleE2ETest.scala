@@ -3,6 +3,7 @@ package temple
 import java.nio.file.{Files, Paths}
 
 import org.scalatest.{FlatSpec, Matchers}
+import temple.utils.FileUtils
 
 import scala.jdk.StreamConverters._
 import scala.reflect.io.Directory
@@ -11,7 +12,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
   behavior of "Temple"
 
-  it should "generate Postgres scripts" in {
+  it should "generate Postgres, Docker and Kube scripts" in {
     // Clean up folder if exists
     val basePath  = Paths.get("/tmp/temple-e2e-test-1")
     val directory = new Directory(basePath.toFile)
@@ -42,5 +43,65 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     // The content of the templeuser/Dockerfile file should be correct
     val templeUserDockerfile = Files.readString(basePath.resolve("templeuser").resolve("Dockerfile"))
     templeUserDockerfile shouldBe SimpleE2ETestData.dockerfile
+
+    // Only one file should be present in the kong folder
+    val expectedKongFiles = Set("configure-kong.sh").map(dir => basePath.resolve("kong").resolve(dir))
+    Files.list(basePath.resolve("kong")).toScala(Set) shouldBe expectedKongFiles
+
+    // The content of the kong/configure-kong.sh file should be correct
+    val templeKongConf = Files.readString(basePath.resolve("kong").resolve("configure-kong.sh"))
+    templeKongConf shouldBe SimpleE2ETestData.configureKong
+
+    // Only these files should be present in the kube/kong folder
+    val expectedKongKubeFiles = Set(
+      "kong-deployment.yaml",
+      "kong-service.yaml",
+      "kong-db-deployment.yaml",
+      "kong-db-service.yaml",
+      "kong-migration-job.yaml",
+    ).map(dir => basePath.resolve("kube/kong").resolve(dir))
+    Files.list(basePath.resolve("kube/kong")).toScala(Set) shouldBe expectedKongKubeFiles
+
+    // The content of the kube/kong/ files should be correct
+    val templeKongKubeDeployment = Files.readString(basePath.resolve("kube/kong").resolve("kong-deployment.yaml"))
+    templeKongKubeDeployment shouldBe FileUtils.readResources("kube/kong/kong-deployment.yaml")
+
+    val templeKongKubeDbDeployment = Files.readString(basePath.resolve("kube/kong").resolve("kong-db-deployment.yaml"))
+    templeKongKubeDbDeployment shouldBe FileUtils.readResources("kube/kong/kong-db-deployment.yaml")
+
+    val templeKongKubeService = Files.readString(basePath.resolve("kube/kong").resolve("kong-service.yaml"))
+    templeKongKubeService shouldBe FileUtils.readResources("kube/kong/kong-service.yaml")
+
+    val templeKongKubeDbService = Files.readString(basePath.resolve("kube/kong").resolve("kong-db-service.yaml"))
+    templeKongKubeDbService shouldBe FileUtils.readResources("kube/kong/kong-db-service.yaml")
+
+    val templeKongKubeMigration = Files.readString(basePath.resolve("kube/kong").resolve("kong-migration-job.yaml"))
+    templeKongKubeMigration shouldBe FileUtils.readResources("kube/kong/kong-migration-job.yaml")
+
+    // Only these files should be present in the kube/TempleUser folder
+    val expectedUserKubeFiles = Set(
+      "deployment.yaml",
+      "service.yaml",
+      "db-deployment.yaml",
+      "db-service.yaml",
+      "db-storage.yaml",
+    ).map(dir => basePath.resolve("kube/TempleUser").resolve(dir))
+    Files.list(basePath.resolve("kube/TempleUser")).toScala(Set) shouldBe expectedUserKubeFiles
+
+    // The content of the kube/TempleUser/ files should be correct
+    val templeUserKubeDeployment = Files.readString(basePath.resolve("kube/TempleUser").resolve("deployment.yaml"))
+    templeUserKubeDeployment shouldBe SimpleE2ETestData.kubeDeployment
+
+    val templeUserKubeDbDeployment = Files.readString(basePath.resolve("kube/TempleUser").resolve("db-deployment.yaml"))
+    templeUserKubeDbDeployment shouldBe SimpleE2ETestData.kubeDbDeployment
+
+    val templeUserKubeService = Files.readString(basePath.resolve("kube/TempleUser").resolve("service.yaml"))
+    templeUserKubeService shouldBe SimpleE2ETestData.kubeService
+
+    val templeUserKubeDbService = Files.readString(basePath.resolve("kube/TempleUser").resolve("db-service.yaml"))
+    templeUserKubeDbService shouldBe SimpleE2ETestData.kubeDbService
+
+    val templeUserKubeStorage = Files.readString(basePath.resolve("kube/TempleUser").resolve("db-storage.yaml"))
+    templeUserKubeStorage shouldBe SimpleE2ETestData.kubeDbStorage
   }
 }
