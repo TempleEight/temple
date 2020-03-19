@@ -18,3 +18,8 @@ type Datastore interface {
 	UpdateUser(input UpdateUserInput) (*User, error)
 	DeleteUser(input DeleteUserInput) error
 }
+
+// DAO encapsulates access to the datastore
+type DAO struct {
+	DB *sql.DB
+}

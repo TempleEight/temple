@@ -20,3 +20,8 @@ type Datastore interface {
 	UpdateMatch(input UpdateMatchInput) (*Match, error)
 	DeleteMatch(input DeleteMatchInput) error
 }
+
+// DAO encapsulates access to the datastore
+type DAO struct {
+	DB *sql.DB
+}
