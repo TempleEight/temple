@@ -50,6 +50,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceDAOGenerator.generateImports(serviceRoot.attributes, serviceRoot.module),
         GoServiceDAOGenerator.generateDatastoreInterface(serviceRoot.name, serviceRoot.operations),
         GoCommonDAOGenerator.generateDAOStruct(),
+        GoServiceDAOGenerator.generateDatastoreObjectStruct(serviceRoot.name, serviceRoot.attributes),
       ),
       File(s"${serviceRoot.name}/util", "util.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("util"),

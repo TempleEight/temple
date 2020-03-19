@@ -1,18 +1,18 @@
 package temple.generate.server.go.service
 
 import temple.ast.{Attribute, AttributeType}
+import temple.ast.AttributeType._
 import temple.generate.CRUD
+import temple.generate.CRUD._
 import temple.generate.server.ServiceGenerator.verb
+import temple.generate.server.go.common.GoCommonGenerator
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
+import temple.generate.utils.CodeUtils
 import temple.utils.FileUtils
 import temple.utils.StringUtils.doubleQuote
 
 import scala.Option.when
-import temple.generate.CRUD.ReadAll
-import temple.generate.CRUD.Create
-import temple.generate.CRUD.Read
-import temple.generate.CRUD.Update
-import temple.generate.CRUD.Delete
+import scala.collection.immutable.ListMap
 
 object GoServiceDAOGenerator {
 
@@ -66,10 +66,22 @@ object GoServiceDAOGenerator {
       ),
     )
 
-  private[service] def generateStructs(): String =
+  private[service] def generateDatastoreObjectStruct(
+    serviceName: String,
+    attributes: ListMap[String, Attribute],
+  ): String =
     mkCode.lines(
-      "// DAO encapsulates access to the database",
-      s"type DAO struct ${CodeWrap.curly.tabbed("DB *sql.DB")}",
+      s"// ${serviceName.capitalize} encapsulates the object stored in the datastore",
+      mkCode(
+        s"type ${serviceName.capitalize} struct",
+        CodeWrap.curly.tabbed(
+          CodeUtils
+            .pad(attributes.map {
+              case (name, attribute) => (name, GoCommonGenerator.generateGoType(attribute.attributeType))
+            })
+            .map { case (identifier, goType) => identifier.capitalize.concat(goType) },
+        ),
+      ),
     )
 
   private[service] def generateInit(): String =

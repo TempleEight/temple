@@ -25,3 +25,12 @@ type Datastore interface {
 type DAO struct {
 	DB *sql.DB
 }
+
+// Match encapsulates the object stored in the datastore
+type Match struct {
+	ID        uuid.UUID
+	CreatedBy uuid.UUID
+	UserOne   uuid.UUID
+	UserTwo   uuid.UUID
+	MatchedOn time.Time
+}

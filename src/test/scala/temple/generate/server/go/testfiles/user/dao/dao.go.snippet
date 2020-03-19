@@ -23,3 +23,9 @@ type Datastore interface {
 type DAO struct {
 	DB *sql.DB
 }
+
+// User encapsulates the object stored in the datastore
+type User struct {
+	ID   uuid.UUID
+	Name string
+}
