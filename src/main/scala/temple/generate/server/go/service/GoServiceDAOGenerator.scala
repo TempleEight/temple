@@ -1,21 +1,36 @@
 package temple.generate.server.go.service
 
+import temple.ast.{Attribute, AttributeType}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.FileUtils
+import temple.utils.StringUtils.doubleQuote
+
+import scala.Option.when
 
 object GoServiceDAOGenerator {
 
-  private[go] def generateImports(module: String): String = mkCode(
-    "import",
-    CodeWrap.parens.tabbed(
-      """"database/sql"""",
-      """"fmt"""",
-      "",
-      s""""$module/util"""",
-      "// pq acts as the driver for SQL requests",
-      """_ "github.com/lib/pq"""",
-    ),
-  )
+  private[go] def generateImports(attributes: Map[String, Attribute], module: String): String = {
+    // Check if attributes contains an attribute of type date, time or datetime
+    val containsTime =
+      Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateTimeType)
+        .intersect(attributes.values.map(_.attributeType).toSet)
+        .nonEmpty
+
+    mkCode(
+      "import",
+      CodeWrap.parens.tabbed(
+        doubleQuote("database/sql"),
+        doubleQuote("fmt"),
+        when(containsTime) { doubleQuote("time") },
+        "",
+        doubleQuote(s"$module/util"),
+        doubleQuote("github.com/google/uuid"),
+        "",
+        "// pq acts as the driver for SQL requests",
+        s"_ ${doubleQuote("github.com/lib/pq")}",
+      ),
+    )
+  }
 
   private[go] def generateStructs(): String =
     mkCode.lines(

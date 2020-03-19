@@ -1,1 +1,13 @@
 package dao
+
+import (
+	"database/sql"
+	"fmt"
+	"time"
+
+	"github.com/TempleEight/spec-golang/match/util"
+	"github.com/google/uuid"
+
+	// pq acts as the driver for SQL requests
+	_ "github.com/lib/pq"
+)
