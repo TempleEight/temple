@@ -29,10 +29,8 @@ object ProjectBuilder {
         }
     }
 
-    val servicePortIterator = templefile.services.zip(1024 until Int.MaxValue)
-
-    val dockerfiles = servicePortIterator.map {
-      case ((name, service), port) =>
+    val dockerfiles = templefile.servicesWithPorts.map {
+      case (name, service, port) =>
         val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, port)
         val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)
         (File(s"${name.toLowerCase}", "Dockerfile"), dockerfileContents)
@@ -40,9 +38,7 @@ object ProjectBuilder {
 
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(
       templefile.projectName,
-      servicePortIterator.map {
-        case ((name, service), port) => (name, service, port)
-      }.toSeq,
+      templefile.servicesWithPorts.toSeq,
     )
     val kubeFiles = KubernetesGenerator.generate(orchestrationRoot)
 

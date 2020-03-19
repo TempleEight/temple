@@ -149,7 +149,7 @@ object KubernetesGenerator {
       service.image,
       service.name,
       service.ports.map { case (_, port) => ContainerPort(port) },
-      env = service.appEnvVars.map(x => EnvVar(x._1, x._2)),
+      env = service.appEnvVars.map(EnvVar.tupled),
       volumeMounts = Seq(),
     )
 
