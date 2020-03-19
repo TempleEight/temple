@@ -1,12 +1,11 @@
 package temple.generate.server.go
 
+import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
 import temple.generate.server.ServiceRoot
 import temple.utils.FileUtils._
-import temple.ast.Attribute
-import temple.ast.AttributeType
-import temple.ast.Annotation
+
 import scala.collection.immutable.ListMap
 
 object GoServiceGeneratorTestData {

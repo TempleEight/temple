@@ -1,7 +1,6 @@
 package temple.generate.server.go.service
 
 import temple.ast.{Attribute, AttributeType}
-import temple.ast.AttributeType._
 import temple.generate.CRUD
 import temple.generate.CRUD._
 import temple.generate.server.ServiceGenerator.verb

@@ -1,7 +1,6 @@
 package temple.generate.server.go.common
 
-import temple.generate.utils.CodeTerm.mkCode
-import temple.generate.utils.CodeTerm.CodeWrap
+import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
 object GoCommonDAOGenerator {
 

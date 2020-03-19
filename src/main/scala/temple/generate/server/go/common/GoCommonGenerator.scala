@@ -1,8 +1,8 @@
 package temple.generate.server.go.common
 
-import temple.generate.utils.CodeTerm.mkCode
 import temple.ast.AttributeType
 import temple.ast.AttributeType._
+import temple.generate.utils.CodeTerm.mkCode
 
 object GoCommonGenerator {
 
