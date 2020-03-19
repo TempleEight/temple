@@ -16,7 +16,7 @@ import temple.generate.CRUD.Delete
 
 object GoServiceDAOGenerator {
 
-  private[go] def generateImports(attributes: Map[String, Attribute], module: String): String = {
+  private[service] def generateImports(attributes: Map[String, Attribute], module: String): String = {
     // Check if attributes contains an attribute of type date, time or datetime
     val containsTime =
       Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateTimeType)
@@ -54,7 +54,7 @@ object GoServiceDAOGenerator {
     )
   }
 
-  private[go] def generateDatastoreInterface(serviceName: String, operations: Set[CRUD]): String =
+  private[service] def generateDatastoreInterface(serviceName: String, operations: Set[CRUD]): String =
     mkCode.lines(
       "// Datastore provides the interface adopted by the DAO, allowing for mocking",
       mkCode(
@@ -66,16 +66,16 @@ object GoServiceDAOGenerator {
       ),
     )
 
-  private[go] def generateStructs(): String =
+  private[service] def generateStructs(): String =
     mkCode.lines(
       "// DAO encapsulates access to the database",
       s"type DAO struct ${CodeWrap.curly.tabbed("DB *sql.DB")}",
     )
 
-  private[go] def generateInit(): String =
+  private[service] def generateInit(): String =
     FileUtils.readResources("go/genFiles/common/dao/init.go.snippet").stripLineEnd
 
-  private[go] def generateErrors(serviceName: String): String =
+  private[service] def generateErrors(serviceName: String): String =
     mkCode.lines(
       "package dao",
       "",
