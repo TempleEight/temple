@@ -1,8 +1,7 @@
 package temple.builder.project
 
-import temple.generate.kube.ast.OrchestrationType.DbStorage
 import temple.ast.Metadata._
-
+import temple.generate.kube.ast.OrchestrationType.DbStorage
 
 object ProjectConfig {
 
