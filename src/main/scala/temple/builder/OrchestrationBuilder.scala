@@ -6,9 +6,12 @@ import temple.builder.project.ProjectConfig
 import temple.generate.kube.ast.OrchestrationType.{OrchestrationRoot, Service}
 import temple.generate.kube.ast.gen.LifecycleCommand
 
-object KubernetesBuilder {
+object OrchestrationBuilder {
 
-  def createServiceKubeFiles(projectName: String, services: Seq[(String, ServiceBlock, Int)]): OrchestrationRoot =
+  def createServiceOrchestrationRoot(
+    projectName: String,
+    services: Seq[(String, ServiceBlock, Int)],
+  ): OrchestrationRoot =
     OrchestrationRoot(
       services map {
         case (name, service, port) =>

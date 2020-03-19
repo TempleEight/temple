@@ -2,7 +2,7 @@ package temple.builder.project
 
 import temple.ast.Metadata.Database
 import temple.ast.Templefile
-import temple.builder.{DatabaseBuilder, DockerfileBuilder, KubernetesBuilder}
+import temple.builder.{DatabaseBuilder, DockerfileBuilder, OrchestrationBuilder}
 import temple.generate.FileSystem._
 import temple.generate.database.PreparedType.QuestionMarks
 import temple.generate.database.ast.Statement
@@ -29,25 +29,22 @@ object ProjectBuilder {
         }
     }
 
-    val dockerfiles = templefile.services.zip(1024 until Int.MaxValue).map {
+    val servicePortIterator = templefile.services.zip(1024 until Int.MaxValue)
+
+    val dockerfiles = servicePortIterator.map {
       case ((name, service), port) =>
         val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, port)
         val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)
         (File(s"${name.toLowerCase}", "Dockerfile"), dockerfileContents)
     }
 
-    val kubeFiles = KubernetesGenerator.generate(
-      KubernetesBuilder
-        .createServiceKubeFiles(
-          templefile.projectName,
-          templefile.services
-            .zip(1024 until Int.MaxValue)
-            .map {
-              case ((name, service), port) => (name, service, port)
-            }
-            .toSeq,
-        ),
+    val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(
+      templefile.projectName,
+      servicePortIterator.map {
+        case ((name, service), port) => (name, service, port)
+      }.toSeq,
     )
+    val kubeFiles = KubernetesGenerator.generate(orchestrationRoot)
 
     Project(databaseCreationScripts ++ dockerfiles ++ kubeFiles)
   }
