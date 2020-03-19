@@ -1,6 +1,6 @@
 package temple.builder.project
 
-import temple.DSL.semantics.Metadata.{Database, ServiceLanguage}
+import temple.ast.Metadata._
 
 object ProjectConfig {
   case class DockerImage(image: String, version: String)

@@ -1,16 +1,17 @@
 package temple.DSL.semantics
 
-import temple.DSL.semantics.Analyser.parseParameters
+import temple.DSL.semantics.Analyzer.parseParameters
 import temple.DSL.semantics.ErrorHandling.{BlockContext, Context, fail}
 import temple.DSL.syntax.Arg.NoArg
 import temple.DSL.syntax.Args
+import temple.ast.{ArgType, Metadata}
 
 import scala.collection.mutable
 
 /**
   * Build a metadata parser by building a list of function calls for each match
   *
-  * This is needed because each call to [[temple.DSL.semantics.MetadataParser#registerKeyword]] is effectively
+  * This is needed because each call to [[MetadataParser#registerKeyword]] is effectively
   * dependently typed, so it cannot be encoded into a tuple, but instead must immediately be bundled into a function
   *
   * @tparam T the subtype of metadata that we are specifically parsing.
@@ -24,7 +25,7 @@ class MetadataParser[T <: Metadata]() {
     *
     * @param metaKey The name of the metadata item to add
     * @param argKey The name of the single argument to the metadata. Note that there is also
-    *               [[temple.DSL.semantics.MetadataParser#registerKeyword(java.lang.String, temple.DSL.semantics.ArgType, scala.Option, scala.Function1)]]
+    *               [[MetadataParser#registerKeyword(java.lang.String, temple.DSL.semantics.ArgType, scala.Option, scala.Function1)]]
     *               if this is the same as `metaKey`.
     * @param argType The type of the field to expect
     * @param constructor The function to turn an input of type [[ArgType]] into a value of type [[T]]
@@ -41,7 +42,7 @@ class MetadataParser[T <: Metadata]() {
       })
 
   /** A shorthand for
-    * [[temple.DSL.semantics.MetadataParser#registerKeyword(java.lang.String, temple.DSL.semantics.ArgType, scala.Option, scala.Function1)]]
+    * [[MetadataParser#registerKeyword(java.lang.String, temple.DSL.semantics.ArgType, scala.Option, scala.Function1)]]
     * with the same `key` used for both the metadata name and its single argument */
   final protected def registerKeyword[A](key: String, argType: ArgType[A])(constructor: A => T): Unit =
     registerKeyword(key, key, argType)(constructor)

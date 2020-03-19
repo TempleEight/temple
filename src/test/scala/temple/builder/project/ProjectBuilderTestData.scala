@@ -1,8 +1,8 @@
 package temple.builder.project
 
-import temple.DSL.semantics.AttributeType._
-import temple.DSL.semantics.Metadata.Database
-import temple.DSL.semantics._
+import temple.ast.AttributeType._
+import temple.ast.Metadata.Database
+import temple.ast._
 
 import scala.collection.immutable.ListMap
 
