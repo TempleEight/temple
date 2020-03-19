@@ -23,7 +23,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
       ),
     )
 
-    // Four folders should have been generated
+    // Exactly these folders should have been generated
     val expectedFolders = Set("templeuser-db", "templeuser", "kong", "kube").map(dir => basePath.resolve(dir))
     Files.list(basePath).toScala(Set) shouldBe expectedFolders
 

@@ -1,7 +1,6 @@
 package temple.builder.project
 
 import temple.ast.Metadata.Database
-import temple.ast.Metadata.Database.Postgres
 import temple.ast.Templefile
 import temple.builder.{DatabaseBuilder, DockerfileBuilder, KubernetesBuilder}
 import temple.generate.FileSystem._
@@ -41,9 +40,12 @@ object ProjectBuilder {
       KubernetesBuilder
         .createServiceKubeFiles(
           templefile.projectName,
-          (templefile.services.zip(1024 until Int.MaxValue) map {
-            case ((name, service), port) => (name, service, port)
-          }).toSeq,
+          templefile.services
+            .zip(1024 until Int.MaxValue)
+            .map {
+              case ((name, service), port) => (name, service, port)
+            }
+            .toSeq,
         ),
     )
 

@@ -6,7 +6,6 @@ import temple.ast._
 import temple.generate.FileSystem.{File, FileContent}
 import temple.utils.FileUtils
 
-
 import scala.collection.immutable.ListMap
 
 object ProjectBuilderTestData {

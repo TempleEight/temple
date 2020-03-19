@@ -13,7 +13,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
         File("templeuser-db", "init.sql") -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("templeuser", "Dockerfile")  -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
       ) ++ ProjectBuilderTestData.simpleTemplefileKubeScripts
-    project.files.toSet shouldBe expected.toSet
+    project.files shouldBe expected
   }
 
   it should "use postgres when defined at the project level" in {
@@ -22,7 +22,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
         File("templeuser-db", "init.sql") -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("templeuser", "Dockerfile")  -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
       ) ++ ProjectBuilderTestData.simpleTemplefileKubeScripts
-    project.files.toSet shouldBe expected.toSet
+    project.files shouldBe expected
   }
 
   it should "use postgres when defined at the service level" in {
@@ -31,7 +31,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
         File("templeuser-db", "init.sql") -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("templeuser", "Dockerfile")  -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
       ) ++ ProjectBuilderTestData.simpleTemplefileKubeScripts
-    project.files.toSet shouldBe expected.toSet
+    project.files shouldBe expected
   }
 
   it should "correctly create a complex service with nested struct" in {
