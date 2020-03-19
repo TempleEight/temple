@@ -1,11 +1,10 @@
 package temple
 
 import java.nio.file.{Files, Paths}
-import java.util.stream.Collectors
 
 import org.scalatest.{FlatSpec, Matchers}
-import scala.jdk.StreamConverters._
 
+import scala.jdk.StreamConverters._
 import scala.reflect.io.Directory
 
 class SimpleE2ETest extends FlatSpec with Matchers {
@@ -24,8 +23,8 @@ class SimpleE2ETest extends FlatSpec with Matchers {
       ),
     )
 
-    // Two folders should have been generated
-    val expectedFolders = Set("templeuser-db", "templeuser").map(dir => basePath.resolve(dir))
+    // Four folders should have been generated
+    val expectedFolders = Set("templeuser-db", "templeuser", "kong", "kube").map(dir => basePath.resolve(dir))
     Files.list(basePath).toScala(Set) shouldBe expectedFolders
 
     // Only one file should be present in the templeuser-db folder

@@ -9,26 +9,29 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
 
   it should "correctly create a simple project using postgres as the default" in {
     val project = ProjectBuilder.build(ProjectBuilderTestData.simpleTemplefile)
-    project.files shouldBe Map(
-      File("templeuser-db", "init.sql") -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
-      File("templeuser", "Dockerfile")  -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
-    )
+    val expected = Map(
+        File("templeuser-db", "init.sql") -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
+        File("templeuser", "Dockerfile")  -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
+      ) ++ ProjectBuilderTestData.simpleTemplefileKubeScripts
+    project.files.toSet shouldBe expected.toSet
   }
 
   it should "use postgres when defined at the project level" in {
     val project = ProjectBuilder.build(ProjectBuilderTestData.simpleTemplefilePostgresProject)
-    project.files shouldBe Map(
-      File("templeuser-db", "init.sql") -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
-      File("templeuser", "Dockerfile")  -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
-    )
+    val expected = Map(
+        File("templeuser-db", "init.sql") -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
+        File("templeuser", "Dockerfile")  -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
+      ) ++ ProjectBuilderTestData.simpleTemplefileKubeScripts
+    project.files.toSet shouldBe expected.toSet
   }
 
   it should "use postgres when defined at the service level" in {
     val project = ProjectBuilder.build(ProjectBuilderTestData.simpleTemplefilePostgresService)
-    project.files shouldBe Map(
-      File("templeuser-db", "init.sql") -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
-      File("templeuser", "Dockerfile")  -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
-    )
+    val expected = Map(
+        File("templeuser-db", "init.sql") -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
+        File("templeuser", "Dockerfile")  -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
+      ) ++ ProjectBuilderTestData.simpleTemplefileKubeScripts
+    project.files.toSet shouldBe expected.toSet
   }
 
   it should "correctly create a complex service with nested struct" in {
@@ -36,6 +39,6 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
     project.files shouldBe Map(
       File("complexuser-db", "init.sql") -> ProjectBuilderTestData.complexTemplefilePostgresCreateOutput,
       File("complexuser", "Dockerfile")  -> ProjectBuilderTestData.complexTemplefileUsersDockerfile,
-    )
+    ) ++ ProjectBuilderTestData.complexTemplefileUsersKubeScripts
   }
 }

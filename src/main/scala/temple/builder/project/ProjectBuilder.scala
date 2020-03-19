@@ -3,12 +3,13 @@ package temple.builder.project
 import temple.DSL.semantics.Metadata.Database
 import temple.DSL.semantics.Metadata.Database.Postgres
 import temple.DSL.semantics.Templefile
-import temple.builder.{DatabaseBuilder, DockerfileBuilder}
+import temple.builder.{DatabaseBuilder, DockerfileBuilder, KubernetesBuilder}
 import temple.generate.FileSystem._
 import temple.generate.database.PreparedType.QuestionMarks
 import temple.generate.database.ast.Statement
 import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.docker.DockerfileGenerator
+import temple.generate.kube.KubernetesGenerator
 
 object ProjectBuilder {
 
@@ -36,6 +37,15 @@ object ProjectBuilder {
         (File(s"${name.toLowerCase}", "Dockerfile"), dockerfileContents)
     }
 
-    Project(databaseCreationScripts ++ dockerfiles)
+    val kubeFiles = KubernetesGenerator.generate(
+      KubernetesBuilder
+        .createServiceKubeFiles(
+          (templefile.services.zip(1024 until Int.MaxValue) map {
+            case ((name, service), port) => (name, service, port)
+          }).toSeq,
+        ),
+    )
+
+    Project(databaseCreationScripts ++ dockerfiles ++ kubeFiles)
   }
 }
