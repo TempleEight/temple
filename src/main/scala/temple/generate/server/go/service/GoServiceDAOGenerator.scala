@@ -1,11 +1,18 @@
 package temple.generate.server.go.service
 
 import temple.ast.{Attribute, AttributeType}
+import temple.generate.CRUD
+import temple.generate.server.ServiceGenerator.verb
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.FileUtils
 import temple.utils.StringUtils.doubleQuote
 
 import scala.Option.when
+import temple.generate.CRUD.ReadAll
+import temple.generate.CRUD.Create
+import temple.generate.CRUD.Read
+import temple.generate.CRUD.Update
+import temple.generate.CRUD.Delete
 
 object GoServiceDAOGenerator {
 
@@ -31,6 +38,33 @@ object GoServiceDAOGenerator {
       ),
     )
   }
+
+  private def generateDatastoreInterfaceFunctionReturnType(serviceName: String, operation: CRUD): String =
+    operation match {
+      case ReadAll                => s"(*[]${serviceName.capitalize}, error)"
+      case Create | Read | Update => s"(*${serviceName.capitalize}, error)"
+      case Delete                 => "error"
+    }
+
+  private def generateDatastoreInterfaceFunction(serviceName: String, operation: CRUD): String = {
+    val functionName = s"${verb(operation)}${serviceName.capitalize}"
+    mkCode(
+      s"$functionName(input ${functionName}Input)",
+      generateDatastoreInterfaceFunctionReturnType(serviceName, operation),
+    )
+  }
+
+  private[go] def generateDatastoreInterface(serviceName: String, operations: Set[CRUD]): String =
+    mkCode.lines(
+      "// Datastore provides the interface adopted by the DAO, allowing for mocking",
+      mkCode(
+        "type Datastore interface",
+        CodeWrap.curly.tabbed(
+          for (operation <- CRUD.values if operations.contains(operation))
+            yield generateDatastoreInterfaceFunction(serviceName, operation),
+        ),
+      ),
+    )
 
   private[go] def generateStructs(): String =
     mkCode.lines(

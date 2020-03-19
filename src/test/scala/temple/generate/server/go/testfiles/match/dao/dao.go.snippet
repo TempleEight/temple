@@ -11,3 +11,12 @@ import (
 	// pq acts as the driver for SQL requests
 	_ "github.com/lib/pq"
 )
+
+// Datastore provides the interface adopted by the DAO, allowing for mocking
+type Datastore interface {
+	ListMatch(input ListMatchInput) (*[]Match, error)
+	CreateMatch(input CreateMatchInput) (*Match, error)
+	ReadMatch(input ReadMatchInput) (*Match, error)
+	UpdateMatch(input UpdateMatchInput) (*Match, error)
+	DeleteMatch(input DeleteMatchInput) error
+}

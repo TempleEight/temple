@@ -48,6 +48,7 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${serviceRoot.name}/dao", "dao.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("dao"),
         GoServiceDAOGenerator.generateImports(serviceRoot.attributes, serviceRoot.module),
+        GoServiceDAOGenerator.generateDatastoreInterface(serviceRoot.name, serviceRoot.operations),
       ),
       File(s"${serviceRoot.name}/util", "util.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("util"),
