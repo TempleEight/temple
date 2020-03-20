@@ -112,5 +112,5 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   //                     \*(?!/)                      - are a star not followed by a slash
   //                             [^\*]                - are not a star
   //                                    \*/         - a star-slash
-  override protected val whiteSpace: Regex = """(\s+|//[^\n]*\n|/\*(\*(?!/)|[^\*])*\*/)+""".r
+  override protected val whiteSpace: Regex = """(\s+|//[^\n]*\n|/\*(\*(?!/)|[^*])*\*/)+""".r
 }
