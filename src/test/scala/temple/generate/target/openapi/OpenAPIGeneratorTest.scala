@@ -34,7 +34,7 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
   }
 
   it should "generate OpenAPI specs correctly" in {
-    val openAPI = OpenAPIGenerator.render("x", "0.1.2")(
+    val openAPIFiles = OpenAPIGenerator.generate("x", "0.1.2")(
       Service(
         "match",
         CRUD.values,
@@ -52,6 +52,8 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         ),
       ),
     )
+    openAPIFiles should have size 1
+    val openAPI: String = openAPIFiles.values.head
     openAPI shouldBe {
       """openapi: 3.0.0
         |info:

@@ -91,7 +91,7 @@ object KubernetesGenerator {
       service.dbImage,
       name,
       ports = Seq(),
-      env = service.envVars.map(x => EnvVar(x._1, x._2)),
+      env = service.dbEnvVars.map(EnvVar.tupled),
       volumeMounts = Seq(
         VolumeMount(service.dbStorage.dataMount, None, name + "-claim"),
         VolumeMount(service.dbStorage.initMount, Some(service.dbStorage.initFile), name + "-init"),
@@ -149,7 +149,7 @@ object KubernetesGenerator {
       service.image,
       service.name,
       service.ports.map { case (_, port) => ContainerPort(port) },
-      env = Seq(),
+      env = service.appEnvVars.map(EnvVar.tupled),
       volumeMounts = Seq(),
     )
 
@@ -182,7 +182,7 @@ object KubernetesGenerator {
     )
   }
 
-  private val kongFiles: Map[File, FileContent] = Map(
+  private val kongFiles: Files = Map(
     File("kube/kong", "kong-db-deployment.yaml") -> FileUtils.readResources("kube/kong/kong-db-deployment.yaml"),
     File("kube/kong", "kong-db-service.yaml")    -> FileUtils.readResources("kube/kong/kong-db-service.yaml"),
     File("kube/kong", "kong-deployment.yaml")    -> FileUtils.readResources("kube/kong/kong-deployment.yaml"),
@@ -200,10 +200,10 @@ object KubernetesGenerator {
     )
 
   /** Given an [[OrchestrationRoot]], check the services inside it and generate deployment scripts */
-  def generate(orchestrationRoot: OrchestrationRoot): Map[File, FileContent] = {
-    val kubeFiles: Map[File, FileContent] = orchestrationRoot.services.flatMap(buildKubeFiles).toMap
-    val kongConfig: (File, FileContent)   = KongConfigGenerator.generate(orchestrationRoot)
-    (kubeFiles + kongConfig) ++ kongFiles
+  def generate(orchestrationRoot: OrchestrationRoot): Files = {
+    val kubeFiles: Files  = orchestrationRoot.services.flatMap(buildKubeFiles).toMap
+    val kongConfig: Files = Map(KongConfigGenerator.generate(orchestrationRoot))
+    kubeFiles ++ kongConfig ++ kongFiles
   }
 
 }

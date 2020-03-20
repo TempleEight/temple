@@ -3,9 +3,6 @@ package temple.utils
 import java.nio.file.{FileAlreadyExistsException, Files, Paths}
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.utils.FileUtilsTest._
-
-import scala.util.Random
 
 class FileUtilsTest extends FlatSpec with Matchers {
 
@@ -22,7 +19,8 @@ class FileUtilsTest extends FlatSpec with Matchers {
 
   it should "create a file successfully in" in {
     // Generate a filename randomly, retrying if the file name already exists
-    val filename = Iterator.continually(s"/tmp/test-${randomString(10)}").find(x => !Files.exists(Paths.get(x))).get
+    val filename =
+      Iterator.continually(s"/tmp/test-${StringUtils.randomString(10)}").find(x => !Files.exists(Paths.get(x))).get
 
     val fileContents = "Example file contents"
     FileUtils.writeToFile(filename, fileContents)
@@ -34,8 +32,4 @@ class FileUtilsTest extends FlatSpec with Matchers {
     val dog             = FileUtils.readBinaryFile("src/test/scala/temple/testfiles/dog.jpeg")
     dog.length shouldBe expectedDogSize
   }
-}
-
-object FileUtilsTest {
-  def randomString(length: Int): String = new Random().alphanumeric.take(length).mkString
 }

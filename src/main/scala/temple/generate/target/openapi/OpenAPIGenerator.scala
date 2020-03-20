@@ -7,6 +7,7 @@ import temple.ast.Annotation
 import temple.ast.Attribute
 import temple.collection.FlagMapView
 import temple.generate.CRUD._
+import temple.generate.FileSystem._
 import temple.generate.target.openapi.OpenAPIGenerator._
 import temple.generate.target.openapi.ast.OpenAPIFile.{Components, Info}
 import temple.generate.target.openapi.ast.OpenAPIType._
@@ -185,16 +186,21 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
 
 object OpenAPIGenerator {
 
+  private def jsonContent(mediaTypeObject: MediaTypeObject) = Map("application/json" -> mediaTypeObject)
+
   private def build(name: String, version: String, description: String = "")(services: Service*): OpenAPIFile = {
     val builder = new OpenAPIGenerator(name, version, description)
     services.foreach(builder.addPaths)
     builder.toOpenAPI
   }
 
-  def render(name: String, version: String, description: String = "")(services: Service*): String =
+  private def render(name: String, version: String, description: String = "")(services: Service*): String =
     Printer(preserveOrder = true, dropNullKeys = true).pretty(build(name, version, description)(services: _*).asJson)
 
-  private def jsonContent(mediaTypeObject: MediaTypeObject) = Map("application/json" -> mediaTypeObject)
+  // TODO: standardize this type
+  def generate(name: String, version: String, description: String = "")(services: Service*): Files = Map(
+    File("api", s"$name.openapi.yaml") -> render(name, version, description)(services: _*),
+  )
 
   /** Create a Response representation for an error */
   private[openapi] def generateError(description: String, example: String): Response =

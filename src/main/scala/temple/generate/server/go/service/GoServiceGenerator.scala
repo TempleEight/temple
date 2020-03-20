@@ -10,7 +10,7 @@ import scala.Option.when
 /** Implementation of [[ServiceGenerator]] for generating Go */
 object GoServiceGenerator extends ServiceGenerator {
 
-  override def generate(serviceRoot: ServiceRoot): Map[File, FileContent] = {
+  override def generate(serviceRoot: ServiceRoot): Files = {
     /* TODO
      * main in <>.go
      * handlers in <>.go
