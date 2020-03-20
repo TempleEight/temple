@@ -6,7 +6,7 @@ class GrafanaDashboardGeneratorTest extends FlatSpec with Matchers {
   behavior of "GrafanaDashboardGenerator"
 
   it should "generate a correct JSON file with no panels" in {
-    val dashboard = GrafanaDashboardGenerator.generate("Example")
+    val dashboard = GrafanaDashboardGenerator.generate("Example", "abcdefg")
     dashboard shouldBe GrafanaDashboardGeneratorTestData.emptyDashboard
   }
 }

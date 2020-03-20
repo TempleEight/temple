@@ -45,7 +45,7 @@ object GrafanaDashboardGeneratorTestData {
        |  },
        |  "timezone" : "",
        |  "title" : "Example Dashboard",
-       |  "uid" : "OOmH3tqF",
+       |  "uid" : "abcdefg",
        |  "version" : 1
        |}""".stripMargin
 }

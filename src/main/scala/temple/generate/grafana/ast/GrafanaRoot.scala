@@ -4,7 +4,9 @@ import io.circe.Json
 import temple.generate.JsonEncodable
 import temple.utils.StringUtils
 
-case class GrafanaRoot(serviceName: String, panels: Seq[Panel]) extends JsonEncodable.Object {
+import scala.util.Random
+
+case class GrafanaRoot(serviceName: String, panels: Seq[Panel], uid: String) extends JsonEncodable.Object {
 
   override def jsonEntryIterator: IterableOnce[(String, Json)] = Seq(
     "annotations"   ~> Map("list" -> Seq[String]()),
@@ -23,7 +25,7 @@ case class GrafanaRoot(serviceName: String, panels: Seq[Panel]) extends JsonEnco
     "timepicker"    ~> Map("refresh_intervals" -> Seq("5s", "10s", "30s", "1m", "5m", "15m", "30m", "1h", "2h", "1d")),
     "timezone"      ~> "",
     "title"         ~> s"${serviceName} Dashboard",
-    "uid"           ~> StringUtils.randomString(8, Some(123)),
+    "uid"           ~> uid,
     "version"       ~> 1,
   )
 }
