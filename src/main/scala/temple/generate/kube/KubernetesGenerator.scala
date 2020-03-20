@@ -91,7 +91,7 @@ object KubernetesGenerator {
       service.dbImage,
       name,
       ports = Seq(),
-      env = service.dbEnvVars.map(x => EnvVar(x._1, x._2)),
+      env = service.dbEnvVars.map(EnvVar.tupled),
       volumeMounts = Seq(
         VolumeMount(service.dbStorage.dataMount, None, name + "-claim"),
         VolumeMount(service.dbStorage.initMount, Some(service.dbStorage.initFile), name + "-init"),
