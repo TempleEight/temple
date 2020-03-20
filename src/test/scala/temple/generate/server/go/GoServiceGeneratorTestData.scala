@@ -47,9 +47,9 @@ object GoServiceGeneratorTestData {
       ListMap(
         "userOne"   -> Attribute(AttributeType.UUIDType),
         "userTwo"   -> Attribute(AttributeType.UUIDType),
-        "matchedOn" -> Attribute(AttributeType.DateTimeType, Option(Annotation.ServerSet)),
+        "matchedOn" -> Attribute(AttributeType.DateTimeType, Some(Annotation.ServerSet)),
       ),
-      true,
+      enumByCreatedBy = true,
     )
 
   val simpleServiceFilesWithComms: Files = Map(

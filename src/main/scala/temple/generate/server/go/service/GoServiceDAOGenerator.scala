@@ -121,8 +121,9 @@ object GoServiceDAOGenerator {
     createdByAttribute: Option[CreatedByAttribute],
     attributes: ListMap[String, Attribute],
   ): String = {
-    val structName = s"${generateDAOFunctionName(operation, serviceName)}Input"
-    val idListMap  = ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
+    val structName       = s"${generateDAOFunctionName(operation, serviceName)}Input"
+    val commentSubstring = generateInputStructCommentSubstring(operation, serviceName)
+    val idListMap        = ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
 
     val createdByVal = createdByAttribute.getOrElse {
       throw new Exception(
@@ -136,12 +137,12 @@ object GoServiceDAOGenerator {
 
     // Omit attribute from input struct fields if server set
     val attributesListMap = attributes.collect {
-      case (name, attribute) if attribute.accessAnnotation != Some(Annotation.ServerSet) =>
+      case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.ServerSet) =>
         (name.capitalize, generateGoType(attribute.attributeType))
     }
 
     mkCode.lines(
-      s"// $structName encapsulates the information required to ${generateInputStructCommentSubstring(operation, serviceName)} in the datastore",
+      s"// $structName encapsulates the information required to $commentSubstring in the datastore",
       mkCode(
         s"type $structName struct",
         CodeWrap.curly.tabbed(
