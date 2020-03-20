@@ -1,10 +1,11 @@
 package temple.generate.server.go.service
 
-import temple.ast.{Attribute, AttributeType}
+import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD
 import temple.generate.CRUD._
+import temple.generate.server.{IDAttribute, CreatedByAttribute}
 import temple.generate.server.ServiceGenerator.verb
-import temple.generate.server.go.common.GoCommonGenerator
+import temple.generate.server.go.common.GoCommonGenerator.generateGoType
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
 import temple.utils.FileUtils
@@ -48,41 +49,57 @@ object GoServiceDAOGenerator {
   private def generateDAOFunctionName(operation: CRUD, serviceName: String): String =
     s"${verb(operation)}${serviceName.capitalize}"
 
-  private def generateDatastoreInterfaceFunction(serviceName: String, operation: CRUD): String = {
+  private def generateDatastoreInterfaceFunction(
+    serviceName: String,
+    operation: CRUD,
+    enumByCreatedBy: Boolean,
+  ): String = {
     val functionName = generateDAOFunctionName(operation, serviceName)
     mkCode(
-      s"$functionName(input ${functionName}Input)",
+      if (enumByCreatedBy || operation != CRUD.ReadAll) s"$functionName(input ${functionName}Input)"
+      else s"$functionName()",
       generateDatastoreInterfaceFunctionReturnType(serviceName, operation),
     )
   }
 
-  private[service] def generateDatastoreInterface(serviceName: String, operations: Set[CRUD]): String =
+  private[service] def generateDatastoreInterface(
+    serviceName: String,
+    operations: Set[CRUD],
+    enumByCreatedBy: Boolean,
+  ): String =
     mkCode.lines(
       "// Datastore provides the interface adopted by the DAO, allowing for mocking",
       mkCode(
         "type Datastore interface",
         CodeWrap.curly.tabbed(
           for (operation <- CRUD.values if operations.contains(operation))
-            yield generateDatastoreInterfaceFunction(serviceName, operation),
+            yield generateDatastoreInterfaceFunction(serviceName, operation, enumByCreatedBy),
         ),
       ),
     )
 
   private[service] def generateDatastoreObjectStruct(
     serviceName: String,
+    idAttribute: IDAttribute,
+    createdByAttribute: Option[CreatedByAttribute],
     attributes: ListMap[String, Attribute],
-  ): String =
+  ): String = {
+    val structFields = ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType)) ++
+      createdByAttribute.map(createdByAttribute =>
+        createdByAttribute.name.capitalize -> generateGoType(createdByAttribute.attributeType),
+      ) ++
+      attributes.map { case (name, attribute) => (name.capitalize -> generateGoType(attribute.attributeType)) }
+
     mkCode.lines(
       s"// ${serviceName.capitalize} encapsulates the object stored in the datastore",
       mkCode(
         s"type ${serviceName.capitalize} struct",
         CodeWrap.curly.tabbed(
-          CodeUtils.pad(attributes.map {
-            case (name, attribute) => (name.capitalize, GoCommonGenerator.generateGoType(attribute.attributeType))
-          }),
+          CodeUtils.pad(structFields),
         ),
       ),
     )
+  }
 
   private def generateInputStructCommentSubstring(operation: CRUD, serviceName: String): String =
     operation match {
@@ -93,6 +110,8 @@ object GoServiceDAOGenerator {
   private def generateInputStruct(
     serviceName: String,
     operation: CRUD,
+    idAttribute: IDAttribute,
+    createdByAttribute: Option[CreatedByAttribute],
     attributes: ListMap[String, Attribute],
   ): String = {
     val structName = s"${generateDAOFunctionName(operation, serviceName)}Input"
@@ -104,10 +123,26 @@ object GoServiceDAOGenerator {
           CodeUtils.pad(
             operation match {
               case ReadAll =>
-              case Create  =>
-              case Read    => ListMap("ID" -> GoCommonGenerator.generateGoType(AttributeType.UUIDType))
-              case Update  =>
-              case Delete  => ListMap("ID" -> GoCommonGenerator.generateGoType(AttributeType.UUIDType))
+                ListMap(
+                  createdByAttribute.get.inputName.capitalize -> generateGoType(createdByAttribute.get.attributeType),
+                )
+              case Create =>
+                ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType)) ++
+                createdByAttribute.map(createdByAttribute =>
+                  createdByAttribute.inputName.capitalize -> generateGoType(createdByAttribute.attributeType),
+                ) ++
+                attributes.collect {
+                  case (name, attribute) if attribute.accessAnnotation != Some(Annotation.ServerSet) =>
+                    (name.capitalize, generateGoType(attribute.attributeType))
+                }
+              case Read => ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
+              case Update =>
+                ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType)) ++
+                attributes.collect {
+                  case (name, attribute) if attribute.accessAnnotation != Some(Annotation.ServerSet) =>
+                    (name.capitalize, generateGoType(attribute.attributeType))
+                }
+              case Delete => ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
             },
           ),
         ),
@@ -118,11 +153,15 @@ object GoServiceDAOGenerator {
   private[service] def generateInputStructs(
     serviceName: String,
     operations: Set[CRUD],
+    idAttribute: IDAttribute,
+    createdByAttribute: Option[CreatedByAttribute],
     attributes: ListMap[String, Attribute],
+    enumByCreatedBy: Boolean,
   ): String =
     mkCode.doubleLines(
-      for (operation <- CRUD.values if operations.contains(operation))
-        yield generateInputStruct(serviceName, operation, attributes),
+      // Generate input struct for each operation, except for List operation when not enumerating by createdBy
+      for (operation <- CRUD.values if operations.contains(operation) && (enumByCreatedBy || operation != CRUD.ReadAll))
+        yield generateInputStruct(serviceName, operation, idAttribute, createdByAttribute, attributes),
     )
 
   private[service] def generateInit(): String =

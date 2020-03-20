@@ -11,5 +11,8 @@ case class ServiceRoot(
   comms: Seq[String],
   operations: Set[CRUD],
   port: Int,
+  idAttribute: IDAttribute,
+  createdByAttribute: Option[CreatedByAttribute],
   attributes: ListMap[String, Attribute],
+  enumByCreatedBy: Boolean = false,
 )

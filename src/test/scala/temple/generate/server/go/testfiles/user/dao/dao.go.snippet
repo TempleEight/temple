@@ -29,3 +29,25 @@ type User struct {
 	ID   uuid.UUID
 	Name string
 }
+
+// CreateUserInput encapsulates the information required to create a single user in the datastore
+type CreateUserInput struct {
+	ID   uuid.UUID
+	Name string
+}
+
+// ReadUserInput encapsulates the information required to read a single user in the datastore
+type ReadUserInput struct {
+	ID uuid.UUID
+}
+
+// UpdateUserInput encapsulates the information required to update a single user in the datastore
+type UpdateUserInput struct {
+	ID   uuid.UUID
+	Name string
+}
+
+// DeleteUserInput encapsulates the information required to delete a single user in the datastore
+type DeleteUserInput struct {
+	ID uuid.UUID
+}

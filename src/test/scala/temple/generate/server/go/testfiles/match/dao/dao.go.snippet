@@ -34,3 +34,33 @@ type Match struct {
 	UserTwo   uuid.UUID
 	MatchedOn time.Time
 }
+
+// ListMatchInput encapsulates the information required to read a match list in the datastore
+type ListMatchInput struct {
+	AuthID uuid.UUID
+}
+
+// CreateMatchInput encapsulates the information required to create a single match in the datastore
+type CreateMatchInput struct {
+	ID      uuid.UUID
+	AuthID  uuid.UUID
+	UserOne uuid.UUID
+	UserTwo uuid.UUID
+}
+
+// ReadMatchInput encapsulates the information required to read a single match in the datastore
+type ReadMatchInput struct {
+	ID uuid.UUID
+}
+
+// UpdateMatchInput encapsulates the information required to update a single match in the datastore
+type UpdateMatchInput struct {
+	ID      uuid.UUID
+	UserOne uuid.UUID
+	UserTwo uuid.UUID
+}
+
+// DeleteMatchInput encapsulates the information required to delete a single match in the datastore
+type DeleteMatchInput struct {
+	ID uuid.UUID
+}
