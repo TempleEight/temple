@@ -13,7 +13,6 @@ class GoServiceGeneratorTest extends FlatSpec with Matchers {
   }
 
   it should "generate simple services with inter-service communication correctly" in {
-    GoServiceGenerator.generate(GoServiceGeneratorTestData.simpleServiceRootWithComms)(File("match/dao", "dao.go")) shouldBe GoServiceGeneratorTestData
-      .simpleServiceFilesWithComms(File("match/dao", "dao.go"))
+    GoServiceGenerator.generate(GoServiceGeneratorTestData.simpleServiceRootWithComms) shouldBe GoServiceGeneratorTestData.simpleServiceFilesWithComms
   }
 }
