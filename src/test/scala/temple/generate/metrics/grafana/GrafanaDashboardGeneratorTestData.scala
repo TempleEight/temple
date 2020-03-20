@@ -1,4 +1,4 @@
-package temple.generate.grafana
+package temple.generate.metrics.grafana
 
 object GrafanaDashboardGeneratorTestData {
 

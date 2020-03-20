@@ -1,4 +1,4 @@
-package temple.generate.grafana.ast
+package temple.generate.metrics.grafana.ast
 
 import io.circe.Json
 import temple.generate.JsonEncodable

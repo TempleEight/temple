@@ -1,7 +1,7 @@
-package temple.generate.grafana
+package temple.generate.metrics.grafana
 
 import io.circe.syntax._
-import temple.generate.grafana.ast.GrafanaRoot
+import temple.generate.metrics.grafana.ast.GrafanaRoot
 import temple.utils.StringUtils
 
 object GrafanaDashboardGenerator {
