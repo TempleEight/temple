@@ -93,14 +93,13 @@ object GoServiceDAOGenerator {
       case (name, attribute) => (name.capitalize -> generateGoType(attribute.attributeType))
     }
 
-    val structFields = idMap ++ createdByMap ++ attributesMap
-
     mkCode.lines(
       s"// ${serviceName.capitalize} encapsulates the object stored in the datastore",
       mkCode(
         s"type ${serviceName.capitalize} struct",
         CodeWrap.curly.tabbed(
-          CodeUtils.pad(structFields),
+          // Compose struct fields
+          CodeUtils.pad(idMap ++ createdByMap ++ attributesMap),
         ),
       ),
     )
