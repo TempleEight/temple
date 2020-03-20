@@ -1,5 +1,7 @@
 package temple.utils
 
+import scala.util.Random
+
 /** Utility functions useful for performing operations on strings */
 object StringUtils {
 
@@ -22,15 +24,23 @@ object StringUtils {
 
   /** Given a string, convert it to snake case */
   // https://github.com/lift/framework/blob/f1b450db2dd6a22cf9ffe5576ec34c8e87118319/core/util/src/main/scala/net/liftweb/util/StringHelpers.scala#L91
-  def snakeCase(str: String): String =
+  def snakeCase(str: String, sep: Char = '_'): String =
     str
-      .replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2")
-      .replaceAll("([a-z\\d])([A-Z])", "$1_$2")
+      .replaceAll("([A-Z]+)([A-Z][a-z])", s"$$1$sep$$2")
+      .replaceAll("([a-z\\d])([A-Z])", s"$$1$sep$$2")
       .toLowerCase
 
+  def kebabCase(str: String): String = snakeCase(str, '-')
+
+  /** Generate a random alphanumeric string of given length */
+  def randomString(length: Int): String =
+    new Random().alphanumeric.take(length).mkString
+
   type StringWrap = String => String
+
   private def stringWrap(start: String, end: String)(string: String): String = start + string + end
-  private def stringWrap(start: String): StringWrap                          = stringWrap(start, start)
+
+  private def stringWrap(start: String): StringWrap = stringWrap(start, start)
 
   /** Wrap a string in double quotes, note that this does not perform any escaping */
   val doubleQuote: StringWrap = stringWrap("\"")

@@ -18,7 +18,7 @@ abstract class GolangSpec extends DockerShell2HttpService(8081) with DockerTestK
     validateAll(Map(file -> gofile), file)
   }
 
-  def validateAll(files: Map[File, FileContent], entryFile: File): String = {
+  def validateAll(files: Files, entryFile: File): String = {
     val json = files.map { case (file, contents) => (file.folder + "/" + file.filename, contents) }.asJson.toString()
     Http(golangVerifyUrl)
       .params(Map("src" -> json, "root" -> entryFile.folder, "entrypoint" -> entryFile.filename))

@@ -11,4 +11,9 @@ case class Templefile(
   for (block <- Iterator(projectBlock) ++ targets.valuesIterator ++ services.valuesIterator) {
     block.setParent(this)
   }
+
+  def servicesWithPorts: Iterable[(String, ServiceBlock, Int)] =
+    services
+      .zip(Iterator from 1024)
+      .map { case ((name, service), port) => (name, service, port) }
 }

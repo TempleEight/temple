@@ -7,7 +7,7 @@ import temple.generate.utils.CodeTerm.mkCode
 
 object GoAuthServiceGenerator extends AuthServiceGenerator {
 
-  override def generate(authServiceRoot: AuthServiceRoot): Map[File, FileContent] =
+  override def generate(authServiceRoot: AuthServiceRoot): Files =
     /* TODO
      * auth.go main
      * dao.go
