@@ -18,7 +18,8 @@ object SimpleE2ETestData {
       |
       |CREATE TABLE fred (
       |  field TEXT,
-      |  friend INT NOT NULL
+      |  friend INT NOT NULL,
+      |  image BYTEA CHECK (octet_length(image) <= 10000000) NOT NULL
       |);""".stripMargin
 
   val dockerfile: String =
