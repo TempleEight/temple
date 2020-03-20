@@ -85,17 +85,15 @@ object GoServiceDAOGenerator {
     attributes: ListMap[String, Attribute],
   ): String = {
 
-    val idListMap = ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
-    val createdByListMap = createdByAttribute.map(createdByAttribute =>
+    val idMap = ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
+    val createdByMap = createdByAttribute.map(createdByAttribute =>
       createdByAttribute.name.capitalize -> generateGoType(createdByAttribute.attributeType),
     )
-    val attributesListMap = attributes.map {
+    val attributesMap = attributes.map {
       case (name, attribute) => (name.capitalize -> generateGoType(attribute.attributeType))
     }
 
-    val structFields = idListMap ++
-      createdByListMap ++
-      attributesListMap
+    val structFields = idMap ++ createdByMap ++ attributesMap
 
     mkCode.lines(
       s"// ${serviceName.capitalize} encapsulates the object stored in the datastore",
@@ -114,6 +112,18 @@ object GoServiceDAOGenerator {
       case Create | Read | Update | Delete => s"${verb(operation).toLowerCase()} a single $serviceName"
     }
 
+  private def generateReadAllInputStructFields(
+    createdByAttribute: Option[CreatedByAttribute],
+  ): ListMap[String, String] = {
+    val createdByVal = createdByAttribute.getOrElse {
+      throw new Exception(
+        "Programmer error: createdByAttribute should be present because input struct for readAll " +
+        "operation should only be generated if enumerating by creator",
+      )
+    }
+    ListMap(createdByVal.inputName.capitalize -> generateGoType(createdByVal.attributeType))
+  }
+
   private def generateInputStruct(
     serviceName: String,
     operation: CRUD,
@@ -123,20 +133,17 @@ object GoServiceDAOGenerator {
   ): String = {
     val structName       = s"${generateDAOFunctionName(operation, serviceName)}Input"
     val commentSubstring = generateInputStructCommentSubstring(operation, serviceName)
-    val idListMap        = ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
 
-    val createdByVal = createdByAttribute.getOrElse {
-      throw new Exception(
-        "Programmer error: createdByAttribute should be present because input struct for readAll " +
-        "operation should only be generated if enumerating by creator",
-      )
+    // We assume identifier is an acronym, so we upper case it
+    val idMap = ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
+
+    // Note we use the createdBy input name, rather than name
+    val createdByOption = createdByAttribute.map { createdByAttribute =>
+      createdByAttribute.inputName.capitalize -> generateGoType(createdByAttribute.attributeType)
     }
-    val createdByListMap = ListMap(
-      createdByVal.inputName.capitalize -> generateGoType(createdByVal.attributeType),
-    )
 
     // Omit attribute from input struct fields if server set
-    val attributesListMap = attributes.collect {
+    val attributesMap = attributes.collect {
       case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.ServerSet) =>
         (name.capitalize, generateGoType(attribute.attributeType))
     }
@@ -149,19 +156,11 @@ object GoServiceDAOGenerator {
           CodeUtils.pad(
             operation match {
               // Compose struct fields for each operation
-              case ReadAll =>
-                createdByListMap
-              case Create =>
-                idListMap ++
-                createdByListMap ++
-                attributesListMap
-              case Read =>
-                idListMap
-              case Update =>
-                idListMap ++
-                attributesListMap
-              case Delete =>
-                idListMap
+              case ReadAll => generateReadAllInputStructFields(createdByAttribute)
+              case Create  => idMap ++ createdByOption ++ attributesMap
+              case Read    => idMap
+              case Update  => idMap ++ attributesMap
+              case Delete  => idMap
             },
           ),
         ),
