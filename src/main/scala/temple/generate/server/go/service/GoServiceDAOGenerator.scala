@@ -27,10 +27,10 @@ object GoServiceDAOGenerator {
       "import",
       CodeWrap.parens.tabbed(
         doubleQuote("database/sql"),
-        doubleQuote("fmt"),
+        //doubleQuote("fmt"),
         when(containsTime) { doubleQuote("time") },
         "",
-        doubleQuote(s"$module/util"),
+        //doubleQuote(s"$module/util"),
         doubleQuote("github.com/google/uuid"),
         "",
         "// pq acts as the driver for SQL requests",
