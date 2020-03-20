@@ -15,4 +15,9 @@ case class ServiceRoot(
   createdByAttribute: Option[CreatedByAttribute],
   attributes: ListMap[String, Attribute],
   enumByCreatedBy: Boolean = false,
-)
+) {
+  if (enumByCreatedBy && createdByAttribute.isEmpty)
+    throw new IllegalArgumentException(
+      "Cannot construct service root without a createdByAttribute if enumerating by creator",
+    )
+}

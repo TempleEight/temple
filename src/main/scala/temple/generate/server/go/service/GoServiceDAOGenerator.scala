@@ -123,8 +123,14 @@ object GoServiceDAOGenerator {
           CodeUtils.pad(
             operation match {
               case ReadAll =>
+                val createdByAttributeVal = createdByAttribute.getOrElse {
+                  throw new Exception(
+                    "Programmer error: createdByAttribute should be present because input struct for readAll " +
+                    "operation should only be generated if enumerating by creator",
+                  )
+                }
                 ListMap(
-                  createdByAttribute.get.inputName.capitalize -> generateGoType(createdByAttribute.get.attributeType),
+                  createdByAttributeVal.inputName.capitalize -> generateGoType(createdByAttributeVal.attributeType),
                 )
               case Create =>
                 ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType)) ++
