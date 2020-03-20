@@ -7,7 +7,7 @@ import temple.generate.FileSystem._
 trait ServiceGenerator {
 
   /** Given a ServiceRoot ADT, generate the service boilerplate in a specific language */
-  def generate(serviceRoot: ServiceRoot): Map[File, FileContent]
+  def generate(serviceRoot: ServiceRoot): Files
 }
 
 object ServiceGenerator {

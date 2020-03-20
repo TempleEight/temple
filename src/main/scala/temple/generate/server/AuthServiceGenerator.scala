@@ -6,5 +6,5 @@ import temple.generate.FileSystem._
 trait AuthServiceGenerator {
 
   /** Given an AuthServiceRoot ADT, generate the Auth service boilerplate in a specific language */
-  def generate(authServiceRoot: AuthServiceRoot): Map[File, FileContent]
+  def generate(authServiceRoot: AuthServiceRoot): Files
 }

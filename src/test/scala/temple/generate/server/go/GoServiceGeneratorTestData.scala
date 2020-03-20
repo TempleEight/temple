@@ -15,7 +15,7 @@ object GoServiceGeneratorTestData {
     80,
   )
 
-  val simpleServiceFiles: Map[File, FileContent] = Map(
+  val simpleServiceFiles: Files = Map(
     File("user", "go.mod")  -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/go.mod.snippet"),
     File("user", "user.go") -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/user.go.snippet"),
     File("user/dao", "errors.go") -> readFile(
@@ -38,7 +38,7 @@ object GoServiceGeneratorTestData {
       81,
     )
 
-  val simpleServiceFilesWithComms: Map[File, FileContent] = Map(
+  val simpleServiceFilesWithComms: Files = Map(
     File("match", "go.mod") -> readFile("src/test/scala/temple/generate/server/go/testfiles/match/go.mod.snippet"),
     File("match", "match.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/match/match.go.snippet",
