@@ -1,5 +1,7 @@
 package temple.utils
 
+import scala.util.Random
+
 /** Utility functions useful for performing operations on strings */
 object StringUtils {
 
@@ -27,6 +29,12 @@ object StringUtils {
       .replaceAll("([A-Z]+)([A-Z][a-z])", "$1_$2")
       .replaceAll("([a-z\\d])([A-Z])", "$1_$2")
       .toLowerCase
+
+  /** Generate a random alphanumeric string of given length, using a provided seed */
+  def randomString(length: Int, seed: Option[Int] = None): String = seed match {
+    case Some(value) => new Random(value).alphanumeric.take(length).mkString
+    case None        => new Random().alphanumeric.take(length).mkString
+  }
 
   type StringWrap = String => String
   private def stringWrap(start: String, end: String)(string: String): String = start + string + end
