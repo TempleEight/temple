@@ -23,7 +23,7 @@ object GoCommonGenerator {
       case IntType(_, _, _)                               => "int64"
       case FloatType(_, _, p) if p <= 4                   => "float32"
       case FloatType(_, _, _)                             => "float64"
-      case StringType(max, min)                           => "string"
+      case StringType(_, _)                               => "string"
       case BoolType                                       => "bool"
       case DateType                                       => "time.Time"
       case TimeType                                       => "time.Time"

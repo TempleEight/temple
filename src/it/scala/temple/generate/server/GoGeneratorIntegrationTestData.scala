@@ -1,9 +1,7 @@
 package temple.generate.server
 
+import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD
-import temple.ast.Attribute
-import temple.ast.AttributeType
-import temple.ast.Annotation
 
 import scala.collection.immutable.ListMap
 
@@ -16,7 +14,7 @@ object GoGeneratorIntegrationTestData {
     Set(CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
     80,
     IDAttribute("id", AttributeType.UUIDType),
-    Option.empty,
+    None,
     ListMap("name" -> Attribute(AttributeType.StringType())),
   )
 
@@ -28,7 +26,7 @@ object GoGeneratorIntegrationTestData {
       Set(CRUD.ReadAll, CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
       81,
       IDAttribute("id", AttributeType.UUIDType),
-      Option(CreatedByAttribute("authID", "createdBy", AttributeType.UUIDType)),
+      Some(CreatedByAttribute("authID", "createdBy", AttributeType.UUIDType)),
       ListMap(
         "userOne"   -> Attribute(AttributeType.UUIDType),
         "userTwo"   -> Attribute(AttributeType.UUIDType),

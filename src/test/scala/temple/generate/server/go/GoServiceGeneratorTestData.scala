@@ -17,7 +17,7 @@ object GoServiceGeneratorTestData {
     Set(CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
     80,
     IDAttribute("id", AttributeType.UUIDType),
-    Option.empty,
+    None,
     ListMap("name" -> Attribute(AttributeType.StringType())),
   )
 
@@ -43,7 +43,7 @@ object GoServiceGeneratorTestData {
       Set(CRUD.ReadAll, CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
       81,
       IDAttribute("id", AttributeType.UUIDType),
-      Option(CreatedByAttribute("authID", "createdBy", AttributeType.UUIDType)),
+      Some(CreatedByAttribute("authID", "createdBy", AttributeType.UUIDType)),
       ListMap(
         "userOne"   -> Attribute(AttributeType.UUIDType),
         "userTwo"   -> Attribute(AttributeType.UUIDType),

@@ -55,9 +55,9 @@ object GoServiceDAOGenerator {
     enumByCreatedBy: Boolean,
   ): String = {
     val functionName = generateDAOFunctionName(operation, serviceName)
+    val functionArgs = if (enumByCreatedBy || operation != CRUD.ReadAll) s"input ${functionName}Input" else ""
     mkCode(
-      if (enumByCreatedBy || operation != CRUD.ReadAll) s"$functionName(input ${functionName}Input)"
-      else s"$functionName()",
+      s"$functionName($functionArgs)",
       generateDatastoreInterfaceFunctionReturnType(serviceName, operation),
     )
   }
@@ -84,11 +84,18 @@ object GoServiceDAOGenerator {
     createdByAttribute: Option[CreatedByAttribute],
     attributes: ListMap[String, Attribute],
   ): String = {
-    val structFields = ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType)) ++
-      createdByAttribute.map(createdByAttribute =>
-        createdByAttribute.name.capitalize -> generateGoType(createdByAttribute.attributeType),
-      ) ++
-      attributes.map { case (name, attribute) => (name.capitalize -> generateGoType(attribute.attributeType)) }
+
+    val idListMap = ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
+    val createdByListMap = createdByAttribute.map(createdByAttribute =>
+      createdByAttribute.name.capitalize -> generateGoType(createdByAttribute.attributeType),
+    )
+    val attributesListMap = attributes.map {
+      case (name, attribute) => (name.capitalize -> generateGoType(attribute.attributeType))
+    }
+
+    val structFields = idListMap ++
+      createdByListMap ++
+      attributesListMap
 
     mkCode.lines(
       s"// ${serviceName.capitalize} encapsulates the object stored in the datastore",
@@ -115,6 +122,24 @@ object GoServiceDAOGenerator {
     attributes: ListMap[String, Attribute],
   ): String = {
     val structName = s"${generateDAOFunctionName(operation, serviceName)}Input"
+    val idListMap  = ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
+
+    val createdByVal = createdByAttribute.getOrElse {
+      throw new Exception(
+        "Programmer error: createdByAttribute should be present because input struct for readAll " +
+        "operation should only be generated if enumerating by creator",
+      )
+    }
+    val createdByListMap = ListMap(
+      createdByVal.inputName.capitalize -> generateGoType(createdByVal.attributeType),
+    )
+
+    // Omit attribute from input struct fields if server set
+    val attributesListMap = attributes.collect {
+      case (name, attribute) if attribute.accessAnnotation != Some(Annotation.ServerSet) =>
+        (name.capitalize, generateGoType(attribute.attributeType))
+    }
+
     mkCode.lines(
       s"// $structName encapsulates the information required to ${generateInputStructCommentSubstring(operation, serviceName)} in the datastore",
       mkCode(
@@ -122,33 +147,20 @@ object GoServiceDAOGenerator {
         CodeWrap.curly.tabbed(
           CodeUtils.pad(
             operation match {
+              // Compose struct fields for each operation
               case ReadAll =>
-                val createdByAttributeVal = createdByAttribute.getOrElse {
-                  throw new Exception(
-                    "Programmer error: createdByAttribute should be present because input struct for readAll " +
-                    "operation should only be generated if enumerating by creator",
-                  )
-                }
-                ListMap(
-                  createdByAttributeVal.inputName.capitalize -> generateGoType(createdByAttributeVal.attributeType),
-                )
+                createdByListMap
               case Create =>
-                ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType)) ++
-                createdByAttribute.map(createdByAttribute =>
-                  createdByAttribute.inputName.capitalize -> generateGoType(createdByAttribute.attributeType),
-                ) ++
-                attributes.collect {
-                  case (name, attribute) if attribute.accessAnnotation != Some(Annotation.ServerSet) =>
-                    (name.capitalize, generateGoType(attribute.attributeType))
-                }
-              case Read => ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
+                idListMap ++
+                createdByListMap ++
+                attributesListMap
+              case Read =>
+                idListMap
               case Update =>
-                ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType)) ++
-                attributes.collect {
-                  case (name, attribute) if attribute.accessAnnotation != Some(Annotation.ServerSet) =>
-                    (name.capitalize, generateGoType(attribute.attributeType))
-                }
-              case Delete => ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
+                idListMap ++
+                attributesListMap
+              case Delete =>
+                idListMap
             },
           ),
         ),
