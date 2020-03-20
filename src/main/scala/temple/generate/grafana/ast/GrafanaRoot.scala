@@ -2,9 +2,6 @@ package temple.generate.grafana.ast
 
 import io.circe.Json
 import temple.generate.JsonEncodable
-import temple.utils.StringUtils
-
-import scala.util.Random
 
 case class GrafanaRoot(serviceName: String, panels: Seq[Panel], uid: String) extends JsonEncodable.Object {
 
