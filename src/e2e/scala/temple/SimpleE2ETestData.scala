@@ -46,16 +46,16 @@ object SimpleE2ETestData {
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
-      |  --data 'name=TempleUser-service' \
-      |  --data 'url=http://TempleUser:1024/TempleUser'
+      |  --data 'name=temple-user-service' \
+      |  --data 'url=http://temple-user:1024/temple-user'
       |
       |curl -X POST \
-      |  --url $KONG_ADMIN/services/TempleUser-service/routes \
+      |  --url $KONG_ADMIN/services/temple-user-service/routes \
       |  --data "hosts[]=$KONG_ENTRY" \
-      |  --data 'paths[]=/api/TempleUser'
+      |  --data 'paths[]=/api/temple-user'
       |
       |curl -X POST \
-      |  --url $KONG_ADMIN/services/TempleUser-service/plugins \
+      |  --url $KONG_ADMIN/services/temple-user-service/plugins \
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
 
@@ -63,27 +63,27 @@ object SimpleE2ETestData {
     """apiVersion: apps/v1
       |kind: Deployment
       |metadata:
-      |  name: TempleUser
+      |  name: temple-user
       |  labels:
-      |    app: TempleUser
+      |    app: temple-user
       |    kind: service
       |spec:
       |  replicas: 1
       |  selector:
       |    matchLabels:
-      |      app: TempleUser
+      |      app: temple-user
       |      kind: service
       |  template:
       |    metadata:
-      |      name: TempleUser
+      |      name: temple-user
       |      labels:
-      |        app: TempleUser
+      |        app: temple-user
       |        kind: service
       |    spec:
-      |      hostname: TempleUser
+      |      hostname: temple-user
       |      containers:
-      |      - image: temple-SimpleTempleTest-TempleUser
-      |        name: TempleUser
+      |      - image: simple-temple-test-temple-user
+      |        name: temple-user
       |        ports:
       |        - containerPort: 1024
       |      imagePullSecrets:
@@ -95,38 +95,38 @@ object SimpleE2ETestData {
     """apiVersion: apps/v1
       |kind: Deployment
       |metadata:
-      |  name: TempleUser-db
+      |  name: temple-user-db
       |  labels:
-      |    app: TempleUser
+      |    app: temple-user
       |    kind: db
       |spec:
       |  replicas: 1
       |  selector:
       |    matchLabels:
-      |      app: TempleUser
+      |      app: temple-user
       |      kind: db
       |  strategy:
       |    type: Recreate
       |  template:
       |    metadata:
-      |      name: TempleUser-db
+      |      name: temple-user-db
       |      labels:
-      |        app: TempleUser
+      |        app: temple-user
       |        kind: db
       |    spec:
-      |      hostname: TempleUser-db
+      |      hostname: temple-user-db
       |      containers:
       |      - env:
       |        - name: PGUSER
       |          value: postgres
       |        image: postgres:12.1
-      |        name: TempleUser-db
+      |        name: temple-user-db
       |        volumeMounts:
       |        - mountPath: /var/lib/postgresql/data
-      |          name: TempleUser-db-claim
+      |          name: temple-user-db-claim
       |        - mountPath: /docker-entrypoint-initdb.d/init.sql
       |          subPath: init.sql
-      |          name: TempleUser-db-init
+      |          name: temple-user-db-init
       |        lifecycle:
       |          postStart:
       |            exec:
@@ -136,21 +136,21 @@ object SimpleE2ETestData {
       |              - psql -U postgres -f /docker-entrypoint-initdb.d/init.sql && echo done
       |      restartPolicy: Always
       |      volumes:
-      |      - name: TempleUser-db-init
+      |      - name: temple-user-db-init
       |        configMap:
-      |          name: TempleUser-db-config
-      |      - name: TempleUser-db-claim
+      |          name: temple-user-db-config
+      |      - name: temple-user-db-claim
       |        persistentVolumeClaim:
-      |          claimName: TempleUser-db-claim
+      |          claimName: temple-user-db-claim
       |""".stripMargin
 
   val kubeService: String =
     """apiVersion: v1
       |kind: Service
       |metadata:
-      |  name: TempleUser
+      |  name: temple-user
       |  labels:
-      |    app: TempleUser
+      |    app: temple-user
       |    kind: service
       |spec:
       |  ports:
@@ -158,7 +158,7 @@ object SimpleE2ETestData {
       |    port: 1024
       |    targetPort: 1024
       |  selector:
-      |    app: TempleUser
+      |    app: temple-user
       |    kind: service
       |""".stripMargin
 
@@ -166,9 +166,9 @@ object SimpleE2ETestData {
     """apiVersion: v1
       |kind: PersistentVolume
       |metadata:
-      |  name: TempleUser-db-volume
+      |  name: temple-user-db-volume
       |  labels:
-      |    app: TempleUser
+      |    app: temple-user
       |    type: local
       |spec:
       |  storageClassName: manual
@@ -178,18 +178,18 @@ object SimpleE2ETestData {
       |  - ReadWriteMany
       |  persistentVolumeReclaimPolicy: Delete
       |  hostPath:
-      |    path: /data/TempleUser-db
+      |    path: /data/temple-user-db
       |---
       |apiVersion: v1
       |kind: PersistentVolumeClaim
       |metadata:
-      |  name: TempleUser-db-claim
+      |  name: temple-user-db-claim
       |  labels:
-      |    app: TempleUser
+      |    app: temple-user
       |spec:
       |  accessModes:
       |  - ReadWriteMany
-      |  volumeName: TempleUser-db-volume
+      |  volumeName: temple-user-db-volume
       |  storageClassName: manual
       |  resources:
       |    requests:
@@ -200,9 +200,9 @@ object SimpleE2ETestData {
     """apiVersion: v1
       |kind: Service
       |metadata:
-      |  name: TempleUser-db
+      |  name: temple-user-db
       |  labels:
-      |    app: TempleUser
+      |    app: temple-user
       |    kind: db
       |spec:
       |  ports:
@@ -210,7 +210,7 @@ object SimpleE2ETestData {
       |    port: 5432
       |    targetPort: 5432
       |  selector:
-      |    app: TempleUser
+      |    app: temple-user
       |    kind: db
       |""".stripMargin
 }

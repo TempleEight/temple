@@ -78,30 +78,31 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     val templeKongKubeMigration = Files.readString(basePath.resolve("kube/kong").resolve("kong-migration-job.yaml"))
     templeKongKubeMigration shouldBe FileUtils.readResources("kube/kong/kong-migration-job.yaml")
 
-    // Only these files should be present in the kube/TempleUser folder
+    // Only these files should be present in the kube/temple-user folder
     val expectedUserKubeFiles = Set(
       "deployment.yaml",
       "service.yaml",
       "db-deployment.yaml",
       "db-service.yaml",
       "db-storage.yaml",
-    ).map(dir => basePath.resolve("kube/TempleUser").resolve(dir))
-    Files.list(basePath.resolve("kube/TempleUser")).toScala(Set) shouldBe expectedUserKubeFiles
+    ).map(dir => basePath.resolve("kube/temple-user").resolve(dir))
+    Files.list(basePath.resolve("kube/temple-user")).toScala(Set) shouldBe expectedUserKubeFiles
 
-    // The content of the kube/TempleUser/ files should be correct
-    val templeUserKubeDeployment = Files.readString(basePath.resolve("kube/TempleUser").resolve("deployment.yaml"))
+    // The content of the kube/temple-user/ files should be correct
+    val templeUserKubeDeployment = Files.readString(basePath.resolve("kube/temple-user").resolve("deployment.yaml"))
     templeUserKubeDeployment shouldBe SimpleE2ETestData.kubeDeployment
 
-    val templeUserKubeDbDeployment = Files.readString(basePath.resolve("kube/TempleUser").resolve("db-deployment.yaml"))
+    val templeUserKubeDbDeployment =
+      Files.readString(basePath.resolve("kube/temple-user").resolve("db-deployment.yaml"))
     templeUserKubeDbDeployment shouldBe SimpleE2ETestData.kubeDbDeployment
 
-    val templeUserKubeService = Files.readString(basePath.resolve("kube/TempleUser").resolve("service.yaml"))
+    val templeUserKubeService = Files.readString(basePath.resolve("kube/temple-user").resolve("service.yaml"))
     templeUserKubeService shouldBe SimpleE2ETestData.kubeService
 
-    val templeUserKubeDbService = Files.readString(basePath.resolve("kube/TempleUser").resolve("db-service.yaml"))
+    val templeUserKubeDbService = Files.readString(basePath.resolve("kube/temple-user").resolve("db-service.yaml"))
     templeUserKubeDbService shouldBe SimpleE2ETestData.kubeDbService
 
-    val templeUserKubeStorage = Files.readString(basePath.resolve("kube/TempleUser").resolve("db-storage.yaml"))
+    val templeUserKubeStorage = Files.readString(basePath.resolve("kube/temple-user").resolve("db-storage.yaml"))
     templeUserKubeStorage shouldBe SimpleE2ETestData.kubeDbStorage
   }
 }

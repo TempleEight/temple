@@ -9,6 +9,7 @@ import temple.generate.database.ast.Statement
 import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.docker.DockerfileGenerator
 import temple.generate.kube.KubernetesGenerator
+import temple.utils.StringUtils
 
 object ProjectBuilder {
 
@@ -37,7 +38,7 @@ object ProjectBuilder {
     }
 
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(
-      templefile.projectName,
+      StringUtils.kebabCase(templefile.projectName),
       templefile.servicesWithPorts.toSeq,
     )
     val kubeFiles = KubernetesGenerator.generate(orchestrationRoot)
