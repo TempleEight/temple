@@ -12,7 +12,7 @@ import temple.generate.FileSystem._
 abstract class KubeSpec extends DockerShell2HttpService(8084) with DockerTestKit with BeforeAndAfterAll {
   implicit override val dockerFactory: DockerFactory = new SpotifyDockerFactory(DefaultDockerClient.fromEnv().build())
 
-  def validateAll(files: Map[File, FileContent], entryFile: File): String = {
+  def validateAll(files: Files, entryFile: File): String = {
     val json = files.map { case (file, contents) => (file.folder + "/" + file.filename, contents) }.asJson.toString()
     Http(kubeVerifyUrl)
       .params(Map("src" -> json, "root" -> entryFile.folder))
