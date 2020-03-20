@@ -2,26 +2,63 @@ package dao
 
 import (
 	"database/sql"
-	"fmt"
+	"time"
 
-	"github.com/TempleEight/spec-golang/match/util"
+	"github.com/google/uuid"
+
 	// pq acts as the driver for SQL requests
 	_ "github.com/lib/pq"
 )
 
-// DAO encapsulates access to the database
+// Datastore provides the interface adopted by the DAO, allowing for mocking
+type Datastore interface {
+	ListMatch(input ListMatchInput) (*[]Match, error)
+	CreateMatch(input CreateMatchInput) (*Match, error)
+	ReadMatch(input ReadMatchInput) (*Match, error)
+	UpdateMatch(input UpdateMatchInput) (*Match, error)
+	DeleteMatch(input DeleteMatchInput) error
+}
+
+// DAO encapsulates access to the datastore
 type DAO struct {
 	DB *sql.DB
 }
 
-// Init opens the database connection
-func (dao *DAO) Init(config *util.Config) error {
-	connStr := fmt.Sprintf("user=%s dbname=%s host=%s sslmode=%s", config.User, config.DBName, config.Host, config.SSLMode)
-	var err error
-	dao.DB, err = sql.Open("postgres", connStr)
-	if err != nil {
-		return err
-	}
+// Match encapsulates the object stored in the datastore
+type Match struct {
+	ID        uuid.UUID
+	CreatedBy uuid.UUID
+	UserOne   uuid.UUID
+	UserTwo   uuid.UUID
+	MatchedOn time.Time
+}
 
-	return nil
+// ListMatchInput encapsulates the information required to read a match list in the datastore
+type ListMatchInput struct {
+	AuthID uuid.UUID
+}
+
+// CreateMatchInput encapsulates the information required to create a single match in the datastore
+type CreateMatchInput struct {
+	ID      uuid.UUID
+	AuthID  uuid.UUID
+	UserOne uuid.UUID
+	UserTwo uuid.UUID
+}
+
+// ReadMatchInput encapsulates the information required to read a single match in the datastore
+type ReadMatchInput struct {
+	ID uuid.UUID
+}
+
+// UpdateMatchInput encapsulates the information required to update a single match in the datastore
+type UpdateMatchInput struct {
+	ID      uuid.UUID
+	UserOne uuid.UUID
+	UserTwo uuid.UUID
+}
+
+// DeleteMatchInput encapsulates the information required to delete a single match in the datastore
+type DeleteMatchInput struct {
+	ID uuid.UUID
 }

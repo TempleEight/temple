@@ -8,6 +8,7 @@ object AttributeType {
 
   sealed trait PrimitiveAttributeType extends AttributeType
 
+  case object UUIDType     extends PrimitiveAttributeType
   case object BoolType     extends PrimitiveAttributeType
   case object DateType     extends PrimitiveAttributeType
   case object DateTimeType extends PrimitiveAttributeType

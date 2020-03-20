@@ -1,6 +1,9 @@
 package temple.generate.server
 
+import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD
+
+import scala.collection.immutable.ListMap
 
 object GoGeneratorIntegrationTestData {
 
@@ -10,6 +13,9 @@ object GoGeneratorIntegrationTestData {
     Seq.empty,
     Set(CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
     80,
+    IDAttribute("id", AttributeType.UUIDType),
+    None,
+    ListMap("name" -> Attribute(AttributeType.StringType())),
   )
 
   val simpleServiceRootWithComms: ServiceRoot =
@@ -19,5 +25,13 @@ object GoGeneratorIntegrationTestData {
       Seq("user"),
       Set(CRUD.ReadAll, CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
       81,
+      IDAttribute("id", AttributeType.UUIDType),
+      Some(CreatedByAttribute("authID", "createdBy", AttributeType.UUIDType)),
+      ListMap(
+        "userOne"   -> Attribute(AttributeType.UUIDType),
+        "userTwo"   -> Attribute(AttributeType.UUIDType),
+        "matchedOn" -> Attribute(AttributeType.DateTimeType, Some(Annotation.ServerSet)),
+      ),
+      enumByCreatedBy = true,
     )
 }

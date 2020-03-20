@@ -1,7 +1,7 @@
 package temple.generate.server.go.service
 
 import temple.generate.CRUD
-import temple.generate.server.ServiceGenerator
+import temple.generate.server.ServiceGenerator.verb
 import temple.generate.utils.CodeTerm
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
@@ -12,7 +12,7 @@ object GoServiceMainGenerator {
 
   /** Given a service name, module name and whether the service uses inter-service communication, return the import
     * block */
-  private[go] def generateImports(serviceName: String, module: String, usesComms: Boolean): String = {
+  private[service] def generateImports(serviceName: String, module: String, usesComms: Boolean): String = {
     val standardImports = Seq(
       //"flag",
       //"log",
@@ -31,7 +31,7 @@ object GoServiceMainGenerator {
   }
 
   /** Given a service name and whether the service uses inter-service communication, return global statements */
-  private[go] def generateGlobals(serviceName: String, usesComms: Boolean): String =
+  private[service] def generateGlobals(serviceName: String, usesComms: Boolean): String =
     mkCode.lines(
       s"var dao ${serviceName}DAO.DAO",
       when(usesComms) { s"var comm ${serviceName}Comm.Handler" },
@@ -39,7 +39,7 @@ object GoServiceMainGenerator {
 
   /** Given a service name, whether the service uses inter-service communication, the operations desired and the port
     * number, generate the main function */
-  private[go] def generateMain(serviceName: String, usesComms: Boolean, operations: Set[CRUD], port: Int): String =
+  private[service] def generateMain(serviceName: String, usesComms: Boolean, operations: Set[CRUD], port: Int): String =
     mkCode(
       "func main() ",
       CodeWrap.curly.tabbed(
@@ -93,10 +93,10 @@ object GoServiceMainGenerator {
       ),
     )
 
-  private[go] def generateHandler(serviceName: String, endpoint: CRUD): String =
-    s"func $serviceName${ServiceGenerator.verb(endpoint)}Handler(w http.ResponseWriter, r *http.Request) {}"
+  private[service] def generateHandler(serviceName: String, operation: CRUD): String =
+    s"func $serviceName${verb(operation)}Handler(w http.ResponseWriter, r *http.Request) {}"
 
-  private[go] def generateHandlers(serviceName: String, operations: Set[CRUD]): String =
+  private[service] def generateHandlers(serviceName: String, operations: Set[CRUD]): String =
     mkCode.doubleLines(
       for (operation <- CRUD.values if operations.contains(operation))
         yield generateHandler(serviceName, operation),

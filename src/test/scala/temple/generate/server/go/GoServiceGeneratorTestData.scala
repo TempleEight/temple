@@ -1,9 +1,12 @@
 package temple.generate.server.go
 
+import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
-import temple.generate.server.ServiceRoot
+import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceRoot}
 import temple.utils.FileUtils._
+
+import scala.collection.immutable.ListMap
 
 object GoServiceGeneratorTestData {
 
@@ -13,6 +16,9 @@ object GoServiceGeneratorTestData {
     Seq.empty,
     Set(CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
     80,
+    IDAttribute("id", AttributeType.UUIDType),
+    None,
+    ListMap("name" -> Attribute(AttributeType.StringType())),
   )
 
   val simpleServiceFiles: Files = Map(
@@ -36,6 +42,14 @@ object GoServiceGeneratorTestData {
       Seq("user"),
       Set(CRUD.ReadAll, CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
       81,
+      IDAttribute("id", AttributeType.UUIDType),
+      Some(CreatedByAttribute("authID", "createdBy", AttributeType.UUIDType)),
+      ListMap(
+        "userOne"   -> Attribute(AttributeType.UUIDType),
+        "userTwo"   -> Attribute(AttributeType.UUIDType),
+        "matchedOn" -> Attribute(AttributeType.DateTimeType, Some(Annotation.ServerSet)),
+      ),
+      enumByCreatedBy = true,
     )
 
   val simpleServiceFilesWithComms: Files = Map(
