@@ -1,7 +1,6 @@
 package temple.generate.server.go.service
 
 import temple.generate.CRUD
-import temple.generate.server.ServiceGenerator.verb
 import temple.generate.utils.CodeTerm
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
@@ -94,7 +93,7 @@ object GoServiceMainGenerator {
     )
 
   private[service] def generateHandler(serviceName: String, operation: CRUD): String =
-    s"func $serviceName${verb(operation)}Handler(w http.ResponseWriter, r *http.Request) {}"
+    s"func $serviceName${operation.verb}Handler(w http.ResponseWriter, r *http.Request) {}"
 
   private[service] def generateHandlers(serviceName: String, operations: Set[CRUD]): String =
     mkCode.doubleLines(
