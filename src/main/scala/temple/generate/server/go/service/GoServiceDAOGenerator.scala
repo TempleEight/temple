@@ -3,9 +3,9 @@ package temple.generate.server.go.service
 import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD
 import temple.generate.CRUD._
-import temple.generate.server.{IDAttribute, CreatedByAttribute}
 import temple.generate.server.ServiceGenerator.verb
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
+import temple.generate.server.{CreatedByAttribute, IDAttribute}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
 import temple.utils.FileUtils
