@@ -93,8 +93,8 @@ object GoServiceMainGenerator {
       ),
     )
 
-  private[service] def generateHandler(serviceName: String, endpoint: CRUD): String =
-    s"func $serviceName${verb(endpoint)}Handler(w http.ResponseWriter, r *http.Request) {}"
+  private[service] def generateHandler(serviceName: String, operation: CRUD): String =
+    s"func $serviceName${verb(operation)}Handler(w http.ResponseWriter, r *http.Request) {}"
 
   private[service] def generateHandlers(serviceName: String, operations: Set[CRUD]): String =
     mkCode.doubleLines(

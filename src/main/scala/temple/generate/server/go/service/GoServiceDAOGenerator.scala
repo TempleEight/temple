@@ -45,8 +45,11 @@ object GoServiceDAOGenerator {
       case Delete                 => "error"
     }
 
+  private def generateDAOFunctionName(operation: CRUD, serviceName: String): String =
+    s"${verb(operation)}${serviceName.capitalize}"
+
   private def generateDatastoreInterfaceFunction(serviceName: String, operation: CRUD): String = {
-    val functionName = s"${verb(operation)}${serviceName.capitalize}"
+    val functionName = generateDAOFunctionName(operation, serviceName)
     mkCode(
       s"$functionName(input ${functionName}Input)",
       generateDatastoreInterfaceFunctionReturnType(serviceName, operation),
@@ -74,13 +77,52 @@ object GoServiceDAOGenerator {
       mkCode(
         s"type ${serviceName.capitalize} struct",
         CodeWrap.curly.tabbed(
-          CodeUtils
-            .pad(attributes.map {
-              case (name, attribute) => (name, GoCommonGenerator.generateGoType(attribute.attributeType))
-            })
-            .map { case (identifier, goType) => identifier.capitalize.concat(goType) },
+          CodeUtils.pad(attributes.map {
+            case (name, attribute) => (name.capitalize, GoCommonGenerator.generateGoType(attribute.attributeType))
+          }),
         ),
       ),
+    )
+
+  private def generateInputStructCommentSubstring(operation: CRUD, serviceName: String): String =
+    operation match {
+      case ReadAll                         => s"read a $serviceName list"
+      case Create | Read | Update | Delete => s"${verb(operation).toLowerCase()} a single $serviceName"
+    }
+
+  private def generateInputStruct(
+    serviceName: String,
+    operation: CRUD,
+    attributes: ListMap[String, Attribute],
+  ): String = {
+    val structName = s"${generateDAOFunctionName(operation, serviceName)}Input"
+    mkCode.lines(
+      s"// $structName encapsulates the information required to ${generateInputStructCommentSubstring(operation, serviceName)} in the datastore",
+      mkCode(
+        s"type $structName struct",
+        CodeWrap.curly.tabbed(
+          CodeUtils.pad(
+            operation match {
+              case ReadAll =>
+              case Create  =>
+              case Read    => ListMap("ID" -> GoCommonGenerator.generateGoType(AttributeType.UUIDType))
+              case Update  =>
+              case Delete  => ListMap("ID" -> GoCommonGenerator.generateGoType(AttributeType.UUIDType))
+            },
+          ),
+        ),
+      ),
+    )
+  }
+
+  private[service] def generateInputStructs(
+    serviceName: String,
+    operations: Set[CRUD],
+    attributes: ListMap[String, Attribute],
+  ): String =
+    mkCode.doubleLines(
+      for (operation <- CRUD.values if operations.contains(operation))
+        yield generateInputStruct(serviceName, operation, attributes),
     )
 
   private[service] def generateInit(): String =
