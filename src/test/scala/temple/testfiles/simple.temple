@@ -15,6 +15,7 @@ TempleUser: service {
   Fred: struct {
     field: string @nullable;
     friend: User;
+    image: data(10M);
     #enumerable(by: friend);
   };
 
