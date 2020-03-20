@@ -1,5 +1,7 @@
 package temple.utils
 
+import scala.util.Random
+
 /** Utility functions useful for performing operations on strings */
 object StringUtils {
 
@@ -29,6 +31,10 @@ object StringUtils {
       .toLowerCase
 
   def kebabCase(str: String): String = snakeCase(str, '-')
+
+  /** Generate a random alphanumeric string of given length */
+  def randomString(length: Int): String =
+    new Random().alphanumeric.take(length).mkString
 
   type StringWrap = String => String
 
