@@ -14,7 +14,8 @@ object KubernetesGeneratorIntegrationTestData {
         ports = Seq("api" -> 80),
         replicas = 1,
         secretName = "regcred",
-        envVars = Seq("PGUSER" -> "postgres"),
+        appEnvVars = Seq(),
+        dbEnvVars = Seq("PGUSER" -> "postgres"),
         dbStorage = DbStorage(
           dataMount = "/var/lib/postgresql/data",
           initMount = "/docker-entrypoint-initdb.d/init.sql",
