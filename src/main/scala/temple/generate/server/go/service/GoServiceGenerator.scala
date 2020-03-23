@@ -54,7 +54,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceDAOGenerator.generateDatastoreInterface(
           serviceRoot.name,
           serviceRoot.operations,
-          serviceRoot.enumByCreatedBy,
+          serviceRoot.createdByAttribute,
         ),
         GoCommonDAOGenerator.generateDAOStruct(),
         GoServiceDAOGenerator.generateDatastoreObjectStruct(
@@ -69,7 +69,6 @@ object GoServiceGenerator extends ServiceGenerator {
           serviceRoot.idAttribute,
           serviceRoot.createdByAttribute,
           serviceRoot.attributes,
-          serviceRoot.enumByCreatedBy,
         ),
       ),
       File(s"${serviceRoot.name}/util", "util.go") -> mkCode.doubleLines(

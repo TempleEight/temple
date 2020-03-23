@@ -17,7 +17,7 @@ object GoServiceGeneratorTestData {
     Set(CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
     80,
     IDAttribute("id", AttributeType.UUIDType),
-    None,
+    CreatedByAttribute.None,
     ListMap("name" -> Attribute(AttributeType.StringType())),
   )
 
@@ -43,13 +43,12 @@ object GoServiceGeneratorTestData {
       Set(CRUD.ReadAll, CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
       81,
       IDAttribute("id", AttributeType.UUIDType),
-      Some(CreatedByAttribute("authID", "createdBy", AttributeType.UUIDType)),
+      CreatedByAttribute.EnumerateByCreator("authID", "createdBy", AttributeType.UUIDType),
       ListMap(
         "userOne"   -> Attribute(AttributeType.UUIDType),
         "userTwo"   -> Attribute(AttributeType.UUIDType),
         "matchedOn" -> Attribute(AttributeType.DateTimeType, Some(Annotation.ServerSet)),
       ),
-      enumByCreatedBy = true,
     )
 
   val simpleServiceFilesWithComms: Files = Map(
