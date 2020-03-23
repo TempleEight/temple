@@ -1,5 +1,7 @@
 package temple
 
+import temple.utils.FileUtils
+
 object SimpleE2ETestData {
 
   val createStatement: String =
@@ -214,4 +216,6 @@ object SimpleE2ETestData {
       |    app: temple-user
       |    kind: db
       |""".stripMargin
+
+  val grafanaDashboard: String = FileUtils.readResources("grafana/simple-templeuser.json").init
 }
