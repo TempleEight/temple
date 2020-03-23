@@ -5,8 +5,6 @@ import temple.errors.ErrorHandlingContext
 
 class EnumTest extends FlatSpec with Matchers {
 
-  implicit val testContext: ErrorHandlingContext[RuntimeException] = _ => new RuntimeException
-
   sealed abstract class MyEnum(name: String, aliases: String*) extends EnumEntry(name, aliases)
 
   object MyEnum extends Enum[MyEnum, ErrorHandlingContext[RuntimeException]] {
@@ -41,6 +39,8 @@ class EnumTest extends FlatSpec with Matchers {
   }
 
   it should "call the context’s error handler if nothing is found" in {
+    implicit val testContext: ErrorHandlingContext[RuntimeException] = _ => new RuntimeException
+
     MyEnum.parse("alias") shouldBe MyEnum.Case1
 
     a[RuntimeException] should be thrownBy { MyEnum.parse("notfound") }
