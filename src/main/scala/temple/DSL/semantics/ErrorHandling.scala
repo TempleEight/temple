@@ -7,9 +7,11 @@ object ErrorHandling {
 
   /**
     * Throws an exception about the semantic analysis.
+    *
+    * Use [[temple.DSL.semantics.Context#fail(java.lang.String)]] instead wherever possible.
     * @param str A string representation of the error
     * @return never returns
-    * @deprecated use Context.error instead
+    *
     */
   private[temple] def fail(str: String): Nothing = throw new SemanticParsingException(str)
 

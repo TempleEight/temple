@@ -121,7 +121,7 @@ object Analyzer {
           case "bool" =>
             assertNoParameters(args)(innerContext)
             AttributeType.BoolType
-          case typeName => fail(s"Unknown type $typeName")
+          case typeName => throw context.error(s"Unknown type $typeName")
         }
     }
   }
@@ -206,7 +206,7 @@ object Analyzer {
       case DSLRootItem(key, tag, entries) =>
         tag match {
           case "struct" => structs.safeInsert(key -> parseStructBlock(entries)(context :+ tag :+ key))
-          case tag      => fail(s"Unknown block type $tag for $key in $context")
+          case tag      => throw context.error(s"Unknown block type $tag for $key")
         }
     }
     ServiceBlock(attributes.to(ListMap), metadatas.toSeq, structs.to(ListMap))
@@ -277,16 +277,18 @@ object Analyzer {
           case "service" => services.safeInsert(key -> parseServiceBlock(entries))
           case "project" =>
             projectNameBlock.fold { projectNameBlock = Some(key -> parseProjectBlock(entries)) } {
-              case (str, _) => throw Context.empty.error(s"Multiple projects found: $str and $key")
+              case (str, _) => fail(s"Multiple projects found: $str and $key")
             }
           // TODO: error message
           case "target" => targets.safeInsert(key -> parseTargetBlock(entries))
 
-          case tag => fail(s"Unknown block type $tag for $key")
+          case tag => throw context.error(s"Unknown block type")
         }
     }
 
-    val (projectName, projectBlock) = projectNameBlock.getOrElse { fail("Temple file has no project block") }
+    val (projectName, projectBlock) = projectNameBlock.getOrElse {
+      fail("Temple file has no project block")
+    }
 
     Templefile(projectName, projectBlock, targets.to(ListMap), services.to(ListMap))
   }
