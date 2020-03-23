@@ -11,7 +11,6 @@ object ErrorHandling {
     * Use [[temple.DSL.semantics.Context#fail(java.lang.String)]] instead wherever possible.
     * @param str A string representation of the error
     * @return never returns
-    *
     */
   private[temple] def fail(str: String): Nothing = throw new SemanticParsingException(str)
 
