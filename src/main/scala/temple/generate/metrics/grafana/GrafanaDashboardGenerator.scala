@@ -11,6 +11,6 @@ object GrafanaDashboardGenerator {
   private[grafana] def generate(serviceName: String, uid: String): String = {
     // TODO
     val panels = Seq()
-    GrafanaRoot(serviceName, panels, uid).asJson.toString()
+    GrafanaRoot(uid, serviceName, panels).asJson.toString()
   }
 }
