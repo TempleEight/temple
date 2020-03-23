@@ -3,7 +3,6 @@ package temple.generate.server.go.service
 import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD
 import temple.generate.CRUD._
-import temple.generate.server.ServiceGenerator.verb
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
 import temple.generate.server.{CreatedByAttribute, IDAttribute}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -47,7 +46,7 @@ object GoServiceDAOGenerator {
     }
 
   private def generateDAOFunctionName(operation: CRUD, serviceName: String): String =
-    s"${verb(operation)}${serviceName.capitalize}"
+    s"${operation.verb}${serviceName.capitalize}"
 
   private def generateDatastoreInterfaceFunction(
     serviceName: String,
@@ -108,7 +107,7 @@ object GoServiceDAOGenerator {
   private def generateInputStructCommentSubstring(operation: CRUD, serviceName: String): String =
     operation match {
       case ReadAll                         => s"read a $serviceName list"
-      case Create | Read | Update | Delete => s"${verb(operation).toLowerCase()} a single $serviceName"
+      case Create | Read | Update | Delete => s"${operation.verb.toLowerCase()} a single $serviceName"
     }
 
   private def generateReadAllInputStructFields(

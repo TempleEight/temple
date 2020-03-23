@@ -9,15 +9,3 @@ trait ServiceGenerator {
   /** Given a ServiceRoot ADT, generate the service boilerplate in a specific language */
   def generate(serviceRoot: ServiceRoot): Files
 }
-
-object ServiceGenerator {
-
-  /** Get the string representation of an endpoint, for use in the generated function name */
-  private[server] def verb(endpoint: CRUD): String = endpoint match {
-    case CRUD.ReadAll => "List"
-    case CRUD.Create  => "Create"
-    case CRUD.Read    => "Read"
-    case CRUD.Update  => "Update"
-    case CRUD.Delete  => "Delete"
-  }
-}
