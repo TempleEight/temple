@@ -20,7 +20,7 @@ object ProjectBuilder {
     val endpoints: Set[CRUD] = service
       .lookupMetadata[Metadata.Omit]
       .map(_.endpoints)
-      .getOrElse(Seq())
+      .getOrElse(Set.empty)
       .foldLeft(Set[CRUD](Create, Read, Update, Delete)) {
         case (set, endpoint) =>
           endpoint match {
@@ -30,9 +30,8 @@ object ProjectBuilder {
             case Endpoint.Delete => set - CRUD.Delete
           }
       }
-    val readAllEndpoint: Set[CRUD] =
-      service.lookupMetadata[Metadata.ServiceEnumerable].fold(Set[CRUD]())(_ => Set[CRUD](ReadAll))
-    endpoints ++ readAllEndpoint
+    // Add read all endpoint if defined
+    service.lookupMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + ReadAll)
   }
 
   /**
