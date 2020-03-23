@@ -1,6 +1,7 @@
 package temple.generate.server
 
 import temple.ast.Attribute
+import temple.ast.Metadata.Database
 import temple.generate.CRUD
 
 import scala.collection.immutable.ListMap
@@ -17,6 +18,7 @@ import scala.collection.immutable.ListMap
   * @param createdByAttribute the input name, name and type of the createdBy field in this service, and whether it is
   * used to enumerate the service in the List endpoint
   * @param attributes the user-defined fields of the resource handled by this service
+  * @param datastore the datastore being used
   */
 case class ServiceRoot(
   name: String,
@@ -27,4 +29,5 @@ case class ServiceRoot(
   idAttribute: IDAttribute,
   createdByAttribute: CreatedByAttribute,
   attributes: ListMap[String, Attribute],
+  datastore: Database,
 )

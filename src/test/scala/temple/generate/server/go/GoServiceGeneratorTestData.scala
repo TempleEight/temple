@@ -1,6 +1,7 @@
 package temple.generate.server.go
 
 import temple.ast.{Annotation, Attribute, AttributeType}
+import temple.ast.Metadata.Database.Postgres
 import temple.generate.CRUD
 import temple.generate.FileSystem._
 import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceRoot}
@@ -19,6 +20,7 @@ object GoServiceGeneratorTestData {
     IDAttribute("id", AttributeType.UUIDType),
     CreatedByAttribute.None,
     ListMap("name" -> Attribute(AttributeType.StringType())),
+    Postgres,
   )
 
   val simpleServiceFiles: Files = Map(
@@ -49,6 +51,7 @@ object GoServiceGeneratorTestData {
         "userTwo"   -> Attribute(AttributeType.UUIDType),
         "matchedOn" -> Attribute(AttributeType.DateTimeType, Some(Annotation.ServerSet)),
       ),
+      Postgres,
     )
 
   val simpleServiceFilesWithComms: Files = Map(

@@ -77,9 +77,21 @@ func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) 
 }
 
 // CreateUser creates a new user in the datastore, returning the newly created user
+func (dao *DAO) CreateUser(input CreateUserInput) (*User, error) {
+
+}
 
 // ReadUser returns the user in the datastore for a given ID
+func (dao *DAO) ReadUser(input ReadUserInput) (*User, error) {
+
+}
 
 // UpdateUser updates the user in the datastore for a given ID, returning the newly updated user
+func (dao *DAO) UpdateUser(input UpdateUserInput) (*User, error) {
+
+}
 
 // DeleteUser deletes the user in the datastore for a given ID
+func (dao *DAO) DeleteUser(input DeleteUserInput) error {
+
+}

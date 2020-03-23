@@ -3,6 +3,8 @@ package temple.generate.server.go.service
 import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD
 import temple.generate.CRUD._
+import temple.generate.server.CreatedByAttribute.EnumerateByCreator
+import temple.generate.server.go.common.GoCommonDAOGenerator
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
 import temple.generate.server.{CreatedByAttribute, IDAttribute}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -11,8 +13,6 @@ import temple.utils.StringUtils.doubleQuote
 
 import scala.Option.when
 import scala.collection.immutable.ListMap
-import temple.generate.server.go.common.GoCommonDAOGenerator
-import temple.generate.server.CreatedByAttribute.EnumerateByCreator
 
 object GoServiceDAOGenerator {
 
@@ -221,6 +221,27 @@ object GoServiceDAOGenerator {
       },
     )
 
+  private def generateReadAllInterfaceFunctionBody(
+    createdByAttribute: CreatedByAttribute,
+  ): String = {
+    val dbQuery = "will is the best"
+    mkCode.lines(
+      mkCode(
+        s"rows, err := executeQueryWithRowResponses",
+        CodeWrap.parens(
+          mkCode.list(
+            "dao.DB",
+            doubleQuote(dbQuery),
+            createdByAttribute match {
+              case EnumerateByCreator(inputName, _, _) => s"input.${inputName.capitalize}"
+              case _                                   => ""
+            },
+          ),
+        ),
+      ),
+    )
+  }
+
   private def generateInterfaceFunction(
     serviceName: String,
     operation: CRUD,
@@ -228,6 +249,16 @@ object GoServiceDAOGenerator {
   ): String =
     mkCode.lines(
       generateInterfaceFunctionComment(serviceName, operation, createdByAttribute),
+      mkCode(
+        "func (dao *DAO)",
+        generateDatastoreInterfaceFunction(serviceName, operation, createdByAttribute),
+        CodeWrap.curly.tabbed(
+          operation match {
+            case ReadAll => generateReadAllInterfaceFunctionBody(createdByAttribute)
+            case _       => ""
+          },
+        ),
+      ),
     )
 
   private[service] def generateInterfaceFunctions(
