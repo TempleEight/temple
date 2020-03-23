@@ -5,7 +5,7 @@ import temple.DSL.parser.DSLParserMatchers
 import temple.DSL.semantics.Analyzer.parseSemantics
 import temple.ast.Annotation.{Nullable, Server, Unique}
 import temple.ast.AttributeType._
-import temple.ast.Metadata.{ServiceAuth, ServiceEnumerable, Uses}
+import temple.ast.Metadata._
 import temple.ast._
 import temple.utils.FileUtils.readFile
 
@@ -38,6 +38,9 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
           ),
           metadata = Seq(
             ServiceEnumerable(),
+            Omit(Seq(Endpoint.Delete)),
+            Readable.All,
+            Writable.This,
             ServiceAuth("username"),
             Uses(Seq("Booking", "Events")),
           ),
@@ -48,7 +51,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
                 "friend" -> Attribute(ForeignKey("User")),
                 "image"  -> Attribute(BlobType(size = Some(10_000_000))),
               ),
-              Seq(ServiceEnumerable(byThis = true)),
+              Seq(ServiceEnumerable(byThis = true), Readable.This),
             ),
           ),
         ),
