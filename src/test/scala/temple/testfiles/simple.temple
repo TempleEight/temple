@@ -16,7 +16,7 @@ TempleUser: service {
     field: string @nullable;
     friend: User;
     image: data(10M);
-    #enumerable(by: friend);
+    #enumerableByThis;
   };
 
   #enumerable;

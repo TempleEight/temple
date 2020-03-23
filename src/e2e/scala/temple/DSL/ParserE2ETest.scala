@@ -48,7 +48,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
                 "friend" -> Attribute(ForeignKey("User")),
                 "image"  -> Attribute(BlobType(size = Some(10_000_000))),
               ),
-              Seq(ServiceEnumerable(by = Some("friend"))),
+              Seq(ServiceEnumerable(byThis = true)),
             ),
           ),
         ),

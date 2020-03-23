@@ -1,7 +1,7 @@
 package temple.DSL.semantics
 
 import temple.DSL.semantics.Analyzer.parseParameters
-import temple.DSL.semantics.ErrorHandling.{BlockContext, Context, fail}
+import temple.DSL.semantics.ErrorHandling.{BlockContext, Context, assertNoParameters, fail}
 import temple.DSL.syntax.Arg.NoArg
 import temple.DSL.syntax.Args
 import temple.ast.{ArgType, Metadata}
@@ -63,6 +63,19 @@ class MetadataParser[T <: Metadata]() {
         implicit val context: Context = Context(metaKey)
         val argMap                    = parseParameters(argKey -> Some(NoArg))(args)
         constructor(argMap.getOptionArg(argKey, argType))
+      })
+
+  /**
+    * Add a handler for a new type of metadata, without an argument.
+    *
+    * @param metaKey The name of the metadata item to add
+    * @param constructor The item to return
+    */
+  final protected def registerEmptyKeyword(metaKey: String)(constructor: T): Unit =
+    matchers += (metaKey -> { args =>
+        implicit val context: Context = Context(metaKey)
+        assertNoParameters(args)
+        constructor
       })
 
   /** Perform parsing by looking up the relevant function and passing it the argument list */
