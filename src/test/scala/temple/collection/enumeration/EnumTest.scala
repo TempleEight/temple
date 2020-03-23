@@ -7,7 +7,7 @@ class EnumTest extends FlatSpec with Matchers {
 
   sealed abstract class MyEnum(name: String, aliases: String*) extends EnumEntry(name, aliases)
 
-  object MyEnum extends Enum[MyEnum, ErrorHandlingContext[RuntimeException]] {
+  object MyEnum extends Enum[MyEnum] {
     override def values: IndexedSeq[MyEnum] = findValues
 
     case object Case1 extends MyEnum("case1", "alias", "This")
@@ -39,7 +39,11 @@ class EnumTest extends FlatSpec with Matchers {
   }
 
   it should "call the context’s error handler if nothing is found" in {
-    implicit val testContext: ErrorHandlingContext[RuntimeException] = _ => new RuntimeException
+    // noinspection ConvertExpressionToSAM:
+    // produces a BootstrapMethodError of a LambdaConversionException if this is converted to a lambda
+    implicit val testContext: ErrorHandlingContext = new ErrorHandlingContext {
+      def fail(msg: String): Nothing = throw new RuntimeException
+    }
 
     MyEnum.parse("alias") shouldBe MyEnum.Case1
 

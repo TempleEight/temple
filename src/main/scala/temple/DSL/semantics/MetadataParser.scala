@@ -4,6 +4,7 @@ import temple.DSL.semantics.Analyzer.parseParameters
 import temple.DSL.syntax.Args
 import temple.ast.{ArgType, Metadata}
 import temple.collection.enumeration.EnumParser
+import temple.errors.ErrorHandlingContext
 
 import scala.collection.mutable
 
@@ -19,8 +20,8 @@ class MetadataParser[T <: Metadata]() {
   private type Matcher = (Args, SemanticContext) => T
   private var matchers = mutable.LinkedHashMap[String, Matcher]()
 
-  def enumParser[A](constructor: A => T): EnumParser[T, A, SemanticContext] = new EnumParser[T, A, SemanticContext] {
-    override def parse(name: A)(implicit context: SemanticContext): T = constructor(name)
+  def enumParser[A](constructor: A => T): EnumParser[T, A] = new EnumParser[T, A] {
+    override def parse(name: A)(implicit context: ErrorHandlingContext): T = constructor(name)
   }
 
   /**
@@ -35,7 +36,7 @@ class MetadataParser[T <: Metadata]() {
     * @tparam A The underlying type of the field, inferred from `argType`
     */
   // TODO: do we need to add support for multiple arguments in future?
-  final protected def registerKeywordWithContext[A, P <: EnumParser[T, A, SemanticContext]](
+  final protected def registerKeywordWithContext[A, P <: EnumParser[T, A]](
     metaKey: String,
     argKey: String,
     argType: ArgType[A],
@@ -62,7 +63,7 @@ class MetadataParser[T <: Metadata]() {
   )(constructor: A => T): Unit =
     registerKeywordWithContext(metaKey, argKey, argType)(enumParser(constructor))
 
-  final protected def registerKeywordWithContext[A, P <: EnumParser[T, A, SemanticContext]](
+  final protected def registerKeywordWithContext[A, P <: EnumParser[T, A]](
     key: String,
     argType: ArgType[A],
   )(constructor: P): Unit =

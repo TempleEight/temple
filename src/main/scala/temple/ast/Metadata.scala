@@ -1,7 +1,7 @@
 package temple.ast
 
-import temple.DSL.semantics.SemanticContext
 import temple.collection.enumeration._
+import temple.errors.ErrorHandlingContext
 
 /** A piece of metadata modifying a service/project/target block */
 sealed trait Metadata
@@ -16,7 +16,7 @@ object Metadata {
       extends EnumEntry(name, aliases)
       with TargetMetadata
 
-  object TargetLanguage extends Enum[TargetLanguage, SemanticContext] {
+  object TargetLanguage extends Enum[TargetLanguage] {
     val values: IndexedSeq[TargetLanguage] = findValues
 
     case object Swift      extends TargetLanguage("Swift")
@@ -28,7 +28,7 @@ object Metadata {
       with ServiceMetadata
       with ProjectMetadata
 
-  object ServiceLanguage extends Enum[ServiceLanguage, SemanticContext] {
+  object ServiceLanguage extends Enum[ServiceLanguage] {
     val values: IndexedSeq[ServiceLanguage] = findValues
 
     case object Go extends ServiceLanguage("Go", "golang")
@@ -36,7 +36,7 @@ object Metadata {
 
   sealed abstract class Provider private (name: String) extends EnumEntry(name) with ProjectMetadata
 
-  object Provider extends Enum[Provider, SemanticContext] {
+  object Provider extends Enum[Provider] {
     val values: IndexedSeq[Provider] = findValues
     case object Aws extends Provider("aws")
   }
@@ -46,7 +46,7 @@ object Metadata {
       with ProjectMetadata
       with ServiceMetadata
 
-  object Database extends Enum[Database, SemanticContext] {
+  object Database extends Enum[Database] {
     override def values: IndexedSeq[Database] = findValues
     case object Postgres extends Database("postgres", "PostgreSQL")
   }
@@ -57,7 +57,7 @@ object Metadata {
       with StructMetadata
       with ProjectMetadata
 
-  object Readable extends Enum[Readable, SemanticContext] {
+  object Readable extends Enum[Readable] {
     override def values: IndexedSeq[Readable] = findValues
     case object All  extends Readable("all")
     case object This extends Readable("this")
@@ -69,7 +69,7 @@ object Metadata {
       with StructMetadata
       with ProjectMetadata
 
-  object Writable extends Enum[Writable, SemanticContext] {
+  object Writable extends Enum[Writable] {
     override def values: IndexedSeq[Writable] = findValues
     case object All  extends Writable("all")
     case object This extends Writable("this")
@@ -77,7 +77,7 @@ object Metadata {
 
   sealed abstract class Endpoint private (name: String) extends EnumEntry(name)
 
-  object Endpoint extends Enum[Endpoint, SemanticContext] {
+  object Endpoint extends Enum[Endpoint] {
     override def values: IndexedSeq[Endpoint] = findValues
     case object Create extends Endpoint("create")
     case object Read   extends Endpoint("read")
@@ -87,9 +87,9 @@ object Metadata {
 
   case class Omit(endpoints: Seq[Endpoint]) extends ServiceMetadata with StructMetadata
 
-  object Omit extends EnumParser[Omit, Seq[String], SemanticContext] {
+  object Omit extends EnumParser[Omit, Seq[String]] {
 
-    def parse(names: Seq[String])(implicit context: SemanticContext): Omit =
+    def parse(names: Seq[String])(implicit context: ErrorHandlingContext): Omit =
       Omit(names.map(Endpoint.parse(_)))
   }
 

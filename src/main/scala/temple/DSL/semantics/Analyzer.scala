@@ -29,7 +29,7 @@ object Analyzer {
     val argc     = args.posargs.length
 
     if (specs.sizeIs < argc)
-      throw context.error(s"Too many arguments supplied to function (found $argc, expected at most ${specs.length})")
+      context.fail(s"Too many arguments supplied to function (found $argc, expected at most ${specs.length})")
 
     val map = mutable.HashMap[String, syntax.Arg]()
 
@@ -42,7 +42,7 @@ object Analyzer {
     // Add the keyword arguments to the map
     args.kwargs foreach {
       case (name, arg) =>
-        if (!specsMap.contains(name)) throw context.error(s"Unknown keyword argument $name with value $arg")
+        if (!specsMap.contains(name)) context.fail(s"Unknown keyword argument $name with value $arg")
         map.safeInsert(name -> arg, context.fail(s"Duplicate argument provided for $name"))
     }
 
@@ -121,7 +121,7 @@ object Analyzer {
           case "bool" =>
             assertNoParameters(args)(innerContext)
             AttributeType.BoolType
-          case typeName => throw context.error(s"Unknown type $typeName")
+          case typeName => context.fail(s"Unknown type $typeName")
         }
     }
   }
@@ -145,7 +145,7 @@ object Analyzer {
       case "server"    => setAccessAnnotation(Annotation.Server)
       case "client"    => setAccessAnnotation(Annotation.Client)
       case "serverSet" => setAccessAnnotation(Annotation.ServerSet)
-      case key         => throw context.error(s"Unknown annotation @$key")
+      case key         => context.fail(s"Unknown annotation @$key")
     }
     Attribute(parseAttributeType(dataType), accessAnnotation, valueAnnotations.toSet)
   }
@@ -206,7 +206,7 @@ object Analyzer {
       case DSLRootItem(key, tag, entries) =>
         tag match {
           case "struct" => structs.safeInsert(key -> parseStructBlock(entries)(context :+ tag :+ key))
-          case tag      => throw context.error(s"Unknown block type $tag for $key")
+          case tag      => context.fail(s"Unknown block type $tag for $key")
         }
     }
     ServiceBlock(attributes.to(ListMap), metadatas.toSeq, structs.to(ListMap))
@@ -282,7 +282,7 @@ object Analyzer {
           // TODO: error message
           case "target" => targets.safeInsert(key -> parseTargetBlock(entries))
 
-          case _ => throw context.error(s"Unknown block type")
+          case _ => context.fail(s"Unknown block type")
         }
     }
 
