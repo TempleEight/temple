@@ -51,6 +51,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     attribute.accessAnnotation.isEmpty || (attribute.accessAnnotation contains Annotation.Client)
 
   private def attributeToOpenAPIType(attribute: Attribute): OpenAPISimpleType = attribute.attributeType match {
+    case UUIDType     => OpenAPISimpleType("string", "uuid")
     case BoolType     => OpenAPISimpleType("boolean")
     case DateType     => OpenAPISimpleType("string", "date")
     case DateTimeType => OpenAPISimpleType("string", "date-time")
