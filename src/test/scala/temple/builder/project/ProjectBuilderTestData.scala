@@ -4,7 +4,7 @@ import temple.ast.AttributeType._
 import temple.ast.Metadata.Database
 import temple.ast._
 import temple.generate.FileSystem.{File, FileContent}
-import temple.utils.FileUtils
+import temple.utils.{FileUtils, StringUtils}
 
 import scala.collection.immutable.ListMap
 
@@ -276,6 +276,8 @@ object ProjectBuilderTestData {
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
 
+  val simpleTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/templeuser.json").init
+
   val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
     ProjectBlock(),
@@ -496,4 +498,6 @@ object ProjectBuilderTestData {
       |  --url $KONG_ADMIN/services/complex-user-service/plugins \
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
+
+  val complexTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/complexuser.json").init
 }
