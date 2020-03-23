@@ -72,6 +72,13 @@ object GoServiceGenerator extends ServiceGenerator {
         ),
         GoCommonDAOGenerator.generateInit(),
         GoServiceDAOGenerator.generateQueryFunctions(serviceRoot.operations),
+        GoServiceDAOGenerator.generateInterfaceFunctions(
+          serviceRoot.name,
+          serviceRoot.operations,
+          serviceRoot.idAttribute,
+          serviceRoot.createdByAttribute,
+          serviceRoot.attributes,
+        ),
       ),
       File(s"${serviceRoot.name}/util", "util.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("util"),

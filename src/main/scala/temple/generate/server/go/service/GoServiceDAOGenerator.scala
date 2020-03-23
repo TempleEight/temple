@@ -12,6 +12,7 @@ import temple.utils.StringUtils.doubleQuote
 import scala.Option.when
 import scala.collection.immutable.ListMap
 import temple.generate.server.go.common.GoCommonDAOGenerator
+import temple.generate.server.CreatedByAttribute.EnumerateByCreator
 
 object GoServiceDAOGenerator {
 
@@ -189,6 +190,56 @@ object GoServiceDAOGenerator {
         GoCommonDAOGenerator.generateExecuteQueryWithRowResponse()
       },
       when(operations.contains(Delete)) { GoCommonDAOGenerator.generateExecuteQuery() },
+    )
+
+  private def generateInterfaceFunctionComment(
+    serviceName: String,
+    operation: CRUD,
+    createdByAttribute: CreatedByAttribute,
+  ): String =
+    mkCode(
+      "//",
+      generateDAOFunctionName(operation, serviceName),
+      operation match {
+        case ReadAll => s"returns a list containing every $serviceName"
+        case Create  => s"creates a new $serviceName"
+        case Read    => s"returns the $serviceName"
+        case Update  => s"updates the $serviceName"
+        case Delete  => s"deletes the $serviceName"
+      },
+      "in the datastore",
+      operation match {
+        case ReadAll =>
+          createdByAttribute match {
+            case _: EnumerateByCreator => "for a given ID"
+            case _                     => ""
+          }
+        case Create => s", returning the newly created $serviceName"
+        case Read   => "for a given ID"
+        case Update => s"for a given ID, returning the newly updated $serviceName"
+        case Delete => "for a given ID"
+      },
+    )
+
+  private def generateInterfaceFunction(
+    serviceName: String,
+    operation: CRUD,
+    createdByAttribute: CreatedByAttribute,
+  ): String =
+    mkCode.lines(
+      generateInterfaceFunctionComment(serviceName, operation, createdByAttribute),
+    )
+
+  private[service] def generateInterfaceFunctions(
+    serviceName: String,
+    operations: Set[CRUD],
+    idAttribute: IDAttribute,
+    createdByAttribute: CreatedByAttribute,
+    attributes: ListMap[String, Attribute],
+  ): String =
+    mkCode.doubleLines(
+      for (operation <- CRUD.values if operations.contains(operation))
+        yield generateInterfaceFunction(serviceName, operation, createdByAttribute),
     )
 
   private[service] def generateErrors(serviceName: String): String =
