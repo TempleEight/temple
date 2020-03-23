@@ -1,6 +1,6 @@
 package temple.generate
 
-abstract class CRUD
+sealed trait CRUD
 
 object CRUD {
   case object List   extends CRUD
