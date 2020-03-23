@@ -2,7 +2,6 @@ package temple.DSL.semantics
 
 import temple.DSL.semantics.Analyzer.parseParameters
 import temple.DSL.semantics.ErrorHandling.{BlockContext, Context, assertNoParameters, fail}
-import temple.DSL.syntax.Arg.NoArg
 import temple.DSL.syntax.Args
 import temple.ast.{ArgType, Metadata}
 
@@ -46,24 +45,6 @@ class MetadataParser[T <: Metadata]() {
     * with the same `key` used for both the metadata name and its single argument */
   final protected def registerKeyword[A](key: String, argType: ArgType[A])(constructor: A => T): Unit =
     registerKeyword(key, key, argType)(constructor)
-
-  /**
-    * Add a handler for a new type of metadata, with an optional argument.
-    *
-    * @param metaKey The name of the metadata item to add
-    * @param argKey The name of the single argument to the metadata.
-    * @param argType The type of the field to expect
-    * @param constructor The function to turn an optional input of type [[ArgType]] into a value of type [[T]]
-    * @tparam A The underlying type of the field, inferred from `argType`
-    */
-  final protected def registerOptionalKeyword[A](metaKey: String, argKey: String, argType: ArgType[A])(
-    constructor: Option[A] => T,
-  ): Unit =
-    matchers += (metaKey -> { args =>
-        implicit val context: Context = Context(metaKey)
-        val argMap                    = parseParameters(argKey -> Some(NoArg))(args)
-        constructor(argMap.getOptionArg(argKey, argType))
-      })
 
   /**
     * Add a handler for a new type of metadata, without an argument.
