@@ -1,8 +1,8 @@
 package temple.generate.server.go.service
 
 import temple.ast.{Annotation, Attribute, AttributeType}
-import temple.generate.CRUD
 import temple.generate.CRUD._
+import temple.generate.server.go.common.GoCommonDAOGenerator
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
 import temple.generate.server.{CreatedByAttribute, IDAttribute}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -11,7 +11,6 @@ import temple.utils.StringUtils.doubleQuote
 
 import scala.Option.when
 import scala.collection.immutable.ListMap
-import temple.generate.server.go.common.GoCommonDAOGenerator
 
 object GoServiceDAOGenerator {
 
@@ -58,7 +57,7 @@ object GoServiceDAOGenerator {
       case _: CreatedByAttribute.EnumerateByCreator => true
       case _                                        => false
     }
-    val functionArgs = if (enumeratingByCreator || operation != CRUD.List) s"input ${functionName}Input" else ""
+    val functionArgs = if (enumeratingByCreator || operation != List) s"input ${functionName}Input" else ""
     mkCode(
       s"$functionName($functionArgs)",
       generateDatastoreInterfaceFunctionReturnType(serviceName, operation),
@@ -75,7 +74,7 @@ object GoServiceDAOGenerator {
       mkCode(
         "type Datastore interface",
         CodeWrap.curly.tabbed(
-          for (operation <- CRUD.values if operations.contains(operation))
+          for (operation <- operations.toSeq.sorted)
             yield generateDatastoreInterfaceFunction(serviceName, operation, createdByAttribute),
         ),
       ),
@@ -176,8 +175,7 @@ object GoServiceDAOGenerator {
     }
     mkCode.doubleLines(
       // Generate input struct for each operation, except for List when not enumerating by creator
-      for (operation <- CRUD.values if operations.contains(operation) &&
-           (operation != CRUD.List || enumeratingByCreator))
+      for (operation <- operations.toSeq.sorted if operation != List || enumeratingByCreator)
         yield generateInputStruct(serviceName, operation, idAttribute, createdByAttribute, attributes),
     )
   }

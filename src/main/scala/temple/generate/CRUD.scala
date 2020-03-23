@@ -1,13 +1,6 @@
 package temple.generate
 
-sealed trait CRUD
-
-object CRUD {
-  case object List   extends CRUD
-  case object Create extends CRUD
-  case object Read   extends CRUD
-  case object Update extends CRUD
-  case object Delete extends CRUD
-
-  val values = Seq(List, Create, Read, Update, Delete)
+object CRUD extends Enumeration {
+  type CRUD = Value
+  val List, Create, Read, Update, Delete = Value
 }
