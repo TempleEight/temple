@@ -85,10 +85,10 @@ object Metadata {
     case object Delete extends Endpoint("delete")
   }
 
-  case class Omit(endpoints: Seq[Endpoint]) extends ServiceMetadata with StructMetadata
+  case class Omit(endpoints: Set[Endpoint]) extends ServiceMetadata with StructMetadata
 
   object Omit {
-    def parse(names: Seq[String])(implicit failThrower: FailThrower): Omit = Omit(names.map(Endpoint.parse(_)))
+    def parse(names: Seq[String])(implicit failThrower: FailThrower): Omit = Omit(names.map(Endpoint.parse(_)).toSet)
   }
 
   case class ServiceAuth(login: String)                 extends ServiceMetadata
