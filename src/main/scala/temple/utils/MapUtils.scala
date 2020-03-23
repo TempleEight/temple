@@ -1,10 +1,10 @@
 package temple.utils
 
+import temple.errors.FailureContext
+
 import scala.collection.mutable
 
 object MapUtils {
-  type FailThrower = String => Nothing
-  type FailHandler = String => Unit
 
   /**
     * Add `safeInsert` function to a map, which throw an error when trying to overwrite an existing key
@@ -26,7 +26,7 @@ object MapUtils {
       * Insert an entry into the map, throwing on error
       * @param kv a key-value pair to insert into the map
       */
-    def safeInsert(kv: (K, V))(implicit fail: FailHandler): Unit =
-      safeInsert(kv, fail(s"Key ${kv._1} already exists in $map."))
+    def safeInsert[E <: Exception](kv: (K, V))(implicit context: FailureContext): Unit =
+      safeInsert(kv, context.fail(s"Key ${kv._1} already exists in $map"))
   }
 }

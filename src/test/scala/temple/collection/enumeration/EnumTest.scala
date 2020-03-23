@@ -1,13 +1,15 @@
 package temple.collection.enumeration
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.utils.MapUtils.FailThrower
+import temple.errors.ErrorHandlingContext
 
 class EnumTest extends FlatSpec with Matchers {
 
+  implicit val testContext: ErrorHandlingContext[RuntimeException] = _ => new RuntimeException
+
   sealed abstract class MyEnum(name: String, aliases: String*) extends EnumEntry(name, aliases)
 
-  object MyEnum extends Enum[MyEnum] {
+  object MyEnum extends Enum[MyEnum, ErrorHandlingContext[RuntimeException]] {
     override def values: IndexedSeq[MyEnum] = findValues
 
     case object Case1 extends MyEnum("case1", "alias", "This")
@@ -38,9 +40,7 @@ class EnumTest extends FlatSpec with Matchers {
     MyEnum.parseOption("case 1") shouldBe None
   }
 
-  it should "call a fail thrower if nothing is found" in {
-    implicit val failThrower: FailThrower = _ => throw new RuntimeException
-
+  it should "call the context’s error handler if nothing is found" in {
     MyEnum.parse("alias") shouldBe MyEnum.Case1
 
     a[RuntimeException] should be thrownBy { MyEnum.parse("notfound") }
