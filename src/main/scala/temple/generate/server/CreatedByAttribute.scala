@@ -11,7 +11,7 @@ object CreatedByAttribute {
     */
   case object None extends CreatedByAttribute
 
-  sealed trait Enumerating extends CreatedByAttribute{
+  sealed trait Enumerating extends CreatedByAttribute {
     def inputName: String
     def name: String
     def attributeType: AttributeType
