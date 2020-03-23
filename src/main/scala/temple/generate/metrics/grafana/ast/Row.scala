@@ -3,7 +3,7 @@ package temple.generate.metrics.grafana.ast
 import temple.generate.metrics.grafana.ast.Row.Metric
 
 /** A row expresses a horizontal sequence of metric graphs placed on the dashboard */
-case class Row(metric: Metric*)
+case class Row(metrics: Metric*)
 
 object Row {
 

@@ -3,7 +3,8 @@ package temple.generate.metrics.grafana.ast
 import io.circe.Json
 import temple.generate.JsonEncodable
 
-case class GrafanaRoot(uid: String, serviceName: String, panels: Seq[GrafanaPanel]) extends JsonEncodable.Object {
+private[grafana] case class GrafanaRoot(uid: String, serviceName: String, panels: Seq[GrafanaPanel])
+    extends JsonEncodable.Object {
 
   override def jsonEntryIterator: IterableOnce[(String, Json)] = Seq(
     "annotations"   ~> Map("list" -> Seq[String]()),
