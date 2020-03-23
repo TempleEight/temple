@@ -53,7 +53,7 @@ object MetricsBuilder {
           ),
           Metric(
             index * 2 + 1,
-            s"DB ${endpoint.toString} Queries",
+            s"DB $endpoint Queries",
             "Prometheus",
             "Time (seconds)",
             databaseDurationQueries(serviceName.toLowerCase, endpoint.toString.toLowerCase),
