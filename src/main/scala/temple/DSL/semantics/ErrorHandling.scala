@@ -9,32 +9,11 @@ object ErrorHandling {
     * Throws an exception about the semantic analysis.
     * @param str A string representation of the error
     * @return never returns
+    * @deprecated use Context.error instead
     */
-  // TODO: better error handling
-  //   When parsing into an AST, we could pass around a mutable context, which we use to log the location of each part
-  //   of the code. This could also be a good way of enforcing that each name is unique (at the moment there is no
-  //   checking that for example the names of structs and fields are distinct). A mutable Trie or HashMap would work
-  //   well for this
-  // TODO: This function could take the context as an implicit argument.
   private[temple] def fail(str: String): Nothing = throw new SemanticParsingException(str)
 
   implicit private[temple] val failThrower: FailThrower = fail
-
-  // TODO: add more path
-  private[temple] case class KeyName(keyName: String)  { override def toString: String = keyName  }
-  private[temple] case class Context(function: String) { override def toString: String = function }
-
-  private[temple] case class BlockContext private (block: String, tag: String, context: Option[BlockContext]) {
-
-    override def toString: String = context.fold(s"$tag ($block)") { context =>
-      s"$tag ($block, inside $context)"
-    }
-  }
-
-  private[temple] object BlockContext {
-    def apply(block: String, tag: String, wrapper: BlockContext): BlockContext = BlockContext(block, tag, Some(wrapper))
-    def apply(block: String, tag: String): BlockContext                        = BlockContext(block, tag, None)
-  }
 
   private[temple] def assertNoParameters(args: Args)(implicit context: Context): Unit =
     if (!args.isEmpty) fail(s"Arguments supplied to function $context, which should take no parameters")

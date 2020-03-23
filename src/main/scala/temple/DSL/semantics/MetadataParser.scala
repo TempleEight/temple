@@ -1,7 +1,7 @@
 package temple.DSL.semantics
 
 import temple.DSL.semantics.Analyzer.parseParameters
-import temple.DSL.semantics.ErrorHandling.{BlockContext, Context, assertNoParameters, fail}
+import temple.DSL.semantics.ErrorHandling.assertNoParameters
 import temple.DSL.syntax.Args
 import temple.ast.{ArgType, Metadata}
 
@@ -35,7 +35,7 @@ class MetadataParser[T <: Metadata]() {
     constructor: A => T,
   ): Unit =
     matchers += (metaKey -> { args =>
-        implicit val context: Context = Context(metaKey)
+        implicit val context: Context = Context.from(metaKey)
         val argMap                    = parseParameters(argKey -> None)(args)
         constructor(argMap.getArg(argKey, argType))
       })
@@ -54,14 +54,12 @@ class MetadataParser[T <: Metadata]() {
     */
   final protected def registerEmptyKeyword(metaKey: String)(constructor: T): Unit =
     matchers += (metaKey -> { args =>
-        implicit val context: Context = Context(metaKey)
+        implicit val context: Context = Context.from(metaKey)
         assertNoParameters(args)
         constructor
       })
 
   /** Perform parsing by looking up the relevant function and passing it the argument list */
-  final def apply(metaKey: String, args: Args)(implicit context: BlockContext): T =
-    matchers.get(metaKey).map(_(args)) getOrElse {
-      fail(s"No valid metadata $metaKey in $context")
-    }
+  final def apply(metaKey: String, args: Args)(implicit context: Context): T =
+    matchers.get(metaKey).map(_(args)) getOrElse { context.fail(s"No valid metadata $metaKey") }
 }
