@@ -16,10 +16,14 @@ TempleUser: service {
     field: string @nullable;
     friend: User;
     image: data(10M);
-    #enumerable(by: friend);
+    #enumerableByThis;
+    #readable(by: this);
   };
 
   #enumerable;
+  #omit [delete];
+  #readable(by: all);
+  #writable(by: this);
 
   #auth(login: username);
   #uses [Booking, Events, /* Reservations */];

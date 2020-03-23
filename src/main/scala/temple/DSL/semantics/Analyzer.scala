@@ -155,14 +155,22 @@ object Analyzer {
   private val parseServiceMetadata = new MetadataParser[ServiceMetadata] {
     registerKeyword("language", TokenArgType)(ServiceLanguage.parse(_))
     registerKeyword("database", TokenArgType)(Database.parse(_))
-    registerOptionalKeyword("enumerable", "by", TokenArgType)(ServiceEnumerable)
+    registerEmptyKeyword("enumerable")(ServiceEnumerable())
+    registerEmptyKeyword("enumerableByThis")(ServiceEnumerable(byThis = true))
+    registerKeyword("readable", "by", TokenArgType)(Readable.parse(_))
+    registerKeyword("writable", "by", TokenArgType)(Writable.parse(_))
     registerKeyword("auth", "login", TokenArgType)(ServiceAuth)
     registerKeyword("uses", "services", ListArgType(TokenArgType))(Uses)
+    registerKeyword("omit", "endpoints", ListArgType(TokenArgType))(Omit.parse(_))
   }
 
   /** A parser of Metadata items that can occur in struct blocks */
   private val parseStructMetadata = new MetadataParser[StructMetadata] {
-    registerOptionalKeyword("enumerable", "by", TokenArgType)(ServiceEnumerable)
+    registerEmptyKeyword("enumerable")(ServiceEnumerable())
+    registerEmptyKeyword("enumerableByThis")(ServiceEnumerable(byThis = true))
+    registerKeyword("readable", "by", TokenArgType)(Readable.parse(_))
+    registerKeyword("writable", "by", TokenArgType)(Writable.parse(_))
+    registerKeyword("omit", "endpoints", ListArgType(TokenArgType))(Omit.parse(_))
   }
 
   /** A parser of Metadata items that can occur in project blocks */
@@ -170,6 +178,8 @@ object Analyzer {
     registerKeyword("language", TokenArgType)(ServiceLanguage.parse(_))
     registerKeyword("database", TokenArgType)(Database.parse(_))
     registerKeyword("provider", TokenArgType)(Provider.parse(_))
+    registerKeyword("readable", "by", TokenArgType)(Readable.parse(_))
+    registerKeyword("writable", "by", TokenArgType)(Writable.parse(_))
   }
 
   /** A parser of Metadata items that can occur in target blocks */
