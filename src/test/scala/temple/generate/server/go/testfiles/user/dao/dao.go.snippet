@@ -57,6 +57,19 @@ func Init(config *util.Config) (*DAO, error) {
 	if err != nil {
 		return nil, err
 	}
-	
 	return &DAO{db}, nil
+}
+
+// Executes a query, returning the row
+func executeQueryWithRowResponse(db *sql.DB, query string, args ...interface{}) *sql.Row {
+	return db.QueryRow(query, args...)
+}
+
+// Executes a query, returning the number of rows affected
+func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) {
+	result, err := db.Exec(query, args...)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }

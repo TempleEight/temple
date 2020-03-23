@@ -11,6 +11,7 @@ import temple.utils.StringUtils.doubleQuote
 
 import scala.Option.when
 import scala.collection.immutable.ListMap
+import temple.generate.server.go.common.GoCommonDAOGenerator
 
 object GoServiceDAOGenerator {
 
@@ -180,6 +181,15 @@ object GoServiceDAOGenerator {
         yield generateInputStruct(serviceName, operation, idAttribute, createdByAttribute, attributes),
     )
   }
+
+  private[service] def generateQueryFunctions(operations: Set[CRUD]): String =
+    mkCode.doubleLines(
+      when(operations.contains(ReadAll)) { GoCommonDAOGenerator.generateExecuteQueryWithRowResponses() },
+      when(operations.intersect(Set(Create, Read, Update)).nonEmpty) {
+        GoCommonDAOGenerator.generateExecuteQueryWithRowResponse()
+      },
+      when(operations.contains(Delete)) { GoCommonDAOGenerator.generateExecuteQuery() },
+    )
 
   private[service] def generateErrors(serviceName: String): String =
     mkCode.lines(
