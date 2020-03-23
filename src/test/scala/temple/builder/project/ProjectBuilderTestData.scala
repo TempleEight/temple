@@ -4,7 +4,7 @@ import temple.ast.AttributeType._
 import temple.ast.Metadata.Database
 import temple.ast._
 import temple.generate.FileSystem.{File, FileContent}
-import temple.utils.{FileUtils, StringUtils}
+import temple.utils.FileUtils
 
 import scala.collection.immutable.ListMap
 
