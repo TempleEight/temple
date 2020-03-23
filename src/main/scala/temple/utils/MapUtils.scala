@@ -26,7 +26,7 @@ object MapUtils {
       * Insert an entry into the map, throwing on error
       * @param kv a key-value pair to insert into the map
       */
-    def safeInsert[E <: Exception](kv: (K, V))(implicit context: FailureContext): Unit =
+    def safeInsert(kv: (K, V))(implicit context: FailureContext): Unit =
       safeInsert(kv, context.fail(s"Key ${kv._1} already exists in $map"))
   }
 }
