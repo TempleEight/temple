@@ -1,11 +1,10 @@
-// Init opens the database connection
-func (dao *DAO) Init(config *util.Config) error {
+// Init opens the datastore connection, returning a DAO
+func Init(config *util.Config) (*DAO, error) {
 	connStr := fmt.Sprintf("user=%s dbname=%s host=%s sslmode=%s", config.User, config.DBName, config.Host, config.SSLMode)
-	var err error
-	dao.DB, err = sql.Open("postgres", connStr)
+	db, err := sql.Open("postgres", connStr)
 	if err != nil {
-		return err
+		return nil, err
 	}
-
-	return nil
+	
+	return &DAO{db}, nil
 }

@@ -62,3 +62,14 @@ type UpdateMatchInput struct {
 type DeleteMatchInput struct {
 	ID uuid.UUID
 }
+
+// Init opens the datastore connection, returning a DAO
+func Init(config *util.Config) (*DAO, error) {
+	connStr := fmt.Sprintf("user=%s dbname=%s host=%s sslmode=%s", config.User, config.DBName, config.Host, config.SSLMode)
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		return nil, err
+	}
+	
+	return &DAO{db}, nil
+}

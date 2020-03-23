@@ -7,7 +7,6 @@ import temple.generate.server.go.common.GoCommonGenerator.generateGoType
 import temple.generate.server.{CreatedByAttribute, IDAttribute}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
-import temple.utils.FileUtils
 import temple.utils.StringUtils.doubleQuote
 
 import scala.Option.when
@@ -181,9 +180,6 @@ object GoServiceDAOGenerator {
         yield generateInputStruct(serviceName, operation, idAttribute, createdByAttribute, attributes),
     )
   }
-
-  private[service] def generateInit(): String =
-    FileUtils.readResources("go/genFiles/common/dao/init.go.snippet").stripLineEnd
 
   private[service] def generateErrors(serviceName: String): String =
     mkCode.lines(
