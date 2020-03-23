@@ -31,7 +31,7 @@ object ProjectBuilder {
           }
       }
     // Add read all endpoint if defined
-    service.lookupMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + ReadAll)
+    service.lookupMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + List)
   }
 
   /**
