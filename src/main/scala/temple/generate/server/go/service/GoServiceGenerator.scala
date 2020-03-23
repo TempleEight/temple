@@ -70,6 +70,8 @@ object GoServiceGenerator extends ServiceGenerator {
           serviceRoot.createdByAttribute,
           serviceRoot.attributes,
         ),
+        GoCommonDAOGenerator.generateInit(),
+        GoServiceDAOGenerator.generateQueryFunctions(serviceRoot.operations),
       ),
       File(s"${serviceRoot.name}/util", "util.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("util"),
