@@ -20,10 +20,10 @@ object GrafanaDashboardGenerator {
     val grafanaPanels = rows.zipWithIndex.flatMap {
       case (row, index) =>
         val rowY       = index * panelHeight
-        val panelWidth = maxWidth / row.metric.size
+        val panelWidth = maxWidth / row.metrics.size
 
         // Create a panel for each metric, with unique ID
-        row.metric.zipWithIndex.map {
+        row.metrics.zipWithIndex.map {
           case (metric, metricIndex) =>
             // Define a target for each query with unique refID
             val targets = metric.queries.zip('A' to 'Z').map {
