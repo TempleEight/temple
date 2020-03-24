@@ -3,7 +3,7 @@ package temple.generate.metrics.grafana
 object GrafanaDashboardConfigGeneratorTestData {
 
   val prometheusConfig: String =
-    """|apiVersion: 1
+    """apiVersion: 1
       |providers:
       |- name: Prometheus
       |  orgId: 1
