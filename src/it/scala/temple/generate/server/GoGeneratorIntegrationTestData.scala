@@ -1,7 +1,7 @@
 package temple.generate.server
 
-import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.ast.Metadata.Database.Postgres
+import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD
 
 import scala.collection.immutable.ListMap
