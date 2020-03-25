@@ -1,7 +1,7 @@
 package temple.collection.enumeration
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.utils.MapUtils.FailThrower
+import temple.errors.ErrorHandlingContext
 
 class EnumTest extends FlatSpec with Matchers {
 
@@ -38,8 +38,12 @@ class EnumTest extends FlatSpec with Matchers {
     MyEnum.parseOption("case 1") shouldBe None
   }
 
-  it should "call a fail thrower if nothing is found" in {
-    implicit val failThrower: FailThrower = _ => throw new RuntimeException
+  it should "call the context’s error handler if nothing is found" in {
+    // noinspection ConvertExpressionToSAM:
+    // produces a BootstrapMethodError of a LambdaConversionException if this is converted to a lambda
+    implicit val testContext: ErrorHandlingContext = new ErrorHandlingContext {
+      def fail(msg: String): Nothing = throw new RuntimeException
+    }
 
     MyEnum.parse("alias") shouldBe MyEnum.Case1
 
