@@ -5,7 +5,7 @@ import temple.generate.CRUD
 import temple.generate.CRUD._
 import temple.generate.server.CreatedByAttribute.EnumerateByCreator
 import temple.generate.server.go.common.GoCommonDAOGenerator
-import temple.generate.server.go.common.GoCommonGenerator.generateGoType
+import temple.generate.server.go.common.GoCommonGenerator.{generateCheckAndReturnError, generateGoType}
 import temple.generate.server.{CreatedByAttribute, IDAttribute}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
@@ -236,12 +236,7 @@ object GoServiceDAOGenerator {
             case _                                   => ""
           },
         ),
-      mkCode(
-        "if err != nil",
-        CodeWrap.curly.tabbed(
-          "return nil, err",
-        ),
-      ),
+      generateCheckAndReturnError("nil"),
     )
 
   private def generateListInterfaceFunctionBodyScanBlock(
@@ -267,22 +262,12 @@ object GoServiceDAOGenerator {
               },
               attributes.map { case (name, _) => s"&$serviceName.${name.capitalize}" },
             ),
-          mkCode(
-            "if err != nil",
-            CodeWrap.curly.tabbed(
-              "return nil, err",
-            ),
-          ),
+          generateCheckAndReturnError("nil"),
           s"${serviceName}List = append(${serviceName}List, $serviceName)",
         ),
       ),
       "err = rows.Err()",
-      mkCode(
-        "if err != nil",
-        CodeWrap.curly.tabbed(
-          "return nil, err",
-        ),
-      ),
+      generateCheckAndReturnError("nil"),
     )
 
   private def generateListInterfaceFunctionBody(
