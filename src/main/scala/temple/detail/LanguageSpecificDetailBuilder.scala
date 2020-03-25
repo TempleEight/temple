@@ -8,7 +8,7 @@ import temple.detail.LanguageDetail.GoLanguageDetail
 /** Call out to the user and ask for any required extra input based on their Templefile options */
 object LanguageSpecificDetailBuilder {
 
-  private def buildGoDetail(templefile: Templefile, questionAsker: QuestionAsker): LanguageDetail = {
+  private def buildGoDetail(templefile: Templefile, questionAsker: QuestionAsker): GoLanguageDetail = {
     val packageName = questionAsker.askQuestion(
       "What should the Go module name be? (expected format \"github.com/username/repo\")",
     )
