@@ -46,17 +46,17 @@ object MetricsBuilder {
         Row(
           Metric(
             index * 2,
-            s"${endpoint.verb} ${serviceName} Requests",
+            s"$endpoint $serviceName Requests",
             "Prometheus",
             "QPS",
-            qpsQueries(serviceName.toLowerCase, endpoint.verb.toLowerCase()),
+            qpsQueries(serviceName.toLowerCase, endpoint.toString.toLowerCase),
           ),
           Metric(
             index * 2 + 1,
-            s"DB ${endpoint.verb} Queries",
+            s"DB $endpoint Queries",
             "Prometheus",
             "Time (seconds)",
-            databaseDurationQueries(serviceName.toLowerCase, endpoint.verb.toLowerCase),
+            databaseDurationQueries(serviceName.toLowerCase, endpoint.toString.toLowerCase),
           ),
         )
     }.toSeq

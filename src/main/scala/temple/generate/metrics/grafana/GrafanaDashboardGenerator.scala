@@ -2,7 +2,6 @@ package temple.generate.metrics.grafana
 
 import io.circe.syntax._
 import temple.generate.metrics.grafana.ast.{GrafanaPanel, GrafanaRoot, GrafanaTarget, Row}
-import temple.utils.StringUtils
 
 object GrafanaDashboardGenerator {
   private val maxWidth    = 24

@@ -14,7 +14,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
   behavior of "Semantic Analyzer"
 
   it should "complain that there is no project block when parsing an Empty AST" in {
-    a[SemanticParsingException] should be thrownBy { parseSemantics(Nil) }
+    the[SemanticParsingException] thrownBy parseSemantics(Nil) should have message "Temple file has no project block"
   }
 
   it should "parse an AST containing only an empty project block" in {
@@ -70,13 +70,13 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
       )
     }
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute("a", syntax.AttributeType.Primitive("wat")),
         ),
       )
-    }
+    } should have message "Unknown type wat in a, in service, in User"
   }
 
   it should "fail on too many arguments" in {
@@ -88,13 +88,13 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
       )
     }
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute("a", syntax.AttributeType.Primitive("bool", Args(Seq(IntArg(12))))),
         ),
       )
-    }
+    } should have message "Arguments supplied to function that should take no parameters in bool, in a, in service, in User"
 
     noException should be thrownBy {
       parseSemantics(
@@ -104,7 +104,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
       )
     }
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute(
@@ -113,7 +113,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    }
+    } should have message "Too many arguments supplied to function (found 4, expected at most 3) in int, in a, in service, in User"
   }
 
   it should "fail on duplicate key names" in {
@@ -126,14 +126,14 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
       )
     }
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute("a", syntax.AttributeType.Primitive("int")),
           Entry.Attribute("a", syntax.AttributeType.Primitive("float")),
         ),
       )
-    }
+    } should have message "Key a already exists in LinkedHashMap(a -> Attribute(IntType(None,None,4),None,Set())) in service, in User"
 
     noException should be thrownBy {
       parseSemantics(
@@ -150,7 +150,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
       )
     }
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           DSLRootItem(
@@ -163,7 +163,8 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    }
+
+    } should have message "Key a already exists in LinkedHashMap(a -> Attribute(IntType(None,None,4),None,Set())) in Neighbour, in struct, in service, in User"
   }
 
   it should "pass kwargs in any order" in {
@@ -191,7 +192,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
   }
 
   it should "fail to parse repeated kwargs" in {
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute(
@@ -200,9 +201,9 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    }
+    } should have message "Duplicate argument provided for max in int, in a, in service, in User"
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute(
@@ -211,19 +212,20 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    }
+
+    } should have message "Duplicate argument provided for max in int, in a, in service, in User"
   }
 
   it should "fail to parse a bad nested item in a service" in {
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           DSLRootItem("Neighbour", "badItem", Seq()),
         ),
       )
-    }
+    } should have message "Unknown block type badItem for Neighbour in service, in User"
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           DSLRootItem(
@@ -235,7 +237,8 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    }
+
+    } should have message "No valid metadata language in Neighbour, in struct, in service, in User"
   }
 
   it should "work with non-mutex annotations" in {
@@ -265,7 +268,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
   }
 
   it should "fail for mutually exclusive annotations" in {
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute(
@@ -275,17 +278,17 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    }
+    } should have message "Two scope annotations found: @server is incompatible with @client in a, in service, in User"
   }
 
   it should "fail for unknown annotations" in {
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute("a", syntax.AttributeType.Primitive("int"), Seq(syntax.Annotation("something"))),
         ),
       )
-    }
+    } should have message "Unknown annotation @something in a, in service, in User"
   }
 
   it should "accept valid annotations" in {
@@ -309,39 +312,39 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
   }
 
   it should "fail on invalid annotations" in {
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute("id", syntax.AttributeType.Primitive("int")),
           Entry.Metadata("uses", Args(kwargs = Seq("badKey" -> ListArg(Seq())))),
         ),
       )
-    }
+    } should have message "Unknown keyword argument badKey with value [] in uses, in service, in User"
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Metadata("uses", Args(kwargs = Seq("services" -> IntArg(12)))),
         ),
       )
-    }
+    } should have message "Token list expected at services, found 12, in uses, in service, in User"
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Metadata("uses", Args(kwargs = Seq("services" -> NoArg))),
         ),
       )
-    }
+    } should have message "Token list expected at services, found <default>, in uses, in service, in User"
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute("id", syntax.AttributeType.Primitive("int")),
           Entry.Metadata("badMetadata"),
         ),
       )
-    }
+    } should have message "No valid metadata badMetadata in service, in User"
   }
 
   it should "parse project blocks correctly" in {
@@ -349,33 +352,33 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
       parseSemantics(Seq(DSLRootItem("Test", "project", Seq(Entry.Metadata("language", Args(Seq(TokenArg("go"))))))))
     }
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(Seq(DSLRootItem("Test", "project", Seq(Entry.Metadata("bad", Args(Seq(TokenArg("go"))))))))
-    }
+    } should have message "No valid metadata bad in project, in Test"
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         Seq(DSLRootItem("Test", "project", Seq(Entry.Attribute("field", syntax.AttributeType.Primitive("int"))))),
       )
-    }
+    } should have message "Found unexpected attribute: `field: int;` in project, in Test"
   }
 
   it should "fail to parse duplicate project blocks" in {
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(Seq(DSLRootItem("Test", "project", Seq()), DSLRootItem("other", "project", Seq())))
-    }
+    } should have message "Second project found in addition to Test, in project, in other"
   }
 
   it should "fail to parse metadata without required parameter" in {
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(Seq(DSLRootItem("Test", "project", Seq(Entry.Metadata("language", Args())))))
-    }
+    } should have message "Required argument language not provided in language, in project, in Test"
   }
 
   it should "fail to parse unknown root blocks" in {
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(Seq(DSLRootItem("Test", "project", Seq()), DSLRootItem("other", "badItem", Seq())))
-    }
+    } should have message "Unknown block type in badItem, in other"
   }
 
   it should "parse target blocks correctly" in {
@@ -385,19 +388,19 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
       )
     }
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileAST(DSLRootItem("mobile", "target", Seq(Entry.Metadata("badKey", Args(Seq(TokenArg("swift"))))))),
       )
-    }
+    } should have message "No valid metadata badKey in target, in mobile"
 
-    a[SemanticParsingException] should be thrownBy {
+    the[SemanticParsingException] thrownBy {
       parseSemantics(
         mkTemplefileAST(
           DSLRootItem("mobile", "target", Seq(Entry.Attribute("field", syntax.AttributeType.Primitive("int")))),
         ),
       )
-    }
+    } should have message "Found unexpected attribute: `field: int;` in target, in mobile"
   }
 }
 
