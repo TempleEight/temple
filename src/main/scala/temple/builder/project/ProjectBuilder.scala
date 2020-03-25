@@ -12,6 +12,7 @@ import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.docker.DockerfileGenerator
 import temple.generate.kube.KubernetesGenerator
 import temple.generate.metrics.grafana.GrafanaDashboardGenerator
+import temple.generate.metrics.grafana.ast.Datasource
 import temple.utils.StringUtils
 
 object ProjectBuilder {
@@ -66,8 +67,10 @@ object ProjectBuilder {
 
     val metrics = templefile.services.map {
       case (name, service) =>
-        val rows             = MetricsBuilder.createDashboardRows(name, endpoints(service))
-        val grafanaDashboard = GrafanaDashboardGenerator.generate(name.toLowerCase, name, rows)
+        // TODO: Get this from templefile
+        val datasource: Datasource = Datasource.Prometheus("Prometheus")
+        val rows                   = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
+        val grafanaDashboard       = GrafanaDashboardGenerator.generate(name.toLowerCase, name, rows)
         (File(s"grafana/provisioning/dashboards", s"${name.toLowerCase}.json"), grafanaDashboard)
     }
 
