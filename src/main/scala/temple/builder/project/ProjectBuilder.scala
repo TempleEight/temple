@@ -1,8 +1,8 @@
 package temple.builder.project
 
-import temple.ast.Metadata.{Database, Endpoint}
+import temple.ast.Metadata.{Database, Endpoint, ServiceLanguage}
 import temple.ast.{Metadata, ServiceBlock, Templefile}
-import temple.builder.{DatabaseBuilder, DockerfileBuilder, MetricsBuilder, OrchestrationBuilder}
+import temple.builder._
 import temple.generate.CRUD
 import temple.generate.CRUD._
 import temple.generate.FileSystem._
@@ -12,6 +12,7 @@ import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.docker.DockerfileGenerator
 import temple.generate.kube.KubernetesGenerator
 import temple.generate.metrics.grafana.GrafanaDashboardGenerator
+import temple.generate.server.go.service.GoServiceGenerator
 import temple.utils.StringUtils
 
 object ProjectBuilder {
@@ -71,6 +72,15 @@ object ProjectBuilder {
         (File(s"grafana/provisioning/dashboards", s"${name.toLowerCase}.json"), grafanaDashboard)
     }
 
-    Project(databaseCreationScripts ++ dockerfiles ++ kubeFiles ++ metrics)
+    val serverFiles = templefile.servicesWithPorts.flatMap {
+      case (name, service, port) =>
+        val serviceRoot = ServerBuilder.buildServiceRoot(name.toLowerCase, service, port, endpoints(service))
+        service.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
+          case ServiceLanguage.Go =>
+            GoServiceGenerator.generate(serviceRoot)
+        }
+    }
+
+    Project(databaseCreationScripts ++ dockerfiles ++ kubeFiles ++ serverFiles ++ metrics)
   }
 }
