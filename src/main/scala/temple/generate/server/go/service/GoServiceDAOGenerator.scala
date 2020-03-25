@@ -40,13 +40,13 @@ object GoServiceDAOGenerator {
 
   private def generateDatastoreInterfaceFunctionReturnType(serviceName: String, operation: CRUD): String =
     operation match {
-      case ReadAll                => s"(*[]${serviceName.capitalize}, error)"
+      case List                   => s"(*[]${serviceName.capitalize}, error)"
       case Create | Read | Update => s"(*${serviceName.capitalize}, error)"
       case Delete                 => "error"
     }
 
   private def generateDAOFunctionName(operation: CRUD, serviceName: String): String =
-    s"${operation.verb}${serviceName.capitalize}"
+    s"$operation${serviceName.capitalize}"
 
   private def generateDatastoreInterfaceFunction(
     serviceName: String,
@@ -58,7 +58,7 @@ object GoServiceDAOGenerator {
       case _: CreatedByAttribute.EnumerateByCreator => true
       case _                                        => false
     }
-    val functionArgs = if (enumeratingByCreator || operation != CRUD.ReadAll) s"input ${functionName}Input" else ""
+    val functionArgs = if (enumeratingByCreator || operation != CRUD.List) s"input ${functionName}Input" else ""
     mkCode(
       s"$functionName($functionArgs)",
       generateDatastoreInterfaceFunctionReturnType(serviceName, operation),
@@ -112,8 +112,8 @@ object GoServiceDAOGenerator {
 
   private def generateInputStructCommentSubstring(operation: CRUD, serviceName: String): String =
     operation match {
-      case ReadAll                         => s"read a $serviceName list"
-      case Create | Read | Update | Delete => s"${operation.verb.toLowerCase()} a single $serviceName"
+      case List                            => s"read a $serviceName list"
+      case Create | Read | Update | Delete => s"${operation.toString.toLowerCase} a single $serviceName"
     }
 
   private def generateInputStruct(
@@ -151,11 +151,11 @@ object GoServiceDAOGenerator {
           CodeUtils.pad(
             operation match {
               // Compose struct fields for each operation
-              case ReadAll => createdByMap
-              case Create  => idMap ++ createdByMap ++ attributesMap
-              case Read    => idMap
-              case Update  => idMap ++ attributesMap
-              case Delete  => idMap
+              case List   => createdByMap
+              case Create => idMap ++ createdByMap ++ attributesMap
+              case Read   => idMap
+              case Update => idMap ++ attributesMap
+              case Delete => idMap
             },
           ),
         ),
@@ -175,16 +175,16 @@ object GoServiceDAOGenerator {
       case _                                        => false
     }
     mkCode.doubleLines(
-      // Generate input struct for each operation, except for ReadAll when not enumerating by creator
+      // Generate input struct for each operation, except for List when not enumerating by creator
       for (operation <- CRUD.values if operations.contains(operation) &&
-           (operation != CRUD.ReadAll || enumeratingByCreator))
+           (operation != CRUD.List || enumeratingByCreator))
         yield generateInputStruct(serviceName, operation, idAttribute, createdByAttribute, attributes),
     )
   }
 
   private[service] def generateQueryFunctions(operations: Set[CRUD]): String =
     mkCode.doubleLines(
-      when(operations.contains(ReadAll)) { GoCommonDAOGenerator.generateExecuteQueryWithRowResponses() },
+      when(operations.contains(List)) { GoCommonDAOGenerator.generateExecuteQueryWithRowResponses() },
       when(operations.intersect(Set(Create, Read, Update)).nonEmpty) {
         GoCommonDAOGenerator.generateExecuteQueryWithRowResponse()
       },

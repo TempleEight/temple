@@ -94,7 +94,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     val capitalizedName = service.name.capitalize
     val tags            = Seq(capitalizedName)
     service.operations.foreach {
-      case ReadAll =>
+      case List =>
         path(s"/$lowerName/all") += HTTPVerb.Get -> Handler(
             s"Get a list of every $lowerName",
             tags = tags,

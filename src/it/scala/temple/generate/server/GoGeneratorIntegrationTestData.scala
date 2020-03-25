@@ -23,7 +23,7 @@ object GoGeneratorIntegrationTestData {
       "match",
       "github.com/TempleEight/spec-golang/match",
       Seq("user"),
-      Set(CRUD.ReadAll, CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
+      Set(CRUD.List, CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
       81,
       IDAttribute("id", AttributeType.UUIDType),
       CreatedByAttribute.EnumerateByCreator("authID", "createdBy", AttributeType.UUIDType),
