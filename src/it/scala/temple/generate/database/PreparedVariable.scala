@@ -1,6 +1,7 @@
 package temple.generate.database
 
 import java.sql.{Date, Time, Timestamp}
+import java.util.UUID
 
 /** Helper case class for holding values for prepared variables in SQL statements
   * Used mainly in @containers.PostgresSpec */
@@ -19,4 +20,5 @@ object PreparedVariable {
   case class TimeVariable(value: Time)            extends PreparedVariable
   case class DateTimeTzVariable(value: Timestamp) extends PreparedVariable
   case class BlobVariable(value: Array[Byte])     extends PreparedVariable
+  case class UUIDVariable(value: UUID)            extends PreparedVariable
 }
