@@ -50,17 +50,17 @@ object GrafanaDashboardGeneratorTestUtils {
        |  "hiddenSeries" : false,
        |  "id" : $id,
        |  "legend" : {
-       |    "show" : true,
        |    "avg" : false,
+       |    "current" : false,
+       |    "max" : false,
        |    "min" : false,
        |    "rightSide" : true,
+       |    "show" : true,
        |    "total" : false,
-       |    "max" : false,
-       |    "values" : false,
-       |    "current" : false
+       |    "values" : false
        |  },
        |  "lines" : true,
-       |  "lineWidth" : 1,
+       |  "linewidth" : 1,
        |  "nullPointMode" : "null",
        |  "options" : {
        |    "dataLinks" : [
@@ -90,30 +90,30 @@ object GrafanaDashboardGeneratorTestUtils {
        |    "value_type" : "individual"
        |  },
        |  "type" : "graph",
-       |  "x-axis" : {
+       |  "xaxis" : {
+       |    "buckets" : null,
+       |    "mode" : "time",
        |    "name" : null,
        |    "show" : true,
-       |    "buckets" : null,
-       |    "mode" : "Time",
        |    "values" : [
        |    ]
        |  },
        |  "yaxes" : [
        |    {
        |      "format" : "short",
-       |      "show" : true,
-       |      "logBase" : 1,
        |      "label" : "$yAxisLabel",
+       |      "logBase" : 1,
+       |      "max" : null,
        |      "min" : null,
-       |      "max" : null
+       |      "show" : true
        |    },
        |    {
        |      "format" : "short",
-       |      "show" : true,
-       |      "logBase" : 1,
        |      "label" : null,
+       |      "logBase" : 1,
+       |      "max" : null,
        |      "min" : null,
-       |      "max" : null
+       |      "show" : true
        |    }
        |  ],
        |  "yaxis" : {

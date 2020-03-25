@@ -14,9 +14,9 @@ import scala.collection.immutable.ListMap
   * @param operations a set of operations this service supports on the resource handled
   * @param port the port number this service will be served on
   * @param idAttribute the name and type of the ID field in this service
-  * @param createdByAttribute the input name, name and type of the createdBy field in this service
+  * @param createdByAttribute the input name, name and type of the createdBy field in this service, and whether it is
+  * used to enumerate the service in the List endpoint
   * @param attributes the user-defined fields of the resource handled by this service
-  * @param enumByCreatedBy whether or not this service is enumerated by the creator of the resource
   */
 case class ServiceRoot(
   name: String,
@@ -25,12 +25,6 @@ case class ServiceRoot(
   operations: Set[CRUD],
   port: Int,
   idAttribute: IDAttribute,
-  createdByAttribute: Option[CreatedByAttribute],
+  createdByAttribute: CreatedByAttribute,
   attributes: ListMap[String, Attribute],
-  enumByCreatedBy: Boolean = false,
-) {
-  if (enumByCreatedBy && createdByAttribute.isEmpty)
-    throw new IllegalArgumentException(
-      "Cannot construct service root without a createdByAttribute if enumerating by creator",
-    )
-}
+)
