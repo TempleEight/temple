@@ -278,6 +278,20 @@ object ProjectBuilderTestData {
 
   val simpleTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/templeuser.json").init
 
+  val simpleTemplefileGrafanaDashboardConfig: String =
+    """apiVersion: 1
+      |providers:
+      |- name: Prometheus
+      |  orgId: 1
+      |  folder: ''
+      |  type: file
+      |  disableDeletion: false
+      |  editable: true
+      |  allowUiUpdates: true
+      |  options:
+      |    path: /etc/grafana/provisioning/dashboards
+      |""".stripMargin
+
   val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
     ProjectBlock(),
@@ -500,4 +514,18 @@ object ProjectBuilderTestData {
       |  --data 'config.claims_to_verify=exp'""".stripMargin
 
   val complexTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/complexuser.json").init
+
+  val complexTemplefileGrafanaDashboardConfig: String =
+    """apiVersion: 1
+      |providers:
+      |- name: Prometheus
+      |  orgId: 1
+      |  folder: ''
+      |  type: file
+      |  disableDeletion: false
+      |  editable: true
+      |  allowUiUpdates: true
+      |  options:
+      |    path: /etc/grafana/provisioning/dashboards
+      |""".stripMargin
 }
