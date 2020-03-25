@@ -1,7 +1,6 @@
 package temple.generate.server.go.common
 
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
-import temple.utils.FileUtils
 import temple.utils.StringUtils.doubleQuote
 
 object GoCommonDAOGenerator {

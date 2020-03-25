@@ -20,10 +20,14 @@ trait CodeTerm {
 
 object CodeTerm {
 
-  /** Turns a [[String]] into a [[CodeTerm]], with a trivial iterator of just the single string
-    */
+  /** Turns a [[String]] into a [[CodeTerm]], with a trivial iterator of just the single string */
   implicit class CodeTermString(string: String) extends CodeTerm {
     override def flatIterator: Iterator[String] = Iterable.single(string).iterator
+  }
+
+  /** Turns a [[None]] into a [[CodeTerm]], with a trivial iterator of nothing */
+  implicit class CodeTermNone(none: None.type) extends CodeTerm {
+    override def flatIterator: Iterator[String] = Iterator.empty
   }
 
   /**
@@ -99,8 +103,14 @@ object CodeTerm {
 
   sealed class CodeWrap private (start: String, end: String) {
 
-    /** Wrap a (comma-separated list of) terms in parentheses */
+    /** Add a string before the opening symbol, without any spacing */
+    def prefix(prefix: String): CodeWrap = new CodeWrap(prefix + start, end)
+
+    /** Wrap a (space-separated list of) terms in parentheses */
     def apply(string: CodeTerm*): String = mkCode(start, string, end)
+
+    /** Wrap a (comma-separated list of) terms in parentheses */
+    def list(string: CodeTerm*): String = mkCode(start, mkCode.list(string), end)
 
     /** Wrap a (comma-separated list of) code snippet in parentheses, indenting with spaces */
     def spacedList(string: CodeTerm*): String = mkCode(start, "\n", indent(mkCode.spacedList(string)), "\n", end)
