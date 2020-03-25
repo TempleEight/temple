@@ -317,7 +317,8 @@ object GoServiceDAOGenerator {
           operation match {
             case List =>
               generateListInterfaceFunctionBody(serviceName, idAttribute, createdByAttribute, attributes, query)
-            case _ => ""
+            case Create | Read | Update => "return nil, nil"
+            case Delete                 => "return nil"
           },
         ),
       ),
