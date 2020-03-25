@@ -1,7 +1,8 @@
 package temple.utils
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.utils.MapUtils.{FailHandler, SafeInsertMap}
+import temple.errors.FailureContext
+import temple.utils.MapUtils.SafeInsertMap
 
 import scala.collection.mutable
 
@@ -48,9 +49,7 @@ class MapUtilsTest extends FlatSpec with Matchers {
 
     val map: mutable.Map[Int, Boolean] = mutable.HashMap(3 -> true)
 
-    implicit val failHandler: FailHandler = { _ =>
-      callbackCalled += 1
-    }
+    implicit val failureContext: FailureContext = _ => callbackCalled += 1
 
     map.safeInsert(1 -> true)
 
