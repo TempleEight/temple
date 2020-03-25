@@ -244,24 +244,26 @@ object GoServiceDAOGenerator {
     idAttribute: IDAttribute,
     createdByAttribute: CreatedByAttribute,
     attributes: ListMap[String, Attribute],
-  ): String =
+  ): String = {
+    val scanStatement = CodeWrap.parens
+      .prefix("err = rows.Scan")
+      .list(
+        s"&$serviceName.${idAttribute.name.toUpperCase()}",
+        createdByAttribute match {
+          case CreatedByAttribute.None => None
+          case enumerating: CreatedByAttribute.Enumerating =>
+            Some(s"&${serviceName}.${enumerating.name.capitalize}")
+        },
+        attributes.map { case (name, _) => s"&$serviceName.${name.capitalize}" },
+      )
+
     mkCode.lines(
       s"${serviceName}List := make([]${serviceName.capitalize}, 0)",
       mkCode(
         "for rows.Next()",
         CodeWrap.curly.tabbed(
           s"var $serviceName ${serviceName.capitalize}",
-          CodeWrap.parens
-            .prefix("err = rows.Scan")
-            .list(
-              s"&$serviceName.${idAttribute.name.toUpperCase()}",
-              createdByAttribute match {
-                case CreatedByAttribute.None => None
-                case enumerating: CreatedByAttribute.Enumerating =>
-                  Some(s"&${serviceName}.${enumerating.name.capitalize}")
-              },
-              attributes.map { case (name, _) => s"&$serviceName.${name.capitalize}" },
-            ),
+          scanStatement,
           generateCheckAndReturnError("nil"),
           s"${serviceName}List = append(${serviceName}List, $serviceName)",
         ),
@@ -269,6 +271,7 @@ object GoServiceDAOGenerator {
       "err = rows.Err()",
       generateCheckAndReturnError("nil"),
     )
+  }
 
   private def generateListInterfaceFunctionBody(
     serviceName: String,
