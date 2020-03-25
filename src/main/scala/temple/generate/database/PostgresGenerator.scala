@@ -12,7 +12,8 @@ import temple.generate.utils.CodeTerm._
 import scala.Option.when
 
 /** Implementation of [[DatabaseGenerator]] for generating PostgreSQL */
-object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
+object PostgresGenerator extends DatabaseGenerator {
+  type Context = PostgresContext
 
   /** Given an expression, parse it into the Postgres format */
   private def generateExpression(expression: Expression): String =
