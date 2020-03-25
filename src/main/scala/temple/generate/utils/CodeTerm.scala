@@ -99,6 +99,9 @@ object CodeTerm {
 
   sealed class CodeWrap private (start: String, end: String) {
 
+    /** Add a string before the opening symbol, without any spacing */
+    def prefix(prefix: String): CodeWrap = new CodeWrap(prefix + start, end)
+
     /** Wrap a (comma-separated list of) terms in parentheses */
     def apply(string: CodeTerm*): String = mkCode(start, string, end)
 
