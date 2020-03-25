@@ -11,7 +11,7 @@ import temple.generate.utils.CodeUtils
 
 import scala.collection.immutable.ListMap
 
-object GoServideDAOInputStructsGenerator {
+object GoServiceDAOInputStructsGenerator {
 
   private def generateStructCommentSubstring(operation: CRUD, serviceName: String): String =
     operation match {

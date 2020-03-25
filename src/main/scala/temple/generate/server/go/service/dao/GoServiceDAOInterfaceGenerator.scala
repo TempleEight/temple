@@ -15,7 +15,7 @@ object GoServiceDAOInterfaceGenerator {
       case Delete                 => "error"
     }
 
-  private[go] def generateInterfaceFunction(
+  private[dao] def generateInterfaceFunction(
     serviceName: String,
     operation: CRUD,
     createdByAttribute: CreatedByAttribute,

@@ -2,7 +2,7 @@ package temple.generate.server.go.service
 
 import temple.generate.FileSystem._
 import temple.generate.server.go.common._
-import temple.generate.server.go.service.dao.GoServiceDAOGenerator
+import temple.generate.server.go.service.dao.{GoServiceDAOFunctionsGenerator, GoServiceDAOGenerator, GoServiceDAOInputStructsGenerator, GoServiceDAOInterfaceGenerator}
 import temple.generate.server.{ServiceGenerator, ServiceRoot}
 import temple.generate.utils.CodeTerm.mkCode
 
@@ -53,7 +53,7 @@ object GoServiceGenerator extends ServiceGenerator {
           serviceRoot.attributes,
           serviceRoot.module,
         ),
-        GoServiceDAOGenerator.generateDatastoreInterface(
+        GoServiceDAOInterfaceGenerator.generateInterface(
           serviceRoot.name,
           operations,
           serviceRoot.createdByAttribute,
@@ -65,7 +65,7 @@ object GoServiceGenerator extends ServiceGenerator {
           serviceRoot.createdByAttribute,
           serviceRoot.attributes,
         ),
-        GoServiceDAOGenerator.generateInputStructs(
+        GoServiceDAOInputStructsGenerator.generateStructs(
           serviceRoot.name,
           operations,
           serviceRoot.idAttribute,
@@ -74,7 +74,7 @@ object GoServiceGenerator extends ServiceGenerator {
         ),
         GoCommonDAOGenerator.generateInit(),
         GoServiceDAOGenerator.generateQueryFunctions(operations),
-        GoServiceDAOGenerator.generateInterfaceFunctions(
+        GoServiceDAOFunctionsGenerator.generateDAOFunctions(
           serviceRoot.name,
           serviceRoot.opQueries,
           serviceRoot.idAttribute,
