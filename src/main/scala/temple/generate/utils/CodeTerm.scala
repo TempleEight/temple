@@ -20,10 +20,14 @@ trait CodeTerm {
 
 object CodeTerm {
 
-  /** Turns a [[String]] into a [[CodeTerm]], with a trivial iterator of just the single string
-    */
+  /** Turns a [[String]] into a [[CodeTerm]], with a trivial iterator of just the single string */
   implicit class CodeTermString(string: String) extends CodeTerm {
     override def flatIterator: Iterator[String] = Iterable.single(string).iterator
+  }
+
+  /** Turns a [[None]] into a [[CodeTerm]], with a trivial iterator of nothing */
+  implicit class CodeTermNone(none: None.type) extends CodeTerm {
+    override def flatIterator: Iterator[String] = Iterator.empty
   }
 
   /**
