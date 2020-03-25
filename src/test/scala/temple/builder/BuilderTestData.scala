@@ -1,6 +1,7 @@
 package temple.builder
 
 import temple.ast.AttributeType._
+import temple.ast.Metadata.ServiceLanguage
 import temple.ast._
 
 import scala.collection.immutable.ListMap
@@ -20,6 +21,13 @@ object BuilderTestData {
       "expiry"      -> Attribute(DateTimeType),
       "image"       -> Attribute(BlobType()),
     ),
+  )
+
+  val simpleTemplefile: Templefile = Templefile(
+    "test-project",
+    ProjectBlock(Seq(ServiceLanguage.Go)),
+    targets = Map(),
+    services = Map("test-service" -> sampleService),
   )
 
   val sampleComplexService: ServiceBlock = ServiceBlock(

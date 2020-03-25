@@ -2,7 +2,7 @@ package temple.builder
 
 import temple.ast.AttributeType.{ForeignKey, PrimitiveAttributeType}
 import temple.ast.Metadata.{ServiceEnumerable, ServiceLanguage}
-import temple.ast.{AttributeType, ServiceBlock}
+import temple.ast.{Attribute, AttributeType, ServiceBlock}
 import temple.builder.project.LanguageConfig.GoLanguageConfig
 import temple.builder.project.ProjectConfig
 import temple.generate.CRUD
@@ -41,13 +41,9 @@ object ServerBuilder {
 
     ServiceRoot(
       serviceName,
-      module = serviceName,
+      module = serviceName, //TODO: Make this correct
       comms = serviceBlock.attributes.collect {
-        case (_, attr) =>
-          attr.attributeType match {
-            case ForeignKey(ref) => ref
-            case _               => null
-          }
+        case (_, Attribute(x: ForeignKey, _, _)) => x.references
       }.toSeq,
       operations = endpoints,
       port = port,
