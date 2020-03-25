@@ -218,4 +218,18 @@ object SimpleE2ETestData {
       |""".stripMargin
 
   val grafanaDashboard: String = FileUtils.readResources("grafana/simple-templeuser.json").init
+
+  val grafanaDashboardConfig: String =
+    """apiVersion: 1
+      |providers:
+      |- name: Prometheus
+      |  orgId: 1
+      |  folder: ''
+      |  type: file
+      |  disableDeletion: false
+      |  editable: true
+      |  allowUiUpdates: true
+      |  options:
+      |    path: /etc/grafana/provisioning/dashboards
+      |""".stripMargin
 }
