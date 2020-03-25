@@ -226,8 +226,9 @@ object GoServiceDAOGenerator {
     query: String,
   ): String =
     mkCode.lines(
-      CodeWrap.parens.prefix("rows, err := executeQueryWithRowResponses")(
-        mkCode.list(
+      CodeWrap.parens
+        .prefix("rows, err := executeQueryWithRowResponses")
+        .list(
           "dao.DB",
           doubleQuote(query),
           createdByAttribute match {
@@ -235,7 +236,6 @@ object GoServiceDAOGenerator {
             case _                                   => ""
           },
         ),
-      ),
       mkCode(
         "if err != nil",
         CodeWrap.curly.tabbed(
@@ -256,8 +256,9 @@ object GoServiceDAOGenerator {
         "for rows.Next()",
         CodeWrap.curly.tabbed(
           s"var $serviceName ${serviceName.capitalize}",
-          CodeWrap.parens.prefix("err = rows.Scan")(
-            mkCode.list(
+          CodeWrap.parens
+            .prefix("err = rows.Scan")
+            .list(
               s"&$serviceName.${idAttribute.name.toUpperCase()}",
               createdByAttribute match {
                 case CreatedByAttribute.None => None
@@ -266,7 +267,6 @@ object GoServiceDAOGenerator {
               },
               attributes.map { case (name, _) => s"&$serviceName.${name.capitalize}" },
             ),
-          ),
           mkCode(
             "if err != nil",
             CodeWrap.curly.tabbed(
