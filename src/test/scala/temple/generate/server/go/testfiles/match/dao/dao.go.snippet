@@ -96,7 +96,26 @@ func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) 
 
 // ListMatch returns a list containing every match in the datastore for a given ID
 func (dao *DAO) ListMatch(input ListMatchInput) (*[]Match, error) {
+	rows, err := executeQueryWithRowResponses(dao.DB, "SELECT id, created_by, userOne, userTwo, matchedOn FROM match WHERE created_by = $1", input.AuthID)
+	if err != nil {
+		return nil, err
+	}
 
+	matchList := make([]Match, 0)
+	for rows.Next() {
+		var match Match
+		err = rows.Scan(&match.ID, &match.CreatedBy, &match.UserOne, &match.UserTwo, &match.MatchedOn)
+		if err != nil {
+			return nil, err
+		}
+		matchList = append(matchList, match)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	return &matchList, nil
 }
 
 // CreateMatch creates a new match in the datastore, returning the newly created match

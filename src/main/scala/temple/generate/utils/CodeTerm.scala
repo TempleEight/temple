@@ -26,6 +26,11 @@ object CodeTerm {
     override def flatIterator: Iterator[String] = Iterable.single(string).iterator
   }
 
+  /** Turns a [[None]] into a [[CodeTerm]], with a trivial iterator of nothing */
+  implicit class CodeTermNone(none: None.type) extends CodeTerm {
+    override def flatIterator: Iterator[String] = Iterator.empty
+  }
+
   /**
     * Turns a list of items into a string with separators, constructed with
     * [[temple.generate.utils.CodeTerm.mkCode#list(temple.generate.utils.CodeTerm.CodeTermIterableString)]]

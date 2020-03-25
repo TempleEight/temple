@@ -221,31 +221,92 @@ object GoServiceDAOGenerator {
       },
     )
 
-  private def generateReadAllInterfaceFunctionBody(
+  private def generateListInterfaceFunctionBodyQueryBlock(
     createdByAttribute: CreatedByAttribute,
-  ): String = {
-    val dbQuery = "will is the best"
+    query: String,
+  ): String =
     mkCode.lines(
+      s"rows, err := executeQueryWithRowResponses" + // TODO: Replace when mkCode is updated
+      CodeWrap.parens(
+        mkCode.list(
+          "dao.DB",
+          doubleQuote(query),
+          createdByAttribute match {
+            case EnumerateByCreator(inputName, _, _) => s"input.${inputName.capitalize}"
+            case _                                   => ""
+          },
+        ),
+      ),
       mkCode(
-        s"rows, err := executeQueryWithRowResponses",
-        CodeWrap.parens(
-          mkCode.list(
-            "dao.DB",
-            doubleQuote(dbQuery),
-            createdByAttribute match {
-              case EnumerateByCreator(inputName, _, _) => s"input.${inputName.capitalize}"
-              case _                                   => ""
-            },
-          ),
+        "if err != nil",
+        CodeWrap.curly.tabbed(
+          "return nil, err",
         ),
       ),
     )
-  }
+
+  private def generateListInterfaceFunctionBodyScanBlock(
+    serviceName: String,
+    idAttribute: IDAttribute,
+    createdByAttribute: CreatedByAttribute,
+    attributes: ListMap[String, Attribute],
+  ): String =
+    mkCode.lines(
+      s"${serviceName}List := make([]${serviceName.capitalize}, 0)",
+      mkCode(
+        "for rows.Next()",
+        CodeWrap.curly.tabbed(
+          s"var $serviceName ${serviceName.capitalize}",
+          "err = rows.Scan" + // TODO: replace when mkCode is updated
+          CodeWrap.parens(
+            mkCode.list(
+              s"&$serviceName.${idAttribute.name.toUpperCase()}",
+              createdByAttribute match {
+                case CreatedByAttribute.None => None
+                case enumerating: CreatedByAttribute.Enumerating =>
+                  Some(s"&${serviceName}.${enumerating.name.capitalize}")
+              },
+              attributes.map { case (name, _) => s"&$serviceName.${name.capitalize}" },
+            ),
+          ),
+          mkCode(
+            "if err != nil",
+            CodeWrap.curly.tabbed(
+              "return nil, err",
+            ),
+          ),
+          s"${serviceName}List = append(${serviceName}List, $serviceName)",
+        ),
+      ),
+      "err = rows.Err()",
+      mkCode(
+        "if err != nil",
+        CodeWrap.curly.tabbed(
+          "return nil, err",
+        ),
+      ),
+    )
+
+  private def generateListInterfaceFunctionBody(
+    serviceName: String,
+    idAttribute: IDAttribute,
+    createdByAttribute: CreatedByAttribute,
+    attributes: ListMap[String, Attribute],
+    query: String,
+  ): String =
+    mkCode.doubleLines(
+      generateListInterfaceFunctionBodyQueryBlock(createdByAttribute, query),
+      generateListInterfaceFunctionBodyScanBlock(serviceName, idAttribute, createdByAttribute, attributes),
+      s"return &${serviceName}List, nil",
+    )
 
   private def generateInterfaceFunction(
     serviceName: String,
     operation: CRUD,
+    idAttribute: IDAttribute,
     createdByAttribute: CreatedByAttribute,
+    attributes: ListMap[String, Attribute],
+    query: String,
   ): String =
     mkCode.lines(
       generateInterfaceFunctionComment(serviceName, operation, createdByAttribute),
@@ -254,8 +315,9 @@ object GoServiceDAOGenerator {
         generateDatastoreInterfaceFunction(serviceName, operation, createdByAttribute),
         CodeWrap.curly.tabbed(
           operation match {
-            case ReadAll => generateReadAllInterfaceFunctionBody(createdByAttribute)
-            case _       => ""
+            case ReadAll =>
+              generateListInterfaceFunctionBody(serviceName, idAttribute, createdByAttribute, attributes, query)
+            case _ => ""
           },
         ),
       ),
@@ -263,14 +325,14 @@ object GoServiceDAOGenerator {
 
   private[service] def generateInterfaceFunctions(
     serviceName: String,
-    operations: Set[CRUD],
+    opQueries: ListMap[CRUD, String],
     idAttribute: IDAttribute,
     createdByAttribute: CreatedByAttribute,
     attributes: ListMap[String, Attribute],
   ): String =
     mkCode.doubleLines(
-      for (operation <- CRUD.values if operations.contains(operation))
-        yield generateInterfaceFunction(serviceName, operation, createdByAttribute),
+      for ((operation, query) <- opQueries)
+        yield generateInterfaceFunction(serviceName, operation, idAttribute, createdByAttribute, attributes, query),
     )
 
   private[service] def generateErrors(serviceName: String): String =
