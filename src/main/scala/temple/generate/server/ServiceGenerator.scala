@@ -1,6 +1,5 @@
 package temple.generate.server
 
-import temple.generate.CRUD
 import temple.generate.FileSystem._
 
 /** ServiceGenerator provides an interface for generating service boilerplate from an ADT */
