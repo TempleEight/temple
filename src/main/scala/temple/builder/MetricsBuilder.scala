@@ -1,7 +1,7 @@
 package temple.builder
 
 import temple.generate.CRUD
-import temple.generate.metrics.grafana.ast.Row
+import temple.generate.metrics.grafana.ast.{Datasource, Row}
 import temple.generate.metrics.grafana.ast.Row.{Metric, Query}
 
 object MetricsBuilder {
@@ -40,21 +40,21 @@ object MetricsBuilder {
       ),
     )
 
-  def createDashboardRows(serviceName: String, endpoints: Set[CRUD]): Seq[Row] =
+  def createDashboardRows(serviceName: String, datasource: Datasource, endpoints: Set[CRUD]): Seq[Row] =
     endpoints.zipWithIndex.map {
       case (endpoint, index) =>
         Row(
           Metric(
             index * 2,
             s"$endpoint $serviceName Requests",
-            "Prometheus",
+            datasource,
             "QPS",
             qpsQueries(serviceName.toLowerCase, endpoint.toString.toLowerCase),
           ),
           Metric(
             index * 2 + 1,
             s"DB $endpoint Queries",
-            "Prometheus",
+            datasource,
             "Time (seconds)",
             databaseDurationQueries(serviceName.toLowerCase, endpoint.toString.toLowerCase),
           ),
