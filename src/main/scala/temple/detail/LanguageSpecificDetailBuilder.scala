@@ -3,20 +3,26 @@ package temple.detail
 import temple.ast.Metadata.ServiceLanguage
 import temple.ast.{Metadata, Templefile}
 import temple.builder.project.ProjectConfig
-import temple.detail.Detail.GoDetail
+import temple.detail.LanguageDetail.GoLanguageDetail
 
-/** Call out to the user and ask for any required extra input based on their templefile options */
+/** Call out to the user and ask for any required extra input based on their Templefile options */
 object LanguageSpecificDetailBuilder {
 
-  private def buildGoDetail(templefile: Templefile, questionAsker: QuestionAsker): Detail = {
+  private def buildGoDetail(templefile: Templefile, questionAsker: QuestionAsker): LanguageDetail = {
     val packageName = questionAsker.askQuestion(
-      "Yo pal, what is the Go module name you'd like (expected format \"github.com/yeeter69/lockdown\")?",
+      "What should the Go module name be? (expected format \"github.com/username/repo\")",
     )
-    GoDetail(packageName)
+    if (packageName.length == 0) {
+      throw new RuntimeException("Please enter a Go module name.")
+    }
+    if (packageName.contains(" ")) {
+      throw new RuntimeException("Please enter a valid Go module name.")
+    }
+    GoLanguageDetail(packageName)
   }
 
-  /** Given a templefile and a question asker, build all the required details */
-  def build(templefile: Templefile, questionAsker: QuestionAsker): Detail = {
+  /** Given a [[Templefile]] and a [[QuestionAsker]], build the additional details required to generate */
+  def build(templefile: Templefile, questionAsker: QuestionAsker): LanguageDetail = {
     val language =
       templefile.projectBlock.lookupMetadata[Metadata.ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
     language match {
