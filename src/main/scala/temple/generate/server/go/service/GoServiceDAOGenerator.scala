@@ -7,11 +7,11 @@ import temple.generate.server.go.common.GoCommonGenerator.generateGoType
 import temple.generate.server.{CreatedByAttribute, IDAttribute}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
-import temple.utils.FileUtils
 import temple.utils.StringUtils.doubleQuote
 
 import scala.Option.when
 import scala.collection.immutable.ListMap
+import temple.generate.server.go.common.GoCommonDAOGenerator
 
 object GoServiceDAOGenerator {
 
@@ -26,10 +26,10 @@ object GoServiceDAOGenerator {
       "import",
       CodeWrap.parens.tabbed(
         doubleQuote("database/sql"),
-        //doubleQuote("fmt"),
+        doubleQuote("fmt"),
         when(containsTime) { doubleQuote("time") },
         "",
-        //doubleQuote(s"$module/util"),
+        doubleQuote(s"$module/util"),
         doubleQuote("github.com/google/uuid"),
         "",
         "// pq acts as the driver for SQL requests",
@@ -182,8 +182,14 @@ object GoServiceDAOGenerator {
     )
   }
 
-  private[service] def generateInit(): String =
-    FileUtils.readResources("go/genFiles/common/dao/init.go.snippet").stripLineEnd
+  private[service] def generateQueryFunctions(operations: Set[CRUD]): String =
+    mkCode.doubleLines(
+      when(operations.contains(ReadAll)) { GoCommonDAOGenerator.generateExecuteQueryWithRowResponses() },
+      when(operations.intersect(Set(Create, Read, Update)).nonEmpty) {
+        GoCommonDAOGenerator.generateExecuteQueryWithRowResponse()
+      },
+      when(operations.contains(Delete)) { GoCommonDAOGenerator.generateExecuteQuery() },
+    )
 
   private[service] def generateErrors(serviceName: String): String =
     mkCode.lines(
