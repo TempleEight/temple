@@ -17,9 +17,13 @@ import scala.collection.mutable
   * @tparam T the subtype of metadata that we are specifically parsing.
   */
 class MetadataParser[T <: Metadata]() {
+
+  /** A matcher takes a list of arguments and a semantic context for reporting errors, and returns some metadata */
   private type Matcher = (Args, SemanticContext) => T
   private var matchers = mutable.LinkedHashMap[String, Matcher]()
 
+  /** Take a constructor for metadata, and raise it to an EnumParser (something with a parse method taking a context),
+    * by simply ignoring this context */
   def enumParser[A](constructor: A => T): EnumParser[T, A] = new EnumParser[T, A] {
     override def parse(name: A)(implicit context: ErrorHandlingContext): T = constructor(name)
   }
@@ -27,29 +31,26 @@ class MetadataParser[T <: Metadata]() {
   /**
     * Add a handler for a new type of metadata
     *
-    * @param metaKey     The name of the metadata item to add
-    * @param argKey      The name of the single argument to the metadata. Note that there is also
-    *                    [[MetadataParser#registerKeyword(java.lang.String, temple.DSL.semantics.ArgType, scala.Option, scala.Function1)]]
-    *                    if this is the same as `metaKey`.
-    * @param argType     The type of the field to expect
-    * @param constructor The function to turn an input of type [[ArgType]] into a value of type [[T]], with context
+    * @param metaKey   The name of the metadata item to add
+    * @param argKey The name of the single argument to the metadata. Note that this function is overloaded to with a
+    *               single string argument for both `metaKey` and `argKey`
+    * @param argType The type of the field to expect
+    * @param constructor An EnumParser, i.e. something with a function `parse` that can take a value of the `argType`,
+    *                    and return a piece of metadata
     * @tparam A The underlying type of the field, inferred from `argType`
     */
   // TODO: do we need to add support for multiple arguments in future?
-  final protected def registerKeywordWithContext[A, P <: EnumParser[T, A]](
+  final protected def registerKeywordWithContext[A](
     metaKey: String,
     argKey: String,
     argType: ArgType[A],
-  )(constructor: P): Unit =
+  )(constructor: EnumParser[T, A]): Unit =
     matchers += (metaKey -> { (args, context) =>
         implicit val innerContext: SemanticContext = context :+ metaKey
         val argMap                                 = parseParameters(argKey -> None)(args)
         constructor.parse(argMap.getArg(argKey, argType))
       })
 
-  /** A shorthand for
-    * [[MetadataParser#registerKeyword(java.lang.String, temple.DSL.semantics.ArgType, scala.Option, scala.Function1)]]
-    * with the same `key` used for both the metadata name and its single argument */
   final protected def registerKeyword[A](
     key: String,
     argType: ArgType[A],
@@ -63,10 +64,10 @@ class MetadataParser[T <: Metadata]() {
   )(constructor: A => T): Unit =
     registerKeywordWithContext(metaKey, argKey, argType)(enumParser(constructor))
 
-  final protected def registerKeywordWithContext[A, P <: EnumParser[T, A]](
+  final protected def registerKeywordWithContext[A](
     key: String,
     argType: ArgType[A],
-  )(constructor: P): Unit =
+  )(constructor: EnumParser[T, A]): Unit =
     registerKeywordWithContext(key, key, argType)(constructor)
 
   /**
@@ -84,7 +85,7 @@ class MetadataParser[T <: Metadata]() {
 
   /** Perform parsing by looking up the relevant function and passing it the argument list */
   final def apply(metaKey: String, args: Args)(implicit context: SemanticContext): T =
-    matchers.get(metaKey).map(_(args, context)) getOrElse {
+    matchers.get(metaKey).map(matcher => matcher(args, context)) getOrElse {
       context.fail(s"No valid metadata $metaKey")
     }
 }
