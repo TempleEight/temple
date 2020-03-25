@@ -34,6 +34,10 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
     PostgresGenerator.generate(TestData.insertStatement)(questionMarkContext) shouldBe TestData.postgresInsertStringWithQuestionMarks
   }
 
+  it should "generate correct INSERT statements with RETURNING" in {
+    PostgresGenerator.generate(TestData.insertStatementWithReturn) shouldBe TestData.postgresInsertStringWithReturn
+  }
+
   it should "handle conjunctions in WHERE correctly" in {
     PostgresGenerator.generate(TestData.readStatementWithWhereConjunction) shouldBe TestData.postgresSelectStringWithWhereConjunction
   }
@@ -52,6 +56,14 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
 
   it should "handle updates with WHERE correctly" in {
     PostgresGenerator.generate(TestData.updateStatementWithWhere) shouldBe TestData.postgresUpdateStringWithWhere
+  }
+
+  it should "generate correct update statements with RETURNING" in {
+    PostgresGenerator.generate(TestData.updateStatementWithReturn) shouldBe TestData.postgresUpdateStringWithReturn
+  }
+
+  it should "generate correct update statements with WHERE and RETURNING" in {
+    PostgresGenerator.generate(TestData.updateStatementWithWhereAndReturn) shouldBe TestData.postgresUpdateStringWithWhereAndReturn
   }
 
   it should "generate correct DELETE statements" in {
