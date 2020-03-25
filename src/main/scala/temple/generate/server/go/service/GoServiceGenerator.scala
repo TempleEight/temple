@@ -2,7 +2,7 @@ package temple.generate.server.go.service
 
 import temple.generate.FileSystem._
 import temple.generate.server.go.common._
-import temple.generate.server.go.service.dao.{GoServiceDAOFunctionsGenerator, GoServiceDAOGenerator, GoServiceDAOInputStructsGenerator, GoServiceDAOInterfaceGenerator}
+import temple.generate.server.go.service.dao._
 import temple.generate.server.{ServiceGenerator, ServiceRoot}
 import temple.generate.utils.CodeTerm.mkCode
 
