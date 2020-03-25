@@ -107,7 +107,7 @@ object CodeTerm {
     def prefix(prefix: String): CodeWrap = new CodeWrap(prefix + start, end)
 
     /** Wrap a (comma-separated list of) terms in parentheses */
-    def apply(string: CodeTerm*): String = mkCode(start, string, end)
+    def apply(string: CodeTerm*): String = mkCode(start, mkCode.list(string), end)
 
     /** Wrap a (comma-separated list of) code snippet in parentheses, indenting with spaces */
     def spacedList(string: CodeTerm*): String = mkCode(start, "\n", indent(mkCode.spacedList(string)), "\n", end)
