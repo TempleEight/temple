@@ -101,28 +101,28 @@ func (dao *DAO) ListMatch(input ListMatchInput) (*[]Match, error) {
 		return nil, err
 	}
 
-	return nil, nil
+	return &matchList, nil
 }
 
 // CreateMatch creates a new match in the datastore, returning the newly created match
 func (dao *DAO) CreateMatch(input CreateMatchInput) (*Match, error) {
 	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO match (id, created_by, userOne, userTwo, matchedOn) VALUES ($1, $2, $3, $4, NOW()) RETURNING id, created_by, userOne, userTwo, matchedOn", input.ID, input.AuthID, input.UserOne, input.UserTwo)
 
-	return nil, nil
+	return &match, nil
 }
 
 // ReadMatch returns the match in the datastore for a given ID
 func (dao *DAO) ReadMatch(input ReadMatchInput) (*Match, error) {
 	row := executeQueryWithRowResponse(dao.DB, "SELECT id, created_by, userOne, userTwo, matchedOn FROM match WHERE id = $1", input.ID)
 
-	return nil, nil
+	return &match, nil
 }
 
 // UpdateMatch updates the match in the datastore for a given ID, returning the newly updated match
 func (dao *DAO) UpdateMatch(input UpdateMatchInput) (*Match, error) {
 	row := executeQueryWithRowResponse(dao.DB, "UPDATE match SET userOne = $1, userTwo = $2, matchedOn = NOW() WHERE id = $3 RETURNING id, created_by, userOne, userTwo, matchedOn", input.UserOne, input.UserTwo, input.ID)
 
-	return nil, nil
+	return &match, nil
 }
 
 // DeleteMatch deletes the match in the datastore for a given ID

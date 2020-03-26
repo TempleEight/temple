@@ -75,8 +75,8 @@ object GoServiceDAOFunctionsGenerator {
     idAttribute: IDAttribute,
   ): Option[String] =
     operation match {
-      case CRUD.List => Some(generateCheckAndReturnError("nil"))
-      case CRUD.Delete =>
+      case List => Some(generateCheckAndReturnError("nil"))
+      case Delete =>
         Some(
           mkCode(
             generateCheckAndReturnError(),
@@ -100,16 +100,16 @@ object GoServiceDAOFunctionsGenerator {
     query: String,
   ): String = {
     val identifiers = operation match {
-      case CRUD.List                             => Seq("rows", "err")
-      case CRUD.Create | CRUD.Read | CRUD.Update => Seq("row")
-      case CRUD.Delete                           => Seq("rowsAffected", "err")
+      case List                   => Seq("rows", "err")
+      case Create | Read | Update => Seq("row")
+      case Delete                 => Seq("rowsAffected", "err")
     }
 
     val value = genCallFunction(
       operation match {
-        case CRUD.List                             => "executeQueryWithRowResponses"
-        case CRUD.Create | CRUD.Read | CRUD.Update => "executeQueryWithRowResponse"
-        case CRUD.Delete                           => "executeQuery"
+        case List                   => "executeQueryWithRowResponses"
+        case Create | Read | Update => "executeQueryWithRowResponse"
+        case Delete                 => "executeQuery"
       },
       Seq("dao.DB", doubleQuote(query)) ++
       generateQueryArgs(operation, idAttribute, createdByAttribute, attributes): _*,
@@ -120,6 +120,13 @@ object GoServiceDAOFunctionsGenerator {
       generateQueryBlockErrorHandling(serviceName, operation, idAttribute),
     )
   }
+
+  private def generateQueryBlockReturn(serviceName: String, operation: CRUD): Seq[String] =
+    operation match {
+      case List                   => Seq(s"&${serviceName}List", "nil")
+      case Create | Read | Update => Seq(s"&$serviceName", "nil")
+      case Delete                 => Seq("nil")
+    }
 
   private def generateDAOFunction(
     serviceName: String,
@@ -137,10 +144,7 @@ object GoServiceDAOFunctionsGenerator {
         CodeWrap.curly.tabbed(
           mkCode.doubleLines(
             generateQueryBlock(serviceName, operation, idAttribute, createdByAttribute, attributes, query),
-            operation match {
-              case CRUD.Delete => "return nil"
-              case _           => "return nil, nil"
-            },
+            genReturn(generateQueryBlockReturn(serviceName, operation): _*),
           ),
         ),
       ),
