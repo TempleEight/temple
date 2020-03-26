@@ -4,9 +4,10 @@ import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.semantics.Validator.validate
 import temple.DSL.semantics.ValidatorTest._
 import temple.ast.Annotation
+import temple.ast.Annotation.{Nullable, Unique}
 import temple.ast.AttributeType._
 import temple.ast.Metadata._
-import temple.ast.{Attribute, Metadata, ProjectBlock, ServiceBlock, StructBlock, TargetBlock, Templefile}
+import temple.ast._
 
 class ValidatorTest extends FlatSpec with Matchers {
 
@@ -17,14 +18,15 @@ class ValidatorTest extends FlatSpec with Matchers {
       validate(
         Templefile(
           "MyProject",
-          projectBlock = ProjectBlock(Seq(Database.Postgres)),
+          projectBlock = ProjectBlock(Seq(Database.Postgres, Provider.AWS)),
           services = Map(
             "User" -> ServiceBlock(
               attributes = Map(
                 "a" -> Attribute(IntType(), accessAnnotation = Some(Annotation.Server)),
                 "b" -> Attribute(BoolType, accessAnnotation = Some(Annotation.Client)),
-                "c" -> Attribute(FloatType(), accessAnnotation = Some(Annotation.ServerSet)),
-                "d" -> Attribute(StringType()),
+                "c" -> Attribute(BlobType(), valueAnnotations = Set(Nullable, Unique)),
+                "d" -> Attribute(FloatType(), accessAnnotation = Some(Annotation.ServerSet)),
+                "e" -> Attribute(StringType()),
               ),
               metadata = Seq(ServiceAuth.Email, Writable.This, Readable.All, Database.Postgres, ServiceEnumerable()),
             ),
@@ -115,6 +117,18 @@ class ValidatorTest extends FlatSpec with Matchers {
 
     the[SemanticParsingException] thrownBy {
       validate(
+        templefileWithUserAttributes("a" -> Attribute(UUIDType)),
+      )
+    } should have message "Illegal use of UUID type in a, in User"
+
+    the[SemanticParsingException] thrownBy {
+      validate(
+        templefileWithUserAttributes("a" -> Attribute(BlobType(Some(-1)))),
+      )
+    } should have message "BlobType size is negative in a, in User"
+
+    the[SemanticParsingException] thrownBy {
+      validate(
         templefileWithUserAttributes("b" -> Attribute(FloatType(max = Some(0), min = Some(1)))),
       )
     } should have message "FloatType max not above min in b, in User"
@@ -173,6 +187,20 @@ class ValidatorTest extends FlatSpec with Matchers {
         ),
       )
     } should have message "Multiple occurrences of Readable metadata in User"
+
+    the[SemanticParsingException] thrownBy {
+      validate(
+        Templefile(
+          "MyProject",
+          services = Map(
+            "User" -> ServiceBlock(
+              attributes = Map("a" -> Attribute(IntType())),
+              metadata = Seq(Writable.All, Readable.This),
+            ),
+          ),
+        ),
+      )
+    } should have message "#writable(all) is not compatible with #readable(this)"
   }
 }
 

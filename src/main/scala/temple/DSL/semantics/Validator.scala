@@ -69,6 +69,10 @@ private class Validator private (templefile: Templefile) {
       case Some(Annotation.ServerSet) => // nothing to validate
       case None                       => // nothing to validate
     }
+    attribute.valueAnnotations foreach {
+      case Annotation.Unique   => // nothing to validate
+      case Annotation.Nullable => // nothing to validate
+    }
   }
 
   private def validateAttributeType(attributeType: AttributeType)(context: SemanticContext): Unit =
