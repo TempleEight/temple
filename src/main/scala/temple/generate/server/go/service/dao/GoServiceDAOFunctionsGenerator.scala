@@ -80,11 +80,9 @@ object GoServiceDAOFunctionsGenerator {
         Some(
           mkCode(
             generateCheckAndReturnError(),
-            mkCode(
-              "else if rowsAffected == 0",
-              CodeWrap.curly.tabbed(
-                s"return Err${serviceName.capitalize}NotFound(input.${idAttribute.name.toUpperCase()}.String())",
-              ),
+            "else if rowsAffected == 0",
+            CodeWrap.curly.tabbed(
+              s"return Err${serviceName.capitalize}NotFound(input.${idAttribute.name.toUpperCase()}.String())",
             ),
           ),
         )
