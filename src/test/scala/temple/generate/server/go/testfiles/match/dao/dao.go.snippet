@@ -120,20 +120,61 @@ func (dao *DAO) ListMatch(input ListMatchInput) (*[]Match, error) {
 
 // CreateMatch creates a new match in the datastore, returning the newly created match
 func (dao *DAO) CreateMatch(input CreateMatchInput) (*Match, error) {
-	return nil, nil
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO match (id, created_by, userOne, userTwo, matchedOn) VALUES ($1, $2, $3, $4, NOW()) RETURNING id, created_by, userOne, userTwo, matchedOn", input.ID, input.AuthID, input.UserOne, input.UserTwo)
+
+	var match Match
+	err := row.Scan(&match.ID, &match.CreatedBy, &match.UserOne, &match.UserTwo, &match.MatchedOn)
+	if err != nil {
+		return nil, err
+	}
+
+	return &match, nil
 }
 
 // ReadMatch returns the match in the datastore for a given ID
 func (dao *DAO) ReadMatch(input ReadMatchInput) (*Match, error) {
-	return nil, nil
+	row := executeQueryWithRowResponse(dao.DB, "SELECT id, created_by, userOne, userTwo, matchedOn FROM match WHERE id = $1", input.ID)
+
+	var match Match
+	err := row.Scan(&match.ID, &match.CreatedBy, &match.UserOne, &match.UserTwo, &match.MatchedOn)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrMatchNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
+	return &match, nil
 }
 
 // UpdateMatch updates the match in the datastore for a given ID, returning the newly updated match
 func (dao *DAO) UpdateMatch(input UpdateMatchInput) (*Match, error) {
-	return nil, nil
+	row := executeQueryWithRowResponse(dao.DB, "UPDATE match SET userOne = $1, userTwo = $2, matchedOn = NOW() WHERE id = $3 RETURNING id, created_by, userOne, userTwo, matchedOn", input.UserOne, input.UserTwo, input.ID)
+
+	var match Match
+	err := row.Scan(&match.ID, &match.CreatedBy, &match.UserOne, &match.UserTwo, &match.MatchedOn)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrMatchNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
+	return &match, nil
 }
 
 // DeleteMatch deletes the match in the datastore for a given ID
 func (dao *DAO) DeleteMatch(input DeleteMatchInput) error {
+	rowsAffected, err := executeQuery(dao.DB, "DELETE FROM match WHERE id = $1", input.ID)
+	if err != nil {
+		return err
+	} else if rowsAffected == 0 {
+		return ErrMatchNotFound(input.ID.String())
+	}
+
 	return nil
 }

@@ -1,7 +1,7 @@
 package temple.ast
 
-import temple.DSL.syntax.Arg
 import temple.DSL.semantics.SemanticContext
+import temple.DSL.syntax.Arg
 
 /**
   * A wrapper around a map of arguments, as produced by [[temple.DSL.semantics#parseParameters]], with methods added

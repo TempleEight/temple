@@ -262,4 +262,17 @@ object SimpleE2ETestData {
       |  options:
       |    path: /etc/grafana/provisioning/dashboards
       |""".stripMargin
+
+  val grafanaDatasourceConfig: String =
+    """apiVersion: 1
+      |datasources:
+      |- name: Prometheus
+      |  type: prometheus
+      |  access: proxy
+      |  orgId: 1
+      |  url: http://prom:9090
+      |  basicAuth: false
+      |  isDefault: true
+      |  editable: true
+      |""".stripMargin
 }

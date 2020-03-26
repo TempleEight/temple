@@ -2,11 +2,11 @@ package temple.DSL.semantics
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.semantics.Analyzer.parseSemantics
-import temple.ast.AttributeType._
+import temple.DSL.semantics.SemanticAnalyzerTest._
 import temple.DSL.syntax
 import temple.DSL.syntax.Arg._
 import temple.DSL.syntax.{Args, DSLRootItem, Entry}
-import SemanticAnalyzerTest._
+import temple.ast.AttributeType._
 import temple.ast.{Attribute, ProjectBlock, ServiceBlock, Templefile}
 
 class SemanticAnalyzerTest extends FlatSpec with Matchers {

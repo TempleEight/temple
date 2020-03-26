@@ -287,6 +287,19 @@ object ProjectBuilderTestData {
       |    path: /etc/grafana/provisioning/dashboards
       |""".stripMargin
 
+  val simpleTemplefileGrafanaDatasourceConfig: String =
+    """apiVersion: 1
+      |datasources:
+      |- name: Prometheus
+      |  type: prometheus
+      |  access: proxy
+      |  orgId: 1
+      |  url: http://prom:9090
+      |  basicAuth: false
+      |  isDefault: true
+      |  editable: true
+      |""".stripMargin
+
   val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
     services = Map(
@@ -520,5 +533,18 @@ object ProjectBuilderTestData {
       |  allowUiUpdates: true
       |  options:
       |    path: /etc/grafana/provisioning/dashboards
+      |""".stripMargin
+
+  val complexTemplefileGrafanaDatasourceConfig: String =
+    """apiVersion: 1
+      |datasources:
+      |- name: Prometheus
+      |  type: prometheus
+      |  access: proxy
+      |  orgId: 1
+      |  url: http://prom:9090
+      |  basicAuth: false
+      |  isDefault: true
+      |  editable: true
       |""".stripMargin
 }

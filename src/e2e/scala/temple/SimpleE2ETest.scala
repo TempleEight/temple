@@ -113,7 +113,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
     // Only these folders should be present in the grafana/provisioning folder
     val expectedGrafanaProvisioningFolders =
-      Set("dashboards").map(dir => basePath.resolve("grafana/provisioning").resolve(dir))
+      Set("dashboards", "datasources").map(dir => basePath.resolve("grafana/provisioning").resolve(dir))
     Files.list(basePath.resolve("grafana/provisioning")).toScala(Set) shouldBe expectedGrafanaProvisioningFolders
 
     // Only these files should be present in the grafana/provisioning/dashboards folder
@@ -134,6 +134,19 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     val templeUserGrafanaDashboardConfig =
       Files.readString(basePath.resolve("grafana/provisioning/dashboards").resolve("dashboards.yml"))
     templeUserGrafanaDashboardConfig shouldBe SimpleE2ETestData.grafanaDashboardConfig
+
+    // Only these files should be present in the grafana/provisioning/datasources folder
+    val expectedGrafanaDatasourcesFolders =
+      Set("datasource.yml").map(dir => basePath.resolve("grafana/provisioning/datasources").resolve(dir))
+
+    Files
+      .list(basePath.resolve("grafana/provisioning/datasources"))
+      .toScala(Set) shouldBe expectedGrafanaDatasourcesFolders
+
+    // The content of the grafana/provisioning/datasources files should be correct
+    val templeUserGrafanaDatasourceConfig =
+      Files.readString(basePath.resolve("grafana/provisioning/datasources").resolve("datasource.yml"))
+    templeUserGrafanaDatasourceConfig shouldBe SimpleE2ETestData.grafanaDatasourceConfig
 
   }
 }

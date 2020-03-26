@@ -42,4 +42,43 @@ object GoCommonGenerator {
         ),
       ),
     )
+
+  /** Generate declaration and assignment statement */
+  private[go] def genDeclareAndAssign(expr: String, identifiers: String*): String =
+    mkCode.list(identifiers) + " := " + expr // mkCode doesn't put a space before the colon
+
+  /** Generate assignment */
+  private[go] def genAssign(expr: String, identifiers: String*): String =
+    mkCode(
+      mkCode.list(identifiers),
+      "=",
+      expr,
+    )
+
+  /** Generate variable declaration */
+  private[go] def genVar(identifier: String, typ: String): String =
+    mkCode(
+      "var",
+      identifier,
+      typ,
+    )
+
+  /** Generate function call */
+  private[go] def genFunctionCall(name: String, args: String*): String =
+    CodeWrap.parens.prefix(name).list(args)
+
+  /** Generate for loop with expression */
+  private[go] def genForLoop(expr: String, body: String): String =
+    mkCode(
+      "for",
+      expr,
+      CodeWrap.curly.tabbed(body),
+    )
+
+  /** Generate return statement */
+  private[go] def genReturn(exprs: String*): String =
+    mkCode(
+      "return",
+      mkCode.list(exprs),
+    )
 }
