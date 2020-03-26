@@ -10,7 +10,6 @@ import temple.generate.database.ast._
 import temple.generate.utils.CodeTerm._
 
 import scala.Option.when
-import scala.collection.immutable.{AbstractSeq, LinearSeq}
 
 /** Implementation of [[DatabaseGenerator]] for generating PostgreSQL */
 object PostgresGenerator extends DatabaseGenerator {
