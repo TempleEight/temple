@@ -63,7 +63,7 @@ object GoCommonGenerator {
       typ,
     )
 
-  //** Generate function call */
+  /** Generate function call */
   private[go] def genFunctionCall(name: String, args: String*): String =
     CodeWrap.parens.prefix(name).list(args)
 
@@ -75,7 +75,7 @@ object GoCommonGenerator {
       CodeWrap.curly.tabbed(body),
     )
 
-  //** Generate return statement */
+  /** Generate return statement */
   private[go] def genReturn(exprs: String*): String =
     mkCode(
       "return",

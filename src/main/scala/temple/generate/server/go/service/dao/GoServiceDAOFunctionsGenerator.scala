@@ -74,7 +74,8 @@ object GoServiceDAOFunctionsGenerator {
     idAttribute: IDAttribute,
   ): Option[String] =
     operation match {
-      case List => Some(generateCheckAndReturnError("nil"))
+      case List =>
+        Some(generateCheckAndReturnError("nil"))
       case Delete =>
         Some(
           mkCode(
@@ -87,7 +88,8 @@ object GoServiceDAOFunctionsGenerator {
             ),
           ),
         )
-      case _ => None
+      case _ =>
+        None
     }
 
   private def generateQueryBlock(
