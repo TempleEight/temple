@@ -53,12 +53,42 @@ object SimpleE2ETestData {
       |  --data 'url=http://temple-user:1024/temple-user'
       |
       |curl -X POST \
+      |  --url $KONG_ADMIN/services/ \
+      |  --data 'name=booking-service' \
+      |  --data 'url=http://booking:1025/booking'
+      |
+      |curl -X POST \
+      |  --url $KONG_ADMIN/services/ \
+      |  --data 'name=event-service' \
+      |  --data 'url=http://event:1026/event'
+      |
+      |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/routes \
       |  --data "hosts[]=$KONG_ENTRY" \
       |  --data 'paths[]=/api/temple-user'
       |
       |curl -X POST \
+      |  --url $KONG_ADMIN/services/booking-service/routes \
+      |  --data "hosts[]=$KONG_ENTRY" \
+      |  --data 'paths[]=/api/booking'
+      |
+      |curl -X POST \
+      |  --url $KONG_ADMIN/services/event-service/routes \
+      |  --data "hosts[]=$KONG_ENTRY" \
+      |  --data 'paths[]=/api/event'
+      |
+      |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/plugins \
+      |  --data 'name=jwt' \
+      |  --data 'config.claims_to_verify=exp'
+      |
+      |curl -X POST \
+      |  --url $KONG_ADMIN/services/booking-service/plugins \
+      |  --data 'name=jwt' \
+      |  --data 'config.claims_to_verify=exp'
+      |
+      |curl -X POST \
+      |  --url $KONG_ADMIN/services/event-service/plugins \
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
 

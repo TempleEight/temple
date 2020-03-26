@@ -57,7 +57,7 @@ class DSLParserTest extends FlatSpec with Matchers with DSLParserMatchers {
             "struct",
             Seq(
               Attribute("field", AttributeType.Primitive("string"), Seq(Annotation("nullable"))),
-              Attribute("friend", AttributeType.Foreign("User")),
+              Attribute("friend", AttributeType.Foreign("TempleUser")),
               Attribute("image", AttributeType.Primitive("data", Args(Seq(Arg.IntArg(10_000_000))))),
               Metadata("enumerableByThis"),
               Metadata("readable", Args(kwargs = Seq("by" -> Arg.TokenArg("this")))),
@@ -67,10 +67,12 @@ class DSLParserTest extends FlatSpec with Matchers with DSLParserMatchers {
           Metadata("omit", Args(Seq(Arg.ListArg(Seq(Arg.TokenArg("delete")))))),
           Metadata("readable", Args(kwargs = Seq("by" -> Arg.TokenArg("all")))),
           Metadata("writable", Args(kwargs = Seq("by" -> Arg.TokenArg("this")))),
-          Metadata("auth", Args(kwargs = Seq("login"  -> Arg.TokenArg("username")))),
-          Metadata("uses", Args(Seq(Arg.ListArg(Seq(Arg.TokenArg("Booking"), Arg.TokenArg("Events")))))),
+          Metadata("auth", Args(Seq(Arg.TokenArg("email")))),
+          Metadata("uses", Args(Seq(Arg.ListArg(Seq(Arg.TokenArg("Booking"), Arg.TokenArg("Event")))))),
         ),
       ),
+      DSLRootItem("Booking", "service", Seq()),
+      DSLRootItem("Event", "service", Seq()),
     )
   }
 

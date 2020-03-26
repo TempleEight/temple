@@ -93,7 +93,13 @@ object Metadata {
       Omit(names.map(Endpoint.parse(_)).toSet)
   }
 
-  case class ServiceAuth(login: String)                 extends ServiceMetadata
+  sealed abstract class ServiceAuth private (name: String) extends EnumEntry(name) with ServiceMetadata
+
+  object ServiceAuth extends Enum[ServiceAuth] {
+    override def values: IndexedSeq[ServiceAuth] = findValues
+    case object Email extends ServiceAuth("email")
+  }
+
   case class ServiceEnumerable(byThis: Boolean = false) extends ServiceMetadata with StructMetadata
   case class TargetAuth(services: Seq[String])          extends TargetMetadata
   case class Uses(services: Seq[String])                extends ServiceMetadata

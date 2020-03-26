@@ -2,7 +2,7 @@ package temple.DSL
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.parser.DSLParserMatchers
-import temple.DSL.semantics.Analyzer.parseSemantics
+import temple.DSL.semantics.Analyzer.parseAndValidate
 import temple.ast.Annotation.{Nullable, Server, Unique}
 import temple.ast.AttributeType._
 import temple.ast.Metadata._
@@ -17,7 +17,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
   it should "parse and analyze simple.temple correctly" in {
     val source      = readFile("src/test/scala/temple/testfiles/simple.temple")
     val parseResult = DSLProcessor.parse(source).shouldParse
-    val semantics   = parseSemantics(parseResult)
+    val semantics   = parseAndValidate(parseResult)
     semantics shouldBe Templefile(
       projectName = "SimpleTempleTest",
       projectBlock = ProjectBlock(),
@@ -41,20 +41,22 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
             Omit(Set(Endpoint.Delete)),
             Readable.All,
             Writable.This,
-            ServiceAuth("username"),
-            Uses(Seq("Booking", "Events")),
+            ServiceAuth.Email,
+            Uses(Seq("Booking", "Event")),
           ),
           structs = Map(
             "Fred" -> StructBlock(
               Map(
                 "field"  -> Attribute(StringType(), valueAnnotations = Set(Nullable)),
-                "friend" -> Attribute(ForeignKey("User")),
+                "friend" -> Attribute(ForeignKey("TempleUser")),
                 "image"  -> Attribute(BlobType(size = Some(10_000_000))),
               ),
               Seq(ServiceEnumerable(byThis = true), Readable.This),
             ),
           ),
         ),
+        "Booking" -> ServiceBlock(Map()),
+        "Event"   -> ServiceBlock(Map()),
       ),
     )
   }
