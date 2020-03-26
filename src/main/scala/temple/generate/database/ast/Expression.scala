@@ -5,4 +5,5 @@ sealed trait Expression
 
 object Expression {
   case class Value(value: String) extends Expression
+  case object PreparedValue       extends Expression
 }

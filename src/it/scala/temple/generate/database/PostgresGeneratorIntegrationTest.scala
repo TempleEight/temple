@@ -235,6 +235,26 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.isLast shouldBe true
   }
 
+  it should "be executed correctly when using a prepared WHERE statement" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
+    //The query should select both
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
+    val result = executePreparedWithResults(
+      PostgresGenerator.generate(TestData.readStatementWithWherePrepared),
+      Seq(PreparedVariable.ShortVariable(3)),
+    ).getOrElse(fail("Database connection could not be established"))
+    result.next()
+    result.getShort("id") shouldBe 3
+    result.getFloat("bankBalance") shouldBe 100.1f
+    result.getString("name") shouldBe "John Smith"
+    result.getBoolean("isStudent") shouldBe true
+    result.getDate("dateOfBirth") shouldBe Date.valueOf("1998-03-05")
+    result.getTime("timeOfDay") shouldBe Time.valueOf("12:00:00")
+    result.getTimestamp("expiry") shouldBe Timestamp.valueOf("2020-01-01 00:00:00.0")
+    result.isLast shouldBe true
+  }
+
   behavior of "UpdateStatements"
   it should "update all rows in a table" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
@@ -331,6 +351,38 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
       .getOrElse(fail("Database connection could not be established"))
     result.next()
     result.getFloat("bankBalance") shouldBe 123.456f
+    result.isLast shouldBe true
+  }
+
+  it should "succeed when updating with prepared values and returning" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
+    val result = executePreparedWithResults(
+      PostgresGenerator.generate(TestData.updateStatementWithPreparedInputAndReturn),
+      TestData.updateDataPreparedA,
+    ).getOrElse(fail("Database connection could not be established"))
+    result.next()
+    result.getFloat("bankBalance") shouldBe 678.90f
+    result.getString("name") shouldBe "Smithe Williamson"
+    result.isLast shouldBe false
+    result.next()
+    result.getFloat("bankBalance") shouldBe 678.90f
+    result.getString("name") shouldBe "Smithe Williamson"
+    result.isLast shouldBe true
+  }
+
+  it should "succeed when updating with prepared values, prepared where, and returning" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
+    val result = executePreparedWithResults(
+      PostgresGenerator.generate(TestData.updateStatementWithPreparedInputWhereAndReturn),
+      TestData.updateDataPreparedB,
+    ).getOrElse(fail("Database connection could not be established"))
+    result.next()
+    result.getFloat("bankBalance") shouldBe 678.90f
+    result.getString("name") shouldBe "Smithe Williamson"
     result.isLast shouldBe true
   }
 

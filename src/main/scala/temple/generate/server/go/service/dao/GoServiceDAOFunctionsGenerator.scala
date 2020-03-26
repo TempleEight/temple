@@ -1,8 +1,7 @@
 package temple.generate.server.go.service.dao
 
 import temple.ast.Attribute
-import temple.generate.CRUD
-import temple.generate.CRUD.{Create, Delete, List, Read, Update}
+import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
 import temple.generate.server.CreatedByAttribute.EnumerateByCreator
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.server.go.service.dao.GoServiceDAOInterfaceGenerator.generateInterfaceFunction
