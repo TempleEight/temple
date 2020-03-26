@@ -9,7 +9,7 @@ final case class SemanticContext private (private val chain: List[String]) exten
 
   override def toString: String = chain.mkString(", in ")
 
-  private def location: String = if (chain.nonEmpty) s"in $this" else ""
+  private def location: String = if (chain.nonEmpty) s" in $this" else ""
 
   def fail(msg: String): Nothing = throw new SemanticParsingException(msg + location)
 }

@@ -78,12 +78,12 @@ private class Validator private (templefile: Templefile) {
 
       case IntType(Some(max), Some(min), _) if max < min => context.fail(s"IntType max not above min")
       case IntType(_, _, precision) if precision <= 0 || precision > 8 =>
-        context.fail(s"IntType precision not between 0 and 8")
+        context.fail(s"IntType precision not between 1 and 8")
       case IntType(_, _, _) => // all good
 
       case FloatType(Some(max), Some(min), _) if max < min => context.fail(s"FloatType max not above min")
       case FloatType(_, _, precision) if precision <= 0 || precision > 8 =>
-        context.fail(s"FloatType precision not between 0 and 8")
+        context.fail(s"FloatType precision not between 1 and 8")
       case FloatType(_, _, _) => // all good
     }
 
@@ -115,7 +115,7 @@ private class Validator private (templefile: Templefile) {
       context.fail(s"Project, targets and structs must be globally unique, $suffix")
     }
     rootNames.collect {
-      case (name, location) if (!name.head.isUpper) =>
+      case (name, location) if !name.head.isUpper =>
         context.fail(s"Invalid name: $name ($location), it should start with a capital letter")
     }
   }
