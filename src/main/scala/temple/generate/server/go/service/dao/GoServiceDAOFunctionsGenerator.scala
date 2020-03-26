@@ -105,7 +105,7 @@ object GoServiceDAOFunctionsGenerator {
       case Delete                 => Seq("rowsAffected", "err")
     }
 
-    val value = genCallFunction(
+    val value = genFunctionCall(
       operation match {
         case List                   => "executeQueryWithRowResponses"
         case Create | Read | Update => "executeQueryWithRowResponse"
@@ -154,7 +154,7 @@ object GoServiceDAOFunctionsGenerator {
           genVar(serviceName, serviceName.capitalize),
           genAssign(s"rows.$scanFunctionCall", "err"),
           generateCheckAndReturnError("nil"),
-          genAssign(genCallFunction("append", s"${serviceName}List", serviceName), s"${serviceName}List"),
+          genAssign(genFunctionCall("append", s"${serviceName}List", serviceName), s"${serviceName}List"),
         ),
       ),
       genAssign("rows.Err()", "err"),
