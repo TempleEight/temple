@@ -73,7 +73,7 @@ private class Validator private (templefile: Templefile) {
       case FloatType(Some(max), Some(min), _) if max < min => context.fail(s"FloatType max not above min")
       case FloatType(_, _, precision) if precision <= 0 || precision > 8 =>
         context.fail(s"FloatType precision not between 0 and 8")
-      case FloatType(max, _, _) => // all good
+      case FloatType(_, _, _) => // all good
     }
 
   private def validateBlockOfMetadata[T <: Metadata](target: TempleBlock[T])(context: SemanticContext): Unit =
@@ -81,9 +81,20 @@ private class Validator private (templefile: Templefile) {
 
   def validate(): Unit = {
     val context = SemanticContext.empty
+
     templefile.services.foreachEntry(context(validateService))
     templefile.targets.foreachEntry(context(validateBlockOfMetadata))
     validateBlockOfMetadata(templefile.projectBlock)(context :+ s"${templefile.projectName} project")
+
+    val rootNames  = allStructs.toSeq ++ templefile.targets.keys :+ templefile.projectName
+    val duplicates = rootNames.groupBy(identity).collect { case (name, repeats) if repeats.sizeIs > 1 => name }.toSet
+
+    if (duplicates.nonEmpty) {
+      val suffix =
+        if (duplicates.sizeIs == 1) s"duplicate found: ${duplicates.mkString(", ")}"
+        else s"duplicates found: ${duplicates.mkString(", ")}"
+      context.fail(s"Project, targets and structs must be globally unique, $suffix")
+    }
   }
 }
 
