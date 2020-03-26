@@ -85,9 +85,9 @@ object GoServiceDAOGenerator {
       """import "fmt"""",
       "",
       s"// Err${serviceName.capitalize}NotFound is returned when a $serviceName for the provided ID was not found",
-      s"type Err${serviceName.capitalize}NotFound int64",
+      s"type Err${serviceName.capitalize}NotFound string",
       "",
       s"func (e Err${serviceName.capitalize}NotFound) Error() string ${CodeWrap.curly
-        .tabbed(s"""return fmt.Sprintf("$serviceName not found with ID %d", e)""")}",
+        .tabbed(s"""return fmt.Sprintf("$serviceName not found with ID %d", string(e))""")}",
     )
 }
