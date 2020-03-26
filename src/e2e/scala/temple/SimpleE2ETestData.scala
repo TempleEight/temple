@@ -20,7 +20,7 @@ object SimpleE2ETestData {
       |
       |CREATE TABLE fred (
       |  field TEXT,
-      |  friend INT NOT NULL,
+      |  friend UUID NOT NULL,
       |  image BYTEA CHECK (octet_length(image) <= 10000000) NOT NULL
       |);""".stripMargin
 
