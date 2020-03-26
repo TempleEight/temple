@@ -103,6 +103,11 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
     PostgresGenerator.generate(TestData.updateStatementPrepared) shouldBe TestData.postgresUpdateStringPrepared
   }
 
+  it should "handle UPDATE statements with prepared values correctly with question marks" in {
+    val questionMarkContext: PostgresContext = PostgresContext(PreparedType.QuestionMarks)
+    PostgresGenerator.generate(TestData.updateStatementPrepared)(questionMarkContext) shouldBe TestData.postgresUpdateStringPreparedWithQuestionMarks
+  }
+
   it should "handle UPDATE statements with prepared values and WHERE statement correctly" in {
     PostgresGenerator.generate(TestData.updateStatementPreparedWithWhere) shouldBe TestData.postgresUpdateStringPreparedWithWhere
   }

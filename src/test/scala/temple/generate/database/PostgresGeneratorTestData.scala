@@ -350,6 +350,9 @@ object PostgresGeneratorTestData {
   val postgresUpdateStringPrepared: String =
     """UPDATE Users SET bankBalance = $1, name = $2;"""
 
+  val postgresUpdateStringPreparedWithQuestionMarks: String =
+    """UPDATE Users SET bankBalance = ?, name = ?;"""
+
   val updateStatementPreparedWithWhere: Update = Update(
     "Users",
     Seq(
