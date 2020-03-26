@@ -214,6 +214,27 @@ object TestData {
     ),
   )
 
+  val insertStatementWithReturn: Insert = Insert(
+    "temple_user",
+    Seq(
+      Column("id"),
+      Column("anotherId"),
+      Column("yetAnotherId"),
+      Column("bankBalance"),
+      Column("bigBankBalance"),
+      Column("name"),
+      Column("initials"),
+      Column("isStudent"),
+      Column("dateOfBirth"),
+      Column("timeOfDay"),
+      Column("expiry"),
+      Column("veryUnique"),
+    ),
+    Seq(
+      Column("id"),
+    ),
+  )
+
   val insertStatementForUniqueConstraint: Insert = Insert(
     "unique_test",
     Seq(
@@ -274,6 +295,32 @@ object TestData {
     ),
     Some(
       Comparison("temple_user.id", Equal, "12345"),
+    ),
+  )
+
+  val updateStatementWithReturn: Update = Update(
+    "temple_user",
+    Seq(
+      Assignment(Column("bankBalance"), Value("123.456")),
+      Assignment(Column("name"), Value("'Will'")),
+    ),
+    None,
+    Seq(
+      Column("bankBalance"),
+    ),
+  )
+
+  val updateStatementWithWhereAndReturn: Update = Update(
+    "temple_user",
+    Seq(
+      Assignment(Column("bankBalance"), Value("123.456")),
+      Assignment(Column("name"), Value("'Will'")),
+    ),
+    Some(
+      Comparison("temple_user.id", Equal, "12345"),
+    ),
+    Seq(
+      Column("bankBalance"),
     ),
   )
 
