@@ -26,6 +26,7 @@ object PostgresGeneratorTestData {
       ColumnDef("timeOfDay", TimeCol),
       ColumnDef("expiry", DateTimeTzCol),
       ColumnDef("picture", BlobCol),
+      ColumnDef("veryUnique", UUIDCol),
     ),
   )
 
@@ -42,7 +43,8 @@ object PostgresGeneratorTestData {
         |  dateOfBirth DATE,
         |  timeOfDay TIME,
         |  expiry TIMESTAMPTZ,
-        |  picture BYTEA
+        |  picture BYTEA,
+        |  veryUnique UUID
         |);""".stripMargin
 
   val createStatementWithConstraints: Create = Create(
@@ -77,11 +79,12 @@ object PostgresGeneratorTestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
   )
 
   val postgresSelectString: String =
-    """SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry FROM Users;"""
+    """SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, veryUnique FROM Users;"""
 
   val readStatementWithWhere: Read = Read(
     "Users",

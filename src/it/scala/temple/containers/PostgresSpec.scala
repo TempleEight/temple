@@ -51,6 +51,7 @@ trait PostgresSpec extends FlatSpec with DockerTestKit with DockerPostgresServic
           case TimeVariable(value)       => prep.setTime(i, value)
           case DateTimeTzVariable(value) => prep.setTimestamp(i, value)
           case BlobVariable(value)       => prep.setBytes(i, value)
+          case UUIDVariable(value)       => prep.setObject(i, value)
         }
     }
     prep.execute()

@@ -79,6 +79,7 @@ object PostgresGenerator extends DatabaseGenerator {
       case TimeCol                => "TIME"
       case DateTimeTzCol          => "TIMESTAMPTZ"
       case BlobCol                => "BYTEA"
+      case UUIDCol                => "UUID"
     }
 
   /** Parse a given column into PostgreSQL syntax */
