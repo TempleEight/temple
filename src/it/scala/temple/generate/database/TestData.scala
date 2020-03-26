@@ -7,7 +7,7 @@ import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.ComparisonOperator._
 import temple.generate.database.ast.Condition._
-import temple.generate.database.ast.Expression.Value
+import temple.generate.database.ast.Expression.{PreparedValue, Value}
 import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
 
@@ -196,6 +196,22 @@ object TestData {
     ),
   )
 
+  val readStatementWithWherePrepared: Read = Read(
+    "temple_user",
+    Seq(
+      Column("id"),
+      Column("bankBalance"),
+      Column("name"),
+      Column("isStudent"),
+      Column("dateOfBirth"),
+      Column("timeOfDay"),
+      Column("expiry"),
+    ),
+    Some(
+      PreparedComparison("temple_user.id", Equal),
+    ),
+  )
+
   val insertStatement: Insert = Insert(
     "temple_user",
     Seq(
@@ -324,6 +340,34 @@ object TestData {
     ),
   )
 
+  val updateStatementWithPreparedInputAndReturn: Update = Update(
+    "temple_user",
+    Seq(
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+    ),
+    None,
+    Seq(
+      Column("bankBalance"),
+      Column("name"),
+    ),
+  )
+
+  val updateStatementWithPreparedInputWhereAndReturn: Update = Update(
+    "temple_user",
+    Seq(
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+    ),
+    Some(
+      PreparedComparison("temple_user.id", Equal),
+    ),
+    Seq(
+      Column("bankBalance"),
+      Column("name"),
+    ),
+  )
+
   val insertDataA: Seq[PreparedVariable] = Seq(
     PreparedVariable.ShortVariable(3),
     PreparedVariable.IntVariable(4),
@@ -387,6 +431,17 @@ object TestData {
   val insertDataCheckConstraintPasses: Seq[PreparedVariable] = Seq(
     PreparedVariable.IntVariable(1),
     PreparedVariable.IntVariable(5),
+  )
+
+  val updateDataPreparedA: Seq[PreparedVariable] = Seq(
+    PreparedVariable.FloatVariable(678.90f),
+    PreparedVariable.StringVariable("Smithe Williamson"),
+  )
+
+  val updateDataPreparedB: Seq[PreparedVariable] = Seq(
+    PreparedVariable.FloatVariable(678.90f),
+    PreparedVariable.StringVariable("Smithe Williamson"),
+    PreparedVariable.ShortVariable(3),
   )
 
 }

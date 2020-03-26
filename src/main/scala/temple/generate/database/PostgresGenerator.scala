@@ -16,14 +16,31 @@ object PostgresGenerator extends DatabaseGenerator {
   type Context = PostgresContext
 
   /** Given an expression, parse it into the Postgres format */
-  private def generateExpression(expression: Expression): String =
+  private def generateExpression(expression: Expression, index: Int)(implicit context: PostgresContext): (String, Int) =
     expression match {
-      case Value(value) => value
+      case Value(value) =>
+        (value, index)
+      case PreparedValue =>
+        val value = context.preparedType match {
+          case PreparedType.QuestionMarks => "?"
+          case PreparedType.DollarNumbers => "$" + index
+        }
+        (value, index + 1)
     }
 
-  /** Given an assignment, parse it into the Postgres format */
-  private def generateAssignment(assignment: Assignment): String =
-    s"${assignment.column.name} = ${generateExpression(assignment.expression)}"
+  /** Given a list of assignments, parse it into the Postgres format */
+  private def generateAssignmentString(
+    assignments: Seq[Assignment],
+    startIndex: Int,
+  )(implicit context: PostgresContext): (String, Int) = {
+    val (assignmentStrs, nextIndex) = assignments
+      .foldLeft((Seq[String](), startIndex)) {
+        case ((seq, index), assignment) =>
+          val (expression, nextIndex) = generateExpression(assignment.expression, index)
+          (seq :+ s"${assignment.column.name} = $expression", nextIndex)
+      }
+    (mkCode.list(assignmentStrs), nextIndex)
+  }
 
   /** Given a comparison, parse it into the Postgres format */
   private def generateComparison(comparison: ComparisonOperator): String =
@@ -47,22 +64,37 @@ object PostgresGenerator extends DatabaseGenerator {
     }
 
   /** Given a query modifier, generate the type required by PostgreSQL */
-  private def generateCondition(condition: Condition): String =
+  private def generateCondition(condition: Condition, index: Int)(implicit context: PostgresContext): (String, Int) =
     condition match {
-      case Comparison(left, comp, right) => mkCode(left, generateComparison(comp), right)
-      case Inverse(IsNull(column))       => mkCode(column.name, "IS NOT NULL")
-      case Inverse(condition)            => mkCode("NOT", CodeWrap.parens(generateCondition(condition)))
-      case IsNull(column)                => mkCode(column.name, "IS NULL")
-
+      case Comparison(left, comp, right) =>
+        (mkCode(left, generateComparison(comp), right), index)
+      case PreparedComparison(left, comp) =>
+        context.preparedType match {
+          case PreparedType.QuestionMarks => (mkCode(left, generateComparison(comp), "?"), index + 1)
+          case PreparedType.DollarNumbers => (mkCode(left, generateComparison(comp), "$" + index), index + 1)
+        }
+      case Inverse(IsNull(column)) =>
+        (mkCode(column.name, "IS NOT NULL"), index)
+      case Inverse(condition) =>
+        val (genCondition, nextIndex) = generateCondition(condition, index)
+        (mkCode("NOT", CodeWrap.parens(genCondition)), nextIndex)
+      case IsNull(column) =>
+        (mkCode(column.name, "IS NULL"), index)
       case Disjunction(left, right) =>
-        mkCode(CodeWrap.parens(generateCondition(left)), "OR", CodeWrap.parens(generateCondition(right)))
+        val (leftCondition, leftIndex)   = generateCondition(left, index)
+        val (rightCondition, rightIndex) = generateCondition(right, leftIndex)
+        (mkCode(CodeWrap.parens(leftCondition), "OR", CodeWrap.parens(rightCondition)), rightIndex)
       case Conjunction(left, right) =>
-        mkCode(CodeWrap.parens(generateCondition(left)), "AND", CodeWrap.parens(generateCondition(right)))
+        val (leftCondition, leftIndex)   = generateCondition(left, index)
+        val (rightCondition, rightIndex) = generateCondition(right, leftIndex)
+        (mkCode(CodeWrap.parens(leftCondition), "AND", CodeWrap.parens(rightCondition)), rightIndex)
     }
 
   /** Given conditions, generate a Postgres WHERE clause  */
-  private def generateConditionString(conditions: Option[Condition]): Option[String] =
-    conditions.map(generateCondition).map(mkCode("WHERE", _))
+  private def generateConditionString(conditions: Option[Condition], startIndex: Int)(
+    implicit context: PostgresContext,
+  ): Option[String] =
+    conditions.map(generateCondition(_, startIndex)).map { case (conditions, _) => mkCode("WHERE", conditions) }
 
   private def generateReturningString(returnCols: Seq[Column]): String =
     if (returnCols.isEmpty) ""
@@ -110,11 +142,11 @@ object PostgresGenerator extends DatabaseGenerator {
         val stringColumns = mkCode.spacedList(columns.map(generateColumnDef))
         mkCode.stmt("CREATE TABLE", tableName, CodeWrap.parens.spaced(stringColumns))
       case Read(tableName, columns, conditions) =>
-        val stringColumns    = columns.map(_.name).mkString(", ")
-        val stringConditions = generateConditionString(conditions)
+        val stringColumns    = mkCode.list(columns.map(_.name))
+        val stringConditions = generateConditionString(conditions, 1)
         mkCode.stmt("SELECT", stringColumns, "FROM", tableName, stringConditions)
       case Insert(tableName, columns, returnColumns) =>
-        val stringColumns       = columns.map(_.name).mkString(", ")
+        val stringColumns       = mkCode.list(columns.map(_.name))
         val values              = generatePreparedValues(columns)
         val stringReturnColumns = generateReturningString(returnColumns)
         mkCode.stmt(
@@ -126,12 +158,12 @@ object PostgresGenerator extends DatabaseGenerator {
           stringReturnColumns,
         )
       case Update(tableName, assignments, conditions, returnColumns) =>
-        val stringAssignments   = assignments.map(generateAssignment).mkString(", ")
-        val stringConditions    = generateConditionString(conditions)
-        val stringReturnColumns = generateReturningString(returnColumns)
+        val (stringAssignments, nextIndex) = generateAssignmentString(assignments, 1)
+        val stringConditions               = generateConditionString(conditions, nextIndex)
+        val stringReturnColumns            = generateReturningString(returnColumns)
         mkCode.stmt("UPDATE", tableName, "SET", stringAssignments, stringConditions, stringReturnColumns)
       case Delete(tableName, conditions) =>
-        val stringConditions = generateConditionString(conditions)
+        val stringConditions = generateConditionString(conditions, 1)
         mkCode.stmt("DELETE FROM", tableName, stringConditions)
       case Drop(tableName, ifExists) =>
         mkCode.stmt("DROP TABLE", tableName, when(ifExists)("IF EXISTS"))
