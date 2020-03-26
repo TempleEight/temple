@@ -161,6 +161,16 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     returnedFileContents shouldBe fileContents
   }
 
+  it should "succeed when inserting and returning in a single query" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
+    val result =
+      executePreparedWithResults(PostgresGenerator.generate(TestData.insertStatementWithReturn), TestData.insertDataA)
+        .getOrElse(fail("Database connection could not be established"))
+    result.next()
+    result.getShort("id") shouldBe 3
+    result.isLast shouldBe true
+  }
+
   behavior of "DeleteStatements"
   it should "clear the table following an insert" in {
     executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
@@ -299,4 +309,29 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     result.getObject("veryUnique") shouldBe UUID.fromString("00000000-1234-5678-9012-000000000001")
     result.isLast shouldBe true
   }
+
+  it should "succeed when updating and returning in a single query" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
+    val result = executeWithResults(PostgresGenerator.generate(TestData.updateStatementWithReturn))
+      .getOrElse(fail("Database connection could not be established"))
+    result.next()
+    result.getFloat("bankBalance") shouldBe 123.456f
+    result.next()
+    result.getFloat("bankBalance") shouldBe 123.456f
+    result.isLast shouldBe true
+  }
+
+  it should "succeed when updating with where and returning in a single query" in {
+    executeWithoutResults(PostgresGenerator.generate(TestData.createStatement))
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataA)
+    executePreparedWithoutResults(PostgresGenerator.generate(TestData.insertStatement), TestData.insertDataB)
+    val result = executeWithResults(PostgresGenerator.generate(TestData.updateStatementWithWhereAndReturn))
+      .getOrElse(fail("Database connection could not be established"))
+    result.next()
+    result.getFloat("bankBalance") shouldBe 123.456f
+    result.isLast shouldBe true
+  }
+
 }
