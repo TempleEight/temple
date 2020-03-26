@@ -28,7 +28,8 @@ object DatabaseBuilder {
       case AttributeType.DateType      => (ColType.DateCol, Nil)
       case AttributeType.DateTimeType  => (ColType.DateTimeTzCol, Nil)
       case AttributeType.TimeType      => (ColType.TimeCol, Nil)
-      case AttributeType.ForeignKey(_) => (ColType.IntCol(4), Nil)
+      case AttributeType.ForeignKey(_) => (ColType.UUIDCol, Nil)
+      case AttributeType.UUIDType      => (ColType.UUIDCol, Nil)
       case AttributeType.BlobType(max) =>
         (ColType.BlobCol, generateMaxMinConstraints(s"octet_length($name)", max, None))
       case AttributeType.IntType(max, min, precision) =>
