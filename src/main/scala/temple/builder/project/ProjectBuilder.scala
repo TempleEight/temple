@@ -3,6 +3,7 @@ package temple.builder.project
 import temple.ast.Metadata.{Database, Endpoint, ServiceLanguage}
 import temple.ast.{Metadata, ServiceBlock, Templefile}
 import temple.builder._
+import temple.detail.LanguageDetail
 import temple.generate.CRUD
 import temple.generate.CRUD._
 import temple.generate.FileSystem._
@@ -38,10 +39,11 @@ object ProjectBuilder {
 
   /**
     * Converts a Templefile to an associated project, containing all generated code
+    *
     * @param templefile The semantically correct Templefile
     * @return the associated generated project
     */
-  def build(templefile: Templefile): Project = {
+  def build(templefile: Templefile, detail: LanguageDetail): Project = {
     val databaseCreationScripts = templefile.services.map {
       case (name, service) =>
         val createStatements: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
@@ -80,7 +82,7 @@ object ProjectBuilder {
 
     val serverFiles = templefile.servicesWithPorts.flatMap {
       case (name, service, port) =>
-        val serviceRoot = ServerBuilder.buildServiceRoot(name.toLowerCase, service, port, endpoints(service))
+        val serviceRoot = ServerBuilder.buildServiceRoot(name.toLowerCase, service, port, endpoints(service), detail)
         service.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
           case ServiceLanguage.Go =>
             GoServiceGenerator.generate(serviceRoot)

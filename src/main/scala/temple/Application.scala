@@ -3,6 +3,7 @@ package temple
 import temple.DSL.DSLProcessor
 import temple.DSL.semantics.Analyzer
 import temple.builder.project.ProjectBuilder
+import temple.detail.{LanguageSpecificDetailBuilder, PoliceSergeantNicholasAngel}
 import temple.utils.FileUtils
 
 object Application {
@@ -14,7 +15,8 @@ object Application {
       case Left(error) => throw new RuntimeException(error)
       case Right(data) =>
         val analyzedTemplefile = Analyzer.parseSemantics(data)
-        val project            = ProjectBuilder.build(analyzedTemplefile)
+        val detail             = LanguageSpecificDetailBuilder.build(analyzedTemplefile, PoliceSergeantNicholasAngel)
+        val project            = ProjectBuilder.build(analyzedTemplefile, detail)
 
         FileUtils.createDirectory(outputDirectory)
         project.files.foreach {

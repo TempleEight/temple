@@ -1,0 +1,77 @@
+package dao
+
+    import(
+    "database/sql"
+    "fmt"
+
+    "github.com/TempleEight/spec-golang/user/util"
+    "github.com/google/uuid"
+
+    // pq acts as the driver for SQL requests
+    _"github.com/lib/pq"
+    )
+
+// Datastore provides the interface adopted by the DAO, allowing for mocking
+    type Datastore interface{
+    CreateUser(input CreateUserInput)(*User,error)
+    ReadUser(input ReadUserInput)(*User,error)
+    UpdateUser(input UpdateUserInput)(*User,error)
+    DeleteUser(input DeleteUserInput)error
+}
+
+// DAO encapsulates access to the datastore
+    type DAO struct{
+    DB*sql.DB
+}
+
+// User encapsulates the object stored in the datastore
+    type User struct{
+    ID uuid.UUID
+    Name string
+}
+
+// CreateUserInput encapsulates the information required to create a single user in the datastore
+    type CreateUserInput struct{
+    ID uuid.UUID
+    Name string
+}
+
+// ReadUserInput encapsulates the information required to read a single user in the datastore
+    type ReadUserInput struct{
+    ID uuid.UUID
+}
+
+// UpdateUserInput encapsulates the information required to update a single user in the datastore
+    type UpdateUserInput struct{
+    ID uuid.UUID
+    Name string
+}
+
+// DeleteUserInput encapsulates the information required to delete a single user in the datastore
+    type DeleteUserInput struct{
+    ID uuid.UUID
+}
+
+// Init opens the datastore connection, returning a DAO
+    func Init(config*util.Config)(*DAO,error){
+    connStr:=fmt.Sprintf("user=%s dbname=%s host=%s sslmode=%s",config.User,config.DBName,config.Host,config.SSLMode)
+    db,err:=sql.Open("postgres",connStr)
+    if err!=nil{
+    return nil,err
+}
+    return&DAO{db},nil
+}
+
+// Executes a query, returning the row
+    func executeQueryWithRowResponse(db*sql.DB,query string,args...interface{})*sql.Row{
+    return db.QueryRow(query,args...)
+}
+
+// Executes a query, returning the number of rows affected
+    func executeQuery(db*sql.DB,query string,args...interface{})(int64,error){
+    result,err:=db.Exec(query,args...)
+    if err!=nil{
+    return 0,err
+}
+    return result.RowsAffected()
+}

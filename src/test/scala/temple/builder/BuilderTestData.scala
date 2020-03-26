@@ -55,4 +55,11 @@ object BuilderTestData {
       ),
     ),
   )
+
+  val complexTemplefile: Templefile = Templefile(
+    "test-complex-project",
+    ProjectBlock(Seq(ServiceLanguage.Go)),
+    targets = Map(),
+    services = Map("test-complex-service" -> sampleComplexService),
+  )
 }

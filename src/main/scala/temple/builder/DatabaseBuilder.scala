@@ -2,9 +2,15 @@ package temple.builder
 
 import temple.ast.Annotation.Nullable
 import temple.ast.{Annotation, Attribute, AttributeType, ServiceBlock}
+import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
 import temple.generate.database.ast.ColumnConstraint.Check
+import temple.generate.database.ast.Condition.PreparedComparison
+import temple.generate.database.ast.Expression.PreparedValue
 import temple.generate.database.ast._
+import temple.generate.server.{CreatedByAttribute, IDAttribute}
 import temple.utils.StringUtils
+
+import scala.collection.immutable.ListMap
 
 /** Construct database queries from a Templefile structure */
 object DatabaseBuilder {
@@ -43,10 +49,66 @@ object DatabaseBuilder {
     ColumnDef(name, colType, typeConstraints ++ valueConstraints)
   }
 
+  def buildQuery(
+    serviceName: String,
+    service: ServiceBlock,
+    endpoints: Set[CRUD],
+    iDAttribute: IDAttribute,
+    createdByAttribute: CreatedByAttribute,
+  ): ListMap[CRUD, Statement] = {
+    val tableName = StringUtils.snakeCase(serviceName)
+    val columns   = service.primitiveAttributes.map { case (name, _) => Column(name) }.toSeq
+    ListMap.from(
+      endpoints.map {
+        case Create =>
+          Create -> Statement.Insert(
+            tableName,
+            columns = columns,
+            returnColumns = columns,
+          )
+        case Read =>
+          Read -> Statement.Read(
+            tableName,
+            columns = columns,
+            condition = Some(PreparedComparison(iDAttribute.name, ComparisonOperator.Equal)),
+          )
+        case Update =>
+          Update -> Statement.Update(
+            tableName,
+            assignments = columns.map {
+              Assignment(_, PreparedValue)
+            },
+            condition = Some(PreparedComparison(iDAttribute.name, ComparisonOperator.Equal)),
+            returnColumns = columns,
+          )
+        case Delete =>
+          Delete -> Statement.Delete(
+            tableName,
+            condition = Some(PreparedComparison(iDAttribute.name, ComparisonOperator.Equal)),
+          )
+        case List =>
+          createdByAttribute match {
+            case CreatedByAttribute.EnumerateByCreator(_, _, _) =>
+              List -> Statement.Read(
+                tableName,
+                columns = columns,
+                condition = Some(PreparedComparison("created_by", ComparisonOperator.Equal)),
+              )
+            case CreatedByAttribute.EnumerateByAll(_, _, _) | CreatedByAttribute.None =>
+              List -> Statement.Read(
+                tableName,
+                columns = columns,
+              )
+          }
+      },
+    )
+  }
+
   /**
     * Converts a service block to an associated list of database table create statement
+    *
     * @param serviceName The service name
-    * @param service The ServiceBlock to generate
+    * @param service     The ServiceBlock to generate
     * @return the associated create statement
     */
   def createServiceTables(serviceName: String, service: ServiceBlock): Seq[Statement.Create] = {
