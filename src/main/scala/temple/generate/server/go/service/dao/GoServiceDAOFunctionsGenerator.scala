@@ -61,10 +61,10 @@ object GoServiceDAOFunctionsGenerator {
     }).toSeq
 
     operation match {
-      case CRUD.List               => createdBy
-      case CRUD.Create             => id ++ createdBy ++ filteredAttributes
-      case CRUD.Read | CRUD.Delete => id
-      case CRUD.Update             => filteredAttributes ++ id
+      case List          => createdBy
+      case Create        => id ++ createdBy ++ filteredAttributes
+      case Read | Delete => id
+      case Update        => filteredAttributes ++ id
     }
   }
 
