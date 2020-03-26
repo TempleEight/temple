@@ -1,8 +1,7 @@
 package temple.generate.metrics.prometheus
 
-import io.circe.yaml.Printer
 import io.circe.syntax._
-import io.circe.yaml.Printer.FlowStyle
+import io.circe.yaml.Printer
 import temple.generate.metrics.prometheus.ast.{PrometheusConfig, PrometheusJob}
 
 object PrometheusConfigGenerator {

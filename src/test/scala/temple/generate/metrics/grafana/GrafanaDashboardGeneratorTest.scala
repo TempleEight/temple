@@ -4,7 +4,6 @@ import org.scalatest.{FlatSpec, Matchers}
 import temple.generate.metrics.grafana.GrafanaDashboardGeneratorTestUtils.{makeTarget, _}
 import temple.generate.metrics.grafana.ast.Row.{Metric, Query}
 import temple.generate.metrics.grafana.ast.{Datasource, Row}
-import temple.generate.utils.CodeTerm.mkCode
 
 class GrafanaDashboardGeneratorTest extends FlatSpec with Matchers {
   behavior of "GrafanaDashboardGenerator"

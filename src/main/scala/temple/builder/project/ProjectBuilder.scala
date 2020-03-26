@@ -11,7 +11,7 @@ import temple.generate.database.ast.Statement
 import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.docker.DockerfileGenerator
 import temple.generate.kube.KubernetesGenerator
-import temple.generate.metrics.grafana.ast.{Datasource, GrafanaDatasourceConfig}
+import temple.generate.metrics.grafana.ast.Datasource
 import temple.generate.metrics.grafana.{GrafanaDashboardConfigGenerator, GrafanaDashboardGenerator, GrafanaDatasourceConfigGenerator}
 import temple.utils.StringUtils
 

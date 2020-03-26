@@ -2,6 +2,7 @@ package temple.utils
 
 import java.nio.charset.Charset
 import java.nio.file.{Files, Paths}
+
 import scala.io.Source
 
 /** Helper functions useful for manipulating files */
