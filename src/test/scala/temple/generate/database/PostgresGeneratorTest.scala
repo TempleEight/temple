@@ -38,6 +38,10 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
     PostgresGenerator.generate(TestData.insertStatementWithReturn) shouldBe TestData.postgresInsertStringWithReturn
   }
 
+  it should "generate correct INSERT statements with prepared and provided values" in {
+    PostgresGenerator.generate(TestData.insertStatementWithProvidedValue) shouldBe TestData.postgresInsertStringWithProvidedValue
+  }
+
   it should "handle conjunctions in WHERE correctly" in {
     PostgresGenerator.generate(TestData.readStatementWithWhereConjunction) shouldBe TestData.postgresSelectStringWithWhereConjunction
   }
@@ -130,5 +134,25 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
 
   it should "handle DELETE statements with nested prepared WHERE statement correctly" in {
     PostgresGenerator.generate(TestData.deleteStatementWithNestedWherePrepared) shouldBe TestData.postgresDeleteStringWithNestedWherePrepared
+  }
+
+  it should "handle a list query from spec-golang" in {
+    PostgresGenerator.generate(TestData.specGolangList) shouldBe TestData.specGolangListPostgresString
+  }
+
+  it should "handle a create query from spec-golang" in {
+    PostgresGenerator.generate(TestData.specGolangCreate) shouldBe TestData.specGolangCreatePostgresString
+  }
+
+  it should "handle a read query from spec-golang" in {
+    PostgresGenerator.generate(TestData.specGolangRead) shouldBe TestData.specGolangReadPostgresString
+  }
+
+  it should "handle a update query from spec-golang" in {
+    PostgresGenerator.generate(TestData.specGolangUpdate) shouldBe TestData.specGolangUpdatePostgresString
+  }
+
+  it should "handle a delete query from spec-golang" in {
+    PostgresGenerator.generate(TestData.specGolangDelete) shouldBe TestData.specGolangDeletePostgresString
   }
 }
