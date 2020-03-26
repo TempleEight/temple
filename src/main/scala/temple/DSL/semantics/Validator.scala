@@ -76,13 +76,14 @@ private class Validator private (templefile: Templefile) {
       case FloatType(max, _, _) => // all good
     }
 
-  def validateTarget(target: TargetBlock)(context: SemanticContext): Unit =
+  private def validateBlockOfMetadata[T <: Metadata](target: TempleBlock[T])(context: SemanticContext): Unit =
     target.metadata.foreach(validateMetadata(_)(context))
 
   def validate(): Unit = {
     val context = SemanticContext.empty
     templefile.services.foreachEntry(context(validateService))
-    templefile.targets.foreachEntry(context(validateTarget))
+    templefile.targets.foreachEntry(context(validateBlockOfMetadata))
+    validateBlockOfMetadata(templefile.projectBlock)(context :+ s"${templefile.projectName} project")
   }
 }
 
