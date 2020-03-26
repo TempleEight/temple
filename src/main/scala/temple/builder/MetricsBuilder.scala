@@ -1,6 +1,6 @@
 package temple.builder
 
-import temple.generate.CRUD
+import temple.generate.CRUD.CRUD
 import temple.generate.metrics.grafana.ast.{Datasource, Row}
 import temple.generate.metrics.grafana.ast.Row.{Metric, Query}
 

@@ -1,7 +1,7 @@
 package temple.generate.target.openapi.ast
 
 import temple.ast.Attribute
-import temple.generate.CRUD
+import temple.generate.CRUD.CRUD
 
 case class Service(
   name: String,
