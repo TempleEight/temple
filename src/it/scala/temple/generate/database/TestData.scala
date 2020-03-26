@@ -1,6 +1,7 @@
 package temple.generate.database
 
 import java.sql.{Date, Time, Timestamp}
+import java.util.UUID
 
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
@@ -27,6 +28,7 @@ object TestData {
       ColumnDef("dateOfBirth", DateCol),
       ColumnDef("timeOfDay", TimeCol),
       ColumnDef("expiry", DateTimeTzCol),
+      ColumnDef("veryUnique", UUIDCol),
     ),
   )
 
@@ -68,6 +70,7 @@ object TestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
   )
 
@@ -85,6 +88,7 @@ object TestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
     Some(
       Comparison("user.id", Equal, "123456"),
@@ -105,6 +109,7 @@ object TestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
     Some(
       Conjunction(
@@ -128,6 +133,7 @@ object TestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
     Some(
       Disjunction(
@@ -151,6 +157,7 @@ object TestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
     Some(
       Inverse(
@@ -173,6 +180,7 @@ object TestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
     Some(
       Conjunction(
@@ -202,6 +210,28 @@ object TestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
+    ),
+  )
+
+  val insertStatementWithReturn: Insert = Insert(
+    "temple_user",
+    Seq(
+      Column("id"),
+      Column("anotherId"),
+      Column("yetAnotherId"),
+      Column("bankBalance"),
+      Column("bigBankBalance"),
+      Column("name"),
+      Column("initials"),
+      Column("isStudent"),
+      Column("dateOfBirth"),
+      Column("timeOfDay"),
+      Column("expiry"),
+      Column("veryUnique"),
+    ),
+    Seq(
+      Column("id"),
     ),
   )
 
@@ -268,6 +298,32 @@ object TestData {
     ),
   )
 
+  val updateStatementWithReturn: Update = Update(
+    "temple_user",
+    Seq(
+      Assignment(Column("bankBalance"), Value("123.456")),
+      Assignment(Column("name"), Value("'Will'")),
+    ),
+    None,
+    Seq(
+      Column("bankBalance"),
+    ),
+  )
+
+  val updateStatementWithWhereAndReturn: Update = Update(
+    "temple_user",
+    Seq(
+      Assignment(Column("bankBalance"), Value("123.456")),
+      Assignment(Column("name"), Value("'Will'")),
+    ),
+    Some(
+      Comparison("temple_user.id", Equal, "12345"),
+    ),
+    Seq(
+      Column("bankBalance"),
+    ),
+  )
+
   val insertDataA: Seq[PreparedVariable] = Seq(
     PreparedVariable.ShortVariable(3),
     PreparedVariable.IntVariable(4),
@@ -280,6 +336,7 @@ object TestData {
     PreparedVariable.DateVariable(Date.valueOf("1998-03-05")),
     PreparedVariable.TimeVariable(Time.valueOf("12:00:00")),
     PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2020-01-01 00:00:00.0")),
+    PreparedVariable.UUIDVariable(UUID.fromString("00000000-1234-5678-9012-000000000000")),
   )
 
   val insertDataB: Seq[PreparedVariable] = Seq(
@@ -294,6 +351,7 @@ object TestData {
     PreparedVariable.DateVariable(Date.valueOf("1998-03-05")),
     PreparedVariable.TimeVariable(Time.valueOf("12:00:00")),
     PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2019-02-03 02:23:50.0")),
+    PreparedVariable.UUIDVariable(UUID.fromString("00000000-1234-5678-9012-000000000001")),
   )
 
   val insertDataUniqueConstraintA: Seq[PreparedVariable] = Seq(

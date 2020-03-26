@@ -8,7 +8,7 @@ import scala.collection.immutable.ListMap
 private[grafana] case class GrafanaPanel(
   id: Int,
   title: String,
-  datasource: String,
+  datasource: Datasource,
   width: Int,
   height: Int,
   x: Int,
@@ -22,7 +22,7 @@ private[grafana] case class GrafanaPanel(
     "bars"         ~> false,
     "dashLength"   ~> 10,
     "dashes"       ~> false,
-    "datasource"   ~> datasource,
+    "datasource"   ~> datasource.name,
     "fill"         ~> 1,
     "fillGradient" ~> 0,
     "gridPos"      ~> ListMap("h" -> height, "w" -> width, "x" -> x, "y" -> y),

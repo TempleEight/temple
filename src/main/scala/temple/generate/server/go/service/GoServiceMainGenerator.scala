@@ -66,7 +66,7 @@ object GoServiceMainGenerator {
             )
           },
           "r := mux.NewRouter()",
-          when(operations.contains(CRUD.ReadAll)) {
+          when(operations.contains(CRUD.List)) {
             mkCode.lines(
               "// Mux directs to first matching route, i.e. the order matters",
               s"""r.HandleFunc("/$serviceName/all", ${serviceName}ListHandler).Methods(http.MethodGet)""",
@@ -93,7 +93,7 @@ object GoServiceMainGenerator {
     )
 
   private[service] def generateHandler(serviceName: String, operation: CRUD): String =
-    s"func $serviceName${operation.verb}Handler(w http.ResponseWriter, r *http.Request) {}"
+    s"func $serviceName${operation}Handler(w http.ResponseWriter, r *http.Request) {}"
 
   private[service] def generateHandlers(serviceName: String, operations: Set[CRUD]): String =
     mkCode.doubleLines(

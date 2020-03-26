@@ -2,7 +2,7 @@ package temple.generate.server.go.common
 
 import temple.ast.AttributeType
 import temple.ast.AttributeType._
-import temple.generate.utils.CodeTerm.mkCode
+import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
 object GoCommonGenerator {
 
@@ -31,4 +31,15 @@ object GoCommonGenerator {
       case BlobType(Some(size))                           => s"[$size]byte"
       case BlobType(_)                                    => "[]byte"
     }
+
+  private[go] def generateCheckAndReturnError(returnValues: String*): String =
+    mkCode(
+      "if err != nil",
+      CodeWrap.curly.tabbed(
+        mkCode(
+          "return",
+          mkCode.list(returnValues, "err"),
+        ),
+      ),
+    )
 }

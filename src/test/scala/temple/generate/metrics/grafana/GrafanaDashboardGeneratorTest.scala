@@ -1,9 +1,10 @@
 package temple.generate.metrics.grafana
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.generate.metrics.grafana.ast.Row
-import temple.generate.metrics.grafana.ast.Row.{Metric, Query}
 import temple.generate.metrics.grafana.GrafanaDashboardGeneratorTestUtils.{makeTarget, _}
+import temple.generate.metrics.grafana.ast.Row.{Metric, Query}
+import temple.generate.metrics.grafana.ast.{Datasource, Row}
+import temple.generate.utils.CodeTerm.mkCode
 
 class GrafanaDashboardGeneratorTest extends FlatSpec with Matchers {
   behavior of "GrafanaDashboardGenerator"
@@ -22,7 +23,15 @@ class GrafanaDashboardGeneratorTest extends FlatSpec with Matchers {
     )
 
     val generated = GrafanaDashboardGenerator
-      .generate("abcdefg", "Example", Seq(Row(Metric(1, "My Example Metric", "Prometheus", "MyYAxis", Seq()))))
+      .generate(
+        "abcdefg",
+        "Example",
+        Seq(
+          Row(
+            Metric(1, "My Example Metric", Datasource.Prometheus("Prometheus", "http://prom:9090"), "MyYAxis", Seq()),
+          ),
+        ),
+      )
 
     generated shouldBe expected
   }
@@ -37,15 +46,16 @@ class GrafanaDashboardGeneratorTest extends FlatSpec with Matchers {
       makePanel(4, "Prometheus", "My Fourth Metric", 6, 5, 18, 0, "MyYAxis4"),
     )
 
+    val datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
     val generated = GrafanaDashboardGenerator.generate(
       "abcdefg",
       "Example",
       Seq(
         Row(
-          Metric(1, "My First Metric", "Prometheus", "MyYAxis1", Seq()),
-          Metric(2, "My Second Metric", "Prometheus", "MyYAxis2", Seq()),
-          Metric(3, "My Third Metric", "Prometheus", "MyYAxis3", Seq()),
-          Metric(4, "My Fourth Metric", "Prometheus", "MyYAxis4", Seq()),
+          Metric(1, "My First Metric", datasource, "MyYAxis1", Seq()),
+          Metric(2, "My Second Metric", datasource, "MyYAxis2", Seq()),
+          Metric(3, "My Third Metric", datasource, "MyYAxis3", Seq()),
+          Metric(4, "My Fourth Metric", datasource, "MyYAxis4", Seq()),
         ),
       ),
     )
@@ -63,15 +73,16 @@ class GrafanaDashboardGeneratorTest extends FlatSpec with Matchers {
       makePanel(4, "Prometheus", "My Fourth Metric", 6, 5, 18, 0, "MyYAxis4"),
     )
 
+    val datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
     val generated = GrafanaDashboardGenerator.generate(
       "abcdefg",
       "Example",
       Seq(
         Row(
-          Metric(1, "My First Metric", "Prometheus", "MyYAxis1", Seq()),
-          Metric(2, "My Second Metric", "Prometheus", "MyYAxis2", Seq()),
-          Metric(3, "My Third Metric", "Prometheus", "MyYAxis3", Seq()),
-          Metric(4, "My Fourth Metric", "Prometheus", "MyYAxis4", Seq()),
+          Metric(1, "My First Metric", datasource, "MyYAxis1", Seq()),
+          Metric(2, "My Second Metric", datasource, "MyYAxis2", Seq()),
+          Metric(3, "My Third Metric", datasource, "MyYAxis3", Seq()),
+          Metric(4, "My Fourth Metric", datasource, "MyYAxis4", Seq()),
         ),
       ),
     )
@@ -89,17 +100,18 @@ class GrafanaDashboardGeneratorTest extends FlatSpec with Matchers {
       makePanel(4, "Prometheus", "My Fourth Metric", 12, 5, 12, 5, "MyYAxis4"),
     )
 
+    val datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
     val generated = GrafanaDashboardGenerator.generate(
       "abcdefg",
       "Example",
       Seq(
         Row(
-          Metric(1, "My First Metric", "Prometheus", "MyYAxis1", Seq()),
-          Metric(2, "My Second Metric", "Prometheus", "MyYAxis2", Seq()),
+          Metric(1, "My First Metric", datasource, "MyYAxis1", Seq()),
+          Metric(2, "My Second Metric", datasource, "MyYAxis2", Seq()),
         ),
         Row(
-          Metric(3, "My Third Metric", "Prometheus", "MyYAxis3", Seq()),
-          Metric(4, "My Fourth Metric", "Prometheus", "MyYAxis4", Seq()),
+          Metric(3, "My Third Metric", datasource, "MyYAxis3", Seq()),
+          Metric(4, "My Fourth Metric", datasource, "MyYAxis4", Seq()),
         ),
       ),
     )
@@ -119,16 +131,41 @@ class GrafanaDashboardGeneratorTest extends FlatSpec with Matchers {
       makePanel(4, "Prometheus", "My Fourth Metric", 12, 5, 12, 5, "MyYAxis4", targets(3)),
     )
 
+    val datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
     val topRow = Seq(
       Row(
-        Metric(1, "My First Metric", "Prometheus", "MyYAxis1", Seq(Query("rate(my_first_metric)", "Success"))),
-        Metric(2, "My Second Metric", "Prometheus", "MyYAxis2", Seq(Query("rate(my_second_metric)", "Success"))),
+        Metric(
+          1,
+          "My First Metric",
+          datasource,
+          "MyYAxis1",
+          Seq(Query("rate(my_first_metric)", "Success")),
+        ),
+        Metric(
+          2,
+          "My Second Metric",
+          datasource,
+          "MyYAxis2",
+          Seq(Query("rate(my_second_metric)", "Success")),
+        ),
       ),
     )
     val bottomRow = Seq(
       Row(
-        Metric(3, "My Third Metric", "Prometheus", "MyYAxis3", Seq(Query("rate(my_third_metric)", "Success"))),
-        Metric(4, "My Fourth Metric", "Prometheus", "MyYAxis4", Seq(Query("rate(my_fourth_metric)", "Success"))),
+        Metric(
+          3,
+          "My Third Metric",
+          datasource,
+          "MyYAxis3",
+          Seq(Query("rate(my_third_metric)", "Success")),
+        ),
+        Metric(
+          4,
+          "My Fourth Metric",
+          datasource,
+          "MyYAxis4",
+          Seq(Query("rate(my_fourth_metric)", "Success")),
+        ),
       ),
     )
 
@@ -162,16 +199,17 @@ class GrafanaDashboardGeneratorTest extends FlatSpec with Matchers {
         ),
       )
 
+    val datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
     val topRow = Seq(
       Row(
-        Metric(1, "My First Metric", "Prometheus", "MyYAxis1", queries(0)),
-        Metric(2, "My Second Metric", "Prometheus", "MyYAxis2", queries(1)),
+        Metric(1, "My First Metric", datasource, "MyYAxis1", queries(0)),
+        Metric(2, "My Second Metric", datasource, "MyYAxis2", queries(1)),
       ),
     )
     val bottomRow = Seq(
       Row(
-        Metric(3, "My Third Metric", "Prometheus", "MyYAxis3", queries(2)),
-        Metric(4, "My Fourth Metric", "Prometheus", "MyYAxis4", queries(3)),
+        Metric(3, "My Third Metric", datasource, "MyYAxis3", queries(2)),
+        Metric(4, "My Fourth Metric", datasource, "MyYAxis4", queries(3)),
       ),
     )
     val generated = GrafanaDashboardGenerator.generate("abcdefg", "Example", topRow ++ bottomRow)

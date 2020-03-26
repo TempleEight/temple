@@ -2,6 +2,7 @@ package temple.generate.server.go.service
 
 import temple.generate.FileSystem._
 import temple.generate.server.go.common._
+import temple.generate.server.go.service.dao._
 import temple.generate.server.{ServiceGenerator, ServiceRoot}
 import temple.generate.utils.CodeTerm.mkCode
 
@@ -18,7 +19,8 @@ object GoServiceGenerator extends ServiceGenerator {
      * handler.go
      * config.json
      */
-    val usesComms = serviceRoot.comms.nonEmpty
+    val usesComms  = serviceRoot.comms.nonEmpty
+    val operations = serviceRoot.opQueries.keySet
     (Map(
       File(s"${serviceRoot.name}", "go.mod") -> GoCommonGenerator.generateMod(serviceRoot.module),
       File(serviceRoot.name, s"${serviceRoot.name}.go") -> mkCode.doubleLines(
@@ -35,13 +37,13 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainGenerator.generateMain(
           serviceRoot.name,
           usesComms,
-          serviceRoot.operations,
+          operations,
           serviceRoot.port,
         ),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoServiceMainGenerator.generateHandlers(
           serviceRoot.name,
-          serviceRoot.operations,
+          operations,
         ),
       ),
       File(s"${serviceRoot.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(serviceRoot.name),
@@ -51,9 +53,9 @@ object GoServiceGenerator extends ServiceGenerator {
           serviceRoot.attributes,
           serviceRoot.module,
         ),
-        GoServiceDAOGenerator.generateDatastoreInterface(
+        GoServiceDAOInterfaceGenerator.generateInterface(
           serviceRoot.name,
-          serviceRoot.operations,
+          operations,
           serviceRoot.createdByAttribute,
         ),
         GoCommonDAOGenerator.generateDAOStruct(),
@@ -63,15 +65,22 @@ object GoServiceGenerator extends ServiceGenerator {
           serviceRoot.createdByAttribute,
           serviceRoot.attributes,
         ),
-        GoServiceDAOGenerator.generateInputStructs(
+        GoServiceDAOInputStructsGenerator.generateStructs(
           serviceRoot.name,
-          serviceRoot.operations,
+          operations,
           serviceRoot.idAttribute,
           serviceRoot.createdByAttribute,
           serviceRoot.attributes,
         ),
         GoCommonDAOGenerator.generateInit(),
-        GoServiceDAOGenerator.generateQueryFunctions(serviceRoot.operations),
+        GoServiceDAOGenerator.generateQueryFunctions(operations),
+        GoServiceDAOFunctionsGenerator.generateDAOFunctions(
+          serviceRoot.name,
+          serviceRoot.opQueries,
+          serviceRoot.idAttribute,
+          serviceRoot.createdByAttribute,
+          serviceRoot.attributes,
+        ),
       ),
       File(s"${serviceRoot.name}/util", "util.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("util"),

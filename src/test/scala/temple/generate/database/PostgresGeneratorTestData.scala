@@ -26,6 +26,7 @@ object PostgresGeneratorTestData {
       ColumnDef("timeOfDay", TimeCol),
       ColumnDef("expiry", DateTimeTzCol),
       ColumnDef("picture", BlobCol),
+      ColumnDef("veryUnique", UUIDCol),
     ),
   )
 
@@ -42,7 +43,8 @@ object PostgresGeneratorTestData {
         |  dateOfBirth DATE,
         |  timeOfDay TIME,
         |  expiry TIMESTAMPTZ,
-        |  picture BYTEA
+        |  picture BYTEA,
+        |  veryUnique UUID
         |);""".stripMargin
 
   val createStatementWithConstraints: Create = Create(
@@ -77,11 +79,12 @@ object PostgresGeneratorTestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
   )
 
   val postgresSelectString: String =
-    """SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry FROM Users;"""
+    """SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, veryUnique FROM Users;"""
 
   val readStatementWithWhere: Read = Read(
     "Users",
@@ -214,6 +217,31 @@ object PostgresGeneratorTestData {
   val postgresInsertStringWithQuestionMarks: String =
     "INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry) VALUES (?, ?, ?, ?, ?, ?, ?);"
 
+  val insertStatementWithReturn: Insert = Insert(
+    "Users",
+    Seq(
+      Column("id"),
+      Column("bankBalance"),
+      Column("name"),
+      Column("isStudent"),
+      Column("dateOfBirth"),
+      Column("timeOfDay"),
+      Column("expiry"),
+    ),
+    Seq(
+      Column("id"),
+      Column("bankBalance"),
+      Column("name"),
+      Column("isStudent"),
+      Column("dateOfBirth"),
+      Column("timeOfDay"),
+      Column("expiry"),
+    ),
+  )
+
+  val postgresInsertStringWithReturn: String =
+    "INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry;"
+
   val updateStatement: Update = Update(
     "Users",
     Seq(
@@ -238,6 +266,38 @@ object PostgresGeneratorTestData {
 
   val postgresUpdateStringWithWhere: String =
     """UPDATE Users SET bankBalance = 123.456, name = 'Will' WHERE Users.id = 123456;"""
+
+  val updateStatementWithReturn: Update = Update(
+    "Users",
+    Seq(
+      Assignment(Column("bankBalance"), Value("123.456")),
+      Assignment(Column("name"), Value("'Will'")),
+    ),
+    None,
+    Seq(
+      Column("bankBalance"),
+    ),
+  )
+
+  val postgresUpdateStringWithReturn: String =
+    """UPDATE Users SET bankBalance = 123.456, name = 'Will' RETURNING bankBalance;"""
+
+  val updateStatementWithWhereAndReturn: Update = Update(
+    "Users",
+    Seq(
+      Assignment(Column("bankBalance"), Value("123.456")),
+      Assignment(Column("name"), Value("'Will'")),
+    ),
+    Some(
+      Comparison("Users.id", Equal, "123456"),
+    ),
+    Seq(
+      Column("bankBalance"),
+    ),
+  )
+
+  val postgresUpdateStringWithWhereAndReturn: String =
+    """UPDATE Users SET bankBalance = 123.456, name = 'Will' WHERE Users.id = 123456 RETURNING bankBalance;"""
 
   val deleteStatement: Delete = Delete(
     "Users",

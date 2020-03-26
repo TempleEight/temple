@@ -19,6 +19,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
         File("kube/temple-user", "db-storage.yaml")                -> ProjectBuilderTestData.simpleTemplefileKubeDbStorage,
         File("kong", "configure-kong.sh")                          -> ProjectBuilderTestData.simpleTemplefileConfigureKong,
         File("grafana/provisioning/dashboards", "templeuser.json") -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboard,
+        File("grafana/provisioning/dashboards", "dashboards.yml")  -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboardConfig,
       ) ++ ProjectBuilderTestData.kongFiles
     project.files shouldBe expected
   }
@@ -35,6 +36,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
         File("kube/temple-user", "db-storage.yaml")                -> ProjectBuilderTestData.simpleTemplefileKubeDbStorage,
         File("kong", "configure-kong.sh")                          -> ProjectBuilderTestData.simpleTemplefileConfigureKong,
         File("grafana/provisioning/dashboards", "templeuser.json") -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboard,
+        File("grafana/provisioning/dashboards", "dashboards.yml")  -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboardConfig,
       ) ++ ProjectBuilderTestData.kongFiles
     project.files shouldBe expected
   }
@@ -51,6 +53,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
         File("kube/temple-user", "db-storage.yaml")                -> ProjectBuilderTestData.simpleTemplefileKubeDbStorage,
         File("kong", "configure-kong.sh")                          -> ProjectBuilderTestData.simpleTemplefileConfigureKong,
         File("grafana/provisioning/dashboards", "templeuser.json") -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboard,
+        File("grafana/provisioning/dashboards", "dashboards.yml")  -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboardConfig,
       ) ++ ProjectBuilderTestData.kongFiles
     project.files shouldBe expected
   }
@@ -67,6 +70,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
       File("kube/complex-user", "db-storage.yaml")                -> ProjectBuilderTestData.complexTemplefileKubeDbStorage,
       File("kong", "configure-kong.sh")                           -> ProjectBuilderTestData.complexTemplefileConfigureKong,
       File("grafana/provisioning/dashboards", "complexuser.json") -> ProjectBuilderTestData.complexTemplefileGrafanaDashboard,
+      File("grafana/provisioning/dashboards", "dashboards.yml")   -> ProjectBuilderTestData.complexTemplefileGrafanaDashboardConfig,
     ) ++ ProjectBuilderTestData.kongFiles
   }
 }

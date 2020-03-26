@@ -11,7 +11,8 @@ import temple.generate.database.ast.Statement
 import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.docker.DockerfileGenerator
 import temple.generate.kube.KubernetesGenerator
-import temple.generate.metrics.grafana.GrafanaDashboardGenerator
+import temple.generate.metrics.grafana.ast.Datasource
+import temple.generate.metrics.grafana.{GrafanaDashboardConfigGenerator, GrafanaDashboardGenerator}
 import temple.generate.server.go.service.GoServiceGenerator
 import temple.utils.StringUtils
 
@@ -32,7 +33,7 @@ object ProjectBuilder {
           }
       }
     // Add read all endpoint if defined
-    service.lookupMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + ReadAll)
+    service.lookupMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + List)
   }
 
   /**
@@ -65,12 +66,17 @@ object ProjectBuilder {
     )
     val kubeFiles = KubernetesGenerator.generate(orchestrationRoot)
 
+    // TODO: Get this from templefile and project settings
+    val datasource: Datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
     val metrics = templefile.services.map {
-      case (name, service) =>
-        val rows             = MetricsBuilder.createDashboardRows(name, endpoints(service))
-        val grafanaDashboard = GrafanaDashboardGenerator.generate(name.toLowerCase, name, rows)
-        (File(s"grafana/provisioning/dashboards", s"${name.toLowerCase}.json"), grafanaDashboard)
-    }
+        case (name, service) =>
+          val rows             = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
+          val grafanaDashboard = GrafanaDashboardGenerator.generate(name.toLowerCase, name, rows)
+          (File(s"grafana/provisioning/dashboards", s"${name.toLowerCase}.json"), grafanaDashboard)
+      } + (
+        File(s"grafana/provisioning/dashboards", "dashboards.yml") ->
+        GrafanaDashboardConfigGenerator.generate(datasource),
+      )
 
     val serverFiles = templefile.servicesWithPorts.flatMap {
       case (name, service, port) =>

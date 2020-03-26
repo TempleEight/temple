@@ -12,7 +12,8 @@ import temple.generate.utils.CodeTerm._
 import scala.Option.when
 
 /** Implementation of [[DatabaseGenerator]] for generating PostgreSQL */
-object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
+object PostgresGenerator extends DatabaseGenerator {
+  type Context = PostgresContext
 
   /** Given an expression, parse it into the Postgres format */
   private def generateExpression(expression: Expression): String =
@@ -63,6 +64,10 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
   private def generateConditionString(conditions: Option[Condition]): Option[String] =
     conditions.map(generateCondition).map(mkCode("WHERE", _))
 
+  private def generateReturningString(returnCols: Seq[Column]): String =
+    if (returnCols.isEmpty) ""
+    else returnCols.map(_.name).mkString("RETURNING ", ", ", "")
+
   /** Given a column type, parse it into the type required by PostgreSQL */
   private def generateColumnType(columnType: ColType): String =
     columnType match {
@@ -78,6 +83,7 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
       case TimeCol                => "TIME"
       case DateTimeTzCol          => "TIMESTAMPTZ"
       case BlobCol                => "BYTEA"
+      case UUIDCol                => "UUID"
     }
 
   /** Parse a given column into PostgreSQL syntax */
@@ -107,14 +113,23 @@ object PostgresGenerator extends DatabaseGenerator[PostgresContext] {
         val stringColumns    = columns.map(_.name).mkString(", ")
         val stringConditions = generateConditionString(conditions)
         mkCode.stmt("SELECT", stringColumns, "FROM", tableName, stringConditions)
-      case Insert(tableName, columns) =>
-        val stringColumns = columns.map(_.name).mkString(", ")
-        val values        = generatePreparedValues(columns)
-        mkCode.stmt("INSERT INTO", tableName, CodeWrap.parens(stringColumns), "VALUES", CodeWrap.parens(values))
-      case Update(tableName, assignments, conditions) =>
-        val stringAssignments = assignments.map(generateAssignment).mkString(", ")
-        val stringConditions  = generateConditionString(conditions)
-        mkCode.stmt("UPDATE", tableName, "SET", stringAssignments, stringConditions)
+      case Insert(tableName, columns, returnColumns) =>
+        val stringColumns       = columns.map(_.name).mkString(", ")
+        val values              = generatePreparedValues(columns)
+        val stringReturnColumns = generateReturningString(returnColumns)
+        mkCode.stmt(
+          "INSERT INTO",
+          tableName,
+          CodeWrap.parens(stringColumns),
+          "VALUES",
+          CodeWrap.parens(values),
+          stringReturnColumns,
+        )
+      case Update(tableName, assignments, conditions, returnColumns) =>
+        val stringAssignments   = assignments.map(generateAssignment).mkString(", ")
+        val stringConditions    = generateConditionString(conditions)
+        val stringReturnColumns = generateReturningString(returnColumns)
+        mkCode.stmt("UPDATE", tableName, "SET", stringAssignments, stringConditions, stringReturnColumns)
       case Delete(tableName, conditions) =>
         val stringConditions = generateConditionString(conditions)
         mkCode.stmt("DELETE FROM", tableName, stringConditions)

@@ -1,6 +1,6 @@
 package temple.DSL.semantics
 
-import temple.DSL.semantics.ErrorHandling._
+import MetadataParser.assertNoParameters
 import temple.DSL.syntax
 import temple.DSL.syntax.{Arg, Args, DSLRootItem, Entry}
 import temple.ast.ArgType._
@@ -23,27 +23,27 @@ object Analyzer {
     */
   private[semantics] def parseParameters(
     specs: (String, Option[syntax.Arg])*,
-  )(args: Args)(implicit context: Context): ArgMap = {
+  )(args: Args)(implicit context: SemanticContext): ArgMap = {
     // A ListMap is an insertion-ordered immutable map
     val specsMap = specs.to(ListMap)
     val argc     = args.posargs.length
 
     if (specs.sizeIs < argc)
-      fail(s"Too many arguments supplied to function $context (found $argc, expected at most ${specs.length})")
+      context.fail(s"Too many arguments supplied to function (found $argc, expected at most ${specs.length})")
 
     val map = mutable.HashMap[String, syntax.Arg]()
 
     // Add the positional arguments to the map
     specsMap.lazyZip(args.posargs) foreach {
       case ((name, _), arg) =>
-        map.safeInsert(name -> arg, fail(s"Programmer error: duplicate argument name $name in spec for $context?"))
+        map.safeInsert(name -> arg, context.fail(s"Programmer error: duplicate argument name $name in spec?"))
     }
 
     // Add the keyword arguments to the map
     args.kwargs foreach {
       case (name, arg) =>
-        if (!specsMap.contains(name)) fail(s"Unknown keyword argument $name with value $arg for $context")
-        map.safeInsert(name -> arg, fail(s"Duplicate argument provided for $name for $context"))
+        if (!specsMap.contains(name)) context.fail(s"Unknown keyword argument $name with value $arg")
+        map.safeInsert(name -> arg, context.fail(s"Duplicate argument provided for $name"))
     }
 
     // Add the default arguments to the map
@@ -53,7 +53,7 @@ object Analyzer {
         // If there is no default value, throw an error.
         map.getOrElseUpdate(
           name,
-          default.getOrElse { fail(s"Required argument $name not provided for $context") },
+          default.getOrElse { context.fail(s"Required argument $name not provided") },
         )
     }
 
@@ -64,11 +64,11 @@ object Analyzer {
     * Parse the type of an attribute from a raw AST to a meaningful data type
     * @param dataType The raw AST entry, consisting of a type and optionally some arguments (both positional and named):
     *                 `bool`, `int(max: 100)`, `string(20)`.
-    * @param keyNameContext Where this attribute is tagged
+    * @param context Where this attribute is tagged
     * @return A parsed attribute type
     */
-  def parseAttributeType(dataType: syntax.AttributeType)(implicit keyNameContext: KeyName): AttributeType = {
-    implicit val context: Context = Context(s"${dataType.typeName}@$keyNameContext")
+  def parseAttributeType(dataType: syntax.AttributeType)(implicit context: SemanticContext): AttributeType = {
+    implicit val innerContext: SemanticContext = context :+ dataType.typeName
     dataType match {
       case syntax.AttributeType.Foreign(typeName) => AttributeType.ForeignKey(typeName)
       case syntax.AttributeType.Primitive(typeName, args) =>
@@ -78,50 +78,50 @@ object Analyzer {
               "max"       -> Some(Arg.NoArg),
               "min"       -> Some(Arg.NoArg),
               "precision" -> Some(Arg.IntArg(4)),
-            )(args)
+            )(args)(innerContext)
             AttributeType.IntType(
-              argMap.getOptionArg("min", IntArgType),
-              argMap.getOptionArg("max", IntArgType),
-              argMap.getArg("precision", IntArgType).toByte,
+              argMap.getOptionArg("min", IntArgType)(innerContext),
+              argMap.getOptionArg("max", IntArgType)(innerContext),
+              argMap.getArg("precision", IntArgType)(innerContext).toByte,
             )
           case "string" =>
             val argMap = parseParameters(
               "maxLength" -> Some(Arg.NoArg),
               "minLength" -> Some(Arg.NoArg),
-            )(args)
+            )(args)(innerContext)
             AttributeType.StringType(
-              argMap.getOptionArg("maxLength", IntArgType),
-              argMap.getOptionArg("minLength", IntArgType).map(_.toInt),
+              argMap.getOptionArg("maxLength", IntArgType)(innerContext),
+              argMap.getOptionArg("minLength", IntArgType)(innerContext).map(_.toInt),
             )
           case "float" =>
             val argMap = parseParameters(
               "max"       -> Some(Arg.NoArg),
               "min"       -> Some(Arg.NoArg),
               "precision" -> Some(Arg.IntArg(8)),
-            )(args)
+            )(args)(innerContext)
             AttributeType.FloatType(
-              argMap.getOptionArg("max", FloatingArgType),
-              argMap.getOptionArg("min", FloatingArgType),
-              argMap.getArg("precision", FloatingArgType).toByte,
+              argMap.getOptionArg("max", FloatingArgType)(innerContext),
+              argMap.getOptionArg("min", FloatingArgType)(innerContext),
+              argMap.getArg("precision", FloatingArgType)(innerContext).toByte,
             )
           case "data" =>
-            val argMap = parseParameters("maxSize" -> Some(Arg.NoArg))(args)
+            val argMap = parseParameters("maxSize" -> Some(Arg.NoArg))(args)(innerContext)
             AttributeType.BlobType(
-              argMap.getOptionArg("maxSize", IntArgType),
+              argMap.getOptionArg("maxSize", IntArgType)(innerContext),
             )
           case "date" =>
-            assertNoParameters(args)
+            assertNoParameters(args)(innerContext)
             AttributeType.DateType
           case "datetime" =>
-            assertNoParameters(args)
+            assertNoParameters(args)(innerContext)
             AttributeType.DateTimeType
           case "time" =>
-            assertNoParameters(args)
+            assertNoParameters(args)(innerContext)
             AttributeType.TimeType
           case "bool" =>
-            assertNoParameters(args)
+            assertNoParameters(args)(innerContext)
             AttributeType.BoolType
-          case typeName => fail(s"Unknown type $typeName")
+          case typeName => context.fail(s"Unknown type $typeName")
         }
     }
   }
@@ -129,14 +129,13 @@ object Analyzer {
   def parseAttribute(
     dataType: syntax.AttributeType,
     annotations: Seq[syntax.Annotation],
-  )(implicit keyNameContext: KeyName): Attribute = {
+  )(implicit context: SemanticContext): Attribute = {
     var accessAnnotation: Option[Annotation.AccessAnnotation] = None
 
     def setAccessAnnotation(annotation: Annotation.AccessAnnotation): Unit =
       accessAnnotation.fold { accessAnnotation = Some(annotation) } { existingAnnotation =>
-        fail(
-          s"Two scope annotations found for ${keyNameContext.keyName}: " +
-          s"${annotation.render} is incompatible with ${existingAnnotation.render}",
+        context.fail(
+          s"Two scope annotations found: ${annotation.render} is incompatible with ${existingAnnotation.render}",
         )
       }
     val valueAnnotations = mutable.HashSet[Annotation.ValueAnnotation]()
@@ -146,45 +145,45 @@ object Analyzer {
       case "server"    => setAccessAnnotation(Annotation.Server)
       case "client"    => setAccessAnnotation(Annotation.Client)
       case "serverSet" => setAccessAnnotation(Annotation.ServerSet)
-      case key         => fail(s"Unknown annotation @$key at ${keyNameContext.keyName}")
+      case key         => context.fail(s"Unknown annotation @$key")
     }
     Attribute(parseAttributeType(dataType), accessAnnotation, valueAnnotations.toSet)
   }
 
   /** A parser of Metadata items that can occur in service blocks */
   private val parseServiceMetadata = new MetadataParser[ServiceMetadata] {
-    registerKeyword("language", TokenArgType)(ServiceLanguage.parse(_))
-    registerKeyword("database", TokenArgType)(Database.parse(_))
+    registerKeywordWithContext("language", TokenArgType)(ServiceLanguage)
+    registerKeywordWithContext("database", TokenArgType)(Database)
     registerEmptyKeyword("enumerable")(ServiceEnumerable())
     registerEmptyKeyword("enumerableByThis")(ServiceEnumerable(byThis = true))
-    registerKeyword("readable", "by", TokenArgType)(Readable.parse(_))
-    registerKeyword("writable", "by", TokenArgType)(Writable.parse(_))
+    registerKeywordWithContext("readable", "by", TokenArgType)(Readable)
+    registerKeywordWithContext("writable", "by", TokenArgType)(Writable)
     registerKeyword("auth", "login", TokenArgType)(ServiceAuth)
     registerKeyword("uses", "services", ListArgType(TokenArgType))(Uses)
-    registerKeyword("omit", "endpoints", ListArgType(TokenArgType))(Omit.parse(_))
+    registerKeywordWithContext("omit", "endpoints", ListArgType(TokenArgType))(Omit)
   }
 
   /** A parser of Metadata items that can occur in struct blocks */
   private val parseStructMetadata = new MetadataParser[StructMetadata] {
     registerEmptyKeyword("enumerable")(ServiceEnumerable())
     registerEmptyKeyword("enumerableByThis")(ServiceEnumerable(byThis = true))
-    registerKeyword("readable", "by", TokenArgType)(Readable.parse(_))
-    registerKeyword("writable", "by", TokenArgType)(Writable.parse(_))
-    registerKeyword("omit", "endpoints", ListArgType(TokenArgType))(Omit.parse(_))
+    registerKeywordWithContext("readable", "by", TokenArgType)(Readable)
+    registerKeywordWithContext("writable", "by", TokenArgType)(Writable)
+    registerKeywordWithContext("omit", "endpoints", ListArgType(TokenArgType))(Omit)
   }
 
   /** A parser of Metadata items that can occur in project blocks */
   private val parseProjectMetadata = new MetadataParser[ProjectMetadata] {
-    registerKeyword("language", TokenArgType)(ServiceLanguage.parse(_))
-    registerKeyword("database", TokenArgType)(Database.parse(_))
-    registerKeyword("provider", TokenArgType)(Provider.parse(_))
-    registerKeyword("readable", "by", TokenArgType)(Readable.parse(_))
-    registerKeyword("writable", "by", TokenArgType)(Writable.parse(_))
+    registerKeywordWithContext("language", TokenArgType)(ServiceLanguage)
+    registerKeywordWithContext("database", TokenArgType)(Database)
+    registerKeywordWithContext("provider", TokenArgType)(Provider)
+    registerKeywordWithContext("readable", "by", TokenArgType)(Readable)
+    registerKeywordWithContext("writable", "by", TokenArgType)(Writable)
   }
 
   /** A parser of Metadata items that can occur in target blocks */
   private val parseTargetMetadata = new MetadataParser[TargetMetadata] {
-    registerKeyword("language", TokenArgType)(TargetLanguage.parse(_))
+    registerKeywordWithContext("language", TokenArgType)(TargetLanguage)
     registerKeyword("auth", "services", ListArgType(TokenArgType))(TargetAuth)
   }
 
@@ -195,19 +194,19 @@ object Analyzer {
     * @param context The location in the AST, used for error messages
     * @return A semantic representation of a [[temple.ast.ServiceBlock]]
     */
-  private def parseServiceBlock(entries: Seq[Entry])(implicit context: BlockContext): ServiceBlock = {
+  private def parseServiceBlock(entries: Seq[Entry])(implicit context: SemanticContext): ServiceBlock = {
     // LinkedHashMap is used to preserve order in the map
     val attributes = mutable.LinkedHashMap[String, Attribute]()
     val metadatas  = mutable.ListBuffer[ServiceMetadata]()
     val structs    = mutable.LinkedHashMap[String, StructBlock]()
     entries.foreach {
       case Entry.Attribute(key, dataType, annotations) =>
-        attributes.safeInsert(key -> parseAttribute(dataType, annotations)(KeyName(key)))
+        attributes.safeInsert(key -> parseAttribute(dataType, annotations)(context :+ key))
       case Entry.Metadata(metaKey, args) => metadatas += parseServiceMetadata(metaKey, args)
       case DSLRootItem(key, tag, entries) =>
         tag match {
-          case "struct" => structs.safeInsert(key -> parseStructBlock(entries)(BlockContext(key, tag, context)))
-          case tag      => fail(s"Unknown block type $tag for $key in $context")
+          case "struct" => structs.safeInsert(key -> parseStructBlock(entries)(context :+ tag :+ key))
+          case tag      => context.fail(s"Unknown block type $tag for $key")
         }
     }
     ServiceBlock(attributes.to(ListMap), metadatas.toSeq, structs.to(ListMap))
@@ -217,12 +216,12 @@ object Analyzer {
   private def parseMetadataBlock[T <: Metadata](
     entries: Seq[Entry],
     f: MetadataParser[T],
-  )(implicit context: BlockContext): Seq[T] = parseBlockWithMetdata(entries, f)()
+  )(implicit context: SemanticContext): Seq[T] = parseBlockWithMetadata(entries, f)()
 
   /** Parse a block containing metadata, among other things */
-  private def parseBlockWithMetdata[T <: Metadata](entries: Seq[Entry], f: MetadataParser[T])(
+  private def parseBlockWithMetadata[T <: Metadata](entries: Seq[Entry], f: MetadataParser[T])(
     parser: PartialFunction[Entry, Unit] = PartialFunction.empty,
-  )(implicit context: BlockContext): Seq[T] = entries flatMap { entry =>
+  )(implicit context: SemanticContext): Seq[T] = entries flatMap { entry =>
     // When the custom handlers are performed, succeed with no result
     val customParser = parser.andThen(_ => None)
 
@@ -236,21 +235,21 @@ object Analyzer {
 
     // Pass the entry to either the combined parser, or fail with a relevant message
     combinedParser.lift(entry).getOrElse {
-      fail(s"Found ${entry.typeName} in ${context.tag} block (${context.block}): `$entry`")
+      context.fail(s"Found unexpected ${entry.typeName}: `$entry`")
     }
   }
 
-  private def parseProjectBlock(entries: Seq[Entry])(implicit context: BlockContext): ProjectBlock =
+  private def parseProjectBlock(entries: Seq[Entry])(implicit context: SemanticContext): ProjectBlock =
     ProjectBlock(parseMetadataBlock(entries, parseProjectMetadata))
 
-  private def parseTargetBlock(entries: Seq[Entry])(implicit context: BlockContext): TargetBlock =
+  private def parseTargetBlock(entries: Seq[Entry])(implicit context: SemanticContext): TargetBlock =
     TargetBlock(parseMetadataBlock(entries, parseTargetMetadata))
 
-  private def parseStructBlock(entries: Seq[Entry])(implicit context: BlockContext): StructBlock = {
+  private def parseStructBlock(entries: Seq[Entry])(implicit context: SemanticContext): StructBlock = {
     val attributes = mutable.LinkedHashMap[String, Attribute]()
-    val metadata = parseBlockWithMetdata(entries, parseStructMetadata) {
+    val metadata = parseBlockWithMetadata(entries, parseStructMetadata) {
       case Entry.Attribute(key, dataType, annotations) =>
-        attributes.safeInsert(key -> parseAttribute(dataType, annotations)(KeyName(key)))
+        attributes.safeInsert(key -> parseAttribute(dataType, annotations)(context :+ key))
     }
 
     StructBlock(attributes.toMap, metadata)
@@ -272,22 +271,24 @@ object Analyzer {
 
     templefile.foreach {
       case DSLRootItem(key, tag, entries) =>
-        implicit val blockContext: BlockContext = BlockContext(key, tag)
+        implicit val context: SemanticContext = SemanticContext.empty :+ key :+ tag
         tag match {
           // TODO: error message
           case "service" => services.safeInsert(key -> parseServiceBlock(entries))
           case "project" =>
             projectNameBlock.fold { projectNameBlock = Some(key -> parseProjectBlock(entries)) } {
-              case (str, _) => fail(s"Multiple projects found: $str and $key")
+              case (str, _) => context.fail(s"Second project found in addition to $str,")
             }
           // TODO: error message
           case "target" => targets.safeInsert(key -> parseTargetBlock(entries))
 
-          case tag => fail(s"Unknown block type $tag for $key")
+          case _ => context.fail(s"Unknown block type")
         }
     }
 
-    val (projectName, projectBlock) = projectNameBlock.getOrElse { fail("Temple file has no project block") }
+    val (projectName, projectBlock) = projectNameBlock.getOrElse {
+      throw new SemanticParsingException("Temple file has no project block")
+    }
 
     Templefile(projectName, projectBlock, targets.to(ListMap), services.to(ListMap))
   }
