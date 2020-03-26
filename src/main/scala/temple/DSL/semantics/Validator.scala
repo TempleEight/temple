@@ -5,14 +5,25 @@ import temple.ast.{Metadata, _}
 
 private class Validator private (templefile: Templefile) {
 
-  private lazy val allStructs: Set[String] =
-    templefile.services.flatMap { case serviceName -> service => Iterator(serviceName) ++ service.structs.keys }.toSet
+  private lazy val allStructs: Iterable[String] = templefile.services.flatMap {
+    case (name, service) => service.structs.keys
+  }
 
   private lazy val allServices: Set[String] = templefile.services.keys.toSet
 
+  private lazy val allStructsAndServices: Set[String] = allServices ++ allStructs
+
+  private def validateAttributes(attributes: Map[String, Attribute])(context: SemanticContext): Unit = {
+    attributes.keys.foreach { attributeName =>
+      if (attributeName.headOption.forall(!_.isLower))
+        context.fail(s"Invalid attribute name $attributeName, it must start with a lowercase letter,")
+    }
+    attributes.foreachEntry(context(validateAttribute))
+  }
+
   private def validateService(service: ServiceBlock)(context: SemanticContext): Unit = {
     service.structs.foreachEntry(context(validateStruct))
-    service.attributes.foreachEntry(context(validateAttribute))
+    validateAttributes(service.attributes)(context)
     service.metadata.foreach(validateMetadata(_, service.attributes)(context))
   }
 
@@ -51,7 +62,7 @@ private class Validator private (templefile: Templefile) {
 
   private def validateAttributeType(attributeType: AttributeType)(context: SemanticContext): Unit =
     attributeType match {
-      case ForeignKey(references) if !allStructs.contains(references) =>
+      case ForeignKey(references) if !allStructsAndServices.contains(references) =>
         context.fail(s"Invalid foreign key $references")
       case ForeignKey(_) => // all good
 
@@ -86,14 +97,26 @@ private class Validator private (templefile: Templefile) {
     templefile.targets.foreachEntry(context(validateBlockOfMetadata))
     validateBlockOfMetadata(templefile.projectBlock)(context :+ s"${templefile.projectName} project")
 
-    val rootNames  = allStructs.toSeq ++ templefile.targets.keys :+ templefile.projectName
-    val duplicates = rootNames.groupBy(identity).collect { case (name, repeats) if repeats.sizeIs > 1 => name }.toSet
+    val rootNames =
+      allServices.toSeq.map(_       -> "service") ++
+      allStructs.map(_              -> "struct") ++
+      templefile.targets.keys.map(_ -> "target") :+
+      (templefile.projectName -> "project")
+    val duplicates = rootNames
+      .groupBy(_._1)
+      .collect { case (name, repeats) if repeats.sizeIs > 1 => (name, repeats.map(_._2)) }
 
     if (duplicates.nonEmpty) {
+      val duplicateString = duplicates.map { case (name, used) => s"$name (${used.mkString(", ")})" }.mkString(", ")
+
       val suffix =
-        if (duplicates.sizeIs == 1) s"duplicate found: ${duplicates.mkString(", ")}"
-        else s"duplicates found: ${duplicates.mkString(", ")}"
+        if (duplicates.sizeIs == 1) s"duplicate found: $duplicateString"
+        else s"duplicates found: $duplicateString"
       context.fail(s"Project, targets and structs must be globally unique, $suffix")
+    }
+    rootNames.collect {
+      case (name, location) if (!name.head.isUpper) =>
+        context.fail(s"Invalid name: $name ($location), it should start with a capital letter")
     }
   }
 }
