@@ -20,6 +20,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
         File("kong", "configure-kong.sh")                          -> ProjectBuilderTestData.simpleTemplefileConfigureKong,
         File("grafana/provisioning/dashboards", "templeuser.json") -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboard,
         File("grafana/provisioning/dashboards", "dashboards.yml")  -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboardConfig,
+        File("grafana/provisioning/datasources", "datasource.yml") -> ProjectBuilderTestData.simpleTemplefileGrafanaDatasourceConfig,
       ) ++ ProjectBuilderTestData.kongFiles
     project.files shouldBe expected
   }
@@ -37,6 +38,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
         File("kong", "configure-kong.sh")                          -> ProjectBuilderTestData.simpleTemplefileConfigureKong,
         File("grafana/provisioning/dashboards", "templeuser.json") -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboard,
         File("grafana/provisioning/dashboards", "dashboards.yml")  -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboardConfig,
+        File("grafana/provisioning/datasources", "datasource.yml") -> ProjectBuilderTestData.simpleTemplefileGrafanaDatasourceConfig,
       ) ++ ProjectBuilderTestData.kongFiles
     project.files shouldBe expected
   }
@@ -54,6 +56,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
         File("kong", "configure-kong.sh")                          -> ProjectBuilderTestData.simpleTemplefileConfigureKong,
         File("grafana/provisioning/dashboards", "templeuser.json") -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboard,
         File("grafana/provisioning/dashboards", "dashboards.yml")  -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboardConfig,
+        File("grafana/provisioning/datasources", "datasource.yml") -> ProjectBuilderTestData.simpleTemplefileGrafanaDatasourceConfig,
       ) ++ ProjectBuilderTestData.kongFiles
     project.files shouldBe expected
   }
@@ -71,6 +74,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
       File("kong", "configure-kong.sh")                           -> ProjectBuilderTestData.complexTemplefileConfigureKong,
       File("grafana/provisioning/dashboards", "complexuser.json") -> ProjectBuilderTestData.complexTemplefileGrafanaDashboard,
       File("grafana/provisioning/dashboards", "dashboards.yml")   -> ProjectBuilderTestData.complexTemplefileGrafanaDashboardConfig,
+      File("grafana/provisioning/datasources", "datasource.yml")  -> ProjectBuilderTestData.complexTemplefileGrafanaDatasourceConfig,
     ) ++ ProjectBuilderTestData.kongFiles
   }
 }
