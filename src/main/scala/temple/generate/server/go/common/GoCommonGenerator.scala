@@ -42,4 +42,12 @@ object GoCommonGenerator {
         ),
       ),
     )
+
+  /** Generate "a, b, ... := c" */
+  private[go] def genDeclareAndAssign(value: String, identifiers: String*): String =
+    mkCode.list(identifiers) + " := " + value // mkCode doesn't put a space before the colon
+
+  //** Generate "a(b, c, ...)" */
+  private[go] def genCallFunction(name: String, args: String*): String =
+    CodeWrap.parens.prefix(name).list(args)
 }

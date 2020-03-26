@@ -78,20 +78,33 @@ func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) 
 
 // CreateUser creates a new user in the datastore, returning the newly created user
 func (dao *DAO) CreateUser(input CreateUserInput) (*User, error) {
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO user_temple (id, name) VALUES ($1, $2) RETURNING id, name", input.ID, input.Name)
+
 	return nil, nil
 }
 
 // ReadUser returns the user in the datastore for a given ID
 func (dao *DAO) ReadUser(input ReadUserInput) (*User, error) {
+	row := executeQueryWithRowResponse(dao.DB, "SELECT id, name FROM user_temple WHERE id = $1", input.ID)
+
 	return nil, nil
 }
 
 // UpdateUser updates the user in the datastore for a given ID, returning the newly updated user
 func (dao *DAO) UpdateUser(input UpdateUserInput) (*User, error) {
+	row := executeQueryWithRowResponse(dao.DB, "UPDATE user_temple SET name = $1 WHERE id = $2 RETURNING id, name", input.Name, input.ID)
+
 	return nil, nil
 }
 
 // DeleteUser deletes the user in the datastore for a given ID
 func (dao *DAO) DeleteUser(input DeleteUserInput) error {
+	rowsAffected, err := executeQuery(dao.DB, "DELETE FROM user_temple WHERE id = $1", input.ID)
+	if err != nil {
+		return err
+	} else if rowsAffected == 0 {
+		return ErrUserNotFound(input.ID.String())
+	}
+
 	return nil
 }

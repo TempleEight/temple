@@ -1,14 +1,15 @@
 package temple.generate.server.go.service.dao
 
-import temple.ast.Attribute
+import temple.ast.{Annotation, Attribute}
 import temple.generate.CRUD
 import temple.generate.CRUD.{Create, Delete, List, Read, Update}
 import temple.generate.server.CreatedByAttribute.EnumerateByCreator
+import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.server.go.service.dao.GoServiceDAOInterfaceGenerator.generateInterfaceFunction
-import temple.generate.server.go.service.dao.GoServiceDAOListFunctionGenerator.generateDAOListFunctionBody
 import temple.generate.server.{CreatedByAttribute, IDAttribute}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
+import temple.utils.StringUtils.doubleQuote
 
 import scala.collection.immutable.ListMap
 
@@ -43,6 +44,83 @@ object GoServiceDAOFunctionsGenerator {
       },
     )
 
+  private def generateQueryArgs(
+    operation: CRUD,
+    idAttribute: IDAttribute,
+    createdByAttribute: CreatedByAttribute,
+    attributes: ListMap[String, Attribute],
+  ): Seq[String] = {
+    val prefix  = "input"
+    lazy val id = Seq(s"$prefix.${idAttribute.name.toUpperCase()}")
+    lazy val createdBy = createdByAttribute match {
+      case EnumerateByCreator(inputName, _, _) => Seq(s"$prefix.${inputName.capitalize}")
+      case _                                   => Seq.empty
+    }
+    lazy val filteredAttributes = (attributes.collect {
+      case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.ServerSet) =>
+        s"$prefix.${name.capitalize}"
+    }).toSeq
+
+    operation match {
+      case CRUD.List               => createdBy
+      case CRUD.Create             => id ++ createdBy ++ filteredAttributes
+      case CRUD.Read | CRUD.Delete => id
+      case CRUD.Update             => filteredAttributes ++ id
+    }
+  }
+
+  private def generateQueryBlockErrorHandling(
+    serviceName: String,
+    operation: CRUD,
+    idAttribute: IDAttribute,
+  ): Option[String] =
+    operation match {
+      case CRUD.List => Some(generateCheckAndReturnError("nil"))
+      case CRUD.Delete =>
+        Some(
+          mkCode(
+            generateCheckAndReturnError(),
+            mkCode(
+              "else if rowsAffected == 0",
+              CodeWrap.curly.tabbed(
+                s"return Err${serviceName.capitalize}NotFound(input.${idAttribute.name.toUpperCase()}.String())",
+              ),
+            ),
+          ),
+        )
+      case _ => None
+    }
+
+  private def generateQueryBlock(
+    serviceName: String,
+    operation: CRUD,
+    idAttribute: IDAttribute,
+    createdByAttribute: CreatedByAttribute,
+    attributes: ListMap[String, Attribute],
+    query: String,
+  ): String = {
+    val identifiers = operation match {
+      case CRUD.List                             => Seq("rows", "err")
+      case CRUD.Create | CRUD.Read | CRUD.Update => Seq("row")
+      case CRUD.Delete                           => Seq("rowsAffected", "err")
+    }
+
+    val value = genCallFunction(
+      operation match {
+        case CRUD.List                             => "executeQueryWithRowResponses"
+        case CRUD.Create | CRUD.Read | CRUD.Update => "executeQueryWithRowResponse"
+        case CRUD.Delete                           => "executeQuery"
+      },
+      Seq("dao.DB", doubleQuote(query)) ++
+      generateQueryArgs(operation, idAttribute, createdByAttribute, attributes): _*,
+    )
+
+    mkCode.lines(
+      genDeclareAndAssign(value, identifiers: _*),
+      generateQueryBlockErrorHandling(serviceName, operation, idAttribute),
+    )
+  }
+
   private def generateDAOFunction(
     serviceName: String,
     operation: CRUD,
@@ -57,12 +135,13 @@ object GoServiceDAOFunctionsGenerator {
         "func (dao *DAO)",
         generateInterfaceFunction(serviceName, operation, createdByAttribute),
         CodeWrap.curly.tabbed(
-          operation match {
-            case List =>
-              generateDAOListFunctionBody(serviceName, idAttribute, createdByAttribute, attributes, query)
-            case Create | Read | Update => "return nil, nil"
-            case Delete                 => "return nil"
-          },
+          mkCode.doubleLines(
+            generateQueryBlock(serviceName, operation, idAttribute, createdByAttribute, attributes, query),
+            operation match {
+              case CRUD.Delete => "return nil"
+              case _           => "return nil, nil"
+            },
+          ),
         ),
       ),
     )
