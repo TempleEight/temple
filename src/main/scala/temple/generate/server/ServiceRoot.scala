@@ -1,8 +1,8 @@
 package temple.generate.server
 
 import temple.ast.Attribute
+import temple.generate.CRUD.CRUD
 import temple.ast.Metadata.Database
-import temple.generate.CRUD
 
 import scala.collection.immutable.ListMap
 
