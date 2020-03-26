@@ -215,36 +215,36 @@ object TestData {
   val insertStatement: Insert = Insert(
     "temple_user",
     Seq(
-      Column("id"),
-      Column("anotherId"),
-      Column("yetAnotherId"),
-      Column("bankBalance"),
-      Column("bigBankBalance"),
-      Column("name"),
-      Column("initials"),
-      Column("isStudent"),
-      Column("dateOfBirth"),
-      Column("timeOfDay"),
-      Column("expiry"),
-      Column("veryUnique"),
+      Assignment(Column("id"), PreparedValue),
+      Assignment(Column("anotherId"), PreparedValue),
+      Assignment(Column("yetAnotherId"), PreparedValue),
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("bigBankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+      Assignment(Column("initials"), PreparedValue),
+      Assignment(Column("isStudent"), PreparedValue),
+      Assignment(Column("dateOfBirth"), PreparedValue),
+      Assignment(Column("timeOfDay"), PreparedValue),
+      Assignment(Column("expiry"), PreparedValue),
+      Assignment(Column("veryUnique"), PreparedValue),
     ),
   )
 
   val insertStatementWithReturn: Insert = Insert(
     "temple_user",
     Seq(
-      Column("id"),
-      Column("anotherId"),
-      Column("yetAnotherId"),
-      Column("bankBalance"),
-      Column("bigBankBalance"),
-      Column("name"),
-      Column("initials"),
-      Column("isStudent"),
-      Column("dateOfBirth"),
-      Column("timeOfDay"),
-      Column("expiry"),
-      Column("veryUnique"),
+      Assignment(Column("id"), PreparedValue),
+      Assignment(Column("anotherId"), PreparedValue),
+      Assignment(Column("yetAnotherId"), PreparedValue),
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("bigBankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+      Assignment(Column("initials"), PreparedValue),
+      Assignment(Column("isStudent"), PreparedValue),
+      Assignment(Column("dateOfBirth"), PreparedValue),
+      Assignment(Column("timeOfDay"), PreparedValue),
+      Assignment(Column("expiry"), PreparedValue),
+      Assignment(Column("veryUnique"), PreparedValue),
     ),
     Seq(
       Column("id"),
@@ -254,24 +254,24 @@ object TestData {
   val insertStatementForUniqueConstraint: Insert = Insert(
     "unique_test",
     Seq(
-      Column("itemID"),
-      Column("createdAt"),
+      Assignment(Column("itemID"), PreparedValue),
+      Assignment(Column("createdAt"), PreparedValue),
     ),
   )
 
   val insertStatementForReferenceConstraint: Insert = Insert(
     "reference_test",
     Seq(
-      Column("itemID"),
-      Column("userID"),
+      Assignment(Column("itemID"), PreparedValue),
+      Assignment(Column("userID"), PreparedValue),
     ),
   )
 
   val insertStatementForCheckConstraint: Insert = Insert(
     "check_test",
     Seq(
-      Column("itemID"),
-      Column("value"),
+      Assignment(Column("itemID"), PreparedValue),
+      Assignment(Column("value"), PreparedValue),
     ),
   )
 
