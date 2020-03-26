@@ -1,5 +1,7 @@
 package temple.ast
 
+import temple.ast.Templefile.Ports
+
 /** The semantic representation of a Templefile */
 case class Templefile(
   projectName: String,
@@ -12,8 +14,12 @@ case class Templefile(
     block.setParent(this)
   }
 
-  def servicesWithPorts: Iterable[(String, ServiceBlock, Int)] =
+  def servicesWithPorts: Iterable[(String, ServiceBlock, Ports)] =
     services
-      .zip(Iterator from 1024)
-      .map { case ((name, service), port) => (name, service, port) }
+      .zip(Iterator.from(1024, step = 2))
+      .map { case ((name, service), port) => (name, service, Ports(port, port + 1)) }
+}
+
+object Templefile {
+  case class Ports(service: Int, metrics: Int)
 }

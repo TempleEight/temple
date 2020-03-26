@@ -245,4 +245,15 @@ object SimpleE2ETestData {
       |  isDefault: true
       |  editable: true
       |""".stripMargin
+
+  val prometheusConfig: String =
+    """global:
+    |  scrape_interval: 15s
+    |  evaluation_interval: 15s
+    |scrape_configs:
+    |- job_name: templeuser
+    |  static_configs:
+    |  - targets:
+    |    - templeuser:1025
+    |""".stripMargin
 }

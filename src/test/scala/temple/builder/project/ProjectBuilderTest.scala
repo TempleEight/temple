@@ -21,6 +21,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
         File("grafana/provisioning/dashboards", "templeuser.json") -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboard,
         File("grafana/provisioning/dashboards", "dashboards.yml")  -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboardConfig,
         File("grafana/provisioning/datasources", "datasource.yml") -> ProjectBuilderTestData.simpleTemplefileGrafanaDatasourceConfig,
+        File("prometheus", "prometheus.yml")                       -> ProjectBuilderTestData.simpleTemplefilePrometheusConfig,
       ) ++ ProjectBuilderTestData.kongFiles
     project.files shouldBe expected
   }
@@ -39,6 +40,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
         File("grafana/provisioning/dashboards", "templeuser.json") -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboard,
         File("grafana/provisioning/dashboards", "dashboards.yml")  -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboardConfig,
         File("grafana/provisioning/datasources", "datasource.yml") -> ProjectBuilderTestData.simpleTemplefileGrafanaDatasourceConfig,
+        File("prometheus", "prometheus.yml")                       -> ProjectBuilderTestData.simpleTemplefilePrometheusConfig,
       ) ++ ProjectBuilderTestData.kongFiles
     project.files shouldBe expected
   }
@@ -57,6 +59,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
         File("grafana/provisioning/dashboards", "templeuser.json") -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboard,
         File("grafana/provisioning/dashboards", "dashboards.yml")  -> ProjectBuilderTestData.simpleTemplefileGrafanaDashboardConfig,
         File("grafana/provisioning/datasources", "datasource.yml") -> ProjectBuilderTestData.simpleTemplefileGrafanaDatasourceConfig,
+        File("prometheus", "prometheus.yml")                       -> ProjectBuilderTestData.simpleTemplefilePrometheusConfig,
       ) ++ ProjectBuilderTestData.kongFiles
     project.files shouldBe expected
   }
@@ -75,6 +78,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
       File("grafana/provisioning/dashboards", "complexuser.json") -> ProjectBuilderTestData.complexTemplefileGrafanaDashboard,
       File("grafana/provisioning/dashboards", "dashboards.yml")   -> ProjectBuilderTestData.complexTemplefileGrafanaDashboardConfig,
       File("grafana/provisioning/datasources", "datasource.yml")  -> ProjectBuilderTestData.complexTemplefileGrafanaDatasourceConfig,
+      File("prometheus", "prometheus.yml")                        -> ProjectBuilderTestData.complexTemplefilePrometheusConfig,
     ) ++ ProjectBuilderTestData.kongFiles
   }
 }

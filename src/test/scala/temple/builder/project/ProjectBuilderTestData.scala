@@ -305,6 +305,17 @@ object ProjectBuilderTestData {
       |  editable: true
       |""".stripMargin
 
+  val simpleTemplefilePrometheusConfig: String =
+    """global:
+      |  scrape_interval: 15s
+      |  evaluation_interval: 15s
+      |scrape_configs:
+      |- job_name: templeuser
+      |  static_configs:
+      |  - targets:
+      |    - templeuser:1025
+      |""".stripMargin
+
   val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
     ProjectBlock(),
@@ -554,4 +565,15 @@ object ProjectBuilderTestData {
       |  isDefault: true
       |  editable: true
       |""".stripMargin
+
+  val complexTemplefilePrometheusConfig: String =
+    """global:
+    |  scrape_interval: 15s
+    |  evaluation_interval: 15s
+    |scrape_configs:
+    |- job_name: complexuser
+    |  static_configs:
+    |  - targets:
+    |    - complexuser:1025
+    |""".stripMargin
 }
