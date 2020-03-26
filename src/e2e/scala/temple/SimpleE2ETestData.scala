@@ -1,5 +1,7 @@
 package temple
 
+import temple.utils.FileUtils
+
 object SimpleE2ETestData {
 
   val createStatement: String =
@@ -18,7 +20,7 @@ object SimpleE2ETestData {
       |
       |CREATE TABLE fred (
       |  field TEXT,
-      |  friend INT NOT NULL,
+      |  friend UUID NOT NULL,
       |  image BYTEA CHECK (octet_length(image) <= 10000000) NOT NULL
       |);""".stripMargin
 
@@ -213,5 +215,21 @@ object SimpleE2ETestData {
       |  selector:
       |    app: temple-user
       |    kind: db
+      |""".stripMargin
+
+  val grafanaDashboard: String = FileUtils.readResources("grafana/simple-templeuser.json").init
+
+  val grafanaDashboardConfig: String =
+    """apiVersion: 1
+      |providers:
+      |- name: Prometheus
+      |  orgId: 1
+      |  folder: ''
+      |  type: file
+      |  disableDeletion: false
+      |  editable: true
+      |  allowUiUpdates: true
+      |  options:
+      |    path: /etc/grafana/provisioning/dashboards
       |""".stripMargin
 }

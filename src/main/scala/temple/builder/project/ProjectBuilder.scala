@@ -1,17 +1,39 @@
 package temple.builder.project
 
-import temple.ast.Metadata.Database
-import temple.ast.Templefile
-import temple.builder.{DatabaseBuilder, DockerfileBuilder, OrchestrationBuilder}
+import temple.ast.Metadata.{Database, Endpoint}
+import temple.ast.{Metadata, ServiceBlock, Templefile}
+import temple.builder.{DatabaseBuilder, DockerfileBuilder, MetricsBuilder, OrchestrationBuilder}
+import temple.generate.CRUD
+import temple.generate.CRUD._
 import temple.generate.FileSystem._
 import temple.generate.database.PreparedType.QuestionMarks
 import temple.generate.database.ast.Statement
 import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.docker.DockerfileGenerator
 import temple.generate.kube.KubernetesGenerator
+import temple.generate.metrics.grafana.ast.Datasource
+import temple.generate.metrics.grafana.{GrafanaDashboardConfigGenerator, GrafanaDashboardGenerator}
 import temple.utils.StringUtils
 
 object ProjectBuilder {
+
+  private def endpoints(service: ServiceBlock): Set[CRUD] = {
+    val endpoints: Set[CRUD] = service
+      .lookupMetadata[Metadata.Omit]
+      .map(_.endpoints)
+      .getOrElse(Set.empty)
+      .foldLeft(Set[CRUD](Create, Read, Update, Delete)) {
+        case (set, endpoint) =>
+          endpoint match {
+            case Endpoint.Create => set - CRUD.Create
+            case Endpoint.Read   => set - CRUD.Read
+            case Endpoint.Update => set - CRUD.Update
+            case Endpoint.Delete => set - CRUD.Delete
+          }
+      }
+    // Add read all endpoint if defined
+    service.lookupMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + List)
+  }
 
   /**
     * Converts a Templefile to an associated project, containing all generated code
@@ -43,6 +65,18 @@ object ProjectBuilder {
     )
     val kubeFiles = KubernetesGenerator.generate(orchestrationRoot)
 
-    Project(databaseCreationScripts ++ dockerfiles ++ kubeFiles)
+    // TODO: Get this from templefile
+    val datasource: Datasource = Datasource.Prometheus("Prometheus")
+    val metrics = templefile.services.map {
+        case (name, service) =>
+          val rows             = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
+          val grafanaDashboard = GrafanaDashboardGenerator.generate(name.toLowerCase, name, rows)
+          (File(s"grafana/provisioning/dashboards", s"${name.toLowerCase}.json"), grafanaDashboard)
+      } + (
+        File(s"grafana/provisioning/dashboards", "dashboards.yml") ->
+        GrafanaDashboardConfigGenerator.generate(datasource),
+      )
+
+    Project(databaseCreationScripts ++ dockerfiles ++ kubeFiles ++ metrics)
   }
 }

@@ -2,7 +2,6 @@ package temple.generate.metrics.grafana
 
 import io.circe.syntax._
 import temple.generate.metrics.grafana.ast.{GrafanaPanel, GrafanaRoot, GrafanaTarget, Row}
-import temple.utils.StringUtils
 
 object GrafanaDashboardGenerator {
   private val maxWidth    = 24
@@ -14,9 +13,7 @@ object GrafanaDashboardGenerator {
     * @param rows A sequence of rows, each of which contains a sequence of metrics to display
     * @return The raw JSON string
     */
-  def generate(serviceName: String, rows: Seq[Row]): String = generate(StringUtils.randomString(8), serviceName, rows)
-
-  private[grafana] def generate(uid: String, serviceName: String, rows: Seq[Row]): String = {
+  def generate(uid: String, serviceName: String, rows: Seq[Row]): String = {
     val grafanaPanels = rows.zipWithIndex.flatMap {
       case (row, index) =>
         val rowY       = index * panelHeight

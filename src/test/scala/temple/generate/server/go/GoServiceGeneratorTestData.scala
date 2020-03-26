@@ -1,5 +1,6 @@
 package temple.generate.server.go
 
+import temple.ast.Metadata.Database.Postgres
 import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
@@ -14,11 +15,17 @@ object GoServiceGeneratorTestData {
     "user",
     "github.com/TempleEight/spec-golang/user",
     Seq.empty,
-    Set(CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
+    ListMap(
+      CRUD.Create -> "INSERT INTO user_temple (id, name) VALUES ($1, $2) RETURNING id, name",
+      CRUD.Read   -> "SELECT id, name FROM user_temple WHERE id = $1",
+      CRUD.Update -> "UPDATE user_temple SET name = $1 WHERE id = $2 RETURNING id, name",
+      CRUD.Delete -> "DELETE FROM user_temple WHERE id = $1",
+    ),
     80,
     IDAttribute("id", AttributeType.UUIDType),
-    None,
+    CreatedByAttribute.None,
     ListMap("name" -> Attribute(AttributeType.StringType())),
+    Postgres,
   )
 
   val simpleServiceFiles: Files = Map(
@@ -40,16 +47,22 @@ object GoServiceGeneratorTestData {
       "match",
       "github.com/TempleEight/spec-golang/match",
       Seq("user"),
-      Set(CRUD.ReadAll, CRUD.Create, CRUD.Read, CRUD.Update, CRUD.Delete),
+      ListMap(
+        CRUD.List   -> "SELECT id, created_by, userOne, userTwo, matchedOn FROM match WHERE created_by = $1",
+        CRUD.Create -> "INSERT INTO match (id, created_by, userOne, userTwo, matchedOn) VALUES ($1, $2, $3, $4, NOW()) RETURNING id, created_by, userOne, userTwo, matchedOn",
+        CRUD.Read   -> "SELECT id, created_by, userOne, userTwo, matchedOn FROM match WHERE id = $1",
+        CRUD.Update -> "UPDATE match SET userOne = $1, userTwo = $2, matchedOn = NOW() WHERE id = $3 RETURNING id, created_by, userOne, userTwo, matchedOn",
+        CRUD.Delete -> "DELETE FROM match WHERE id = $1",
+      ),
       81,
       IDAttribute("id", AttributeType.UUIDType),
-      Some(CreatedByAttribute("authID", "createdBy", AttributeType.UUIDType)),
+      CreatedByAttribute.EnumerateByCreator("authID", "createdBy", AttributeType.UUIDType),
       ListMap(
         "userOne"   -> Attribute(AttributeType.UUIDType),
         "userTwo"   -> Attribute(AttributeType.UUIDType),
         "matchedOn" -> Attribute(AttributeType.DateTimeType, Some(Annotation.ServerSet)),
       ),
-      enumByCreatedBy = true,
+      Postgres,
     )
 
   val simpleServiceFilesWithComms: Files = Map(

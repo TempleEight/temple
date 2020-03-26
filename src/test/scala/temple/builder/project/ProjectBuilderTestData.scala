@@ -276,6 +276,22 @@ object ProjectBuilderTestData {
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
 
+  val simpleTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/templeuser.json").init
+
+  val simpleTemplefileGrafanaDashboardConfig: String =
+    """apiVersion: 1
+      |providers:
+      |- name: Prometheus
+      |  orgId: 1
+      |  folder: ''
+      |  type: file
+      |  disableDeletion: false
+      |  editable: true
+      |  allowUiUpdates: true
+      |  options:
+      |    path: /etc/grafana/provisioning/dashboards
+      |""".stripMargin
+
   val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
     ProjectBlock(),
@@ -496,4 +512,20 @@ object ProjectBuilderTestData {
       |  --url $KONG_ADMIN/services/complex-user-service/plugins \
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
+
+  val complexTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/complexuser.json").init
+
+  val complexTemplefileGrafanaDashboardConfig: String =
+    """apiVersion: 1
+      |providers:
+      |- name: Prometheus
+      |  orgId: 1
+      |  folder: ''
+      |  type: file
+      |  disableDeletion: false
+      |  editable: true
+      |  allowUiUpdates: true
+      |  options:
+      |    path: /etc/grafana/provisioning/dashboards
+      |""".stripMargin
 }

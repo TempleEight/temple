@@ -3,10 +3,12 @@ package temple.generate.metrics.grafana.ast
 import io.circe.Json
 import temple.generate.JsonEncodable
 
+import scala.collection.immutable.ListMap
+
 private[grafana] case class GrafanaPanel(
   id: Int,
   title: String,
-  datasource: String,
+  datasource: Datasource,
   width: Int,
   height: Int,
   x: Int,
@@ -16,17 +18,17 @@ private[grafana] case class GrafanaPanel(
 ) extends JsonEncodable.Object {
 
   override def jsonEntryIterator: IterableOnce[(String, Json)] = Seq(
-    "aliasColors"  ~> Map[String, Json](),
+    "aliasColors"  ~> ListMap[String, Json](),
     "bars"         ~> false,
     "dashLength"   ~> 10,
     "dashes"       ~> false,
-    "datasource"   ~> datasource,
+    "datasource"   ~> datasource.name,
     "fill"         ~> 1,
     "fillGradient" ~> 0,
-    "gridPos"      ~> Map("h" -> height, "w" -> width, "x" -> x, "y" -> y),
+    "gridPos"      ~> ListMap("h" -> height, "w" -> width, "x" -> x, "y" -> y),
     "hiddenSeries" ~> false,
     "id"           ~> id,
-    "legend" ~> Map(
+    "legend" ~> ListMap(
       "avg"       -> false,
       "current"   -> false,
       "max"       -> false,
@@ -37,9 +39,9 @@ private[grafana] case class GrafanaPanel(
       "values"    -> false,
     ),
     "lines"           ~> true,
-    "lineWidth"       ~> 1,
+    "linewidth"       ~> 1,
     "nullPointMode"   ~> "null",
-    "options"         ~> Map("dataLinks" -> Seq[String]()),
+    "options"         ~> ListMap("dataLinks" -> Seq[String]()),
     "percentage"      ~> false,
     "pointradius"     ~> 2,
     "points"          ~> false,
@@ -54,19 +56,19 @@ private[grafana] case class GrafanaPanel(
     "timeRegions"     ~> Seq[String](),
     "timeShift"       ~> None,
     "title"           ~> title,
-    "tooltip"         ~> Map[String, Json]("shared" ~> true, "sort" ~> 0, "value_type" ~> "individual"),
+    "tooltip"         ~> ListMap[String, Json]("shared" ~> true, "sort" ~> 0, "value_type" ~> "individual"),
     "type"            ~> "graph",
-    "x-axis" ~> Map[String, Json](
+    "xaxis" ~> ListMap[String, Json](
       "buckets" ~> None,
-      "mode"    ~> "Time",
+      "mode"    ~> "time",
       "name"    ~> None,
       "show"    ~> true,
       "values"  ~> Seq[String](),
     ),
-    "yaxes" ~> Seq[Map[String, Json]](
-      Map("format" ~> "short", "label" ~> yaxisLabel, "logBase" ~> 1, "max" ~> None, "min" ~> None, "show" ~> true),
-      Map("format" ~> "short", "label" ~> None, "logBase"       ~> 1, "max" ~> None, "min" ~> None, "show" ~> true),
+    "yaxes" ~> Seq[ListMap[String, Json]](
+      ListMap("format" ~> "short", "label" ~> yaxisLabel, "logBase" ~> 1, "max" ~> None, "min" ~> None, "show" ~> true),
+      ListMap("format" ~> "short", "label" ~> None, "logBase"       ~> 1, "max" ~> None, "min" ~> None, "show" ~> true),
     ),
-    "yaxis" ~> Map[String, Json]("align" ~> false, "alignLevel" ~> None),
+    "yaxis" ~> ListMap[String, Json]("align" ~> false, "alignLevel" ~> None),
   )
 }

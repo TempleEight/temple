@@ -1,7 +1,7 @@
 package temple.ast
 
 import temple.collection.enumeration._
-import temple.utils.MapUtils.FailThrower
+import temple.errors.ErrorHandlingContext
 
 /** A piece of metadata modifying a service/project/target block */
 sealed trait Metadata
@@ -85,10 +85,12 @@ object Metadata {
     case object Delete extends Endpoint("delete")
   }
 
-  case class Omit(endpoints: Seq[Endpoint]) extends ServiceMetadata with StructMetadata
+  case class Omit(endpoints: Set[Endpoint]) extends ServiceMetadata with StructMetadata
 
-  object Omit {
-    def parse(names: Seq[String])(implicit failThrower: FailThrower): Omit = Omit(names.map(Endpoint.parse(_)))
+  object Omit extends EnumParser[Omit, Seq[String]] {
+
+    def parse(names: Seq[String])(implicit context: ErrorHandlingContext): Omit =
+      Omit(names.map(Endpoint.parse(_)).toSet)
   }
 
   case class ServiceAuth(login: String)                 extends ServiceMetadata

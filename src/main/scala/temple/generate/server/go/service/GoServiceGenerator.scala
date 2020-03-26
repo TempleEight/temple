@@ -18,7 +18,8 @@ object GoServiceGenerator extends ServiceGenerator {
      * handler.go
      * config.json
      */
-    val usesComms = serviceRoot.comms.nonEmpty
+    val usesComms  = serviceRoot.comms.nonEmpty
+    val operations = serviceRoot.opQueries.keySet
     (Map(
       File(s"${serviceRoot.name}", "go.mod") -> GoCommonGenerator.generateMod(serviceRoot.module),
       File(serviceRoot.name, s"${serviceRoot.name}.go") -> mkCode.doubleLines(
@@ -35,13 +36,13 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainGenerator.generateMain(
           serviceRoot.name,
           usesComms,
-          serviceRoot.operations,
+          operations,
           serviceRoot.port,
         ),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoServiceMainGenerator.generateHandlers(
           serviceRoot.name,
-          serviceRoot.operations,
+          operations,
         ),
       ),
       File(s"${serviceRoot.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(serviceRoot.name),
@@ -53,8 +54,8 @@ object GoServiceGenerator extends ServiceGenerator {
         ),
         GoServiceDAOGenerator.generateDatastoreInterface(
           serviceRoot.name,
-          serviceRoot.operations,
-          serviceRoot.enumByCreatedBy,
+          operations,
+          serviceRoot.createdByAttribute,
         ),
         GoCommonDAOGenerator.generateDAOStruct(),
         GoServiceDAOGenerator.generateDatastoreObjectStruct(
@@ -65,11 +66,19 @@ object GoServiceGenerator extends ServiceGenerator {
         ),
         GoServiceDAOGenerator.generateInputStructs(
           serviceRoot.name,
-          serviceRoot.operations,
+          operations,
           serviceRoot.idAttribute,
           serviceRoot.createdByAttribute,
           serviceRoot.attributes,
-          serviceRoot.enumByCreatedBy,
+        ),
+        GoCommonDAOGenerator.generateInit(),
+        GoServiceDAOGenerator.generateQueryFunctions(operations),
+        GoServiceDAOGenerator.generateInterfaceFunctions(
+          serviceRoot.name,
+          serviceRoot.opQueries,
+          serviceRoot.idAttribute,
+          serviceRoot.createdByAttribute,
+          serviceRoot.attributes,
         ),
       ),
       File(s"${serviceRoot.name}/util", "util.go") -> mkCode.doubleLines(

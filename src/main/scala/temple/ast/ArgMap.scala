@@ -1,7 +1,7 @@
 package temple.ast
 
 import temple.DSL.syntax.Arg
-import temple.DSL.semantics.Context
+import temple.DSL.semantics.SemanticContext
 
 /**
   * A wrapper around a map of arguments, as produced by [[temple.DSL.semantics#parseParameters]], with methods added
@@ -19,9 +19,9 @@ case class ArgMap(argMap: Map[String, Arg]) {
     * @tparam T The type of the element to extract
     * @return The typesafe extracted value
     */
-  def getArg[T](key: String, argType: ArgType[T])(implicit context: Context): T =
+  def getArg[T](key: String, argType: ArgType[T])(implicit context: SemanticContext): T =
     argType.extractArg(argMap(key)).getOrElse {
-      throw context.error(s"${argType.stringRep.capitalize} expected at $key, found ${argMap(key)},")
+      context.fail(s"${argType.stringRep.capitalize} expected at $key, found ${argMap(key)},")
     }
 
   /**
@@ -34,6 +34,6 @@ case class ArgMap(argMap: Map[String, Arg]) {
     * @return [[Some]] typesafe extracted value, or [[None]] if it was not provided and the default was
     *         [[temple.DSL.syntax.Arg.NoArg]]
     */
-  def getOptionArg[T](key: String, argType: ArgType[T])(implicit context: Context): Option[T] =
+  def getOptionArg[T](key: String, argType: ArgType[T])(implicit context: SemanticContext): Option[T] =
     argMap(key) match { case Arg.NoArg => None; case _ => Some(getArg(key, argType)) }
 }

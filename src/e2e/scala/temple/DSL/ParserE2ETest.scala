@@ -38,7 +38,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
           ),
           metadata = Seq(
             ServiceEnumerable(),
-            Omit(Seq(Endpoint.Delete)),
+            Omit(Set(Endpoint.Delete)),
             Readable.All,
             Writable.This,
             ServiceAuth("username"),

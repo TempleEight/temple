@@ -25,7 +25,8 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     )
 
     // Exactly these folders should have been generated
-    val expectedFolders = Set("templeuser-db", "templeuser", "kong", "kube").map(dir => basePath.resolve(dir))
+    val expectedFolders =
+      Set("templeuser-db", "templeuser", "kong", "kube", "grafana").map(dir => basePath.resolve(dir))
     Files.list(basePath).toScala(Set) shouldBe expectedFolders
 
     // Only one file should be present in the templeuser-db folder
@@ -104,5 +105,34 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
     val templeUserKubeStorage = Files.readString(basePath.resolve("kube/temple-user").resolve("db-storage.yaml"))
     templeUserKubeStorage shouldBe SimpleE2ETestData.kubeDbStorage
+
+    // Only these folders should be present in the grafana folder
+    val expectedGrafanaFolders = Set("provisioning").map(dir => basePath.resolve("grafana").resolve(dir))
+    Files.list(basePath.resolve("grafana")).toScala(Set) shouldBe expectedGrafanaFolders
+
+    // Only these folders should be present in the grafana/provisioning folder
+    val expectedGrafanaProvisioningFolders =
+      Set("dashboards").map(dir => basePath.resolve("grafana/provisioning").resolve(dir))
+    Files.list(basePath.resolve("grafana/provisioning")).toScala(Set) shouldBe expectedGrafanaProvisioningFolders
+
+    // Only these files should be present in the grafana/provisioning/dashboards folder
+    val expectedGrafanaDashboardsFolders =
+      Set("templeuser.json", "dashboards.yml").map(dir =>
+        basePath.resolve("grafana/provisioning/dashboards").resolve(dir),
+      )
+
+    Files
+      .list(basePath.resolve("grafana/provisioning/dashboards"))
+      .toScala(Set) shouldBe expectedGrafanaDashboardsFolders
+
+    // The content of the grafana/provisioning/dashboards files should be correct
+    val templeUserGrafanaDashboard =
+      Files.readString(basePath.resolve("grafana/provisioning/dashboards").resolve("templeuser.json"))
+    templeUserGrafanaDashboard shouldBe SimpleE2ETestData.grafanaDashboard
+
+    val templeUserGrafanaDashboardConfig =
+      Files.readString(basePath.resolve("grafana/provisioning/dashboards").resolve("dashboards.yml"))
+    templeUserGrafanaDashboardConfig shouldBe SimpleE2ETestData.grafanaDashboardConfig
+
   }
 }
