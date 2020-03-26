@@ -38,9 +38,7 @@ object ProjectBuilderTestData {
 
   val simpleTemplefile: Templefile = Templefile(
     "SampleProject",
-    ProjectBlock(),
-    Map(),
-    Map(
+    services = Map(
       "TempleUser" -> ServiceBlock(simpleServiceAttributes),
     ),
   )
@@ -48,17 +46,14 @@ object ProjectBuilderTestData {
   val simpleTemplefilePostgresProject: Templefile = Templefile(
     "SampleProject",
     ProjectBlock(Seq(Database.Postgres)),
-    Map(),
-    Map(
+    services = Map(
       "TempleUser" -> ServiceBlock(simpleServiceAttributes),
     ),
   )
 
   val simpleTemplefilePostgresService: Templefile = Templefile(
     "SampleProject",
-    ProjectBlock(),
-    Map(),
-    Map(
+    services = Map(
       "TempleUser" -> ServiceBlock(simpleServiceAttributes, metadata = Seq(Database.Postgres)),
     ),
   )
@@ -294,9 +289,7 @@ object ProjectBuilderTestData {
 
   val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
-    ProjectBlock(),
-    Map(),
-    Map(
+    services = Map(
       "ComplexUser" -> ServiceBlock(
         complexServiceAttributes,
         structs = Map("TempleUser" -> StructBlock(simpleServiceAttributes)),

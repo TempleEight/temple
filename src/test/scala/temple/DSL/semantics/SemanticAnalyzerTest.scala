@@ -425,7 +425,7 @@ object SemanticAnalyzerTest {
     DSLRootItem("Test", "project", Nil) +: rootItems
 
   private def mkTemplefileSemantics(entries: (String, ServiceBlock)*): Templefile =
-    Templefile("Test", ProjectBlock(), Map.empty, entries.toMap)
+    Templefile("Test", services = entries.toMap)
 
   private def mkTemplefileASTWithUserService(entries: Entry*): syntax.Templefile = Seq(
     DSLRootItem("Test", "project", Nil),
@@ -433,5 +433,5 @@ object SemanticAnalyzerTest {
   )
 
   private def mkTemplefileSemanticsWithUserService(serviceBlock: ServiceBlock): Templefile =
-    Templefile("Test", ProjectBlock(), Map.empty, Map("User" -> serviceBlock))
+    Templefile("Test", services = Map("User" -> serviceBlock))
 }

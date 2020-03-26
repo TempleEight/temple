@@ -26,7 +26,7 @@ class TempleBlockTest extends FlatSpec with Matchers {
     val projectBlock = ProjectBlock(Seq(Metadata.Database.Postgres))
     val serviceBlock = ServiceBlock(Map.empty, Seq(Metadata.ServiceLanguage.Go))
 
-    Templefile("TestProject", projectBlock, Map.empty, Map("Users" -> serviceBlock))
+    Templefile("TestProject", projectBlock, services = Map("Users" -> serviceBlock))
 
     serviceBlock.lookupMetadata[Metadata.ServiceLanguage] shouldBe Some(Metadata.ServiceLanguage.Go)
     serviceBlock.lookupMetadata[Metadata.Database] shouldBe Some(Metadata.Database.Postgres)
