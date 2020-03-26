@@ -5,7 +5,7 @@ import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
-import temple.generate.server.{CreatedByAttribute, IDAttribute}
+import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceRoot}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
 
@@ -13,27 +13,21 @@ import scala.collection.immutable.ListMap
 
 object GoServiceDAOInputStructsGenerator {
 
-  private def generateStructCommentSubstring(operation: CRUD, serviceName: String): String =
+  private def generateStructCommentSubstring(root: ServiceRoot, operation: CRUD): String =
     operation match {
-      case List                            => s"read a $serviceName list"
-      case Create | Read | Update | Delete => s"${operation.toString.toLowerCase} a single $serviceName"
+      case List                            => s"read a ${root.name} list"
+      case Create | Read | Update | Delete => s"${operation.toString.toLowerCase} a single ${root.name}"
     }
 
-  private def generateStruct(
-    serviceName: String,
-    operation: CRUD,
-    idAttribute: IDAttribute,
-    createdByAttribute: CreatedByAttribute,
-    attributes: ListMap[String, Attribute],
-  ): String = {
-    val structName       = s"${generateDAOFunctionName(operation, serviceName)}Input"
-    val commentSubstring = generateStructCommentSubstring(operation, serviceName)
+  private def generateStruct(root: ServiceRoot, operation: CRUD): String = {
+    val structName       = s"${generateDAOFunctionName(root, operation)}Input"
+    val commentSubstring = generateStructCommentSubstring(root, operation)
 
     // We assume identifier is an acronym, so we upper case it
-    lazy val idMap = ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
+    lazy val idMap = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(root.idAttribute.attributeType))
 
     // Note we use the createdBy input name, rather than name
-    lazy val createdByMap = createdByAttribute match {
+    lazy val createdByMap = root.createdByAttribute match {
       case CreatedByAttribute.None =>
         ListMap.empty
       case enumerating: CreatedByAttribute.Enumerating =>
@@ -41,7 +35,7 @@ object GoServiceDAOInputStructsGenerator {
     }
 
     // Omit attribute from input struct fields if server set
-    lazy val attributesMap = attributes.collect {
+    lazy val attributesMap = root.attributes.collect {
       case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.ServerSet) =>
         (name.capitalize, generateGoType(attribute.attributeType))
     }
@@ -66,21 +60,15 @@ object GoServiceDAOInputStructsGenerator {
     )
   }
 
-  private[service] def generateStructs(
-    serviceName: String,
-    operations: Set[CRUD],
-    idAttribute: IDAttribute,
-    createdByAttribute: CreatedByAttribute,
-    attributes: ListMap[String, Attribute],
-  ): String = {
-    val enumeratingByCreator = createdByAttribute match {
+  private[service] def generateStructs(root: ServiceRoot, operations: Set[CRUD]): String = {
+    val enumeratingByCreator = root.createdByAttribute match {
       case _: CreatedByAttribute.EnumerateByCreator => true
       case _                                        => false
     }
     mkCode.doubleLines(
       // Generate input struct for each operation, except for List when not enumerating by creator
       for (operation <- operations.toSeq.sorted if operation != CRUD.List || enumeratingByCreator)
-        yield generateStruct(serviceName, operation, idAttribute, createdByAttribute, attributes),
+        yield generateStruct(root, operation),
     )
   }
 }

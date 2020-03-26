@@ -1,20 +1,21 @@
 package temple.generate.server.go.auth
 
+import temple.generate.server.AuthServiceRoot
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.FileUtils
 import temple.utils.StringUtils.doubleQuote
 
 object GoAuthServiceMainGenerator {
 
-  private[auth] def generateImports(module: String): String = {
+  private[auth] def generateImports(root: AuthServiceRoot): String = {
     val standardImports = Seq("encoding/json", "flag", "fmt", "log", "net/http", "time").map(doubleQuote)
 
     val officialImports = doubleQuote("golang.org/x/crypto/bcrypt")
 
     val customImports = Seq(
-      doubleQuote(s"$module/comm"),
-      doubleQuote(s"$module/dao"),
-      doubleQuote(s"$module/util"),
+      doubleQuote(s"${root.module}/comm"),
+      doubleQuote(s"${root.module}/dao"),
+      doubleQuote(s"${root.module}/util"),
       s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
       doubleQuote("github.com/dgrijalva/jwt-go"),
       doubleQuote("github.com/google/uuid"),
