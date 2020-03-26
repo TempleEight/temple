@@ -3,7 +3,9 @@ package temple.DSL.semantics
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.semantics.Validator.validate
 import temple.DSL.semantics.ValidatorTest._
+import temple.ast.Annotation
 import temple.ast.AttributeType._
+import temple.ast.Metadata._
 import temple.ast.{Attribute, Metadata, ProjectBlock, ServiceBlock, StructBlock, TargetBlock, Templefile}
 
 class ValidatorTest extends FlatSpec with Matchers {
@@ -15,15 +17,16 @@ class ValidatorTest extends FlatSpec with Matchers {
       validate(
         Templefile(
           "MyProject",
-          projectBlock = ProjectBlock(Seq(Metadata.Database.Postgres)),
+          projectBlock = ProjectBlock(Seq(Database.Postgres)),
           services = Map(
             "User" -> ServiceBlock(
               attributes = Map(
-                "a" -> Attribute(IntType()),
-                "b" -> Attribute(BoolType),
-                "c" -> Attribute(FloatType()),
+                "a" -> Attribute(IntType(), accessAnnotation = Some(Annotation.Server)),
+                "b" -> Attribute(BoolType, accessAnnotation = Some(Annotation.Client)),
+                "c" -> Attribute(FloatType(), accessAnnotation = Some(Annotation.ServerSet)),
                 "d" -> Attribute(StringType()),
               ),
+              metadata = Seq(ServiceAuth.Email, Writable.This, Readable.All, Database.Postgres, ServiceEnumerable()),
             ),
           ),
         ),
@@ -34,7 +37,7 @@ class ValidatorTest extends FlatSpec with Matchers {
       validate(
         Templefile(
           "MyProject",
-          projectBlock = ProjectBlock(Seq(Metadata.Database.Postgres)),
+          projectBlock = ProjectBlock(Seq(Database.Postgres)),
           services = Map(
             "User" -> ServiceBlock(
               attributes = Map(
@@ -48,12 +51,13 @@ class ValidatorTest extends FlatSpec with Matchers {
         ),
       )
     } should have message "Project, targets and structs must be globally unique, duplicate found: User (service, struct)"
+
     the[SemanticParsingException] thrownBy {
       validate(
         Templefile(
           "Box",
-          projectBlock = ProjectBlock(Seq(Metadata.Database.Postgres)),
-          targets = Map("User" -> TargetBlock(), "Box" -> TargetBlock()),
+          projectBlock = ProjectBlock(Seq(Database.Postgres)),
+          targets = Map("User" -> TargetBlock(Seq(TargetLanguage.JavaScript)), "Box" -> TargetBlock()),
           services = Map(
             "User" -> ServiceBlock(
               attributes = Map(
@@ -79,7 +83,7 @@ class ValidatorTest extends FlatSpec with Matchers {
       validate(
         Templefile(
           "User",
-          projectBlock = ProjectBlock(Seq(Metadata.Database.Postgres)),
+          projectBlock = ProjectBlock(Seq(Database.Postgres)),
           services = Map(
             "User" -> ServiceBlock(
               attributes = Map(
@@ -90,6 +94,12 @@ class ValidatorTest extends FlatSpec with Matchers {
         ),
       )
     } should have message "Project, targets and structs must be globally unique, duplicate found: User (service, project)"
+
+    the[SemanticParsingException] thrownBy {
+      validate(
+        templefileWithUserAttributes("A" -> Attribute(BoolType)),
+      )
+    } should have message "Invalid attribute name A, it must start with a lowercase letter, in User"
 
     the[SemanticParsingException] thrownBy {
       validate(
@@ -123,11 +133,47 @@ class ValidatorTest extends FlatSpec with Matchers {
 
     the[SemanticParsingException] thrownBy {
       validate(
+        templefileWithUserAttributes("c" -> Attribute(StringType(max = Some(5), min = Some(8)))),
+      )
+    } should have message "StringType max not above min in c, in User"
+
+    the[SemanticParsingException] thrownBy {
+      validate(
         templefileWithUserAttributes("c" -> Attribute(ForeignKey("Unknown"))),
       )
     } should have message "Invalid foreign key Unknown in c, in User"
-  }
 
+    the[SemanticParsingException] thrownBy {
+      validate(
+        Templefile(
+          "MyProject",
+          projectBlock = ProjectBlock(Seq(Database.Postgres)),
+          services = Map(
+            "User" -> ServiceBlock(
+              attributes = Map(
+                "a" -> Attribute(IntType()),
+              ),
+              metadata = Seq(Metadata.Uses(Seq("Box"))),
+            ),
+          ),
+        ),
+      )
+    } should have message "No such service Box referenced in #uses in User"
+
+    the[SemanticParsingException] thrownBy {
+      validate(
+        Templefile(
+          "MyProject",
+          services = Map(
+            "User" -> ServiceBlock(
+              attributes = Map("a" -> Attribute(IntType())),
+              metadata = Seq(Readable.All, Readable.This),
+            ),
+          ),
+        ),
+      )
+    } should have message "Multiple occurrences of Readable metadata in User"
+  }
 }
 
 object ValidatorTest {

@@ -3,6 +3,8 @@ package temple.DSL.semantics
 import temple.ast.AttributeType._
 import temple.ast.{Metadata, _}
 
+import scala.reflect.{ClassTag, classTag}
+
 private class Validator private (templefile: Templefile) {
 
   private lazy val allStructs: Iterable[String] = templefile.services.flatMap {
@@ -24,31 +26,40 @@ private class Validator private (templefile: Templefile) {
   private def validateService(service: ServiceBlock)(context: SemanticContext): Unit = {
     service.structs.foreachEntry(context(validateStruct))
     validateAttributes(service.attributes)(context)
-    service.metadata.foreach(validateMetadata(_, service.attributes)(context))
+    validateMetadata(service.metadata, service.attributes)(context)
   }
 
   private def validateStruct(struct: StructBlock)(context: SemanticContext): Unit = {
     struct.attributes.foreachEntry(context(validateAttribute))
-    struct.metadata.foreach(validateMetadata(_, struct.attributes)(context))
+    validateMetadata(struct.metadata, struct.attributes)(context)
   }
 
-  private def validateMetadata(metadata: Metadata, attributes: Map[String, Attribute] = Map())(
+  private def validateMetadata(metadata: Seq[Metadata], attributes: Map[String, Attribute] = Map())(
     context: SemanticContext,
-  ): Unit =
-    metadata match {
-      case _: Metadata.TargetLanguage    => // Nothing to validate yet
-      case Metadata.TargetAuth(_)        => context.fail(s"TODO: figure out how this auth works")
-      case _: Metadata.ServiceLanguage   => // Nothing to validate yet
-      case _: Metadata.Database          => // Nothing to validate yet
-      case _: Metadata.ServiceAuth       => // Nothing to validate yet
-      case _: Metadata.Readable          => // Nothing to validate yet
-      case _: Metadata.Writable          => // Nothing to validate yet
-      case Metadata.Omit(_)              => // Nothing to validate yet
-      case Metadata.ServiceEnumerable(_) => // Nothing to validate yet
-      case _: Metadata.Provider          => // Nothing to validate yet
+  ): Unit = {
+    def assertUnique[T <: Metadata: ClassTag](): Unit =
+      if (metadata.collect { case m: T => m }.sizeIs > 1)
+        context.fail(s"Multiple occurrences of ${classTag[T].runtimeClass.getSimpleName} metadata")
+
+    metadata foreach {
+      case _: Metadata.TargetLanguage  => assertUnique[Metadata.TargetLanguage]()
+      case Metadata.TargetAuth(_)      => context.fail(s"TODO: figure out how this auth works")
+      case _: Metadata.ServiceLanguage => assertUnique[Metadata.ServiceLanguage]()
+      case _: Metadata.Database        => assertUnique[Metadata.Database]()
+      case _: Metadata.ServiceAuth     => assertUnique[Metadata.ServiceAuth]()
+      case _: Metadata.Readable        => assertUnique[Metadata.Readable]()
+      case Metadata.Writable.All if metadata contains Metadata.Readable.This =>
+        context.fail(s"#writable(all) is not compatible with #readable(this)")
+      case _: Metadata.Writable          => assertUnique[Metadata.Writable]()
+      case Metadata.Omit(_)              => assertUnique[Metadata.Omit]()
+      case Metadata.ServiceEnumerable(_) => assertUnique[Metadata.ServiceEnumerable]()
+      case _: Metadata.Provider          => assertUnique[Metadata.Provider]()
       case Metadata.Uses(services) =>
-        for (service <- services if !allServices.contains(service)) context.fail(s"No such service $service")
+        assertUnique[Metadata.Uses]()
+        for (service <- services if !allServices.contains(service))
+          context.fail(s"No such service $service referenced in #uses")
     }
+  }
 
   private def validateAttribute(attribute: Attribute)(context: SemanticContext): Unit = {
     validateAttributeType(attribute.attributeType)(context)
@@ -88,7 +99,7 @@ private class Validator private (templefile: Templefile) {
     }
 
   private def validateBlockOfMetadata[T <: Metadata](target: TempleBlock[T])(context: SemanticContext): Unit =
-    target.metadata.foreach(validateMetadata(_)(context))
+    validateMetadata(target.metadata)(context)
 
   def validate(): Unit = {
     val context = SemanticContext.empty
