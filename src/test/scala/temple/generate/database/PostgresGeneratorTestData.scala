@@ -198,6 +198,45 @@ object PostgresGeneratorTestData {
   val postgresSelectStringComplex: String =
     "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE ((isStudent IS NULL) OR (Users.id >= 1)) AND ((isStudent IS NOT NULL) OR (NOT (Users.expiry < TIMESTAMP '2020-02-03 00:00:00+00')));"
 
+  val readStatementWithWherePrepared: Read = Read(
+    "Users",
+    Seq(
+      Column("id"),
+      Column("bankBalance"),
+      Column("name"),
+      Column("isStudent"),
+      Column("dateOfBirth"),
+      Column("timeOfDay"),
+      Column("expiry"),
+    ),
+    Some(
+      PreparedComparison("Users.id", Equal),
+    ),
+  )
+
+  val postgresSelectStringWithWherePrepared: String =
+    """SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry FROM Users WHERE Users.id = $1;"""
+
+  val readStatementWithNestedWherePrepared: Read = Read(
+    "Users",
+    Seq(Column("bankBalance")),
+    Some(
+      Conjunction(
+        Disjunction(
+          Inverse(PreparedComparison("Users.id", LessEqual)),
+          PreparedComparison("Users.isStudent", Equal),
+        ),
+        PreparedComparison("Users.timeOfDay", Equal),
+      ),
+    ),
+  )
+
+  val postgresSelectStringWithNestedWherePrepared: String =
+    """SELECT bankBalance FROM Users WHERE ((NOT (Users.id <= $1)) OR (Users.isStudent = $2)) AND (Users.timeOfDay = $3);"""
+
+  val postgresSelectStringWithNestedWherePreparedUsingQuestionMarks: String =
+    """SELECT bankBalance FROM Users WHERE ((NOT (Users.id <= ?)) OR (Users.isStudent = ?)) AND (Users.timeOfDay = ?);"""
+
   val insertStatement: Insert = Insert(
     "Users",
     Seq(
@@ -216,6 +255,31 @@ object PostgresGeneratorTestData {
 
   val postgresInsertStringWithQuestionMarks: String =
     "INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry) VALUES (?, ?, ?, ?, ?, ?, ?);"
+
+  val insertStatementWithReturn: Insert = Insert(
+    "Users",
+    Seq(
+      Column("id"),
+      Column("bankBalance"),
+      Column("name"),
+      Column("isStudent"),
+      Column("dateOfBirth"),
+      Column("timeOfDay"),
+      Column("expiry"),
+    ),
+    Seq(
+      Column("id"),
+      Column("bankBalance"),
+      Column("name"),
+      Column("isStudent"),
+      Column("dateOfBirth"),
+      Column("timeOfDay"),
+      Column("expiry"),
+    ),
+  )
+
+  val postgresInsertStringWithReturn: String =
+    "INSERT INTO Users (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry) VALUES ($1, $2, $3, $4, $5, $6, $7) RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry;"
 
   val updateStatement: Update = Update(
     "Users",
@@ -242,6 +306,121 @@ object PostgresGeneratorTestData {
   val postgresUpdateStringWithWhere: String =
     """UPDATE Users SET bankBalance = 123.456, name = 'Will' WHERE Users.id = 123456;"""
 
+  val updateStatementWithReturn: Update = Update(
+    "Users",
+    Seq(
+      Assignment(Column("bankBalance"), Value("123.456")),
+      Assignment(Column("name"), Value("'Will'")),
+    ),
+    None,
+    Seq(
+      Column("bankBalance"),
+    ),
+  )
+
+  val postgresUpdateStringWithReturn: String =
+    """UPDATE Users SET bankBalance = 123.456, name = 'Will' RETURNING bankBalance;"""
+
+  val updateStatementWithWhereAndReturn: Update = Update(
+    "Users",
+    Seq(
+      Assignment(Column("bankBalance"), Value("123.456")),
+      Assignment(Column("name"), Value("'Will'")),
+    ),
+    Some(
+      Comparison("Users.id", Equal, "123456"),
+    ),
+    Seq(
+      Column("bankBalance"),
+    ),
+  )
+
+  val postgresUpdateStringWithWhereAndReturn: String =
+    """UPDATE Users SET bankBalance = 123.456, name = 'Will' WHERE Users.id = 123456 RETURNING bankBalance;"""
+
+  val updateStatementPrepared: Update = Update(
+    "Users",
+    Seq(
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+    ),
+    None,
+  )
+
+  val postgresUpdateStringPrepared: String =
+    """UPDATE Users SET bankBalance = $1, name = $2;"""
+
+  val postgresUpdateStringPreparedWithQuestionMarks: String =
+    """UPDATE Users SET bankBalance = ?, name = ?;"""
+
+  val updateStatementPreparedWithWhere: Update = Update(
+    "Users",
+    Seq(
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+    ),
+    Some(
+      Comparison("Users.id", Equal, "123456"),
+    ),
+  )
+
+  val postgresUpdateStringPreparedWithWhere: String =
+    """UPDATE Users SET bankBalance = $1, name = $2 WHERE Users.id = 123456;"""
+
+  val updateStatementPreparedWithWherePrepared: Update = Update(
+    "Users",
+    Seq(
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+    ),
+    Some(
+      PreparedComparison("Users.id", Equal),
+    ),
+  )
+
+  val postgresUpdateStringPreparedWithWherePrepared: String =
+    """UPDATE Users SET bankBalance = $1, name = $2 WHERE Users.id = $3;"""
+
+  val updateStatementPreparedWithNestedWherePrepared: Update = Update(
+    "Users",
+    Seq(
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+    ),
+    Some(
+      Conjunction(
+        Disjunction(
+          Inverse(PreparedComparison("Users.id", LessEqual)),
+          PreparedComparison("Users.isStudent", Equal),
+        ),
+        PreparedComparison("Users.timeOfDay", Equal),
+      ),
+    ),
+  )
+
+  val postgresUpdateStringPreparedWithNestedWherePrepared: String =
+    """UPDATE Users SET bankBalance = $1, name = $2 WHERE ((NOT (Users.id <= $3)) OR (Users.isStudent = $4)) AND (Users.timeOfDay = $5);"""
+
+  val updateStatementPreparedAndValuesWithNestedWherePrepared: Update = Update(
+    "Users",
+    Seq(
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("name"), Value("'Hello'")),
+    ),
+    Some(
+      Conjunction(
+        Disjunction(
+          Inverse(PreparedComparison("Users.id", LessEqual)),
+          PreparedComparison("Users.isStudent", Equal),
+        ),
+        PreparedComparison("Users.timeOfDay", Equal),
+      ),
+    ),
+  )
+
+  val postgresUpdateStringPreparedAndValuesWithNestedWherePrepared: String =
+    """UPDATE Users SET bankBalance = $1, name = 'Hello' WHERE ((NOT (Users.id <= $2)) OR (Users.isStudent = $3)) AND (Users.timeOfDay = $4);"""
+
   val deleteStatement: Delete = Delete(
     "Users",
   )
@@ -258,6 +437,32 @@ object PostgresGeneratorTestData {
 
   val postgresDeleteStringWithWhere: String =
     """DELETE FROM Users WHERE Users.id = 123456;"""
+
+  val deleteStatementWithWherePrepared: Delete = Delete(
+    "Users",
+    Some(
+      PreparedComparison("Users.id", Equal),
+    ),
+  )
+
+  val postgresDeleteStringWithWherePrepared: String =
+    """DELETE FROM Users WHERE Users.id = $1;"""
+
+  val deleteStatementWithNestedWherePrepared: Delete = Delete(
+    "Users",
+    Some(
+      Conjunction(
+        Disjunction(
+          Inverse(PreparedComparison("Users.id", LessEqual)),
+          PreparedComparison("Users.isStudent", Equal),
+        ),
+        PreparedComparison("Users.timeOfDay", Equal),
+      ),
+    ),
+  )
+
+  val postgresDeleteStringWithNestedWherePrepared: String =
+    """DELETE FROM Users WHERE ((NOT (Users.id <= $1)) OR (Users.isStudent = $2)) AND (Users.timeOfDay = $3);"""
 
   val dropStatement: Drop = Drop(
     "Users",

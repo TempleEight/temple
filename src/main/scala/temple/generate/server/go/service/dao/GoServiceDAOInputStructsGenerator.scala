@@ -2,7 +2,7 @@ package temple.generate.server.go.service.dao
 
 import temple.ast.{Annotation, Attribute}
 import temple.generate.CRUD
-import temple.generate.CRUD.{Create, Delete, List, Read, Update}
+import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.server.{CreatedByAttribute, IDAttribute}
@@ -79,8 +79,7 @@ object GoServiceDAOInputStructsGenerator {
     }
     mkCode.doubleLines(
       // Generate input struct for each operation, except for List when not enumerating by creator
-      for (operation <- CRUD.values if operations.contains(operation) &&
-           (operation != CRUD.List || enumeratingByCreator))
+      for (operation <- operations.toSeq.sorted if operation != CRUD.List || enumeratingByCreator)
         yield generateStruct(serviceName, operation, idAttribute, createdByAttribute, attributes),
     )
   }
