@@ -1,7 +1,7 @@
 package temple.builder
 
 import temple.generate.docker.ast.DockerfileRoot
-import temple.generate.docker.ast.Statement.{Copy, Entrypoint, Expose, From, Run, WorkDir}
+import temple.generate.docker.ast.Statement._
 
 object DockerfileBuilderTestData {
 

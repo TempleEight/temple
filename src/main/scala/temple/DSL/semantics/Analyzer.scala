@@ -1,6 +1,6 @@
 package temple.DSL.semantics
 
-import MetadataParser.assertNoParameters
+import temple.DSL.semantics.MetadataParser.assertNoParameters
 import temple.DSL.syntax
 import temple.DSL.syntax.{Arg, Args, DSLRootItem, Entry}
 import temple.ast.ArgType._
