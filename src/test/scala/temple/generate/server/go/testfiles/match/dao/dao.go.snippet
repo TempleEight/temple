@@ -101,12 +101,32 @@ func (dao *DAO) ListMatch(input ListMatchInput) (*[]Match, error) {
 		return nil, err
 	}
 
+	matchList := make([]Match, 0)
+	for rows.Next() {
+		var match Match
+		err = rows.Scan(&match.ID, &match.CreatedBy, &match.UserOne, &match.UserTwo, &match.MatchedOn)
+		if err != nil {
+			return nil, err
+		}
+		matchList = append(matchList, match)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
 	return &matchList, nil
 }
 
 // CreateMatch creates a new match in the datastore, returning the newly created match
 func (dao *DAO) CreateMatch(input CreateMatchInput) (*Match, error) {
 	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO match (id, created_by, userOne, userTwo, matchedOn) VALUES ($1, $2, $3, $4, NOW()) RETURNING id, created_by, userOne, userTwo, matchedOn", input.ID, input.AuthID, input.UserOne, input.UserTwo)
+
+	var match Match
+	err := row.Scan(&match.ID, &match.CreatedBy, &match.UserOne, &match.UserTwo, &match.MatchedOn)
+	if err != nil {
+		return nil, err
+	}
 
 	return &match, nil
 }
@@ -115,12 +135,34 @@ func (dao *DAO) CreateMatch(input CreateMatchInput) (*Match, error) {
 func (dao *DAO) ReadMatch(input ReadMatchInput) (*Match, error) {
 	row := executeQueryWithRowResponse(dao.DB, "SELECT id, created_by, userOne, userTwo, matchedOn FROM match WHERE id = $1", input.ID)
 
+	var match Match
+	err := row.Scan(&match.ID, &match.CreatedBy, &match.UserOne, &match.UserTwo, &match.MatchedOn)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrMatchNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
 	return &match, nil
 }
 
 // UpdateMatch updates the match in the datastore for a given ID, returning the newly updated match
 func (dao *DAO) UpdateMatch(input UpdateMatchInput) (*Match, error) {
 	row := executeQueryWithRowResponse(dao.DB, "UPDATE match SET userOne = $1, userTwo = $2, matchedOn = NOW() WHERE id = $3 RETURNING id, created_by, userOne, userTwo, matchedOn", input.UserOne, input.UserTwo, input.ID)
+
+	var match Match
+	err := row.Scan(&match.ID, &match.CreatedBy, &match.UserOne, &match.UserTwo, &match.MatchedOn)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrMatchNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
 
 	return &match, nil
 }

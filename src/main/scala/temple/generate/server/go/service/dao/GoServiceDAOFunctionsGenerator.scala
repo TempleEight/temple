@@ -9,7 +9,7 @@ import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFu
 import temple.generate.server.go.service.dao.GoServiceDAOInterfaceGenerator.generateInterfaceFunction
 import temple.generate.server.{CreatedByAttribute, IDAttribute}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
-import temple.utils.StringUtils.doubleQuote
+import temple.utils.StringUtils.{doubleQuote, tabIndent}
 
 import scala.collection.immutable.ListMap
 
@@ -121,7 +121,102 @@ object GoServiceDAOFunctionsGenerator {
     )
   }
 
-  private def generateQueryBlockReturn(serviceName: String, operation: CRUD): Seq[String] =
+  private def generateScan(
+    serviceName: String,
+    idAttribute: IDAttribute,
+    createdByAttribute: CreatedByAttribute,
+    attributes: ListMap[String, Attribute],
+  ): String =
+    CodeWrap.parens
+      .prefix("Scan")
+      .list(
+        s"&$serviceName.${idAttribute.name.toUpperCase()}",
+        createdByAttribute match {
+          case CreatedByAttribute.None => None
+          case enumerating: CreatedByAttribute.Enumerating =>
+            Some(s"&${serviceName}.${enumerating.name.capitalize}")
+        },
+        attributes.map { case (name, _) => s"&$serviceName.${name.capitalize}" },
+      )
+
+  private def generateListScanBlock(
+    serviceName: String,
+    idAttribute: IDAttribute,
+    createdByAttribute: CreatedByAttribute,
+    attributes: ListMap[String, Attribute],
+    scanFunctionCall: String,
+  ): String =
+    mkCode.lines(
+      genDeclareAndAssign(s"make([]${serviceName.capitalize}, 0)", s"${serviceName}List"),
+      genForLoop(
+        "rows.Next()",
+        mkCode.lines(
+          genVar(serviceName, serviceName.capitalize),
+          genAssign(s"rows.$scanFunctionCall", "err"),
+          generateCheckAndReturnError("nil"),
+          genAssign(genCallFunction("append", s"${serviceName}List", serviceName), s"${serviceName}List"),
+        ),
+      ),
+      genAssign("rows.Err()", "err"),
+      generateCheckAndReturnError("nil"),
+    )
+
+  private def generateCreateScanBlock(serviceName: String, scanFunctionCall: String): String =
+    mkCode.lines(
+      genVar(serviceName, serviceName.capitalize),
+      genDeclareAndAssign(s"row.$scanFunctionCall", "err"),
+      generateCheckAndReturnError("nil"),
+    )
+
+  private def generateReadUpdateScanBlock(
+    serviceName: String,
+    idAttribute: IDAttribute,
+    scanFunctionCall: String,
+  ): String =
+    mkCode.lines(
+      genVar(serviceName, serviceName.capitalize),
+      genDeclareAndAssign(s"row.$scanFunctionCall", "err"),
+      mkCode(
+        "if err != nil",
+        CodeWrap.curly.tabbed(
+          mkCode(
+            "switch err",
+            CodeWrap.curly.noIndent(
+              "case sql.ErrNoRows:",
+              tabIndent(
+                genReturn(
+                  "nil",
+                  s"Err${serviceName.capitalize}NotFound(input.${idAttribute.name.toUpperCase()}.String())",
+                ),
+              ),
+              "default:",
+              tabIndent(
+                genReturn("nil", "err"),
+              ),
+            ),
+          ),
+        ),
+      ),
+    )
+
+  private def generateScanBlock(
+    serviceName: String,
+    operation: CRUD,
+    idAttribute: IDAttribute,
+    createdByAttribute: CreatedByAttribute,
+    attributes: ListMap[String, Attribute],
+  ): Option[String] = {
+    val scanFunctionCall = generateScan(serviceName, idAttribute, createdByAttribute, attributes)
+    operation match {
+      case List =>
+        Some(generateListScanBlock(serviceName, idAttribute, createdByAttribute, attributes, scanFunctionCall))
+      case Create        => Some(generateCreateScanBlock(serviceName, scanFunctionCall))
+      case Read | Update => Some(generateReadUpdateScanBlock(serviceName, idAttribute, scanFunctionCall))
+      case Delete        => None
+    }
+  }
+
+  private def generateReturnExprs(serviceName: String, operation: CRUD): Seq[String] =
     operation match {
       case List                   => Seq(s"&${serviceName}List", "nil")
       case Create | Read | Update => Seq(s"&$serviceName", "nil")
@@ -144,7 +239,8 @@ object GoServiceDAOFunctionsGenerator {
         CodeWrap.curly.tabbed(
           mkCode.doubleLines(
             generateQueryBlock(serviceName, operation, idAttribute, createdByAttribute, attributes, query),
-            genReturn(generateQueryBlockReturn(serviceName, operation): _*),
+            generateScanBlock(serviceName, operation, idAttribute, createdByAttribute, attributes),
+            genReturn(generateReturnExprs(serviceName, operation): _*),
           ),
         ),
       ),

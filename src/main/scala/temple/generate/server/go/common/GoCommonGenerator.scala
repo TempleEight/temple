@@ -51,6 +51,27 @@ object GoCommonGenerator {
   private[go] def genCallFunction(name: String, args: String*): String =
     CodeWrap.parens.prefix(name).list(args)
 
+  private[go] def genForLoop(expr: String, body: String): String =
+    mkCode(
+      "for",
+      expr,
+      CodeWrap.curly.tabbed(body),
+    )
+
+  private[go] def genVar(identifier: String, typ: String): String =
+    mkCode(
+      "var",
+      identifier,
+      typ,
+    )
+
+  private[go] def genAssign(expr: String, identifiers: String*): String =
+    mkCode(
+      mkCode.list(identifiers),
+      "=",
+      expr,
+    )
+
   //** Generate "return a, b, ..." */
   private[go] def genReturn(exprs: String*): String =
     mkCode(

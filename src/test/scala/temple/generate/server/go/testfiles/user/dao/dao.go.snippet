@@ -80,6 +80,12 @@ func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) 
 func (dao *DAO) CreateUser(input CreateUserInput) (*User, error) {
 	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO user_temple (id, name) VALUES ($1, $2) RETURNING id, name", input.ID, input.Name)
 
+	var user User
+	err := row.Scan(&user.ID, &user.Name)
+	if err != nil {
+		return nil, err
+	}
+
 	return &user, nil
 }
 
@@ -87,12 +93,34 @@ func (dao *DAO) CreateUser(input CreateUserInput) (*User, error) {
 func (dao *DAO) ReadUser(input ReadUserInput) (*User, error) {
 	row := executeQueryWithRowResponse(dao.DB, "SELECT id, name FROM user_temple WHERE id = $1", input.ID)
 
+	var user User
+	err := row.Scan(&user.ID, &user.Name)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrUserNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
 	return &user, nil
 }
 
 // UpdateUser updates the user in the datastore for a given ID, returning the newly updated user
 func (dao *DAO) UpdateUser(input UpdateUserInput) (*User, error) {
 	row := executeQueryWithRowResponse(dao.DB, "UPDATE user_temple SET name = $1 WHERE id = $2 RETURNING id, name", input.Name, input.ID)
+
+	var user User
+	err := row.Scan(&user.ID, &user.Name)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrUserNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
 
 	return &user, nil
 }
