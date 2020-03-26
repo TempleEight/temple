@@ -65,8 +65,8 @@ object ProjectBuilder {
     )
     val kubeFiles = KubernetesGenerator.generate(orchestrationRoot)
 
-    // TODO: Get this from templefile
-    val datasource: Datasource = Datasource.Prometheus("Prometheus")
+    // TODO: Get this from templefile and project settings
+    val datasource: Datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
     val metrics = templefile.services.map {
         case (name, service) =>
           val rows             = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))

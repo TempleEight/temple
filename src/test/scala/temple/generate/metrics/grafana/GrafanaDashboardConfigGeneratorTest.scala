@@ -7,7 +7,7 @@ class GrafanaDashboardConfigGeneratorTest extends FlatSpec with Matchers {
   behavior of "GrafanaDashboardConfigGenerator"
 
   it should "generate correct config" in {
-    val generated = GrafanaDashboardConfigGenerator.generate(Datasource.Prometheus("Prometheus"))
+    val generated = GrafanaDashboardConfigGenerator.generate(Datasource.Prometheus("Prometheus", "http://prom:9090"))
     generated shouldBe GrafanaDashboardConfigGeneratorTestData.prometheusConfig
   }
 }

@@ -1,7 +1,7 @@
 package temple.generate.server.go.service.dao
 
 import temple.generate.CRUD
-import temple.generate.CRUD.{Create, Delete, List, Read, Update}
+import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
 import temple.generate.server.CreatedByAttribute
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -42,7 +42,7 @@ object GoServiceDAOInterfaceGenerator {
       mkCode(
         "type Datastore interface",
         CodeWrap.curly.tabbed(
-          for (operation <- CRUD.values if operations.contains(operation))
+          for (operation <- operations.toSeq.sorted)
             yield generateInterfaceFunction(serviceName, operation, createdByAttribute),
         ),
       ),
