@@ -17,7 +17,7 @@ object GoServiceCommGenerator {
         doubleQuote("fmt"),
         doubleQuote("net/http"),
         "",
-        s""""${root.module}/util"""",
+        doubleQuote(s"${root.module}/util"),
         doubleQuote("github.com/google/uuid"),
       ),
     )

@@ -15,7 +15,6 @@ object GoServiceGenerator extends ServiceGenerator {
     /* TODO
      * main in <>.go
      * handlers in <>.go
-     * handler.go
      * config.json
      */
     val usesComms  = root.comms.nonEmpty
