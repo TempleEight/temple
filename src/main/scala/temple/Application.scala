@@ -3,14 +3,18 @@ package temple
 import temple.DSL.DSLProcessor
 import temple.DSL.semantics.{Analyzer, SemanticParsingException}
 import temple.builder.project.ProjectBuilder
+import temple.test.EndpointTester
 import temple.utils.FileUtils
 import temple.utils.MonadUtils.FromEither
 
 object Application {
 
+  private def readFileOrStdIn(filename: String): String =
+    if (filename == "-") FileUtils.readStdIn() else FileUtils.readFile(filename)
+
   def generate(config: TempleConfig): Unit = {
     val outputDirectory = config.Generate.outputDirectory.getOrElse(System.getProperty("user.dir"))
-    val fileContents    = FileUtils.readFile(config.Generate.filename())
+    val fileContents    = readFileOrStdIn(config.Generate.filename())
     val data = DSLProcessor.parse(fileContents) fromEither { error =>
       throw new RuntimeException(error)
     }
@@ -31,7 +35,7 @@ object Application {
   }
 
   def validate(config: TempleConfig): Unit = {
-    val fileContents = FileUtils.readFile(config.Validate.filename())
+    val fileContents = readFileOrStdIn(config.Validate.filename())
     val data = DSLProcessor.parse(fileContents) fromEither { error =>
       throw new RuntimeException("Templefile could not be parsed\n" + error)
     }
@@ -42,5 +46,15 @@ object Application {
       case error: SemanticParsingException =>
         throw new RuntimeException("Templefile could not be validated\n" + error.getMessage, error)
     }
+  }
+
+  def test(config: TempleConfig): Unit = {
+    val generatedDirectory = config.Test.generatedDirectory.getOrElse(System.getProperty("user.dir"))
+    val fileContents       = readFileOrStdIn(config.Test.filename())
+    val data = DSLProcessor.parse(fileContents) fromEither { error =>
+      throw new RuntimeException(error)
+    }
+    val analyzedTemplefile = Analyzer.parseAndValidate(data)
+    EndpointTester.test(analyzedTemplefile, generatedDirectory)
   }
 }
