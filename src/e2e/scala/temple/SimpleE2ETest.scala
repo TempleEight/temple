@@ -26,8 +26,18 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
     // Exactly these folders should have been generated
     val expectedFolders =
-      Set("templeuser-db", "templeuser", "booking-db", "booking", "event-db", "event", "kong", "kube", "grafana")
-        .map(dir => basePath.resolve(dir))
+      Set(
+        "templeuser-db",
+        "templeuser",
+        "booking-db",
+        "booking",
+        "event-db",
+        "event",
+        "kong",
+        "kube",
+        "grafana",
+        "prometheus",
+      ).map(dir => basePath.resolve(dir))
     Files.list(basePath).toScala(Set) shouldBe expectedFolders
 
     // Only one file should be present in the templeuser-db folder
@@ -148,5 +158,13 @@ class SimpleE2ETest extends FlatSpec with Matchers {
       Files.readString(basePath.resolve("grafana/provisioning/datasources").resolve("datasource.yml"))
     templeUserGrafanaDatasourceConfig shouldBe SimpleE2ETestData.grafanaDatasourceConfig
 
+    // Only these files should be present in the prometheus folder
+    val expectedPrometheusFolders = Set("prometheus.yml").map(dir => basePath.resolve("prometheus").resolve(dir))
+    Files.list(basePath.resolve("prometheus")).toScala(Set) shouldBe expectedPrometheusFolders
+
+    // The content of the prometheus/prometheus.yml file should be correct
+    val templeUserPrometheusConfig =
+      Files.readString(basePath.resolve("prometheus").resolve("prometheus.yml"))
+    templeUserPrometheusConfig shouldBe SimpleE2ETestData.prometheusConfig
   }
 }
