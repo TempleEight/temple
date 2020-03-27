@@ -38,9 +38,7 @@ object ProjectBuilderTestData {
 
   val simpleTemplefile: Templefile = Templefile(
     "SampleProject",
-    ProjectBlock(),
-    Map(),
-    Map(
+    services = Map(
       "TempleUser" -> ServiceBlock(simpleServiceAttributes),
     ),
   )
@@ -48,17 +46,14 @@ object ProjectBuilderTestData {
   val simpleTemplefilePostgresProject: Templefile = Templefile(
     "SampleProject",
     ProjectBlock(Seq(Database.Postgres)),
-    Map(),
-    Map(
+    services = Map(
       "TempleUser" -> ServiceBlock(simpleServiceAttributes),
     ),
   )
 
   val simpleTemplefilePostgresService: Templefile = Templefile(
     "SampleProject",
-    ProjectBlock(),
-    Map(),
-    Map(
+    services = Map(
       "TempleUser" -> ServiceBlock(simpleServiceAttributes, metadata = Seq(Database.Postgres)),
     ),
   )
@@ -318,9 +313,7 @@ object ProjectBuilderTestData {
 
   val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
-    ProjectBlock(),
-    Map(),
-    Map(
+    services = Map(
       "ComplexUser" -> ServiceBlock(
         complexServiceAttributes,
         structs = Map("TempleUser" -> StructBlock(simpleServiceAttributes)),
@@ -568,12 +561,12 @@ object ProjectBuilderTestData {
 
   val complexTemplefilePrometheusConfig: String =
     """global:
-    |  scrape_interval: 15s
-    |  evaluation_interval: 15s
-    |scrape_configs:
-    |- job_name: complexuser
-    |  static_configs:
-    |  - targets:
-    |    - complexuser:1025
-    |""".stripMargin
+      |  scrape_interval: 15s
+      |  evaluation_interval: 15s
+      |scrape_configs:
+      |- job_name: complexuser
+      |  static_configs:
+      |  - targets:
+      |    - complexuser:1025
+      |""".stripMargin
 }

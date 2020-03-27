@@ -7,19 +7,17 @@ import temple.generate.utils.CodeTerm.mkCode
 
 object GoAuthServiceGenerator extends AuthServiceGenerator {
 
-  override def generate(authServiceRoot: AuthServiceRoot): Files =
+  override def generate(root: AuthServiceRoot): Files =
     /* TODO
      * auth.go main
      * dao.go
      * config.json
      */
     Map(
-      File("auth", "go.mod") -> GoCommonGenerator.generateMod(authServiceRoot.module),
+      File("auth", "go.mod") -> GoCommonGenerator.generateMod(root.module),
       File("auth", "auth.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoAuthServiceMainGenerator.generateImports(
-          authServiceRoot.module,
-        ),
+        GoAuthServiceMainGenerator.generateImports(root),
         GoAuthServiceMainGenerator.generateStructs(),
         GoAuthServiceMainGenerator.generateRouter(),
         GoAuthServiceMainGenerator.generateMain(),
@@ -30,7 +28,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
       File("auth/dao", "errors.go") -> GoAuthServiceDAOGenerator.generateErrors(),
       File("auth/comm", "handler.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("comm"),
-        GoAuthServiceCommGenerator.generateImports(authServiceRoot.module),
+        GoAuthServiceCommGenerator.generateImports(root),
         GoAuthServiceCommGenerator.generateStructs(),
         GoCommonCommGenerator.generateInit(),
         GoAuthServiceCommGenerator.generateCreateJWTCredential(),

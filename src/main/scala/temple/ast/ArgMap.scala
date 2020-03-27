@@ -21,7 +21,9 @@ case class ArgMap(argMap: Map[String, Arg]) {
     */
   def getArg[T](key: String, argType: ArgType[T])(implicit context: SemanticContext): T =
     argType.extractArg(argMap(key)).getOrElse {
-      context.fail(s"${argType.stringRep.capitalize} expected at $key, found ${argMap(key)},")
+      context.fail(
+        s"${argType.stringRep.capitalize} expected at $key, found ${argMap(key)},",
+      )
     }
 
   /**

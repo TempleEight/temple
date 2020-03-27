@@ -26,7 +26,18 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
     // Exactly these folders should have been generated
     val expectedFolders =
-      Set("templeuser-db", "templeuser", "kong", "kube", "grafana", "prometheus").map(dir => basePath.resolve(dir))
+      Set(
+        "templeuser-db",
+        "templeuser",
+        "booking-db",
+        "booking",
+        "event-db",
+        "event",
+        "kong",
+        "kube",
+        "grafana",
+        "prometheus",
+      ).map(dir => basePath.resolve(dir))
     Files.list(basePath).toScala(Set) shouldBe expectedFolders
 
     // Only one file should be present in the templeuser-db folder
@@ -117,7 +128,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
     // Only these files should be present in the grafana/provisioning/dashboards folder
     val expectedGrafanaDashboardsFolders =
-      Set("templeuser.json", "dashboards.yml").map(dir =>
+      Set("booking.json", "event.json", "templeuser.json", "dashboards.yml").map(dir =>
         basePath.resolve("grafana/provisioning/dashboards").resolve(dir),
       )
 

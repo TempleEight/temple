@@ -32,20 +32,20 @@ object PostgresGeneratorTestData {
 
   val postgresCreateString: String =
     """CREATE TABLE Users (
-        |  id SMALLINT,
-        |  anotherId INT,
-        |  yetAnotherId BIGINT,
-        |  bankBalance REAL,
-        |  bigBankBalance DOUBLE PRECISION,
-        |  name TEXT,
-        |  initials VARCHAR(5),
-        |  isStudent BOOLEAN,
-        |  dateOfBirth DATE,
-        |  timeOfDay TIME,
-        |  expiry TIMESTAMPTZ,
-        |  picture BYTEA,
-        |  veryUnique UUID
-        |);""".stripMargin
+      |  id SMALLINT,
+      |  anotherId INT,
+      |  yetAnotherId BIGINT,
+      |  bankBalance REAL,
+      |  bigBankBalance DOUBLE PRECISION,
+      |  name TEXT,
+      |  initials VARCHAR(5),
+      |  isStudent BOOLEAN,
+      |  dateOfBirth DATE,
+      |  timeOfDay TIME,
+      |  expiry TIMESTAMPTZ,
+      |  picture BYTEA,
+      |  veryUnique UUID
+      |);""".stripMargin
 
   val createStatementWithConstraints: Create = Create(
     "Test",
@@ -59,11 +59,11 @@ object PostgresGeneratorTestData {
 
   val postgresCreateStringWithConstraints: String =
     """CREATE TABLE Test (
-        |  item_id INT NOT NULL PRIMARY KEY,
-        |  createdAt TIMESTAMPTZ UNIQUE,
-        |  bookingTime TIME REFERENCES Bookings (bookingTime),
-        |  value INT CHECK (value >= 1) NOT NULL
-        |);""".stripMargin
+      |  item_id INT NOT NULL PRIMARY KEY,
+      |  createdAt TIMESTAMPTZ UNIQUE,
+      |  bookingTime TIME REFERENCES Bookings (bookingTime),
+      |  value INT CHECK (value >= 1) NOT NULL
+      |);""".stripMargin
 
   val readStatement: Read = Read(
     "Users",
