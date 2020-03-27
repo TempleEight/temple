@@ -6,6 +6,7 @@ import temple.DSL.semantics.ValidatorTest._
 import temple.ast.Annotation
 import temple.ast.Annotation.{Nullable, Unique}
 import temple.ast.AttributeType._
+import temple.ast.Metadata.Endpoint.Delete
 import temple.ast.Metadata._
 import temple.ast._
 
@@ -27,9 +28,19 @@ class ValidatorTest extends FlatSpec with Matchers {
                 "c" -> Attribute(BlobType(), valueAnnotations = Set(Nullable, Unique)),
                 "d" -> Attribute(FloatType(), accessAnnotation = Some(Annotation.ServerSet)),
                 "e" -> Attribute(StringType()),
+                "f" -> Attribute(ForeignKey("Box")),
               ),
-              metadata = Seq(ServiceAuth.Email, Writable.This, Readable.All, Database.Postgres, ServiceEnumerable()),
+              metadata = Seq(
+                ServiceAuth.Email,
+                Writable.This,
+                Readable.All,
+                Database.Postgres,
+                ServiceEnumerable(),
+                ServiceLanguage.Go,
+                Omit(Set(Delete)),
+              ),
             ),
+            "Box" -> ServiceBlock(Map()),
           ),
         ),
       )
