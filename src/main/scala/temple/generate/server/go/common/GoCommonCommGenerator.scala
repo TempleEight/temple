@@ -16,5 +16,4 @@ object GoCommonCommGenerator {
         ),
       ),
     )
-  FileUtils.readResources("go/genFiles/common/comm/init.go.snippet").stripLineEnd
 }
