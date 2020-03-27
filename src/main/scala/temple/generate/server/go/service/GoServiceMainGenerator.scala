@@ -1,6 +1,7 @@
 package temple.generate.server.go.service
 
 import temple.generate.CRUD.CRUD
+import temple.generate.server.ServiceRoot
 import temple.generate.utils.CodeTerm
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
@@ -11,7 +12,7 @@ object GoServiceMainGenerator {
 
   /** Given a service name, module name and whether the service uses inter-service communication, return the import
     * block */
-  private[service] def generateImports(serviceName: String, module: String, usesComms: Boolean): String = {
+  private[service] def generateImports(root: ServiceRoot, usesComms: Boolean): String = {
     val standardImports = Seq(
       //"flag",
       //"log",
@@ -19,8 +20,8 @@ object GoServiceMainGenerator {
     ).map(doubleQuote)
 
     val customImports = Seq[CodeTerm](
-      when(usesComms) { s"${serviceName}Comm ${doubleQuote(s"$module/comm")}" },
-      s"${serviceName}DAO ${doubleQuote(s"$module/dao")}",
+      when(usesComms) { s"${root.name}Comm ${doubleQuote(s"${root.module}/comm")}" },
+      s"${root.name}DAO ${doubleQuote(s"${root.module}/dao")}",
       //doubleQuote(s"$module/util"),
       //s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
       //doubleQuote("github.com/gorilla/mux"),
@@ -30,15 +31,15 @@ object GoServiceMainGenerator {
   }
 
   /** Given a service name and whether the service uses inter-service communication, return global statements */
-  private[service] def generateGlobals(serviceName: String, usesComms: Boolean): String =
+  private[service] def generateGlobals(root: ServiceRoot, usesComms: Boolean): String =
     mkCode.lines(
-      s"var dao ${serviceName}DAO.DAO",
-      when(usesComms) { s"var comm ${serviceName}Comm.Handler" },
+      s"var dao ${root.name}DAO.DAO",
+      when(usesComms) { s"var comm ${root.name}Comm.Handler" },
     )
 
   /** Given a service name, whether the service uses inter-service communication, the operations desired and the port
     * number, generate the main function */
-  private[service] def generateMain(serviceName: String, usesComms: Boolean, operations: Set[CRUD], port: Int): String =
+  private[service] def generateMain(root: ServiceRoot, usesComms: Boolean, operations: Set[CRUD]): String =
     mkCode(
       "func main() ",
       CodeWrap.curly.tabbed(
@@ -92,12 +93,12 @@ object GoServiceMainGenerator {
       ),
     )
 
-  private[service] def generateHandler(serviceName: String, operation: CRUD): String =
-    s"func $serviceName${operation}Handler(w http.ResponseWriter, r *http.Request) {}"
+  private[service] def generateHandler(root: ServiceRoot, operation: CRUD): String =
+    s"func ${root.name}${operation}Handler(w http.ResponseWriter, r *http.Request) {}"
 
-  private[service] def generateHandlers(serviceName: String, operations: Set[CRUD]): String =
+  private[service] def generateHandlers(root: ServiceRoot, operations: Set[CRUD]): String =
     mkCode.doubleLines(
       for (operation <- operations.toSeq.sorted)
-        yield generateHandler(serviceName, operation),
+        yield generateHandler(root, operation),
     )
 }
