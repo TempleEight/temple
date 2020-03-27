@@ -55,6 +55,7 @@ object ServerBuilder {
     val moduleName: String = detail match {
       case GoLanguageDetail(modulePath) => s"$modulePath/$serviceName"
     }
+    //TODO: Auth
 
     ServiceRoot(
       serviceName,

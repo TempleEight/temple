@@ -1,10 +1,10 @@
 package dao
 
-    import"fmt"
+	import"fmt"
 
-// ErrUserNotFound is returned when a user for the provided ID was not found
-    type ErrUserNotFound int64
+// ErrTempleuserNotFound is returned when a templeuser for the provided ID was not found
+	type ErrTempleuserNotFound int64
 
-    func(e ErrUserNotFound)Error()string{
-    return fmt.Sprintf("user not found with ID %d",e)
+	func(e ErrTempleuserNotFound)Error()string{
+	return fmt.Sprintf("templeuser not found with ID %d",e)
 }

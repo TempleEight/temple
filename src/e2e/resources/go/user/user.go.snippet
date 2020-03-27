@@ -1,29 +1,29 @@
 package main
 
-    import(
-    "net/http"
+	import(
+	"net/http"
 
-    userDAO"github.com/TempleEight/spec-golang/user/dao"
-    )
+	templeuserDAO"github.com/squat/and/dab/templeuser/dao"
+	)
 
-    var dao userDAO.DAO
+	var dao templeuserDAO.DAO
 
-    func main(){
+	func main(){
 
 }
 
-    func jsonMiddleware(next http.Handler)http.Handler{
-    return http.HandlerFunc(func(w http.ResponseWriter,r*http.Request){
-    // All responses are JSON, set header accordingly
-    w.Header().Set("Content-Type","application/json")
-    next.ServeHTTP(w,r)
+	func jsonMiddleware(next http.Handler)http.Handler{
+	return http.HandlerFunc(func(w http.ResponseWriter,r*http.Request){
+	// All responses are JSON, set header accordingly
+	w.Header().Set("Content-Type","application/json")
+	next.ServeHTTP(w,r)
 })
 }
 
-    func userCreateHandler(w http.ResponseWriter,r*http.Request){}
+	func templeuserListHandler(w http.ResponseWriter,r*http.Request){}
 
-    func userReadHandler(w http.ResponseWriter,r*http.Request){}
+	func templeuserCreateHandler(w http.ResponseWriter,r*http.Request){}
 
-    func userUpdateHandler(w http.ResponseWriter,r*http.Request){}
+	func templeuserReadHandler(w http.ResponseWriter,r*http.Request){}
 
-    func userDeleteHandler(w http.ResponseWriter,r*http.Request){}
+	func templeuserUpdateHandler(w http.ResponseWriter,r*http.Request){}

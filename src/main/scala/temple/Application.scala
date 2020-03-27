@@ -3,19 +3,19 @@ package temple
 import temple.DSL.DSLProcessor
 import temple.DSL.semantics.Analyzer
 import temple.builder.project.ProjectBuilder
-import temple.detail.{LanguageSpecificDetailBuilder, PoliceSergeantNicholasAngel}
+import temple.detail.{LanguageSpecificDetailBuilder, QuestionAsker}
 import temple.utils.FileUtils
 
 object Application {
 
-  def generate(config: TempleConfig): Unit = {
+  def generate(config: TempleConfig, questionAsker: QuestionAsker): Unit = {
     val outputDirectory = config.Generate.outputDirectory.getOrElse(System.getProperty("user.dir"))
     val fileContents    = FileUtils.readFile(config.Generate.filename())
     DSLProcessor.parse(fileContents) match {
       case Left(error) => throw new RuntimeException(error)
       case Right(data) =>
         val analyzedTemplefile = Analyzer.parseSemantics(data)
-        val detail             = LanguageSpecificDetailBuilder.build(analyzedTemplefile, PoliceSergeantNicholasAngel)
+        val detail             = LanguageSpecificDetailBuilder.build(analyzedTemplefile, questionAsker)
         val project            = ProjectBuilder.build(analyzedTemplefile, detail)
 
         FileUtils.createDirectory(outputDirectory)
