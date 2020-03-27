@@ -15,11 +15,6 @@ object EndpointTester {
 
   private def performSetup(templefile: Templefile, generatedPath: String): EndpointConfig = {
     println("🍪 Spinning up Kubernetes infrastructure...")
-    // Require certain env vars to be set
-    Seq("REG_URL", "REG_USERNAME", "REG_PASSWORD", "REG_EMAIL").foreach { envVar =>
-      if (Option(System.getenv(envVar)).isEmpty) throw new EnvironmentVariableNotSetException(envVar)
-    }
-
     // Deploy Kubernetes
     exec(s"sh $generatedPath/deploy.sh")
 
@@ -47,12 +42,18 @@ object EndpointTester {
     println(sampleRequest)
   }
 
-  def test(templefile: Templefile, generatedPath: String): Unit =
+  def test(templefile: Templefile, generatedPath: String): Unit = {
+    // Require certain env vars to be set
+    Seq("REG_URL", "REG_USERNAME", "REG_PASSWORD", "REG_EMAIL").foreach { envVar =>
+      if (System.getenv(envVar) == null) throw new EnvironmentVariableNotSetException(envVar)
+    }
+
     try {
       val config = performSetup(templefile, generatedPath)
       performTests(templefile, generatedPath, config.baseIP)
     } finally {
       performShutdown(templefile, generatedPath)
     }
+  }
 
 }
