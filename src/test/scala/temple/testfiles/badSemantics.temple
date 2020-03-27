@@ -1,0 +1,7 @@
+BadSemanticsTest: project {}
+
+TempleUser: service {
+  username: string;
+  email: string(40,5);
+  #omit [badKey];
+}
