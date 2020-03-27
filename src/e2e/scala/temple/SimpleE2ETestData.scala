@@ -55,12 +55,12 @@ object SimpleE2ETestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=booking-service' \
-      |  --data 'url=http://booking:1025/booking'
+      |  --data 'url=http://booking:1026/booking'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=event-service' \
-      |  --data 'url=http://event:1026/event'
+      |  --data 'url=http://event:1028/event'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/routes \
@@ -274,5 +274,24 @@ object SimpleE2ETestData {
       |  basicAuth: false
       |  isDefault: true
       |  editable: true
+      |""".stripMargin
+
+  val prometheusConfig: String =
+    """global:
+      |  scrape_interval: 15s
+      |  evaluation_interval: 15s
+      |scrape_configs:
+      |- job_name: templeuser
+      |  static_configs:
+      |  - targets:
+      |    - templeuser:1025
+      |- job_name: booking
+      |  static_configs:
+      |  - targets:
+      |    - booking:1027
+      |- job_name: event
+      |  static_configs:
+      |  - targets:
+      |    - event:1029
       |""".stripMargin
 }
