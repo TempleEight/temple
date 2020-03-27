@@ -127,17 +127,7 @@ object GoAuthServiceDAOGenerator {
       genDeclareAndAssign(s"row.$scanFunctionCall", "err"),
       genIf(
         "err != nil",
-        mkCode.lines(
-          mkCode(
-            "switch err",
-            CodeWrap.curly.noIndent(
-              "case sql.ErrNoRows:",
-              tabIndent(genReturn("nil", "ErrAuthNotFound")),
-              "default:",
-              tabIndent(genReturn("nil", "err")),
-            ),
-          ),
-        ),
+        genSwitch("err", ListMap("sql.ErrNoRows" -> genReturn("nil", "ErrAuthNotFound")), genReturn("nil", "err")),
       ),
     )
 

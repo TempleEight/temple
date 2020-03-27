@@ -5,6 +5,7 @@ import temple.ast.AttributeType._
 import temple.generate.server.ServiceRoot
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
+import temple.utils.StringUtils.tabIndent
 
 import scala.collection.immutable.ListMap
 
@@ -105,6 +106,18 @@ object GoCommonGenerator {
       "for",
       expr,
       CodeWrap.curly.tabbed(body),
+    )
+
+  /** Generate switch statement */
+  private[go] def genSwitch(expr: String, cases: ListMap[String, String], default: String): String =
+    mkCode(
+      "switch",
+      expr,
+      CodeWrap.curly.noIndent(
+        cases.map { case (switchCase, statements) => mkCode.lines(s"case $switchCase:", tabIndent(statements)) },
+        "default:",
+        tabIndent(default),
+      ),
     )
 
   /** Generate return statement */
