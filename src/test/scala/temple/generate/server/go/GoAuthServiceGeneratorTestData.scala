@@ -13,6 +13,8 @@ object GoAuthServiceGeneratorTestData {
     82,
     AuthAttribute(ServiceAuth.Email, AttributeType.StringType()),
     IDAttribute("id", AttributeType.UUIDType),
+    "INSERT INTO auth (id, email, password) VALUES ($1, $2, $3) RETURNING id, name, password",
+    "SELECT id, email, password FROM auth WHERE email = $1",
   )
 
   val authServiceFiles: Files = Map(

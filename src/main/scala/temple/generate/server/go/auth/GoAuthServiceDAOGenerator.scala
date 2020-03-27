@@ -4,7 +4,6 @@ import temple.generate.server.AuthServiceRoot
 import temple.generate.server.go.common.GoCommonDAOGenerator
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
-import temple.generate.utils.CodeUtils
 import temple.utils.StringUtils.{doubleQuote, tabIndent}
 
 import scala.collection.immutable.ListMap
@@ -71,9 +70,7 @@ object GoAuthServiceDAOGenerator {
       genFunctionCall(
         "executeQueryWithRowResponse",
         "dao.DB",
-        doubleQuote(
-          s"INSERT INTO auth (${root.idAttribute.name}, ${root.authAttribute.authType.name}, password) VALUES ($$1, $$2, $$3) RETURNING id, name, password",
-        ),
+        doubleQuote(root.createQuery),
         s"input.${root.idAttribute.name.toUpperCase()}",
         s"input.${root.authAttribute.authType.name.capitalize}",
         s"input.Password",
@@ -119,9 +116,7 @@ object GoAuthServiceDAOGenerator {
       genFunctionCall(
         "executeQueryWithRowResponse",
         "dao.DB",
-        doubleQuote(
-          s"SELECT ${root.idAttribute.name}, ${root.authAttribute.authType.name}, password FROM auth WHERE ${root.authAttribute.authType.name} = $$1",
-        ),
+        doubleQuote(root.readQuery),
         s"input.${root.authAttribute.authType.name.capitalize}",
       ),
       "row",
