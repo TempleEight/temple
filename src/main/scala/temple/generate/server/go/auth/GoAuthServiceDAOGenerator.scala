@@ -71,7 +71,7 @@ object GoAuthServiceDAOGenerator {
         "executeQueryWithRowResponse",
         "dao.DB",
         doubleQuote(root.createQuery),
-        s"input.${root.idAttribute.name.toUpperCase()}",
+        s"input.${root.idAttribute.name.toUpperCase}",
         s"input.${root.authAttribute.authType.name.capitalize}",
         s"input.Password",
       ),
@@ -159,7 +159,7 @@ object GoAuthServiceDAOGenerator {
   private[auth] def generateDAOFunctions(root: AuthServiceRoot): String = {
     val scanFunctionCall = genFunctionCall(
       "Scan",
-      s"&auth.${root.idAttribute.name.toUpperCase()}",
+      s"&auth.${root.idAttribute.name.toUpperCase}",
       s"&auth.${root.authAttribute.authType.name.capitalize}",
       s"&auth.Password",
     )
