@@ -14,7 +14,6 @@ class DockerfileBuilderTest extends FlatSpec with Matchers {
     val templefile = Templefile(
       "ExampleProject",
       ProjectBlock(Seq(ServiceLanguage.Go)),
-      targets = Map(),
       services = Map("SampleService" -> BuilderTestData.sampleService),
     )
 
@@ -29,7 +28,6 @@ class DockerfileBuilderTest extends FlatSpec with Matchers {
     val templefile = Templefile(
       "ExampleProject",
       ProjectBlock(Seq(ServiceLanguage.Go)),
-      targets = Map(),
       services = Map("ComplexService" -> BuilderTestData.sampleComplexService),
     )
 
@@ -43,8 +41,6 @@ class DockerfileBuilderTest extends FlatSpec with Matchers {
   it should "generate a Dockerfile for Go if no language is specified" in {
     val templefile = Templefile(
       "ExampleProject",
-      ProjectBlock(),
-      targets = Map(),
       services = Map("ComplexService" -> BuilderTestData.sampleComplexService),
     )
 

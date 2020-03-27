@@ -11,78 +11,38 @@ import scala.Option.when
 /** Implementation of [[ServiceGenerator]] for generating Go */
 object GoServiceGenerator extends ServiceGenerator {
 
-  override def generate(serviceRoot: ServiceRoot): Files = {
+  override def generate(root: ServiceRoot): Files = {
     /* TODO
      * main in <>.go
      * handlers in <>.go
-     * dao.go
      * handler.go
      * config.json
      */
-    val usesComms  = serviceRoot.comms.nonEmpty
-    val operations = serviceRoot.opQueries.keySet
+    val usesComms  = root.comms.nonEmpty
+    val operations = root.opQueries.keySet
     (Map(
-      File(s"${serviceRoot.name}", "go.mod") -> GoCommonGenerator.generateMod(serviceRoot.module),
-      File(serviceRoot.name, s"${serviceRoot.name}.go") -> mkCode.doubleLines(
+      File(s"${root.name}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
+      File(root.name, s"${root.name}.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoServiceMainGenerator.generateImports(
-          serviceRoot.name,
-          serviceRoot.module,
-          usesComms,
-        ),
-        GoServiceMainGenerator.generateGlobals(
-          serviceRoot.name,
-          usesComms,
-        ),
-        GoServiceMainGenerator.generateMain(
-          serviceRoot.name,
-          usesComms,
-          operations,
-          serviceRoot.port,
-        ),
+        GoServiceMainGenerator.generateImports(root, usesComms),
+        GoServiceMainGenerator.generateGlobals(root, usesComms),
+        GoServiceMainGenerator.generateMain(root, usesComms, operations),
         GoCommonMainGenerator.generateJsonMiddleware(),
-        GoServiceMainGenerator.generateHandlers(
-          serviceRoot.name,
-          operations,
-        ),
+        GoServiceMainGenerator.generateHandlers(root, operations),
       ),
-      File(s"${serviceRoot.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(serviceRoot.name),
-      File(s"${serviceRoot.name}/dao", "dao.go") -> mkCode.doubleLines(
+      File(s"${root.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),
+      File(s"${root.name}/dao", "dao.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("dao"),
-        GoServiceDAOGenerator.generateImports(
-          serviceRoot.attributes,
-          serviceRoot.module,
-        ),
-        GoServiceDAOInterfaceGenerator.generateInterface(
-          serviceRoot.name,
-          operations,
-          serviceRoot.createdByAttribute,
-        ),
+        GoServiceDAOGenerator.generateImports(root),
+        GoServiceDAOInterfaceGenerator.generateInterface(root, operations),
         GoCommonDAOGenerator.generateDAOStruct(),
-        GoServiceDAOGenerator.generateDatastoreObjectStruct(
-          serviceRoot.name,
-          serviceRoot.idAttribute,
-          serviceRoot.createdByAttribute,
-          serviceRoot.attributes,
-        ),
-        GoServiceDAOInputStructsGenerator.generateStructs(
-          serviceRoot.name,
-          operations,
-          serviceRoot.idAttribute,
-          serviceRoot.createdByAttribute,
-          serviceRoot.attributes,
-        ),
+        GoServiceDAOGenerator.generateDatastoreObjectStruct(root),
+        GoServiceDAOInputStructsGenerator.generateStructs(root, operations),
         GoCommonDAOGenerator.generateInit(),
         GoServiceDAOGenerator.generateQueryFunctions(operations),
-        GoServiceDAOFunctionsGenerator.generateDAOFunctions(
-          serviceRoot.name,
-          serviceRoot.opQueries,
-          serviceRoot.idAttribute,
-          serviceRoot.createdByAttribute,
-          serviceRoot.attributes,
-        ),
+        GoServiceDAOFunctionsGenerator.generateDAOFunctions(root),
       ),
-      File(s"${serviceRoot.name}/util", "util.go") -> mkCode.doubleLines(
+      File(s"${root.name}/util", "util.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("util"),
         GoServiceUtilGenerator.generateImports(),
         GoCommonUtilGenerator.generateConfigStruct(),
@@ -92,9 +52,9 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceUtilGenerator.generateIDsFromRequest(),
       ),
     ) ++ when(usesComms)(
-      File(s"${serviceRoot.name}/comm", "handler.go") -> mkCode.doubleLines(
+      File(s"${root.name}/comm", "handler.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("comm"),
-        GoServiceCommGenerator.generateImports(serviceRoot.module),
+        GoServiceCommGenerator.generateImports(root),
         GoServiceCommGenerator.generateStructs(),
         GoCommonCommGenerator.generateInit(),
       ),

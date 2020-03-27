@@ -100,20 +100,61 @@ func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) 
 
 // CreateTempleuser creates a new templeuser in the datastore, returning the newly created templeuser
 func (dao *DAO) CreateTempleuser(input CreateTempleuserInput) (*Templeuser, error) {
-	return nil, nil
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO templeuser (intField, doubleField, stringField, boolField, dateField, timeField, dateTimeField, blobField) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING intField, doubleField, stringField, boolField, dateField, timeField, dateTimeField, blobField;", input.ID, input.IntField, input.DoubleField, input.StringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField)
+
+	var templeuser Templeuser
+	err := row.Scan(&templeuser.ID, &templeuser.IntField, &templeuser.DoubleField, &templeuser.StringField, &templeuser.BoolField, &templeuser.DateField, &templeuser.TimeField, &templeuser.DateTimeField, &templeuser.BlobField)
+	if err != nil {
+		return nil, err
+	}
+
+	return &templeuser, nil
 }
 
 // ReadTempleuser returns the templeuser in the datastore for a given ID
 func (dao *DAO) ReadTempleuser(input ReadTempleuserInput) (*Templeuser, error) {
-	return nil, nil
+	row := executeQueryWithRowResponse(dao.DB, "SELECT intField, doubleField, stringField, boolField, dateField, timeField, dateTimeField, blobField FROM templeuser WHERE id = $1;", input.ID)
+
+	var templeuser Templeuser
+	err := row.Scan(&templeuser.ID, &templeuser.IntField, &templeuser.DoubleField, &templeuser.StringField, &templeuser.BoolField, &templeuser.DateField, &templeuser.TimeField, &templeuser.DateTimeField, &templeuser.BlobField)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrTempleuserNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
+	return &templeuser, nil
 }
 
 // UpdateTempleuser updates the templeuser in the datastore for a given ID, returning the newly updated templeuser
 func (dao *DAO) UpdateTempleuser(input UpdateTempleuserInput) (*Templeuser, error) {
-	return nil, nil
+	row := executeQueryWithRowResponse(dao.DB, "UPDATE templeuser SET intField = $1, doubleField = $2, stringField = $3, boolField = $4, dateField = $5, timeField = $6, dateTimeField = $7, blobField = $8 WHERE id = $9 RETURNING intField, doubleField, stringField, boolField, dateField, timeField, dateTimeField, blobField;", input.IntField, input.DoubleField, input.StringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField, input.ID)
+
+	var templeuser Templeuser
+	err := row.Scan(&templeuser.ID, &templeuser.IntField, &templeuser.DoubleField, &templeuser.StringField, &templeuser.BoolField, &templeuser.DateField, &templeuser.TimeField, &templeuser.DateTimeField, &templeuser.BlobField)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrTempleuserNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
+	return &templeuser, nil
 }
 
 // DeleteTempleuser deletes the templeuser in the datastore for a given ID
 func (dao *DAO) DeleteTempleuser(input DeleteTempleuserInput) error {
+	rowsAffected, err := executeQuery(dao.DB, "DELETE FROM templeuser WHERE id = $1;", input.ID)
+	if err != nil {
+		return err
+	} else if rowsAffected == 0 {
+		return ErrTempleuserNotFound(input.ID.String())
+	}
+
 	return nil
 }

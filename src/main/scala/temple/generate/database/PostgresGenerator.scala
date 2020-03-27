@@ -107,13 +107,12 @@ private class PostgresGenerator private (context: PostgresContext) {
   }
 
   /** Given the current PostgresContext, generate the prepared statement placeholders for each column */
-  private def generatePreparedValues(columns: Seq[Any]): String =
+  private def generatePreparedValues(expressions: Seq[Expression]): String =
     // Make a comma-separated list
     mkCode.list(
-      // Consisting of question marks or numbered question marks
-      context.preparedType match {
-        case PreparedType.QuestionMarks => Iterator.fill(columns.length)("?")
-        case PreparedType.DollarNumbers => (1 to columns.length).map("$" + _)
+      expressions.map {
+        case Value(value)             => value
+        case Expression.PreparedValue => nextPreparedSymbol()
       },
     )
 
@@ -127,9 +126,9 @@ private class PostgresGenerator private (context: PostgresContext) {
         val stringColumns    = mkCode.list(columns.map(_.name))
         val stringConditions = generateConditionString(conditions)
         mkCode.stmt("SELECT", stringColumns, "FROM", tableName, stringConditions)
-      case Insert(tableName, columns, returnColumns) =>
-        val stringColumns       = mkCode.list(columns.map(_.name))
-        val values              = generatePreparedValues(columns)
+      case Insert(tableName, assignments, returnColumns) =>
+        val stringColumns       = mkCode.list(assignments.map(_.column.name))
+        val values              = generatePreparedValues(assignments.map(_.expression))
         val stringReturnColumns = generateReturningString(returnColumns)
         mkCode.stmt(
           "INSERT INTO",

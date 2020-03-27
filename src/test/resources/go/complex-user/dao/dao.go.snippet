@@ -112,20 +112,61 @@ func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) 
 
 // CreateComplexuser creates a new complexuser in the datastore, returning the newly created complexuser
 func (dao *DAO) CreateComplexuser(input CreateComplexuserInput) (*Complexuser, error) {
-	return nil, nil
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO complexuser (smallIntField, intField, bigIntField, floatField, doubleField, stringField, boundedStringField, boolField, dateField, timeField, dateTimeField, blobField) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING smallIntField, intField, bigIntField, floatField, doubleField, stringField, boundedStringField, boolField, dateField, timeField, dateTimeField, blobField;", input.ID, input.SmallIntField, input.IntField, input.BigIntField, input.FloatField, input.DoubleField, input.StringField, input.BoundedStringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField)
+
+	var complexuser Complexuser
+	err := row.Scan(&complexuser.ID, &complexuser.SmallIntField, &complexuser.IntField, &complexuser.BigIntField, &complexuser.FloatField, &complexuser.DoubleField, &complexuser.StringField, &complexuser.BoundedStringField, &complexuser.BoolField, &complexuser.DateField, &complexuser.TimeField, &complexuser.DateTimeField, &complexuser.BlobField)
+	if err != nil {
+		return nil, err
+	}
+
+	return &complexuser, nil
 }
 
 // ReadComplexuser returns the complexuser in the datastore for a given ID
 func (dao *DAO) ReadComplexuser(input ReadComplexuserInput) (*Complexuser, error) {
-	return nil, nil
+	row := executeQueryWithRowResponse(dao.DB, "SELECT smallIntField, intField, bigIntField, floatField, doubleField, stringField, boundedStringField, boolField, dateField, timeField, dateTimeField, blobField FROM complexuser WHERE id = $1;", input.ID)
+
+	var complexuser Complexuser
+	err := row.Scan(&complexuser.ID, &complexuser.SmallIntField, &complexuser.IntField, &complexuser.BigIntField, &complexuser.FloatField, &complexuser.DoubleField, &complexuser.StringField, &complexuser.BoundedStringField, &complexuser.BoolField, &complexuser.DateField, &complexuser.TimeField, &complexuser.DateTimeField, &complexuser.BlobField)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrComplexuserNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
+	return &complexuser, nil
 }
 
 // UpdateComplexuser updates the complexuser in the datastore for a given ID, returning the newly updated complexuser
 func (dao *DAO) UpdateComplexuser(input UpdateComplexuserInput) (*Complexuser, error) {
-	return nil, nil
+	row := executeQueryWithRowResponse(dao.DB, "UPDATE complexuser SET smallIntField = $1, intField = $2, bigIntField = $3, floatField = $4, doubleField = $5, stringField = $6, boundedStringField = $7, boolField = $8, dateField = $9, timeField = $10, dateTimeField = $11, blobField = $12 WHERE id = $13 RETURNING smallIntField, intField, bigIntField, floatField, doubleField, stringField, boundedStringField, boolField, dateField, timeField, dateTimeField, blobField;", input.SmallIntField, input.IntField, input.BigIntField, input.FloatField, input.DoubleField, input.StringField, input.BoundedStringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField, input.ID)
+
+	var complexuser Complexuser
+	err := row.Scan(&complexuser.ID, &complexuser.SmallIntField, &complexuser.IntField, &complexuser.BigIntField, &complexuser.FloatField, &complexuser.DoubleField, &complexuser.StringField, &complexuser.BoundedStringField, &complexuser.BoolField, &complexuser.DateField, &complexuser.TimeField, &complexuser.DateTimeField, &complexuser.BlobField)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrComplexuserNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
+	return &complexuser, nil
 }
 
 // DeleteComplexuser deletes the complexuser in the datastore for a given ID
 func (dao *DAO) DeleteComplexuser(input DeleteComplexuserInput) error {
+	rowsAffected, err := executeQuery(dao.DB, "DELETE FROM complexuser WHERE id = $1;", input.ID)
+	if err != nil {
+		return err
+	} else if rowsAffected == 0 {
+		return ErrComplexuserNotFound(input.ID.String())
+	}
+
 	return nil
 }

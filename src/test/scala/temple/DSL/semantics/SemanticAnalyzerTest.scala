@@ -2,11 +2,11 @@ package temple.DSL.semantics
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.semantics.Analyzer.parseSemantics
-import temple.ast.AttributeType._
+import temple.DSL.semantics.SemanticAnalyzerTest._
 import temple.DSL.syntax
 import temple.DSL.syntax.Arg._
 import temple.DSL.syntax.{Args, DSLRootItem, Entry}
-import SemanticAnalyzerTest._
+import temple.ast.AttributeType._
 import temple.ast.{Attribute, ProjectBlock, ServiceBlock, Templefile}
 
 class SemanticAnalyzerTest extends FlatSpec with Matchers {
@@ -76,7 +76,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           Entry.Attribute("a", syntax.AttributeType.Primitive("wat")),
         ),
       )
-    } should have message "Unknown type wat in a, in service, in User"
+    } should have message "Unknown type wat in a, in User service"
   }
 
   it should "fail on too many arguments" in {
@@ -94,7 +94,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           Entry.Attribute("a", syntax.AttributeType.Primitive("bool", Args(Seq(IntArg(12))))),
         ),
       )
-    } should have message "Arguments supplied to function that should take no parameters in bool, in a, in service, in User"
+    } should have message "Arguments supplied to function that should take no parameters in bool, in a, in User service"
 
     noException should be thrownBy {
       parseSemantics(
@@ -113,7 +113,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    } should have message "Too many arguments supplied to function (found 4, expected at most 3) in int, in a, in service, in User"
+    } should have message "Too many arguments supplied to function (found 4, expected at most 3) in int, in a, in User service"
   }
 
   it should "fail on duplicate key names" in {
@@ -133,7 +133,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           Entry.Attribute("a", syntax.AttributeType.Primitive("float")),
         ),
       )
-    } should have message "Key a already exists in LinkedHashMap(a -> Attribute(IntType(None,None,4),None,Set())) in service, in User"
+    } should have message "Key a already exists in LinkedHashMap(a -> Attribute(IntType(None,None,4),None,Set())) in User service"
 
     noException should be thrownBy {
       parseSemantics(
@@ -164,7 +164,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
         ),
       )
 
-    } should have message "Key a already exists in LinkedHashMap(a -> Attribute(IntType(None,None,4),None,Set())) in Neighbour, in struct, in service, in User"
+    } should have message "Key a already exists in LinkedHashMap(a -> Attribute(IntType(None,None,4),None,Set())) in Neighbour struct, in User service"
   }
 
   it should "pass kwargs in any order" in {
@@ -201,7 +201,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    } should have message "Duplicate argument provided for max in int, in a, in service, in User"
+    } should have message "Duplicate argument provided for max in int, in a, in User service"
 
     the[SemanticParsingException] thrownBy {
       parseSemantics(
@@ -213,7 +213,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
         ),
       )
 
-    } should have message "Duplicate argument provided for max in int, in a, in service, in User"
+    } should have message "Duplicate argument provided for max in int, in a, in User service"
   }
 
   it should "fail to parse a bad nested item in a service" in {
@@ -223,7 +223,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           DSLRootItem("Neighbour", "badItem", Seq()),
         ),
       )
-    } should have message "Unknown block type badItem for Neighbour in service, in User"
+    } should have message "Unknown block type badItem for Neighbour in User service"
 
     the[SemanticParsingException] thrownBy {
       parseSemantics(
@@ -238,7 +238,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
         ),
       )
 
-    } should have message "No valid metadata language in Neighbour, in struct, in service, in User"
+    } should have message "No valid metadata language in Neighbour struct, in User service"
   }
 
   it should "work with non-mutex annotations" in {
@@ -278,7 +278,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    } should have message "Two scope annotations found: @server is incompatible with @client in a, in service, in User"
+    } should have message "Two scope annotations found: @server is incompatible with @client in a, in User service"
   }
 
   it should "fail for unknown annotations" in {
@@ -288,7 +288,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           Entry.Attribute("a", syntax.AttributeType.Primitive("int"), Seq(syntax.Annotation("something"))),
         ),
       )
-    } should have message "Unknown annotation @something in a, in service, in User"
+    } should have message "Unknown annotation @something in a, in User service"
   }
 
   it should "accept valid annotations" in {
@@ -302,7 +302,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
               Entry.Attribute("id", syntax.AttributeType.Primitive("int")),
               Entry.Metadata("enumerable"),
               Entry.Metadata("uses", Args(kwargs = Seq("services" -> ListArg(Seq(TokenArg("Box")))))),
-              Entry.Metadata("auth", Args(kwargs = Seq("login"    -> TokenArg("id")))),
+              Entry.Metadata("auth", Args(Seq(TokenArg("email")))),
             ),
           ),
           DSLRootItem("Box", "service", Seq()),
@@ -319,7 +319,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           Entry.Metadata("uses", Args(kwargs = Seq("badKey" -> ListArg(Seq())))),
         ),
       )
-    } should have message "Unknown keyword argument badKey with value [] in uses, in service, in User"
+    } should have message "Unknown keyword argument badKey with value ListArg(List()) in uses, in User service"
 
     the[SemanticParsingException] thrownBy {
       parseSemantics(
@@ -327,7 +327,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           Entry.Metadata("uses", Args(kwargs = Seq("services" -> IntArg(12)))),
         ),
       )
-    } should have message "Token list expected at services, found 12, in uses, in service, in User"
+    } should have message "Token list expected at services, found IntArg(12), in uses, in User service"
 
     the[SemanticParsingException] thrownBy {
       parseSemantics(
@@ -335,7 +335,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           Entry.Metadata("uses", Args(kwargs = Seq("services" -> NoArg))),
         ),
       )
-    } should have message "Token list expected at services, found <default>, in uses, in service, in User"
+    } should have message "Token list expected at services, found NoArg, in uses, in User service"
 
     the[SemanticParsingException] thrownBy {
       parseSemantics(
@@ -344,7 +344,22 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           Entry.Metadata("badMetadata"),
         ),
       )
-    } should have message "No valid metadata badMetadata in service, in User"
+    } should have message "No valid metadata badMetadata in User service"
+
+    the[SemanticParsingException] thrownBy {
+      parseSemantics(
+        mkTemplefileASTWithUserService(
+          Entry.Attribute("id", syntax.AttributeType.Primitive("int")),
+          DSLRootItem(
+            "Fred",
+            "struct",
+            Seq(
+              Entry.Metadata("badMetadata"),
+            ),
+          ),
+        ),
+      )
+    } should have message "No valid metadata badMetadata in Fred struct, in User service"
   }
 
   it should "parse project blocks correctly" in {
@@ -354,31 +369,31 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
 
     the[SemanticParsingException] thrownBy {
       parseSemantics(Seq(DSLRootItem("Test", "project", Seq(Entry.Metadata("bad", Args(Seq(TokenArg("go"))))))))
-    } should have message "No valid metadata bad in project, in Test"
+    } should have message "No valid metadata bad in Test project"
 
     the[SemanticParsingException] thrownBy {
       parseSemantics(
         Seq(DSLRootItem("Test", "project", Seq(Entry.Attribute("field", syntax.AttributeType.Primitive("int"))))),
       )
-    } should have message "Found unexpected attribute: `field: int;` in project, in Test"
+    } should have message "Found unexpected attribute: `field: int;` in Test project"
   }
 
   it should "fail to parse duplicate project blocks" in {
     the[SemanticParsingException] thrownBy {
       parseSemantics(Seq(DSLRootItem("Test", "project", Seq()), DSLRootItem("other", "project", Seq())))
-    } should have message "Second project found in addition to Test, in project, in other"
+    } should have message "Second project found in addition to Test, in other project"
   }
 
   it should "fail to parse metadata without required parameter" in {
     the[SemanticParsingException] thrownBy {
       parseSemantics(Seq(DSLRootItem("Test", "project", Seq(Entry.Metadata("language", Args())))))
-    } should have message "Required argument language not provided in language, in project, in Test"
+    } should have message "Required argument language not provided in language, in Test project"
   }
 
   it should "fail to parse unknown root blocks" in {
     the[SemanticParsingException] thrownBy {
       parseSemantics(Seq(DSLRootItem("Test", "project", Seq()), DSLRootItem("other", "badItem", Seq())))
-    } should have message "Unknown block type in badItem, in other"
+    } should have message "Unknown block type in other badItem"
   }
 
   it should "parse target blocks correctly" in {
@@ -392,7 +407,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
       parseSemantics(
         mkTemplefileAST(DSLRootItem("mobile", "target", Seq(Entry.Metadata("badKey", Args(Seq(TokenArg("swift"))))))),
       )
-    } should have message "No valid metadata badKey in target, in mobile"
+    } should have message "No valid metadata badKey in mobile target"
 
     the[SemanticParsingException] thrownBy {
       parseSemantics(
@@ -400,7 +415,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
           DSLRootItem("mobile", "target", Seq(Entry.Attribute("field", syntax.AttributeType.Primitive("int")))),
         ),
       )
-    } should have message "Found unexpected attribute: `field: int;` in target, in mobile"
+    } should have message "Found unexpected attribute: `field: int;` in mobile target"
   }
 }
 
@@ -410,7 +425,7 @@ object SemanticAnalyzerTest {
     DSLRootItem("Test", "project", Nil) +: rootItems
 
   private def mkTemplefileSemantics(entries: (String, ServiceBlock)*): Templefile =
-    Templefile("Test", ProjectBlock(), Map.empty, entries.toMap)
+    Templefile("Test", services = entries.toMap)
 
   private def mkTemplefileASTWithUserService(entries: Entry*): syntax.Templefile = Seq(
     DSLRootItem("Test", "project", Nil),
@@ -418,5 +433,5 @@ object SemanticAnalyzerTest {
   )
 
   private def mkTemplefileSemanticsWithUserService(serviceBlock: ServiceBlock): Templefile =
-    Templefile("Test", ProjectBlock(), Map.empty, Map("User" -> serviceBlock))
+    Templefile("Test", services = Map("User" -> serviceBlock))
 }

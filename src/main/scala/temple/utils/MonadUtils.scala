@@ -6,6 +6,6 @@ object MonadUtils {
   implicit class FromEither[A, B](either: Either[A, B]) {
 
     /** Reduces the Either to an item of the right type, by transforming a Left item if present */
-    def fromEither(f: A => B): B = either.fold(f, identity)
+    def fromEither[B1 >: B](f: A => B1): B1 = either.fold(f, identity)
   }
 }

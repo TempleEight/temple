@@ -22,7 +22,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
             name,
             service,
             endpoints = Set(Create, Read, Update, Delete, List),
-            port = port,
+            port = port.service,
             detail = GoLanguageDetail("github.com/squat/and/dab"),
           )
     }
@@ -62,7 +62,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
             name,
             service,
             endpoints = Set(),
-            port = port,
+            port = port.service,
             detail = GoLanguageDetail("github.com/squat/and/dab"),
           )
     }
@@ -96,7 +96,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
             name,
             service,
             endpoints = Set(Create, Read, Update, Delete, List),
-            port = port,
+            port = port.service,
             detail = GoLanguageDetail("github.com/squat/and/dab"),
           )
     }

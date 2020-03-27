@@ -63,7 +63,7 @@ object DatabaseBuilder {
         case Create =>
           Create -> Statement.Insert(
             tableName,
-            columns = columns,
+            assignment = columns.map(col => Assignment(col, PreparedValue)),
             returnColumns = columns,
           )
         case Read =>

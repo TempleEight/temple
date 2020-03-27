@@ -2,7 +2,6 @@ package temple
 
 import java.nio.file.FileAlreadyExistsException
 
-import temple.DSL.semantics.SemanticParsingException
 import temple.detail.PoliceSergeantNicholasAngel
 
 /** Main entry point into the application */
@@ -17,13 +16,14 @@ object Main extends App {
     val config = new TempleConfig(args)
     config.subcommand match {
       case Some(config.Generate) => Application.generate(config, PoliceSergeantNicholasAngel)
+      case Some(config.Validate) => Application.validate(config)
+      case Some(config.Test)     => Application.test(config)
       case Some(_)               => throw new TempleConfig.UnhandledArgumentException
       case None                  => config.printHelp()
     }
   } catch {
-    case error: IllegalArgumentException   => exit(error.getMessage)
     case error: FileAlreadyExistsException => exit(s"File already exists: ${error.getMessage}")
-    case error: SemanticParsingException   => exit(error.getMessage)
+    case error: Exception                  => exit(error.getMessage)
   }
 
 }

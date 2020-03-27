@@ -4,7 +4,7 @@ import temple.ast.{Attribute, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.go.common.GoCommonDAOGenerator
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
-import temple.generate.server.{CreatedByAttribute, IDAttribute}
+import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceRoot}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
 import temple.utils.StringUtils.doubleQuote
@@ -14,11 +14,11 @@ import scala.collection.immutable.ListMap
 
 object GoServiceDAOGenerator {
 
-  private[service] def generateImports(attributes: Map[String, Attribute], module: String): String = {
+  private[service] def generateImports(root: ServiceRoot): String = {
     // Check if attributes contains an attribute of type date, time or datetime
     val containsTime =
       Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateTimeType)
-        .intersect(attributes.values.map(_.attributeType).toSet)
+        .intersect(root.attributes.values.map(_.attributeType).toSet)
         .nonEmpty
 
     mkCode(
@@ -28,7 +28,7 @@ object GoServiceDAOGenerator {
         doubleQuote("fmt"),
         when(containsTime) { doubleQuote("time") },
         "",
-        doubleQuote(s"$module/util"),
+        doubleQuote(s"${root.module}/util"),
         doubleQuote("github.com/google/uuid"),
         "",
         "// pq acts as the driver for SQL requests",
@@ -37,30 +37,25 @@ object GoServiceDAOGenerator {
     )
   }
 
-  private[dao] def generateDAOFunctionName(operation: CRUD, serviceName: String): String =
-    s"$operation${serviceName.capitalize}"
+  private[dao] def generateDAOFunctionName(root: ServiceRoot, operation: CRUD): String =
+    s"$operation${root.name.capitalize}"
 
-  private[service] def generateDatastoreObjectStruct(
-    serviceName: String,
-    idAttribute: IDAttribute,
-    createdByAttribute: CreatedByAttribute,
-    attributes: ListMap[String, Attribute],
-  ): String = {
-    val idMap = ListMap(idAttribute.name.toUpperCase -> generateGoType(idAttribute.attributeType))
-    val createdByMap = createdByAttribute match {
+  private[service] def generateDatastoreObjectStruct(root: ServiceRoot): String = {
+    val idMap = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(root.idAttribute.attributeType))
+    val createdByMap = root.createdByAttribute match {
       case CreatedByAttribute.None =>
         ListMap.empty
       case enumerating: CreatedByAttribute.Enumerating =>
         ListMap(enumerating.name.capitalize -> generateGoType(enumerating.attributeType))
     }
-    val attributesMap = attributes.map {
+    val attributesMap = root.attributes.map {
       case (name, attribute) => (name.capitalize -> generateGoType(attribute.attributeType))
     }
 
     mkCode.lines(
-      s"// ${serviceName.capitalize} encapsulates the object stored in the datastore",
+      s"// ${root.name.capitalize} encapsulates the object stored in the datastore",
       mkCode(
-        s"type ${serviceName.capitalize} struct",
+        s"type ${root.name.capitalize} struct",
         CodeWrap.curly.tabbed(
           // Compose struct fields
           CodeUtils.pad(idMap ++ createdByMap ++ attributesMap),
@@ -78,16 +73,16 @@ object GoServiceDAOGenerator {
       when(operations.contains(Delete)) { GoCommonDAOGenerator.generateExecuteQuery() },
     )
 
-  private[service] def generateErrors(serviceName: String): String =
+  private[service] def generateErrors(root: ServiceRoot): String =
     mkCode.lines(
       "package dao",
       "",
       """import "fmt"""",
       "",
-      s"// Err${serviceName.capitalize}NotFound is returned when a $serviceName for the provided ID was not found",
-      s"type Err${serviceName.capitalize}NotFound int64",
+      s"// Err${root.name.capitalize}NotFound is returned when a ${root.name} for the provided ID was not found",
+      s"type Err${root.name.capitalize}NotFound string",
       "",
-      s"func (e Err${serviceName.capitalize}NotFound) Error() string ${CodeWrap.curly
-        .tabbed(s"""return fmt.Sprintf("$serviceName not found with ID %d", e)""")}",
+      s"func (e Err${root.name.capitalize}NotFound) Error() string ${CodeWrap.curly
+        .tabbed(s"""return fmt.Sprintf("${root.name} not found with ID %d", string(e))""")}",
     )
 }

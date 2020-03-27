@@ -7,7 +7,8 @@ import org.postgresql.util.PSQLException
 import org.scalatest.{BeforeAndAfter, Matchers}
 import temple.containers.PostgresSpec
 import temple.generate.database.ast.ColType.BlobCol
-import temple.generate.database.ast.{Column, ColumnDef, Statement}
+import temple.generate.database.ast.Expression.PreparedValue
+import temple.generate.database.ast.{Assignment, Column, ColumnDef, Statement}
 import temple.utils.FileUtils
 
 class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with BeforeAndAfter {
@@ -149,7 +150,7 @@ class PostgresGeneratorIntegrationTest extends PostgresSpec with Matchers with B
     val createStatement = Statement.Create("temple_user", Seq(ColumnDef("picture", BlobCol)))
     executeWithoutResults(PostgresGenerator.generate(createStatement))
 
-    val insertStatement = Statement.Insert("temple_user", Seq(Column("picture")))
+    val insertStatement = Statement.Insert("temple_user", Seq(Assignment(Column("picture"), PreparedValue)))
     val insertData      = Seq(PreparedVariable.BlobVariable(fileContents))
     executePreparedWithoutResults(PostgresGenerator.generate(insertStatement), insertData)
 

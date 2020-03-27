@@ -1,7 +1,7 @@
 package temple.utils
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.utils.StringUtils.{indent, snakeCase, españolQue}
+import temple.utils.StringUtils.{españolQue, indent, snakeCase}
 
 class StringUtilsTest extends FlatSpec with Matchers {
 

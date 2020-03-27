@@ -38,9 +38,7 @@ object ProjectBuilderTestData {
 
   val simpleTemplefile: Templefile = Templefile(
     "SampleProject",
-    ProjectBlock(),
-    Map(),
-    Map(
+    services = Map(
       "TempleUser" -> ServiceBlock(simpleServiceAttributes),
     ),
   )
@@ -48,17 +46,14 @@ object ProjectBuilderTestData {
   val simpleTemplefilePostgresProject: Templefile = Templefile(
     "SampleProject",
     ProjectBlock(Seq(Database.Postgres)),
-    Map(),
-    Map(
+    services = Map(
       "TempleUser" -> ServiceBlock(simpleServiceAttributes),
     ),
   )
 
   val simpleTemplefilePostgresService: Templefile = Templefile(
     "SampleProject",
-    ProjectBlock(),
-    Map(),
-    Map(
+    services = Map(
       "TempleUser" -> ServiceBlock(simpleServiceAttributes, metadata = Seq(Database.Postgres)),
     ),
   )
@@ -298,11 +293,33 @@ object ProjectBuilderTestData {
   val simpleTemplefileErrorsFile: String       = FileUtils.readResources("go/simple-user/dao/errors.go.snippet")
   val simpleTemplefileUtilFile: String         = FileUtils.readResources("go/simple-user/util/util.go.snippet")
 
+  val simpleTemplefileGrafanaDatasourceConfig: String =
+    """apiVersion: 1
+      |datasources:
+      |- name: Prometheus
+      |  type: prometheus
+      |  access: proxy
+      |  orgId: 1
+      |  url: http://prom:9090
+      |  basicAuth: false
+      |  isDefault: true
+      |  editable: true
+      |""".stripMargin
+
+  val simpleTemplefilePrometheusConfig: String =
+    """global:
+      |  scrape_interval: 15s
+      |  evaluation_interval: 15s
+      |scrape_configs:
+      |- job_name: templeuser
+      |  static_configs:
+      |  - targets:
+      |    - templeuser:1025
+      |""".stripMargin
+
   val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
-    ProjectBlock(),
-    Map(),
-    Map(
+    services = Map(
       "ComplexUser" -> ServiceBlock(
         complexServiceAttributes,
         structs = Map("TempleUser" -> StructBlock(simpleServiceAttributes)),
@@ -540,4 +557,28 @@ object ProjectBuilderTestData {
   val complexTemplefileDaoFile: String          = FileUtils.readResources("go/complex-user/dao/dao.go.snippet")
   val complexTemplefileErrorsFile: String       = FileUtils.readResources("go/complex-user/dao/errors.go.snippet")
   val complexTemplefileUtilFile: String         = FileUtils.readResources("go/complex-user/util/util.go.snippet")
+
+  val complexTemplefileGrafanaDatasourceConfig: String =
+    """apiVersion: 1
+      |datasources:
+      |- name: Prometheus
+      |  type: prometheus
+      |  access: proxy
+      |  orgId: 1
+      |  url: http://prom:9090
+      |  basicAuth: false
+      |  isDefault: true
+      |  editable: true
+      |""".stripMargin
+
+  val complexTemplefilePrometheusConfig: String =
+    """global:
+      |  scrape_interval: 15s
+      |  evaluation_interval: 15s
+      |scrape_configs:
+      |- job_name: complexuser
+      |  static_configs:
+      |  - targets:
+      |    - complexuser:1025
+      |""".stripMargin
 }

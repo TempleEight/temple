@@ -53,12 +53,42 @@ object SimpleE2ETestData {
       |  --data 'url=http://temple-user:1024/temple-user'
       |
       |curl -X POST \
+      |  --url $KONG_ADMIN/services/ \
+      |  --data 'name=booking-service' \
+      |  --data 'url=http://booking:1026/booking'
+      |
+      |curl -X POST \
+      |  --url $KONG_ADMIN/services/ \
+      |  --data 'name=event-service' \
+      |  --data 'url=http://event:1028/event'
+      |
+      |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/routes \
       |  --data "hosts[]=$KONG_ENTRY" \
       |  --data 'paths[]=/api/temple-user'
       |
       |curl -X POST \
+      |  --url $KONG_ADMIN/services/booking-service/routes \
+      |  --data "hosts[]=$KONG_ENTRY" \
+      |  --data 'paths[]=/api/booking'
+      |
+      |curl -X POST \
+      |  --url $KONG_ADMIN/services/event-service/routes \
+      |  --data "hosts[]=$KONG_ENTRY" \
+      |  --data 'paths[]=/api/event'
+      |
+      |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/plugins \
+      |  --data 'name=jwt' \
+      |  --data 'config.claims_to_verify=exp'
+      |
+      |curl -X POST \
+      |  --url $KONG_ADMIN/services/booking-service/plugins \
+      |  --data 'name=jwt' \
+      |  --data 'config.claims_to_verify=exp'
+      |
+      |curl -X POST \
+      |  --url $KONG_ADMIN/services/event-service/plugins \
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
 
@@ -231,5 +261,37 @@ object SimpleE2ETestData {
       |  allowUiUpdates: true
       |  options:
       |    path: /etc/grafana/provisioning/dashboards
+      |""".stripMargin
+
+  val grafanaDatasourceConfig: String =
+    """apiVersion: 1
+      |datasources:
+      |- name: Prometheus
+      |  type: prometheus
+      |  access: proxy
+      |  orgId: 1
+      |  url: http://prom:9090
+      |  basicAuth: false
+      |  isDefault: true
+      |  editable: true
+      |""".stripMargin
+
+  val prometheusConfig: String =
+    """global:
+      |  scrape_interval: 15s
+      |  evaluation_interval: 15s
+      |scrape_configs:
+      |- job_name: templeuser
+      |  static_configs:
+      |  - targets:
+      |    - templeuser:1025
+      |- job_name: booking
+      |  static_configs:
+      |  - targets:
+      |    - booking:1027
+      |- job_name: event
+      |  static_configs:
+      |  - targets:
+      |    - event:1029
       |""".stripMargin
 }
