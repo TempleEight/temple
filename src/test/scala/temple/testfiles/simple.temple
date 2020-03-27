@@ -14,7 +14,7 @@ TempleUser: service {
 
   Fred: struct {
     field: string @nullable;
-    friend: User;
+    friend: TempleUser;
     image: data(10M);
     #enumerableByThis;
     #readable(by: this);
@@ -25,6 +25,9 @@ TempleUser: service {
   #readable(by: all);
   #writable(by: this);
 
-  #auth(login: username);
-  #uses [Booking, Events, /* Reservations */];
+  #auth(email);
+  #uses [Booking, Event, /* Reservations */];
 }
+
+Booking: service {}
+Event: service {}

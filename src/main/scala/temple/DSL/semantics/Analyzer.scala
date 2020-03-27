@@ -1,6 +1,6 @@
 package temple.DSL.semantics
 
-import MetadataParser.assertNoParameters
+import temple.DSL.semantics.MetadataParser.assertNoParameters
 import temple.DSL.syntax
 import temple.DSL.syntax.{Arg, Args, DSLRootItem, Entry}
 import temple.ast.ArgType._
@@ -67,7 +67,7 @@ object Analyzer {
     * @param context Where this attribute is tagged
     * @return A parsed attribute type
     */
-  def parseAttributeType(dataType: syntax.AttributeType)(implicit context: SemanticContext): AttributeType = {
+  private def parseAttributeType(dataType: syntax.AttributeType)(implicit context: SemanticContext): AttributeType = {
     implicit val innerContext: SemanticContext = context :+ dataType.typeName
     dataType match {
       case syntax.AttributeType.Foreign(typeName) => AttributeType.ForeignKey(typeName)
@@ -126,7 +126,7 @@ object Analyzer {
     }
   }
 
-  def parseAttribute(
+  private def parseAttribute(
     dataType: syntax.AttributeType,
     annotations: Seq[syntax.Annotation],
   )(implicit context: SemanticContext): Attribute = {
@@ -138,6 +138,7 @@ object Analyzer {
           s"Two scope annotations found: ${annotation.render} is incompatible with ${existingAnnotation.render}",
         )
       }
+
     val valueAnnotations = mutable.HashSet[Annotation.ValueAnnotation]()
     annotations.iterator.map(_.key) foreach {
       case "unique"    => valueAnnotations += Annotation.Unique
@@ -158,7 +159,7 @@ object Analyzer {
     registerEmptyKeyword("enumerableByThis")(ServiceEnumerable(byThis = true))
     registerKeywordWithContext("readable", "by", TokenArgType)(Readable)
     registerKeywordWithContext("writable", "by", TokenArgType)(Writable)
-    registerKeyword("auth", "login", TokenArgType)(ServiceAuth)
+    registerKeywordWithContext("auth", "type", TokenArgType)(ServiceAuth)
     registerKeyword("uses", "services", ListArgType(TokenArgType))(Uses)
     registerKeywordWithContext("omit", "endpoints", ListArgType(TokenArgType))(Omit)
   }
@@ -205,7 +206,7 @@ object Analyzer {
       case Entry.Metadata(metaKey, args) => metadatas += parseServiceMetadata(metaKey, args)
       case DSLRootItem(key, tag, entries) =>
         tag match {
-          case "struct" => structs.safeInsert(key -> parseStructBlock(entries)(context :+ tag :+ key))
+          case "struct" => structs.safeInsert(key -> parseStructBlock(entries)(context :+ s"$key $tag"))
           case tag      => context.fail(s"Unknown block type $tag for $key")
         }
     }
@@ -263,7 +264,7 @@ object Analyzer {
     * @throws SemanticParsingException when there is no project information, as well as when any of the definitions are
     *                                  malformed
     */
-  def parseSemantics(templefile: syntax.Templefile): Templefile = {
+  private[semantics] def parseSemantics(templefile: syntax.Templefile): Templefile = {
     var projectNameBlock: Option[(String, ProjectBlock)] = None
 
     val targets  = mutable.LinkedHashMap[String, TargetBlock]()
@@ -271,7 +272,7 @@ object Analyzer {
 
     templefile.foreach {
       case DSLRootItem(key, tag, entries) =>
-        implicit val context: SemanticContext = SemanticContext.empty :+ key :+ tag
+        implicit val context: SemanticContext = SemanticContext.empty :+ s"$key $tag"
         tag match {
           // TODO: error message
           case "service" => services.safeInsert(key -> parseServiceBlock(entries))
@@ -293,4 +294,13 @@ object Analyzer {
     Templefile(projectName, projectBlock, targets.to(ListMap), services.to(ListMap))
   }
 
+  /**
+    * Turns an AST of a Templefile into a semantic representation and validates it
+    * @param templefileAST the AST parsed from the Templefile
+    * @return A semantic representation of the project, as well as all the targets and services, defined in the
+    *         Templefile
+    * @throws SemanticParsingException when there is no project information, as well as when any of the definitions are
+    *                                  malformed or the contents is not valid
+    */
+  def parseAndValidate(templefileAST: syntax.Templefile): Templefile = Validator.validate(parseSemantics(templefileAST))
 }

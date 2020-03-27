@@ -1,7 +1,7 @@
 package temple.ast
 
-import temple.DSL.syntax.Arg
 import temple.DSL.semantics.SemanticContext
+import temple.DSL.syntax.Arg
 
 /**
   * A wrapper around a map of arguments, as produced by [[temple.DSL.semantics#parseParameters]], with methods added
@@ -21,7 +21,9 @@ case class ArgMap(argMap: Map[String, Arg]) {
     */
   def getArg[T](key: String, argType: ArgType[T])(implicit context: SemanticContext): T =
     argType.extractArg(argMap(key)).getOrElse {
-      context.fail(s"${argType.stringRep.capitalize} expected at $key, found ${argMap(key)},")
+      context.fail(
+        s"${argType.stringRep.capitalize} expected at $key, found ${argMap(key)},",
+      )
     }
 
   /**

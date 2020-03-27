@@ -1,13 +1,20 @@
 package temple.DSL.semantics
 
-import temple.errors.Context
+import temple.errors.ErrorHandlingContext
 
-case class SemanticContext private (private val chain: List[String]) extends Context {
+final case class SemanticContext private (private val chain: List[String]) extends ErrorHandlingContext {
   def :+(string: String): SemanticContext = SemanticContext(string :: chain)
+
+  def apply[T](f: T => SemanticContext => Unit)(name: String, t: T): Unit = f(t)(this :+ name)
 
   override def toString: String = chain.mkString(", in ")
 
-  def fail(msg: String): Nothing = throw new SemanticParsingException(s"$msg in $this")
+  private def location: String = if (chain.nonEmpty) s" in $this" else ""
+
+  def errorMessage(msg: String): String = msg + location
+
+  def fail(msg: String): Nothing = throw new SemanticParsingException(errorMessage(msg))
+
 }
 
 object SemanticContext {
