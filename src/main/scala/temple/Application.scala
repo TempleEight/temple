@@ -1,7 +1,7 @@
 package temple
 
 import temple.DSL.DSLProcessor
-import temple.DSL.semantics.Analyzer
+import temple.DSL.semantics.{Analyzer, SemanticParsingException}
 import temple.builder.project.ProjectBuilder
 import temple.test.EndpointTester
 import temple.utils.FileUtils
@@ -29,6 +29,20 @@ object Application {
         )
     }
     println(s"Generated project in $outputDirectory")
+  }
+
+  def validate(config: TempleConfig): Unit = {
+    val fileContents = FileUtils.readFile(config.Validate.filename())
+    val data = DSLProcessor.parse(fileContents) fromEither { error =>
+      throw new RuntimeException("Templefile could not be parsed\n" + error)
+    }
+    try {
+      Analyzer.parseAndValidate(data)
+      println(s"Templefile validated correctly")
+    } catch {
+      case error: SemanticParsingException =>
+        throw new RuntimeException("Templefile could not be validated\n" + error.getMessage, error)
+    }
   }
 
   def test(config: TempleConfig): Unit = {

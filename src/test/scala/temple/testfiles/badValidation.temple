@@ -1,0 +1,26 @@
+BadValidationTest: project {}
+
+TempleUser: service {
+  username: string;
+  email: string(40,5);
+  firstName: string;
+  lastName: string;
+  createdAt: datetime;
+  numberOfDogs: int;
+  yeets: bool @unique @server; // Don't send this to the client
+  currentBankBalance: float(min: 0.0, precision: 16);
+  birthDate: date;
+  breakfastTime: time;
+
+  Fred: struct {
+    field: Box @client;
+    #readable(by: this);
+    #readable(by: all);
+  };
+
+
+  #readable(by: this);
+  #writable(by: all);
+  #auth(email);
+  #uses [Booking, /* Reservations */];
+}
