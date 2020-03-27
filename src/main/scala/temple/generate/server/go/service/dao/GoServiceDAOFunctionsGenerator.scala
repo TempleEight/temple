@@ -143,21 +143,15 @@ object GoServiceDAOFunctionsGenerator {
       mkCode(
         "if err != nil",
         CodeWrap.curly.tabbed(
-          mkCode(
-            "switch err",
-            CodeWrap.curly.noIndent(
-              "case sql.ErrNoRows:",
-              tabIndent(
-                genReturn(
-                  "nil",
-                  s"Err${root.name.capitalize}NotFound(input.${root.idAttribute.name.toUpperCase()}.String())",
-                ),
-              ),
-              "default:",
-              tabIndent(
-                genReturn("nil", "err"),
+          genSwitch(
+            "err",
+            ListMap(
+              "sql.ErrNoRows" -> genReturn(
+                "nil",
+                s"Err${root.name.capitalize}NotFound(input.${root.idAttribute.name.toUpperCase()}.String())",
               ),
             ),
+            genReturn("nil", "err"),
           ),
         ),
       ),
