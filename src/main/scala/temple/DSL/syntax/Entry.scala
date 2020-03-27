@@ -16,7 +16,7 @@ object Entry {
   case class Metadata(metaKey: String, args: Args = Args()) extends Entry("metadata") {
 
     private def argsToString: String = args match {
-      case Args(Seq(list: ListArg), Seq()) => list.toString
+      case Args(Seq(list: ListArg), Seq()) => list.toTempleString
       case Args(Seq(), Seq())              => ""
       case args                            => CodeWrap.parens(args.toString)
     }

@@ -24,7 +24,6 @@ object LanguageSpecificDetailBuilderTestData {
   val simpleTemplefile: Templefile = Templefile(
     "test-project",
     ProjectBlock(Seq(ServiceLanguage.Go)),
-    targets = Map(),
     services = Map("test-service" -> sampleService),
   )
 }
