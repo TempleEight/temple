@@ -13,6 +13,8 @@ import temple.generate.docker.DockerfileGenerator
 import temple.generate.kube.KubernetesGenerator
 import temple.generate.metrics.grafana.ast.Datasource
 import temple.generate.metrics.grafana.{GrafanaDashboardConfigGenerator, GrafanaDashboardGenerator, GrafanaDatasourceConfigGenerator}
+import temple.generate.metrics.prometheus.PrometheusConfigGenerator
+import temple.generate.metrics.prometheus.ast.PrometheusJob
 import temple.utils.StringUtils
 
 object ProjectBuilder {
@@ -54,19 +56,20 @@ object ProjectBuilder {
 
     val dockerfiles = templefile.servicesWithPorts.map {
       case (name, service, port) =>
-        val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, port)
+        val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, port.service)
         val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)
         (File(s"${name.toLowerCase}", "Dockerfile"), dockerfileContents)
     }
 
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(
       StringUtils.kebabCase(templefile.projectName),
-      templefile.servicesWithPorts.toSeq,
+      templefile.servicesWithPorts.map { case (name, block, ports) => (name, block, ports.service) }.toSeq,
     )
     val kubeFiles = KubernetesGenerator.generate(orchestrationRoot)
 
     // TODO: Get this from templefile and project settings
     val datasource: Datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
+    // TODO: Take all of this inside MetricsBuilder
     val metrics = templefile.services.map {
         case (name, service) =>
           val rows             = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
@@ -77,6 +80,13 @@ object ProjectBuilder {
         GrafanaDashboardConfigGenerator.generate(datasource),
         File(s"grafana/provisioning/datasources", "datasource.yml") ->
         GrafanaDatasourceConfigGenerator.generate(datasource),
+        File(s"prometheus", "prometheus.yml") ->
+        PrometheusConfigGenerator.generate(
+          templefile.servicesWithPorts.map {
+            case (serviceName, _, ports) =>
+              PrometheusJob(serviceName.toLowerCase, s"${serviceName.toLowerCase}:${ports.metrics}")
+          }.toSeq,
+        ),
       )
 
     Project(databaseCreationScripts ++ dockerfiles ++ kubeFiles ++ metrics)
