@@ -200,7 +200,7 @@ class ValidatorTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    } should have message "#writable(all) is not compatible with #readable(this)"
+    } should have message "#writable(all) is not compatible with #readable(this) in User"
   }
 }
 
