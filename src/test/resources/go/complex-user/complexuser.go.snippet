@@ -1,0 +1,29 @@
+package main
+
+import (
+	"net/http"
+
+	complexuserDAO "github.com/squat/and/dab/complexuser/dao"
+)
+
+var dao complexuserDAO.DAO
+
+func main() {
+
+}
+
+func jsonMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// All responses are JSON, set header accordingly
+		w.Header().Set("Content-Type", "application/json")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func complexuserCreateHandler(w http.ResponseWriter, r *http.Request) {}
+
+func complexuserReadHandler(w http.ResponseWriter, r *http.Request) {}
+
+func complexuserUpdateHandler(w http.ResponseWriter, r *http.Request) {}
+
+func complexuserDeleteHandler(w http.ResponseWriter, r *http.Request) {}

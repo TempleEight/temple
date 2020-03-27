@@ -1,0 +1,131 @@
+package dao
+
+import (
+	"database/sql"
+	"fmt"
+	"time"
+
+	"github.com/squat/and/dab/complexuser/util"
+	"github.com/google/uuid"
+
+	// pq acts as the driver for SQL requests
+	_ "github.com/lib/pq"
+)
+
+// Datastore provides the interface adopted by the DAO, allowing for mocking
+type Datastore interface {
+	CreateComplexuser(input CreateComplexuserInput) (*Complexuser, error)
+	ReadComplexuser(input ReadComplexuserInput) (*Complexuser, error)
+	UpdateComplexuser(input UpdateComplexuserInput) (*Complexuser, error)
+	DeleteComplexuser(input DeleteComplexuserInput) error
+}
+
+// DAO encapsulates access to the datastore
+type DAO struct {
+	DB *sql.DB
+}
+
+// Complexuser encapsulates the object stored in the datastore
+type Complexuser struct {
+	ID                 uuid.UUID
+	SmallIntField      uint16
+	IntField           uint32
+	BigIntField        uint64
+	FloatField         float32
+	DoubleField        float64
+	StringField        string
+	BoundedStringField string
+	BoolField          bool
+	DateField          time.Time
+	TimeField          time.Time
+	DateTimeField      time.Time
+	BlobField          []byte
+}
+
+// CreateComplexuserInput encapsulates the information required to create a single complexuser in the datastore
+type CreateComplexuserInput struct {
+	ID                 uuid.UUID
+	SmallIntField      uint16
+	IntField           uint32
+	BigIntField        uint64
+	FloatField         float32
+	DoubleField        float64
+	StringField        string
+	BoundedStringField string
+	BoolField          bool
+	DateField          time.Time
+	TimeField          time.Time
+	DateTimeField      time.Time
+	BlobField          []byte
+}
+
+// ReadComplexuserInput encapsulates the information required to read a single complexuser in the datastore
+type ReadComplexuserInput struct {
+	ID uuid.UUID
+}
+
+// UpdateComplexuserInput encapsulates the information required to update a single complexuser in the datastore
+type UpdateComplexuserInput struct {
+	ID                 uuid.UUID
+	SmallIntField      uint16
+	IntField           uint32
+	BigIntField        uint64
+	FloatField         float32
+	DoubleField        float64
+	StringField        string
+	BoundedStringField string
+	BoolField          bool
+	DateField          time.Time
+	TimeField          time.Time
+	DateTimeField      time.Time
+	BlobField          []byte
+}
+
+// DeleteComplexuserInput encapsulates the information required to delete a single complexuser in the datastore
+type DeleteComplexuserInput struct {
+	ID uuid.UUID
+}
+
+// Init opens the datastore connection, returning a DAO
+func Init(config *util.Config) (*DAO, error) {
+	connStr := fmt.Sprintf("user=%s dbname=%s host=%s sslmode=%s", config.User, config.DBName, config.Host, config.SSLMode)
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		return nil, err
+	}
+	return &DAO{db}, nil
+}
+
+// Executes a query, returning the row
+func executeQueryWithRowResponse(db *sql.DB, query string, args ...interface{}) *sql.Row {
+	return db.QueryRow(query, args...)
+}
+
+// Executes a query, returning the number of rows affected
+func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) {
+	result, err := db.Exec(query, args...)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+// CreateComplexuser creates a new complexuser in the datastore, returning the newly created complexuser
+func (dao *DAO) CreateComplexuser(input CreateComplexuserInput) (*Complexuser, error) {
+	return nil, nil
+}
+
+// ReadComplexuser returns the complexuser in the datastore for a given ID
+func (dao *DAO) ReadComplexuser(input ReadComplexuserInput) (*Complexuser, error) {
+	return nil, nil
+}
+
+// UpdateComplexuser updates the complexuser in the datastore for a given ID, returning the newly updated complexuser
+func (dao *DAO) UpdateComplexuser(input UpdateComplexuserInput) (*Complexuser, error) {
+	return nil, nil
+}
+
+// DeleteComplexuser deletes the complexuser in the datastore for a given ID
+func (dao *DAO) DeleteComplexuser(input DeleteComplexuserInput) error {
+	return nil
+}

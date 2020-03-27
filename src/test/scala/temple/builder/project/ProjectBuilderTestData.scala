@@ -292,6 +292,12 @@ object ProjectBuilderTestData {
       |    path: /etc/grafana/provisioning/dashboards
       |""".stripMargin
 
+  val simpleTemplefileTempleUserGoFile: String = FileUtils.readResources("go/simple-user/user.go.snippet")
+  val simpleTemplefileGoModFile: String        = FileUtils.readResources("go/simple-user/go.mod.snippet")
+  val simpleTemplefileDaoFile: String          = FileUtils.readResources("go/simple-user/dao/dao.go.snippet")
+  val simpleTemplefileErrorsFile: String       = FileUtils.readResources("go/simple-user/dao/errors.go.snippet")
+  val simpleTemplefileUtilFile: String         = FileUtils.readResources("go/simple-user/util/util.go.snippet")
+
   val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
     ProjectBlock(),
@@ -528,4 +534,10 @@ object ProjectBuilderTestData {
       |  options:
       |    path: /etc/grafana/provisioning/dashboards
       |""".stripMargin
+
+  val complexTemplefileTempleUserGoFile: String = FileUtils.readResources("go/complex-user/complexuser.go.snippet")
+  val complexTemplefileGoModFile: String        = FileUtils.readResources("go/complex-user/go.mod.snippet")
+  val complexTemplefileDaoFile: String          = FileUtils.readResources("go/complex-user/dao/dao.go.snippet")
+  val complexTemplefileErrorsFile: String       = FileUtils.readResources("go/complex-user/dao/errors.go.snippet")
+  val complexTemplefileUtilFile: String         = FileUtils.readResources("go/complex-user/util/util.go.snippet")
 }

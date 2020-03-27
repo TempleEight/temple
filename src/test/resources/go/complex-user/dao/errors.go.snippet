@@ -1,0 +1,10 @@
+package dao
+
+import "fmt"
+
+// ErrComplexuserNotFound is returned when a complexuser for the provided ID was not found
+type ErrComplexuserNotFound int64
+
+func (e ErrComplexuserNotFound) Error() string {
+	return fmt.Sprintf("complexuser not found with ID %d", e)
+}

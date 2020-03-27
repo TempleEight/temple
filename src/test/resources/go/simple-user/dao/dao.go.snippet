@@ -1,0 +1,119 @@
+package dao
+
+import (
+	"database/sql"
+	"fmt"
+	"time"
+
+	"github.com/squat/and/dab/templeuser/util"
+	"github.com/google/uuid"
+
+	// pq acts as the driver for SQL requests
+	_ "github.com/lib/pq"
+)
+
+// Datastore provides the interface adopted by the DAO, allowing for mocking
+type Datastore interface {
+	CreateTempleuser(input CreateTempleuserInput) (*Templeuser, error)
+	ReadTempleuser(input ReadTempleuserInput) (*Templeuser, error)
+	UpdateTempleuser(input UpdateTempleuserInput) (*Templeuser, error)
+	DeleteTempleuser(input DeleteTempleuserInput) error
+}
+
+// DAO encapsulates access to the datastore
+type DAO struct {
+	DB *sql.DB
+}
+
+// Templeuser encapsulates the object stored in the datastore
+type Templeuser struct {
+	ID            uuid.UUID
+	IntField      int32
+	DoubleField   float64
+	StringField   string
+	BoolField     bool
+	DateField     time.Time
+	TimeField     time.Time
+	DateTimeField time.Time
+	BlobField     []byte
+}
+
+// CreateTempleuserInput encapsulates the information required to create a single templeuser in the datastore
+type CreateTempleuserInput struct {
+	ID            uuid.UUID
+	IntField      int32
+	DoubleField   float64
+	StringField   string
+	BoolField     bool
+	DateField     time.Time
+	TimeField     time.Time
+	DateTimeField time.Time
+	BlobField     []byte
+}
+
+// ReadTempleuserInput encapsulates the information required to read a single templeuser in the datastore
+type ReadTempleuserInput struct {
+	ID uuid.UUID
+}
+
+// UpdateTempleuserInput encapsulates the information required to update a single templeuser in the datastore
+type UpdateTempleuserInput struct {
+	ID            uuid.UUID
+	IntField      int32
+	DoubleField   float64
+	StringField   string
+	BoolField     bool
+	DateField     time.Time
+	TimeField     time.Time
+	DateTimeField time.Time
+	BlobField     []byte
+}
+
+// DeleteTempleuserInput encapsulates the information required to delete a single templeuser in the datastore
+type DeleteTempleuserInput struct {
+	ID uuid.UUID
+}
+
+// Init opens the datastore connection, returning a DAO
+func Init(config *util.Config) (*DAO, error) {
+	connStr := fmt.Sprintf("user=%s dbname=%s host=%s sslmode=%s", config.User, config.DBName, config.Host, config.SSLMode)
+	db, err := sql.Open("postgres", connStr)
+	if err != nil {
+		return nil, err
+	}
+	return &DAO{db}, nil
+}
+
+// Executes a query, returning the row
+func executeQueryWithRowResponse(db *sql.DB, query string, args ...interface{}) *sql.Row {
+	return db.QueryRow(query, args...)
+}
+
+// Executes a query, returning the number of rows affected
+func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) {
+	result, err := db.Exec(query, args...)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
+}
+
+// CreateTempleuser creates a new templeuser in the datastore, returning the newly created templeuser
+func (dao *DAO) CreateTempleuser(input CreateTempleuserInput) (*Templeuser, error) {
+	return nil, nil
+}
+
+// ReadTempleuser returns the templeuser in the datastore for a given ID
+func (dao *DAO) ReadTempleuser(input ReadTempleuserInput) (*Templeuser, error) {
+	return nil, nil
+}
+
+// UpdateTempleuser updates the templeuser in the datastore for a given ID, returning the newly updated templeuser
+func (dao *DAO) UpdateTempleuser(input UpdateTempleuserInput) (*Templeuser, error) {
+	return nil, nil
+}
+
+// DeleteTempleuser deletes the templeuser in the datastore for a given ID
+func (dao *DAO) DeleteTempleuser(input DeleteTempleuserInput) error {
+	return nil
+}
