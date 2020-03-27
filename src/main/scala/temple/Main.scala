@@ -15,6 +15,7 @@ object Main extends App {
     config.subcommand match {
       case Some(config.Generate) => Application.generate(config)
       case Some(config.Validate) => Application.validate(config)
+      case Some(config.Test)     => Application.test(config)
       case Some(_)               => throw new TempleConfig.UnhandledArgumentException
       case None                  => config.printHelp()
     }

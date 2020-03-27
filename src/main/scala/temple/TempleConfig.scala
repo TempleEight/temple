@@ -29,6 +29,14 @@ class TempleConfig(arguments: CSeq[String]) extends ScallopConf(arguments) {
     val filename: ScallopOption[String] = trailArg[String]("filename", "Templefile to validate")
   }
   addSubcommand(Validate)
+
+  object Test extends Subcommand("test") {
+    val filename: ScallopOption[String] = trailArg[String]("filename", "Templefile to test against")
+
+    val generatedDirectory: ScallopOption[String] =
+      opt[String]("dir", 'd', "Root directory where files have been generated")
+  }
+  addSubcommand(Test)
   verify()
 }
 
