@@ -8,9 +8,12 @@ import temple.utils.MonadUtils.FromEither
 
 object Application {
 
+  private def readFile(filename: String): String =
+    if (filename == "-") FileUtils.readStdIn() else FileUtils.readFile(filename)
+
   def generate(config: TempleConfig): Unit = {
     val outputDirectory = config.Generate.outputDirectory.getOrElse(System.getProperty("user.dir"))
-    val fileContents    = FileUtils.readFile(config.Generate.filename())
+    val fileContents    = readFile(config.Generate.filename())
     val data = DSLProcessor.parse(fileContents) fromEither { error =>
       throw new RuntimeException(error)
     }
@@ -31,7 +34,7 @@ object Application {
   }
 
   def validate(config: TempleConfig): Unit = {
-    val fileContents = FileUtils.readFile(config.Validate.filename())
+    val fileContents = readFile(config.Validate.filename())
     val data = DSLProcessor.parse(fileContents) fromEither { error =>
       throw new RuntimeException("Templefile could not be parsed\n" + error)
     }
