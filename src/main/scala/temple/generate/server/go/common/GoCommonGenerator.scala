@@ -57,6 +57,17 @@ object GoCommonGenerator {
       expr,
     )
 
+  /** Generate interface */
+  private[go] def genInterface(identifier: String, methods: Seq[String]): String =
+    mkCode(
+      "type",
+      identifier,
+      "interface",
+      CodeWrap.curly.tabbed(
+        methods,
+      ),
+    )
+
   /** Generate struct */
   private[go] def genStruct(identifier: String, fields: ListMap[String, String]): String =
     mkCode(

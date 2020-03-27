@@ -55,8 +55,10 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${root.name}/comm", "handler.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("comm"),
         GoServiceCommGenerator.generateImports(root),
-        GoServiceCommGenerator.generateStructs(),
+        GoServiceCommGenerator.generateInterface(root),
+        GoServiceCommGenerator.generateHandlerStruct(),
         GoCommonCommGenerator.generateInit(),
+        GoServiceCommGenerator.generateCommFunctions(root),
       ),
     )).map { case (path, contents) => path -> (contents + "\n") }
   }
