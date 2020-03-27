@@ -11,7 +11,10 @@ final case class SemanticContext private (private val chain: List[String]) exten
 
   private def location: String = if (chain.nonEmpty) s" in $this" else ""
 
-  def fail(msg: String): Nothing = throw new SemanticParsingException(msg + location)
+  def errorMessage(msg: String): String = msg + location
+
+  def fail(msg: String): Nothing = throw new SemanticParsingException(errorMessage(msg))
+
 }
 
 object SemanticContext {

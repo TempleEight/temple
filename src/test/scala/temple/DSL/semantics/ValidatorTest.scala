@@ -52,7 +52,9 @@ class ValidatorTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    } should have message "Project, targets and structs must be globally unique, duplicate found: User (service, struct)"
+    } should have message singleError(
+      "Project, targets and structs must be globally unique, duplicate found: User (service, struct)",
+    )
 
     the[SemanticParsingException] thrownBy {
       validate(
@@ -73,13 +75,15 @@ class ValidatorTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    } should have message "Project, targets and structs must be globally unique, duplicates found: Box (struct, target, project), User (service, struct, target)"
+    } should have message singleError(
+      "Project, targets and structs must be globally unique, duplicates found: Box (struct, target, project), User (service, struct, target)",
+    )
 
     the[SemanticParsingException] thrownBy {
       validate(
         Templefile("myProject"),
       )
-    } should have message "Invalid name: myProject (project), it should start with a capital letter"
+    } should have message singleError("Invalid name: myProject (project), it should start with a capital letter")
 
     the[SemanticParsingException] thrownBy {
       validate(
@@ -95,67 +99,69 @@ class ValidatorTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    } should have message "Project, targets and structs must be globally unique, duplicate found: User (service, project)"
+    } should have message singleError(
+      "Project, targets and structs must be globally unique, duplicate found: User (service, project)",
+    )
 
     the[SemanticParsingException] thrownBy {
       validate(
         templefileWithUserAttributes("A" -> Attribute(BoolType)),
       )
-    } should have message "Invalid attribute name A, it must start with a lowercase letter, in User"
+    } should have message singleError("Invalid attribute name A, it must start with a lowercase letter, in User")
 
     the[SemanticParsingException] thrownBy {
       validate(
         templefileWithUserAttributes("a" -> Attribute(IntType(max = Some(0), min = Some(1)))),
       )
-    } should have message "IntType max not above min in a, in User"
+    } should have message singleError("IntType max not above min in a, in User")
 
     the[SemanticParsingException] thrownBy {
       validate(
         templefileWithUserAttributes("a" -> Attribute(IntType(precision = 16))),
       )
-    } should have message "IntType precision not between 1 and 8 in a, in User"
+    } should have message singleError("IntType precision not between 1 and 8 in a, in User")
 
     the[SemanticParsingException] thrownBy {
       validate(
         templefileWithUserAttributes("a" -> Attribute(UUIDType)),
       )
-    } should have message "Illegal use of UUID type in a, in User"
+    } should have message singleError("Illegal use of UUID type in a, in User")
 
     the[SemanticParsingException] thrownBy {
       validate(
         templefileWithUserAttributes("a" -> Attribute(BlobType(Some(-1)))),
       )
-    } should have message "BlobType size is negative in a, in User"
+    } should have message singleError("BlobType size is negative in a, in User")
 
     the[SemanticParsingException] thrownBy {
       validate(
-        templefileWithUserAttributes("b" -> Attribute(FloatType(max = Some(0), min = Some(1)))),
+        templefileWithUserAttributes(
+          "b" -> Attribute(FloatType(max = Some(0), min = Some(1))),
+          "c" -> Attribute(FloatType(precision = -1)),
+        ),
       )
-    } should have message "FloatType max not above min in b, in User"
+    } should have message multipleErrors(
+      "FloatType max not above min in b, in User",
+      "FloatType precision not between 1 and 8 in c, in User",
+    )
 
     the[SemanticParsingException] thrownBy {
       validate(
-        templefileWithUserAttributes("b" -> Attribute(FloatType(precision = -1))),
+        templefileWithUserAttributes(
+          "c" -> Attribute(StringType(max = Some(-1))),
+          "d" -> Attribute(StringType(max = Some(5), min = Some(8))),
+        ),
       )
-    } should have message "FloatType precision not between 1 and 8 in b, in User"
-
-    the[SemanticParsingException] thrownBy {
-      validate(
-        templefileWithUserAttributes("c" -> Attribute(StringType(max = Some(-1)))),
-      )
-    } should have message "StringType max is negative in c, in User"
-
-    the[SemanticParsingException] thrownBy {
-      validate(
-        templefileWithUserAttributes("c" -> Attribute(StringType(max = Some(5), min = Some(8)))),
-      )
-    } should have message "StringType max not above min in c, in User"
+    } should have message multipleErrors(
+      "StringType max is negative in c, in User",
+      "StringType max not above min in d, in User",
+    )
 
     the[SemanticParsingException] thrownBy {
       validate(
         templefileWithUserAttributes("c" -> Attribute(ForeignKey("Unknown"))),
       )
-    } should have message "Invalid foreign key Unknown in c, in User"
+    } should have message singleError("Invalid foreign key Unknown in c, in User")
 
     the[SemanticParsingException] thrownBy {
       validate(
@@ -172,7 +178,7 @@ class ValidatorTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    } should have message "No such service Box referenced in #uses in User"
+    } should have message singleError("No such service Box referenced in #uses in User")
 
     the[SemanticParsingException] thrownBy {
       validate(
@@ -186,7 +192,7 @@ class ValidatorTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    } should have message "Multiple occurrences of Readable metadata in User"
+    } should have message singleError("Multiple occurrences of Readable metadata in User")
 
     the[SemanticParsingException] thrownBy {
       validate(
@@ -200,7 +206,7 @@ class ValidatorTest extends FlatSpec with Matchers {
           ),
         ),
       )
-    } should have message "#writable(all) is not compatible with #readable(this) in User"
+    } should have message singleError("#writable(all) is not compatible with #readable(this) in User")
   }
 }
 
@@ -212,4 +218,9 @@ object ValidatorTest {
       "User" -> ServiceBlock(attributes.toMap),
     ),
   )
+
+  def singleError(string: String): String = s"An error was encountered while validating the Templefile\n$string"
+
+  def multipleErrors(strings: String*): String =
+    s"${strings.size} errors were encountered while validating the Templefile\n${strings.sorted.mkString("\n")}"
 }
