@@ -1,13 +1,14 @@
 package temple.generate.server.go.service
 
+import temple.generate.server.ServiceRoot
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
 object GoServiceCommGenerator {
 
-  private[service] def generateImports(module: String): String = mkCode(
+  private[service] def generateImports(root: ServiceRoot): String = mkCode(
     "import",
     CodeWrap.parens.tabbed(
-      s""""$module/util"""",
+      s""""${root.module}/util"""",
     ),
   )
 

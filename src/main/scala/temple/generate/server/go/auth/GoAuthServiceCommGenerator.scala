@@ -1,14 +1,15 @@
 package temple.generate.server.go.auth
 
+import temple.generate.server.AuthServiceRoot
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.FileUtils
 import temple.utils.StringUtils.doubleQuote
 
 object GoAuthServiceCommGenerator {
 
-  private[auth] def generateImports(module: String): String = {
+  private[auth] def generateImports(root: AuthServiceRoot): String = {
     val standardImports = Seq("encoding/json", "errors", "fmt", "io/ioutil", "net/http", "net/url").map(doubleQuote)
-    val customImports   = doubleQuote(s"$module/util")
+    val customImports   = doubleQuote(s"${root.module}/util")
     mkCode("import", CodeWrap.parens.tabbed(standardImports, "", customImports))
   }
 

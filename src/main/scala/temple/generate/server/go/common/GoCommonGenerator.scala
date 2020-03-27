@@ -2,6 +2,7 @@ package temple.generate.server.go.common
 
 import temple.ast.AttributeType
 import temple.ast.AttributeType._
+import temple.generate.server.ServiceRoot
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
 object GoCommonGenerator {
