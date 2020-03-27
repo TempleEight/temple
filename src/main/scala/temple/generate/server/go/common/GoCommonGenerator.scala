@@ -4,6 +4,10 @@ import temple.ast.AttributeType
 import temple.ast.AttributeType._
 import temple.generate.server.ServiceRoot
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
+import temple.generate.utils.CodeUtils
+import temple.utils.StringUtils.tabIndent
+
+import scala.collection.immutable.ListMap
 
 object GoCommonGenerator {
 
@@ -44,6 +48,26 @@ object GoCommonGenerator {
       ),
     )
 
+  /** Generate constant */
+  private[go] def genConst(identifier: String, expr: String): String =
+    mkCode(
+      "const",
+      identifier,
+      "=",
+      expr,
+    )
+
+  /** Generate struct */
+  private[go] def genStruct(identifier: String, fields: ListMap[String, String]): String =
+    mkCode(
+      "type",
+      identifier,
+      "struct",
+      CodeWrap.curly.tabbed(
+        CodeUtils.pad(fields),
+      ),
+    )
+
   /** Generate declaration and assignment statement */
   private[go] def genDeclareAndAssign(expr: String, identifiers: String*): String =
     mkCode.list(identifiers) + " := " + expr // mkCode doesn't put a space before the colon
@@ -68,12 +92,32 @@ object GoCommonGenerator {
   private[go] def genFunctionCall(name: String, args: String*): String =
     CodeWrap.parens.prefix(name).list(args)
 
+  /** Generate if statement */
+  private[go] def genIf(expr: String, body: String): String =
+    mkCode(
+      "if",
+      expr,
+      CodeWrap.curly.tabbed(body),
+    )
+
   /** Generate for loop with expression */
   private[go] def genForLoop(expr: String, body: String): String =
     mkCode(
       "for",
       expr,
       CodeWrap.curly.tabbed(body),
+    )
+
+  /** Generate switch statement */
+  private[go] def genSwitch(expr: String, cases: ListMap[String, String], default: String): String =
+    mkCode(
+      "switch",
+      expr,
+      CodeWrap.curly.noIndent(
+        cases.map { case (switchCase, statements) => mkCode.lines(s"case $switchCase:", tabIndent(statements)) },
+        "default:",
+        tabIndent(default),
+      ),
     )
 
   /** Generate return statement */
