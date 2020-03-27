@@ -25,7 +25,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceMainGenerator.generateHandlers(),
         GoAuthServiceMainGenerator.generateCreateToken(),
       ),
-      File("auth/dao", "errors.go") -> GoAuthServiceDAOGenerator.generateErrors(),
+      File("auth/dao", "errors.go") -> GoAuthServiceDAOGenerator.generateErrors(root),
       File("auth/comm", "handler.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("comm"),
         GoAuthServiceCommGenerator.generateImports(root),

@@ -1,5 +1,6 @@
 package temple.generate.server.go.auth
 
+import temple.ast.Metadata.ServiceAuth
 import temple.generate.FileSystem._
 import temple.generate.server.AuthServiceRoot
 import temple.utils.FileUtils._
@@ -9,6 +10,7 @@ object GoAuthServiceGeneratorTestData {
   val authServiceRoot: AuthServiceRoot = AuthServiceRoot(
     "github.com/TempleEight/spec-golang/auth",
     82,
+    ServiceAuth.Email,
   )
 
   val authServiceFiles: Files = Map(
