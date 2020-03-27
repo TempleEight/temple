@@ -5,7 +5,7 @@ import temple.generate.server.go.common.GoCommonDAOGenerator
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
-import temple.utils.StringUtils.doubleQuote
+import temple.utils.StringUtils.{doubleQuote, tabIndent}
 
 import scala.collection.immutable.ListMap
 
@@ -65,6 +65,114 @@ object GoAuthServiceDAOGenerator {
       GoCommonDAOGenerator.generateExecuteQueryWithRowResponse(),
       GoCommonDAOGenerator.generateExecuteQuery(),
     )
+
+  private def generateCreateFunction(root: AuthServiceRoot, scanFunctionCall: String): String = {
+    val queryStatement = genDeclareAndAssign(
+      genFunctionCall(
+        "executeQueryWithRowResponse",
+        "dao.DB",
+        doubleQuote(
+          s"INSERT INTO auth (${root.idAttribute.name}, ${root.authAttribute.authType.name}, password) VALUES ($$1, $$2, $$3) RETURNING id, name, password",
+        ),
+        s"input.${root.idAttribute.name.toUpperCase()}",
+        s"input.${root.authAttribute.authType.name.capitalize}",
+        s"input.Password",
+      ),
+      "row",
+    )
+
+    val scanBlock = mkCode.lines(
+      genVar("auth", "Auth"),
+      genDeclareAndAssign(s"row.$scanFunctionCall", "err"),
+      genIf(
+        "err != nil",
+        mkCode.lines(
+          "// PQ specific error",
+          genIf(
+            "err, ok := err.(*pq.Error); ok",
+            mkCode.lines(
+              genIf("err.Code.Name() == psqlUniqueViolation", "return nil, ErrDuplicateAuth"),
+            ),
+          ),
+          genReturn("nil", "err"),
+        ),
+      ),
+    )
+
+    mkCode.lines(
+      "// CreateAuth creates a new auth in the datastore, returning the newly created auth",
+      mkCode(
+        "func (dao *DAO) CreateAuth(input CreateAuthInput) (*Auth, error)",
+        CodeWrap.curly.tabbed(
+          mkCode.doubleLines(
+            queryStatement,
+            scanBlock,
+            genReturn("&auth", "nil"),
+          ),
+        ),
+      ),
+    )
+  }
+
+  private def generateReadFunction(root: AuthServiceRoot, scanFunctionCall: String): String = {
+    val queryStatement = genDeclareAndAssign(
+      genFunctionCall(
+        "executeQueryWithRowResponse",
+        "dao.DB",
+        doubleQuote(
+          s"SELECT ${root.idAttribute.name}, ${root.authAttribute.authType.name}, password FROM auth WHERE ${root.authAttribute.authType.name} = $$1",
+        ),
+        s"input.${root.authAttribute.authType.name.capitalize}",
+      ),
+      "row",
+    )
+
+    val scanBlock = mkCode.lines(
+      genVar("auth", "Auth"),
+      genDeclareAndAssign(s"row.$scanFunctionCall", "err"),
+      genIf(
+        "err != nil",
+        mkCode.lines(
+          mkCode(
+            "switch err",
+            CodeWrap.curly.noIndent(
+              "case sql.ErrNoRows:",
+              tabIndent(genReturn("nil", "ErrAuthNotFound")),
+              "default:",
+              tabIndent(genReturn("nil", "err")),
+            ),
+          ),
+        ),
+      ),
+    )
+
+    mkCode.lines(
+      s"// ReadAuth returns the auth in the datastore for a given ${root.authAttribute.authType.name}",
+      mkCode(
+        "func (dao *DAO) ReadAuth(input ReadAuthInput) (*Auth, error)",
+        CodeWrap.curly.tabbed(
+          mkCode.doubleLines(
+            queryStatement,
+            scanBlock,
+            genReturn("&auth", "nil"),
+          ),
+        ),
+      ),
+    )
+  }
+
+  private[auth] def generateDAOFunctions(root: AuthServiceRoot): String = {
+    val scanFunctionCall = genFunctionCall(
+      "Scan",
+      s"&auth.${root.idAttribute.name.toUpperCase()}",
+      s"&auth.${root.authAttribute.authType.name.capitalize}",
+      s"&auth.Password",
+    )
+    mkCode.doubleLines(
+      generateCreateFunction(root, scanFunctionCall),
+      generateReadFunction(root, scanFunctionCall),
+    )
+  }
 
   private[auth] def generateErrors(root: AuthServiceRoot): String =
     mkCode.lines(

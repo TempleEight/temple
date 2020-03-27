@@ -67,3 +67,40 @@ func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) 
 	}
 	return result.RowsAffected()
 }
+
+// CreateAuth creates a new auth in the datastore, returning the newly created auth
+func (dao *DAO) CreateAuth(input CreateAuthInput) (*Auth, error) {
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO auth (id, email, password) VALUES ($1, $2, $3) RETURNING id, name, password", input.ID, input.Email, input.Password)
+
+	var auth Auth
+	err := row.Scan(&auth.ID, &auth.Email, &auth.Password)
+	if err != nil {
+		// PQ specific error
+		if err, ok := err.(*pq.Error); ok {
+			if err.Code.Name() == psqlUniqueViolation {
+				return nil, ErrDuplicateAuth
+			}
+		}
+		return nil, err
+	}
+
+	return &auth, nil
+}
+
+// ReadAuth returns the auth in the datastore for a given email
+func (dao *DAO) ReadAuth(input ReadAuthInput) (*Auth, error) {
+	row := executeQueryWithRowResponse(dao.DB, "SELECT id, email, password FROM auth WHERE email = $1", input.Email)
+
+	var auth Auth
+	err := row.Scan(&auth.ID, &auth.Email, &auth.Password)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrAuthNotFound
+		default:
+			return nil, err
+		}
+	}
+
+	return &auth, nil
+}

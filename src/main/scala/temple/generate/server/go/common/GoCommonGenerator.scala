@@ -91,6 +91,14 @@ object GoCommonGenerator {
   private[go] def genFunctionCall(name: String, args: String*): String =
     CodeWrap.parens.prefix(name).list(args)
 
+  /** Generate if statement */
+  private[go] def genIf(expr: String, body: String): String =
+    mkCode(
+      "if",
+      expr,
+      CodeWrap.curly.tabbed(body),
+    )
+
   /** Generate for loop with expression */
   private[go] def genForLoop(expr: String, body: String): String =
     mkCode(

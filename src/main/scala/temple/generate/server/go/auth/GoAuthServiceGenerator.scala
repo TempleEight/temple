@@ -35,6 +35,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceDAOGenerator.generateStructs(root),
         GoCommonDAOGenerator.generateInit(),
         GoAuthServiceDAOGenerator.generateQueryFunctions(),
+        GoAuthServiceDAOGenerator.generateDAOFunctions(root),
       ),
       File("auth/comm", "handler.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("comm"),
