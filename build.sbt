@@ -41,7 +41,7 @@ lazy val root = (project in file("."))
         "io.circe"               %% "circe-generic"               % "0.12.3",
         "io.circe"               %% "circe-parser"                % "0.12.3",
         "io.circe"               %% "circe-yaml"                  % "0.12.0",
-        "org.scalaj"             %% "scalaj-http"                 % "2.4.2" % "it",
+        "org.scalaj"             %% "scalaj-http"                 % "2.4.2",
       ),
   )
   .enablePlugins(BuildInfoPlugin)
