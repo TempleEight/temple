@@ -4,6 +4,9 @@ import temple.ast.AttributeType
 import temple.ast.AttributeType._
 import temple.generate.server.ServiceRoot
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
+import temple.generate.utils.CodeUtils
+
+import scala.collection.immutable.ListMap
 
 object GoCommonGenerator {
 
@@ -41,6 +44,26 @@ object GoCommonGenerator {
           "return",
           mkCode.list(returnValues, "err"),
         ),
+      ),
+    )
+
+  /** Generate constant */
+  private[go] def genConst(identifier: String, expr: String): String =
+    mkCode(
+      "const",
+      identifier,
+      "=",
+      expr,
+    )
+
+  /** Generate struct */
+  private[go] def genStruct(identifier: String, fields: ListMap[String, String]): String =
+    mkCode(
+      "type",
+      identifier,
+      "struct",
+      CodeWrap.curly.tabbed(
+        CodeUtils.pad(fields),
       ),
     )
 
