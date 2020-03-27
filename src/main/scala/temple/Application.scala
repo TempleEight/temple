@@ -3,6 +3,7 @@ package temple
 import temple.DSL.DSLProcessor
 import temple.DSL.semantics.Analyzer
 import temple.builder.project.ProjectBuilder
+import temple.test.EndpointTester
 import temple.utils.FileUtils
 import temple.utils.MonadUtils.FromEither
 
@@ -28,5 +29,15 @@ object Application {
         )
     }
     println(s"Generated project in $outputDirectory")
+  }
+
+  def test(config: TempleConfig): Unit = {
+    val generatedDirectory = config.Test.generatedDirectory.getOrElse(System.getProperty("user.dir"))
+    val fileContents       = FileUtils.readFile(config.Test.filename())
+    val data = DSLProcessor.parse(fileContents) fromEither { error =>
+      throw new RuntimeException(error)
+    }
+    val analyzedTemplefile = Analyzer.parseAndValidate(data)
+    EndpointTester.test(analyzedTemplefile, generatedDirectory)
   }
 }

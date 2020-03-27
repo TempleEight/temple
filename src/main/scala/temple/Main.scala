@@ -16,6 +16,7 @@ object Main extends App {
     val config = new TempleConfig(args)
     config.subcommand match {
       case Some(config.Generate) => Application.generate(config)
+      case Some(config.Test)     => Application.test(config)
       case Some(_)               => throw new TempleConfig.UnhandledArgumentException
       case None                  => config.printHelp()
     }
