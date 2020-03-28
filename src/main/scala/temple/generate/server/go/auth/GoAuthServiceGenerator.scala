@@ -10,7 +10,6 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
   override def generate(root: AuthServiceRoot): Files =
     /* TODO
      * auth.go main
-     * dao.go
      * config.json
      */
     Map(
