@@ -3,7 +3,7 @@ package temple
 import temple.DSL.DSLProcessor
 import temple.DSL.semantics.{Analyzer, SemanticParsingException}
 import temple.builder.project.ProjectBuilder
-import temple.test.EndpointTester
+import temple.test.ProjectTester
 import temple.utils.FileUtils
 import temple.utils.MonadUtils.FromEither
 
@@ -55,6 +55,6 @@ object Application {
       throw new RuntimeException(error)
     }
     val analyzedTemplefile = Analyzer.parseAndValidate(data)
-    EndpointTester.test(analyzedTemplefile, generatedDirectory)
+    ProjectTester.test(analyzedTemplefile, generatedDirectory)
   }
 }

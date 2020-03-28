@@ -4,15 +4,18 @@ import temple.ast.Templefile
 
 import sys.process._
 import scalaj.http.Http
+import temple.test.internal.EndpointConfig
 
-object EndpointTester {
+object ProjectTester {
 
   class EnvironmentVariableNotSetException(name: String)
       extends RuntimeException(s"The environment variable $name was required, but not found")
 
+  /** Execute a command, returning the stdout */
   private def exec(command: String): String =
     s"sh -c '$command'".!!
 
+  /** Configure the infrastructure for testing */
   private def performSetup(templefile: Templefile, generatedPath: String): EndpointConfig = {
     println("🍪 Spinning up Kubernetes infrastructure...")
     // Deploy Kubernetes
@@ -31,17 +34,25 @@ object EndpointTester {
     config
   }
 
-  def performShutdown(templefile: Templefile, generatedPath: String): Unit = {
+  /** Gracefully shutdown the infrastructure */
+  private def performShutdown(templefile: Templefile, generatedPath: String): Unit = {
     println(s"💀 Shutting down Kubernetes infrastructure...")
     exec("kubectl drain minikube && minikube delete")
   }
 
-  def performTests(templefile: Templefile, generatedPath: String, url: String): Unit = {
+  /** Execute the tests on each generated service */
+  private def performTests(templefile: Templefile, generatedPath: String, url: String): Unit = {
     println(s"🧪 Testing user service at $url/api/user...")
     val sampleRequest = Http(s"http://$url/api/user/1").asString.body
     println(sampleRequest)
   }
 
+  /**
+    * Perform a full endpoint test on a generated project, by querying each endpoint and validating responses
+    * This involves deploying the service locally, performing the tests and then cleaning up
+    * @param templefile The parsed & validated templefile
+    * @param generatedPath The root of the project where the generated code resides
+    */
   def test(templefile: Templefile, generatedPath: String): Unit = {
     // Require certain env vars to be set
     Seq("REG_URL", "REG_USERNAME", "REG_PASSWORD", "REG_EMAIL").foreach { envVar =>
