@@ -1,10 +1,10 @@
 package temple.test
 
+import temple.ast.Metadata.ServiceAuth
 import temple.ast.Templefile
+import temple.test.internal.{AuthServiceTest, ProjectConfig}
 
-import sys.process._
-import scalaj.http.Http
-import temple.test.internal.EndpointConfig
+import scala.sys.process._
 
 object ProjectTester {
 
@@ -16,15 +16,15 @@ object ProjectTester {
     s"sh -c '$command'".!!
 
   /** Configure the infrastructure for testing */
-  private def performSetup(templefile: Templefile, generatedPath: String): EndpointConfig = {
+  private def performSetup(templefile: Templefile, generatedPath: String): ProjectConfig = {
     println("🍪 Spinning up Kubernetes infrastructure...")
     // Deploy Kubernetes
     exec(s"sh $generatedPath/deploy.sh")
 
     // Grab Kong's URL for future requests
-    val urls   = exec("minikube service kong --url").split("\n")
-    val baseIP = urls(0).replaceAll("http[s]*://", "")
-    val config = EndpointConfig(baseIP, urls(1))
+    val Array(baseURL, kongAdmin, _*) = exec("minikube service kong --url").split("\n")
+    val baseIP                        = baseURL.replaceAll("http[s]*://", "")
+    val config                        = ProjectConfig(baseIP, kongAdmin)
 
     // Running deploy.sh doesn't set Kong up correctly for some reason. I couldn't figure it out, so manually call that part
     exec(
@@ -42,9 +42,10 @@ object ProjectTester {
 
   /** Execute the tests on each generated service */
   private def performTests(templefile: Templefile, generatedPath: String, url: String): Unit = {
-    println(s"🧪 Testing user service at $url/api/user...")
-    val sampleRequest = Http(s"http://$url/api/user/1").asString.body
-    println(sampleRequest)
+    val serviceAuths = templefile.services.values.flatMap(_.lookupMetadata[ServiceAuth]).toSet
+    if (serviceAuths.nonEmpty) {
+      AuthServiceTest.test(serviceAuths, url)
+    }
   }
 
   /**
