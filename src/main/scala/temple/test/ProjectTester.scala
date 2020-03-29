@@ -22,9 +22,10 @@ object ProjectTester {
     exec(s"sh $generatedPath/deploy.sh")
 
     // Grab Kong's URL for future requests
-    val urls   = exec("minikube service kong --url").split("\n")
-    val baseIP = urls(0).replaceAll("http[s]*://", "")
-    val config = ProjectConfig(baseIP, urls(1))
+    val minikubeURLString = exec("minikube service kong --url")
+    val urls              = minikubeURLString.split("\n")
+    val baseIP            = urls(0).replaceAll("http[s]*://", "")
+    val config            = ProjectConfig(baseIP, urls(1))
 
     // Running deploy.sh doesn't set Kong up correctly for some reason. I couldn't figure it out, so manually call that part
     exec(

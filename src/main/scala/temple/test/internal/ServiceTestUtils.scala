@@ -4,6 +4,7 @@ import io.circe.parser.parse
 import io.circe.{Json, JsonObject}
 import scalaj.http.Http
 import temple.utils.StringUtils
+import temple.utils.MonadUtils.FromEither
 
 object ServiceTestUtils {
 
@@ -18,15 +19,15 @@ object ServiceTestUtils {
     val response = Http(url).postData(body.toString).method("POST").asString
     test.assertEqual(200, response.code)
 
-    parse(response.body) match {
-      case Left(value) =>
-        test.fail(s"response was not valid JSON: ${value.message}")
-      case Right(value) =>
-        value.asObject match {
-          case Some(value) => value
-          case None        => test.fail("response was not a JSON object")
-        }
+    val parsedBody = parse(response.body) fromEither { failure =>
+      test.fail(s"response was not valid JSON - ${failure.message}")
     }
+
+    val jsonObject = parsedBody.asObject getOrElse {
+      test.fail("response was not a JSON object")
+    }
+
+    jsonObject
   }
 
   /**

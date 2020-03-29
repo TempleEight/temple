@@ -1,5 +1,7 @@
 package temple.test.internal
 
+import temple.utils.StringUtils
+
 private[internal] class EndpointTest(service: String, endpointName: String) {
   class TestFailedException(msg: String) extends RuntimeException(msg)
 
@@ -11,8 +13,8 @@ private[internal] class EndpointTest(service: String, endpointName: String) {
     if (!value) fail(failMsg)
 
   def pass(): Unit =
-    println(s"\t✅ $service $endpointName")
+    println(StringUtils.indent(s"✅ $service $endpointName", 4))
 
   def fail(message: String): Nothing =
-    throw new TestFailedException(s"\t❌ $service $endpointName: $message")
+    throw new TestFailedException(StringUtils.indent(s"❌ $service $endpointName: $message", 4))
 }
