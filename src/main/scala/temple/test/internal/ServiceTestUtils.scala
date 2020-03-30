@@ -14,6 +14,30 @@ import temple.ast.{Attribute, AttributeType, Metadata, ServiceBlock}
 import scala.util.Random
 
 object ServiceTestUtils {
+  case class CreateResponse(id: String, accessToken: String)
+
+  // Decode a string body into a JSON object, failing the test if any stage fails
+  private def decodeJSON(test: EndpointTest, body: String): JsonObject = {
+    val parsedBody = parse(body) fromEither { failure =>
+      test.fail(s"response was not valid JSON - ${failure.message}")
+    }
+
+    parsedBody.asObject getOrElse {
+      test.fail("response was not a JSON object")
+    }
+  }
+
+  private def executeRequest(method: String, test: EndpointTest, url: String, token: String): JsonObject = {
+    val response = Http(url).method(method).header("Authorization", s"Bearer $token").asString
+    test.assertEqual(200, response.code)
+    decodeJSON(test, response.body)
+  }
+
+  private def executeRequest(method: String, test: EndpointTest, url: String, body: Json, token: String) = {
+    val response = Http(url).postData(body.toString).method(method).header("Authorization", s"Bearer $token").asString
+    test.assertEqual(200, response.code)
+    decodeJSON(test, response.body)
+  }
 
   /**
     * Execute a POST request, where the response body is expected to be a JSON object
@@ -22,20 +46,36 @@ object ServiceTestUtils {
     * @param test The endpoint under test
     * @return The decoded JSON response from the request
     */
-  def postRequest(test: EndpointTest, url: String, body: Json, token: String = ""): JsonObject = {
-    val response = Http(url).postData(body.toString).method("POST").header("Authorization", s"Bearer $token").asString
-    test.assertEqual(200, response.code)
+  def postRequest(test: EndpointTest, url: String, body: Json, token: String = ""): JsonObject =
+    executeRequest("POST", test, url, body, token)
 
-    val parsedBody = parse(response.body) fromEither { failure =>
-      test.fail(s"response was not valid JSON - ${failure.message}")
-    }
+  /**
+    * Execute a PUT request, where the response body is expected to be a JSON object
+    * @param url The URL to send the request to, prefixed with the protocol
+    * @param body The JSON body to send along with the request
+    * @param test The endpoint under test
+    * @return The decoded JSON response from the request
+    */
+  def putRequest(test: EndpointTest, url: String, body: Json, token: String = ""): JsonObject =
+    executeRequest("PUT", test, url, body, token)
 
-    val jsonObject = parsedBody.asObject getOrElse {
-      test.fail("response was not a JSON object")
-    }
+  /**
+    * Execute a GET request, where the response body is expected to be a JSON object
+    * @param url The URL to send the request to, prefixed with the protocol
+    * @param test The endpoint under test
+    * @return The decoded JSON response from the request
+    */
+  def getRequest(test: EndpointTest, url: String, token: String = ""): JsonObject =
+    executeRequest("GET", test, url, token)
 
-    jsonObject
-  }
+  /**
+    * Execute a DELETE request, where the response body is expected to be a JSON object
+    * @param url The URL to send the request to, prefixed with the protocol
+    * @param test The endpoint under test
+    * @return The decoded JSON response from the request
+    */
+  def deleteRequest(test: EndpointTest, url: String, token: String = ""): JsonObject =
+    executeRequest("DELETE", test, url, token)
 
   /**
     * Create an access token for use by the provided service
@@ -74,7 +114,7 @@ object ServiceTestUtils {
       case (name, attribute) =>
         val value: Json = attribute.attributeType match {
           case AttributeType.ForeignKey(references) =>
-            create(test, references, allServices, baseURL, accessToken).asJson
+            create(test, references, allServices, baseURL, accessToken).id.asJson
           case AttributeType.UUIDType =>
             UUID.randomUUID().asJson
           case AttributeType.BoolType =>
@@ -107,14 +147,14 @@ object ServiceTestUtils {
         (name, value)
     }.asJson
 
-  /** Create a new object in a given service, returning the ID field */
-  private def create(
+  /** Create a new object in a given service, returning the ID field and access token used to make the request */
+  def create(
     test: EndpointTest,
     serviceName: String,
     allServices: Map[String, ServiceBlock],
     baseURL: String,
     accessToken: String,
-  ): String = {
+  ): CreateResponse = {
     val service = allServices.getOrElse(serviceName, test.fail(s"service $serviceName does not exist"))
     // If this service is an auth service, the same access token cannot be used twice, so make a new one to be safe...
     // This is so that services that reference 2+ auth'd services can be successfully tested
@@ -131,7 +171,9 @@ object ServiceTestUtils {
         newAccessToken,
       )
     val idJSON = createJSON("ID").getOrElse(test.fail(s"response to create $serviceName did not contain an ID key"))
-    idJSON.asString.getOrElse(test.fail(s"response to create $serviceName contained field ID, but was not a string"))
+    val id =
+      idJSON.asString.getOrElse(test.fail(s"response to create $serviceName contained field ID, but was not a string"))
+    CreateResponse(id, newAccessToken)
   }
 
   /**

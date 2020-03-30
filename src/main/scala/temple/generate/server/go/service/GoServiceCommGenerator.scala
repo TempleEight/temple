@@ -1,5 +1,6 @@
 package temple.generate.server.go.service
 
+import temple.ast.AttributeType
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -26,7 +27,7 @@ object GoServiceCommGenerator {
     mkCode(
       genFunctionCall(
         s"Check${serviceName.capitalize}",
-        s"${serviceName}${root.idAttribute.name.toUpperCase} ${generateGoType(root.idAttribute.attributeType)}",
+        s"${serviceName}${root.idAttribute.name.toUpperCase} ${generateGoType(AttributeType.UUIDType)}",
         "token string",
       ),
       "(bool, error)",

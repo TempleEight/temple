@@ -24,7 +24,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.Create),
-      IDAttribute("id", AttributeType.UUIDType),
+      IDAttribute("id"),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.Create)
@@ -36,7 +36,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.Read),
-      IDAttribute("id", AttributeType.UUIDType),
+      IDAttribute("id"),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.Read)
@@ -48,7 +48,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.Update),
-      IDAttribute("id", AttributeType.UUIDType),
+      IDAttribute("id"),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.Update)
@@ -60,7 +60,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.Delete),
-      IDAttribute("id", AttributeType.UUIDType),
+      IDAttribute("id"),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.Delete)
@@ -72,7 +72,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.List),
-      IDAttribute("id", AttributeType.UUIDType),
+      IDAttribute("id"),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.List)
@@ -84,8 +84,8 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.List),
-      IDAttribute("id", AttributeType.UUIDType),
-      CreatedByAttribute.EnumerateByAll("created_by", "created_by", AttributeType.UUIDType),
+      IDAttribute("id"),
+      CreatedByAttribute.EnumerateByAll("created_by", "created_by"),
     )
     queries.keys should contain(CRUD.List)
     queries(CRUD.List) shouldBe DatabaseBuilderTestData.sampleListStatementEnumerateByAll
@@ -96,8 +96,8 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.List),
-      IDAttribute("id", AttributeType.UUIDType),
-      CreatedByAttribute.EnumerateByCreator("created_by", "created_by", AttributeType.UUIDType),
+      IDAttribute("id"),
+      CreatedByAttribute.EnumerateByCreator("created_by", "created_by"),
     )
     queries.keys should contain(CRUD.List)
     queries(CRUD.List) shouldBe DatabaseBuilderTestData.sampleListStatementEnumerateByCreator
