@@ -1,6 +1,5 @@
 package temple.ast
 
-import temple.ast.AttributeType.PrimitiveAttributeType
 import temple.ast.Metadata.ServiceMetadata
 
 /** A service block, representing one microservice on its own isolated server */
@@ -20,11 +19,4 @@ case class ServiceBlock(
   def structIterator(rootName: String): Iterator[(String, Map[String, Attribute])] =
     Iterator((rootName, attributes)) ++ structs.iterator.map { case (str, block) => (str, block.attributes) }
 
-  /**
-    * The attributes of this service that are of primitive types - i.e not foreign keys.
-    */
-  val primitiveAttributes: Map[String, Attribute] = attributes.filter {
-    case (_, attr) =>
-      attr.attributeType.isInstanceOf[PrimitiveAttributeType]
-  }
 }
