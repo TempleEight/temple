@@ -2,6 +2,8 @@ package temple
 
 import java.nio.file.FileAlreadyExistsException
 
+import temple.detail.PoliceSergeantNicholasAngel
+
 /** Main entry point into the application */
 object Main extends App {
 
@@ -13,7 +15,7 @@ object Main extends App {
   try {
     val config = new TempleConfig(args)
     config.subcommand match {
-      case Some(config.Generate) => Application.generate(config)
+      case Some(config.Generate) => Application.generate(config, PoliceSergeantNicholasAngel)
       case Some(config.Validate) => Application.validate(config)
       case Some(config.Test)     => Application.test(config)
       case Some(_)               => throw new TempleConfig.UnhandledArgumentException

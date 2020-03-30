@@ -18,6 +18,7 @@ lazy val endToEndTestSettings: Seq[Def.Setting[_]] =
   inConfig(EndToEndTest)(Defaults.testSettings) ++
   Seq(
     scalaSource in EndToEndTest := baseDirectory.value / "src/e2e/scala",
+    resourceDirectory in EndToEndTest := baseDirectory.value / "src/e2e/resources",
     parallelExecution in EndToEndTest := false,
     fork in EndToEndTest := true,
   )

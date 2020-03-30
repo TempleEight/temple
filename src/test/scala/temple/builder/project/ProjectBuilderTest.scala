@@ -1,6 +1,7 @@
 package temple.builder.project
 
 import org.scalatest.{FlatSpec, Matchers}
+import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.FileSystem._
 
 class ProjectBuilderTest extends FlatSpec with Matchers {
@@ -8,10 +9,16 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
   behavior of "ProjectBuilder"
 
   it should "correctly create a simple project using postgres as the default" in {
-    val project = ProjectBuilder.build(ProjectBuilderTestData.simpleTemplefile)
+    val project =
+      ProjectBuilder.build(ProjectBuilderTestData.simpleTemplefile, GoLanguageDetail("github.com/squat/and/dab"))
     val expected = Map(
         File("templeuser-db", "init.sql")                          -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("templeuser", "Dockerfile")                           -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
+        File("templeuser", "templeuser.go")                        -> ProjectBuilderTestData.simpleTemplefileTempleUserGoFile,
+        File("templeuser", "go.mod")                               -> ProjectBuilderTestData.simpleTemplefileGoModFile,
+        File("templeuser/dao", "dao.go")                           -> ProjectBuilderTestData.simpleTemplefileDaoFile,
+        File("templeuser/dao", "errors.go")                        -> ProjectBuilderTestData.simpleTemplefileErrorsFile,
+        File("templeuser/util", "util.go")                         -> ProjectBuilderTestData.simpleTemplefileUtilFile,
         File("kube/temple-user", "deployment.yaml")                -> ProjectBuilderTestData.simpleTemplefileKubeDeployment,
         File("kube/temple-user", "db-deployment.yaml")             -> ProjectBuilderTestData.simpleTemplefileKubeDbDeployment,
         File("kube/temple-user", "service.yaml")                   -> ProjectBuilderTestData.simpleTemplefileKubeService,
@@ -27,10 +34,16 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "use postgres when defined at the project level" in {
-    val project = ProjectBuilder.build(ProjectBuilderTestData.simpleTemplefilePostgresProject)
+    val project = ProjectBuilder
+      .build(ProjectBuilderTestData.simpleTemplefilePostgresProject, GoLanguageDetail("github.com/squat/and/dab"))
     val expected = Map(
         File("templeuser-db", "init.sql")                          -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("templeuser", "Dockerfile")                           -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
+        File("templeuser", "templeuser.go")                        -> ProjectBuilderTestData.simpleTemplefileTempleUserGoFile,
+        File("templeuser", "go.mod")                               -> ProjectBuilderTestData.simpleTemplefileGoModFile,
+        File("templeuser/dao", "dao.go")                           -> ProjectBuilderTestData.simpleTemplefileDaoFile,
+        File("templeuser/dao", "errors.go")                        -> ProjectBuilderTestData.simpleTemplefileErrorsFile,
+        File("templeuser/util", "util.go")                         -> ProjectBuilderTestData.simpleTemplefileUtilFile,
         File("kube/temple-user", "deployment.yaml")                -> ProjectBuilderTestData.simpleTemplefileKubeDeployment,
         File("kube/temple-user", "db-deployment.yaml")             -> ProjectBuilderTestData.simpleTemplefileKubeDbDeployment,
         File("kube/temple-user", "service.yaml")                   -> ProjectBuilderTestData.simpleTemplefileKubeService,
@@ -46,10 +59,16 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "use postgres when defined at the service level" in {
-    val project = ProjectBuilder.build(ProjectBuilderTestData.simpleTemplefilePostgresService)
+    val project = ProjectBuilder
+      .build(ProjectBuilderTestData.simpleTemplefilePostgresService, GoLanguageDetail("github.com/squat/and/dab"))
     val expected = Map(
         File("templeuser-db", "init.sql")                          -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("templeuser", "Dockerfile")                           -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
+        File("templeuser", "templeuser.go")                        -> ProjectBuilderTestData.simpleTemplefileTempleUserGoFile,
+        File("templeuser", "go.mod")                               -> ProjectBuilderTestData.simpleTemplefileGoModFile,
+        File("templeuser/dao", "dao.go")                           -> ProjectBuilderTestData.simpleTemplefileDaoFile,
+        File("templeuser/dao", "errors.go")                        -> ProjectBuilderTestData.simpleTemplefileErrorsFile,
+        File("templeuser/util", "util.go")                         -> ProjectBuilderTestData.simpleTemplefileUtilFile,
         File("kube/temple-user", "deployment.yaml")                -> ProjectBuilderTestData.simpleTemplefileKubeDeployment,
         File("kube/temple-user", "db-deployment.yaml")             -> ProjectBuilderTestData.simpleTemplefileKubeDbDeployment,
         File("kube/temple-user", "service.yaml")                   -> ProjectBuilderTestData.simpleTemplefileKubeService,
@@ -65,10 +84,16 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly create a complex service with nested struct" in {
-    val project = ProjectBuilder.build(ProjectBuilderTestData.complexTemplefile)
+    val project =
+      ProjectBuilder.build(ProjectBuilderTestData.complexTemplefile, GoLanguageDetail("github.com/squat/and/dab"))
     project.files shouldBe Map(
       File("complexuser-db", "init.sql")                          -> ProjectBuilderTestData.complexTemplefilePostgresCreateOutput,
       File("complexuser", "Dockerfile")                           -> ProjectBuilderTestData.complexTemplefileUsersDockerfile,
+      File("complexuser", "complexuser.go")                       -> ProjectBuilderTestData.complexTemplefileTempleUserGoFile,
+      File("complexuser", "go.mod")                               -> ProjectBuilderTestData.complexTemplefileGoModFile,
+      File("complexuser/dao", "dao.go")                           -> ProjectBuilderTestData.complexTemplefileDaoFile,
+      File("complexuser/dao", "errors.go")                        -> ProjectBuilderTestData.complexTemplefileErrorsFile,
+      File("complexuser/util", "util.go")                         -> ProjectBuilderTestData.complexTemplefileUtilFile,
       File("kube/complex-user", "deployment.yaml")                -> ProjectBuilderTestData.complexTemplefileKubeDeployment,
       File("kube/complex-user", "db-deployment.yaml")             -> ProjectBuilderTestData.complexTemplefileKubeDbDeployment,
       File("kube/complex-user", "service.yaml")                   -> ProjectBuilderTestData.complexTemplefileKubeService,
