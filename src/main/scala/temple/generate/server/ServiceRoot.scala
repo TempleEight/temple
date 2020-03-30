@@ -14,7 +14,7 @@ import scala.collection.immutable.ListMap
   * @param comms a sequence of service names this service communicates with
   * @param opQueries a map of CRUD operations to their corresponding datastore query
   * @param port the port number this service will be served on
-  * @param idAttribute the name and type of the ID field in this service // TODO: This is assumed to be the same for all services (for comms), needs to be refactored
+  * @param idAttribute the name of the ID field
   * @param createdByAttribute the input name, name and type of the createdBy field in this service, and whether it is
   * used to enumerate the service in the List endpoint
   * @param attributes the user-defined fields of the resource handled by this service

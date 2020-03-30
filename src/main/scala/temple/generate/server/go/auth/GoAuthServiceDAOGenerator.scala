@@ -1,5 +1,6 @@
 package temple.generate.server.go.auth
 
+import temple.ast.AttributeType
 import temple.generate.server.AuthServiceRoot
 import temple.generate.server.go.common.GoCommonDAOGenerator
 import temple.generate.server.go.common.GoCommonGenerator._
@@ -44,7 +45,7 @@ object GoAuthServiceDAOGenerator {
     )
 
   private[auth] def generateStructs(root: AuthServiceRoot): String = {
-    val id       = ListMap(root.idAttribute.name.toUpperCase           -> generateGoType(root.idAttribute.attributeType))
+    val id       = ListMap(root.idAttribute.name.toUpperCase           -> generateGoType(AttributeType.UUIDType))
     val auth     = ListMap(root.authAttribute.authType.name.capitalize -> generateGoType(root.authAttribute.attributeType))
     val password = ListMap("Password"                                  -> "string")
     mkCode.lines(

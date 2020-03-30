@@ -33,18 +33,16 @@ object ServerBuilder {
         CreatedByAttribute.EnumerateByCreator(
           languageConfig.createdByInputName,
           languageConfig.createdByName,
-          languageConfig.createdByAttributeType,
         )
       case Some(ServiceEnumerable(false)) =>
         CreatedByAttribute.EnumerateByAll(
           languageConfig.createdByInputName,
           languageConfig.createdByName,
-          languageConfig.createdByAttributeType,
         )
       case None => CreatedByAttribute.None
     }
 
-    val idAttribute = IDAttribute("id", AttributeType.UUIDType)
+    val idAttribute = IDAttribute("id")
 
     val queries: ListMap[CRUD, String] =
       DatabaseBuilder
