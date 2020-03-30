@@ -7,7 +7,7 @@ import temple.ast.AttributeType
   * name the name of attribute, e.g. "createdBy"
   * attributeType type of the attribute, e.g. UUID
   * */
-sealed trait LangnuageConfig {
+sealed trait LanguageConfig {
   val createdByInputName: String
   val createdByName: String
   val createdByAttributeType: AttributeType
