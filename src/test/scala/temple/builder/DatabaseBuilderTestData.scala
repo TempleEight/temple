@@ -3,8 +3,10 @@ package temple.builder
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint.{Check, NonNull, Unique}
 import temple.generate.database.ast.ComparisonOperator.{GreaterEqual, LessEqual}
-import temple.generate.database.ast.Statement.Create
-import temple.generate.database.ast.{ColumnDef, Statement}
+import temple.generate.database.ast.Condition.PreparedComparison
+import temple.generate.database.ast.Expression.PreparedValue
+import temple.generate.database.ast.Statement._
+import temple.generate.database.ast.{Assignment, Column, ColumnDef, ComparisonOperator, Condition, Statement}
 
 object DatabaseBuilderTestData {
 
@@ -73,4 +75,102 @@ object DatabaseBuilderTestData {
         ),
       ),
     )
+
+  val sampleInsertStatement: Statement = Insert(
+    "test-service",
+    Seq(
+      Assignment(Column("id"), PreparedValue),
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+      Assignment(Column("isStudent"), PreparedValue),
+      Assignment(Column("dateOfBirth"), PreparedValue),
+      Assignment(Column("timeOfDay"), PreparedValue),
+      Assignment(Column("expiry"), PreparedValue),
+      Assignment(Column("image"), PreparedValue),
+    ),
+    returnColumns = Seq(
+      Column("id"),
+      Column("bankBalance"),
+      Column("name"),
+      Column("isStudent"),
+      Column("dateOfBirth"),
+      Column("timeOfDay"),
+      Column("expiry"),
+      Column("image"),
+    ),
+  )
+
+  val sampleReadStatement: Statement = Read(
+    "test-service",
+    Seq(
+      Column("id"),
+      Column("bankBalance"),
+      Column("name"),
+      Column("isStudent"),
+      Column("dateOfBirth"),
+      Column("timeOfDay"),
+      Column("expiry"),
+      Column("image"),
+    ),
+    Some(PreparedComparison("id", ComparisonOperator.Equal)),
+  )
+
+  val sampleUpdateStatement: Statement = Update(
+    "test-service",
+    Seq(
+      Assignment(Column("id"), PreparedValue),
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+      Assignment(Column("isStudent"), PreparedValue),
+      Assignment(Column("dateOfBirth"), PreparedValue),
+      Assignment(Column("timeOfDay"), PreparedValue),
+      Assignment(Column("expiry"), PreparedValue),
+      Assignment(Column("image"), PreparedValue),
+    ),
+    Some(PreparedComparison("id", ComparisonOperator.Equal)),
+    returnColumns = Seq(
+      Column("id"),
+      Column("bankBalance"),
+      Column("name"),
+      Column("isStudent"),
+      Column("dateOfBirth"),
+      Column("timeOfDay"),
+      Column("expiry"),
+      Column("image"),
+    ),
+  )
+
+  val sampleDeleteStatement: Statement = Delete(
+    "test-service",
+    Some(PreparedComparison("id", ComparisonOperator.Equal)),
+  )
+
+  val sampleListStatementEnumerateByCreator: Statement = Read(
+    "test-service",
+    Seq(
+      Column("id"),
+      Column("bankBalance"),
+      Column("name"),
+      Column("isStudent"),
+      Column("dateOfBirth"),
+      Column("timeOfDay"),
+      Column("expiry"),
+      Column("image"),
+    ),
+    Some(PreparedComparison("created_by", ComparisonOperator.Equal)),
+  )
+
+  val sampleListStatementEnumerateByAll: Statement = Read(
+    "test-service",
+    Seq(
+      Column("id"),
+      Column("bankBalance"),
+      Column("name"),
+      Column("isStudent"),
+      Column("dateOfBirth"),
+      Column("timeOfDay"),
+      Column("expiry"),
+      Column("image"),
+    ),
+  )
 }
