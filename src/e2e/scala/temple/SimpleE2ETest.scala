@@ -3,6 +3,7 @@ package temple
 import java.nio.file.{Files, Paths}
 
 import org.scalatest.{FlatSpec, Matchers}
+import temple.detail.MockQuestionAsker
 import temple.utils.FileUtils
 
 import scala.jdk.StreamConverters._
@@ -22,6 +23,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
       new TempleConfig(
         Seq("generate", "-o", basePath.toAbsolutePath.toString, "src/test/scala/temple/testfiles/simple.temple"),
       ),
+      MockQuestionAsker,
     )
 
     // Exactly these folders should have been generated
@@ -49,7 +51,9 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     initSql shouldBe SimpleE2ETestData.createStatement
 
     // Only one file should be present in the templeuser folder
-    val expectedTempleUserFiles = Set("Dockerfile").map(dir => basePath.resolve("templeuser").resolve(dir))
+    val expectedTempleUserFiles =
+      Set("Dockerfile", "dao", "templeuser.go", "util", "go.mod").map(dir => basePath.resolve("templeuser").resolve(dir),
+      )
     Files.list(basePath.resolve("templeuser")).toScala(Set) shouldBe expectedTempleUserFiles
 
     // The content of the templeuser/Dockerfile file should be correct

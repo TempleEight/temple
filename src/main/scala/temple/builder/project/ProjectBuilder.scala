@@ -1,8 +1,9 @@
 package temple.builder.project
 
-import temple.ast.Metadata.{Database, Endpoint}
+import temple.ast.Metadata.{Database, Endpoint, ServiceLanguage}
 import temple.ast.{Metadata, ServiceBlock, Templefile}
-import temple.builder.{DatabaseBuilder, DockerfileBuilder, MetricsBuilder, OrchestrationBuilder}
+import temple.builder._
+import temple.detail.LanguageDetail
 import temple.generate.CRUD
 import temple.generate.CRUD._
 import temple.generate.FileSystem._
@@ -15,6 +16,7 @@ import temple.generate.metrics.grafana.ast.Datasource
 import temple.generate.metrics.grafana.{GrafanaDashboardConfigGenerator, GrafanaDashboardGenerator, GrafanaDatasourceConfigGenerator}
 import temple.generate.metrics.prometheus.PrometheusConfigGenerator
 import temple.generate.metrics.prometheus.ast.PrometheusJob
+import temple.generate.server.go.service.GoServiceGenerator
 import temple.utils.StringUtils
 
 object ProjectBuilder {
@@ -39,10 +41,11 @@ object ProjectBuilder {
 
   /**
     * Converts a Templefile to an associated project, containing all generated code
+    *
     * @param templefile The semantically correct Templefile
     * @return the associated generated project
     */
-  def build(templefile: Templefile): Project = {
+  def build(templefile: Templefile, detail: LanguageDetail): Project = {
     val databaseCreationScripts = templefile.services.map {
       case (name, service) =>
         val createStatements: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
@@ -89,6 +92,16 @@ object ProjectBuilder {
         ),
       )
 
-    Project(databaseCreationScripts ++ dockerfiles ++ kubeFiles ++ metrics)
+    val serverFiles = templefile.servicesWithPorts.flatMap {
+      case (name, service, port) =>
+        val serviceRoot =
+          ServerBuilder.buildServiceRoot(name.toLowerCase, service, port.service, endpoints(service), detail)
+        service.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
+          case ServiceLanguage.Go =>
+            GoServiceGenerator.generate(serviceRoot)
+        }
+    }
+
+    Project(databaseCreationScripts ++ dockerfiles ++ kubeFiles ++ serverFiles ++ metrics)
   }
 }
