@@ -4,7 +4,7 @@ import temple.ast.Metadata.ServiceAuth
 import temple.utils.StringUtils
 import io.circe.syntax._
 
-object AuthServiceTest extends ServiceTest("auth") {
+object AuthServiceTest extends ServiceTest("Auth") {
 
   private def testEmailAuth(baseURL: String): Unit = {
     val email    = ServiceTestUtils.randomEmail()
@@ -14,9 +14,9 @@ object AuthServiceTest extends ServiceTest("auth") {
     testEndpoint("register") { test =>
       val registerJson = ServiceTestUtils
         .postRequest(
+          test,
           s"http://$baseURL/api/auth/register",
           Map("email" -> email, "password" -> password).asJson,
-          test,
         )
       test.assert(registerJson.contains("AccessToken"), "response didn't contain the key AccessToken")
     }
@@ -25,9 +25,9 @@ object AuthServiceTest extends ServiceTest("auth") {
     testEndpoint("login") { test =>
       val loginJson = ServiceTestUtils
         .postRequest(
+          test,
           s"http://$baseURL/api/auth/login",
           Map("email" -> email, "password" -> password).asJson,
-          test,
         )
       test.assert(loginJson.contains("AccessToken"), "response didn't contain the key AccessToken")
     }
