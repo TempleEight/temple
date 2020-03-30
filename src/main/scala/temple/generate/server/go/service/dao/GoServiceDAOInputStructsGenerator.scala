@@ -1,6 +1,6 @@
 package temple.generate.server.go.service.dao
 
-import temple.ast.{Annotation, Attribute}
+import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
@@ -24,14 +24,14 @@ object GoServiceDAOInputStructsGenerator {
     val commentSubstring = generateStructCommentSubstring(root, operation)
 
     // We assume identifier is an acronym, so we upper case it
-    lazy val idMap = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(root.idAttribute.attributeType))
+    lazy val idMap = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(AttributeType.UUIDType))
 
     // Note we use the createdBy input name, rather than name
     lazy val createdByMap = root.createdByAttribute match {
       case CreatedByAttribute.None =>
         ListMap.empty
       case enumerating: CreatedByAttribute.Enumerating =>
-        ListMap(enumerating.inputName.capitalize -> generateGoType(enumerating.attributeType))
+        ListMap(enumerating.inputName.capitalize -> generateGoType(AttributeType.UUIDType))
     }
 
     // Omit attribute from input struct fields if server set
