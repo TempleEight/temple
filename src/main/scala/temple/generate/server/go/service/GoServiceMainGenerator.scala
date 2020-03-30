@@ -38,13 +38,6 @@ object GoServiceMainGenerator {
       genStruct("env", ListMap("dao" -> "dao.Datastore") ++ when(usesComms) { "comm" -> "comm.Comm" }),
     )
 
-  /** Given a service name and whether the service uses inter-service communication, return global statements */
-  private[service] def generateGlobals(root: ServiceRoot, usesComms: Boolean): String =
-    mkCode.lines(
-      s"var dao ${root.name}DAO.DAO",
-      when(usesComms) { s"var comm ${root.name}Comm.Handler" },
-    )
-
   /** Given a service name, whether the service uses inter-service communication, the operations desired and the port
     * number, generate the main function */
   private[service] def generateMain(root: ServiceRoot, usesComms: Boolean, operations: Set[CRUD]): String =
