@@ -62,7 +62,11 @@ private[internal] class EndpointTest(service: String, endpointName: String) {
         }
     }
 
-  def validateResponseBody(request: JsonObject, response: JsonObject, attributes: Map[String, Attribute]): Unit = {
+  def validateResponseBody(
+    request: Option[JsonObject],
+    response: JsonObject,
+    attributes: Map[String, Attribute],
+  ): Unit = {
     // The response should contain exactly the keys in attributes, PLUS an ID attribute, MINUS anything that is @server
     val expectedAttributes = attributes.filter {
       case (_, attribute) => !attribute.accessAnnotation.contains(Annotation.Server)
@@ -77,10 +81,12 @@ private[internal] class EndpointTest(service: String, endpointName: String) {
         val responseForKey = response(name.capitalize).getOrElse(fail(s"could not find key $name in response body"))
         validateResponseType(name, responseForKey, attribute)
 
-        // Where the attribute is not @serverSet, validate that what was sent is exactly what is returned
-        if (!attribute.accessAnnotation.contains(Annotation.ServerSet)) {
-          val requestForKey = request(name).getOrElse(fail(s"request was expected to contain key $name, but didn't"))
-          assertEqual(requestForKey, responseForKey)
+        request.foreach { request =>
+          // Where the attribute is not @serverSet, validate that what was sent is exactly what is returned
+          if (!attribute.accessAnnotation.contains(Annotation.ServerSet)) {
+            val requestForKey = request(name).getOrElse(fail(s"request was expected to contain key $name, but didn't"))
+            assertEqual(requestForKey, responseForKey)
+          }
         }
     }
   }
