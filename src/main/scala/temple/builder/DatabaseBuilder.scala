@@ -53,38 +53,36 @@ object DatabaseBuilder {
     serviceName: String,
     service: ServiceBlock,
     endpoints: Set[CRUD],
-    iDAttribute: IDAttribute,
+    idAttribute: IDAttribute,
     createdByAttribute: CreatedByAttribute,
   ): ListMap[CRUD, Statement] = {
     val tableName = StringUtils.snakeCase(serviceName)
-    val columns   = service.primitiveAttributes.map { case (name, _) => Column(name) }.toSeq
+    val columns   = service.attributes.keys.map(Column).toSeq
     ListMap.from(
       endpoints.map {
         case Create =>
           Create -> Statement.Insert(
             tableName,
-            assignment = columns.map(col => Assignment(col, PreparedValue)),
+            assignment = columns.map(Assignment(_, PreparedValue)),
             returnColumns = columns,
           )
         case Read =>
           Read -> Statement.Read(
             tableName,
             columns = columns,
-            condition = Some(PreparedComparison(iDAttribute.name, ComparisonOperator.Equal)),
+            condition = Some(PreparedComparison(idAttribute.name, ComparisonOperator.Equal)),
           )
         case Update =>
           Update -> Statement.Update(
             tableName,
-            assignments = columns.map {
-              Assignment(_, PreparedValue)
-            },
-            condition = Some(PreparedComparison(iDAttribute.name, ComparisonOperator.Equal)),
+            assignments = columns.map(Assignment(_, PreparedValue)),
+            condition = Some(PreparedComparison(idAttribute.name, ComparisonOperator.Equal)),
             returnColumns = columns,
           )
         case Delete =>
           Delete -> Statement.Delete(
             tableName,
-            condition = Some(PreparedComparison(iDAttribute.name, ComparisonOperator.Equal)),
+            condition = Some(PreparedComparison(idAttribute.name, ComparisonOperator.Equal)),
           )
         case List =>
           createdByAttribute match {
@@ -94,7 +92,7 @@ object DatabaseBuilder {
                 columns = columns,
                 condition = Some(PreparedComparison("created_by", ComparisonOperator.Equal)),
               )
-            case CreatedByAttribute.EnumerateByAll(_, _, _) | CreatedByAttribute.None =>
+            case _ =>
               List -> Statement.Read(
                 tableName,
                 columns = columns,

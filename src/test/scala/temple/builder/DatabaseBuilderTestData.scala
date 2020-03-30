@@ -4,9 +4,8 @@ import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint.{Check, NonNull, Unique}
 import temple.generate.database.ast.ComparisonOperator.{GreaterEqual, LessEqual}
 import temple.generate.database.ast.Condition.PreparedComparison
-import temple.generate.database.ast.Expression.PreparedValue
 import temple.generate.database.ast.Statement._
-import temple.generate.database.ast.{Assignment, Column, ColumnDef, ComparisonOperator, Condition, Statement}
+import temple.generate.database.ast._
 
 object DatabaseBuilderTestData {
 
@@ -77,16 +76,16 @@ object DatabaseBuilderTestData {
     )
 
   val sampleInsertStatement: Statement = Insert(
-    "test-service",
+    "test_service",
     Seq(
-      Assignment(Column("id"), PreparedValue),
-      Assignment(Column("bankBalance"), PreparedValue),
-      Assignment(Column("name"), PreparedValue),
-      Assignment(Column("isStudent"), PreparedValue),
-      Assignment(Column("dateOfBirth"), PreparedValue),
-      Assignment(Column("timeOfDay"), PreparedValue),
-      Assignment(Column("expiry"), PreparedValue),
-      Assignment(Column("image"), PreparedValue),
+      Assignment(Column("id")),
+      Assignment(Column("bankBalance")),
+      Assignment(Column("name")),
+      Assignment(Column("isStudent")),
+      Assignment(Column("dateOfBirth")),
+      Assignment(Column("timeOfDay")),
+      Assignment(Column("expiry")),
+      Assignment(Column("image")),
     ),
     returnColumns = Seq(
       Column("id"),
@@ -101,7 +100,7 @@ object DatabaseBuilderTestData {
   )
 
   val sampleReadStatement: Statement = Read(
-    "test-service",
+    "test_service",
     Seq(
       Column("id"),
       Column("bankBalance"),
@@ -116,16 +115,16 @@ object DatabaseBuilderTestData {
   )
 
   val sampleUpdateStatement: Statement = Update(
-    "test-service",
+    "test_service",
     Seq(
-      Assignment(Column("id"), PreparedValue),
-      Assignment(Column("bankBalance"), PreparedValue),
-      Assignment(Column("name"), PreparedValue),
-      Assignment(Column("isStudent"), PreparedValue),
-      Assignment(Column("dateOfBirth"), PreparedValue),
-      Assignment(Column("timeOfDay"), PreparedValue),
-      Assignment(Column("expiry"), PreparedValue),
-      Assignment(Column("image"), PreparedValue),
+      Assignment(Column("id")),
+      Assignment(Column("bankBalance")),
+      Assignment(Column("name")),
+      Assignment(Column("isStudent")),
+      Assignment(Column("dateOfBirth")),
+      Assignment(Column("timeOfDay")),
+      Assignment(Column("expiry")),
+      Assignment(Column("image")),
     ),
     Some(PreparedComparison("id", ComparisonOperator.Equal)),
     returnColumns = Seq(
@@ -141,12 +140,12 @@ object DatabaseBuilderTestData {
   )
 
   val sampleDeleteStatement: Statement = Delete(
-    "test-service",
+    "test_service",
     Some(PreparedComparison("id", ComparisonOperator.Equal)),
   )
 
   val sampleListStatementEnumerateByCreator: Statement = Read(
-    "test-service",
+    "test_service",
     Seq(
       Column("id"),
       Column("bankBalance"),
@@ -161,7 +160,7 @@ object DatabaseBuilderTestData {
   )
 
   val sampleListStatementEnumerateByAll: Statement = Read(
-    "test-service",
+    "test_service",
     Seq(
       Column("id"),
       Column("bankBalance"),

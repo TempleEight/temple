@@ -2,12 +2,7 @@ package temple.builder
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.ast.AttributeType
-import temple.generate
 import temple.generate.CRUD
-import temple.generate.CRUD._
-import temple.generate.database.ast.Statement._
-import temple.generate.database.ast.Expression.PreparedValue
-import temple.generate.database.ast.{Assignment, Column}
 import temple.generate.server.{CreatedByAttribute, IDAttribute}
 
 class DatabaseBuilderTest extends FlatSpec with Matchers {
@@ -26,85 +21,85 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
 
   it should "correctly build endpoint create queries" in {
     val queries = DatabaseBuilder.buildQuery(
-      "test-service",
+      "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.Create),
       IDAttribute("id", AttributeType.UUIDType),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.Create)
-    queries(CRUD.Create) should be(DatabaseBuilderTestData.sampleInsertStatement)
+    queries(CRUD.Create) shouldBe DatabaseBuilderTestData.sampleInsertStatement
   }
 
   it should "correctly build endpoint read queries" in {
     val queries = DatabaseBuilder.buildQuery(
-      "test-service",
+      "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.Read),
       IDAttribute("id", AttributeType.UUIDType),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.Read)
-    queries(CRUD.Read) should be(DatabaseBuilderTestData.sampleReadStatement)
+    queries(CRUD.Read) shouldBe DatabaseBuilderTestData.sampleReadStatement
   }
 
   it should "correctly build endpoint update queries" in {
     val queries = DatabaseBuilder.buildQuery(
-      "test-service",
+      "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.Update),
       IDAttribute("id", AttributeType.UUIDType),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.Update)
-    queries(CRUD.Update) should be(DatabaseBuilderTestData.sampleUpdateStatement)
+    queries(CRUD.Update) shouldBe DatabaseBuilderTestData.sampleUpdateStatement
   }
 
   it should "correctly build endpoint delete queries" in {
     val queries = DatabaseBuilder.buildQuery(
-      "test-service",
+      "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.Delete),
       IDAttribute("id", AttributeType.UUIDType),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.Delete)
-    queries(CRUD.Delete) should be(DatabaseBuilderTestData.sampleDeleteStatement)
+    queries(CRUD.Delete) shouldBe DatabaseBuilderTestData.sampleDeleteStatement
   }
 
   it should "correctly build endpoint list CreatedByNone queries" in {
     val queries = DatabaseBuilder.buildQuery(
-      "test-service",
+      "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.List),
       IDAttribute("id", AttributeType.UUIDType),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.List)
-    queries(CRUD.List) should be(DatabaseBuilderTestData.sampleListStatementEnumerateByAll)
+    queries(CRUD.List) shouldBe DatabaseBuilderTestData.sampleListStatementEnumerateByAll
   }
 
   it should "correctly build endpoint list EnumerateByAll queries" in {
     val queries = DatabaseBuilder.buildQuery(
-      "test-service",
+      "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.List),
       IDAttribute("id", AttributeType.UUIDType),
       CreatedByAttribute.EnumerateByAll("created_by", "created_by", AttributeType.UUIDType),
     )
     queries.keys should contain(CRUD.List)
-    queries(CRUD.List) should be(DatabaseBuilderTestData.sampleListStatementEnumerateByAll)
+    queries(CRUD.List) shouldBe DatabaseBuilderTestData.sampleListStatementEnumerateByAll
   }
 
   it should "correctly build endpoint list EnumerateByCreator queries" in {
     val queries = DatabaseBuilder.buildQuery(
-      "test-service",
+      "test_service",
       BuilderTestData.sampleService,
       Set(CRUD.List),
       IDAttribute("id", AttributeType.UUIDType),
       CreatedByAttribute.EnumerateByCreator("created_by", "created_by", AttributeType.UUIDType),
     )
     queries.keys should contain(CRUD.List)
-    queries(CRUD.List) should be(DatabaseBuilderTestData.sampleListStatementEnumerateByCreator)
+    queries(CRUD.List) shouldBe DatabaseBuilderTestData.sampleListStatementEnumerateByCreator
   }
 }

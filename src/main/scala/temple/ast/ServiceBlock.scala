@@ -25,9 +25,6 @@ case class ServiceBlock(
     */
   val primitiveAttributes: Map[String, Attribute] = attributes.filter {
     case (_, attr) =>
-      attr.attributeType match {
-        case _: PrimitiveAttributeType => true
-        case _                         => false
-      }
+      attr.attributeType.isInstanceOf[PrimitiveAttributeType]
   }
 }
