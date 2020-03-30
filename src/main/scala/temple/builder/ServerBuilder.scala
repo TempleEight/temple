@@ -1,7 +1,7 @@
 package temple.builder
 
 import temple.ast.AttributeType.ForeignKey
-import temple.ast.Metadata.{ServiceEnumerable, ServiceLanguage}
+import temple.ast.Metadata.{Database, ServiceEnumerable, ServiceLanguage}
 import temple.ast.{Attribute, AttributeType, Metadata, ServiceBlock}
 import temple.builder.project.LanguageConfig.GoLanguageConfig
 import temple.builder.project.ProjectConfig
@@ -23,6 +23,7 @@ object ServerBuilder {
     detail: LanguageDetail,
   ): ServiceRoot = {
     val language = serviceBlock.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
+    val database = serviceBlock.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase)
     val languageConfig = language match {
       case ServiceLanguage.Go => GoLanguageConfig
     }
@@ -43,29 +44,39 @@ object ServerBuilder {
       case None => CreatedByAttribute.None
     }
 
-    val iDAttribute = IDAttribute("id", AttributeType.UUIDType)
+    val idAttribute = IDAttribute("id", AttributeType.UUIDType)
 
-    implicit val context
-      : PostgresContext = PostgresContext(PreparedType.DollarNumbers) //TODO: Does this need to change with server lang?
     val queries: ListMap[CRUD, String] =
       DatabaseBuilder
-        .buildQuery(serviceName, serviceBlock, endpoints, iDAttribute, createdBy)
-        .map { case (crud, statement) => crud -> PostgresGenerator.generate(statement) }
+        .buildQuery(serviceName, serviceBlock, endpoints, idAttribute, createdBy)
+        .map {
+          case (crud, statement) =>
+            crud -> (database match {
+              case Database.Postgres =>
+                implicit val context
+                  : PostgresContext = PostgresContext(PreparedType.DollarNumbers) //TODO: Does this need to change with server lang?
+                PostgresGenerator.generate(statement)
+            })
+        }
 
     val moduleName: String = detail match {
       case GoLanguageDetail(modulePath) => s"$modulePath/$serviceName"
     }
-    //TODO: Auth
+
+    // The names of each service this service communicates with, i.e all the foreign key attributes of the service
+    val comms: Seq[String] = serviceBlock.attributes.collect {
+      case (_, Attribute(x: ForeignKey, _, _)) => x.references
+    }.toSeq
+
+    // TODO: Auth
 
     ServiceRoot(
       serviceName,
       module = moduleName,
-      comms = serviceBlock.attributes.collect {
-        case (_, Attribute(x: ForeignKey, _, _)) => x.references
-      }.toSeq,
+      comms = comms,
       opQueries = queries,
       port = port,
-      idAttribute = iDAttribute,
+      idAttribute = idAttribute,
       createdByAttribute = createdBy,
       attributes = ListMap.from(serviceBlock.attributes),
       datastore = serviceBlock.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase),
