@@ -67,7 +67,7 @@ object ServerBuilder {
       port = port,
       idAttribute = iDAttribute,
       createdByAttribute = createdBy,
-      attributes = ListMap.from(serviceBlock.primitiveAttributes),
+      attributes = ListMap.from(serviceBlock.attributes),
       datastore = serviceBlock.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase),
     )
   }
