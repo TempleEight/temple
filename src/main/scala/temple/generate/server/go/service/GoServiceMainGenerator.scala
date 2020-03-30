@@ -5,36 +5,37 @@ import temple.generate.server.ServiceRoot
 import temple.generate.utils.CodeTerm
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
+import temple.generate.server.go.common.GoCommonGenerator._
 
 import scala.Option.when
+import scala.collection.immutable.ListMap
 
 object GoServiceMainGenerator {
 
-  /** Given a service name, module name and whether the service uses inter-service communication, return the import
-    * block */
-  private[service] def generateImports(root: ServiceRoot, usesComms: Boolean): String = {
-    val standardImports = Seq(
-      //"flag",
-      //"log",
-      "net/http",
-    ).map(doubleQuote)
-
-    val customImports = Seq[CodeTerm](
-      when(usesComms) { s"${root.name}Comm ${doubleQuote(s"${root.module}/comm")}" },
-      s"${root.name}DAO ${doubleQuote(s"${root.module}/dao")}",
-      //doubleQuote(s"$module/util"),
-      //s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
-      //doubleQuote("github.com/gorilla/mux"),
+  private[service] def generateImports(root: ServiceRoot, usesTime: Boolean, usesComms: Boolean): String =
+    mkCode(
+      "import",
+      CodeWrap.parens.tabbed(
+        //doubleQuote("encoding/json"),
+        //doubleQuote("flag"),
+        //doubleQuote("fmt"),
+        //doubleQuote("log"),
+        //doubleQuote("net/http"),
+        //when(usesTime) { doubleQuote("time") },
+        //"",
+        when(usesComms) { doubleQuote(s"${root.module}/comm") },
+        doubleQuote(s"${root.module}/dao"),
+        //doubleQuote(s"${root.module}/util"),
+        //s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
+        //doubleQuote("github.com/google/uuid"),
+        //doubleQuote("github.com/gorilla/mux"),
+      ),
     )
 
-    mkCode("import", CodeWrap.parens.tabbed(standardImports, "", customImports))
-  }
-
-  /** Given a service name and whether the service uses inter-service communication, return global statements */
-  private[service] def generateGlobals(root: ServiceRoot, usesComms: Boolean): String =
+  private[service] def generateEnvStruct(usesComms: Boolean): String =
     mkCode.lines(
-      s"var dao ${root.name}DAO.DAO",
-      when(usesComms) { s"var comm ${root.name}Comm.Handler" },
+      "// env defines the environment that requests should be executed within",
+      genStruct("env", ListMap("dao" -> "dao.Datastore") ++ when(usesComms) { "comm" -> "comm.Comm" }),
     )
 
   /** Given a service name, whether the service uses inter-service communication, the operations desired and the port
