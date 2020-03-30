@@ -12,6 +12,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
     val expected = Map(
         File("templeuser-db", "init.sql")                          -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("templeuser", "Dockerfile")                           -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
+        File("api", "SampleProject.openapi.yaml")                  -> ProjectBuilderTestData.simpleTemplefileAPISpec,
         File("kube/temple-user", "deployment.yaml")                -> ProjectBuilderTestData.simpleTemplefileKubeDeployment,
         File("kube/temple-user", "db-deployment.yaml")             -> ProjectBuilderTestData.simpleTemplefileKubeDbDeployment,
         File("kube/temple-user", "service.yaml")                   -> ProjectBuilderTestData.simpleTemplefileKubeService,
@@ -31,6 +32,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
     val expected = Map(
         File("templeuser-db", "init.sql")                          -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("templeuser", "Dockerfile")                           -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
+        File("api", "SampleProject.openapi.yaml")                  -> ProjectBuilderTestData.simpleTemplefileAPISpec,
         File("kube/temple-user", "deployment.yaml")                -> ProjectBuilderTestData.simpleTemplefileKubeDeployment,
         File("kube/temple-user", "db-deployment.yaml")             -> ProjectBuilderTestData.simpleTemplefileKubeDbDeployment,
         File("kube/temple-user", "service.yaml")                   -> ProjectBuilderTestData.simpleTemplefileKubeService,
@@ -50,6 +52,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
     val expected = Map(
         File("templeuser-db", "init.sql")                          -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("templeuser", "Dockerfile")                           -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
+        File("api", "SampleProject.openapi.yaml")                  -> ProjectBuilderTestData.simpleTemplefileAPISpec,
         File("kube/temple-user", "deployment.yaml")                -> ProjectBuilderTestData.simpleTemplefileKubeDeployment,
         File("kube/temple-user", "db-deployment.yaml")             -> ProjectBuilderTestData.simpleTemplefileKubeDbDeployment,
         File("kube/temple-user", "service.yaml")                   -> ProjectBuilderTestData.simpleTemplefileKubeService,
@@ -69,6 +72,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
     project.files shouldBe Map(
       File("complexuser-db", "init.sql")                          -> ProjectBuilderTestData.complexTemplefilePostgresCreateOutput,
       File("complexuser", "Dockerfile")                           -> ProjectBuilderTestData.complexTemplefileUsersDockerfile,
+      File("api", "SampleComplexProject.openapi.yaml")            -> ProjectBuilderTestData.complexTemplefileAPISpec,
       File("kube/complex-user", "deployment.yaml")                -> ProjectBuilderTestData.complexTemplefileKubeDeployment,
       File("kube/complex-user", "db-deployment.yaml")             -> ProjectBuilderTestData.complexTemplefileKubeDbDeployment,
       File("kube/complex-user", "service.yaml")                   -> ProjectBuilderTestData.complexTemplefileKubeService,

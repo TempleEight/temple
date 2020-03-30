@@ -2,7 +2,7 @@ package temple.builder.project
 
 import temple.ast.Metadata.{Database, Endpoint, ServiceOrStructMetadata}
 import temple.ast.{Metadata, TempleBlock, Templefile}
-import temple.builder.{DatabaseBuilder, DockerfileBuilder, MetricsBuilder, OrchestrationBuilder}
+import temple.builder._
 import temple.generate.CRUD
 import temple.generate.CRUD._
 import temple.generate.FileSystem._
@@ -15,13 +15,14 @@ import temple.generate.metrics.grafana.ast.Datasource
 import temple.generate.metrics.grafana.{GrafanaDashboardConfigGenerator, GrafanaDashboardGenerator, GrafanaDatasourceConfigGenerator}
 import temple.generate.metrics.prometheus.PrometheusConfigGenerator
 import temple.generate.metrics.prometheus.ast.PrometheusJob
+import temple.generate.target.openapi.OpenAPIGenerator
 import temple.utils.StringUtils
 
 object ProjectBuilder {
 
   def endpoints(service: TempleBlock[ServiceOrStructMetadata]): Set[CRUD] = {
     val endpoints: Set[CRUD] = service
-      .lookupMetadata[Metadata.Omit]
+      .lookupLocalMetadata[Metadata.Omit]
       .map(_.endpoints)
       .getOrElse(Set.empty)
       .foldLeft(Set[CRUD](Create, Read, Update, Delete)) {
@@ -34,7 +35,7 @@ object ProjectBuilder {
           }
       }
     // Add read all endpoint if defined
-    service.lookupMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + List)
+    service.lookupLocalMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + List)
   }
 
   /**
@@ -60,6 +61,9 @@ object ProjectBuilder {
         val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)
         (File(s"${name.toLowerCase}", "Dockerfile"), dockerfileContents)
     }
+
+    val openAPIRoot = OpenAPIBuilder.createOpenAPI(templefile)
+    val apiFiles    = OpenAPIGenerator.generate(openAPIRoot)
 
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(
       StringUtils.kebabCase(templefile.projectName),
@@ -89,6 +93,12 @@ object ProjectBuilder {
         ),
       )
 
-    Project(databaseCreationScripts ++ dockerfiles ++ kubeFiles ++ metrics)
+    Project(
+      databaseCreationScripts ++
+      dockerfiles ++
+      kubeFiles ++
+      apiFiles ++
+      metrics,
+    )
   }
 }
