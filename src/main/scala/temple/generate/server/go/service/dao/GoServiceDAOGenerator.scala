@@ -14,19 +14,13 @@ import scala.collection.immutable.ListMap
 
 object GoServiceDAOGenerator {
 
-  private[service] def generateImports(root: ServiceRoot): String = {
-    // Check if attributes contains an attribute of type date, time or datetime
-    val containsTime =
-      Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateTimeType)
-        .intersect(root.attributes.values.map(_.attributeType).toSet)
-        .nonEmpty
-
+  private[service] def generateImports(root: ServiceRoot, usesTime: Boolean): String =
     mkCode(
       "import",
       CodeWrap.parens.tabbed(
         doubleQuote("database/sql"),
         doubleQuote("fmt"),
-        when(containsTime) { doubleQuote("time") },
+        when(usesTime) { doubleQuote("time") },
         "",
         doubleQuote(s"${root.module}/util"),
         doubleQuote("github.com/google/uuid"),
@@ -35,7 +29,6 @@ object GoServiceDAOGenerator {
         s"_ ${doubleQuote("github.com/lib/pq")}",
       ),
     )
-  }
 
   private[dao] def generateDAOFunctionName(root: ServiceRoot, operation: CRUD): String =
     s"$operation${root.name.capitalize}"
