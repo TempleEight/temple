@@ -2,7 +2,7 @@ package temple.test
 
 import temple.ast.Metadata.ServiceAuth
 import temple.ast.Templefile
-import temple.test.internal.{AuthServiceTest, ProjectConfig}
+import temple.test.internal.{AuthServiceTest, CRUDServiceTest, ProjectConfig}
 
 import scala.sys.process._
 
@@ -45,6 +45,10 @@ object ProjectTester {
     val serviceAuths = templefile.services.values.flatMap(_.lookupMetadata[ServiceAuth]).toSet
     if (serviceAuths.nonEmpty) {
       AuthServiceTest.test(serviceAuths, url)
+    }
+    templefile.services.foreach {
+      case (name, block) =>
+        CRUDServiceTest.test(name, block, templefile.services, url)
     }
   }
 
