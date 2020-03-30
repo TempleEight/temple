@@ -19,7 +19,7 @@ import temple.utils.StringUtils
 
 object ProjectBuilder {
 
-  private def endpoints(service: ServiceBlock): Set[CRUD] = {
+  def endpoints(service: ServiceBlock): Set[CRUD] = {
     val endpoints: Set[CRUD] = service
       .lookupMetadata[Metadata.Omit]
       .map(_.endpoints)
