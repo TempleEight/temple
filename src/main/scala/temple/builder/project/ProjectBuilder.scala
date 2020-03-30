@@ -22,7 +22,7 @@ object ProjectBuilder {
 
   def endpoints(service: TempleBlock[ServiceOrStructMetadata]): Set[CRUD] = {
     val endpoints: Set[CRUD] = service
-      .lookupLocalMetadata[Metadata.Omit]
+      .lookupMetadata[Metadata.Omit]
       .map(_.endpoints)
       .getOrElse(Set.empty)
       .foldLeft(Set[CRUD](Create, Read, Update, Delete)) {
@@ -35,7 +35,7 @@ object ProjectBuilder {
           }
       }
     // Add read all endpoint if defined
-    service.lookupLocalMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + List)
+    service.lookupMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + List)
   }
 
   /**

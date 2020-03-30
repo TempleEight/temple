@@ -12,7 +12,7 @@ abstract class TempleBlock[+M <: Metadata] {
   private var parent: Templefile = _
 
   /** Set the parent that this Templefile is within */
-  final private[temple] def setParent(templefile: Templefile): Unit = parent = templefile
+  private[temple] def setParent(templefile: Templefile): Unit = parent = templefile
 
   /** Fall back to the default metadata for the project */
   final private def lookupDefaultMetadata[T <: Metadata: ClassTag]: Option[T] = {
