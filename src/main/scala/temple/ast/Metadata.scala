@@ -7,10 +7,11 @@ import temple.errors.ErrorHandlingContext
 sealed trait Metadata
 
 object Metadata {
-  sealed trait TargetMetadata  extends Metadata
-  sealed trait ServiceMetadata extends Metadata
-  sealed trait ProjectMetadata extends Metadata
-  sealed trait StructMetadata  extends Metadata
+  sealed trait TargetMetadata          extends Metadata
+  sealed trait ProjectMetadata         extends Metadata
+  sealed trait ServiceOrStructMetadata extends Metadata
+  sealed trait ServiceMetadata         extends ServiceOrStructMetadata
+  sealed trait StructMetadata          extends ServiceOrStructMetadata
 
   sealed abstract class TargetLanguage private (name: String, aliases: String*)
       extends EnumEntry(name, aliases)

@@ -3,7 +3,7 @@ package temple.ast
 import scala.reflect.ClassTag
 
 /** Any of the root blocks in the Templefile */
-abstract class TempleBlock[M <: Metadata] {
+abstract class TempleBlock[+M <: Metadata] {
 
   /** The list of metadata items in the block */
   def metadata: Seq[M]

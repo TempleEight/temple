@@ -1,7 +1,7 @@
 package temple.builder.project
 
-import temple.ast.Metadata.{Database, Endpoint}
-import temple.ast.{Metadata, ServiceBlock, Templefile}
+import temple.ast.Metadata.{Database, Endpoint, ServiceOrStructMetadata}
+import temple.ast.{Metadata, TempleBlock, Templefile}
 import temple.builder.{DatabaseBuilder, DockerfileBuilder, MetricsBuilder, OrchestrationBuilder}
 import temple.generate.CRUD
 import temple.generate.CRUD._
@@ -19,7 +19,7 @@ import temple.utils.StringUtils
 
 object ProjectBuilder {
 
-  def endpoints(service: ServiceBlock): Set[CRUD] = {
+  def endpoints(service: TempleBlock[ServiceOrStructMetadata]): Set[CRUD] = {
     val endpoints: Set[CRUD] = service
       .lookupMetadata[Metadata.Omit]
       .map(_.endpoints)

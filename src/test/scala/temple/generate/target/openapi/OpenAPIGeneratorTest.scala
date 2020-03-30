@@ -7,7 +7,7 @@ import temple.ast.AttributeType._
 import temple.ast.{Annotation, Attribute}
 import temple.generate.CRUD
 import temple.generate.target.openapi.OpenAPIGenerator.generateError
-import temple.generate.target.openapi.ast.{Response, Service}
+import temple.generate.target.openapi.ast.{OpenAPIRoot, Response, Service}
 
 import scala.collection.immutable.ListMap
 
@@ -34,21 +34,23 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
   }
 
   it should "generate OpenAPI specs correctly" in {
-    val openAPIFiles = OpenAPIGenerator.generate("x", "0.1.2")(
-      Service(
-        "match",
-        CRUD.values,
-        ListMap(
-          "a" -> Attribute(IntType()),
-          "b" -> Attribute(FloatType()),
-          "c" -> Attribute(BoolType),
-          "d" -> Attribute(DateType),
-          "e" -> Attribute(TimeType),
-          "f" -> Attribute(DateTimeType, accessAnnotation = Some(Annotation.Server)),
-          "g" -> Attribute(DateTimeType),
-          "h" -> Attribute(BlobType(), accessAnnotation = Some(Annotation.ServerSet)),
-          "i" -> Attribute(StringType(), accessAnnotation = Some(Annotation.Client)),
-          "j" -> Attribute(ForeignKey("User")),
+    val openAPIFiles = OpenAPIGenerator.generate(
+      OpenAPIRoot.build("x", "0.1.2")(
+        Service(
+          "match",
+          CRUD.values,
+          ListMap(
+            "a" -> Attribute(IntType()),
+            "b" -> Attribute(FloatType()),
+            "c" -> Attribute(BoolType),
+            "d" -> Attribute(DateType),
+            "e" -> Attribute(TimeType),
+            "f" -> Attribute(DateTimeType, accessAnnotation = Some(Annotation.Server)),
+            "g" -> Attribute(DateTimeType),
+            "h" -> Attribute(BlobType(), accessAnnotation = Some(Annotation.ServerSet)),
+            "i" -> Attribute(StringType(), accessAnnotation = Some(Annotation.Client)),
+            "j" -> Attribute(ForeignKey("User")),
+          ),
         ),
       ),
     )

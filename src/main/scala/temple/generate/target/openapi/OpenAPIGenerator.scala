@@ -188,18 +188,17 @@ object OpenAPIGenerator {
 
   private def jsonContent(mediaTypeObject: MediaTypeObject) = Map("application/json" -> mediaTypeObject)
 
-  private def build(name: String, version: String, description: String = "")(services: Service*): OpenAPIFile = {
-    val builder = new OpenAPIGenerator(name, version, description)
-    services.foreach(builder.addPaths)
+  private def build(root: OpenAPIRoot): OpenAPIFile = {
+    val builder = new OpenAPIGenerator(root.name, root.version, root.description)
+    root.services.foreach(builder.addPaths)
     builder.toOpenAPI
   }
 
-  private def render(name: String, version: String, description: String = "")(services: Service*): String =
-    Printer(preserveOrder = true, dropNullKeys = true).pretty(build(name, version, description)(services: _*).asJson)
+  private def render(root: OpenAPIRoot): String =
+    Printer(preserveOrder = true, dropNullKeys = true).pretty(build(root).asJson)
 
-  // TODO: standardize this type
-  def generate(name: String, version: String, description: String = "")(services: Service*): Files = Map(
-    File("api", s"$name.openapi.yaml") -> render(name, version, description)(services: _*),
+  def generate(root: OpenAPIRoot): Files = Map(
+    File("api", s"${root.name}.openapi.yaml") -> render(root),
   )
 
   /** Create a Response representation for an error */
