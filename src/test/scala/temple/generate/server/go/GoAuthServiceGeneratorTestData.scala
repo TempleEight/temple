@@ -12,7 +12,7 @@ object GoAuthServiceGeneratorTestData {
     "github.com/TempleEight/spec-golang/auth",
     82,
     AuthAttribute(ServiceAuth.Email, AttributeType.StringType()),
-    IDAttribute("id", AttributeType.UUIDType),
+    IDAttribute("id"),
     "INSERT INTO auth (id, email, password) VALUES ($1, $2, $3) RETURNING id, name, password",
     "SELECT id, email, password FROM auth WHERE email = $1",
   )

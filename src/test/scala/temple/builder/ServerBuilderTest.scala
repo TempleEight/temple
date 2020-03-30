@@ -38,7 +38,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         Delete -> "DELETE FROM test-service WHERE id = $1;",
         List   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test-service;",
       ),
-      idAttribute = IDAttribute("id", AttributeType.UUIDType),
+      idAttribute = IDAttribute("id"),
       createdByAttribute = CreatedByAttribute.None,
       attributes = ListMap(
         "id"          -> Attribute(IntType()),
@@ -72,7 +72,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       comms = Seq(),
       port = 1024,
       opQueries = ListMap(),
-      idAttribute = IDAttribute("id", AttributeType.UUIDType),
+      idAttribute = IDAttribute("id"),
       createdByAttribute = CreatedByAttribute.None,
       attributes = ListMap(
         "id"          -> Attribute(IntType()),
@@ -112,7 +112,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         Delete -> "DELETE FROM test-complex-service WHERE id = $1;",
         List   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test-complex-service;",
       ),
-      idAttribute = IDAttribute("id", AttributeType.UUIDType),
+      idAttribute = IDAttribute("id"),
       createdByAttribute = CreatedByAttribute.None,
       attributes = ListMap(
         "id"             -> Attribute(IntType(max = Some(100), min = Some(10), precision = 2)),
