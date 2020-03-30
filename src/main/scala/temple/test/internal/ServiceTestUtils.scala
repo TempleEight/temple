@@ -24,7 +24,6 @@ object ServiceTestUtils {
     */
   def postRequest(test: EndpointTest, url: String, body: Json, token: String = ""): JsonObject = {
     val response = Http(url).postData(body.toString).method("POST").header("Authorization", s"Bearer $token").asString
-    if (response.code != 200) println(response.body)
     test.assertEqual(200, response.code)
 
     val parsedBody = parse(response.body) fromEither { failure =>
