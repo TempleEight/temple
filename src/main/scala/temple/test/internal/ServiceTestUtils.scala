@@ -107,7 +107,7 @@ object ServiceTestUtils {
         (name, value)
     }.asJson
 
-  // Create a new object in a given service, returning the ID field
+  /** Create a new object in a given service, returning the ID field */
   private def create(
     test: EndpointTest,
     serviceName: String,
