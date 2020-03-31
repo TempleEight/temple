@@ -68,8 +68,8 @@ object ServerBuilder {
 
     // In the server code all foreign keys are stored as UUID types - map into the correct type
     val attributes: ListMap[String, Attribute] = ListMap.from(serviceBlock.attributes.map {
-      case (str, Attribute(_: ForeignKey, y, z)) => (str, Attribute(AttributeType.UUIDType, y, z))
-      case default                               => default
+      case (str, Attribute(_: ForeignKey, access, value)) => (str, Attribute(AttributeType.UUIDType, access, value))
+      case default                                        => default
     })
 
     // TODO: Auth
