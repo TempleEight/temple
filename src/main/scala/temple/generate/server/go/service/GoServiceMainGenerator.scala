@@ -1,8 +1,9 @@
 package temple.generate.server.go.service
 
+import temple.ast.{Annotation, Attribute, AttributeType}
+import temple.generate.CRUD
 import temple.generate.CRUD.CRUD
 import temple.generate.server.ServiceRoot
-import temple.generate.utils.CodeTerm
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
 import temple.generate.server.go.common.GoCommonGenerator._
@@ -12,7 +13,12 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainGenerator {
 
-  private[service] def generateImports(root: ServiceRoot, usesTime: Boolean, usesComms: Boolean): String =
+  private[service] def generateImports(
+    root: ServiceRoot,
+    usesTime: Boolean,
+    usesComms: Boolean,
+    clientAttributes: ListMap[String, Attribute],
+  ): String =
     mkCode(
       "import",
       CodeWrap.parens.tabbed(
@@ -21,12 +27,28 @@ object GoServiceMainGenerator {
         //doubleQuote("fmt"),
         //doubleQuote("log"),
         //doubleQuote("net/http"),
+
+        // TODO: This check is temporary to make the integration tests pass
+        when(
+          clientAttributes
+            .exists {
+              case (_, attr) =>
+                attr.attributeType == AttributeType.DateType ||
+                attr.attributeType == AttributeType.TimeType ||
+                attr.attributeType == AttributeType.DateTimeType
+            },
+        ) { doubleQuote("time") },
         //when(usesTime) { doubleQuote("time") },
         //"",
         when(usesComms) { doubleQuote(s"${root.module}/comm") },
         doubleQuote(s"${root.module}/dao"),
         //doubleQuote(s"${root.module}/util"),
         //s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
+
+        // TODO: This check is temporary to make the integration tests pass
+        when(clientAttributes.exists { case (_, attr) => attr.attributeType == AttributeType.UUIDType }) {
+          doubleQuote("github.com/google/uuid")
+        },
         //doubleQuote("github.com/google/uuid"),
         //doubleQuote("github.com/gorilla/mux"),
       ),
@@ -37,6 +59,52 @@ object GoServiceMainGenerator {
       "// env defines the environment that requests should be executed within",
       genStruct("env", ListMap("dao" -> "dao.Datastore") ++ when(usesComms) { "comm" -> "comm.Comm" }),
     )
+
+  private def generateValidatorAnnotation(attrType: AttributeType): String =
+    // TODO: Fill in mapping and handle optionals
+    s"`valid:${doubleQuote(
+      attrType match {
+        case AttributeType.ForeignKey(_)                  => "-"
+        case AttributeType.UUIDType                       => "-"
+        case AttributeType.BoolType                       => "-"
+        case AttributeType.DateType                       => "-"
+        case AttributeType.DateTimeType                   => "-"
+        case AttributeType.TimeType                       => "-"
+        case AttributeType.BlobType(size)                 => "-"
+        case AttributeType.StringType(max, min)           => "-"
+        case AttributeType.IntType(max, min, precision)   => "-"
+        case AttributeType.FloatType(max, min, precision) => "-"
+      },
+    )}`"
+
+  private def generateRequestStruct(
+    root: ServiceRoot,
+    operation: CRUD,
+    fields: Iterable[(String, String, String)],
+  ): String =
+    mkCode.lines(
+      s"// ${operation.toString.toLowerCase}${root.name.capitalize}Request contains the client-provided information required to ${operation.toString.toLowerCase} a single ${root.name}",
+      genStructWithAnnotations(s"${operation.toString.toLowerCase}${root.name.capitalize}Request", fields),
+    )
+
+  private[service] def generateRequestStructs(
+    root: ServiceRoot,
+    operations: Set[CRUD],
+    clientAttributes: ListMap[String, Attribute],
+  ): String = {
+    val fields = clientAttributes.map {
+      case (name, attr) =>
+        (name.capitalize, s"*${generateGoType(attr.attributeType)}", generateValidatorAnnotation(attr.attributeType))
+    }
+    mkCode.doubleLines(
+      when(operations.contains(CRUD.Create)) {
+        generateRequestStruct(root, CRUD.Create, fields)
+      },
+      when(operations.contains(CRUD.Update)) {
+        generateRequestStruct(root, CRUD.Update, fields)
+      },
+    )
+  }
 
   /** Given a service name, whether the service uses inter-service communication, the operations desired and the port
     * number, generate the main function */

@@ -9,6 +9,16 @@ type env struct {
 	dao dao.Datastore
 }
 
+// createUserRequest contains the client-provided information required to create a single user
+type createUserRequest struct {
+	Name *string `valid:"-"`
+}
+
+// updateUserRequest contains the client-provided information required to update a single user
+type updateUserRequest struct {
+	Name *string `valid:"-"`
+}
+
 func main() {
 
 }
