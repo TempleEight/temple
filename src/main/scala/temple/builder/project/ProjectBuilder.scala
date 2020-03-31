@@ -1,7 +1,7 @@
 package temple.builder.project
 
-import temple.ast.Metadata.{Database, Endpoint, ServiceLanguage}
-import temple.ast.{Metadata, ServiceBlock, Templefile}
+import temple.ast.Metadata._
+import temple.ast.{Metadata, TempleBlock, Templefile}
 import temple.builder._
 import temple.detail.LanguageDetail
 import temple.generate.CRUD
@@ -17,11 +17,12 @@ import temple.generate.metrics.grafana.{GrafanaDashboardConfigGenerator, Grafana
 import temple.generate.metrics.prometheus.PrometheusConfigGenerator
 import temple.generate.metrics.prometheus.ast.PrometheusJob
 import temple.generate.server.go.service.GoServiceGenerator
+import temple.generate.target.openapi.OpenAPIGenerator
 import temple.utils.StringUtils
 
 object ProjectBuilder {
 
-  def endpoints(service: ServiceBlock): Set[CRUD] = {
+  def endpoints(service: TempleBlock[ServiceOrStructMetadata]): Set[CRUD] = {
     val endpoints: Set[CRUD] = service
       .lookupMetadata[Metadata.Omit]
       .map(_.endpoints)
@@ -64,6 +65,9 @@ object ProjectBuilder {
         (File(s"${name.toLowerCase}", "Dockerfile"), dockerfileContents)
     }
 
+    val openAPIRoot = OpenAPIBuilder.createOpenAPI(templefile)
+    val apiFiles    = OpenAPIGenerator.generate(openAPIRoot)
+
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(
       StringUtils.kebabCase(templefile.projectName),
       templefile.servicesWithPorts.map { case (name, block, ports) => (name, block, ports.service) }.toSeq,
@@ -102,6 +106,13 @@ object ProjectBuilder {
         }
     }
 
-    Project(databaseCreationScripts ++ dockerfiles ++ kubeFiles ++ serverFiles ++ metrics)
+    Project(
+      databaseCreationScripts ++
+      dockerfiles ++
+      kubeFiles ++
+      apiFiles ++
+      serverFiles ++
+      metrics,
+    )
   }
 }
