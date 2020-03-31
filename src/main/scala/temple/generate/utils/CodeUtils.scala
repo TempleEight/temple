@@ -1,5 +1,7 @@
 package temple.generate.utils
 
+import scala.collection.immutable.ListMap
+
 object CodeUtils {
 
   /** Takes an iterable collection of string tuples and pads the first element of each tuple to the length of the
@@ -7,5 +9,11 @@ object CodeUtils {
   def pad(tuples: Iterable[(String, String)]): Iterable[String] = {
     val padLength = tuples.map(_._1.length).max
     tuples.map { case (first, second) => first.padTo(padLength, ' ') + " " + second }
+  }
+
+  def padThree(tuples: Iterable[(String, String, String)]): Iterable[String] = {
+    val firstCol       = tuples.map { case (first, _, _) => first }
+    val secondThirdCol = pad(tuples.map { case (_, second, third) => (second, third) })
+    pad(firstCol.zip(secondThirdCol))
   }
 }
