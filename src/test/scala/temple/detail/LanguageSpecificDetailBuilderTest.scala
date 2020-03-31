@@ -9,7 +9,8 @@ class LanguageSpecificDetailBuilderTest extends FlatSpec with Matchers {
 
   it should "build correct Go details" in {
     val detail =
-      LanguageSpecificDetailBuilder.build(LanguageSpecificDetailBuilderTestData.simpleTemplefile, MockQuestionAsker)
+      LanguageSpecificDetailBuilder
+        .build(LanguageSpecificDetailBuilderTestData.simpleTemplefile, PoliceSergeantNicholasAngel)
     detail shouldBe GoLanguageDetail("github.com/squat/and/dab")
   }
 }
