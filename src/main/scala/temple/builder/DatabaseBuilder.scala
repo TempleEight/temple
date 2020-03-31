@@ -86,7 +86,7 @@ object DatabaseBuilder {
           )
         case List =>
           createdByAttribute match {
-            case CreatedByAttribute.EnumerateByCreator(_, _, _) =>
+            case CreatedByAttribute.EnumerateByCreator(_, _) =>
               List -> Statement.Read(
                 tableName,
                 columns = columns,

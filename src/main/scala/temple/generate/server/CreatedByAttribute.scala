@@ -14,7 +14,6 @@ object CreatedByAttribute {
   sealed trait Enumerating extends CreatedByAttribute {
     def inputName: String
     def name: String
-    def attributeType: AttributeType
   }
 
   /**
@@ -23,9 +22,8 @@ object CreatedByAttribute {
     *
     * @param inputName the name of the variable used as input, e.g. "authID", present for improving semantics of code
     * @param name the name of attribute, e.g. "createdBy"
-    * @param attributeType type of the attribute, e.g. UUID
     */
-  case class EnumerateByCreator(inputName: String, name: String, attributeType: AttributeType) extends Enumerating
+  case class EnumerateByCreator(inputName: String, name: String) extends Enumerating
 
   /**
     * EnumerateByAll encapsulates the case where a Temple defined createdBy field exists, but is not used to enumerate
@@ -33,7 +31,6 @@ object CreatedByAttribute {
     *
     * @param inputName the name of the variable used as input, e.g. "authID", present for improving semantics of code
     * @param name the name of attribute, e.g. "createdBy"
-    * @param attributeType type of the attribute, e.g. UUID
     */
-  case class EnumerateByAll(inputName: String, name: String, attributeType: AttributeType) extends Enumerating
+  case class EnumerateByAll(inputName: String, name: String) extends Enumerating
 }

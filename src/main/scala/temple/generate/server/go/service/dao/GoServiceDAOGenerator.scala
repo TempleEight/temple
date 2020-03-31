@@ -14,19 +14,13 @@ import scala.collection.immutable.ListMap
 
 object GoServiceDAOGenerator {
 
-  private[service] def generateImports(root: ServiceRoot): String = {
-    // Check if attributes contains an attribute of type date, time or datetime
-    val containsTime =
-      Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateTimeType)
-        .intersect(root.attributes.values.map(_.attributeType).toSet)
-        .nonEmpty
-
+  private[service] def generateImports(root: ServiceRoot, usesTime: Boolean): String =
     mkCode(
       "import",
       CodeWrap.parens.tabbed(
         doubleQuote("database/sql"),
         doubleQuote("fmt"),
-        when(containsTime) { doubleQuote("time") },
+        when(usesTime) { doubleQuote("time") },
         "",
         doubleQuote(s"${root.module}/util"),
         doubleQuote("github.com/google/uuid"),
@@ -35,18 +29,17 @@ object GoServiceDAOGenerator {
         s"_ ${doubleQuote("github.com/lib/pq")}",
       ),
     )
-  }
 
   private[dao] def generateDAOFunctionName(root: ServiceRoot, operation: CRUD): String =
     s"$operation${root.name.capitalize}"
 
   private[service] def generateDatastoreObjectStruct(root: ServiceRoot): String = {
-    val idMap = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(root.idAttribute.attributeType))
+    val idMap = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(AttributeType.UUIDType))
     val createdByMap = root.createdByAttribute match {
       case CreatedByAttribute.None =>
         ListMap.empty
       case enumerating: CreatedByAttribute.Enumerating =>
-        ListMap(enumerating.name.capitalize -> generateGoType(enumerating.attributeType))
+        ListMap(enumerating.name.capitalize -> generateGoType(AttributeType.UUIDType))
     }
     val attributesMap = root.attributes.map {
       case (name, attribute) => (name.capitalize -> generateGoType(attribute.attributeType))
