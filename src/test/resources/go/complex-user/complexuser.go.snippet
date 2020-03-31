@@ -12,34 +12,34 @@ type env struct {
 
 // createComplexuserRequest contains the client-provided information required to create a single complexuser
 type createComplexuserRequest struct {
-	SmallIntField      *uint16    `valid:"-"`
-	IntField           *uint32    `valid:"-"`
-	BigIntField        *uint64    `valid:"-"`
-	FloatField         *float32   `valid:"-"`
-	DoubleField        *float64   `valid:"-"`
-	StringField        *string    `valid:"-"`
-	BoundedStringField *string    `valid:"-"`
-	BoolField          *bool      `valid:"-"`
-	DateField          *time.Time `valid:"-"`
-	TimeField          *time.Time `valid:"-"`
-	DateTimeField      *time.Time `valid:"-"`
-	BlobField          *[]byte    `valid:"-"`
+	SmallIntField      *uint16    `valid:"type(uint16),required,range(10|100)"`
+	IntField           *uint32    `valid:"type(uint32),required,range(10|100)"`
+	BigIntField        *uint64    `valid:"type(uint64),required,range(10|100)"`
+	FloatField         *float32   `valid:"type(float32),required,range(0.0|300.0)"`
+	DoubleField        *float64   `valid:"type(float64),required,range(0.0|123.0)"`
+	StringField        *string    `valid:"type(string),required"`
+	BoundedStringField *string    `valid:"type(string),required,stringlength(0|5)"`
+	BoolField          *bool      `valid:"type(bool),required"`
+	DateField          *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
+	TimeField          *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
+	DateTimeField      *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
+	BlobField          *[]byte    `valid:"type(string),base64,required"`
 }
 
 // updateComplexuserRequest contains the client-provided information required to update a single complexuser
 type updateComplexuserRequest struct {
-	SmallIntField      *uint16    `valid:"-"`
-	IntField           *uint32    `valid:"-"`
-	BigIntField        *uint64    `valid:"-"`
-	FloatField         *float32   `valid:"-"`
-	DoubleField        *float64   `valid:"-"`
-	StringField        *string    `valid:"-"`
-	BoundedStringField *string    `valid:"-"`
-	BoolField          *bool      `valid:"-"`
-	DateField          *time.Time `valid:"-"`
-	TimeField          *time.Time `valid:"-"`
-	DateTimeField      *time.Time `valid:"-"`
-	BlobField          *[]byte    `valid:"-"`
+	SmallIntField      *uint16    `valid:"type(uint16),required,range(10|100)"`
+	IntField           *uint32    `valid:"type(uint32),required,range(10|100)"`
+	BigIntField        *uint64    `valid:"type(uint64),required,range(10|100)"`
+	FloatField         *float32   `valid:"type(float32),required,range(0.0|300.0)"`
+	DoubleField        *float64   `valid:"type(float64),required,range(0.0|123.0)"`
+	StringField        *string    `valid:"type(string),required"`
+	BoundedStringField *string    `valid:"type(string),required,stringlength(0|5)"`
+	BoolField          *bool      `valid:"type(bool),required"`
+	DateField          *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
+	TimeField          *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
+	DateTimeField      *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
+	BlobField          *[]byte    `valid:"type(string),base64,required"`
 }
 
 func main() {
