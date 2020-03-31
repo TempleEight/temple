@@ -3,7 +3,7 @@ package temple
 import java.nio.file.{Files, Paths}
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.detail.MockQuestionAsker
+import temple.detail.PoliceSergeantNicholasAngel
 import temple.utils.FileUtils
 
 import scala.jdk.StreamConverters._
@@ -23,7 +23,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
       new TempleConfig(
         Seq("generate", "-o", basePath.toAbsolutePath.toString, "src/test/scala/temple/testfiles/simple.temple"),
       ),
-      MockQuestionAsker,
+      PoliceSergeantNicholasAngel,
     )
 
     // Exactly these folders should have been generated
