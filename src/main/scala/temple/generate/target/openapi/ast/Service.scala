@@ -7,7 +7,7 @@ case class Service(
   name: String,
   operations: Iterable[CRUD],
   attributes: Map[String, Attribute],
-  structs: Map[String, Service.Struct] = Map.empty,
+  structs: Iterable[Service.Struct] = Nil,
 )
 
 object Service {
