@@ -24,7 +24,7 @@ object GoServiceGeneratorTestData {
     80,
     IDAttribute("id"),
     CreatedByAttribute.None,
-    ListMap("name" -> Attribute(AttributeType.StringType())),
+    ListMap("name" -> Attribute(AttributeType.StringType(Option(255L), Option(2)))),
     Postgres,
   )
 

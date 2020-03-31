@@ -1,12 +1,39 @@
 package main
 
 import (
+	"time"
 	"github.com/squat/and/dab/templeuser/dao"
 )
 
 // env defines the environment that requests should be executed within
 type env struct {
 	dao dao.Datastore
+}
+
+// createTempleuserRequest contains the client-provided information required to create a single templeuser
+type createTempleuserRequest struct {
+	Username           *string    `valid:"-"`
+	Email              *string    `valid:"-"`
+	FirstName          *string    `valid:"-"`
+	LastName           *string    `valid:"-"`
+	CreatedAt          *time.Time `valid:"-"`
+	NumberOfDogs       *int32     `valid:"-"`
+	CurrentBankBalance *float32   `valid:"-"`
+	BirthDate          *time.Time `valid:"-"`
+	BreakfastTime      *time.Time `valid:"-"`
+}
+
+// updateTempleuserRequest contains the client-provided information required to update a single templeuser
+type updateTempleuserRequest struct {
+	Username           *string    `valid:"-"`
+	Email              *string    `valid:"-"`
+	FirstName          *string    `valid:"-"`
+	LastName           *string    `valid:"-"`
+	CreatedAt          *time.Time `valid:"-"`
+	NumberOfDogs       *int32     `valid:"-"`
+	CurrentBankBalance *float32   `valid:"-"`
+	BirthDate          *time.Time `valid:"-"`
+	BreakfastTime      *time.Time `valid:"-"`
 }
 
 func main() {

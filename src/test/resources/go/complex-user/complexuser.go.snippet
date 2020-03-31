@@ -1,12 +1,45 @@
 package main
 
 import (
+	"time"
 	"github.com/squat/and/dab/complexuser/dao"
 )
 
 // env defines the environment that requests should be executed within
 type env struct {
 	dao dao.Datastore
+}
+
+// createComplexuserRequest contains the client-provided information required to create a single complexuser
+type createComplexuserRequest struct {
+	SmallIntField      *uint16    `valid:"-"`
+	IntField           *uint32    `valid:"-"`
+	BigIntField        *uint64    `valid:"-"`
+	FloatField         *float32   `valid:"-"`
+	DoubleField        *float64   `valid:"-"`
+	StringField        *string    `valid:"-"`
+	BoundedStringField *string    `valid:"-"`
+	BoolField          *bool      `valid:"-"`
+	DateField          *time.Time `valid:"-"`
+	TimeField          *time.Time `valid:"-"`
+	DateTimeField      *time.Time `valid:"-"`
+	BlobField          *[]byte    `valid:"-"`
+}
+
+// updateComplexuserRequest contains the client-provided information required to update a single complexuser
+type updateComplexuserRequest struct {
+	SmallIntField      *uint16    `valid:"-"`
+	IntField           *uint32    `valid:"-"`
+	BigIntField        *uint64    `valid:"-"`
+	FloatField         *float32   `valid:"-"`
+	DoubleField        *float64   `valid:"-"`
+	StringField        *string    `valid:"-"`
+	BoundedStringField *string    `valid:"-"`
+	BoolField          *bool      `valid:"-"`
+	DateField          *time.Time `valid:"-"`
+	TimeField          *time.Time `valid:"-"`
+	DateTimeField      *time.Time `valid:"-"`
+	BlobField          *[]byte    `valid:"-"`
 }
 
 func main() {
