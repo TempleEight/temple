@@ -58,6 +58,261 @@ object ProjectBuilderTestData {
     ),
   )
 
+  val simpleTemplefileAPISpec: String =
+    """openapi: 3.0.0
+      |info:
+      |  title: SampleProject
+      |  version: 0.0.1
+      |paths:
+      |  /templeuser:
+      |    post:
+      |      summary: Register a new templeuser
+      |      tags:
+      |      - TempleUser
+      |      requestBody:
+      |        content:
+      |          application/json:
+      |            schema:
+      |              type: object
+      |              properties:
+      |                intField:
+      |                  type: number
+      |                  format: int32
+      |                doubleField:
+      |                  type: number
+      |                  format: double
+      |                stringField:
+      |                  type: string
+      |                boolField:
+      |                  type: boolean
+      |                dateField:
+      |                  type: string
+      |                  format: date
+      |                timeField:
+      |                  type: string
+      |                  format: time
+      |                dateTimeField:
+      |                  type: string
+      |                  format: date-time
+      |                blobField:
+      |                  type: string
+      |      responses:
+      |        '200':
+      |          description: TempleUser successfully created
+      |          content:
+      |            application/json:
+      |              schema:
+      |                type: object
+      |                properties:
+      |                  intField:
+      |                    type: number
+      |                    format: int32
+      |                  doubleField:
+      |                    type: number
+      |                    format: double
+      |                  stringField:
+      |                    type: string
+      |                  boolField:
+      |                    type: boolean
+      |                  dateField:
+      |                    type: string
+      |                    format: date
+      |                  timeField:
+      |                    type: string
+      |                    format: time
+      |                  dateTimeField:
+      |                    type: string
+      |                    format: date-time
+      |                  blobField:
+      |                    type: string
+      |        '400':
+      |          $ref: '#/components/responses/Error400'
+      |        '401':
+      |          $ref: '#/components/responses/Error401'
+      |        '500':
+      |          $ref: '#/components/responses/Error500'
+      |  /templeuser/{id}:
+      |    parameters:
+      |    - in: path
+      |      name: id
+      |      schema:
+      |        type: number
+      |        format: int32
+      |      required: true
+      |      description: ID of the templeuser to perform operations on
+      |    get:
+      |      summary: Look up a single templeuser
+      |      tags:
+      |      - TempleUser
+      |      responses:
+      |        '200':
+      |          description: TempleUser details
+      |          content:
+      |            application/json:
+      |              schema:
+      |                type: object
+      |                properties:
+      |                  intField:
+      |                    type: number
+      |                    format: int32
+      |                  doubleField:
+      |                    type: number
+      |                    format: double
+      |                  stringField:
+      |                    type: string
+      |                  boolField:
+      |                    type: boolean
+      |                  dateField:
+      |                    type: string
+      |                    format: date
+      |                  timeField:
+      |                    type: string
+      |                    format: time
+      |                  dateTimeField:
+      |                    type: string
+      |                    format: date-time
+      |                  blobField:
+      |                    type: string
+      |        '400':
+      |          $ref: '#/components/responses/Error400'
+      |        '401':
+      |          $ref: '#/components/responses/Error401'
+      |        '404':
+      |          $ref: '#/components/responses/Error404'
+      |        '500':
+      |          $ref: '#/components/responses/Error500'
+      |    put:
+      |      summary: Update a single templeuser
+      |      tags:
+      |      - TempleUser
+      |      requestBody:
+      |        content:
+      |          application/json:
+      |            schema:
+      |              type: object
+      |              properties:
+      |                intField:
+      |                  type: number
+      |                  format: int32
+      |                doubleField:
+      |                  type: number
+      |                  format: double
+      |                stringField:
+      |                  type: string
+      |                boolField:
+      |                  type: boolean
+      |                dateField:
+      |                  type: string
+      |                  format: date
+      |                timeField:
+      |                  type: string
+      |                  format: time
+      |                dateTimeField:
+      |                  type: string
+      |                  format: date-time
+      |                blobField:
+      |                  type: string
+      |      responses:
+      |        '200':
+      |          description: TempleUser successfully updated
+      |          content:
+      |            application/json:
+      |              schema:
+      |                type: object
+      |                properties:
+      |                  intField:
+      |                    type: number
+      |                    format: int32
+      |                  doubleField:
+      |                    type: number
+      |                    format: double
+      |                  stringField:
+      |                    type: string
+      |                  boolField:
+      |                    type: boolean
+      |                  dateField:
+      |                    type: string
+      |                    format: date
+      |                  timeField:
+      |                    type: string
+      |                    format: time
+      |                  dateTimeField:
+      |                    type: string
+      |                    format: date-time
+      |                  blobField:
+      |                    type: string
+      |        '400':
+      |          $ref: '#/components/responses/Error400'
+      |        '401':
+      |          $ref: '#/components/responses/Error401'
+      |        '404':
+      |          $ref: '#/components/responses/Error404'
+      |        '500':
+      |          $ref: '#/components/responses/Error500'
+      |    delete:
+      |      summary: Delete a single templeuser
+      |      tags:
+      |      - TempleUser
+      |      responses:
+      |        '200':
+      |          description: TempleUser successfully deleted
+      |          content:
+      |            application/json:
+      |              schema:
+      |                type: object
+      |                properties: {}
+      |        '400':
+      |          $ref: '#/components/responses/Error400'
+      |        '401':
+      |          $ref: '#/components/responses/Error401'
+      |        '404':
+      |          $ref: '#/components/responses/Error404'
+      |        '500':
+      |          $ref: '#/components/responses/Error500'
+      |components:
+      |  responses:
+      |    Error400:
+      |      description: Invalid request
+      |      content:
+      |        application/json:
+      |          schema:
+      |            type: object
+      |            properties:
+      |              error:
+      |                type: string
+      |                example: 'Invalid request parameters: name'
+      |    Error401:
+      |      description: Valid request but forbidden by server
+      |      content:
+      |        application/json:
+      |          schema:
+      |            type: object
+      |            properties:
+      |              error:
+      |                type: string
+      |                example: Not authorised to create this object
+      |    Error404:
+      |      description: ID not found
+      |      content:
+      |        application/json:
+      |          schema:
+      |            type: object
+      |            properties:
+      |              error:
+      |                type: string
+      |                example: Object not found with ID 1
+      |    Error500:
+      |      description: The server encountered an error while serving this request
+      |      content:
+      |        application/json:
+      |          schema:
+      |            type: object
+      |            properties:
+      |              error:
+      |                type: string
+      |                example: 'Unable to reach user service: connection timeout'
+      |""".stripMargin
+
   val simpleTemplefilePostgresCreateOutput: String =
     """CREATE TABLE temple_user (
       |  intField INT NOT NULL,
@@ -326,6 +581,381 @@ object ProjectBuilderTestData {
       ),
     ),
   )
+
+  val complexTemplefileAPISpec: String =
+    """openapi: 3.0.0
+      |info:
+      |  title: SampleComplexProject
+      |  version: 0.0.1
+      |paths:
+      |  /complexuser:
+      |    post:
+      |      summary: Register a new complexuser
+      |      tags:
+      |      - ComplexUser
+      |      requestBody:
+      |        content:
+      |          application/json:
+      |            schema:
+      |              type: object
+      |              properties:
+      |                smallIntField:
+      |                  type: number
+      |                  format: int32
+      |                  minimum: 10
+      |                  maximum: 100
+      |                intField:
+      |                  type: number
+      |                  format: int32
+      |                  minimum: 10
+      |                  maximum: 100
+      |                bigIntField:
+      |                  type: number
+      |                  format: int64
+      |                  minimum: 10
+      |                  maximum: 100
+      |                floatField:
+      |                  type: number
+      |                  format: float
+      |                  minimum: 0.0
+      |                  maximum: 300.0
+      |                doubleField:
+      |                  type: number
+      |                  format: double
+      |                  minimum: 0.0
+      |                  maximum: 123.0
+      |                stringField:
+      |                  type: string
+      |                  minLength: 1
+      |                boundedStringField:
+      |                  type: string
+      |                  minLength: 0
+      |                  maxLength: 5
+      |                boolField:
+      |                  type: boolean
+      |                dateField:
+      |                  type: string
+      |                  format: date
+      |                timeField:
+      |                  type: string
+      |                  format: time
+      |                dateTimeField:
+      |                  type: string
+      |                  format: date-time
+      |                blobField:
+      |                  type: string
+      |      responses:
+      |        '200':
+      |          description: ComplexUser successfully created
+      |          content:
+      |            application/json:
+      |              schema:
+      |                type: object
+      |                properties:
+      |                  smallIntField:
+      |                    type: number
+      |                    format: int32
+      |                    minimum: 10
+      |                    maximum: 100
+      |                  intField:
+      |                    type: number
+      |                    format: int32
+      |                    minimum: 10
+      |                    maximum: 100
+      |                  bigIntField:
+      |                    type: number
+      |                    format: int64
+      |                    minimum: 10
+      |                    maximum: 100
+      |                  floatField:
+      |                    type: number
+      |                    format: float
+      |                    minimum: 0.0
+      |                    maximum: 300.0
+      |                  doubleField:
+      |                    type: number
+      |                    format: double
+      |                    minimum: 0.0
+      |                    maximum: 123.0
+      |                  stringField:
+      |                    type: string
+      |                    minLength: 1
+      |                  boundedStringField:
+      |                    type: string
+      |                    minLength: 0
+      |                    maxLength: 5
+      |                  boolField:
+      |                    type: boolean
+      |                  dateField:
+      |                    type: string
+      |                    format: date
+      |                  timeField:
+      |                    type: string
+      |                    format: time
+      |                  dateTimeField:
+      |                    type: string
+      |                    format: date-time
+      |                  blobField:
+      |                    type: string
+      |        '400':
+      |          $ref: '#/components/responses/Error400'
+      |        '401':
+      |          $ref: '#/components/responses/Error401'
+      |        '500':
+      |          $ref: '#/components/responses/Error500'
+      |  /complexuser/{id}:
+      |    parameters:
+      |    - in: path
+      |      name: id
+      |      schema:
+      |        type: number
+      |        format: int32
+      |      required: true
+      |      description: ID of the complexuser to perform operations on
+      |    get:
+      |      summary: Look up a single complexuser
+      |      tags:
+      |      - ComplexUser
+      |      responses:
+      |        '200':
+      |          description: ComplexUser details
+      |          content:
+      |            application/json:
+      |              schema:
+      |                type: object
+      |                properties:
+      |                  smallIntField:
+      |                    type: number
+      |                    format: int32
+      |                    minimum: 10
+      |                    maximum: 100
+      |                  intField:
+      |                    type: number
+      |                    format: int32
+      |                    minimum: 10
+      |                    maximum: 100
+      |                  bigIntField:
+      |                    type: number
+      |                    format: int64
+      |                    minimum: 10
+      |                    maximum: 100
+      |                  floatField:
+      |                    type: number
+      |                    format: float
+      |                    minimum: 0.0
+      |                    maximum: 300.0
+      |                  doubleField:
+      |                    type: number
+      |                    format: double
+      |                    minimum: 0.0
+      |                    maximum: 123.0
+      |                  stringField:
+      |                    type: string
+      |                    minLength: 1
+      |                  boundedStringField:
+      |                    type: string
+      |                    minLength: 0
+      |                    maxLength: 5
+      |                  boolField:
+      |                    type: boolean
+      |                  dateField:
+      |                    type: string
+      |                    format: date
+      |                  timeField:
+      |                    type: string
+      |                    format: time
+      |                  dateTimeField:
+      |                    type: string
+      |                    format: date-time
+      |                  blobField:
+      |                    type: string
+      |        '400':
+      |          $ref: '#/components/responses/Error400'
+      |        '401':
+      |          $ref: '#/components/responses/Error401'
+      |        '404':
+      |          $ref: '#/components/responses/Error404'
+      |        '500':
+      |          $ref: '#/components/responses/Error500'
+      |    put:
+      |      summary: Update a single complexuser
+      |      tags:
+      |      - ComplexUser
+      |      requestBody:
+      |        content:
+      |          application/json:
+      |            schema:
+      |              type: object
+      |              properties:
+      |                smallIntField:
+      |                  type: number
+      |                  format: int32
+      |                  minimum: 10
+      |                  maximum: 100
+      |                intField:
+      |                  type: number
+      |                  format: int32
+      |                  minimum: 10
+      |                  maximum: 100
+      |                bigIntField:
+      |                  type: number
+      |                  format: int64
+      |                  minimum: 10
+      |                  maximum: 100
+      |                floatField:
+      |                  type: number
+      |                  format: float
+      |                  minimum: 0.0
+      |                  maximum: 300.0
+      |                doubleField:
+      |                  type: number
+      |                  format: double
+      |                  minimum: 0.0
+      |                  maximum: 123.0
+      |                stringField:
+      |                  type: string
+      |                  minLength: 1
+      |                boundedStringField:
+      |                  type: string
+      |                  minLength: 0
+      |                  maxLength: 5
+      |                boolField:
+      |                  type: boolean
+      |                dateField:
+      |                  type: string
+      |                  format: date
+      |                timeField:
+      |                  type: string
+      |                  format: time
+      |                dateTimeField:
+      |                  type: string
+      |                  format: date-time
+      |                blobField:
+      |                  type: string
+      |      responses:
+      |        '200':
+      |          description: ComplexUser successfully updated
+      |          content:
+      |            application/json:
+      |              schema:
+      |                type: object
+      |                properties:
+      |                  smallIntField:
+      |                    type: number
+      |                    format: int32
+      |                    minimum: 10
+      |                    maximum: 100
+      |                  intField:
+      |                    type: number
+      |                    format: int32
+      |                    minimum: 10
+      |                    maximum: 100
+      |                  bigIntField:
+      |                    type: number
+      |                    format: int64
+      |                    minimum: 10
+      |                    maximum: 100
+      |                  floatField:
+      |                    type: number
+      |                    format: float
+      |                    minimum: 0.0
+      |                    maximum: 300.0
+      |                  doubleField:
+      |                    type: number
+      |                    format: double
+      |                    minimum: 0.0
+      |                    maximum: 123.0
+      |                  stringField:
+      |                    type: string
+      |                    minLength: 1
+      |                  boundedStringField:
+      |                    type: string
+      |                    minLength: 0
+      |                    maxLength: 5
+      |                  boolField:
+      |                    type: boolean
+      |                  dateField:
+      |                    type: string
+      |                    format: date
+      |                  timeField:
+      |                    type: string
+      |                    format: time
+      |                  dateTimeField:
+      |                    type: string
+      |                    format: date-time
+      |                  blobField:
+      |                    type: string
+      |        '400':
+      |          $ref: '#/components/responses/Error400'
+      |        '401':
+      |          $ref: '#/components/responses/Error401'
+      |        '404':
+      |          $ref: '#/components/responses/Error404'
+      |        '500':
+      |          $ref: '#/components/responses/Error500'
+      |    delete:
+      |      summary: Delete a single complexuser
+      |      tags:
+      |      - ComplexUser
+      |      responses:
+      |        '200':
+      |          description: ComplexUser successfully deleted
+      |          content:
+      |            application/json:
+      |              schema:
+      |                type: object
+      |                properties: {}
+      |        '400':
+      |          $ref: '#/components/responses/Error400'
+      |        '401':
+      |          $ref: '#/components/responses/Error401'
+      |        '404':
+      |          $ref: '#/components/responses/Error404'
+      |        '500':
+      |          $ref: '#/components/responses/Error500'
+      |components:
+      |  responses:
+      |    Error400:
+      |      description: Invalid request
+      |      content:
+      |        application/json:
+      |          schema:
+      |            type: object
+      |            properties:
+      |              error:
+      |                type: string
+      |                example: 'Invalid request parameters: name'
+      |    Error401:
+      |      description: Valid request but forbidden by server
+      |      content:
+      |        application/json:
+      |          schema:
+      |            type: object
+      |            properties:
+      |              error:
+      |                type: string
+      |                example: Not authorised to create this object
+      |    Error404:
+      |      description: ID not found
+      |      content:
+      |        application/json:
+      |          schema:
+      |            type: object
+      |            properties:
+      |              error:
+      |                type: string
+      |                example: Object not found with ID 1
+      |    Error500:
+      |      description: The server encountered an error while serving this request
+      |      content:
+      |        application/json:
+      |          schema:
+      |            type: object
+      |            properties:
+      |              error:
+      |                type: string
+      |                example: 'Unable to reach user service: connection timeout'
+      |""".stripMargin
 
   val complexTemplefilePostgresCreateOutput: String =
     """CREATE TABLE complex_user (

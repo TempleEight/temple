@@ -31,6 +31,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
       Set(
         "templeuser-db",
         "templeuser",
+        "api",
         "booking-db",
         "booking",
         "event-db",
@@ -50,15 +51,46 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     val initSql = Files.readString(basePath.resolve("templeuser-db").resolve("init.sql"))
     initSql shouldBe SimpleE2ETestData.createStatement
 
-    // Only one file should be present in the templeuser folder
+    // Only these files should be present in the templeuser folder
     val expectedTempleUserFiles =
-      Set("Dockerfile", "dao", "templeuser.go", "util", "go.mod").map(dir => basePath.resolve("templeuser").resolve(dir),
+      Set("Dockerfile", "dao", "templeuser.go", "util", "go.mod").map(dir =>
+        basePath.resolve("templeuser").resolve(dir),
       )
     Files.list(basePath.resolve("templeuser")).toScala(Set) shouldBe expectedTempleUserFiles
 
     // The content of the templeuser/Dockerfile file should be correct
     val templeUserDockerfile = Files.readString(basePath.resolve("templeuser").resolve("Dockerfile"))
     templeUserDockerfile shouldBe SimpleE2ETestData.dockerfile
+
+    // The content of the main templeuser go file should be correct
+    val templeUserGoFile = Files.readString(basePath.resolve("templeuser").resolve("templeuser.go"))
+    templeUserGoFile shouldBe FileUtils.readResources("go/user/user.go.snippet")
+
+    // The content of the go.mod should be correct
+    val templeUserGoModFile = Files.readString(basePath.resolve("templeuser").resolve("go.mod"))
+    templeUserGoModFile shouldBe FileUtils.readResources("go/user/go.mod.snippet")
+
+    // Only these files should be present in the templeuser/dao folder
+    val expectedTempleUserDaoFiles =
+      Set("dao.go", "errors.go").map(dir => basePath.resolve("templeuser/dao").resolve(dir))
+    Files.list(basePath.resolve("templeuser/dao")).toScala(Set) shouldBe expectedTempleUserDaoFiles
+
+    // The content of the templeuser dao file should be correct
+    val templeUserDaoFile = Files.readString(basePath.resolve("templeuser/dao").resolve("dao.go"))
+    templeUserDaoFile shouldBe FileUtils.readResources("go/user/dao/dao.go.snippet")
+
+    // The content of the templeuser dao errors file should be correct
+    val templeUserErrorsFile = Files.readString(basePath.resolve("templeuser/dao").resolve("errors.go"))
+    templeUserErrorsFile shouldBe FileUtils.readResources("go/user/dao/errors.go.snippet")
+
+    // Only these files should be present in the templeuser/util folder
+    val expectedTempleUserUtilFiles =
+      Set("util.go").map(dir => basePath.resolve("templeuser/util").resolve(dir))
+    Files.list(basePath.resolve("templeuser/util")).toScala(Set) shouldBe expectedTempleUserUtilFiles
+
+    // The content of the templeuser util file should be correct
+    val templeUserUtilFile = Files.readString(basePath.resolve("templeuser/util").resolve("util.go"))
+    templeUserUtilFile shouldBe FileUtils.readResources("go/user/util/util.go.snippet")
 
     // Only one file should be present in the kong folder
     val expectedKongFiles = Set("configure-kong.sh").map(dir => basePath.resolve("kong").resolve(dir))

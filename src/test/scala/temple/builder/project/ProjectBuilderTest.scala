@@ -14,6 +14,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
     val expected = Map(
         File("templeuser-db", "init.sql")                          -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("templeuser", "Dockerfile")                           -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
+        File("api", "SampleProject.openapi.yaml")                  -> ProjectBuilderTestData.simpleTemplefileAPISpec,
         File("templeuser", "templeuser.go")                        -> ProjectBuilderTestData.simpleTemplefileTempleUserGoFile,
         File("templeuser", "go.mod")                               -> ProjectBuilderTestData.simpleTemplefileGoModFile,
         File("templeuser/dao", "dao.go")                           -> ProjectBuilderTestData.simpleTemplefileDaoFile,
@@ -39,6 +40,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
     val expected = Map(
         File("templeuser-db", "init.sql")                          -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("templeuser", "Dockerfile")                           -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
+        File("api", "SampleProject.openapi.yaml")                  -> ProjectBuilderTestData.simpleTemplefileAPISpec,
         File("templeuser", "templeuser.go")                        -> ProjectBuilderTestData.simpleTemplefileTempleUserGoFile,
         File("templeuser", "go.mod")                               -> ProjectBuilderTestData.simpleTemplefileGoModFile,
         File("templeuser/dao", "dao.go")                           -> ProjectBuilderTestData.simpleTemplefileDaoFile,
@@ -64,6 +66,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
     val expected = Map(
         File("templeuser-db", "init.sql")                          -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("templeuser", "Dockerfile")                           -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
+        File("api", "SampleProject.openapi.yaml")                  -> ProjectBuilderTestData.simpleTemplefileAPISpec,
         File("templeuser", "templeuser.go")                        -> ProjectBuilderTestData.simpleTemplefileTempleUserGoFile,
         File("templeuser", "go.mod")                               -> ProjectBuilderTestData.simpleTemplefileGoModFile,
         File("templeuser/dao", "dao.go")                           -> ProjectBuilderTestData.simpleTemplefileDaoFile,
@@ -89,6 +92,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
     project.files shouldBe Map(
       File("complexuser-db", "init.sql")                          -> ProjectBuilderTestData.complexTemplefilePostgresCreateOutput,
       File("complexuser", "Dockerfile")                           -> ProjectBuilderTestData.complexTemplefileUsersDockerfile,
+      File("api", "SampleComplexProject.openapi.yaml")            -> ProjectBuilderTestData.complexTemplefileAPISpec,
       File("complexuser", "complexuser.go")                       -> ProjectBuilderTestData.complexTemplefileTempleUserGoFile,
       File("complexuser", "go.mod")                               -> ProjectBuilderTestData.complexTemplefileGoModFile,
       File("complexuser/dao", "dao.go")                           -> ProjectBuilderTestData.complexTemplefileDaoFile,
