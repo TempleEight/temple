@@ -1,6 +1,6 @@
 package temple.generate.server.go.service
 
-import temple.ast.AttributeType
+import temple.ast.{Annotation, AttributeType}
 import temple.generate.FileSystem._
 import temple.generate.server.go.common._
 import temple.generate.server.go.service.dao._
@@ -31,12 +31,21 @@ object GoServiceGenerator extends ServiceGenerator {
         .intersect(root.attributes.values.map(_.attributeType).toSet)
         .nonEmpty
 
+    // Attributes filtered by which are client-provided
+    val clientAttributes = root.attributes.filterNot {
+      case (_, attr) =>
+        attr.accessAnnotation.contains(Annotation.Server) || attr.accessAnnotation.contains(Annotation.ServerSet)
+    }
+
     (Map(
       File(s"${root.name}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
       File(root.name, s"${root.name}.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoServiceMainGenerator.generateImports(root, usesTime, usesComms),
+        GoServiceMainGenerator.generateImports(root, usesTime, usesComms, clientAttributes),
         GoServiceMainGenerator.generateEnvStruct(usesComms),
+        when(clientAttributes.nonEmpty) {
+          GoServiceMainGenerator.generateRequestStructs(root, operations, clientAttributes)
+        },
         GoServiceMainGenerator.generateMain(root, usesComms, operations),
       ),
       File(s"${root.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),

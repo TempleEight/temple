@@ -3,12 +3,25 @@ package main
 import (
 	"github.com/TempleEight/spec-golang/match/comm"
 	"github.com/TempleEight/spec-golang/match/dao"
+	"github.com/google/uuid"
 )
 
 // env defines the environment that requests should be executed within
 type env struct {
 	dao  dao.Datastore
 	comm comm.Comm
+}
+
+// createMatchRequest contains the client-provided information required to create a single match
+type createMatchRequest struct {
+	UserOne *uuid.UUID `valid:"-"`
+	UserTwo *uuid.UUID `valid:"-"`
+}
+
+// updateMatchRequest contains the client-provided information required to update a single match
+type updateMatchRequest struct {
+	UserOne *uuid.UUID `valid:"-"`
+	UserTwo *uuid.UUID `valid:"-"`
 }
 
 func main() {
