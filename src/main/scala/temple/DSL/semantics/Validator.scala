@@ -144,6 +144,12 @@ private class Validator private (templefile: Templefile) {
 
 object Validator {
 
+  def validationErrors(templefile: Templefile): Set[String] = {
+    val validator = new Validator(templefile)
+    validator.validate()
+    validator.errors.toSet
+  }
+
   def validate(templefile: Templefile): Templefile = {
     val validator   = new Validator(templefile)
     val parseErrors = validator.validate()
