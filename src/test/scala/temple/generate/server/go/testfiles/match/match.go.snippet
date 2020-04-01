@@ -17,14 +17,14 @@ type env struct {
 
 // createMatchRequest contains the client-provided information required to create a single match
 type createMatchRequest struct {
-	UserOne *uuid.UUID `valid:"-"`
-	UserTwo *uuid.UUID `valid:"-"`
+	UserOne *uuid.UUID `valid:"type(string),uuid,required"`
+	UserTwo *uuid.UUID `valid:"type(string),uuid,required"`
 }
 
 // updateMatchRequest contains the client-provided information required to update a single match
 type updateMatchRequest struct {
-	UserOne *uuid.UUID `valid:"-"`
-	UserTwo *uuid.UUID `valid:"-"`
+	UserOne *uuid.UUID `valid:"type(string),uuid,required"`
+	UserTwo *uuid.UUID `valid:"type(string),uuid,required"`
 }
 
 // listMatchElement contains a single match list element
