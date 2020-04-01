@@ -1,9 +1,12 @@
 package main
 
 import (
+	"net/http"
+
 	"github.com/TempleEight/spec-golang/match/comm"
 	"github.com/TempleEight/spec-golang/match/dao"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
 // env defines the environment that requests should be executed within
@@ -61,6 +64,37 @@ type updateMatchResponse struct {
 	MatchedOn string
 }
 
+// router generates a router for this service
+func (env *env) router() *mux.Router {
+	r := mux.NewRouter()
+	// Mux directs to first matching route, i.e. the order matters
+	r.HandleFunc("/match/all", env.listMatchHandler).Methods(http.MethodGet)
+	r.HandleFunc("/match", env.createMatchHandler).Methods(http.MethodPost)
+	r.HandleFunc("/match/{id}", env.readMatchHandler).Methods(http.MethodGet)
+	r.HandleFunc("/match/{id}", env.updateMatchHandler).Methods(http.MethodPut)
+	r.HandleFunc("/match/{id}", env.deleteMatchHandler).Methods(http.MethodDelete)
+	r.Use(jsonMiddleware)
+	return r
+}
+
 func main() {
 
 }
+
+func jsonMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// All responses are JSON, set header accordingly
+		w.Header().Set("Content-Type", "application/json")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {}
+
+func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {}
+
+func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {}
+
+func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {}
+
+func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {}
