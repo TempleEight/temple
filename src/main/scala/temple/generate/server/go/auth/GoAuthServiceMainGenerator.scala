@@ -31,16 +31,6 @@ object GoAuthServiceMainGenerator {
   private[auth] def generateRouter(): String =
     FileUtils.readResources("go/genFiles/auth/main/router.go.snippet").stripLineEnd
 
-  private[auth] def generateMain(): String =
-    mkCode(
-      "func main() ",
-      CodeWrap.curly.tabbed(
-        mkCode.lines(
-          "",
-        ),
-      ),
-    )
-
   private[auth] def generateHandlers(): String =
     FileUtils.readResources("go/genFiles/auth/main/handlers.go.snippet").stripLineEnd
 

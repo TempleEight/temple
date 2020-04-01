@@ -9,7 +9,6 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
 
   override def generate(root: AuthServiceRoot): Files =
     /* TODO
-     * auth.go main
      * config.json
      */
     Map(
@@ -19,7 +18,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceMainGenerator.generateImports(root),
         GoAuthServiceMainGenerator.generateStructs(),
         GoAuthServiceMainGenerator.generateRouter(),
-        GoAuthServiceMainGenerator.generateMain(),
+        GoCommonMainGenerator.generateMain("auth", root.port, usesComms = true, isAuth = true),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoAuthServiceMainGenerator.generateHandlers(),
         GoAuthServiceMainGenerator.generateCreateToken(),

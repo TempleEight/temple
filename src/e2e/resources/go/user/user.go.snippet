@@ -1,10 +1,14 @@
 package main
 
 import (
+	"flag"
+	"log"
 	"net/http"
 	"time"
 
 	"github.com/squat/and/dab/templeuser/dao"
+	"github.com/squat/and/dab/templeuser/util"
+	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
@@ -114,7 +118,25 @@ func (env *env) router() *mux.Router {
 }
 
 func main() {
+	configPtr := flag.String("config", "/etc/templeuser-service/config.json", "configuration filepath")
+	flag.Parse()
 
+	// Require all struct fields by default
+	valid.SetFieldsRequiredByDefault(true)
+
+	config, err := util.GetConfig(*configPtr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	d, err := dao.Init(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	env := env{d}
+
+	log.Fatal(http.ListenAndServe(":1024", env.router()))
 }
 
 func jsonMiddleware(next http.Handler) http.Handler {

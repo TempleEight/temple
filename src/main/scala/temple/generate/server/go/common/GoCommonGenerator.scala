@@ -48,6 +48,14 @@ object GoCommonGenerator {
       ),
     )
 
+  private[go] def genIfErr(body: String): String =
+    mkCode(
+      "if err != nil",
+      CodeWrap.curly.tabbed(
+        body,
+      ),
+    )
+
   /** Generate constant */
   private[go] def genConst(identifier: String, expr: String): String =
     mkCode(
@@ -113,6 +121,10 @@ object GoCommonGenerator {
   /** Generate function call */
   private[go] def genFunctionCall(name: String, args: String*): String =
     CodeWrap.parens.prefix(name).list(args)
+
+  /** Generate method call */
+  private[go] def genMethodCall(objectName: String, methodName: String, args: String*): String =
+    s"$objectName.${genFunctionCall(methodName, args: _*)}"
 
   /** Generate if statement */
   private[go] def genIf(expr: String, body: String): String =
