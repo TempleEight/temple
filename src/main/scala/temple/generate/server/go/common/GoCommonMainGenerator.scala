@@ -4,6 +4,8 @@ import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.utils.StringUtils.doubleQuote
 
+import scala.Option.when
+
 object GoCommonMainGenerator {
 
   private[go] def generateJsonMiddleware(): String =
@@ -22,6 +24,57 @@ object GoCommonMainGenerator {
               ),
             ),
           )}",
+        ),
+      ),
+    )
+
+  private[go] def generateMain(isAuth: Boolean, serviceName: String, port: Int, usesComms: Boolean): String =
+    mkCode(
+      "func main()",
+      CodeWrap.curly.tabbed(
+        genDeclareAndAssign(
+          genMethodCall(
+            "flag",
+            "String",
+            doubleQuote("config"),
+            doubleQuote(s"/etc/$serviceName-service/config.json"),
+            doubleQuote("configuration filepath"),
+          ),
+          "configPtr",
+        ),
+        genMethodCall("flag", "Parse"),
+        "",
+        "// Require all struct fields by default",
+        genMethodCall("valid", "SetFieldsRequiredByDefault", "true"),
+        "",
+        genDeclareAndAssign(genMethodCall("util", "GetConfig", "*configPtr"), "config", "err"),
+        genIfErr(genMethodCall("log", "Fatal", "err")),
+        "",
+        genDeclareAndAssign(genMethodCall("dao", "Init", "config"), "d", "err"),
+        genIfErr(genMethodCall("log", "Fatal", "err")),
+        "",
+        when(usesComms) {
+          mkCode.lines(
+            genDeclareAndAssign(genMethodCall("comm", "Init", "config"), "c"),
+            "",
+          )
+        },
+        when(isAuth) {
+          mkCode.lines(
+            genDeclareAndAssign(genMethodCall("c", "CreateJWTCredential"), "jwtCredential", "err"),
+            genIfErr(genMethodCall("log", "Fatal", "err")),
+            "",
+          )
+        },
+        genDeclareAndAssign(
+          s"env{${mkCode.list("d", when(usesComms) { "c" }, when(isAuth) { "jwtCredential" })}}",
+          "env",
+        ),
+        "",
+        genMethodCall(
+          "log",
+          "Fatal",
+          genMethodCall("http", "ListenAndServe", doubleQuote(s":$port"), genMethodCall("env", "router")),
         ),
       ),
     )

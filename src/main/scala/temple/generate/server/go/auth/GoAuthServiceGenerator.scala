@@ -19,7 +19,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceMainGenerator.generateImports(root),
         GoAuthServiceMainGenerator.generateStructs(),
         GoAuthServiceMainGenerator.generateRouter(),
-        GoAuthServiceMainGenerator.generateMain(),
+        GoCommonMainGenerator.generateMain(isAuth = true, "auth", root.port, usesComms = true),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoAuthServiceMainGenerator.generateHandlers(),
         GoAuthServiceMainGenerator.generateCreateToken(),
