@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 	"github.com/squat/and/dab/templeuser/dao"
+	"github.com/google/uuid"
 )
 
 // env defines the environment that requests should be executed within
@@ -34,6 +35,67 @@ type updateTempleuserRequest struct {
 	CurrentBankBalance *float32   `valid:"-"`
 	BirthDate          *time.Time `valid:"-"`
 	BreakfastTime      *time.Time `valid:"-"`
+}
+
+// listTempleuserElement contains a single templeuser list element
+type listTempleuserElement struct {
+	ID                 uuid.UUID
+	Username           string
+	Email              string
+	FirstName          string
+	LastName           string
+	CreatedAt          string
+	NumberOfDogs       int32
+	CurrentBankBalance float32
+	BirthDate          string
+	BreakfastTime      string
+}
+
+// listTempleuserResponse contains a single templeuser list to be returned to the client
+type listTempleuserResponse struct {
+	TempleuserList []listTempleuserElement
+}
+
+// createTempleuserResponse contains a newly created templeuser to be returned to the client
+type createTempleuserResponse struct {
+	ID                 uuid.UUID
+	Username           string
+	Email              string
+	FirstName          string
+	LastName           string
+	CreatedAt          string
+	NumberOfDogs       int32
+	CurrentBankBalance float32
+	BirthDate          string
+	BreakfastTime      string
+}
+
+// readTempleuserResponse contains a single templeuser to be returned to the client
+type readTempleuserResponse struct {
+	ID                 uuid.UUID
+	Username           string
+	Email              string
+	FirstName          string
+	LastName           string
+	CreatedAt          string
+	NumberOfDogs       int32
+	CurrentBankBalance float32
+	BirthDate          string
+	BreakfastTime      string
+}
+
+// updateTempleuserResponse contains a newly updated templeuser to be returned to the client
+type updateTempleuserResponse struct {
+	ID                 uuid.UUID
+	Username           string
+	Email              string
+	FirstName          string
+	LastName           string
+	CreatedAt          string
+	NumberOfDogs       int32
+	CurrentBankBalance float32
+	BirthDate          string
+	BreakfastTime      string
 }
 
 func main() {

@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 	"github.com/squat/and/dab/complexuser/dao"
+	"github.com/google/uuid"
 )
 
 // env defines the environment that requests should be executed within
@@ -40,6 +41,57 @@ type updateComplexuserRequest struct {
 	TimeField          *time.Time `valid:"-"`
 	DateTimeField      *time.Time `valid:"-"`
 	BlobField          *[]byte    `valid:"-"`
+}
+
+// createComplexuserResponse contains a newly created complexuser to be returned to the client
+type createComplexuserResponse struct {
+	ID                 uuid.UUID
+	SmallIntField      uint16
+	IntField           uint32
+	BigIntField        uint64
+	FloatField         float32
+	DoubleField        float64
+	StringField        string
+	BoundedStringField string
+	BoolField          bool
+	DateField          string
+	TimeField          string
+	DateTimeField      string
+	BlobField          string
+}
+
+// readComplexuserResponse contains a single complexuser to be returned to the client
+type readComplexuserResponse struct {
+	ID                 uuid.UUID
+	SmallIntField      uint16
+	IntField           uint32
+	BigIntField        uint64
+	FloatField         float32
+	DoubleField        float64
+	StringField        string
+	BoundedStringField string
+	BoolField          bool
+	DateField          string
+	TimeField          string
+	DateTimeField      string
+	BlobField          string
+}
+
+// updateComplexuserResponse contains a newly updated complexuser to be returned to the client
+type updateComplexuserResponse struct {
+	ID                 uuid.UUID
+	SmallIntField      uint16
+	IntField           uint32
+	BigIntField        uint64
+	FloatField         float32
+	DoubleField        float64
+	StringField        string
+	BoundedStringField string
+	BoolField          bool
+	DateField          string
+	TimeField          string
+	DateTimeField      string
+	BlobField          string
 }
 
 func main() {

@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 	"github.com/squat/and/dab/templeuser/dao"
+	"github.com/google/uuid"
 )
 
 // env defines the environment that requests should be executed within
@@ -32,6 +33,45 @@ type updateTempleuserRequest struct {
 	TimeField     *time.Time `valid:"-"`
 	DateTimeField *time.Time `valid:"-"`
 	BlobField     *[]byte    `valid:"-"`
+}
+
+// createTempleuserResponse contains a newly created templeuser to be returned to the client
+type createTempleuserResponse struct {
+	ID            uuid.UUID
+	IntField      int32
+	DoubleField   float64
+	StringField   string
+	BoolField     bool
+	DateField     string
+	TimeField     string
+	DateTimeField string
+	BlobField     string
+}
+
+// readTempleuserResponse contains a single templeuser to be returned to the client
+type readTempleuserResponse struct {
+	ID            uuid.UUID
+	IntField      int32
+	DoubleField   float64
+	StringField   string
+	BoolField     bool
+	DateField     string
+	TimeField     string
+	DateTimeField string
+	BlobField     string
+}
+
+// updateTempleuserResponse contains a newly updated templeuser to be returned to the client
+type updateTempleuserResponse struct {
+	ID            uuid.UUID
+	IntField      int32
+	DoubleField   float64
+	StringField   string
+	BoolField     bool
+	DateField     string
+	TimeField     string
+	DateTimeField string
+	BlobField     string
 }
 
 func main() {
