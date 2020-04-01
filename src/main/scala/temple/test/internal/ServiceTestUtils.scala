@@ -9,7 +9,7 @@ import scalaj.http.Http
 import temple.utils.StringUtils
 import temple.utils.MonadUtils.FromEither
 import io.circe.syntax._
-import temple.ast.{Attribute, AttributeType, Metadata, ServiceBlock}
+import temple.ast.{Annotation, Attribute, AttributeType, Metadata, ServiceBlock}
 
 import scala.util.Random
 
@@ -110,42 +110,51 @@ object ServiceTestUtils {
     baseURL: String,
     accessToken: String,
   ): Json =
-    attributes.map {
-      case (name, attribute) =>
-        val value: Json = attribute.attributeType match {
-          case AttributeType.ForeignKey(references) =>
-            create(test, references, allServices, baseURL, accessToken).id.asJson
-          case AttributeType.UUIDType =>
-            UUID.randomUUID().asJson
-          case AttributeType.BoolType =>
-            Random.nextBoolean().asJson
-          case AttributeType.DateType =>
-            new Date(Random.nextLong()).toString.asJson
-          case AttributeType.DateTimeType =>
-            new Timestamp(Random.nextLong()).toString.asJson
-          case AttributeType.TimeType =>
-            new Time(Random.nextLong()).toString.asJson
-          case AttributeType.BlobType(_) =>
-            // TODO
-            "todo".asJson
-          case AttributeType.StringType(max, min) =>
-            val maxValue: Long = max.getOrElse(20)
-            val minValue: Int  = min.getOrElse(0)
-            val random         = Random.between(minValue, maxValue)
-            StringUtils.randomString(random.toInt).asJson
-          case AttributeType.IntType(max, min, _) =>
-            // TODO: Switch on precision
-            val maxValue: Long = max.getOrElse(Long.MaxValue)
-            val minValue: Long = min.getOrElse(Long.MinValue)
-            Random.between(minValue, maxValue).asJson
-          case AttributeType.FloatType(max, min, _) =>
-            // TODO: Switch on precision
-            val maxValue = max.getOrElse(Double.MaxValue)
-            val minValue = min.getOrElse(Double.MinValue)
-            Random.between(minValue, maxValue).asJson
-        }
-        (name, value)
-    }.asJson
+    // Drop any attributes that are @server or @serverSet
+    attributes
+      .filterNot {
+        case (_, attribute) =>
+          attribute.accessAnnotation.contains(Annotation.Server) || attribute.accessAnnotation.contains(
+            Annotation.ServerSet,
+          )
+      }
+      .map {
+        case (name, attribute) =>
+          val value: Json = attribute.attributeType match {
+            case AttributeType.ForeignKey(references) =>
+              create(test, references, allServices, baseURL, accessToken).id.asJson
+            case AttributeType.UUIDType =>
+              UUID.randomUUID().asJson
+            case AttributeType.BoolType =>
+              Random.nextBoolean().asJson
+            case AttributeType.DateType =>
+              new Date(Random.nextLong()).toString.asJson
+            case AttributeType.DateTimeType =>
+              new Timestamp(Random.nextLong()).toString.asJson
+            case AttributeType.TimeType =>
+              new Time(Random.nextLong()).toString.asJson
+            case AttributeType.BlobType(_) =>
+              // TODO
+              "todo".asJson
+            case AttributeType.StringType(max, min) =>
+              val maxValue: Long = max.getOrElse(20)
+              val minValue: Int  = min.getOrElse(0)
+              val random         = Random.between(minValue, maxValue)
+              StringUtils.randomString(random.toInt).asJson
+            case AttributeType.IntType(max, min, _) =>
+              // TODO: Switch on precision
+              val maxValue: Long = max.getOrElse(Long.MaxValue)
+              val minValue: Long = min.getOrElse(Long.MinValue)
+              Random.between(minValue, maxValue).asJson
+            case AttributeType.FloatType(max, min, _) =>
+              // TODO: Switch on precision
+              val maxValue = max.getOrElse(Double.MaxValue)
+              val minValue = min.getOrElse(Double.MinValue)
+              Random.between(minValue, maxValue).asJson
+          }
+          (name, value)
+      }
+      .asJson
 
   /** Create a new object in a given service, returning the ID field and access token used to make the request */
   def create(
