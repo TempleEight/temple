@@ -16,7 +16,6 @@ object GoServiceGenerator extends ServiceGenerator {
 
   override def generate(root: ServiceRoot): Files = {
     /* TODO
-     * main in <>.go
      * handlers in <>.go
      * config.json
      */
