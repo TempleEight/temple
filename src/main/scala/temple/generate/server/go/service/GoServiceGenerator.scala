@@ -49,7 +49,10 @@ object GoServiceGenerator extends ServiceGenerator {
           GoServiceMainStructGenerator.generateRequestStructs(root, operations, clientAttributes)
         },
         GoServiceMainStructGenerator.generateResponseStructs(root, operations),
+        GoServiceMainGenerator.generateRouter(root, operations),
         GoServiceMainGenerator.generateMain(root, usesComms, operations),
+        GoCommonMainGenerator.generateJsonMiddleware(),
+        GoServiceMainGenerator.generateHandlers(root, operations),
       ),
       File(s"${root.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),
       File(s"${root.name}/dao", "dao.go") -> mkCode.doubleLines(
