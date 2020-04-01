@@ -13,28 +13,28 @@ type env struct {
 
 // createTempleuserRequest contains the client-provided information required to create a single templeuser
 type createTempleuserRequest struct {
-	Username           *string    `valid:"-"`
-	Email              *string    `valid:"-"`
-	FirstName          *string    `valid:"-"`
-	LastName           *string    `valid:"-"`
-	CreatedAt          *time.Time `valid:"-"`
-	NumberOfDogs       *int32     `valid:"-"`
-	CurrentBankBalance *float32   `valid:"-"`
-	BirthDate          *time.Time `valid:"-"`
-	BreakfastTime      *time.Time `valid:"-"`
+	Username           *string    `valid:"type(string),required"`
+	Email              *string    `valid:"type(string),required,stringlength(5|40)"`
+	FirstName          *string    `valid:"type(string),required"`
+	LastName           *string    `valid:"type(string),required"`
+	CreatedAt          *time.Time `valid:"type(string),rfc3339,required"`
+	NumberOfDogs       *int32     `valid:"type(int32),required"`
+	CurrentBankBalance *float32   `valid:"type(float32),required"`
+	BirthDate          *time.Time `valid:"type(string),required"`
+	BreakfastTime      *time.Time `valid:"type(string),required"`
 }
 
 // updateTempleuserRequest contains the client-provided information required to update a single templeuser
 type updateTempleuserRequest struct {
-	Username           *string    `valid:"-"`
-	Email              *string    `valid:"-"`
-	FirstName          *string    `valid:"-"`
-	LastName           *string    `valid:"-"`
-	CreatedAt          *time.Time `valid:"-"`
-	NumberOfDogs       *int32     `valid:"-"`
-	CurrentBankBalance *float32   `valid:"-"`
-	BirthDate          *time.Time `valid:"-"`
-	BreakfastTime      *time.Time `valid:"-"`
+	Username           *string    `valid:"type(string),required"`
+	Email              *string    `valid:"type(string),required,stringlength(5|40)"`
+	FirstName          *string    `valid:"type(string),required"`
+	LastName           *string    `valid:"type(string),required"`
+	CreatedAt          *time.Time `valid:"type(string),rfc3339,required"`
+	NumberOfDogs       *int32     `valid:"type(int32),required"`
+	CurrentBankBalance *float32   `valid:"type(float32),required"`
+	BirthDate          *time.Time `valid:"type(string),required"`
+	BreakfastTime      *time.Time `valid:"type(string),required"`
 }
 
 // listTempleuserElement contains a single templeuser list element
