@@ -75,6 +75,9 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonUtilGenerator.generateCreateErrorJSON(),
         GoServiceUtilGenerator.generateIDsFromRequest(),
       ),
+      File(s"${root.name}/metric", "metric.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("metric"),
+      ),
     ) ++ when(usesComms)(
       File(s"${root.name}/comm", "handler.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("comm"),
