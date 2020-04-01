@@ -1,7 +1,7 @@
 package temple.utils
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.utils.StringUtils.{españolQue, indent, snakeCase}
+import temple.utils.StringUtils._
 
 class StringUtilsTest extends FlatSpec with Matchers {
 
@@ -24,6 +24,15 @@ class StringUtilsTest extends FlatSpec with Matchers {
   it should "add spaces on each line except for blank lines" in {
     indent("abcd\nefg", 1) shouldEqual " abcd\n efg"
     indent("abcd\n\nefg\n", 1) shouldEqual " abcd\n\n efg\n"
+  }
+
+  behavior of "decapitalize"
+
+  it should "convert leading capital or acronyms" in {
+    decapitalize("ThisThing") shouldEqual "thisThing"
+    decapitalize("A_Box") shouldEqual "a_Box"
+    decapitalize("AB_Box") shouldEqual "ab_Box"
+    decapitalize("ABBox") shouldEqual "abBox"
   }
 
   behavior of "snakeCase"

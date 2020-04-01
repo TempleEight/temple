@@ -36,6 +36,11 @@ object StringUtils {
   def randomString(length: Int): String =
     new Random().alphanumeric.take(length).mkString
 
+  /** Convert the first character/acronym of a string to lowercase */
+  def decapitalize(string: String): String =
+    // The first capital of the string, optionally followed by any subsequent capitals except for those starting a word
+    """^[A-Z]([A-Z]+(?=[^a-z]))?""".r.replaceAllIn(string, leadingCapitals => leadingCapitals.group(0).toLowerCase)
+
   type StringWrap = String => String
 
   private def stringWrap(start: String, end: String)(string: String): String = start + string + end
