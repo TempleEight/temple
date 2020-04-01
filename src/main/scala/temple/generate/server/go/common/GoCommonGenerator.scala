@@ -160,4 +160,10 @@ object GoCommonGenerator {
       "return",
       mkCode.list(exprs),
     )
+
+  /** Generate a populated struct */
+  private[go] def genPopulateStruct(name: String, body: ListMap[String, String]): String =
+    CodeWrap.curly
+      .prefix(name)
+      .tabbedTrailingList(CodeUtils.pad(body.map { case (k, v) => (k + ":", v) }))
 }
