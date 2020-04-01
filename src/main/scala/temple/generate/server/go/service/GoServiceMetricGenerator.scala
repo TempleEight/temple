@@ -2,10 +2,9 @@ package temple.generate.server.go.service
 
 import temple.generate.CRUD.CRUD
 import temple.generate.server.ServiceRoot
-import temple.generate.server.go.common.GoCommonGenerator
+import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
-import temple.generate.server.go.common.GoCommonGenerator.genAssign
 import temple.generate.utils.CodeUtils
 
 import scala.collection.immutable.ListMap
@@ -24,9 +23,9 @@ object GoServiceMetricGenerator {
     )
 
   private def generatePrometheusCounter(name: String, help: String, tags: Seq[String]): String =
-    GoCommonGenerator.genFunctionCall(
+    genFunctionCall(
       "promauto.NewCounterVec",
-      GoCommonGenerator.genPopulateStruct(
+      genPopulateStruct(
         "prometheus.CounterOpts",
         ListMap(
           "Name" -> doubleQuote(name),
@@ -42,9 +41,9 @@ object GoServiceMetricGenerator {
     objectives: Seq[(Double, Double)],
     tags: Seq[String],
   ): String =
-    GoCommonGenerator.genFunctionCall(
+    genFunctionCall(
       "promauto.NewSummaryVec",
-      GoCommonGenerator.genPopulateStruct(
+      genPopulateStruct(
         "prometheus.SummaryOpts",
         ListMap(
           "Name" -> doubleQuote(name),
