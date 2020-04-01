@@ -1,9 +1,12 @@
 package main
 
 import (
+	"net/http"
 	"time"
+
 	"github.com/squat/and/dab/complexuser/dao"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
 // env defines the environment that requests should be executed within
@@ -94,6 +97,34 @@ type updateComplexuserResponse struct {
 	BlobField          string
 }
 
+// router generates a router for this service
+func (env *env) router() *mux.Router {
+	r := mux.NewRouter()
+	// Mux directs to first matching route, i.e. the order matters
+	r.HandleFunc("/complexuser", env.createComplexuserHandler).Methods(http.MethodPost)
+	r.HandleFunc("/complexuser/{id}", env.readComplexuserHandler).Methods(http.MethodGet)
+	r.HandleFunc("/complexuser/{id}", env.updateComplexuserHandler).Methods(http.MethodPut)
+	r.HandleFunc("/complexuser/{id}", env.deleteComplexuserHandler).Methods(http.MethodDelete)
+	r.Use(jsonMiddleware)
+	return r
+}
+
 func main() {
 
 }
+
+func jsonMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// All responses are JSON, set header accordingly
+		w.Header().Set("Content-Type", "application/json")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (env *env) createComplexuserHandler(w http.ResponseWriter, r *http.Request) {}
+
+func (env *env) readComplexuserHandler(w http.ResponseWriter, r *http.Request) {}
+
+func (env *env) updateComplexuserHandler(w http.ResponseWriter, r *http.Request) {}
+
+func (env *env) deleteComplexuserHandler(w http.ResponseWriter, r *http.Request) {}
