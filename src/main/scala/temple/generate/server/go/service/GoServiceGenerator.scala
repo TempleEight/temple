@@ -1,6 +1,7 @@
 package temple.generate.server.go.service
 
 import temple.ast.{Annotation, AttributeType}
+import temple.generate.CRUD
 import temple.generate.FileSystem._
 import temple.generate.server.go.common._
 import temple.generate.server.go.service.dao._
@@ -43,9 +44,10 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonGenerator.generatePackage("main"),
         GoServiceMainGenerator.generateImports(root, usesTime, usesComms, clientAttributes),
         GoServiceMainGenerator.generateEnvStruct(usesComms),
-        when(clientAttributes.nonEmpty) {
+        when(clientAttributes.nonEmpty && (operations.contains(CRUD.Create) || operations.contains(CRUD.Read))) {
           GoServiceMainGenerator.generateRequestStructs(root, operations, clientAttributes)
         },
+        GoServiceMainGenerator.generateResponseStructs(root, operations),
         GoServiceMainGenerator.generateMain(root, usesComms, operations),
       ),
       File(s"${root.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),

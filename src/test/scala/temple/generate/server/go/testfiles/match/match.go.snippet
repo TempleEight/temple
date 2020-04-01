@@ -24,6 +24,43 @@ type updateMatchRequest struct {
 	UserTwo *uuid.UUID `valid:"-"`
 }
 
+// listMatchElement contains a single match list element
+type listMatchElement struct {
+	ID        uuid.UUID
+	UserOne   uuid.UUID
+	UserTwo   uuid.UUID
+	MatchedOn string
+}
+
+// listMatchResponse contains a single match list to be returned to the client
+type listMatchResponse struct {
+	MatchList []listMatchElement
+}
+
+// createMatchResponse contains a newly created match to be returned to the client
+type createMatchResponse struct {
+	ID        uuid.UUID
+	UserOne   uuid.UUID
+	UserTwo   uuid.UUID
+	MatchedOn string
+}
+
+// readMatchResponse contains a single match to be returned to the client
+type readMatchResponse struct {
+	ID        uuid.UUID
+	UserOne   uuid.UUID
+	UserTwo   uuid.UUID
+	MatchedOn string
+}
+
+// updateMatchResponse contains a newly updated match to be returned to the client
+type updateMatchResponse struct {
+	ID        uuid.UUID
+	UserOne   uuid.UUID
+	UserTwo   uuid.UUID
+	MatchedOn string
+}
+
 func main() {
 
 }
