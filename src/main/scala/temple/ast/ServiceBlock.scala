@@ -19,8 +19,9 @@ case class ServiceBlock(
   def structIterator(rootName: String): Iterator[(String, Map[String, Attribute])] =
     Iterator((rootName, attributes)) ++ structs.iterator.map { case (str, block) => (str, block.attributes) }
 
-  override private[temple] def setParent(templefile: Templefile): Unit = {
-    super.setParent(templefile)
-    structs.valuesIterator.foreach(_.setParent(templefile))
+  /** Set the parent that this Templefile is within */
+  override private[temple] def setParent(parent: TempleNode): Unit = {
+    super.setParent(parent)
+    structs.valuesIterator.foreach(_.setParent(this))
   }
 }
