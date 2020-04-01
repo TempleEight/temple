@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 	"github.com/squat/and/dab/templeuser/dao"
+	"github.com/google/uuid"
 )
 
 // env defines the environment that requests should be executed within
@@ -16,9 +17,9 @@ type createTempleuserRequest struct {
 	DoubleField   *float64   `valid:"type(float64),required"`
 	StringField   *string    `valid:"type(string),required"`
 	BoolField     *bool      `valid:"type(bool),required"`
-	DateField     *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
-	TimeField     *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
-	DateTimeField *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
+	DateField     *time.Time `valid:"type(string),required"`
+	TimeField     *time.Time `valid:"type(string),required"`
+	DateTimeField *time.Time `valid:"type(string),rfc3339,required"`
 	BlobField     *[]byte    `valid:"type(string),base64,required"`
 }
 
@@ -28,10 +29,49 @@ type updateTempleuserRequest struct {
 	DoubleField   *float64   `valid:"type(float64),required"`
 	StringField   *string    `valid:"type(string),required"`
 	BoolField     *bool      `valid:"type(bool),required"`
-	DateField     *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
-	TimeField     *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
-	DateTimeField *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
+	DateField     *time.Time `valid:"type(string),required"`
+	TimeField     *time.Time `valid:"type(string),required"`
+	DateTimeField *time.Time `valid:"type(string),rfc3339,required"`
 	BlobField     *[]byte    `valid:"type(string),base64,required"`
+}
+
+// createTempleuserResponse contains a newly created templeuser to be returned to the client
+type createTempleuserResponse struct {
+	ID            uuid.UUID
+	IntField      int32
+	DoubleField   float64
+	StringField   string
+	BoolField     bool
+	DateField     string
+	TimeField     string
+	DateTimeField string
+	BlobField     string
+}
+
+// readTempleuserResponse contains a single templeuser to be returned to the client
+type readTempleuserResponse struct {
+	ID            uuid.UUID
+	IntField      int32
+	DoubleField   float64
+	StringField   string
+	BoolField     bool
+	DateField     string
+	TimeField     string
+	DateTimeField string
+	BlobField     string
+}
+
+// updateTempleuserResponse contains a newly updated templeuser to be returned to the client
+type updateTempleuserResponse struct {
+	ID            uuid.UUID
+	IntField      int32
+	DoubleField   float64
+	StringField   string
+	BoolField     bool
+	DateField     string
+	TimeField     string
+	DateTimeField string
+	BlobField     string
 }
 
 func main() {

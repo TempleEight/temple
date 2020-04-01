@@ -40,6 +40,9 @@ object GoServiceGeneratorTestData {
     File("user/util", "util.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/user/util/util.go.snippet",
     ),
+    File("user/metric", "metric.go") -> readFile(
+      "src/test/scala/temple/generate/server/go/testfiles/user/metric/metric.go.snippet",
+    ),
   )
 
   val simpleServiceRootWithComms: ServiceRoot =
@@ -81,6 +84,9 @@ object GoServiceGeneratorTestData {
     ),
     File("match/comm", "handler.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/match/comm/handler.go.snippet",
+    ),
+    File("match/metric", "metric.go") -> readFile(
+      "src/test/scala/temple/generate/server/go/testfiles/match/metric/metric.go.snippet",
     ),
   )
 }

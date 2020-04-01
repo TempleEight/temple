@@ -3,7 +3,7 @@ package temple
 import java.nio.file.{Files, Paths}
 
 import org.scalatest.{FlatSpec, Matchers}
-import temple.detail.MockQuestionAsker
+import temple.detail.PoliceSergeantNicholasAngel
 import temple.utils.FileUtils
 
 import scala.jdk.StreamConverters._
@@ -23,7 +23,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
       new TempleConfig(
         Seq("generate", "-o", basePath.toAbsolutePath.toString, "src/test/scala/temple/testfiles/simple.temple"),
       ),
-      MockQuestionAsker,
+      PoliceSergeantNicholasAngel,
     )
 
     // Exactly these folders should have been generated
@@ -53,7 +53,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
     // Only these files should be present in the templeuser folder
     val expectedTempleUserFiles =
-      Set("Dockerfile", "dao", "templeuser.go", "util", "go.mod").map(dir =>
+      Set("Dockerfile", "dao", "templeuser.go", "util", "go.mod", "metric").map(dir =>
         basePath.resolve("templeuser").resolve(dir),
       )
     Files.list(basePath.resolve("templeuser")).toScala(Set) shouldBe expectedTempleUserFiles
@@ -91,6 +91,15 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     // The content of the templeuser util file should be correct
     val templeUserUtilFile = Files.readString(basePath.resolve("templeuser/util").resolve("util.go"))
     templeUserUtilFile shouldBe FileUtils.readResources("go/user/util/util.go.snippet")
+
+    // Only these files should be present in the templeuser/metric folder
+    val expectedTempleUserMetricFiles =
+      Set("metric.go").map(dir => basePath.resolve("templeuser/metric").resolve(dir))
+    Files.list(basePath.resolve("templeuser/metric")).toScala(Set) shouldBe expectedTempleUserMetricFiles
+
+    // The content of the templeuser util file should be correct
+    val templeUserMetricFile = Files.readString(basePath.resolve("templeuser/metric").resolve("metric.go"))
+    templeUserMetricFile shouldBe FileUtils.readResources("go/user/metric/metric.go.snippet")
 
     // Only one file should be present in the kong folder
     val expectedKongFiles = Set("configure-kong.sh").map(dir => basePath.resolve("kong").resolve(dir))

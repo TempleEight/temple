@@ -1,7 +1,5 @@
 package temple.detail
 
-import scala.io.StdIn
-
 /**
   * Police Constable Nicholas Angel: born and schooled in London,
   * graduated Canterbury University in 1993 with a double first in Politics and Sociology. Attended Hendon College of
@@ -18,9 +16,5 @@ import scala.io.StdIn
 object PoliceSergeantNicholasAngel extends QuestionAsker {
 
   /** Police Sergeant Nicholas Angel loves asking questions to the public in order to find out the answers he needs */
-  override def askQuestion(question: String): String = {
-    val answer = StdIn.readLine(Console.BLUE + question + "\n" + Console.RESET)
-    println(answer)
-    answer
-  }
+  override def askQuestion(question: String): String = "github.com/squat/and/dab"
 }

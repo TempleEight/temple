@@ -3,6 +3,7 @@ package main
 import (
 	"time"
 	"github.com/squat/and/dab/templeuser/dao"
+	"github.com/google/uuid"
 )
 
 // env defines the environment that requests should be executed within
@@ -16,11 +17,11 @@ type createTempleuserRequest struct {
 	Email              *string    `valid:"type(string),required,stringlength(5|40)"`
 	FirstName          *string    `valid:"type(string),required"`
 	LastName           *string    `valid:"type(string),required"`
-	CreatedAt          *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
+	CreatedAt          *time.Time `valid:"type(string),rfc3339,required"`
 	NumberOfDogs       *int32     `valid:"type(int32),required"`
 	CurrentBankBalance *float32   `valid:"type(float32),required"`
-	BirthDate          *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
-	BreakfastTime      *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
+	BirthDate          *time.Time `valid:"type(string),required"`
+	BreakfastTime      *time.Time `valid:"type(string),required"`
 }
 
 // updateTempleuserRequest contains the client-provided information required to update a single templeuser
@@ -29,11 +30,72 @@ type updateTempleuserRequest struct {
 	Email              *string    `valid:"type(string),required,stringlength(5|40)"`
 	FirstName          *string    `valid:"type(string),required"`
 	LastName           *string    `valid:"type(string),required"`
-	CreatedAt          *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
+	CreatedAt          *time.Time `valid:"type(string),rfc3339,required"`
 	NumberOfDogs       *int32     `valid:"type(int32),required"`
 	CurrentBankBalance *float32   `valid:"type(float32),required"`
-	BirthDate          *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
-	BreakfastTime      *time.Time `valid:"type(string),rfc3339WithoutZone,required"`
+	BirthDate          *time.Time `valid:"type(string),required"`
+	BreakfastTime      *time.Time `valid:"type(string),required"`
+}
+
+// listTempleuserElement contains a single templeuser list element
+type listTempleuserElement struct {
+	ID                 uuid.UUID
+	Username           string
+	Email              string
+	FirstName          string
+	LastName           string
+	CreatedAt          string
+	NumberOfDogs       int32
+	CurrentBankBalance float32
+	BirthDate          string
+	BreakfastTime      string
+}
+
+// listTempleuserResponse contains a single templeuser list to be returned to the client
+type listTempleuserResponse struct {
+	TempleuserList []listTempleuserElement
+}
+
+// createTempleuserResponse contains a newly created templeuser to be returned to the client
+type createTempleuserResponse struct {
+	ID                 uuid.UUID
+	Username           string
+	Email              string
+	FirstName          string
+	LastName           string
+	CreatedAt          string
+	NumberOfDogs       int32
+	CurrentBankBalance float32
+	BirthDate          string
+	BreakfastTime      string
+}
+
+// readTempleuserResponse contains a single templeuser to be returned to the client
+type readTempleuserResponse struct {
+	ID                 uuid.UUID
+	Username           string
+	Email              string
+	FirstName          string
+	LastName           string
+	CreatedAt          string
+	NumberOfDogs       int32
+	CurrentBankBalance float32
+	BirthDate          string
+	BreakfastTime      string
+}
+
+// updateTempleuserResponse contains a newly updated templeuser to be returned to the client
+type updateTempleuserResponse struct {
+	ID                 uuid.UUID
+	Username           string
+	Email              string
+	FirstName          string
+	LastName           string
+	CreatedAt          string
+	NumberOfDogs       int32
+	CurrentBankBalance float32
+	BirthDate          string
+	BreakfastTime      string
 }
 
 func main() {
