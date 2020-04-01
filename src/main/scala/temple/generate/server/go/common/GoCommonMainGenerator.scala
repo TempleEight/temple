@@ -28,7 +28,7 @@ object GoCommonMainGenerator {
       ),
     )
 
-  private[go] def generateMain(isAuth: Boolean, serviceName: String, port: Int, usesComms: Boolean): String =
+  private[go] def generateMain(serviceName: String, port: Int, usesComms: Boolean, isAuth: Boolean): String =
     mkCode(
       "func main()",
       CodeWrap.curly.tabbed(

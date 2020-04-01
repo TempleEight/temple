@@ -49,7 +49,7 @@ object GoServiceGenerator extends ServiceGenerator {
         },
         GoServiceMainStructGenerator.generateResponseStructs(root, operations),
         GoServiceMainGenerator.generateRouter(root, operations),
-        GoCommonMainGenerator.generateMain(isAuth = false, root.name, root.port, usesComms),
+        GoCommonMainGenerator.generateMain(root.name, root.port, usesComms, isAuth = false),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoServiceMainGenerator.generateHandlers(root, operations),
       ),
