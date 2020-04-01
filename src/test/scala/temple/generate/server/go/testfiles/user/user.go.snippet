@@ -2,6 +2,7 @@ package main
 
 import (
 	"github.com/TempleEight/spec-golang/user/dao"
+	"github.com/google/uuid"
 )
 
 // env defines the environment that requests should be executed within
@@ -11,12 +12,30 @@ type env struct {
 
 // createUserRequest contains the client-provided information required to create a single user
 type createUserRequest struct {
-	Name *string `valid:"-"`
+	Name *string `valid:"type(string),required,stringlength(2|255)"`
 }
 
 // updateUserRequest contains the client-provided information required to update a single user
 type updateUserRequest struct {
-	Name *string `valid:"-"`
+	Name *string `valid:"type(string),required,stringlength(2|255)"`
+}
+
+// createUserResponse contains a newly created user to be returned to the client
+type createUserResponse struct {
+	ID   uuid.UUID
+	Name string
+}
+
+// readUserResponse contains a single user to be returned to the client
+type readUserResponse struct {
+	ID   uuid.UUID
+	Name string
+}
+
+// updateUserResponse contains a newly updated user to be returned to the client
+type updateUserResponse struct {
+	ID   uuid.UUID
+	Name string
 }
 
 func main() {

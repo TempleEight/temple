@@ -547,6 +547,7 @@ object ProjectBuilderTestData {
   val simpleTemplefileDaoFile: String          = FileUtils.readResources("go/simple-user/dao/dao.go.snippet")
   val simpleTemplefileErrorsFile: String       = FileUtils.readResources("go/simple-user/dao/errors.go.snippet")
   val simpleTemplefileUtilFile: String         = FileUtils.readResources("go/simple-user/util/util.go.snippet")
+  val simpleTemplefileMetricFile: String       = FileUtils.readResources("go/simple-user/metric/metric.go.snippet")
 
   val simpleTemplefileGrafanaDatasourceConfig: String =
     """apiVersion: 1
@@ -1187,6 +1188,7 @@ object ProjectBuilderTestData {
   val complexTemplefileDaoFile: String          = FileUtils.readResources("go/complex-user/dao/dao.go.snippet")
   val complexTemplefileErrorsFile: String       = FileUtils.readResources("go/complex-user/dao/errors.go.snippet")
   val complexTemplefileUtilFile: String         = FileUtils.readResources("go/complex-user/util/util.go.snippet")
+  val complexTemplefileMetricFile: String       = FileUtils.readResources("go/complex-user/metric/metric.go.snippet")
 
   val complexTemplefileGrafanaDatasourceConfig: String =
     """apiVersion: 1

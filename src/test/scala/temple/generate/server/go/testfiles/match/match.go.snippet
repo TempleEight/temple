@@ -14,14 +14,51 @@ type env struct {
 
 // createMatchRequest contains the client-provided information required to create a single match
 type createMatchRequest struct {
-	UserOne *uuid.UUID `valid:"-"`
-	UserTwo *uuid.UUID `valid:"-"`
+	UserOne *uuid.UUID `valid:"type(string),uuid,required"`
+	UserTwo *uuid.UUID `valid:"type(string),uuid,required"`
 }
 
 // updateMatchRequest contains the client-provided information required to update a single match
 type updateMatchRequest struct {
-	UserOne *uuid.UUID `valid:"-"`
-	UserTwo *uuid.UUID `valid:"-"`
+	UserOne *uuid.UUID `valid:"type(string),uuid,required"`
+	UserTwo *uuid.UUID `valid:"type(string),uuid,required"`
+}
+
+// listMatchElement contains a single match list element
+type listMatchElement struct {
+	ID        uuid.UUID
+	UserOne   uuid.UUID
+	UserTwo   uuid.UUID
+	MatchedOn string
+}
+
+// listMatchResponse contains a single match list to be returned to the client
+type listMatchResponse struct {
+	MatchList []listMatchElement
+}
+
+// createMatchResponse contains a newly created match to be returned to the client
+type createMatchResponse struct {
+	ID        uuid.UUID
+	UserOne   uuid.UUID
+	UserTwo   uuid.UUID
+	MatchedOn string
+}
+
+// readMatchResponse contains a single match to be returned to the client
+type readMatchResponse struct {
+	ID        uuid.UUID
+	UserOne   uuid.UUID
+	UserTwo   uuid.UUID
+	MatchedOn string
+}
+
+// updateMatchResponse contains a newly updated match to be returned to the client
+type updateMatchResponse struct {
+	ID        uuid.UUID
+	UserOne   uuid.UUID
+	UserTwo   uuid.UUID
+	MatchedOn string
 }
 
 func main() {
