@@ -1,9 +1,12 @@
 package main
 
 import (
+	"net/http"
 	"time"
+
 	"github.com/squat/and/dab/templeuser/dao"
 	"github.com/google/uuid"
+	"github.com/gorilla/mux"
 )
 
 // env defines the environment that requests should be executed within
@@ -98,6 +101,34 @@ type updateTempleuserResponse struct {
 	BreakfastTime      string
 }
 
+// router generates a router for this service
+func (env *env) router() *mux.Router {
+	r := mux.NewRouter()
+	// Mux directs to first matching route, i.e. the order matters
+	r.HandleFunc("/templeuser/all", env.listTempleuserHandler).Methods(http.MethodGet)
+	r.HandleFunc("/templeuser", env.createTempleuserHandler).Methods(http.MethodPost)
+	r.HandleFunc("/templeuser/{id}", env.readTempleuserHandler).Methods(http.MethodGet)
+	r.HandleFunc("/templeuser/{id}", env.updateTempleuserHandler).Methods(http.MethodPut)
+	r.Use(jsonMiddleware)
+	return r
+}
+
 func main() {
 
 }
+
+func jsonMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		// All responses are JSON, set header accordingly
+		w.Header().Set("Content-Type", "application/json")
+		next.ServeHTTP(w, r)
+	})
+}
+
+func (env *env) listTempleuserHandler(w http.ResponseWriter, r *http.Request) {}
+
+func (env *env) createTempleuserHandler(w http.ResponseWriter, r *http.Request) {}
+
+func (env *env) readTempleuserHandler(w http.ResponseWriter, r *http.Request) {}
+
+func (env *env) updateTempleuserHandler(w http.ResponseWriter, r *http.Request) {}
