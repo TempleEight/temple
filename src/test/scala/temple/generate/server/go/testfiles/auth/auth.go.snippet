@@ -58,7 +58,32 @@ func (env *env) router() *mux.Router {
 }
 
 func main() {
+	configPtr := flag.String("config", "/etc/auth-service/config.json", "configuration filepath")
+	flag.Parse()
 
+	// Require all struct fields by default
+	valid.SetFieldsRequiredByDefault(true)
+
+	config, err := util.GetConfig(*configPtr)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	d, err := dao.Init(config)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	c := comm.Init(config)
+
+	jwtCredential, err := c.CreateJWTCredential()
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	env := env{d, c, jwtCredential}
+
+	log.Fatal(http.ListenAndServe(":82", env.router()))
 }
 
 func jsonMiddleware(next http.Handler) http.Handler {
