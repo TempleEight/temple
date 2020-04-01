@@ -5,6 +5,7 @@ import temple.generate.CRUD
 import temple.generate.FileSystem._
 import temple.generate.server.go.common._
 import temple.generate.server.go.service.dao._
+import temple.generate.server.go.service.main.{GoServiceMainGenerator, GoServiceMainStructGenerator}
 import temple.generate.server.{ServiceGenerator, ServiceRoot}
 import temple.generate.utils.CodeTerm.mkCode
 
@@ -43,11 +44,11 @@ object GoServiceGenerator extends ServiceGenerator {
       File(root.name, s"${root.name}.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
         GoServiceMainGenerator.generateImports(root, usesTime, usesComms, clientAttributes),
-        GoServiceMainGenerator.generateEnvStruct(usesComms),
+        GoServiceMainStructGenerator.generateEnvStruct(usesComms),
         when(clientAttributes.nonEmpty && (operations.contains(CRUD.Create) || operations.contains(CRUD.Read))) {
-          GoServiceMainGenerator.generateRequestStructs(root, operations, clientAttributes)
+          GoServiceMainStructGenerator.generateRequestStructs(root, operations, clientAttributes)
         },
-        GoServiceMainGenerator.generateResponseStructs(root, operations),
+        GoServiceMainStructGenerator.generateResponseStructs(root, operations),
         GoServiceMainGenerator.generateMain(root, usesComms, operations),
       ),
       File(s"${root.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),
