@@ -78,13 +78,4 @@ object GoServiceMainGenerator {
       ),
     )
   }
-
-  private def generateHandler(root: ServiceRoot, operation: CRUD): String =
-    s"func (env *env) ${operation.toString.toLowerCase}${root.name.capitalize}Handler(w http.ResponseWriter, r *http.Request) {}"
-
-  private[service] def generateHandlers(root: ServiceRoot, operations: Set[CRUD]): String =
-    mkCode.doubleLines(
-      for (operation <- operations.toSeq.sorted)
-        yield generateHandler(root, operation),
-    )
 }
