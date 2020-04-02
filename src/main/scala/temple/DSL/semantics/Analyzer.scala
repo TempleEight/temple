@@ -185,7 +185,6 @@ object Analyzer {
   /** A parser of Metadata items that can occur in target blocks */
   private val parseTargetMetadata = new MetadataParser[TargetMetadata] {
     registerKeywordWithContext("language", TokenArgType)(TargetLanguage)
-    registerKeyword("auth", "services", ListArgType(TokenArgType))(TargetAuth)
   }
 
   /**

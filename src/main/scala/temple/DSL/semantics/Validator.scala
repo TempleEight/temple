@@ -47,7 +47,6 @@ private class Validator(templefile: Templefile) {
 
     metadata foreach {
       case _: Metadata.TargetLanguage  => assertUnique[Metadata.TargetLanguage]()
-      case Metadata.TargetAuth(_)      => errors += context.errorMessage(s"TODO: figure out how this auth works")
       case _: Metadata.ServiceLanguage => assertUnique[Metadata.ServiceLanguage]()
       case _: Metadata.Database        => assertUnique[Metadata.Database]()
       case _: Metadata.ServiceAuth     => assertUnique[Metadata.ServiceAuth]()
