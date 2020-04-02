@@ -1,37 +1,36 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.Annotation
 import temple.ast.AttributeType.DateTimeType
+import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
-import temple.generate.server.go.service.main.GoServiceMainListHandlerGenerator.generateListHandler
 import temple.generate.server.go.service.main.GoServiceMainCreateHandlerGenerator.generateCreateHandler
+import temple.generate.server.go.service.main.GoServiceMainDeleteHandlerGenerator.generateDeleteHandler
+import temple.generate.server.go.service.main.GoServiceMainListHandlerGenerator.generateListHandler
 import temple.generate.server.go.service.main.GoServiceMainReadHandlerGenerator.generateReadHandler
 import temple.generate.server.go.service.main.GoServiceMainUpdateHandlerGenerator.generateUpdateHandler
-import temple.generate.server.go.service.main.GoServiceMainDeleteHandlerGenerator.generateDeleteHandler
-import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
+import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.StringUtils.doubleQuote
 
 import scala.collection.immutable.ListMap
 
 object GoServiceMainHandlersGenerator {
 
-  /** Generate a map for converting the fields of the DAO response to the JSON response  */
+  private def generateResponseMapFormat(attributeType: AttributeType): String =
+    // Must add formatting to attributes with datetime type
+    attributeType match {
+      case DateTimeType => s".${genFunctionCall("Format", "time.RFC3339")}"
+      case _            => ""
+    }
+
+  /** Generate a map for converting the fields of the DAO response to the JSON response */
   private def generateResponseMap(root: ServiceRoot): ListMap[String, String] =
     // Includes ID attribute and all attributes without the @server annotation
     ListMap(root.idAttribute.name.toUpperCase -> s"${root.name}.${root.idAttribute.name.toUpperCase}") ++
     root.attributes.collect {
-      case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.Server) =>
-        (
-          name.capitalize,
-          s"${root.name}.${name.capitalize}" +
-          // Must add formatting to attributes with datetime type
-          (attribute.attributeType match {
-            case DateTimeType => s".${genFunctionCall("Format", "time.RFC3339")}"
-            case _            => ""
-          }),
-        )
+      case name -> attribute if !attribute.accessAnnotation.contains(Annotation.Server) =>
+        name.capitalize -> s"${root.name}.${name.capitalize}${generateResponseMapFormat(attribute.attributeType)}"
     }
 
   /** Generate a handler method declaration */
@@ -73,14 +72,15 @@ object GoServiceMainHandlersGenerator {
   private[service] def generateHandlers(root: ServiceRoot, operations: Set[CRUD]): String = {
     val responseMap = generateResponseMap(root)
     mkCode.doubleLines(
-      for (operation <- operations.toSeq.sorted)
-        yield operation match {
+      operations.toSeq.sorted.map(
+        {
           case List   => generateListHandler(root, responseMap)
           case Create => generateCreateHandler(root)
           case Read   => generateReadHandler(root)
           case Update => generateUpdateHandler(root)
           case Delete => generateDeleteHandler(root)
         },
+      ),
     )
   }
 }
