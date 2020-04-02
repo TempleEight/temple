@@ -1,7 +1,7 @@
 package temple.builder.project
 
 import temple.ast.AttributeType._
-import temple.ast.Metadata.Database
+import temple.ast.Metadata.{Database, ServiceAuth}
 import temple.ast._
 import temple.generate.FileSystem.{File, FileContent}
 import temple.utils.FileUtils
@@ -342,7 +342,7 @@ object ProjectBuilderTestData {
       |
       |ENTRYPOINT ["./templeuser"]
       |
-      |EXPOSE 1024
+      |EXPOSE 1025
       |""".stripMargin
 
   val kongFiles: Map[File, FileContent] = Map(
@@ -379,7 +379,7 @@ object ProjectBuilderTestData {
       |      - image: sample-project-temple-user
       |        name: temple-user
       |        ports:
-      |        - containerPort: 1024
+      |        - containerPort: 1025
       |      imagePullSecrets:
       |      - name: regcred
       |      restartPolicy: Always
@@ -449,8 +449,8 @@ object ProjectBuilderTestData {
       |spec:
       |  ports:
       |  - name: api
-      |    port: 1024
-      |    targetPort: 1024
+      |    port: 1025
+      |    targetPort: 1025
       |  selector:
       |    app: temple-user
       |    kind: service
@@ -514,7 +514,7 @@ object ProjectBuilderTestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=temple-user-service' \
-      |  --data 'url=http://temple-user:1024/temple-user'
+      |  --data 'url=http://temple-user:1025/temple-user'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/routes \
@@ -571,7 +571,7 @@ object ProjectBuilderTestData {
       |- job_name: templeuser
       |  static_configs:
       |  - targets:
-      |    - templeuser:1025
+      |    - templeuser:1026
       |""".stripMargin
 
   val complexTemplefile: Templefile = Templefile(
@@ -579,6 +579,7 @@ object ProjectBuilderTestData {
     services = Map(
       "ComplexUser" -> ServiceBlock(
         complexServiceAttributes,
+        metadata = Seq(ServiceAuth.Email),
         structs = Map("TempleUser" -> StructBlock(simpleServiceAttributes)),
       ),
     ),
@@ -992,7 +993,7 @@ object ProjectBuilderTestData {
       |
       |ENTRYPOINT ["./complexuser"]
       |
-      |EXPOSE 1024
+      |EXPOSE 1025
       |""".stripMargin
 
   val complexTemplefileKubeDeployment: String =
@@ -1021,7 +1022,7 @@ object ProjectBuilderTestData {
       |      - image: sample-complex-project-complex-user
       |        name: complex-user
       |        ports:
-      |        - containerPort: 1024
+      |        - containerPort: 1025
       |      imagePullSecrets:
       |      - name: regcred
       |      restartPolicy: Always
@@ -1091,8 +1092,8 @@ object ProjectBuilderTestData {
       |spec:
       |  ports:
       |  - name: api
-      |    port: 1024
-      |    targetPort: 1024
+      |    port: 1025
+      |    targetPort: 1025
       |  selector:
       |    app: complex-user
       |    kind: service
@@ -1156,7 +1157,7 @@ object ProjectBuilderTestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=complex-user-service' \
-      |  --data 'url=http://complex-user:1024/complex-user'
+      |  --data 'url=http://complex-user:1025/complex-user'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/complex-user-service/routes \
@@ -1192,6 +1193,13 @@ object ProjectBuilderTestData {
   val complexTemplefileUtilFile: String         = FileUtils.readResources("go/complex-user/util/util.go.snippet")
   val complexTemplefileMetricFile: String       = FileUtils.readResources("go/complex-user/metric/metric.go.snippet")
 
+  val complexTemplefileAuthGoFile: String      = FileUtils.readResources("go/auth/auth.go.snippet")
+  val complexTemplefileAuthGoModFile: String   = FileUtils.readResources("go/auth/go.mod.snippet")
+  val complexTemplefileAuthUtilFile: String    = FileUtils.readResources("go/auth/util/util.go.snippet")
+  val complexTemplefileAuthDaoFile: String     = FileUtils.readResources("go/auth/dao/dao.go.snippet")
+  val complexTemplefileAuthErrorsFile: String  = FileUtils.readResources("go/auth/dao/errors.go.snippet")
+  val complexTemplefileAuthHandlerFile: String = FileUtils.readResources("go/auth/comm/handler.go.snippet")
+
   val complexTemplefileGrafanaDatasourceConfig: String =
     """apiVersion: 1
       |datasources:
@@ -1213,6 +1221,6 @@ object ProjectBuilderTestData {
       |- job_name: complexuser
       |  static_configs:
       |  - targets:
-      |    - complexuser:1025
+      |    - complexuser:1026
       |""".stripMargin
 }
