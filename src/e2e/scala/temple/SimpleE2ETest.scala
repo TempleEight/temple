@@ -53,7 +53,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
     // Only these files should be present in the templeuser folder
     val expectedTempleUserFiles =
-      Set("Dockerfile", "dao", "templeuser.go", "util", "go.mod", "metric").map(dir =>
+      Set("Dockerfile", "dao", "templeuser.go", "util", "go.mod", "metric", "hook.go").map(dir =>
         basePath.resolve("templeuser").resolve(dir),
       )
     Files.list(basePath.resolve("templeuser")).toScala(Set) shouldBe expectedTempleUserFiles
@@ -65,6 +65,10 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     // The content of the main templeuser go file should be correct
     val templeUserGoFile = Files.readString(basePath.resolve("templeuser").resolve("templeuser.go"))
     templeUserGoFile shouldBe FileUtils.readResources("go/user/user.go.snippet")
+
+    // The content of hook.go should be correct
+    val templeUserHookGoFile = Files.readString(basePath.resolve("templeuser").resolve("hook.go"))
+    templeUserHookGoFile shouldBe FileUtils.readResources("go/user/hook.go.snippet")
 
     // The content of the go.mod should be correct
     val templeUserGoModFile = Files.readString(basePath.resolve("templeuser").resolve("go.mod"))
