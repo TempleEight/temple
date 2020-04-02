@@ -164,7 +164,7 @@ object GoCommonGenerator {
     mkCode(
       "switch",
       expr,
-      CodeWrap.curly.noIndent(
+      CodeWrap.curly.lines(
         cases.map { case (switchCase, statements) => mkCode.lines(s"case $switchCase:", tabIndent(statements)) },
         "default:",
         tabIndent(default),

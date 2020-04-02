@@ -125,11 +125,8 @@ object CodeTerm {
     /** Wrap a (newline-separated list of) code snippet in parentheses, indenting with tabs */
     def tabbed(string: CodeTerm*): String = mkCode(start, "\n", tabIndent(mkCode.lines(string)), "\n", end)
 
-    /** Wrap a (comma-separated list of) code snippet in parentheses, with no indent */
-    def noIndentList(string: CodeTerm*): String = mkCode(start, "\n", mkCode.spacedList(string), "\n", end)
-
     /** Wrap a (newline-separated list of) code snippet in parentheses, with no indent */
-    def noIndent(string: CodeTerm*): String = mkCode(start, "\n", mkCode.lines(string), "\n", end)
+    def lines(string: CodeTerm*): String = mkCode(start, "\n", mkCode.lines(string), "\n", end)
 
     /** Wrap a (trailing-comma-separated list of) code snippet in parentheses, indenting with spaces */
     def spacedTrailingList(string: CodeTerm*): String =
