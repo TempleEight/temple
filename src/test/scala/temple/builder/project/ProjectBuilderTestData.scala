@@ -543,6 +543,7 @@ object ProjectBuilderTestData {
       |""".stripMargin
 
   val simpleTemplefileTempleUserGoFile: String = FileUtils.readResources("go/simple-user/user.go.snippet")
+  val simpleTemplefileHookGoFile: String       = FileUtils.readResources("go/simple-user/hook.go.snippet")
   val simpleTemplefileGoModFile: String        = FileUtils.readResources("go/simple-user/go.mod.snippet")
   val simpleTemplefileDaoFile: String          = FileUtils.readResources("go/simple-user/dao/dao.go.snippet")
   val simpleTemplefileErrorsFile: String       = FileUtils.readResources("go/simple-user/dao/errors.go.snippet")
@@ -1185,6 +1186,7 @@ object ProjectBuilderTestData {
       |""".stripMargin
 
   val complexTemplefileTempleUserGoFile: String = FileUtils.readResources("go/complex-user/complexuser.go.snippet")
+  val complexTemplefileHookGoFile: String       = FileUtils.readResources("go/complex-user/hook.go.snippet")
   val complexTemplefileGoModFile: String        = FileUtils.readResources("go/complex-user/go.mod.snippet")
   val complexTemplefileDaoFile: String          = FileUtils.readResources("go/complex-user/dao/dao.go.snippet")
   val complexTemplefileErrorsFile: String       = FileUtils.readResources("go/complex-user/dao/errors.go.snippet")

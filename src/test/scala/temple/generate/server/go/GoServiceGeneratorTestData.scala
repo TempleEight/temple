@@ -31,6 +31,7 @@ object GoServiceGeneratorTestData {
   val simpleServiceFiles: Files = Map(
     File("user", "go.mod")  -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/go.mod.snippet"),
     File("user", "user.go") -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/user.go.snippet"),
+    File("user", "hook.go") -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/hook.go.snippet"),
     File("user/dao", "errors.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/user/dao/errors.go.snippet",
     ),
@@ -73,6 +74,7 @@ object GoServiceGeneratorTestData {
     File("match", "match.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/match/match.go.snippet",
     ),
+    File("match", "hook.go") -> readFile("src/test/scala/temple/generate/server/go/testfiles/match/hook.go.snippet"),
     File("match/dao", "errors.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/match/dao/errors.go.snippet",
     ),

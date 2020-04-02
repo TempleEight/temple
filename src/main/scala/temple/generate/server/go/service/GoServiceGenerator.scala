@@ -53,6 +53,10 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoServiceMainGenerator.generateHandlers(root, operations),
       ),
+      File(root.name, "hook.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("main"),
+        GoServiceHookGenerator.generateImports(root),
+      ),
       File(s"${root.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),
       File(s"${root.name}/dao", "dao.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("dao"),
