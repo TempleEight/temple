@@ -41,7 +41,7 @@ object SimpleE2ETestData {
       |
       |ENTRYPOINT ["./templeuser"]
       |
-      |EXPOSE 1024
+      |EXPOSE 1025
       |""".stripMargin
 
   val configureKong: String =
@@ -50,17 +50,17 @@ object SimpleE2ETestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=temple-user-service' \
-      |  --data 'url=http://temple-user:1024/temple-user'
+      |  --data 'url=http://temple-user:1025/temple-user'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=booking-service' \
-      |  --data 'url=http://booking:1026/booking'
+      |  --data 'url=http://booking:1027/booking'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=event-service' \
-      |  --data 'url=http://event:1028/event'
+      |  --data 'url=http://event:1029/event'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/routes \
@@ -118,7 +118,7 @@ object SimpleE2ETestData {
       |      - image: simple-temple-test-temple-user
       |        name: temple-user
       |        ports:
-      |        - containerPort: 1024
+      |        - containerPort: 1025
       |      imagePullSecrets:
       |      - name: regcred
       |      restartPolicy: Always
@@ -188,8 +188,8 @@ object SimpleE2ETestData {
       |spec:
       |  ports:
       |  - name: api
-      |    port: 1024
-      |    targetPort: 1024
+      |    port: 1025
+      |    targetPort: 1025
       |  selector:
       |    app: temple-user
       |    kind: service
@@ -284,14 +284,14 @@ object SimpleE2ETestData {
       |- job_name: templeuser
       |  static_configs:
       |  - targets:
-      |    - templeuser:1025
+      |    - templeuser:1026
       |- job_name: booking
       |  static_configs:
       |  - targets:
-      |    - booking:1027
+      |    - booking:1028
       |- job_name: event
       |  static_configs:
       |  - targets:
-      |    - event:1029
+      |    - event:1030
       |""".stripMargin
 }

@@ -7,7 +7,7 @@ import temple.generate.database.ast.ColumnConstraint.Check
 import temple.generate.database.ast.Condition.PreparedComparison
 import temple.generate.database.ast.Expression.PreparedValue
 import temple.generate.database.ast._
-import temple.generate.server.{CreatedByAttribute, IDAttribute}
+import temple.generate.server.CreatedByAttribute
 import temple.utils.StringUtils
 
 import scala.collection.immutable.ListMap
@@ -53,8 +53,8 @@ object DatabaseBuilder {
     serviceName: String,
     attributes: Map[String, Attribute],
     endpoints: Set[CRUD],
-    idAttribute: IDAttribute,
     createdByAttribute: CreatedByAttribute,
+    selectionAttribute: String = "id",
   ): ListMap[CRUD, Statement] = {
     val tableName = StringUtils.snakeCase(serviceName)
     val columns   = attributes.keys.map(Column).toSeq
@@ -70,19 +70,19 @@ object DatabaseBuilder {
           Read -> Statement.Read(
             tableName,
             columns = columns,
-            condition = Some(PreparedComparison(idAttribute.name, ComparisonOperator.Equal)),
+            condition = Some(PreparedComparison(selectionAttribute, ComparisonOperator.Equal)),
           )
         case Update =>
           Update -> Statement.Update(
             tableName,
             assignments = columns.map(Assignment(_, PreparedValue)),
-            condition = Some(PreparedComparison(idAttribute.name, ComparisonOperator.Equal)),
+            condition = Some(PreparedComparison(selectionAttribute, ComparisonOperator.Equal)),
             returnColumns = columns,
           )
         case Delete =>
           Delete -> Statement.Delete(
             tableName,
-            condition = Some(PreparedComparison(idAttribute.name, ComparisonOperator.Equal)),
+            condition = Some(PreparedComparison(selectionAttribute, ComparisonOperator.Equal)),
           )
         case List =>
           createdByAttribute match {

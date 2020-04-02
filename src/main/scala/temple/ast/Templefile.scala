@@ -18,7 +18,7 @@ case class Templefile(
 
   def servicesWithPorts: Iterable[(String, ServiceBlock, Ports)] =
     services
-      .zip(Iterator.from(1024, step = 2))
+      .zip(Iterator.from(1025, step = 2)) // 1024 is reserved for auth service
       .map { case ((name, service), port) => (name, service, Ports(port, port + 1)) }
 
   /** Fall back to the default metadata for the project */
