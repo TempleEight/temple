@@ -2,11 +2,11 @@ package temple.builder
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.ast.AttributeType._
-import temple.ast.Metadata.Database
+import temple.ast.Metadata.{Database, ServiceAuth}
 import temple.ast.{Attribute, AttributeType}
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
-import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceRoot}
+import temple.generate.server._
 
 import scala.collection.immutable.ListMap
 
@@ -129,6 +129,23 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "image"          -> Attribute(BlobType()),
       ),
       datastore = Database.Postgres,
+    )
+  }
+
+  it should "generate correct AuthServiceRoot" in {
+    val authServiceRoot: AuthServiceRoot = ServerBuilder.buildAuthRoot(
+      BuilderTestData.simpleTemplefile,
+      GoLanguageDetail("github.com/squat/and/dab"),
+      1000,
+    )
+
+    authServiceRoot shouldBe AuthServiceRoot(
+      "github.com/squat/and/dab/auth",
+      1000,
+      AuthAttribute(ServiceAuth.Email, AttributeType.StringType()),
+      IDAttribute("id"),
+      "INSERT INTO auth (id, password, email) VALUES ($1, $2, $3) RETURNING id, password, email;",
+      "SELECT id, password, email FROM auth WHERE id = $1;",
     )
   }
 

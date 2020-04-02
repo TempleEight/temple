@@ -51,13 +51,13 @@ object DatabaseBuilder {
 
   def buildQuery(
     serviceName: String,
-    service: ServiceBlock,
+    attributes: Map[String, Attribute],
     endpoints: Set[CRUD],
     idAttribute: IDAttribute,
     createdByAttribute: CreatedByAttribute,
   ): ListMap[CRUD, Statement] = {
     val tableName = StringUtils.snakeCase(serviceName)
-    val columns   = service.attributes.keys.map(Column).toSeq
+    val columns   = attributes.keys.map(Column).toSeq
     ListMap.from(
       endpoints.map {
         case Create =>
