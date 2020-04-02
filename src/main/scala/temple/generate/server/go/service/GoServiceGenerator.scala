@@ -59,6 +59,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceHookGenerator.generateHookStruct(root, operations),
         GoServiceHookGenerator.generateHookErrorStruct,
         GoServiceHookGenerator.generateHookErrorFunction,
+        GoServiceHookGenerator.generateAddHookMethods(root, operations),
       ),
       File(s"${root.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),
       File(s"${root.name}/dao", "dao.go") -> mkCode.doubleLines(
