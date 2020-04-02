@@ -20,57 +20,70 @@ object GoServiceMainListHandlerGenerator {
       case _: CreatedByAttribute.EnumerateByAll     => false
     }
 
+    // Fetch list from DAO
+    val queryDAOBlock =
+      genDeclareAndAssign(
+        genMethodCall(
+          "env.dao",
+          s"List${root.name.capitalize}",
+          when(byCreator) {
+            genPopulateStruct(
+              s"dao.List${root.name.capitalize}Input",
+              ListMap(s"AuthID" -> "auth.ID"),
+            )
+          },
+        ),
+        s"${root.name}List",
+        "err",
+      )
+
+    // Check error from fetching list from DAO
+    val queryDAOErrorBlock = genIfErr(
+      mkCode.lines(
+        generateHTTPError(
+          "StatusInternalServerError",
+          "Something went wrong: %s",
+          genMethodCall("err", "Error"),
+        ),
+        genReturn(),
+      ),
+    )
+
+    // Instantiate list response object
+    val instantiateResponseBlock = genDeclareAndAssign(
+      genPopulateStruct(
+        s"list${root.name.capitalize}Response",
+        ListMap(
+          s"${root.name.capitalize}List" -> genFunctionCall("make", s"[]list${root.name.capitalize}Element", "0"),
+        ),
+      ),
+      s"${root.name}ListResp",
+    )
+
+    // Map DAO result into response object
+    val mapResponseBlock = genForLoop(
+      genDeclareAndAssign(s"range *${root.name}List", "_", root.name),
+      genAssign(
+        genFunctionCall(
+          "append",
+          s"${root.name}ListResp.${root.name.capitalize}List",
+          genPopulateStruct(s"list${root.name.capitalize}Element", responseMap),
+        ),
+        s"${root.name}ListResp.${root.name.capitalize}List",
+      ),
+    )
+
     mkCode(
       generateHandlerDecl(root, List),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
           when(byCreator) { generateExtractAuthBlock() },
           mkCode.lines(
-            genDeclareAndAssign(
-              genMethodCall(
-                "env.dao",
-                s"List${root.name.capitalize}",
-                when(byCreator) {
-                  genPopulateStruct(
-                    s"dao.List${root.name.capitalize}Input",
-                    ListMap(s"AuthID" -> "auth.ID"),
-                  )
-                },
-              ),
-              s"${root.name}List",
-              "err",
-            ),
-            genIfErr(
-              mkCode.lines(
-                generateHTTPError(
-                  "StatusInternalServerError",
-                  "Something went wrong: %s",
-                  genMethodCall("err", "Error"),
-                ),
-                genReturn(),
-              ),
-            ),
+            queryDAOBlock,
+            queryDAOErrorBlock,
           ),
-          genDeclareAndAssign(
-            genPopulateStruct(
-              s"list${root.name.capitalize}Response",
-              ListMap(
-                s"${root.name.capitalize}List" -> genFunctionCall("make", s"[]list${root.name.capitalize}Element", "0"),
-              ),
-            ),
-            s"${root.name}ListResp",
-          ),
-          genForLoop(
-            genDeclareAndAssign(s"range *${root.name}List", "_", root.name),
-            genAssign(
-              genFunctionCall(
-                "append",
-                s"${root.name}ListResp.${root.name.capitalize}List",
-                genPopulateStruct(s"list${root.name.capitalize}Element", responseMap),
-              ),
-              s"${root.name}ListResp.${root.name.capitalize}List",
-            ),
-          ),
+          instantiateResponseBlock,
+          mapResponseBlock,
           genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", s"${root.name}ListResp"),
         ),
       ),
