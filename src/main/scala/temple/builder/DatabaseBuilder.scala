@@ -7,7 +7,7 @@ import temple.generate.database.ast.ColumnConstraint.Check
 import temple.generate.database.ast.Condition.PreparedComparison
 import temple.generate.database.ast.Expression.PreparedValue
 import temple.generate.database.ast._
-import temple.generate.server.{CreatedByAttribute, IDAttribute}
+import temple.generate.server.CreatedByAttribute
 import temple.utils.StringUtils
 
 import scala.collection.immutable.ListMap
@@ -53,7 +53,6 @@ object DatabaseBuilder {
     serviceName: String,
     attributes: Map[String, Attribute],
     endpoints: Set[CRUD],
-    idAttribute: IDAttribute,
     createdByAttribute: CreatedByAttribute,
     selectionAttribute: String = "id",
   ): ListMap[CRUD, Statement] = {

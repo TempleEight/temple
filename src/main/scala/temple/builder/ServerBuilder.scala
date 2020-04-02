@@ -46,7 +46,7 @@ object ServerBuilder {
 
     val queries: ListMap[CRUD, String] =
       DatabaseBuilder
-        .buildQuery(serviceName, serviceBlock.attributes, endpoints, idAttribute, createdBy)
+        .buildQuery(serviceName, serviceBlock.attributes, endpoints, createdBy, selectionAttribute = idAttribute.name)
         .map {
           case (crud, statement) =>
             crud -> (database match {
@@ -103,8 +103,6 @@ object ServerBuilder {
         )
     }
 
-    val idAttribute = IDAttribute("id")
-
     val (createQuery: String, readQuery: String) =
       templefile.projectBlock.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase) match {
         case Database.Postgres =>
@@ -114,7 +112,6 @@ object ServerBuilder {
               "auth",
               attributes,
               Set(Create, Read),
-              idAttribute,
               CreatedByAttribute.None,
               selectionAttribute = "email",
             )
@@ -127,7 +124,7 @@ object ServerBuilder {
       moduleName,
       port,
       AuthAttribute(serviceAuth, AttributeType.StringType()),
-      idAttribute,
+      IDAttribute("id"),
       createQuery,
       readQuery,
     )
