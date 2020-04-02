@@ -58,6 +58,7 @@ object CodeTerm {
   implicit class CodeTermIterableString(strings: IterableOnce[String])
       extends CodeTermIterable(strings.iterator.map(CodeTermString))
 
+  /** Handles the case of an iterable of optional strings */
   implicit class CodeTermDoubleIterable(options: IterableOnce[IterableOnce[String]]) extends CodeTerm {
     override def flatIterator: Iterator[String] = options.iterator.flatMap(_.flatIterator)
   }
