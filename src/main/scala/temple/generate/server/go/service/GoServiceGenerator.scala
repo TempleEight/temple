@@ -42,7 +42,7 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${root.name}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
       File(root.name, s"${root.name}.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoServiceMainGenerator.generateImports(root, usesTime, usesComms, clientAttributes),
+        GoServiceMainGenerator.generateImports(root, usesTime, usesComms, clientAttributes, operations),
         GoServiceMainStructGenerator.generateEnvStruct(usesComms),
         when(clientAttributes.nonEmpty && (operations.contains(CRUD.Create) || operations.contains(CRUD.Read))) {
           GoServiceMainStructGenerator.generateRequestStructs(root, operations, clientAttributes)

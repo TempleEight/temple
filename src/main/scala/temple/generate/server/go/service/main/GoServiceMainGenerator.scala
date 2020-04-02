@@ -18,26 +18,19 @@ object GoServiceMainGenerator {
     usesTime: Boolean,
     usesComms: Boolean,
     clientAttributes: ListMap[String, Attribute],
+    operations: Set[CRUD],
   ): String =
     mkCode(
       "import",
       CodeWrap.parens.tabbed(
-        //doubleQuote("encoding/json"),
+        // TODO: This check is temporary to make the integrations tests pass
+        when(operations.contains(List)) { doubleQuote("encoding/json") },
         doubleQuote("flag"),
-        //doubleQuote("fmt"),
+        // TODO: This check is temporary to make the integrations tests pass
+        when(operations.contains(List)) { doubleQuote("fmt") },
         doubleQuote("log"),
         doubleQuote("net/http"),
-        // TODO: This check is temporary to make the integration tests pass
-        when(
-          clientAttributes
-            .exists {
-              case (_, attr) =>
-                attr.attributeType == AttributeType.DateType ||
-                attr.attributeType == AttributeType.TimeType ||
-                attr.attributeType == AttributeType.DateTimeType
-            },
-        ) { doubleQuote("time") },
-        //when(usesTime) { doubleQuote("time") },
+        when(usesTime) { doubleQuote("time") },
         "",
         when(usesComms) { doubleQuote(s"${root.module}/comm") },
         doubleQuote(s"${root.module}/dao"),

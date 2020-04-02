@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -148,7 +150,33 @@ func jsonMiddleware(next http.Handler) http.Handler {
 }
 
 func (env *env) listTempleuserHandler(w http.ResponseWriter, r *http.Request) {
+	templeuserList, err := env.dao.ListTempleuser()
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
 
+	templeuserListResp := listTempleuserResponse{
+		TempleuserList: make([]listTempleuserElement, 0),
+	}
+
+	for _, templeuser := range *templeuserList {
+		templeuserListResp.TempleuserList = append(templeuserListResp.TempleuserList, listTempleuserElement{
+			ID:                 templeuser.ID,
+			Username:           templeuser.Username,
+			Email:              templeuser.Email,
+			FirstName:          templeuser.FirstName,
+			LastName:           templeuser.LastName,
+			CreatedAt:          templeuser.CreatedAt.Format(time.RFC3339),
+			NumberOfDogs:       templeuser.NumberOfDogs,
+			CurrentBankBalance: templeuser.CurrentBankBalance,
+			BirthDate:          templeuser.BirthDate,
+			BreakfastTime:      templeuser.BreakfastTime,
+		})
+	}
+
+	json.NewEncoder(w).Encode(templeuserListResp)
 }
 
 func (env *env) createTempleuserHandler(w http.ResponseWriter, r *http.Request) {
