@@ -1,7 +1,6 @@
 package temple.generate.server.go.service.main
 
 import temple.ast.{Attribute, AttributeType}
-import temple.generate.CRUD
 import temple.generate.CRUD._
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
@@ -53,15 +52,15 @@ object GoServiceMainGenerator {
       for (operation <- operations.toSeq.sorted)
         yield operation match {
           case List =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.name}/all")}, env.list${root.name.capitalize}Handler).Methods(http.MethodGet)"
+            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/all")}, env.list${root.name}Handler).Methods(http.MethodGet)"
           case Create =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.name}")}, env.create${root.name.capitalize}Handler).Methods(http.MethodPost)"
+            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}")}, env.create${root.name}Handler).Methods(http.MethodPost)"
           case Read =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.name}/{id}")}, env.read${root.name.capitalize}Handler).Methods(http.MethodGet)"
+            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.read${root.name}Handler).Methods(http.MethodGet)"
           case Update =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.name}/{id}")}, env.update${root.name.capitalize}Handler).Methods(http.MethodPut)"
+            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.update${root.name}Handler).Methods(http.MethodPut)"
           case Delete =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.name}/{id}")}, env.delete${root.name.capitalize}Handler).Methods(http.MethodDelete)"
+            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.delete${root.name}Handler).Methods(http.MethodDelete)"
         }
 
     mkCode.lines(
@@ -80,7 +79,7 @@ object GoServiceMainGenerator {
   }
 
   private def generateHandler(root: ServiceRoot, operation: CRUD): String =
-    s"func (env *env) ${operation.toString.toLowerCase}${root.name.capitalize}Handler(w http.ResponseWriter, r *http.Request) {}"
+    s"func (env *env) ${operation.toString.toLowerCase}${root.name}Handler(w http.ResponseWriter, r *http.Request) {}"
 
   private[service] def generateHandlers(root: ServiceRoot, operations: Set[CRUD]): String =
     mkCode.doubleLines(

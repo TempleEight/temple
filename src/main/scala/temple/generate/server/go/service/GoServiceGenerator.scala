@@ -39,8 +39,8 @@ object GoServiceGenerator extends ServiceGenerator {
     }
 
     (Map(
-      File(s"${root.name}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
-      File(root.name, s"${root.name}.go") -> mkCode.doubleLines(
+      File(s"${root.kebabName}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
+      File(root.kebabName, s"${root.kebabName}.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
         GoServiceMainGenerator.generateImports(root, usesTime, usesComms, clientAttributes),
         GoServiceMainStructGenerator.generateEnvStruct(usesComms),
@@ -49,19 +49,19 @@ object GoServiceGenerator extends ServiceGenerator {
         },
         GoServiceMainStructGenerator.generateResponseStructs(root, operations),
         GoServiceMainGenerator.generateRouter(root, operations),
-        GoCommonMainGenerator.generateMain(root.name, root.port, usesComms, isAuth = false),
+        GoCommonMainGenerator.generateMain(root, root.port, usesComms, isAuth = false),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoServiceMainGenerator.generateHandlers(root, operations),
       ),
-      File(root.name, "hook.go") -> mkCode.doubleLines(
+      File(root.kebabName, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
         GoServiceHookGenerator.generateImports(root),
         GoServiceHookGenerator.generateHookStruct(root, operations),
         GoServiceHookGenerator.generateHookErrorStruct,
         GoServiceHookGenerator.generateHookErrorFunction,
       ),
-      File(s"${root.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),
-      File(s"${root.name}/dao", "dao.go") -> mkCode.doubleLines(
+      File(s"${root.kebabName}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),
+      File(s"${root.kebabName}/dao", "dao.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("dao"),
         GoServiceDAOGenerator.generateImports(root, usesTime),
         GoServiceDAOInterfaceGenerator.generateInterface(root, operations),
@@ -72,7 +72,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceDAOGenerator.generateQueryFunctions(operations),
         GoServiceDAOFunctionsGenerator.generateDAOFunctions(root),
       ),
-      File(s"${root.name}/util", "util.go") -> mkCode.doubleLines(
+      File(s"${root.kebabName}/util", "util.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("util"),
         GoServiceUtilGenerator.generateImports(),
         GoCommonUtilGenerator.generateConfigStruct(),
@@ -81,13 +81,13 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonUtilGenerator.generateCreateErrorJSON(),
         GoServiceUtilGenerator.generateIDsFromRequest(),
       ),
-      File(s"${root.name}/metric", "metric.go") -> mkCode.doubleLines(
+      File(s"${root.kebabName}/metric", "metric.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("metric"),
         GoServiceMetricGenerator.generateImports(),
         GoServiceMetricGenerator.generateVars(root, operations),
       ),
     ) ++ when(usesComms)(
-      File(s"${root.name}/comm", "handler.go") -> mkCode.doubleLines(
+      File(s"${root.kebabName}/comm", "handler.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("comm"),
         GoServiceCommGenerator.generateImports(root),
         GoServiceCommGenerator.generateInterface(root),

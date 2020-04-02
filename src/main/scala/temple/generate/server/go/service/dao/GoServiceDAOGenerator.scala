@@ -1,10 +1,10 @@
 package temple.generate.server.go.service.dao
 
-import temple.ast.{Attribute, AttributeType}
+import temple.ast.AttributeType
 import temple.generate.CRUD._
 import temple.generate.server.go.common.GoCommonDAOGenerator
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
-import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceRoot}
+import temple.generate.server.{CreatedByAttribute, ServiceRoot}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
 import temple.utils.StringUtils.doubleQuote
@@ -31,7 +31,7 @@ object GoServiceDAOGenerator {
     )
 
   private[dao] def generateDAOFunctionName(root: ServiceRoot, operation: CRUD): String =
-    s"$operation${root.name.capitalize}"
+    s"$operation${root.name}"
 
   private[service] def generateDatastoreObjectStruct(root: ServiceRoot): String = {
     val idMap = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(AttributeType.UUIDType))
@@ -42,13 +42,13 @@ object GoServiceDAOGenerator {
         ListMap(enumerating.name.capitalize -> generateGoType(AttributeType.UUIDType))
     }
     val attributesMap = root.attributes.map {
-      case (name, attribute) => (name.capitalize -> generateGoType(attribute.attributeType))
+      case (name, attribute) => name.capitalize -> generateGoType(attribute.attributeType)
     }
 
     mkCode.lines(
-      s"// ${root.name.capitalize} encapsulates the object stored in the datastore",
+      s"// ${root.name} encapsulates the object stored in the datastore",
       mkCode(
-        s"type ${root.name.capitalize} struct",
+        s"type ${root.name} struct",
         CodeWrap.curly.tabbed(
           // Compose struct fields
           CodeUtils.pad(idMap ++ createdByMap ++ attributesMap),
@@ -72,10 +72,12 @@ object GoServiceDAOGenerator {
       "",
       """import "fmt"""",
       "",
-      s"// Err${root.name.capitalize}NotFound is returned when a ${root.name} for the provided ID was not found",
-      s"type Err${root.name.capitalize}NotFound string",
+      s"// Err${root.name}NotFound is returned when a ${root.decapitalizedName} for the provided ID was not found",
+      s"type Err${root.name}NotFound string",
       "",
-      s"func (e Err${root.name.capitalize}NotFound) Error() string ${CodeWrap.curly
-        .tabbed(s"""return fmt.Sprintf("${root.name} not found with ID %d", string(e))""")}",
+      mkCode(
+        s"func (e Err${root.name}NotFound) Error() string",
+        CodeWrap.curly.tabbed(s"""return fmt.Sprintf("${root.decapitalizedName} not found with ID %d", string(e))"""),
+      ),
     )
 }

@@ -10,6 +10,7 @@ import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
 import temple.generate.database.{PostgresContext, PostgresGenerator, PreparedType}
 import temple.generate.server._
+import temple.utils.StringUtils
 
 import scala.collection.immutable.ListMap
 
@@ -58,7 +59,7 @@ object ServerBuilder {
         }
 
     val moduleName: String = detail match {
-      case GoLanguageDetail(modulePath) => s"$modulePath/$serviceName"
+      case GoLanguageDetail(modulePath) => s"$modulePath/${StringUtils.kebabCase(serviceName)}"
     }
 
     // The names of each service this service communicates with, i.e all the foreign key attributes of the service

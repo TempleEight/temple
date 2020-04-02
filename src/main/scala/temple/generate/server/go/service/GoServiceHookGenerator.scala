@@ -17,16 +17,16 @@ object GoServiceHookGenerator {
   private[service] def generateHookStruct(root: ServiceRoot, operations: Set[CRUD]): String = {
     val beforeCreate = operations.toSeq.sorted.map {
       case op @ (CRUD.List | CRUD.Read | CRUD.Delete) =>
-        s"before${op.toString}Hooks" -> s"[]*func(env *env, input *dao.${op.toString}${root.name.capitalize}Input) *HookError"
+        s"before${op.toString}Hooks" -> s"[]*func(env *env, input *dao.${op.toString}${root.name}Input) *HookError"
       case op @ (CRUD.Create | CRUD.Update) =>
-        s"before${op.toString}Hooks" -> s"[]*func(env *env, req ${op.toString.toLowerCase}${root.name.capitalize}Request, input *dao.${op.toString}${root.name.capitalize}Input) *HookError"
+        s"before${op.toString}Hooks" -> s"[]*func(env *env, req ${op.toString.toLowerCase}${root.name}Request, input *dao.${op.toString}${root.name}Input) *HookError"
     }
 
     val afterCreate = operations.toSeq.sorted.map {
       case CRUD.List =>
-        "afterListHooks" -> s"[]*func(env *env, ${root.name}List *[]dao.${root.name.capitalize}) *HookError"
+        "afterListHooks" -> s"[]*func(env *env, ${root.name}List *[]dao.${root.name}) *HookError"
       case op @ (CRUD.Create | CRUD.Read | CRUD.Update) =>
-        s"after${op.toString}Hooks" -> s"[]*func(env *env, ${root.name} *dao.${root.name.capitalize}) *HookError"
+        s"after${op.toString}Hooks" -> s"[]*func(env *env, ${root.decapitalizedName} *dao.${root.name}) *HookError"
       case CRUD.Delete =>
         s"afterDeleteHooks" -> s"[]*func(env *env) *HookError"
     }

@@ -18,7 +18,7 @@ import temple.generate.metrics.prometheus.PrometheusConfigGenerator
 import temple.generate.metrics.prometheus.ast.PrometheusJob
 import temple.generate.server.go.service.GoServiceGenerator
 import temple.generate.target.openapi.OpenAPIGenerator
-import temple.utils.StringUtils
+import temple.utils.StringUtils._
 
 object ProjectBuilder {
 
@@ -54,22 +54,22 @@ object ProjectBuilder {
           case Database.Postgres =>
             implicit val context: PostgresContext = PostgresContext(QuestionMarks)
             val postgresStatements                = createStatements.map(PostgresGenerator.generate).mkString("\n\n")
-            (File(s"${name.toLowerCase}-db", "init.sql"), postgresStatements)
+            (File(s"${kebabCase(name)}-db", "init.sql"), postgresStatements)
         }
     }
 
     val dockerfiles = templefile.servicesWithPorts.map {
       case (name, service, port) =>
-        val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, port.service)
+        val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(kebabCase(name), service, port.service)
         val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)
-        (File(s"${name.toLowerCase}", "Dockerfile"), dockerfileContents)
+        (File(s"${kebabCase(name)}", "Dockerfile"), dockerfileContents)
     }
 
     val openAPIRoot = OpenAPIBuilder.createOpenAPI(templefile)
     val apiFiles    = OpenAPIGenerator.generate(openAPIRoot)
 
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(
-      StringUtils.kebabCase(templefile.projectName),
+      kebabCase(templefile.projectName),
       templefile.servicesWithPorts.map { case (name, block, ports) => (name, block, ports.service) }.toSeq,
     )
     val kubeFiles = KubernetesGenerator.generate(orchestrationRoot)
@@ -80,8 +80,8 @@ object ProjectBuilder {
     val metrics = templefile.services.map {
         case (name, service) =>
           val rows             = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
-          val grafanaDashboard = GrafanaDashboardGenerator.generate(name.toLowerCase, name, rows)
-          (File(s"grafana/provisioning/dashboards", s"${name.toLowerCase}.json"), grafanaDashboard)
+          val grafanaDashboard = GrafanaDashboardGenerator.generate(name, name, rows)
+          (File(s"grafana/provisioning/dashboards", s"${kebabCase(name)}.json"), grafanaDashboard)
       } ++ Map(
         File(s"grafana/provisioning/dashboards", "dashboards.yml") ->
         GrafanaDashboardConfigGenerator.generate(datasource),
@@ -91,7 +91,7 @@ object ProjectBuilder {
         PrometheusConfigGenerator.generate(
           templefile.servicesWithPorts.map {
             case (serviceName, _, ports) =>
-              PrometheusJob(serviceName.toLowerCase, s"${serviceName.toLowerCase}:${ports.metrics}")
+              PrometheusJob(kebabCase(serviceName), s"${kebabCase(serviceName)}:${ports.metrics}")
           }.toSeq,
         ),
       )
@@ -99,7 +99,7 @@ object ProjectBuilder {
     val serverFiles = templefile.servicesWithPorts.flatMap {
       case (name, service, port) =>
         val serviceRoot =
-          ServerBuilder.buildServiceRoot(name.toLowerCase, service, port.service, endpoints(service), detail)
+          ServerBuilder.buildServiceRoot(name, service, port.service, endpoints(service), detail)
         service.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
           case ServiceLanguage.Go =>
             GoServiceGenerator.generate(serviceRoot)
