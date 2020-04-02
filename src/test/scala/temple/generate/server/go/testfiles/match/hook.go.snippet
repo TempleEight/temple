@@ -1,3 +1,28 @@
 package main
 
 import "github.com/TempleEight/spec-golang/match/dao"
+
+// Hook allows additional code to be executed before and after every datastore interaction
+// Hooks are executed in the order they are defined, such that if any hook errors, future hooks are not executed and the request is terminated
+type Hook struct {
+	beforeListHooks   []*func(env *env, input *dao.ListMatchInput) *HookError
+	beforeCreateHooks []*func(env *env, req createMatchRequest, input *dao.CreateMatchInput) *HookError
+	beforeReadHooks   []*func(env *env, input *dao.ReadMatchInput) *HookError
+	beforeUpdateHooks []*func(env *env, req updateMatchRequest, input *dao.UpdateMatchInput) *HookError
+	beforeDeleteHooks []*func(env *env, input *dao.DeleteMatchInput) *HookError
+	afterListHooks    []*func(env *env, matchList *[]dao.Match) *HookError
+	afterCreateHooks  []*func(env *env, match *dao.Match) *HookError
+	afterReadHooks    []*func(env *env, match *dao.Match) *HookError
+	afterUpdateHooks  []*func(env *env, match *dao.Match) *HookError
+	afterDeleteHooks  []*func(env *env) *HookError
+}
+
+// HookError wraps an existing error with HTTP status code
+type HookError struct {
+	statusCode int
+	error      error
+}
+
+func (e *HookError) Error() string {
+	return e.error.Error()
+}

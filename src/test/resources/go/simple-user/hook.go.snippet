@@ -1,3 +1,26 @@
 package main
 
 import "github.com/squat/and/dab/templeuser/dao"
+
+// Hook allows additional code to be executed before and after every datastore interaction
+// Hooks are executed in the order they are defined, such that if any hook errors, future hooks are not executed and the request is terminated
+type Hook struct {
+	beforeCreateHooks []*func(env *env, req createTempleuserRequest, input *dao.CreateTempleuserInput) *HookError
+	beforeReadHooks   []*func(env *env, input *dao.ReadTempleuserInput) *HookError
+	beforeUpdateHooks []*func(env *env, req updateTempleuserRequest, input *dao.UpdateTempleuserInput) *HookError
+	beforeDeleteHooks []*func(env *env, input *dao.DeleteTempleuserInput) *HookError
+	afterCreateHooks  []*func(env *env, templeuser *dao.Templeuser) *HookError
+	afterReadHooks    []*func(env *env, templeuser *dao.Templeuser) *HookError
+	afterUpdateHooks  []*func(env *env, templeuser *dao.Templeuser) *HookError
+	afterDeleteHooks  []*func(env *env) *HookError
+}
+
+// HookError wraps an existing error with HTTP status code
+type HookError struct {
+	statusCode int
+	error      error
+}
+
+func (e *HookError) Error() string {
+	return e.error.Error()
+}
