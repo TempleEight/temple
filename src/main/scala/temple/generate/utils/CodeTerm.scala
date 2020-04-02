@@ -23,7 +23,6 @@ object CodeTerm {
   // https://scalac.io/typeclasses-in-scala/
   trait CodeTermClass[-C] {
     def flatIterator(code: C): Iterator[String]
-    def mkCodeList(code: C): CodeTermList = new CodeTermList(flatIterator(code))
   }
 
   /** Add the flatIterator method to anything that is a codeterm*/
