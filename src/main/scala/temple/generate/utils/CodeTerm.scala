@@ -30,12 +30,6 @@ object CodeTerm {
     def flatIterator: Iterator[String] = codeTermClass.flatIterator(codeTerm)
   }
 
-  /** Turns a [[String]] into a [[CodeTerm]], with a trivial iterator of just the single string */
-  implicit val stringCodeTerm: CodeTermClass[String] = Iterable.single(_).iterator
-
-  /** Turns a [[None]] into a [[CodeTerm]], with a trivial iterator of nothing */
-  implicit val noneCodeTerm: CodeTermClass[None.type] = _ => Iterator.empty
-
   /**
     * Turns a list of items into a string with separators, constructed with
     * [[temple.generate.utils.CodeTerm.mkCode#list(scala.collection.immutable.Seq)]]
@@ -51,8 +45,13 @@ object CodeTerm {
 
     /** Add newlines after each separator */
     def spaced: CodeTermList = new CodeTermList(strings, ",\n")
-
   }
+
+  /** Turns a [[String]] into a [[CodeTerm]], with a trivial iterator of just the single string */
+  implicit val stringCodeTerm: CodeTermClass[String] = Iterable.single(_).iterator
+
+  /** Turns a [[None]] into a [[CodeTerm]], with a trivial iterator of nothing */
+  implicit val noneCodeTerm: CodeTermClass[None.type] = _ => Iterator.empty
 
   /** Turns an [[IterableOnce]] into a [[CodeTerm]], with a trivial iterator of nothing */
   implicit def iterableCodeTerm[C: CodeTermClass]: CodeTermClass[IterableOnce[C]] = _.iterator.flatMap(_.flatIterator)
