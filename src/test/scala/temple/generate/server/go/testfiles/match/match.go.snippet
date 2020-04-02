@@ -113,12 +113,27 @@ func jsonMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {}
+func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
+}
 
-func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {}
+func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
 
-func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {}
+}
 
-func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {}
+func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
 
-func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {}
+}
+
+func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {
+
+}
