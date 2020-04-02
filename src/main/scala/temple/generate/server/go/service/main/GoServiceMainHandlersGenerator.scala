@@ -1,14 +1,18 @@
 package temple.generate.server.go.service.main
 
+import temple.ast.Annotation
 import temple.ast.AttributeType.DateTimeType
-import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD._
-import temple.generate.server.{CreatedByAttribute, ServiceRoot}
-import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
+import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.server.go.service.main.GoServiceMainListHandlerGenerator.generateListHandler
+import temple.generate.server.go.service.main.GoServiceMainCreateHandlerGenerator.generateCreateHandler
+import temple.generate.server.go.service.main.GoServiceMainReadHandlerGenerator.generateReadHandler
+import temple.generate.server.go.service.main.GoServiceMainUpdateHandlerGenerator.generateUpdateHandler
+import temple.generate.server.go.service.main.GoServiceMainDeleteHandlerGenerator.generateDeleteHandler
+import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
 
-import scala.Option.when
 import scala.collection.immutable.ListMap
 
 object GoServiceMainHandlersGenerator {
@@ -31,11 +35,11 @@ object GoServiceMainHandlersGenerator {
     }
 
   /** Generate a handler method declaration */
-  private def generateHandlerDecl(root: ServiceRoot, operation: CRUD): String =
+  private[main] def generateHandlerDecl(root: ServiceRoot, operation: CRUD): String =
     s"func (env *env) ${operation.toString.toLowerCase}${root.name.capitalize}Handler(w http.ResponseWriter, r *http.Request)"
 
   /** Generate a errMsg declaration and http.Error call */
-  private def generateHTTPError(statusCodeEnum: String, errMsg: String, errMsgArgs: String*): String = {
+  private[main] def generateHTTPError(statusCodeEnum: String, errMsg: String, errMsgArgs: String*): String = {
     val createErrorJSONargs =
       if (errMsgArgs.nonEmpty) genMethodCall("fmt", "Sprintf", (doubleQuote(errMsg) +: errMsgArgs): _*)
       else doubleQuote(errMsg)
@@ -54,7 +58,7 @@ object GoServiceMainHandlersGenerator {
   }
 
   /** Generate the block for extracting an AuthID from the request header */
-  private def generateExtractAuthBlock(): String =
+  private[main] def generateExtractAuthBlock(): String =
     mkCode.lines(
       genDeclareAndAssign(genMethodCall("util", "ExtractAuthIDFromRequest", "r.Header"), "auth", "err"),
       genIfErr(
@@ -63,107 +67,6 @@ object GoServiceMainHandlersGenerator {
           genReturn(),
         ),
       ),
-    )
-
-  /** Generate the list handler function */
-  private def generateListHandler(root: ServiceRoot, responseMap: ListMap[String, String]): String = {
-    // Whether enumerating by created_by field or not
-    val byCreator = root.createdByAttribute match {
-      case CreatedByAttribute.None => false
-      case enumerating: CreatedByAttribute.Enumerating =>
-        enumerating match {
-          case _: CreatedByAttribute.EnumerateByCreator => true
-          case _: CreatedByAttribute.EnumerateByAll     => false
-        }
-    }
-
-    mkCode(
-      generateHandlerDecl(root, List),
-      CodeWrap.curly.tabbed(
-        mkCode.doubleLines(
-          when(byCreator) { generateExtractAuthBlock() },
-          mkCode.lines(
-            genDeclareAndAssign(
-              genMethodCall(
-                "env.dao",
-                s"List${root.name.capitalize}",
-                when(byCreator) {
-                  genPopulateStruct(
-                    s"dao.List${root.name.capitalize}Input",
-                    ListMap(s"AuthID" -> "auth.ID"),
-                  )
-                },
-              ),
-              s"${root.name}List",
-              "err",
-            ),
-            genIfErr(
-              mkCode.lines(
-                generateHTTPError(
-                  "StatusInternalServerError",
-                  "Something went wrong: %s",
-                  genMethodCall("err", "Error"),
-                ),
-                genReturn(),
-              ),
-            ),
-          ),
-          genDeclareAndAssign(
-            genPopulateStruct(
-              s"list${root.name.capitalize}Response",
-              ListMap(
-                s"${root.name.capitalize}List" -> genFunctionCall("make", s"[]list${root.name.capitalize}Element", "0"),
-              ),
-            ),
-            s"${root.name}ListResp",
-          ),
-          genForLoop(
-            genDeclareAndAssign(s"range *${root.name}List", "_", root.name),
-            genAssign(
-              genFunctionCall(
-                "append",
-                s"${root.name}ListResp.${root.name.capitalize}List",
-                genPopulateStruct(s"list${root.name.capitalize}Element", responseMap),
-              ),
-              s"${root.name}ListResp.${root.name.capitalize}List",
-            ),
-          ),
-          genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", s"${root.name}ListResp"),
-        ),
-      ),
-    )
-  }
-
-  /** Generate the create handler function */
-  private def generateCreateHandler(root: ServiceRoot): String =
-    mkCode(
-      generateHandlerDecl(root, Create),
-      CodeWrap.curly.tabbed(
-        ),
-    )
-
-  /** Generate the read handler function */
-  private def generateReadHandler(root: ServiceRoot): String =
-    mkCode(
-      generateHandlerDecl(root, Read),
-      CodeWrap.curly.tabbed(
-        ),
-    )
-
-  /** Generate the update handler function */
-  private def generateUpdateHandler(root: ServiceRoot): String =
-    mkCode(
-      generateHandlerDecl(root, Update),
-      CodeWrap.curly.tabbed(
-        ),
-    )
-
-  /** Generate the delete handler function */
-  private def generateDeleteHandler(root: ServiceRoot): String =
-    mkCode(
-      generateHandlerDecl(root, Delete),
-      CodeWrap.curly.tabbed(
-        ),
     )
 
   /** Generate the env handler functions */
