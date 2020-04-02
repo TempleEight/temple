@@ -342,7 +342,7 @@ object ProjectBuilderTestData {
       |
       |ENTRYPOINT ["./templeuser"]
       |
-      |EXPOSE 1024
+      |EXPOSE 1025
       |""".stripMargin
 
   val kongFiles: Map[File, FileContent] = Map(
@@ -379,7 +379,7 @@ object ProjectBuilderTestData {
       |      - image: sample-project-temple-user
       |        name: temple-user
       |        ports:
-      |        - containerPort: 1024
+      |        - containerPort: 1025
       |      imagePullSecrets:
       |      - name: regcred
       |      restartPolicy: Always
@@ -449,8 +449,8 @@ object ProjectBuilderTestData {
       |spec:
       |  ports:
       |  - name: api
-      |    port: 1024
-      |    targetPort: 1024
+      |    port: 1025
+      |    targetPort: 1025
       |  selector:
       |    app: temple-user
       |    kind: service
@@ -514,7 +514,7 @@ object ProjectBuilderTestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=temple-user-service' \
-      |  --data 'url=http://temple-user:1024/temple-user'
+      |  --data 'url=http://temple-user:1025/temple-user'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/routes \
@@ -571,7 +571,7 @@ object ProjectBuilderTestData {
       |- job_name: templeuser
       |  static_configs:
       |  - targets:
-      |    - templeuser:1025
+      |    - templeuser:1026
       |""".stripMargin
 
   val complexTemplefile: Templefile = Templefile(
@@ -993,7 +993,7 @@ object ProjectBuilderTestData {
       |
       |ENTRYPOINT ["./complexuser"]
       |
-      |EXPOSE 1024
+      |EXPOSE 1025
       |""".stripMargin
 
   val complexTemplefileKubeDeployment: String =
@@ -1022,7 +1022,7 @@ object ProjectBuilderTestData {
       |      - image: sample-complex-project-complex-user
       |        name: complex-user
       |        ports:
-      |        - containerPort: 1024
+      |        - containerPort: 1025
       |      imagePullSecrets:
       |      - name: regcred
       |      restartPolicy: Always
@@ -1092,8 +1092,8 @@ object ProjectBuilderTestData {
       |spec:
       |  ports:
       |  - name: api
-      |    port: 1024
-      |    targetPort: 1024
+      |    port: 1025
+      |    targetPort: 1025
       |  selector:
       |    app: complex-user
       |    kind: service
@@ -1157,7 +1157,7 @@ object ProjectBuilderTestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=complex-user-service' \
-      |  --data 'url=http://complex-user:1024/complex-user'
+      |  --data 'url=http://complex-user:1025/complex-user'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/complex-user-service/routes \
@@ -1221,6 +1221,6 @@ object ProjectBuilderTestData {
       |- job_name: complexuser
       |  static_configs:
       |  - targets:
-      |    - complexuser:1025
+      |    - complexuser:1026
       |""".stripMargin
 }

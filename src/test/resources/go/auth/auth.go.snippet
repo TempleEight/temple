@@ -83,7 +83,7 @@ func main() {
 
 	env := env{d, c, jwtCredential}
 
-	log.Fatal(http.ListenAndServe(":1023", env.router()))
+	log.Fatal(http.ListenAndServe(":1024", env.router()))
 }
 
 func jsonMiddleware(next http.Handler) http.Handler {

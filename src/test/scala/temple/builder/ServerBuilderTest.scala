@@ -30,7 +30,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       "test-service",
       "github.com/squat/and/dab/test-service",
       comms = Seq(),
-      port = 1024,
+      port = 1025,
       opQueries = ListMap(
         Create -> "INSERT INTO test-service (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image;",
         Read   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test-service WHERE id = $1;",
@@ -70,7 +70,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       "test-service",
       "github.com/squat/and/dab/test-service",
       comms = Seq(),
-      port = 1024,
+      port = 1025,
       opQueries = ListMap(),
       idAttribute = IDAttribute("id"),
       createdByAttribute = CreatedByAttribute.None,
@@ -104,7 +104,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       "test-complex-service",
       "github.com/squat/and/dab/test-complex-service",
       comms = Seq(),
-      port = 1024,
+      port = 1025,
       opQueries = ListMap(
         Create -> "INSERT INTO test-complex-service (id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image;",
         Read   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test-complex-service WHERE id = $1;",
