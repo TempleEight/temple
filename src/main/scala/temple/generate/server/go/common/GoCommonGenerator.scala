@@ -139,6 +139,23 @@ object GoCommonGenerator {
   ): String =
     s"$objectName.${genFunctionCall(methodName, firstArg, otherArgs: _*)}"
 
+  /** Generate method definition */
+  private[go] def genMethod(
+    objectName: String,
+    objectType: String,
+    methodName: String,
+    methodArgs: Seq[String],
+    methodReturn: Option[String],
+    methodBody: String,
+  ): String =
+    mkCode(
+      "func",
+      CodeWrap.parens(objectName, objectType),
+      CodeWrap.parens.prefix(methodName)(methodArgs),
+      methodReturn,
+      CodeWrap.curly.tabbed(methodBody),
+    )
+
   /** Generate if statement */
   private[go] def genIf(expr: String, body: String): String =
     mkCode(

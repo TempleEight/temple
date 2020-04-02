@@ -1,3 +1,26 @@
 package main
 
 import "github.com/TempleEight/spec-golang/user/dao"
+
+// Hook allows additional code to be executed before and after every datastore interaction
+// Hooks are executed in the order they are defined, such that if any hook errors, future hooks are not executed and the request is terminated
+type Hook struct {
+	beforeCreateHooks []*func(env *env, req createUserRequest, input *dao.CreateUserInput) *HookError
+	beforeReadHooks   []*func(env *env, input *dao.ReadUserInput) *HookError
+	beforeUpdateHooks []*func(env *env, req updateUserRequest, input *dao.UpdateUserInput) *HookError
+	beforeDeleteHooks []*func(env *env, input *dao.DeleteUserInput) *HookError
+	afterCreateHooks  []*func(env *env, user *dao.User) *HookError
+	afterReadHooks    []*func(env *env, user *dao.User) *HookError
+	afterUpdateHooks  []*func(env *env, user *dao.User) *HookError
+	afterDeleteHooks  []*func(env *env) *HookError
+}
+
+// HookError wraps an existing error with HTTP status code
+type HookError struct {
+	statusCode int
+	error      error
+}
+
+func (e *HookError) Error() string {
+	return e.error.Error()
+}
