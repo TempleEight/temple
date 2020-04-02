@@ -72,15 +72,13 @@ object GoServiceMainHandlersGenerator {
   private[service] def generateHandlers(root: ServiceRoot, operations: Set[CRUD]): String = {
     val responseMap = generateResponseMap(root)
     mkCode.doubleLines(
-      operations.toSeq.sorted.map(
-        {
-          case List   => generateListHandler(root, responseMap)
-          case Create => generateCreateHandler(root)
-          case Read   => generateReadHandler(root)
-          case Update => generateUpdateHandler(root)
-          case Delete => generateDeleteHandler(root)
-        },
-      ),
+      operations.toSeq.sorted.map {
+        case List   => generateListHandler(root, responseMap)
+        case Create => generateCreateHandler(root)
+        case Read   => generateReadHandler(root)
+        case Update => generateUpdateHandler(root)
+        case Delete => generateDeleteHandler(root)
+      },
     )
   }
 }
