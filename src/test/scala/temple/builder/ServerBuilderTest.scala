@@ -144,8 +144,8 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       1000,
       AuthAttribute(ServiceAuth.Email, AttributeType.StringType()),
       IDAttribute("id"),
-      "INSERT INTO auth (id, password, email) VALUES ($1, $2, $3) RETURNING id, password, email;",
-      "SELECT id, password, email FROM auth WHERE id = $1;",
+      "INSERT INTO auth (id, email, password) VALUES ($1, $2, $3) RETURNING id, email, password;",
+      "SELECT id, email, password FROM auth WHERE email = $1;",
     )
   }
 

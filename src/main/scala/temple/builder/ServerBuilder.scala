@@ -98,8 +98,8 @@ object ServerBuilder {
       case ServiceAuth.Email =>
         Map(
           "id"       -> Attribute(AttributeType.UUIDType),
+          "email"    -> Attribute(AttributeType.StringType()),
           "password" -> Attribute(AttributeType.StringType()),
-          "email"    -> Attribute(AttributeType.StringType(), valueAnnotations = Set(Annotation.Unique)),
         )
     }
 
@@ -110,7 +110,14 @@ object ServerBuilder {
         case Database.Postgres =>
           implicit val postgresContext: PostgresContext = PostgresContext(PreparedType.DollarNumbers)
           val queries =
-            DatabaseBuilder.buildQuery("auth", attributes, Set(Create, Read), idAttribute, CreatedByAttribute.None)
+            DatabaseBuilder.buildQuery(
+              "auth",
+              attributes,
+              Set(Create, Read),
+              idAttribute,
+              CreatedByAttribute.None,
+              selectionAttribute = "email",
+            )
           val createQuery = PostgresGenerator.generate(queries(Create))
           val readQuery   = PostgresGenerator.generate(queries(Read))
           (createQuery, readQuery)

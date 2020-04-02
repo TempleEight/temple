@@ -1,7 +1,7 @@
 package temple.builder.project
 
 import temple.ast.AttributeType._
-import temple.ast.Metadata.Database
+import temple.ast.Metadata.{Database, ServiceAuth}
 import temple.ast._
 import temple.generate.FileSystem.{File, FileContent}
 import temple.utils.FileUtils
@@ -578,6 +578,7 @@ object ProjectBuilderTestData {
     services = Map(
       "ComplexUser" -> ServiceBlock(
         complexServiceAttributes,
+        metadata = Seq(ServiceAuth.Email),
         structs = Map("TempleUser" -> StructBlock(simpleServiceAttributes)),
       ),
     ),
@@ -1189,6 +1190,13 @@ object ProjectBuilderTestData {
   val complexTemplefileErrorsFile: String       = FileUtils.readResources("go/complex-user/dao/errors.go.snippet")
   val complexTemplefileUtilFile: String         = FileUtils.readResources("go/complex-user/util/util.go.snippet")
   val complexTemplefileMetricFile: String       = FileUtils.readResources("go/complex-user/metric/metric.go.snippet")
+
+  val complexTemplefileAuthGoFile: String      = FileUtils.readResources("go/auth/auth.go.snippet")
+  val complexTemplefileAuthGoModFile: String   = FileUtils.readResources("go/auth/go.mod.snippet")
+  val complexTemplefileAuthUtilFile: String    = FileUtils.readResources("go/auth/util/util.go.snippet")
+  val complexTemplefileAuthDaoFile: String     = FileUtils.readResources("go/auth/dao/dao.go.snippet")
+  val complexTemplefileAuthErrorsFile: String  = FileUtils.readResources("go/auth/dao/errors.go.snippet")
+  val complexTemplefileAuthHandlerFile: String = FileUtils.readResources("go/auth/comm/handler.go.snippet")
 
   val complexTemplefileGrafanaDatasourceConfig: String =
     """apiVersion: 1
