@@ -102,7 +102,6 @@ object Metadata {
   }
 
   case class ServiceEnumerable(byThis: Boolean = false) extends ServiceMetadata with StructMetadata
-  case class TargetAuth(services: Seq[String])          extends TargetMetadata
   case class Uses(services: Seq[String])                extends ServiceMetadata
 
 }
