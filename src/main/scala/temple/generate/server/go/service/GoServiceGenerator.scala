@@ -16,7 +16,6 @@ object GoServiceGenerator extends ServiceGenerator {
 
   override def generate(root: ServiceRoot): Files = {
     /* TODO
-     * main in <>.go
      * handlers in <>.go
      * config.json
      */
@@ -50,7 +49,7 @@ object GoServiceGenerator extends ServiceGenerator {
         },
         GoServiceMainStructGenerator.generateResponseStructs(root, operations),
         GoServiceMainGenerator.generateRouter(root, operations),
-        GoServiceMainGenerator.generateMain(root, usesComms, operations),
+        GoCommonMainGenerator.generateMain(root.name, root.port, usesComms, isAuth = false),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoServiceMainGenerator.generateHandlers(root, operations),
       ),
@@ -77,6 +76,8 @@ object GoServiceGenerator extends ServiceGenerator {
       ),
       File(s"${root.name}/metric", "metric.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("metric"),
+        GoServiceMetricGenerator.generateImports(),
+        GoServiceMetricGenerator.generateVars(root, operations),
       ),
     ) ++ when(usesComms)(
       File(s"${root.name}/comm", "handler.go") -> mkCode.doubleLines(
