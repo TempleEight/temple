@@ -1,6 +1,5 @@
-package temple.generate.server.go
+package temple.generate.server.go.common
 
-import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator.{genAssign, genFunctionCall, genPopulateStruct}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
@@ -57,10 +56,10 @@ object GoCommonMetricGenerator {
       CodeWrap.curly.prefix("[]string").list(tags.map(doubleQuote)),
     )
 
-  private[go] def generateVars(serviceGlobals: Iterable[String], root: ServiceRoot): String = {
+  private[go] def generateVars(serviceGlobals: Iterable[String], rootName: String): String = {
     val successCounter = genAssign(
       generatePrometheusCounter(
-        name = s"${root.name.toLowerCase}_request_success_total",
+        name = s"${rootName.toLowerCase}_request_success_total",
         help = "The total number of successful requests",
         tags = Seq("request_type"),
       ),
@@ -69,7 +68,7 @@ object GoCommonMetricGenerator {
 
     val failureCounter = genAssign(
       generatePrometheusCounter(
-        name = s"${root.name.toLowerCase}_request_failure_total",
+        name = s"${rootName.toLowerCase}_request_failure_total",
         help = "The total number of failed requests",
         tags = Seq("request_type", "error_code"),
       ),
@@ -78,7 +77,7 @@ object GoCommonMetricGenerator {
 
     val databaseSummary = genAssign(
       generatePrometheusSummary(
-        name = s"${root.name.toLowerCase}_database_request_seconds",
+        name = s"${rootName.toLowerCase}_database_request_seconds",
         help = "The time spent executing database requests in seconds",
         objectives = Seq(0.5 -> 0.05, 0.9 -> 0.01, 0.95 -> 0.005, 0.99 -> 0.001),
         tags = Seq("query_type"),
