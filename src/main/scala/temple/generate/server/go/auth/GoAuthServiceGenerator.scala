@@ -1,7 +1,6 @@
 package temple.generate.server.go.auth
 
 import temple.generate.FileSystem._
-import temple.generate.server.go.GoCommonMetricGenerator
 import temple.generate.server.go.common._
 import temple.generate.server.{AuthServiceGenerator, AuthServiceRoot}
 import temple.generate.utils.CodeTerm.mkCode

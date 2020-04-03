@@ -1,6 +1,5 @@
-package temple.generate.server.go
+package temple.generate.server.go.common
 
-import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator.{genAssign, genFunctionCall, genPopulateStruct}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
