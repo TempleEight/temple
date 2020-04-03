@@ -1,6 +1,6 @@
 package temple.builder
 
-import temple.ast.{Metadata, ServiceBlock}
+import temple.ast.{GeneratedBlock, Metadata, ServiceBlock}
 import temple.builder.project.ProjectConfig
 import temple.generate.docker.ast.Statement._
 import temple.generate.docker.ast.{DockerfileRoot, Statement}
@@ -8,7 +8,7 @@ import temple.generate.docker.ast.{DockerfileRoot, Statement}
 /** Construct a Dockerfile from a Templefile service */
 object DockerfileBuilder {
 
-  def createServiceDockerfile(serviceName: String, service: ServiceBlock, port: Int): DockerfileRoot = {
+  def createServiceDockerfile(serviceName: String, service: GeneratedBlock, port: Int): DockerfileRoot = {
     val language    = service.lookupMetadata[Metadata.ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
     val dockerImage = ProjectConfig.dockerImage(language)
 

@@ -111,7 +111,7 @@ private class Validator private (templefile: Templefile) {
   def validate(): Seq[String] = {
     val context = SemanticContext.empty
 
-    templefile.services.foreachEntry(context(validateService))
+    templefile.providedServices.foreachEntry(context(validateService))
     templefile.targets.foreachEntry(context(validateBlockOfMetadata))
     validateBlockOfMetadata(templefile.projectBlock)(context :+ s"${templefile.projectName} project")
 
