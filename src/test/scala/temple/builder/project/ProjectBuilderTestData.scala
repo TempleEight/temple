@@ -1199,6 +1199,7 @@ object ProjectBuilderTestData {
   val complexTemplefileAuthDaoFile: String     = FileUtils.readResources("go/auth/dao/dao.go.snippet")
   val complexTemplefileAuthErrorsFile: String  = FileUtils.readResources("go/auth/dao/errors.go.snippet")
   val complexTemplefileAuthHandlerFile: String = FileUtils.readResources("go/auth/comm/handler.go.snippet")
+  val complexTemplefileAuthMetricFile: String  = FileUtils.readResources("go/auth/metric/metric.go.snippet")
 
   val complexTemplefileGrafanaDatasourceConfig: String =
     """apiVersion: 1
