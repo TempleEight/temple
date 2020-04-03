@@ -17,6 +17,7 @@ object GoCommonGenerator {
 
   private[go] def generateGoType(attributeType: AttributeType): String =
     attributeType match {
+      case ForeignKey(_)                                  => "uuid.UUID"
       case UUIDType                                       => "uuid.UUID"
       case IntType(_, Some(min), p) if p <= 1 && min >= 0 => "uint8"
       case IntType(_, Some(min), p) if p <= 2 && min >= 0 => "uint16"

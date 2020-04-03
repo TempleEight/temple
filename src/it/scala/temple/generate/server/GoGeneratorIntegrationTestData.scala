@@ -40,8 +40,8 @@ object GoGeneratorIntegrationTestData {
     IDAttribute("id"),
     CreatedByAttribute.EnumerateByCreator("authID", "createdBy"),
     ListMap(
-      "userOne"   -> Attribute(AttributeType.UUIDType),
-      "userTwo"   -> Attribute(AttributeType.UUIDType),
+      "userOne"   -> Attribute(AttributeType.ForeignKey("User")),
+      "userTwo"   -> Attribute(AttributeType.ForeignKey("User")),
       "matchedOn" -> Attribute(AttributeType.DateTimeType, Some(Annotation.ServerSet)),
     ),
     Postgres,
