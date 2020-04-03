@@ -56,12 +56,12 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "rate(complexuser_request_success_total{request_type=\"create\"}[5m])",
+          "expr" : "rate(templeuser_request_success_total{request_type=\"create\"}[5m])",
           "legendFormat" : "Success",
           "refId" : "A"
         },
         {
-          "expr" : "rate(complexuser_request_failure_total{request_type=\"create\"}[5m])",
+          "expr" : "rate(templeuser_request_failure_total{request_type=\"create\"}[5m])",
           "legendFormat" : "{{error_code}}",
           "refId" : "B"
         }
@@ -72,7 +72,7 @@
       "timeRegions" : [
       ],
       "timeShift" : null,
-      "title" : "Create ComplexUser Requests",
+      "title" : "Create TempleUser Requests",
       "tooltip" : {
         "shared" : true,
         "sort" : 0,
@@ -156,22 +156,22 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.5\",query_type=\"create\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.5\",query_type=\"create\"}",
           "legendFormat" : "50th Percentile",
           "refId" : "A"
         },
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.9\",query_type=\"create\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.9\",query_type=\"create\"}",
           "legendFormat" : "90th Percentile",
           "refId" : "B"
         },
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.95\",query_type=\"create\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.95\",query_type=\"create\"}",
           "legendFormat" : "95th Percentile",
           "refId" : "C"
         },
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.99\",query_type=\"create\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.99\",query_type=\"create\"}",
           "legendFormat" : "99th Percentile",
           "refId" : "D"
         }
@@ -266,12 +266,12 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "rate(complexuser_request_success_total{request_type=\"read\"}[5m])",
+          "expr" : "rate(templeuser_request_success_total{request_type=\"read\"}[5m])",
           "legendFormat" : "Success",
           "refId" : "A"
         },
         {
-          "expr" : "rate(complexuser_request_failure_total{request_type=\"read\"}[5m])",
+          "expr" : "rate(templeuser_request_failure_total{request_type=\"read\"}[5m])",
           "legendFormat" : "{{error_code}}",
           "refId" : "B"
         }
@@ -282,7 +282,7 @@
       "timeRegions" : [
       ],
       "timeShift" : null,
-      "title" : "Read ComplexUser Requests",
+      "title" : "Read TempleUser Requests",
       "tooltip" : {
         "shared" : true,
         "sort" : 0,
@@ -366,22 +366,22 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.5\",query_type=\"read\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.5\",query_type=\"read\"}",
           "legendFormat" : "50th Percentile",
           "refId" : "A"
         },
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.9\",query_type=\"read\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.9\",query_type=\"read\"}",
           "legendFormat" : "90th Percentile",
           "refId" : "B"
         },
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.95\",query_type=\"read\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.95\",query_type=\"read\"}",
           "legendFormat" : "95th Percentile",
           "refId" : "C"
         },
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.99\",query_type=\"read\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.99\",query_type=\"read\"}",
           "legendFormat" : "99th Percentile",
           "refId" : "D"
         }
@@ -476,12 +476,12 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "rate(complexuser_request_success_total{request_type=\"update\"}[5m])",
+          "expr" : "rate(templeuser_request_success_total{request_type=\"update\"}[5m])",
           "legendFormat" : "Success",
           "refId" : "A"
         },
         {
-          "expr" : "rate(complexuser_request_failure_total{request_type=\"update\"}[5m])",
+          "expr" : "rate(templeuser_request_failure_total{request_type=\"update\"}[5m])",
           "legendFormat" : "{{error_code}}",
           "refId" : "B"
         }
@@ -492,7 +492,7 @@
       "timeRegions" : [
       ],
       "timeShift" : null,
-      "title" : "Update ComplexUser Requests",
+      "title" : "Update TempleUser Requests",
       "tooltip" : {
         "shared" : true,
         "sort" : 0,
@@ -576,22 +576,22 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.5\",query_type=\"update\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.5\",query_type=\"update\"}",
           "legendFormat" : "50th Percentile",
           "refId" : "A"
         },
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.9\",query_type=\"update\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.9\",query_type=\"update\"}",
           "legendFormat" : "90th Percentile",
           "refId" : "B"
         },
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.95\",query_type=\"update\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.95\",query_type=\"update\"}",
           "legendFormat" : "95th Percentile",
           "refId" : "C"
         },
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.99\",query_type=\"update\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.99\",query_type=\"update\"}",
           "legendFormat" : "99th Percentile",
           "refId" : "D"
         }
@@ -686,12 +686,12 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "rate(complexuser_request_success_total{request_type=\"delete\"}[5m])",
+          "expr" : "rate(templeuser_request_success_total{request_type=\"delete\"}[5m])",
           "legendFormat" : "Success",
           "refId" : "A"
         },
         {
-          "expr" : "rate(complexuser_request_failure_total{request_type=\"delete\"}[5m])",
+          "expr" : "rate(templeuser_request_failure_total{request_type=\"delete\"}[5m])",
           "legendFormat" : "{{error_code}}",
           "refId" : "B"
         }
@@ -702,7 +702,7 @@
       "timeRegions" : [
       ],
       "timeShift" : null,
-      "title" : "Delete ComplexUser Requests",
+      "title" : "Delete TempleUser Requests",
       "tooltip" : {
         "shared" : true,
         "sort" : 0,
@@ -786,22 +786,22 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.5\",query_type=\"delete\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.5\",query_type=\"delete\"}",
           "legendFormat" : "50th Percentile",
           "refId" : "A"
         },
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.9\",query_type=\"delete\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.9\",query_type=\"delete\"}",
           "legendFormat" : "90th Percentile",
           "refId" : "B"
         },
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.95\",query_type=\"delete\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.95\",query_type=\"delete\"}",
           "legendFormat" : "95th Percentile",
           "refId" : "C"
         },
         {
-          "expr" : "complexuser_database_request_seconds{quantile=\"0.99\",query_type=\"delete\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.99\",query_type=\"delete\"}",
           "legendFormat" : "99th Percentile",
           "refId" : "D"
         }
@@ -879,7 +879,7 @@
     ]
   },
   "timezone" : "",
-  "title" : "ComplexUser Dashboard",
-  "uid" : "complexuser",
+  "title" : "TempleUser Dashboard",
+  "uid" : "temple-user",
   "version" : 1
 }

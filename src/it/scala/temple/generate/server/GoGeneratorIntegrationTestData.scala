@@ -9,7 +9,7 @@ import scala.collection.immutable.ListMap
 object GoGeneratorIntegrationTestData {
 
   val simpleServiceRoot: ServiceRoot = ServiceRoot(
-    "user",
+    "User",
     "github.com/TempleEight/spec-golang/user",
     Seq.empty,
     ListMap(
@@ -26,7 +26,7 @@ object GoGeneratorIntegrationTestData {
   )
 
   val simpleServiceRootWithComms: ServiceRoot = ServiceRoot(
-    "match",
+    "Match",
     "github.com/TempleEight/spec-golang/match",
     Seq("user"),
     ListMap(
@@ -40,8 +40,8 @@ object GoGeneratorIntegrationTestData {
     IDAttribute("id"),
     CreatedByAttribute.EnumerateByCreator("authID", "createdBy"),
     ListMap(
-      "userOne"   -> Attribute(AttributeType.UUIDType),
-      "userTwo"   -> Attribute(AttributeType.UUIDType),
+      "userOne"   -> Attribute(AttributeType.ForeignKey("User")),
+      "userTwo"   -> Attribute(AttributeType.ForeignKey("User")),
       "matchedOn" -> Attribute(AttributeType.DateTimeType, Some(Annotation.ServerSet)),
     ),
     Postgres,

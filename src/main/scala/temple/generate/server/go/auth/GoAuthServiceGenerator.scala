@@ -2,7 +2,7 @@ package temple.generate.server.go.auth
 
 import temple.generate.FileSystem._
 import temple.generate.server.go.common._
-import temple.generate.server.{AuthServiceGenerator, AuthServiceRoot}
+import temple.generate.server.{AuthServiceGenerator, AuthServiceRoot, ServiceRoot}
 import temple.generate.utils.CodeTerm.mkCode
 
 object GoAuthServiceGenerator extends AuthServiceGenerator {
@@ -18,10 +18,18 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceMainGenerator.generateImports(root),
         GoAuthServiceMainGenerator.generateStructs(),
         GoAuthServiceMainGenerator.generateRouter(),
-        GoCommonMainGenerator.generateMain("auth", root.port, usesComms = true, isAuth = true),
+        GoCommonMainGenerator.generateMain(new ServiceRoot.Name("Auth"), root.port, usesComms = true, isAuth = true),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoAuthServiceMainGenerator.generateHandlers(),
         GoAuthServiceMainGenerator.generateCreateToken(),
+      ),
+      File("auth", "hook.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("main"),
+        GoCommonHookGenerator.generateImports(root.module),
+        GoAuthServiceHookGenerator.generateHookStruct,
+        GoCommonHookGenerator.generateHookErrorStruct,
+        GoCommonHookGenerator.generateHookErrorFunction,
+        GoAuthServiceHookGenerator.generateAddHookMethods,
       ),
       File("auth/dao", "errors.go") -> GoAuthServiceDAOGenerator.generateErrors(root),
       File("auth/dao", "dao.go") -> mkCode.doubleLines(
@@ -48,6 +56,11 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoCommonUtilGenerator.generateConfigStruct(),
         GoCommonUtilGenerator.generateGetConfig(),
         GoCommonUtilGenerator.generateCreateErrorJSON(),
+      ),
+      File("auth/metric", "metric.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("metric"),
+        GoCommonMetricGenerator.generateImports(),
+        GoAuthServiceMetricGenerator.generateVars(),
       ),
     ).map { case (path, contents) => path -> (contents + "\n") }
 }

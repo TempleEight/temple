@@ -27,7 +27,7 @@ object SimpleE2ETestData {
   val dockerfile: String =
     """FROM golang:1.13.7-alpine
       |
-      |WORKDIR /templeuser
+      |WORKDIR /temple-user
       |
       |COPY go.mod go.sum ./
       |
@@ -35,13 +35,13 @@ object SimpleE2ETestData {
       |
       |COPY . .
       |
-      |COPY config.json /etc/templeuser-service
+      |COPY config.json /etc/temple-user-service/
       |
-      |RUN ["go", "build", "-o", "templeuser"]
+      |RUN ["go", "build", "-o", "temple-user"]
       |
-      |ENTRYPOINT ["./templeuser"]
+      |ENTRYPOINT ["./temple-user"]
       |
-      |EXPOSE 1024
+      |EXPOSE 1025
       |""".stripMargin
 
   val configureKong: String =
@@ -50,17 +50,17 @@ object SimpleE2ETestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=temple-user-service' \
-      |  --data 'url=http://temple-user:1024/temple-user'
+      |  --data 'url=http://temple-user:1025/temple-user'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=booking-service' \
-      |  --data 'url=http://booking:1026/booking'
+      |  --data 'url=http://booking:1027/booking'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=event-service' \
-      |  --data 'url=http://event:1028/event'
+      |  --data 'url=http://event:1029/event'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/routes \
@@ -118,7 +118,7 @@ object SimpleE2ETestData {
       |      - image: simple-temple-test-temple-user
       |        name: temple-user
       |        ports:
-      |        - containerPort: 1024
+      |        - containerPort: 1025
       |      imagePullSecrets:
       |      - name: regcred
       |      restartPolicy: Always
@@ -188,8 +188,8 @@ object SimpleE2ETestData {
       |spec:
       |  ports:
       |  - name: api
-      |    port: 1024
-      |    targetPort: 1024
+      |    port: 1025
+      |    targetPort: 1025
       |  selector:
       |    app: temple-user
       |    kind: service
@@ -247,7 +247,7 @@ object SimpleE2ETestData {
       |    kind: db
       |""".stripMargin
 
-  val grafanaDashboard: String = FileUtils.readResources("grafana/simple-templeuser.json").init
+  val grafanaDashboard: String = FileUtils.readResources("grafana/simple-temple-user.json").stripLineEnd
 
   val grafanaDashboardConfig: String =
     """apiVersion: 1
@@ -281,17 +281,26 @@ object SimpleE2ETestData {
       |  scrape_interval: 15s
       |  evaluation_interval: 15s
       |scrape_configs:
-      |- job_name: templeuser
+      |- job_name: temple-user
       |  static_configs:
       |  - targets:
-      |    - templeuser:1025
+      |    - temple-user:1026
       |- job_name: booking
       |  static_configs:
       |  - targets:
-      |    - booking:1027
+      |    - booking:1028
       |- job_name: event
       |  static_configs:
       |  - targets:
-      |    - event:1029
+      |    - event:1030
       |""".stripMargin
+
+  val authGoFile: String      = FileUtils.readResources("go/auth/auth.go.snippet")
+  val authGoModFile: String   = FileUtils.readResources("go/auth/go.mod.snippet")
+  val authHookFile: String    = FileUtils.readResources("go/auth/hook.go.snippet")
+  val authUtilFile: String    = FileUtils.readResources("go/auth/util/util.go.snippet")
+  val authDaoFile: String     = FileUtils.readResources("go/auth/dao/dao.go.snippet")
+  val authErrorsFile: String  = FileUtils.readResources("go/auth/dao/errors.go.snippet")
+  val authHandlerFile: String = FileUtils.readResources("go/auth/comm/handler.go.snippet")
+  val authMetricFile: String  = FileUtils.readResources("go/auth/metric/metric.go.snippet")
 }

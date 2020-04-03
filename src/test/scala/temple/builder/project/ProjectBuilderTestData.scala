@@ -1,7 +1,7 @@
 package temple.builder.project
 
 import temple.ast.AttributeType._
-import temple.ast.Metadata.Database
+import temple.ast.Metadata.{Database, ServiceAuth}
 import temple.ast._
 import temple.generate.FileSystem.{File, FileContent}
 import temple.utils.FileUtils
@@ -328,7 +328,7 @@ object ProjectBuilderTestData {
   val simpleTemplefileUsersDockerfile: String =
     """FROM golang:1.13.7-alpine
       |
-      |WORKDIR /templeuser
+      |WORKDIR /temple-user
       |
       |COPY go.mod go.sum ./
       |
@@ -336,13 +336,13 @@ object ProjectBuilderTestData {
       |
       |COPY . .
       |
-      |COPY config.json /etc/templeuser-service
+      |COPY config.json /etc/temple-user-service/
       |
-      |RUN ["go", "build", "-o", "templeuser"]
+      |RUN ["go", "build", "-o", "temple-user"]
       |
-      |ENTRYPOINT ["./templeuser"]
+      |ENTRYPOINT ["./temple-user"]
       |
-      |EXPOSE 1024
+      |EXPOSE 1025
       |""".stripMargin
 
   val kongFiles: Map[File, FileContent] = Map(
@@ -379,7 +379,7 @@ object ProjectBuilderTestData {
       |      - image: sample-project-temple-user
       |        name: temple-user
       |        ports:
-      |        - containerPort: 1024
+      |        - containerPort: 1025
       |      imagePullSecrets:
       |      - name: regcred
       |      restartPolicy: Always
@@ -449,8 +449,8 @@ object ProjectBuilderTestData {
       |spec:
       |  ports:
       |  - name: api
-      |    port: 1024
-      |    targetPort: 1024
+      |    port: 1025
+      |    targetPort: 1025
       |  selector:
       |    app: temple-user
       |    kind: service
@@ -514,7 +514,7 @@ object ProjectBuilderTestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=temple-user-service' \
-      |  --data 'url=http://temple-user:1024/temple-user'
+      |  --data 'url=http://temple-user:1025/temple-user'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/routes \
@@ -526,7 +526,7 @@ object ProjectBuilderTestData {
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
 
-  val simpleTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/templeuser.json").init
+  val simpleTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/temple-user.json").stripLineEnd
 
   val simpleTemplefileGrafanaDashboardConfig: String =
     """apiVersion: 1
@@ -542,7 +542,7 @@ object ProjectBuilderTestData {
       |    path: /etc/grafana/provisioning/dashboards
       |""".stripMargin
 
-  val simpleTemplefileTempleUserGoFile: String = FileUtils.readResources("go/simple-user/user.go.snippet")
+  val simpleTemplefileTempleUserGoFile: String = FileUtils.readResources("go/simple-user/simple-user.go.snippet")
   val simpleTemplefileHookGoFile: String       = FileUtils.readResources("go/simple-user/hook.go.snippet")
   val simpleTemplefileGoModFile: String        = FileUtils.readResources("go/simple-user/go.mod.snippet")
   val simpleTemplefileDaoFile: String          = FileUtils.readResources("go/simple-user/dao/dao.go.snippet")
@@ -568,10 +568,10 @@ object ProjectBuilderTestData {
       |  scrape_interval: 15s
       |  evaluation_interval: 15s
       |scrape_configs:
-      |- job_name: templeuser
+      |- job_name: temple-user
       |  static_configs:
       |  - targets:
-      |    - templeuser:1025
+      |    - temple-user:1026
       |""".stripMargin
 
   val complexTemplefile: Templefile = Templefile(
@@ -579,6 +579,7 @@ object ProjectBuilderTestData {
     services = Map(
       "ComplexUser" -> ServiceBlock(
         complexServiceAttributes,
+        metadata = Seq(ServiceAuth.Email),
         structs = Map("TempleUser" -> StructBlock(simpleServiceAttributes)),
       ),
     ),
@@ -978,7 +979,7 @@ object ProjectBuilderTestData {
   val complexTemplefileUsersDockerfile: String =
     """FROM golang:1.13.7-alpine
       |
-      |WORKDIR /complexuser
+      |WORKDIR /complex-user
       |
       |COPY go.mod go.sum ./
       |
@@ -986,13 +987,13 @@ object ProjectBuilderTestData {
       |
       |COPY . .
       |
-      |COPY config.json /etc/complexuser-service
+      |COPY config.json /etc/complex-user-service/
       |
-      |RUN ["go", "build", "-o", "complexuser"]
+      |RUN ["go", "build", "-o", "complex-user"]
       |
-      |ENTRYPOINT ["./complexuser"]
+      |ENTRYPOINT ["./complex-user"]
       |
-      |EXPOSE 1024
+      |EXPOSE 1025
       |""".stripMargin
 
   val complexTemplefileKubeDeployment: String =
@@ -1021,7 +1022,7 @@ object ProjectBuilderTestData {
       |      - image: sample-complex-project-complex-user
       |        name: complex-user
       |        ports:
-      |        - containerPort: 1024
+      |        - containerPort: 1025
       |      imagePullSecrets:
       |      - name: regcred
       |      restartPolicy: Always
@@ -1091,8 +1092,8 @@ object ProjectBuilderTestData {
       |spec:
       |  ports:
       |  - name: api
-      |    port: 1024
-      |    targetPort: 1024
+      |    port: 1025
+      |    targetPort: 1025
       |  selector:
       |    app: complex-user
       |    kind: service
@@ -1156,7 +1157,7 @@ object ProjectBuilderTestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=complex-user-service' \
-      |  --data 'url=http://complex-user:1024/complex-user'
+      |  --data 'url=http://complex-user:1025/complex-user'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/complex-user-service/routes \
@@ -1168,7 +1169,7 @@ object ProjectBuilderTestData {
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
 
-  val complexTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/complexuser.json").init
+  val complexTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/complex-user.json").stripLineEnd
 
   val complexTemplefileGrafanaDashboardConfig: String =
     """apiVersion: 1
@@ -1184,13 +1185,22 @@ object ProjectBuilderTestData {
       |    path: /etc/grafana/provisioning/dashboards
       |""".stripMargin
 
-  val complexTemplefileTempleUserGoFile: String = FileUtils.readResources("go/complex-user/complexuser.go.snippet")
+  val complexTemplefileTempleUserGoFile: String = FileUtils.readResources("go/complex-user/complex-user.go.snippet")
   val complexTemplefileHookGoFile: String       = FileUtils.readResources("go/complex-user/hook.go.snippet")
   val complexTemplefileGoModFile: String        = FileUtils.readResources("go/complex-user/go.mod.snippet")
   val complexTemplefileDaoFile: String          = FileUtils.readResources("go/complex-user/dao/dao.go.snippet")
   val complexTemplefileErrorsFile: String       = FileUtils.readResources("go/complex-user/dao/errors.go.snippet")
   val complexTemplefileUtilFile: String         = FileUtils.readResources("go/complex-user/util/util.go.snippet")
   val complexTemplefileMetricFile: String       = FileUtils.readResources("go/complex-user/metric/metric.go.snippet")
+
+  val complexTemplefileAuthGoFile: String      = FileUtils.readResources("go/auth/auth.go.snippet")
+  val complexTemplefileAuthHookGoFile: String  = FileUtils.readResources("go/auth/hook.go.snippet")
+  val complexTemplefileAuthGoModFile: String   = FileUtils.readResources("go/auth/go.mod.snippet")
+  val complexTemplefileAuthUtilFile: String    = FileUtils.readResources("go/auth/util/util.go.snippet")
+  val complexTemplefileAuthDaoFile: String     = FileUtils.readResources("go/auth/dao/dao.go.snippet")
+  val complexTemplefileAuthErrorsFile: String  = FileUtils.readResources("go/auth/dao/errors.go.snippet")
+  val complexTemplefileAuthHandlerFile: String = FileUtils.readResources("go/auth/comm/handler.go.snippet")
+  val complexTemplefileAuthMetricFile: String  = FileUtils.readResources("go/auth/metric/metric.go.snippet")
 
   val complexTemplefileGrafanaDatasourceConfig: String =
     """apiVersion: 1
@@ -1210,9 +1220,9 @@ object ProjectBuilderTestData {
       |  scrape_interval: 15s
       |  evaluation_interval: 15s
       |scrape_configs:
-      |- job_name: complexuser
+      |- job_name: complex-user
       |  static_configs:
       |  - targets:
-      |    - complexuser:1025
+      |    - complex-user:1026
       |""".stripMargin
 }

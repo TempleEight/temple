@@ -1,11 +1,11 @@
 package temple.generate.server.go.service.dao
 
-import temple.ast.{Annotation, Attribute, AttributeType}
+import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
-import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceRoot}
+import temple.generate.server.{CreatedByAttribute, ServiceRoot}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
 
@@ -15,8 +15,8 @@ object GoServiceDAOInputStructsGenerator {
 
   private def generateStructCommentSubstring(root: ServiceRoot, operation: CRUD): String =
     operation match {
-      case List                            => s"read a ${root.name} list"
-      case Create | Read | Update | Delete => s"${operation.toString.toLowerCase} a single ${root.name}"
+      case List                            => s"read a ${root.decapitalizedName} list"
+      case Create | Read | Update | Delete => s"${operation.toString.toLowerCase} a single ${root.decapitalizedName}"
     }
 
   private def generateStruct(root: ServiceRoot, operation: CRUD): String = {

@@ -1,13 +1,15 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
 
-	"github.com/squat/and/dab/templeuser/dao"
-	"github.com/squat/and/dab/templeuser/util"
+	"github.com/squat/and/dab/temple-user/dao"
+	"github.com/squat/and/dab/temple-user/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -18,8 +20,8 @@ type env struct {
 	dao dao.Datastore
 }
 
-// createTempleuserRequest contains the client-provided information required to create a single templeuser
-type createTempleuserRequest struct {
+// createTempleUserRequest contains the client-provided information required to create a single templeUser
+type createTempleUserRequest struct {
 	Username           *string    `valid:"type(string),required"`
 	Email              *string    `valid:"type(string),required,stringlength(5|40)"`
 	FirstName          *string    `valid:"type(string),required"`
@@ -31,8 +33,8 @@ type createTempleuserRequest struct {
 	BreakfastTime      *time.Time `valid:"type(string),required"`
 }
 
-// updateTempleuserRequest contains the client-provided information required to update a single templeuser
-type updateTempleuserRequest struct {
+// updateTempleUserRequest contains the client-provided information required to update a single templeUser
+type updateTempleUserRequest struct {
 	Username           *string    `valid:"type(string),required"`
 	Email              *string    `valid:"type(string),required,stringlength(5|40)"`
 	FirstName          *string    `valid:"type(string),required"`
@@ -44,8 +46,8 @@ type updateTempleuserRequest struct {
 	BreakfastTime      *time.Time `valid:"type(string),required"`
 }
 
-// listTempleuserElement contains a single templeuser list element
-type listTempleuserElement struct {
+// listTempleUserElement contains a single templeUser list element
+type listTempleUserElement struct {
 	ID                 uuid.UUID
 	Username           string
 	Email              string
@@ -58,13 +60,13 @@ type listTempleuserElement struct {
 	BreakfastTime      string
 }
 
-// listTempleuserResponse contains a single templeuser list to be returned to the client
-type listTempleuserResponse struct {
-	TempleuserList []listTempleuserElement
+// listTempleUserResponse contains a single templeUser list to be returned to the client
+type listTempleUserResponse struct {
+	TempleUserList []listTempleUserElement
 }
 
-// createTempleuserResponse contains a newly created templeuser to be returned to the client
-type createTempleuserResponse struct {
+// createTempleUserResponse contains a newly created templeUser to be returned to the client
+type createTempleUserResponse struct {
 	ID                 uuid.UUID
 	Username           string
 	Email              string
@@ -77,8 +79,8 @@ type createTempleuserResponse struct {
 	BreakfastTime      string
 }
 
-// readTempleuserResponse contains a single templeuser to be returned to the client
-type readTempleuserResponse struct {
+// readTempleUserResponse contains a single templeUser to be returned to the client
+type readTempleUserResponse struct {
 	ID                 uuid.UUID
 	Username           string
 	Email              string
@@ -91,8 +93,8 @@ type readTempleuserResponse struct {
 	BreakfastTime      string
 }
 
-// updateTempleuserResponse contains a newly updated templeuser to be returned to the client
-type updateTempleuserResponse struct {
+// updateTempleUserResponse contains a newly updated templeUser to be returned to the client
+type updateTempleUserResponse struct {
 	ID                 uuid.UUID
 	Username           string
 	Email              string
@@ -109,16 +111,16 @@ type updateTempleuserResponse struct {
 func (env *env) router() *mux.Router {
 	r := mux.NewRouter()
 	// Mux directs to first matching route, i.e. the order matters
-	r.HandleFunc("/templeuser/all", env.listTempleuserHandler).Methods(http.MethodGet)
-	r.HandleFunc("/templeuser", env.createTempleuserHandler).Methods(http.MethodPost)
-	r.HandleFunc("/templeuser/{id}", env.readTempleuserHandler).Methods(http.MethodGet)
-	r.HandleFunc("/templeuser/{id}", env.updateTempleuserHandler).Methods(http.MethodPut)
+	r.HandleFunc("/temple-user/all", env.listTempleUserHandler).Methods(http.MethodGet)
+	r.HandleFunc("/temple-user", env.createTempleUserHandler).Methods(http.MethodPost)
+	r.HandleFunc("/temple-user/{id}", env.readTempleUserHandler).Methods(http.MethodGet)
+	r.HandleFunc("/temple-user/{id}", env.updateTempleUserHandler).Methods(http.MethodPut)
 	r.Use(jsonMiddleware)
 	return r
 }
 
 func main() {
-	configPtr := flag.String("config", "/etc/templeuser-service/config.json", "configuration filepath")
+	configPtr := flag.String("config", "/etc/temple-user-service/config.json", "configuration filepath")
 	flag.Parse()
 
 	// Require all struct fields by default
@@ -136,7 +138,7 @@ func main() {
 
 	env := env{d}
 
-	log.Fatal(http.ListenAndServe(":1024", env.router()))
+	log.Fatal(http.ListenAndServe(":1025", env.router()))
 }
 
 func jsonMiddleware(next http.Handler) http.Handler {
@@ -147,10 +149,109 @@ func jsonMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (env *env) listTempleuserHandler(w http.ResponseWriter, r *http.Request) {}
+func (env *env) listTempleUserHandler(w http.ResponseWriter, r *http.Request) {
+	templeUserList, err := env.dao.ListTempleUser()
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
 
-func (env *env) createTempleuserHandler(w http.ResponseWriter, r *http.Request) {}
+	templeUserListResp := listTempleUserResponse{
+		TempleUserList: make([]listTempleUserElement, 0),
+	}
 
-func (env *env) readTempleuserHandler(w http.ResponseWriter, r *http.Request) {}
+	for _, templeUser := range *templeUserList {
+		templeUserListResp.TempleUserList = append(templeUserListResp.TempleUserList, listTempleUserElement{
+			ID:                 templeUser.ID,
+			Username:           templeUser.Username,
+			Email:              templeUser.Email,
+			FirstName:          templeUser.FirstName,
+			LastName:           templeUser.LastName,
+			CreatedAt:          templeUser.CreatedAt.Format(time.RFC3339),
+			NumberOfDogs:       templeUser.NumberOfDogs,
+			CurrentBankBalance: templeUser.CurrentBankBalance,
+			BirthDate:          templeUser.BirthDate,
+			BreakfastTime:      templeUser.BreakfastTime,
+		})
+	}
 
-func (env *env) updateTempleuserHandler(w http.ResponseWriter, r *http.Request) {}
+	json.NewEncoder(w).Encode(templeUserListResp)
+}
+
+func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
+
+	var req createTempleUserRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	if req.Username == nil || req.Email == nil || req.FirstName == nil || req.LastName == nil || req.CreatedAt == nil || req.NumberOfDogs == nil || req.CurrentBankBalance == nil || req.BirthDate == nil || req.BreakfastTime == nil {
+		errMsg := util.CreateErrorJSON("Missing request parameter(s)")
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	_, err = valid.ValidateStruct(req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	uuid, err := uuid.NewUUID()
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not create UUID: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
+
+	templeUser, err := env.dao.CreateTempleUser(dao.CreateTempleUserInput{
+		ID:                 uuid,
+		AuthID:             auth.ID,
+		Username:           *req.Username,
+		Email:              *req.Email,
+		FirstName:          *req.FirstName,
+		LastName:           *req.LastName,
+		CreatedAt:          *req.CreatedAt,
+		NumberOfDogs:       *req.NumberOfDogs,
+		CurrentBankBalance: *req.CurrentBankBalance,
+		BirthDate:          *req.BirthDate,
+		BreakfastTime:      *req.BreakfastTime,
+	})
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(createTempleUserResponse{
+		ID:                 templeUser.ID,
+		Username:           templeUser.Username,
+		Email:              templeUser.Email,
+		FirstName:          templeUser.FirstName,
+		LastName:           templeUser.LastName,
+		CreatedAt:          templeUser.CreatedAt.Format(time.RFC3339),
+		NumberOfDogs:       templeUser.NumberOfDogs,
+		CurrentBankBalance: templeUser.CurrentBankBalance,
+		BirthDate:          templeUser.BirthDate,
+		BreakfastTime:      templeUser.BreakfastTime,
+	})
+}
+
+func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) {
+
+}

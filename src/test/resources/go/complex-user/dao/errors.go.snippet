@@ -2,9 +2,9 @@ package dao
 
 import "fmt"
 
-// ErrComplexuserNotFound is returned when a complexuser for the provided ID was not found
-type ErrComplexuserNotFound string
+// ErrComplexUserNotFound is returned when a complexUser for the provided ID was not found
+type ErrComplexUserNotFound string
 
-func (e ErrComplexuserNotFound) Error() string {
-	return fmt.Sprintf("complexuser not found with ID %d", string(e))
+func (e ErrComplexUserNotFound) Error() string {
+	return fmt.Sprintf("complexUser not found with ID %d", string(e))
 }

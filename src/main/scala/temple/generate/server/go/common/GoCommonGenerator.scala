@@ -2,9 +2,9 @@ package temple.generate.server.go.common
 
 import temple.ast.AttributeType
 import temple.ast.AttributeType._
-import temple.generate.server.ServiceRoot
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
-import temple.generate.utils.CodeUtils
+import temple.generate.utils.CodeTerm._
+import temple.generate.utils.{CodeTerm, CodeUtils}
 import temple.utils.StringUtils.tabIndent
 
 import scala.collection.immutable.ListMap
@@ -17,7 +17,7 @@ object GoCommonGenerator {
 
   private[go] def generateGoType(attributeType: AttributeType): String =
     attributeType match {
-      case UUIDType                                       => "uuid.UUID"
+      case ForeignKey(_) | UUIDType                       => "uuid.UUID"
       case IntType(_, Some(min), p) if p <= 1 && min >= 0 => "uint8"
       case IntType(_, Some(min), p) if p <= 2 && min >= 0 => "uint16"
       case IntType(_, Some(min), p) if p <= 4 && min >= 0 => "uint32"
@@ -30,9 +30,7 @@ object GoCommonGenerator {
       case FloatType(_, _, _)                             => "float64"
       case StringType(_, _)                               => "string"
       case BoolType                                       => "bool"
-      case DateType                                       => "time.Time"
-      case TimeType                                       => "time.Time"
-      case DateTimeType                                   => "time.Time"
+      case DateType | TimeType | DateTimeType             => "time.Time"
       case BlobType(Some(size))                           => s"[$size]byte"
       case BlobType(_)                                    => "[]byte"
     }
@@ -119,11 +117,15 @@ object GoCommonGenerator {
     )
 
   /** Generate function call */
-  private[go] def genFunctionCall(name: String, args: String*): String =
+  private[go] def genFunctionCall(name: String, args: CodeTerm*): String =
     CodeWrap.parens.prefix(name).list(args)
 
+  /** Generate function call, but with optional arguments */
+  private[go] def genFunctionCall(name: String, firstArg: Option[String], otherArgs: Option[String]*): String =
+    CodeWrap.parens.prefix(name).list(firstArg, otherArgs)
+
   /** Generate method call */
-  private[go] def genMethodCall(objectName: String, methodName: String, args: String*): String =
+  private[go] def genMethodCall(objectName: String, methodName: String, args: CodeTerm*): String =
     s"$objectName.${genFunctionCall(methodName, args: _*)}"
 
   /** Generate method definition */
@@ -164,7 +166,7 @@ object GoCommonGenerator {
     mkCode(
       "switch",
       expr,
-      CodeWrap.curly.noIndent(
+      CodeWrap.curly.lines(
         cases.map { case (switchCase, statements) => mkCode.lines(s"case $switchCase:", tabIndent(statements)) },
         "default:",
         tabIndent(default),

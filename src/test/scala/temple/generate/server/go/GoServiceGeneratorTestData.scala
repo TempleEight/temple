@@ -12,7 +12,7 @@ import scala.collection.immutable.ListMap
 object GoServiceGeneratorTestData {
 
   val simpleServiceRoot: ServiceRoot = ServiceRoot(
-    "user",
+    "User",
     "github.com/TempleEight/spec-golang/user",
     Seq.empty,
     ListMap(
@@ -29,8 +29,10 @@ object GoServiceGeneratorTestData {
   )
 
   val simpleServiceFiles: Files = Map(
-    File("user", "go.mod")  -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/go.mod.snippet"),
-    File("user", "user.go") -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/user.go.snippet"),
+    File("user", "go.mod") -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/go.mod.snippet"),
+    File("user", "user.go") -> readFile(
+      "src/test/scala/temple/generate/server/go/testfiles/user/user.go.snippet",
+    ),
     File("user", "hook.go") -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/hook.go.snippet"),
     File("user/dao", "errors.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/user/dao/errors.go.snippet",
@@ -48,7 +50,7 @@ object GoServiceGeneratorTestData {
 
   val simpleServiceRootWithComms: ServiceRoot =
     ServiceRoot(
-      "match",
+      "Match",
       "github.com/TempleEight/spec-golang/match",
       Seq("user"),
       ListMap(
@@ -62,8 +64,8 @@ object GoServiceGeneratorTestData {
       IDAttribute("id"),
       CreatedByAttribute.EnumerateByCreator("authID", "createdBy"),
       ListMap(
-        "userOne"   -> Attribute(AttributeType.UUIDType),
-        "userTwo"   -> Attribute(AttributeType.UUIDType),
+        "userOne"   -> Attribute(AttributeType.ForeignKey("User")),
+        "userTwo"   -> Attribute(AttributeType.ForeignKey("User")),
         "matchedOn" -> Attribute(AttributeType.DateTimeType, Some(Annotation.ServerSet)),
       ),
       Postgres,

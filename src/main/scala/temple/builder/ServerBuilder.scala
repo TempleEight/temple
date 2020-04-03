@@ -10,6 +10,7 @@ import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
 import temple.generate.database.{PostgresContext, PostgresGenerator, PreparedType}
 import temple.generate.server._
+import temple.utils.StringUtils
 
 import scala.collection.immutable.ListMap
 
@@ -46,7 +47,7 @@ object ServerBuilder {
 
     val queries: ListMap[CRUD, String] =
       DatabaseBuilder
-        .buildQuery(serviceName, serviceBlock.attributes, endpoints, idAttribute, createdBy)
+        .buildQuery(serviceName, serviceBlock.attributes, endpoints, createdBy, selectionAttribute = idAttribute.name)
         .map {
           case (crud, statement) =>
             crud -> (database match {
@@ -58,19 +59,13 @@ object ServerBuilder {
         }
 
     val moduleName: String = detail match {
-      case GoLanguageDetail(modulePath) => s"$modulePath/$serviceName"
+      case GoLanguageDetail(modulePath) => s"$modulePath/${StringUtils.kebabCase(serviceName)}"
     }
 
     // The names of each service this service communicates with, i.e all the foreign key attributes of the service
     val comms: Seq[String] = serviceBlock.attributes.collect {
       case (_, Attribute(x: ForeignKey, _, _)) => x.references
     }.toSeq
-
-    // In the server code all foreign keys are stored as UUID types - map into the correct type
-    val attributes: ListMap[String, Attribute] = ListMap.from(serviceBlock.attributes.map {
-      case (str, Attribute(_: ForeignKey, access, value)) => (str, Attribute(AttributeType.UUIDType, access, value))
-      case default                                        => default
-    })
 
     // TODO: Auth
 
@@ -82,7 +77,7 @@ object ServerBuilder {
       port = port,
       idAttribute = idAttribute,
       createdByAttribute = createdBy,
-      attributes = attributes,
+      attributes = ListMap.from(serviceBlock.attributes),
       datastore = serviceBlock.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase),
     )
   }
@@ -98,19 +93,23 @@ object ServerBuilder {
       case ServiceAuth.Email =>
         Map(
           "id"       -> Attribute(AttributeType.UUIDType),
+          "email"    -> Attribute(AttributeType.StringType()),
           "password" -> Attribute(AttributeType.StringType()),
-          "email"    -> Attribute(AttributeType.StringType(), valueAnnotations = Set(Annotation.Unique)),
         )
     }
-
-    val idAttribute = IDAttribute("id")
 
     val (createQuery: String, readQuery: String) =
       templefile.projectBlock.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase) match {
         case Database.Postgres =>
           implicit val postgresContext: PostgresContext = PostgresContext(PreparedType.DollarNumbers)
           val queries =
-            DatabaseBuilder.buildQuery("auth", attributes, Set(Create, Read), idAttribute, CreatedByAttribute.None)
+            DatabaseBuilder.buildQuery(
+              "auth",
+              attributes,
+              Set(Create, Read),
+              CreatedByAttribute.None,
+              selectionAttribute = "email",
+            )
           val createQuery = PostgresGenerator.generate(queries(Create))
           val readQuery   = PostgresGenerator.generate(queries(Read))
           (createQuery, readQuery)
@@ -120,7 +119,7 @@ object ServerBuilder {
       moduleName,
       port,
       AuthAttribute(serviceAuth, AttributeType.StringType()),
-      idAttribute,
+      IDAttribute("id"),
       createQuery,
       readQuery,
     )
