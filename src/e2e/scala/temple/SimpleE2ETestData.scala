@@ -294,4 +294,13 @@ object SimpleE2ETestData {
       |  - targets:
       |    - event:1030
       |""".stripMargin
+
+  val authGoFile: String      = FileUtils.readResources("go/auth/auth.go.snippet")
+  val authGoModFile: String   = FileUtils.readResources("go/auth/go.mod.snippet")
+  val authHookFile: String    = FileUtils.readResources("go/auth/hook.go.snippet")
+  val authUtilFile: String    = FileUtils.readResources("go/auth/util/util.go.snippet")
+  val authDaoFile: String     = FileUtils.readResources("go/auth/dao/dao.go.snippet")
+  val authErrorsFile: String  = FileUtils.readResources("go/auth/dao/errors.go.snippet")
+  val authHandlerFile: String = FileUtils.readResources("go/auth/comm/handler.go.snippet")
+  val authMetricFile: String  = FileUtils.readResources("go/auth/metric/metric.go.snippet")
 }
