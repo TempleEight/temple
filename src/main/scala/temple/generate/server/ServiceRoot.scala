@@ -2,7 +2,7 @@ package temple.generate.server
 
 import temple.DSL.semantics.SemanticParsingException
 import temple.ast.Attribute
-import temple.ast.Metadata.Database
+import temple.ast.Metadata.{Database, Readable, Writable}
 import temple.generate.CRUD.CRUD
 import temple.utils.StringUtils
 
@@ -32,6 +32,8 @@ case class ServiceRoot(
   createdByAttribute: CreatedByAttribute,
   attributes: ListMap[String, Attribute],
   datastore: Database,
+  readable: Readable,
+  writable: Writable,
 ) extends ServiceRoot.Name(name)
 
 object ServiceRoot {

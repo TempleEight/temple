@@ -22,6 +22,7 @@ object ServerBuilder {
     port: Int,
     endpoints: Set[CRUD],
     detail: LanguageDetail,
+    projectUsesAuth: Boolean,
   ): ServiceRoot = {
     val language = serviceBlock.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
     val database = serviceBlock.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase)
@@ -67,7 +68,10 @@ object ServerBuilder {
       case (_, Attribute(x: ForeignKey, _, _)) => x.references
     }.toSeq
 
-    // TODO: Auth
+    val readable =
+      serviceBlock.lookupLocalMetadata[Metadata.Readable].getOrElse(ProjectConfig.getDefaultReadable(projectUsesAuth))
+    val writable =
+      serviceBlock.lookupLocalMetadata[Metadata.Writable].getOrElse(ProjectConfig.getDefaultWritable(projectUsesAuth))
 
     ServiceRoot(
       serviceName,
@@ -79,6 +83,8 @@ object ServerBuilder {
       createdByAttribute = createdBy,
       attributes = ListMap.from(serviceBlock.attributes),
       datastore = serviceBlock.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase),
+      readable = readable,
+      writable = writable,
     )
   }
 
