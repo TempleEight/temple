@@ -86,8 +86,8 @@ object ProjectBuilder {
     val metrics = templefile.services.map {
         case (name, service) =>
           val rows             = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
-          val grafanaDashboard = GrafanaDashboardGenerator.generate(name, name, rows)
-          (File(s"grafana/provisioning/dashboards", s"${kebabCase(name)}.json"), grafanaDashboard)
+          val grafanaDashboard = GrafanaDashboardGenerator.generate(kebabCase(name), name, rows)
+          File(s"grafana/provisioning/dashboards", s"${kebabCase(name)}.json") -> grafanaDashboard
       } ++ Map(
         File(s"grafana/provisioning/dashboards", "dashboards.yml") ->
         GrafanaDashboardConfigGenerator.generate(datasource),

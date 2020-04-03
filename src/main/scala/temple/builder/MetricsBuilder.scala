@@ -6,6 +6,8 @@ import temple.generate.metrics.grafana.ast.{Datasource, Row}
 
 object MetricsBuilder {
 
+  // TODO: investigate this casing
+  // DON’T LET THIS BE PRed
   // Generate PromQL queries for determining queries per second to a service
   private def qpsQueries(serviceName: String, queryType: String): Seq[Query] =
     Seq(

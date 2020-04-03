@@ -62,7 +62,7 @@ object GoServiceMainListHandlerGenerator {
 
     // Map DAO result into response object
     val mapResponseBlock = genForLoop(
-      genDeclareAndAssign(s"range *${root.name}List", "_", root.name),
+      genDeclareAndAssign(s"range *${root.decapitalizedName}List", "_", root.decapitalizedName),
       genAssign(
         genFunctionCall(
           "append",
