@@ -20,7 +20,7 @@ trait FileMatchers extends Matchers {
 
 object FileMatchers {
 
-  private case class WrappedFiles(files: FileSystem.Files) {
+  private case class WrappedFiles(files: Files) {
 
     override def toString: String =
       files.to(SortedMap).map { case (file, content) => s"$file:\n${indent(content)}" }.mkString("\n")
