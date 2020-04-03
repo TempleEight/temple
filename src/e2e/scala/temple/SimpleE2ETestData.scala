@@ -27,7 +27,7 @@ object SimpleE2ETestData {
   val dockerfile: String =
     """FROM golang:1.13.7-alpine
       |
-      |WORKDIR /templeuser
+      |WORKDIR /temple-user
       |
       |COPY go.mod go.sum ./
       |
@@ -35,11 +35,11 @@ object SimpleE2ETestData {
       |
       |COPY . .
       |
-      |COPY config.json /etc/templeuser-service/
+      |COPY config.json /etc/temple-user-service/
       |
-      |RUN ["go", "build", "-o", "templeuser"]
+      |RUN ["go", "build", "-o", "temple-user"]
       |
-      |ENTRYPOINT ["./templeuser"]
+      |ENTRYPOINT ["./temple-user"]
       |
       |EXPOSE 1025
       |""".stripMargin
@@ -247,7 +247,7 @@ object SimpleE2ETestData {
       |    kind: db
       |""".stripMargin
 
-  val grafanaDashboard: String = FileUtils.readResources("grafana/simple-templeuser.json").init
+  val grafanaDashboard: String = FileUtils.readResources("grafana/simple-temple-user.json").stripLineEnd
 
   val grafanaDashboardConfig: String =
     """apiVersion: 1
@@ -281,10 +281,10 @@ object SimpleE2ETestData {
       |  scrape_interval: 15s
       |  evaluation_interval: 15s
       |scrape_configs:
-      |- job_name: templeuser
+      |- job_name: temple-user
       |  static_configs:
       |  - targets:
-      |    - templeuser:1026
+      |    - temple-user:1026
       |- job_name: booking
       |  static_configs:
       |  - targets:

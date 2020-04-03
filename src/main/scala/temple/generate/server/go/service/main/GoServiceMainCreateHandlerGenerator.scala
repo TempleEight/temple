@@ -47,10 +47,10 @@ object GoServiceMainCreateHandlerGenerator {
       genDeclareAndAssign(
         genMethodCall(
           "env.dao",
-          s"Create${root.name.capitalize}",
-          genPopulateStruct(s"dao.Create${root.name.capitalize}Input", createInput),
+          s"Create${root.name}",
+          genPopulateStruct(s"dao.Create${root.name}Input", createInput),
         ),
-        root.name,
+        root.decapitalizedName,
         "err",
       ),
       genIfErr(

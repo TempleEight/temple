@@ -28,20 +28,20 @@ object GoServiceMainHandlersGenerator {
   /** Generate a map for converting the fields of the DAO response to the JSON response */
   private def generateResponseMap(root: ServiceRoot): ListMap[String, String] =
     // Includes ID attribute and all attributes without the @server annotation
-    ListMap(root.idAttribute.name.toUpperCase -> s"${root.name}.${root.idAttribute.name.toUpperCase}") ++
+    ListMap(root.idAttribute.name.toUpperCase -> s"${root.decapitalizedName}.${root.idAttribute.name.toUpperCase}") ++
     root.attributes.collect {
       case name -> attribute if !attribute.accessAnnotation.contains(Annotation.Server) =>
-        name.capitalize -> s"${root.name}.${name.capitalize}${generateResponseMapFormat(attribute.attributeType)}"
+        name.capitalize -> s"${root.decapitalizedName}.${name.capitalize}${generateResponseMapFormat(attribute.attributeType)}"
     }
 
   /** Generate a handler method declaration */
   private[main] def generateHandlerDecl(root: ServiceRoot, operation: CRUD): String =
-    s"func (env *env) ${operation.toString.toLowerCase}${root.name.capitalize}Handler(w http.ResponseWriter, r *http.Request)"
+    s"func (env *env) ${operation.toString.toLowerCase}${root.name}Handler(w http.ResponseWriter, r *http.Request)"
 
   /** Generate a errMsg declaration and http.Error call */
   private[main] def generateHTTPError(statusCodeEnum: GoHTTPStatus, errMsg: String, errMsgArgs: String*): String = {
     val createErrorJSONargs =
-      if (errMsgArgs.nonEmpty) genMethodCall("fmt", "Sprintf", (doubleQuote(errMsg) +: errMsgArgs): _*)
+      if (errMsgArgs.nonEmpty) genMethodCall("fmt", "Sprintf", doubleQuote(errMsg), errMsgArgs)
       else doubleQuote(errMsg)
 
     mkCode.lines(

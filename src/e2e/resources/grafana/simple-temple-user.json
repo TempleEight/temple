@@ -686,12 +686,12 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "rate(templeuser_request_success_total{request_type=\"delete\"}[5m])",
+          "expr" : "rate(templeuser_request_success_total{request_type=\"list\"}[5m])",
           "legendFormat" : "Success",
           "refId" : "A"
         },
         {
-          "expr" : "rate(templeuser_request_failure_total{request_type=\"delete\"}[5m])",
+          "expr" : "rate(templeuser_request_failure_total{request_type=\"list\"}[5m])",
           "legendFormat" : "{{error_code}}",
           "refId" : "B"
         }
@@ -702,7 +702,7 @@
       "timeRegions" : [
       ],
       "timeShift" : null,
-      "title" : "Delete TempleUser Requests",
+      "title" : "List TempleUser Requests",
       "tooltip" : {
         "shared" : true,
         "sort" : 0,
@@ -786,22 +786,22 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.5\",query_type=\"delete\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.5\",query_type=\"list\"}",
           "legendFormat" : "50th Percentile",
           "refId" : "A"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.9\",query_type=\"delete\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.9\",query_type=\"list\"}",
           "legendFormat" : "90th Percentile",
           "refId" : "B"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.95\",query_type=\"delete\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.95\",query_type=\"list\"}",
           "legendFormat" : "95th Percentile",
           "refId" : "C"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.99\",query_type=\"delete\"}",
+          "expr" : "templeuser_database_request_seconds{quantile=\"0.99\",query_type=\"list\"}",
           "legendFormat" : "99th Percentile",
           "refId" : "D"
         }
@@ -812,7 +812,7 @@
       "timeRegions" : [
       ],
       "timeShift" : null,
-      "title" : "DB Delete Queries",
+      "title" : "DB List Queries",
       "tooltip" : {
         "shared" : true,
         "sort" : 0,
@@ -880,6 +880,6 @@
   },
   "timezone" : "",
   "title" : "TempleUser Dashboard",
-  "uid" : "templeuser",
+  "uid" : "temple-user",
   "version" : 1
 }

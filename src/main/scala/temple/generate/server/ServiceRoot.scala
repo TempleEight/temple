@@ -1,8 +1,10 @@
 package temple.generate.server
 
+import temple.DSL.semantics.SemanticParsingException
 import temple.ast.Attribute
 import temple.ast.Metadata.Database
 import temple.generate.CRUD.CRUD
+import temple.utils.StringUtils
 
 import scala.collection.immutable.ListMap
 
@@ -21,7 +23,7 @@ import scala.collection.immutable.ListMap
   * @param datastore the datastore being used
   */
 case class ServiceRoot(
-  name: String,
+  override val name: String,
   module: String,
   comms: Seq[String],
   opQueries: ListMap[CRUD, String],
@@ -30,4 +32,13 @@ case class ServiceRoot(
   createdByAttribute: CreatedByAttribute,
   attributes: ListMap[String, Attribute],
   datastore: Database,
-)
+) extends ServiceRoot.Name(name)
+
+object ServiceRoot {
+
+  class Name(val name: String) {
+    if (!name.head.isUpper) throw new SemanticParsingException(s"ServiceRoot name ($name) must be capitalized")
+    def decapitalizedName: String = StringUtils.decapitalize(name)
+    def kebabName: String         = StringUtils.kebabCase(name)
+  }
+}

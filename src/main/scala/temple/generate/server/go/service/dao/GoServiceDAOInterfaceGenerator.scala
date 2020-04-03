@@ -10,8 +10,8 @@ object GoServiceDAOInterfaceGenerator {
 
   private def generateInterfaceFunctionReturnType(root: ServiceRoot, operation: CRUD): String =
     operation match {
-      case List                   => s"(*[]${root.name.capitalize}, error)"
-      case Create | Read | Update => s"(*${root.name.capitalize}, error)"
+      case List                   => s"(*[]${root.name}, error)"
+      case Create | Read | Update => s"(*${root.name}, error)"
       case Delete                 => "error"
     }
 

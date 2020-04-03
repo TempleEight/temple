@@ -4,7 +4,7 @@ import temple.ast.AttributeType
 import temple.ast.AttributeType._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeTerm._
-import temple.generate.utils.CodeUtils
+import temple.generate.utils.{CodeTerm, CodeUtils}
 import temple.utils.StringUtils.tabIndent
 
 import scala.collection.immutable.ListMap
@@ -117,7 +117,7 @@ object GoCommonGenerator {
     )
 
   /** Generate function call */
-  private[go] def genFunctionCall(name: String, args: String*): String =
+  private[go] def genFunctionCall(name: String, args: CodeTerm*): String =
     CodeWrap.parens.prefix(name).list(args)
 
   /** Generate function call, but with optional arguments */
@@ -125,17 +125,8 @@ object GoCommonGenerator {
     CodeWrap.parens.prefix(name).list(firstArg, otherArgs)
 
   /** Generate method call */
-  private[go] def genMethodCall(objectName: String, methodName: String, args: String*): String =
+  private[go] def genMethodCall(objectName: String, methodName: String, args: CodeTerm*): String =
     s"$objectName.${genFunctionCall(methodName, args: _*)}"
-
-  /** Generate method call, but with optional arguments */
-  private[go] def genMethodCall(
-    objectName: String,
-    methodName: String,
-    firstArg: Option[String],
-    otherArgs: Option[String]*,
-  ): String =
-    s"$objectName.${genFunctionCall(methodName, firstArg, otherArgs: _*)}"
 
   /** Generate method definition */
   private[go] def genMethod(

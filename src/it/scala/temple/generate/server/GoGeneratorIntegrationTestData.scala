@@ -9,7 +9,7 @@ import scala.collection.immutable.ListMap
 object GoGeneratorIntegrationTestData {
 
   val simpleServiceRoot: ServiceRoot = ServiceRoot(
-    "user",
+    "User",
     "github.com/TempleEight/spec-golang/user",
     Seq.empty,
     ListMap(
@@ -26,7 +26,7 @@ object GoGeneratorIntegrationTestData {
   )
 
   val simpleServiceRootWithComms: ServiceRoot = ServiceRoot(
-    "match",
+    "Match",
     "github.com/TempleEight/spec-golang/match",
     Seq("user"),
     ListMap(
