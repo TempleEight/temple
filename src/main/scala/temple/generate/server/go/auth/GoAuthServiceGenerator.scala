@@ -23,6 +23,12 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceMainGenerator.generateHandlers(),
         GoAuthServiceMainGenerator.generateCreateToken(),
       ),
+      File("auth", "hook.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("main"),
+        GoCommonHookGenerator.generateImports(root.module),
+        GoCommonHookGenerator.generateHookErrorStruct,
+        GoCommonHookGenerator.generateHookErrorFunction,
+      ),
       File("auth/dao", "errors.go") -> GoAuthServiceDAOGenerator.generateErrors(root),
       File("auth/dao", "dao.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("dao"),
@@ -48,6 +54,11 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoCommonUtilGenerator.generateConfigStruct(),
         GoCommonUtilGenerator.generateGetConfig(),
         GoCommonUtilGenerator.generateCreateErrorJSON(),
+      ),
+      File("auth/metric", "metric.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("metric"),
+        GoCommonMetricGenerator.generateImports(),
+        GoAuthServiceMetricGenerator.generateVars(),
       ),
     ).map { case (path, contents) => path -> (contents + "\n") }
 }

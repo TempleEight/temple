@@ -67,12 +67,6 @@ object ServerBuilder {
       case (_, Attribute(x: ForeignKey, _, _)) => x.references
     }.toSeq
 
-    // In the server code all foreign keys are stored as UUID types - map into the correct type
-    val attributes: ListMap[String, Attribute] = ListMap.from(serviceBlock.attributes.map {
-      case (str, Attribute(_: ForeignKey, access, value)) => (str, Attribute(AttributeType.UUIDType, access, value))
-      case default                                        => default
-    })
-
     // TODO: Auth
 
     ServiceRoot(
@@ -83,7 +77,7 @@ object ServerBuilder {
       port = port,
       idAttribute = idAttribute,
       createdByAttribute = createdBy,
-      attributes = attributes,
+      attributes = ListMap.from(serviceBlock.attributes),
       datastore = serviceBlock.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase),
     )
   }

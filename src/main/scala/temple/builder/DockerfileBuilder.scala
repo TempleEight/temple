@@ -19,7 +19,7 @@ object DockerfileBuilder {
           Copy("go.mod go.sum", "./"),
           Run("go", Seq("mod", "download")),
           Copy(".", "."),
-          Copy("config.json", s"/etc/$serviceName-service"),
+          Copy("config.json", s"/etc/$serviceName-service/"),
           Run("go", Seq("build", "-o", serviceName)),
           Entrypoint(s"./$serviceName", Seq()),
           Expose(port),

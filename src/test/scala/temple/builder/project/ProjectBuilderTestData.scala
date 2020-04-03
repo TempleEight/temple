@@ -336,7 +336,7 @@ object ProjectBuilderTestData {
       |
       |COPY . .
       |
-      |COPY config.json /etc/temple-user-service
+      |COPY config.json /etc/temple-user-service/
       |
       |RUN ["go", "build", "-o", "temple-user"]
       |
@@ -987,7 +987,7 @@ object ProjectBuilderTestData {
       |
       |COPY . .
       |
-      |COPY config.json /etc/complex-user-service
+      |COPY config.json /etc/complex-user-service/
       |
       |RUN ["go", "build", "-o", "complex-user"]
       |
@@ -1194,11 +1194,13 @@ object ProjectBuilderTestData {
   val complexTemplefileMetricFile: String       = FileUtils.readResources("go/complex-user/metric/metric.go.snippet")
 
   val complexTemplefileAuthGoFile: String      = FileUtils.readResources("go/auth/auth.go.snippet")
+  val complexTemplefileAuthHookGoFile: String  = FileUtils.readResources("go/auth/hook.go.snippet")
   val complexTemplefileAuthGoModFile: String   = FileUtils.readResources("go/auth/go.mod.snippet")
   val complexTemplefileAuthUtilFile: String    = FileUtils.readResources("go/auth/util/util.go.snippet")
   val complexTemplefileAuthDaoFile: String     = FileUtils.readResources("go/auth/dao/dao.go.snippet")
   val complexTemplefileAuthErrorsFile: String  = FileUtils.readResources("go/auth/dao/errors.go.snippet")
   val complexTemplefileAuthHandlerFile: String = FileUtils.readResources("go/auth/comm/handler.go.snippet")
+  val complexTemplefileAuthMetricFile: String  = FileUtils.readResources("go/auth/metric/metric.go.snippet")
 
   val complexTemplefileGrafanaDatasourceConfig: String =
     """apiVersion: 1
