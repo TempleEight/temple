@@ -49,23 +49,13 @@ object ProjectBuilder {
     */
   def build(templefile: Templefile, detail: LanguageDetail): Project = {
 
-    // Whether or not to generate an auth service - based on whether any service have #auth
+    // Whether or not to generate an auth service - based on whether any service has #auth
     val usesAuth = templefile.services.exists {
       case (_, service) => service.lookupMetadata[ServiceAuth].nonEmpty
     }
 
     if (usesAuth) {
-      templefile.addService(
-        "Auth",
-        ServiceBlock(
-          attributes = Map(
-            "id"       -> Attribute(AttributeType.UUIDType, valueAnnotations = Set(Annotation.Unique)),
-            "email"    -> Attribute(AttributeType.StringType(), valueAnnotations = Set(Annotation.Unique)),
-            "password" -> Attribute(AttributeType.StringType()),
-          ),
-          metadata = Seq(Omit(Set(Endpoint.Update, Endpoint.Delete))),
-        ),
-      )
+      templefile.addService("Auth", AuthServiceBlock)
     }
 
     implicit val dbContext: PostgresContext = PostgresContext(DollarNumbers)

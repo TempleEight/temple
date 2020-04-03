@@ -46,9 +46,9 @@ object ProjectTester {
     if (serviceAuths.nonEmpty) {
       AuthServiceTest.test(serviceAuths, url)
     }
-    templefile.services.foreach {
+    templefile.providedServices.foreach {
       case (name, block) =>
-        CRUDServiceTest.test(name, block, templefile.services, url)
+        CRUDServiceTest.test(name, block, templefile.providedServices, url)
     }
   }
 
