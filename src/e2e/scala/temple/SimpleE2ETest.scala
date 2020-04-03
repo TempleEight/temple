@@ -219,7 +219,9 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
     // Exactly these files should be in the auth directory
     val exepectedAuthFolderFiles =
-      Set("auth.go", "go.mod", "dao", "comm", "util", "metric").map(dir => basePath.resolve("auth").resolve(dir))
+      Set("auth.go", "go.mod", "hook.go", "dao", "comm", "util", "metric").map(dir =>
+        basePath.resolve("auth").resolve(dir),
+      )
 
     Files
       .list(basePath.resolve("auth"))
@@ -234,6 +236,11 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     val authGoModFile =
       Files.readString(basePath.resolve("auth").resolve("go.mod"))
     authGoModFile shouldBe SimpleE2ETestData.authGoModFile
+
+    // The content of the auth/hook.go file should be correct
+    val authHookFile =
+      Files.readString(basePath.resolve("auth").resolve("hook.go"))
+    authHookFile shouldBe SimpleE2ETestData.authHookFile
 
     // Only this file should be in the auth/util directory
     val expectedAuthUtilFiles = Set("util.go").map(dir => basePath.resolve("auth/util").resolve(dir))
