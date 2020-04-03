@@ -1,5 +1,6 @@
 package temple.generate.server
 
+import temple.DSL.semantics.SemanticParsingException
 import temple.ast.Attribute
 import temple.ast.Metadata.Database
 import temple.generate.CRUD.CRUD
@@ -36,7 +37,7 @@ case class ServiceRoot(
 object ServiceRoot {
 
   class Name(val name: String) {
-    if (!name.head.isUpper) throw new Exception("ServiceRoot name must be capitalized")
+    if (!name.head.isUpper) throw new SemanticParsingException(s"ServiceRoot name ($name) must be capitalized")
     def decapitalizedName: String = StringUtils.decapitalize(name)
     def kebabName: String         = StringUtils.kebabCase(name)
   }
