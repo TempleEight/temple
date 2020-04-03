@@ -2,7 +2,7 @@ package temple.generate.server.go.service
 
 import temple.generate.CRUD.CRUD
 import temple.generate.server.ServiceRoot
-import temple.generate.server.go.GoCommonMetricGenerator
+import temple.generate.server.go.common.GoCommonMetricGenerator
 import temple.utils.StringUtils.doubleQuote
 import temple.generate.utils.CodeUtils
 
@@ -15,6 +15,6 @@ object GoServiceMetricGenerator {
       (s"Request${operation.toString.capitalize}", doubleQuote(operation.toString.toLowerCase))
     }, separator = " = ")
 
-    GoCommonMetricGenerator.generateVars(serviceGlobals, root)
+    GoCommonMetricGenerator.generateVars(serviceGlobals, root.name)
   }
 }
