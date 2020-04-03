@@ -6,9 +6,6 @@ import temple.generate.CRUD.presentParticiple
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.mkCode
-import temple.utils.StringUtils.doubleQuote
-
-import scala.collection.immutable.ListMap
 
 object GoServiceHookGenerator {
 
@@ -28,9 +25,6 @@ object GoServiceHookGenerator {
       "func(env *env) *HookError"
   }
 
-  private[service] def generateImports(root: ServiceRoot): String =
-    s"import ${doubleQuote(root.module + "/dao")}"
-
   private[service] def generateHookStruct(root: ServiceRoot, operations: Set[CRUD]): String = {
     val beforeCreate = operations.toSeq.sorted.map { op =>
       s"before${op.toString}Hooks" -> s"[]*${generateBeforeHookType(root, op)}"
@@ -46,22 +40,6 @@ object GoServiceHookGenerator {
       genStruct("Hook", beforeCreate ++ afterCreate),
     )
   }
-
-  private[service] def generateHookErrorStruct: String =
-    mkCode.lines(
-      "// HookError wraps an existing error with HTTP status code",
-      genStruct("HookError", ListMap("statusCode" -> "int", "error" -> "error")),
-    )
-
-  private[service] def generateHookErrorFunction: String =
-    genMethod(
-      "e",
-      "*HookError",
-      "Error",
-      Seq.empty,
-      Some("string"),
-      genReturn("e.error.Error()"),
-    )
 
   private def generateAddHookComment(action: String, op: CRUD): String = op match {
     case CRUD.List =>
