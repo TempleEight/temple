@@ -9,7 +9,7 @@ import scala.collection.mutable
 import scala.reflect.{ClassTag, classTag}
 
 private class Validator(templefile: Templefile) {
-  var errors: mutable.Set[String] = mutable.SortedSet()
+  var errors: mutable.Buffer[String] = mutable.Buffer()
 
   private val allStructs: Iterable[String] = templefile.services.flatMap {
     case _ -> service => service.structs.keys
@@ -26,27 +26,25 @@ private class Validator(templefile: Templefile) {
 
   private def validateAttributes(
     attributes: Map[String, Attribute],
-    projectName: String,
     context: SemanticContext,
   ): Map[String, Attribute] = {
     foreachValueWithContext(attributes, context, validateAttribute)
 
-    val newAttributes = mutable.LinkedHashMap[String, Attribute]()
-    attributes.foreach {
-      case (attributeName, value) =>
+    // This looks like a map, but it isn’t because the accumulator `newAttributes`’ names are accessed during iteration
+    attributes.foldLeft(attributes.mapFactory[String, Attribute]()) {
+      case (newAttributes, (attributeName, value)) =>
         if (attributeName.headOption.exists(!_.isLower))
           errors += context.errorMessage(
             s"Invalid attribute name $attributeName, it must start with a lowercase letter,",
           )
         val newName = dodgeNames(
           attributeName,
-          projectName,
+          templefile.projectName,
           (newAttributes.keys ++ attributes.keys).toSet - attributeName,
           decapitalize = true,
         )(postgresValidator)
-        newAttributes += newName -> value
+        newAttributes + (newName -> value)
     }
-    newAttributes.to(attributes.mapFactory)
   }
 
   private def renameBlock(name: String, block: TempleBlock[_]): Unit =
@@ -59,7 +57,7 @@ private class Validator(templefile: Templefile) {
     renameBlock(serviceName, service)
 
     val newStructs    = mapEntryWithContext(service.structs, context, validateStruct)
-    val newAttributes = validateAttributes(service.attributes, templefile.projectName, context)
+    val newAttributes = validateAttributes(service.attributes, context)
     validateMetadata(service.metadata, context)
 
     ServiceBlock(newAttributes, service.metadata, newStructs)
@@ -68,7 +66,7 @@ private class Validator(templefile: Templefile) {
   private val validateStruct: EntryTransformer[StructBlock] = (structName, struct, context) => {
     renameBlock(structName, struct)
 
-    val newAttributes = validateAttributes(struct.attributes, templefile.projectName, context)
+    val newAttributes = validateAttributes(struct.attributes, context)
     validateMetadata(struct.metadata, context)
 
     StructBlock(newAttributes, struct.metadata)
