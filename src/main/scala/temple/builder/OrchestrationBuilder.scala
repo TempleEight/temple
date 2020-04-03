@@ -36,7 +36,7 @@ object OrchestrationBuilder {
             dbLifecycleCommand = dbLanguage match {
               case Database.Postgres => LifecycleCommand.psqlSetup.toString
             },
-            usesAuth = if (name == "auth") false else true,
+            usesAuth = name != "auth"
           )
       },
     )
