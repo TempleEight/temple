@@ -216,5 +216,54 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     val templeUserPrometheusConfig =
       Files.readString(basePath.resolve("prometheus").resolve("prometheus.yml"))
     templeUserPrometheusConfig shouldBe SimpleE2ETestData.prometheusConfig
+
+    // Exactly these files should be in the auth directory
+    val exepectedAuthFolderFiles =
+      Set("auth.go", "go.mod", "dao", "comm", "util").map(dir => basePath.resolve("auth").resolve(dir))
+
+    Files
+      .list(basePath.resolve("auth"))
+      .toScala(Set) shouldBe exepectedAuthFolderFiles
+
+    // The content of the auth/auth.go file should be correct
+    val authGoFile =
+      Files.readString(basePath.resolve("auth").resolve("auth.go"))
+    authGoFile shouldBe SimpleE2ETestData.authGoFile
+
+    // The content of the auth/go.mod file should be correct
+    val authGoModFile =
+      Files.readString(basePath.resolve("auth").resolve("go.mod"))
+    authGoModFile shouldBe SimpleE2ETestData.authGoModFile
+
+    // Only this file should be in the auth/util directory
+    val expectedAuthUtilFiles = Set("util.go").map(dir => basePath.resolve("auth/util").resolve(dir))
+
+    Files.list(basePath.resolve("auth/util")).toScala(Set) shouldBe expectedAuthUtilFiles
+
+    // The content of the auth/util/util.go file should be correct
+    val authUtilFile = Files.readString(basePath.resolve("auth/util").resolve("util.go"))
+    authUtilFile shouldBe SimpleE2ETestData.authUtilFile
+
+    // Only this file should be in the auth/comm directory
+    val expectedAuthCommFiles = Set("handler.go").map(dir => basePath.resolve("auth/comm").resolve(dir))
+
+    Files.list(basePath.resolve("auth/comm")).toScala(Set) shouldBe expectedAuthCommFiles
+
+    // The content of the auth/util/util.go file should be correct
+    val authHandlerFile = Files.readString(basePath.resolve("auth/comm").resolve("handler.go"))
+    authHandlerFile shouldBe SimpleE2ETestData.authHandlerFile
+
+    // Only this file should be in the auth/dao directory
+    val expectedAuthDaoFiles = Set("dao.go", "errors.go").map(dir => basePath.resolve("auth/dao").resolve(dir))
+
+    Files.list(basePath.resolve("auth/dao")).toScala(Set) shouldBe expectedAuthDaoFiles
+
+    // The content of the auth/util/util.go file should be correct
+    val authDaoFile = Files.readString(basePath.resolve("auth/dao").resolve("dao.go"))
+    authDaoFile shouldBe SimpleE2ETestData.authDaoFile
+
+    // The content of the auth/util/errors.go file should be correct
+    val authErrorsFile = Files.readString(basePath.resolve("auth/dao").resolve("errors.go"))
+    authErrorsFile shouldBe SimpleE2ETestData.authErrorsFile
   }
 }
