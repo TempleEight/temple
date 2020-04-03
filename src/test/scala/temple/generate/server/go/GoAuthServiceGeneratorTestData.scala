@@ -32,5 +32,8 @@ object GoAuthServiceGeneratorTestData {
     File("auth/util", "util.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/auth/util/util.go.snippet",
     ),
+    File("auth/metric", "metric.go") -> readFile(
+      "src/test/scala/temple/generate/server/go/testfiles/auth/metric/metric.go.snippet",
+    ),
   )
 }

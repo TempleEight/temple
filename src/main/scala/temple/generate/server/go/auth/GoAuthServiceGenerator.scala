@@ -49,5 +49,10 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoCommonUtilGenerator.generateGetConfig(),
         GoCommonUtilGenerator.generateCreateErrorJSON(),
       ),
+      File("auth/metric", "metric.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("metric"),
+        GoCommonMetricGenerator.generateImports(),
+        GoAuthServiceMetricGenerator.generateVars(),
+      ),
     ).map { case (path, contents) => path -> (contents + "\n") }
 }

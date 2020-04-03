@@ -84,7 +84,7 @@ object GoServiceGenerator extends ServiceGenerator {
       ),
       File(s"${root.name}/metric", "metric.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("metric"),
-        GoServiceMetricGenerator.generateImports(),
+        GoCommonMetricGenerator.generateImports(),
         GoServiceMetricGenerator.generateVars(root, operations),
       ),
     ) ++ when(usesComms)(
