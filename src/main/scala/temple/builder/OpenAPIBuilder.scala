@@ -11,17 +11,20 @@ object OpenAPIBuilder {
       name = templefile.projectName,
       version = version,
       description = description,
-      services = templefile.services.map {
-        case (serviceName, block) =>
-          Service(
-            name = serviceName,
-            operations = endpoints(block),
-            attributes = block.attributes,
-            structs = block.structs.map {
-              case (structName, structBlock) =>
-                Service.Struct(structName, endpoints(structBlock), attributes = structBlock.attributes)
-            },
-          )
-      }.toSeq,
+      services = templefile.services
+        .filterNot(_._1 == "Auth")
+        .map {
+          case (serviceName, block) =>
+            Service(
+              name = serviceName,
+              operations = endpoints(block),
+              attributes = block.attributes,
+              structs = block.structs.map {
+                case (structName, structBlock) =>
+                  Service.Struct(structName, endpoints(structBlock), attributes = structBlock.attributes)
+              },
+            )
+        }
+        .toSeq,
     )
 }

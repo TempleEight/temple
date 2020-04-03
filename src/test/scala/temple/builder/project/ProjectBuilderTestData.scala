@@ -1235,6 +1235,10 @@ object ProjectBuilderTestData {
       |  static_configs:
       |  - targets:
       |    - complexuser:1026
+      |- job_name: auth
+      |  static_configs:
+      |  - targets:
+      |    - auth:1025
       |""".stripMargin
 
   val complexTemplefilePostgresAuthOutput: String =
