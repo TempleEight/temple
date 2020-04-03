@@ -1,9 +1,12 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
+	"time"
 
 	"github.com/TempleEight/spec-golang/match/comm"
 	"github.com/TempleEight/spec-golang/match/dao"
@@ -113,12 +116,51 @@ func jsonMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {}
+func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
 
-func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {}
+	matchList, err := env.dao.ListMatch(dao.ListMatchInput{
+		AuthID: auth.ID,
+	})
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
 
-func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {}
+	matchListResp := listMatchResponse{
+		MatchList: make([]listMatchElement, 0),
+	}
 
-func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {}
+	for _, match := range *matchList {
+		matchListResp.MatchList = append(matchListResp.MatchList, listMatchElement{
+			ID:        match.ID,
+			UserOne:   match.UserOne,
+			UserTwo:   match.UserTwo,
+			MatchedOn: match.MatchedOn.Format(time.RFC3339),
+		})
+	}
 
-func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {}
+	json.NewEncoder(w).Encode(matchListResp)
+}
+
+func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {
+
+}

@@ -35,7 +35,7 @@ object SimpleE2ETestData {
       |
       |COPY . .
       |
-      |COPY config.json /etc/templeuser-service
+      |COPY config.json /etc/templeuser-service/
       |
       |RUN ["go", "build", "-o", "templeuser"]
       |

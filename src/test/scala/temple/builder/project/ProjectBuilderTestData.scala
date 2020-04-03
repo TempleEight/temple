@@ -336,7 +336,7 @@ object ProjectBuilderTestData {
       |
       |COPY . .
       |
-      |COPY config.json /etc/templeuser-service
+      |COPY config.json /etc/templeuser-service/
       |
       |RUN ["go", "build", "-o", "templeuser"]
       |
@@ -987,7 +987,7 @@ object ProjectBuilderTestData {
       |
       |COPY . .
       |
-      |COPY config.json /etc/complexuser-service
+      |COPY config.json /etc/complexuser-service/
       |
       |RUN ["go", "build", "-o", "complexuser"]
       |

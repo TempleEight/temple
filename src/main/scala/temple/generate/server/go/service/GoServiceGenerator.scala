@@ -3,9 +3,10 @@ package temple.generate.server.go.service
 import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
+import temple.generate.server.go.GoCommonMetricGenerator
 import temple.generate.server.go.common._
 import temple.generate.server.go.service.dao._
-import temple.generate.server.go.service.main.{GoServiceMainGenerator, GoServiceMainStructGenerator}
+import temple.generate.server.go.service.main.{GoServiceMainGenerator, GoServiceMainHandlersGenerator, GoServiceMainStructGenerator}
 import temple.generate.server.{ServiceGenerator, ServiceRoot}
 import temple.generate.utils.CodeTerm.mkCode
 
@@ -42,7 +43,7 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${root.name}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
       File(root.name, s"${root.name}.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoServiceMainGenerator.generateImports(root, usesTime, usesComms, clientAttributes),
+        GoServiceMainGenerator.generateImports(root, usesTime, usesComms, clientAttributes, operations),
         GoServiceMainStructGenerator.generateEnvStruct(usesComms),
         when(clientAttributes.nonEmpty && (operations.contains(CRUD.Create) || operations.contains(CRUD.Read))) {
           GoServiceMainStructGenerator.generateRequestStructs(root, operations, clientAttributes)
@@ -51,7 +52,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainGenerator.generateRouter(root, operations),
         GoCommonMainGenerator.generateMain(root.name, root.port, usesComms, isAuth = false),
         GoCommonMainGenerator.generateJsonMiddleware(),
-        GoServiceMainGenerator.generateHandlers(root, operations),
+        GoServiceMainHandlersGenerator.generateHandlers(root, operations),
       ),
       File(root.name, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
@@ -59,6 +60,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceHookGenerator.generateHookStruct(root, operations),
         GoServiceHookGenerator.generateHookErrorStruct,
         GoServiceHookGenerator.generateHookErrorFunction,
+        GoServiceHookGenerator.generateAddHookMethods(root, operations),
       ),
       File(s"${root.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),
       File(s"${root.name}/dao", "dao.go") -> mkCode.doubleLines(
@@ -83,7 +85,7 @@ object GoServiceGenerator extends ServiceGenerator {
       ),
       File(s"${root.name}/metric", "metric.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("metric"),
-        GoServiceMetricGenerator.generateImports(),
+        GoCommonMetricGenerator.generateImports(),
         GoServiceMetricGenerator.generateVars(root, operations),
       ),
     ) ++ when(usesComms)(
