@@ -26,8 +26,10 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
       File("auth", "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
         GoCommonHookGenerator.generateImports(root.module),
+        GoAuthServiceHookGenerator.generateHookStruct,
         GoCommonHookGenerator.generateHookErrorStruct,
         GoCommonHookGenerator.generateHookErrorFunction,
+        GoAuthServiceHookGenerator.generateAddHookMethods,
       ),
       File("auth/dao", "errors.go") -> GoAuthServiceDAOGenerator.generateErrors(root),
       File("auth/dao", "dao.go") -> mkCode.doubleLines(
