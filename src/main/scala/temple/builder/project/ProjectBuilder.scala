@@ -105,7 +105,7 @@ object ProjectBuilder {
     var serverFiles = templefile.servicesWithPorts.flatMap {
       case (name, service, port) =>
         val serviceRoot =
-          ServerBuilder.buildServiceRoot(name.toLowerCase, service, port.service, endpoints(service), detail)
+          ServerBuilder.buildServiceRoot(name.toLowerCase, service, port.service, endpoints(service), detail, usesAuth)
         service.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
           case ServiceLanguage.Go =>
             GoServiceGenerator.generate(serviceRoot)

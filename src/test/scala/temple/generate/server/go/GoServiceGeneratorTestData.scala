@@ -6,6 +6,7 @@ import temple.generate.CRUD
 import temple.generate.FileSystem._
 import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceRoot}
 import temple.utils.FileUtils._
+import temple.ast.Metadata.{Readable, Writable}
 
 import scala.collection.immutable.ListMap
 
@@ -26,6 +27,8 @@ object GoServiceGeneratorTestData {
     CreatedByAttribute.None,
     ListMap("name" -> Attribute(AttributeType.StringType(Option(255L), Option(2)))),
     Postgres,
+    Readable.All,
+    Writable.This,
   )
 
   val simpleServiceFiles: Files = Map(
@@ -67,6 +70,8 @@ object GoServiceGeneratorTestData {
         "matchedOn" -> Attribute(AttributeType.DateTimeType, Some(Annotation.ServerSet)),
       ),
       Postgres,
+      Readable.This,
+      Writable.This,
     )
 
   val simpleServiceFilesWithComms: Files = Map(

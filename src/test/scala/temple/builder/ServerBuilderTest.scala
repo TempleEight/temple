@@ -2,7 +2,7 @@ package temple.builder
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.ast.AttributeType._
-import temple.ast.Metadata.{Database, ServiceAuth}
+import temple.ast.Metadata.{Database, Readable, ServiceAuth, Writable}
 import temple.ast.{Attribute, AttributeType}
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
@@ -24,6 +24,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
             endpoints = Set(Create, Read, Update, Delete, List),
             port = port.service,
             detail = GoLanguageDetail("github.com/squat/and/dab"),
+            projectUsesAuth = false,
           )
     }
     serviceRoot shouldBe ServiceRoot(
@@ -51,6 +52,8 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "image"       -> Attribute(BlobType()),
       ),
       datastore = Database.Postgres,
+      readable = Readable.All,
+      writable = Writable.All,
     )
   }
 
@@ -64,6 +67,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
             endpoints = Set(),
             port = port.service,
             detail = GoLanguageDetail("github.com/squat/and/dab"),
+            projectUsesAuth = false,
           )
     }
     serviceRoot shouldBe ServiceRoot(
@@ -85,6 +89,8 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "image"       -> Attribute(BlobType()),
       ),
       datastore = Database.Postgres,
+      readable = Readable.All,
+      writable = Writable.All,
     )
   }
 
@@ -98,6 +104,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
             endpoints = Set(Create, Read, Update, Delete, List),
             port = port.service,
             detail = GoLanguageDetail("github.com/squat/and/dab"),
+            projectUsesAuth = false,
           )
     }
     serviceRoot shouldBe ServiceRoot(
@@ -129,6 +136,8 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "image"          -> Attribute(BlobType()),
       ),
       datastore = Database.Postgres,
+      readable = Readable.All,
+      writable = Writable.All,
     )
   }
 

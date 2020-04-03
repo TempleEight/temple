@@ -1,7 +1,7 @@
 package temple.generate.server
 
 import temple.ast.Attribute
-import temple.ast.Metadata.Database
+import temple.ast.Metadata.{Database, Readable, Writable}
 import temple.generate.CRUD.CRUD
 
 import scala.collection.immutable.ListMap
@@ -30,4 +30,6 @@ case class ServiceRoot(
   createdByAttribute: CreatedByAttribute,
   attributes: ListMap[String, Attribute],
   datastore: Database,
+  readable: Readable,
+  writable: Writable,
 )

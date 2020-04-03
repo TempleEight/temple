@@ -1,6 +1,7 @@
 package temple.generate.server
 
 import temple.ast.Metadata.Database.Postgres
+import temple.ast.Metadata.{Readable, Writable}
 import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD
 
@@ -23,6 +24,8 @@ object GoGeneratorIntegrationTestData {
     CreatedByAttribute.None,
     ListMap("name" -> Attribute(AttributeType.StringType())),
     Postgres,
+    Readable.All,
+    Writable.This,
   )
 
   val simpleServiceRootWithComms: ServiceRoot = ServiceRoot(
@@ -45,5 +48,7 @@ object GoGeneratorIntegrationTestData {
       "matchedOn" -> Attribute(AttributeType.DateTimeType, Some(Annotation.ServerSet)),
     ),
     Postgres,
+    Readable.This,
+    Writable.This,
   )
 }
