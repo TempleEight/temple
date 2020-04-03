@@ -28,16 +28,16 @@ class ServerBuilderTest extends FlatSpec with Matchers {
           )
     }
     serviceRoot shouldBe ServiceRoot(
-      "test-service",
+      "TestService",
       "github.com/squat/and/dab/test-service",
       comms = Seq(),
       port = 1025,
       opQueries = ListMap(
-        Create -> "INSERT INTO test-service (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image;",
-        Read   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test-service WHERE id = $1;",
-        Update -> "UPDATE test-service SET id = $1, bankBalance = $2, name = $3, isStudent = $4, dateOfBirth = $5, timeOfDay = $6, expiry = $7, image = $8 WHERE id = $9 RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image;",
-        Delete -> "DELETE FROM test-service WHERE id = $1;",
-        List   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test-service;",
+        Create -> "INSERT INTO test_service (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image;",
+        Read   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test_service WHERE id = $1;",
+        Update -> "UPDATE test_service SET id = $1, bankBalance = $2, name = $3, isStudent = $4, dateOfBirth = $5, timeOfDay = $6, expiry = $7, image = $8 WHERE id = $9 RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image;",
+        Delete -> "DELETE FROM test_service WHERE id = $1;",
+        List   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test_service;",
       ),
       idAttribute = IDAttribute("id"),
       createdByAttribute = CreatedByAttribute.None,
@@ -71,7 +71,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
           )
     }
     serviceRoot shouldBe ServiceRoot(
-      "test-service",
+      "TestService",
       "github.com/squat/and/dab/test-service",
       comms = Seq(),
       port = 1025,
@@ -108,16 +108,16 @@ class ServerBuilderTest extends FlatSpec with Matchers {
           )
     }
     serviceRoot shouldBe ServiceRoot(
-      "test-complex-service",
+      "TestComplexService",
       "github.com/squat/and/dab/test-complex-service",
       comms = Seq(),
       port = 1025,
       opQueries = ListMap(
-        Create -> "INSERT INTO test-complex-service (id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image;",
-        Read   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test-complex-service WHERE id = $1;",
-        Update -> "UPDATE test-complex-service SET id = $1, anotherId = $2, yetAnotherId = $3, bankBalance = $4, bigBankBalance = $5, name = $6, initials = $7, isStudent = $8, dateOfBirth = $9, timeOfDay = $10, expiry = $11, image = $12 WHERE id = $13 RETURNING id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image;",
-        Delete -> "DELETE FROM test-complex-service WHERE id = $1;",
-        List   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test-complex-service;",
+        Create -> "INSERT INTO test_complex_service (id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image;",
+        Read   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test_complex_service WHERE id = $1;",
+        Update -> "UPDATE test_complex_service SET id = $1, anotherId = $2, yetAnotherId = $3, bankBalance = $4, bigBankBalance = $5, name = $6, initials = $7, isStudent = $8, dateOfBirth = $9, timeOfDay = $10, expiry = $11, image = $12 WHERE id = $13 RETURNING id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image;",
+        Delete -> "DELETE FROM test_complex_service WHERE id = $1;",
+        List   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test_complex_service;",
       ),
       idAttribute = IDAttribute("id"),
       createdByAttribute = CreatedByAttribute.None,

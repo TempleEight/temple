@@ -12,16 +12,16 @@ object GoServiceHookGenerator {
 
   private def generateBeforeHookType(root: ServiceRoot, operation: CRUD): String = operation match {
     case op @ (CRUD.List | CRUD.Read | CRUD.Delete) =>
-      s"func(env *env, input *dao.${op.toString}${root.name.capitalize}Input) *HookError"
+      s"func(env *env, input *dao.${op.toString}${root.name}Input) *HookError"
     case op @ (CRUD.Create | CRUD.Update) =>
-      s"func(env *env, req ${op.toString.toLowerCase}${root.name.capitalize}Request, input *dao.${op.toString}${root.name.capitalize}Input) *HookError"
+      s"func(env *env, req ${op.toString.toLowerCase}${root.name}Request, input *dao.${op.toString}${root.name}Input) *HookError"
   }
 
   private def generateAfterHookType(root: ServiceRoot, operation: CRUD): String = operation match {
     case CRUD.List =>
-      s"func(env *env, ${root.name}List *[]dao.${root.name.capitalize}) *HookError"
+      s"func(env *env, ${root.decapitalizedName}List *[]dao.${root.name}) *HookError"
     case CRUD.Create | CRUD.Read | CRUD.Update =>
-      s"func(env *env, ${root.name} *dao.${root.name.capitalize}) *HookError"
+      s"func(env *env, ${root.decapitalizedName} *dao.${root.name}) *HookError"
     case CRUD.Delete =>
       "func(env *env) *HookError"
   }

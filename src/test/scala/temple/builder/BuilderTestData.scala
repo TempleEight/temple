@@ -24,10 +24,10 @@ object BuilderTestData {
   )
 
   val simpleTemplefile: Templefile = Templefile(
-    "test-project",
+    "TestProject",
     ProjectBlock(Seq(ServiceLanguage.Go)),
     targets = Map(),
-    services = Map("test-service" -> sampleService),
+    services = Map("TestService" -> sampleService),
   )
 
   val sampleComplexService: ServiceBlock = ServiceBlock(
@@ -57,9 +57,9 @@ object BuilderTestData {
   )
 
   val complexTemplefile: Templefile = Templefile(
-    "test-complex-project",
+    "TestComplexProject",
     ProjectBlock(Seq(ServiceLanguage.Go)),
     targets = Map(),
-    services = Map("test-complex-service" -> sampleComplexService),
+    services = Map("TestComplexService" -> sampleComplexService),
   )
 }

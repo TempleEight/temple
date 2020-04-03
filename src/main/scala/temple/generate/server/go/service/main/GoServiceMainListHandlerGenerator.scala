@@ -26,15 +26,15 @@ object GoServiceMainListHandlerGenerator {
       genDeclareAndAssign(
         genMethodCall(
           "env.dao",
-          s"List${root.name.capitalize}",
+          s"List${root.name}",
           when(byCreator) {
             genPopulateStruct(
-              s"dao.List${root.name.capitalize}Input",
+              s"dao.List${root.name}Input",
               ListMap(s"AuthID" -> "auth.ID"),
             )
           },
         ),
-        s"${root.name}List",
+        s"${root.decapitalizedName}List",
         "err",
       )
 
@@ -53,24 +53,24 @@ object GoServiceMainListHandlerGenerator {
     // Instantiate list response object
     val instantiateResponseBlock = genDeclareAndAssign(
       genPopulateStruct(
-        s"list${root.name.capitalize}Response",
+        s"list${root.name}Response",
         ListMap(
-          s"${root.name.capitalize}List" -> genFunctionCall("make", s"[]list${root.name.capitalize}Element", "0"),
+          s"${root.name}List" -> genFunctionCall("make", s"[]list${root.name}Element", "0"),
         ),
       ),
-      s"${root.name}ListResp",
+      s"${root.decapitalizedName}ListResp",
     )
 
     // Map DAO result into response object
     val mapResponseBlock = genForLoop(
-      genDeclareAndAssign(s"range *${root.name}List", "_", root.name),
+      genDeclareAndAssign(s"range *${root.decapitalizedName}List", "_", root.decapitalizedName),
       genAssign(
         genFunctionCall(
           "append",
-          s"${root.name}ListResp.${root.name.capitalize}List",
-          genPopulateStruct(s"list${root.name.capitalize}Element", responseMap),
+          s"${root.decapitalizedName}ListResp.${root.name}List",
+          genPopulateStruct(s"list${root.name}Element", responseMap),
         ),
-        s"${root.name}ListResp.${root.name.capitalize}List",
+        s"${root.decapitalizedName}ListResp.${root.name}List",
       ),
     )
 
@@ -85,7 +85,7 @@ object GoServiceMainListHandlerGenerator {
           ),
           instantiateResponseBlock,
           mapResponseBlock,
-          genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", s"${root.name}ListResp"),
+          genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", s"${root.decapitalizedName}ListResp"),
         ),
       ),
     )
