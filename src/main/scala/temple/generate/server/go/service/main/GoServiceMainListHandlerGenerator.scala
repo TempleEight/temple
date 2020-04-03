@@ -5,6 +5,7 @@ import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.{generateHandlerDecl, generateExtractAuthBlock, generateHTTPError}
 import temple.generate.server.{CreatedByAttribute, ServiceRoot}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
+import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
 
 import scala.Option.when
 import scala.collection.immutable.ListMap
@@ -41,7 +42,7 @@ object GoServiceMainListHandlerGenerator {
     val queryDAOErrorBlock = genIfErr(
       mkCode.lines(
         generateHTTPError(
-          "StatusInternalServerError",
+          StatusInternalServerError,
           "Something went wrong: %s",
           genMethodCall("err", "Error"),
         ),
