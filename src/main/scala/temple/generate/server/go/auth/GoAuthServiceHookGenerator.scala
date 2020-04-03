@@ -4,7 +4,7 @@ import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, presentParticiple}
 import temple.generate.server.go.common.GoCommonGenerator.{genAssign, genFunctionCall, genMethod, genStruct}
 import temple.generate.utils.CodeTerm.mkCode
-f
+
 object GoAuthServiceHookGenerator {
   private val endpoints = Seq("Register" -> CRUD.Create, "Login" -> CRUD.Read)
 
