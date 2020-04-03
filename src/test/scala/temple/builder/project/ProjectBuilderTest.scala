@@ -107,6 +107,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
       File("complexuser/util", "util.go")                         -> ProjectBuilderTestData.complexTemplefileUtilFile,
       File("complexuser/metric", "metric.go")                     -> ProjectBuilderTestData.complexTemplefileMetricFile,
       File("auth", "auth.go")                                     -> ProjectBuilderTestData.complexTemplefileAuthGoFile,
+      File("auth", "hook.go")                                     -> ProjectBuilderTestData.complexTemplefileAuthHookGoFile,
       File("auth", "go.mod")                                      -> ProjectBuilderTestData.complexTemplefileAuthGoModFile,
       File("auth/util", "util.go")                                -> ProjectBuilderTestData.complexTemplefileAuthUtilFile,
       File("auth/dao", "dao.go")                                  -> ProjectBuilderTestData.complexTemplefileAuthDaoFile,

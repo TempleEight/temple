@@ -1,0 +1,13 @@
+package main
+
+import "github.com/squat/and/dab/auth/dao"
+
+// HookError wraps an existing error with HTTP status code
+type HookError struct {
+	statusCode int
+	error      error
+}
+
+func (e *HookError) Error() string {
+	return e.error.Error()
+}
