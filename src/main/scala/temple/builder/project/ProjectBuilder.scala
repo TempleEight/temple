@@ -1,7 +1,7 @@
 package temple.builder.project
 
 import temple.ast.Metadata._
-import temple.ast.{Metadata, TempleBlock, Templefile}
+import temple.ast.{Annotation, Attribute, AttributeType, Metadata, ServiceBlock, TempleBlock, Templefile}
 import temple.builder._
 import temple.detail.LanguageDetail
 import temple.generate.CRUD
@@ -9,7 +9,7 @@ import temple.generate.CRUD._
 import temple.generate.FileSystem._
 import temple.generate.database.PreparedType.QuestionMarks
 import temple.generate.database.ast.Statement
-import temple.generate.database.{PostgresContext, PostgresGenerator}
+import temple.generate.database.{PostgresContext, PostgresGenerator, PreparedType}
 import temple.generate.docker.DockerfileGenerator
 import temple.generate.kube.KubernetesGenerator
 import temple.generate.metrics.grafana.ast.Datasource
@@ -53,30 +53,56 @@ object ProjectBuilder {
       case (_, service) => service.lookupMetadata[ServiceAuth].nonEmpty
     }
 
+    // Auth service block only used if usesAuth == true
+    val authServiceBlock: ServiceBlock = ServiceBlock(
+      attributes = Map(
+        "id"       -> Attribute(AttributeType.UUIDType, valueAnnotations = Set(Annotation.Unique)),
+        "email"    -> Attribute(AttributeType.StringType(), valueAnnotations = Set(Annotation.Unique)),
+        "password" -> Attribute(AttributeType.StringType()),
+      ),
+    )
+    authServiceBlock.setParent(templefile)
+
     val databaseCreationScripts = templefile.services.map {
-      case (name, service) =>
-        val createStatements: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
-        service.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase) match {
+        case (name, service) =>
+          val createStatements: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
+          service.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase) match {
+            case Database.Postgres =>
+              implicit val context: PostgresContext = PostgresContext(QuestionMarks)
+              val postgresStatements                = createStatements.map(PostgresGenerator.generate).mkString("\n\n")
+              (File(s"${name.toLowerCase}-db", "init.sql"), postgresStatements)
+          }
+      } ++ Option.when(usesAuth) {
+        templefile.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase) match {
           case Database.Postgres =>
-            implicit val context: PostgresContext = PostgresContext(QuestionMarks)
-            val postgresStatements                = createStatements.map(PostgresGenerator.generate).mkString("\n\n")
-            (File(s"${name.toLowerCase}-db", "init.sql"), postgresStatements)
+            implicit val postgresContext: PostgresContext = PostgresContext(PreparedType.DollarNumbers)
+            val dbAuthFile = DatabaseBuilder
+              .createServiceTables("auth", authServiceBlock)
+              .map(PostgresGenerator.generate)
+              .mkString("\n\n")
+            File("auth-db", "init.sql") -> dbAuthFile
         }
-    }
+      }
 
     val dockerfiles = templefile.servicesWithPorts.map {
-      case (name, service, port) =>
-        val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, port.service)
-        val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)
-        (File(s"${name.toLowerCase}", "Dockerfile"), dockerfileContents)
-    }
+        case (name, service, port) =>
+          val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, port.service)
+          val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)
+          (File(s"${name.toLowerCase}", "Dockerfile"), dockerfileContents)
+      } ++ Option.when(usesAuth) {
+        val authDockerFile = DockerfileGenerator.generate(
+          DockerfileBuilder.createServiceDockerfile("auth", authServiceBlock, ProjectConfig.authPort),
+        )
+        File("auth", "Dockerfile") -> authDockerFile
+      }
 
     val openAPIRoot = OpenAPIBuilder.createOpenAPI(templefile)
     val apiFiles    = OpenAPIGenerator.generate(openAPIRoot)
 
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(
       StringUtils.kebabCase(templefile.projectName),
-      templefile.servicesWithPorts.map { case (name, block, ports) => (name, block, ports.service) }.toSeq,
+      templefile.servicesWithPorts.map { case (name, block, ports) => (name, block, ports.service) }.toSeq
+      ++ Option.when(usesAuth)("auth", authServiceBlock, ProjectConfig.authPort),
     )
     val kubeFiles = KubernetesGenerator.generate(orchestrationRoot)
 
@@ -100,7 +126,11 @@ object ProjectBuilder {
               PrometheusJob(serviceName.toLowerCase, s"${serviceName.toLowerCase}:${ports.metrics}")
           }.toSeq,
         ),
-      )
+      ) ++ Option.when(usesAuth) {
+        val rows      = MetricsBuilder.createDashboardRows("auth", datasource, endpoints(authServiceBlock))
+        val dashboard = GrafanaDashboardGenerator.generate("auth", "Auth", rows)
+        File("grafana/provisioning/dashboards", "auth.json") -> dashboard
+      }
 
     var serverFiles = templefile.servicesWithPorts.flatMap {
       case (name, service, port) =>

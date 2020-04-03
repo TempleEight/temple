@@ -1160,16 +1160,27 @@ object ProjectBuilderTestData {
       |  --data 'url=http://complex-user:1025/complex-user'
       |
       |curl -X POST \
+      |  --url $KONG_ADMIN/services/ \
+      |  --data 'name=auth-service' \
+      |  --data 'url=http://auth:1024/auth'
+      |
+      |curl -X POST \
       |  --url $KONG_ADMIN/services/complex-user-service/routes \
       |  --data "hosts[]=$KONG_ENTRY" \
       |  --data 'paths[]=/api/complex-user'
+      |
+      |curl -X POST \
+      |  --url $KONG_ADMIN/services/auth-service/routes \
+      |  --data "hosts[]=$KONG_ENTRY" \
+      |  --data 'paths[]=/api/auth'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/complex-user-service/plugins \
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
 
-  val complexTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/complexuser.json").init
+  val complexTemplefileGrafanaDashboard: String     = FileUtils.readResources("grafana/complexuser.json").init
+  val complexTemplefileAuthGrafanaDashboard: String = FileUtils.readResources("grafana/auth.json").init
 
   val complexTemplefileGrafanaDashboardConfig: String =
     """apiVersion: 1
@@ -1224,4 +1235,37 @@ object ProjectBuilderTestData {
       |  - targets:
       |    - complexuser:1026
       |""".stripMargin
+
+  val complexTemplefilePostgresAuthOutput: String =
+    """CREATE TABLE auth (
+      |  id UUID UNIQUE NOT NULL,
+      |  email TEXT UNIQUE NOT NULL,
+      |  password TEXT NOT NULL
+      |);""".stripMargin
+
+  val complexTemplefileAuthDockerfile: String =
+    """FROM golang:1.13.7-alpine
+      |
+      |WORKDIR /auth
+      |
+      |COPY go.mod go.sum ./
+      |
+      |RUN ["go", "mod", "download"]
+      |
+      |COPY . .
+      |
+      |COPY config.json /etc/auth-service/
+      |
+      |RUN ["go", "build", "-o", "auth"]
+      |
+      |ENTRYPOINT ["./auth"]
+      |
+      |EXPOSE 1024
+      |""".stripMargin
+
+  val complexTemplefileAuthKubeDeployment: String   = FileUtils.readResources("kube/auth/auth-deployment.yaml")
+  val complexTemplefileAuthKubeService: String      = FileUtils.readResources("kube/auth/auth-service.yaml")
+  val complexTemplefileAuthKubeDbDeployment: String = FileUtils.readResources("kube/auth/auth-db-deployment.yaml")
+  val complexTemplefileAuthKubeDbService: String    = FileUtils.readResources("kube/auth/auth-db-service.yaml")
+  val complexTemplefileAuthKubeDbStorage: String    = FileUtils.readResources("kube/auth/auth-db-storage.yaml")
 }
