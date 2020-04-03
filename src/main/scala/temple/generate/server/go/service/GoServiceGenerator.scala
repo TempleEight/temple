@@ -3,6 +3,7 @@ package temple.generate.server.go.service
 import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
+import temple.generate.server.go.GoCommonMetricGenerator
 import temple.generate.server.go.common._
 import temple.generate.server.go.service.dao._
 import temple.generate.server.go.service.main.{GoServiceMainGenerator, GoServiceMainHandlersGenerator, GoServiceMainStructGenerator}
@@ -84,7 +85,7 @@ object GoServiceGenerator extends ServiceGenerator {
       ),
       File(s"${root.name}/metric", "metric.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("metric"),
-        GoServiceMetricGenerator.generateImports(),
+        GoCommonMetricGenerator.generateImports(),
         GoServiceMetricGenerator.generateVars(root, operations),
       ),
     ) ++ when(usesComms)(
