@@ -17,8 +17,7 @@ object GoCommonGenerator {
 
   private[go] def generateGoType(attributeType: AttributeType): String =
     attributeType match {
-      case ForeignKey(_)                                  => "uuid.UUID"
-      case UUIDType                                       => "uuid.UUID"
+      case ForeignKey(_) | UUIDType                       => "uuid.UUID"
       case IntType(_, Some(min), p) if p <= 1 && min >= 0 => "uint8"
       case IntType(_, Some(min), p) if p <= 2 && min >= 0 => "uint16"
       case IntType(_, Some(min), p) if p <= 4 && min >= 0 => "uint32"
@@ -31,9 +30,7 @@ object GoCommonGenerator {
       case FloatType(_, _, _)                             => "float64"
       case StringType(_, _)                               => "string"
       case BoolType                                       => "bool"
-      case DateType                                       => "time.Time"
-      case TimeType                                       => "time.Time"
-      case DateTimeType                                   => "time.Time"
+      case DateType | TimeType | DateTimeType             => "time.Time"
       case BlobType(Some(size))                           => s"[$size]byte"
       case BlobType(_)                                    => "[]byte"
     }
