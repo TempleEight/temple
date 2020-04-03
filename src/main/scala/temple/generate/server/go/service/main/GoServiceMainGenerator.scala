@@ -17,26 +17,19 @@ object GoServiceMainGenerator {
     usesTime: Boolean,
     usesComms: Boolean,
     clientAttributes: ListMap[String, Attribute],
+    operations: Set[CRUD],
   ): String =
     mkCode(
       "import",
       CodeWrap.parens.tabbed(
-        //doubleQuote("encoding/json"),
+        // TODO: This check is temporary to make the integrations tests pass
+        when(operations.contains(List)) { doubleQuote("encoding/json") },
         doubleQuote("flag"),
-        //doubleQuote("fmt"),
+        // TODO: This check is temporary to make the integrations tests pass
+        when(operations.contains(List)) { doubleQuote("fmt") },
         doubleQuote("log"),
         doubleQuote("net/http"),
-        // TODO: This check is temporary to make the integration tests pass
-        when(
-          clientAttributes
-            .exists {
-              case (_, attr) =>
-                attr.attributeType == AttributeType.DateType ||
-                attr.attributeType == AttributeType.TimeType ||
-                attr.attributeType == AttributeType.DateTimeType
-            },
-        ) { doubleQuote("time") },
-        //when(usesTime) { doubleQuote("time") },
+        when(usesTime) { doubleQuote("time") },
         "",
         when(usesComms) { doubleQuote(s"${root.module}/comm") },
         doubleQuote(s"${root.module}/dao"),
@@ -77,13 +70,4 @@ object GoServiceMainGenerator {
       ),
     )
   }
-
-  private def generateHandler(root: ServiceRoot, operation: CRUD): String =
-    s"func (env *env) ${operation.toString.toLowerCase}${root.name}Handler(w http.ResponseWriter, r *http.Request) {}"
-
-  private[service] def generateHandlers(root: ServiceRoot, operations: Set[CRUD]): String =
-    mkCode.doubleLines(
-      for (operation <- operations.toSeq.sorted)
-        yield generateHandler(root, operation),
-    )
 }

@@ -90,8 +90,9 @@ object GoServiceDAOFunctionsGenerator {
         case Create | Read | Update => "executeQueryWithRowResponse"
         case Delete                 => "executeQuery"
       },
-      Seq("dao.DB", doubleQuote(query)) ++
-      generateQueryArgs(root, operation): _*,
+      "dao.DB",
+      doubleQuote(query),
+      generateQueryArgs(root, operation),
     )
 
     mkCode.lines(

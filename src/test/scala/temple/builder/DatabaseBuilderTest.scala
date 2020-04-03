@@ -2,7 +2,7 @@ package temple.builder
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.generate.CRUD
-import temple.generate.server.{CreatedByAttribute, IDAttribute}
+import temple.generate.server.CreatedByAttribute
 
 class DatabaseBuilderTest extends FlatSpec with Matchers {
 
@@ -23,7 +23,6 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Create),
-      IDAttribute("id"),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.Create)
@@ -35,7 +34,6 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Read),
-      IDAttribute("id"),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.Read)
@@ -47,7 +45,6 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Update),
-      IDAttribute("id"),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.Update)
@@ -59,7 +56,6 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Delete),
-      IDAttribute("id"),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.Delete)
@@ -71,7 +67,6 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
-      IDAttribute("id"),
       CreatedByAttribute.None,
     )
     queries.keys should contain(CRUD.List)
@@ -83,7 +78,6 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
-      IDAttribute("id"),
       CreatedByAttribute.EnumerateByAll("created_by", "created_by"),
     )
     queries.keys should contain(CRUD.List)
@@ -95,7 +89,6 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
-      IDAttribute("id"),
       CreatedByAttribute.EnumerateByCreator("created_by", "created_by"),
     )
     queries.keys should contain(CRUD.List)

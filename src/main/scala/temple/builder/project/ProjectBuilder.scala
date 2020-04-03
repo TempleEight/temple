@@ -16,6 +16,7 @@ import temple.generate.metrics.grafana.ast.Datasource
 import temple.generate.metrics.grafana.{GrafanaDashboardConfigGenerator, GrafanaDashboardGenerator, GrafanaDatasourceConfigGenerator}
 import temple.generate.metrics.prometheus.PrometheusConfigGenerator
 import temple.generate.metrics.prometheus.ast.PrometheusJob
+import temple.generate.server.go.auth.GoAuthServiceGenerator
 import temple.generate.server.go.service.GoServiceGenerator
 import temple.generate.target.openapi.OpenAPIGenerator
 import temple.utils.StringUtils._
@@ -47,6 +48,11 @@ object ProjectBuilder {
     * @return the associated generated project
     */
   def build(templefile: Templefile, detail: LanguageDetail): Project = {
+
+    val usesAuth = templefile.services.exists {
+      case (_, service) => service.lookupMetadata[ServiceAuth].nonEmpty
+    }
+
     val databaseCreationScripts = templefile.services.map {
       case (name, service) =>
         val createStatements: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
@@ -96,7 +102,7 @@ object ProjectBuilder {
         ),
       )
 
-    val serverFiles = templefile.servicesWithPorts.flatMap {
+    var serverFiles = templefile.servicesWithPorts.flatMap {
       case (name, service, port) =>
         val serviceRoot =
           ServerBuilder.buildServiceRoot(name, service, port.service, endpoints(service), detail)
@@ -104,6 +110,15 @@ object ProjectBuilder {
           case ServiceLanguage.Go =>
             GoServiceGenerator.generate(serviceRoot)
         }
+    }
+
+    if (usesAuth) {
+      templefile.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
+        case ServiceLanguage.Go =>
+          serverFiles = serverFiles ++ GoAuthServiceGenerator.generate(
+              ServerBuilder.buildAuthRoot(templefile, detail, ProjectConfig.authPort),
+            )
+      }
     }
 
     Project(

@@ -5,7 +5,7 @@ import temple.generate.CRUD
 import temple.generate.FileSystem._
 import temple.generate.server.go.common._
 import temple.generate.server.go.service.dao._
-import temple.generate.server.go.service.main.{GoServiceMainGenerator, GoServiceMainStructGenerator}
+import temple.generate.server.go.service.main.{GoServiceMainGenerator, GoServiceMainHandlersGenerator, GoServiceMainStructGenerator}
 import temple.generate.server.{ServiceGenerator, ServiceRoot}
 import temple.generate.utils.CodeTerm.mkCode
 
@@ -42,7 +42,7 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${root.kebabName}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
       File(root.kebabName, s"${root.kebabName}.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoServiceMainGenerator.generateImports(root, usesTime, usesComms, clientAttributes),
+        GoServiceMainGenerator.generateImports(root, usesTime, usesComms, clientAttributes, operations),
         GoServiceMainStructGenerator.generateEnvStruct(usesComms),
         when(clientAttributes.nonEmpty && (operations.contains(CRUD.Create) || operations.contains(CRUD.Read))) {
           GoServiceMainStructGenerator.generateRequestStructs(root, operations, clientAttributes)
@@ -51,7 +51,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainGenerator.generateRouter(root, operations),
         GoCommonMainGenerator.generateMain(root, root.port, usesComms, isAuth = false),
         GoCommonMainGenerator.generateJsonMiddleware(),
-        GoServiceMainGenerator.generateHandlers(root, operations),
+        GoServiceMainHandlersGenerator.generateHandlers(root, operations),
       ),
       File(root.kebabName, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
@@ -59,6 +59,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceHookGenerator.generateHookStruct(root, operations),
         GoServiceHookGenerator.generateHookErrorStruct,
         GoServiceHookGenerator.generateHookErrorFunction,
+        GoServiceHookGenerator.generateAddHookMethods(root, operations),
       ),
       File(s"${root.kebabName}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),
       File(s"${root.kebabName}/dao", "dao.go") -> mkCode.doubleLines(

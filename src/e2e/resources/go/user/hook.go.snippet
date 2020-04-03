@@ -24,3 +24,43 @@ type HookError struct {
 func (e *HookError) Error() string {
 	return e.error.Error()
 }
+
+// BeforeList adds a new hook to be executed before listing the objects in the datastore
+func (h *Hook) BeforeList(hook func(env *env, input *dao.ListTempleuserInput) *HookError) {
+	h.beforeListHooks = append(h.beforeListHooks, &hook)
+}
+
+// BeforeCreate adds a new hook to be executed before creating an object in the datastore
+func (h *Hook) BeforeCreate(hook func(env *env, req createTempleuserRequest, input *dao.CreateTempleuserInput) *HookError) {
+	h.beforeCreateHooks = append(h.beforeCreateHooks, &hook)
+}
+
+// BeforeRead adds a new hook to be executed before reading an object in the datastore
+func (h *Hook) BeforeRead(hook func(env *env, input *dao.ReadTempleuserInput) *HookError) {
+	h.beforeReadHooks = append(h.beforeReadHooks, &hook)
+}
+
+// BeforeUpdate adds a new hook to be executed before updating an object in the datastore
+func (h *Hook) BeforeUpdate(hook func(env *env, req updateTempleuserRequest, input *dao.UpdateTempleuserInput) *HookError) {
+	h.beforeUpdateHooks = append(h.beforeUpdateHooks, &hook)
+}
+
+// AfterList adds a new hook to be executed after listing the objects in the datastore
+func (h *Hook) AfterList(hook func(env *env, templeuserList *[]dao.Templeuser) *HookError) {
+	h.afterListHooks = append(h.afterListHooks, &hook)
+}
+
+// AfterCreate adds a new hook to be executed after creating an object in the datastore
+func (h *Hook) AfterCreate(hook func(env *env, templeuser *dao.Templeuser) *HookError) {
+	h.afterCreateHooks = append(h.afterCreateHooks, &hook)
+}
+
+// AfterRead adds a new hook to be executed after reading an object in the datastore
+func (h *Hook) AfterRead(hook func(env *env, templeuser *dao.Templeuser) *HookError) {
+	h.afterReadHooks = append(h.afterReadHooks, &hook)
+}
+
+// AfterUpdate adds a new hook to be executed after updating an object in the datastore
+func (h *Hook) AfterUpdate(hook func(env *env, templeuser *dao.Templeuser) *HookError) {
+	h.afterUpdateHooks = append(h.afterUpdateHooks, &hook)
+}
