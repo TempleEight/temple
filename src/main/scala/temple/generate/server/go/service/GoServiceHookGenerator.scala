@@ -5,6 +5,7 @@ import temple.generate.CRUD.CRUD
 import temple.generate.CRUD.presentParticiple
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.server.go.common.GoCommonHookGenerator
 import temple.generate.utils.CodeTerm.mkCode
 
 object GoServiceHookGenerator {
@@ -35,8 +36,7 @@ object GoServiceHookGenerator {
     }
 
     mkCode.lines(
-      "// Hook allows additional code to be executed before and after every datastore interaction",
-      "// Hooks are executed in the order they are defined, such that if any hook errors, future hooks are not executed and the request is terminated",
+      GoCommonHookGenerator.generateHookStructComment,
       genStruct("Hook", beforeCreate ++ afterCreate),
     )
   }
