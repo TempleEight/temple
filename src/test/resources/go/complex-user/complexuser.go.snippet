@@ -1,7 +1,9 @@
 package main
 
 import (
+	"encoding/json"
 	"flag"
+	"fmt"
 	"log"
 	"net/http"
 	"time"
@@ -144,7 +146,70 @@ func jsonMiddleware(next http.Handler) http.Handler {
 }
 
 func (env *env) createComplexuserHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
 
+	var req createComplexuserRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	if req.SmallIntField == nil || req.IntField == nil || req.BigIntField == nil || req.FloatField == nil || req.DoubleField == nil || req.StringField == nil || req.BoundedStringField == nil || req.BoolField == nil || req.DateField == nil || req.TimeField == nil || req.DateTimeField == nil || req.BlobField == nil {
+		errMsg := util.CreateErrorJSON("Missing request parameter(s)")
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	_, err = valid.ValidateStruct(req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	complexuser, err := env.dao.CreateComplexuser(dao.CreateComplexuserInput{
+		ID:                 auth.ID,
+		SmallIntField:      *req.SmallIntField,
+		IntField:           *req.IntField,
+		BigIntField:        *req.BigIntField,
+		FloatField:         *req.FloatField,
+		DoubleField:        *req.DoubleField,
+		StringField:        *req.StringField,
+		BoundedStringField: *req.BoundedStringField,
+		BoolField:          *req.BoolField,
+		DateField:          *req.DateField,
+		TimeField:          *req.TimeField,
+		DateTimeField:      *req.DateTimeField,
+		BlobField:          *req.BlobField,
+	})
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(createComplexuserResponse{
+		ID:                 complexuser.ID,
+		SmallIntField:      complexuser.SmallIntField,
+		IntField:           complexuser.IntField,
+		BigIntField:        complexuser.BigIntField,
+		FloatField:         complexuser.FloatField,
+		DoubleField:        complexuser.DoubleField,
+		StringField:        complexuser.StringField,
+		BoundedStringField: complexuser.BoundedStringField,
+		BoolField:          complexuser.BoolField,
+		DateField:          complexuser.DateField,
+		TimeField:          complexuser.TimeField,
+		DateTimeField:      complexuser.DateTimeField.Format(time.RFC3339),
+		BlobField:          complexuser.BlobField,
+	})
 }
 
 func (env *env) readComplexuserHandler(w http.ResponseWriter, r *http.Request) {
