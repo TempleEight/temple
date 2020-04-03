@@ -23,11 +23,9 @@ object GoServiceMainGenerator {
     mkCode(
       "import",
       CodeWrap.parens.tabbed(
-        // TODO: This check is temporary to make the integrations tests pass
-        when(operations.contains(List)) { doubleQuote("encoding/json") },
+        doubleQuote("encoding/json"),
         doubleQuote("flag"),
-        // TODO: This check is temporary to make the integrations tests pass
-        when(operations.contains(List)) { doubleQuote("fmt") },
+        doubleQuote("fmt"),
         doubleQuote("log"),
         doubleQuote("net/http"),
         when(usesTime) { doubleQuote("time") },

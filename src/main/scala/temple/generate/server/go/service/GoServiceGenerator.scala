@@ -6,7 +6,7 @@ import temple.generate.FileSystem._
 import temple.generate.server.go.common._
 import temple.generate.server.go.service.dao._
 import temple.generate.server.go.service.main.{GoServiceMainGenerator, GoServiceMainHandlersGenerator, GoServiceMainStructGenerator}
-import temple.generate.server.{ServiceGenerator, ServiceRoot}
+import temple.generate.server.{CreatedByAttribute, ServiceGenerator, ServiceRoot}
 import temple.generate.utils.CodeTerm.mkCode
 
 import scala.Option.when
@@ -26,7 +26,7 @@ object GoServiceGenerator extends ServiceGenerator {
     // Whether or not the service uses inter-service communication
     val usesComms = root.comms.nonEmpty
 
-    // Whether or not ths service uses the time type, by checking for attributes of type date, time or datetime
+    // Whether or not this service uses the time type, by checking for attributes of type date, time or datetime
     val usesTime =
       Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateTimeType)
         .intersect(root.attributes.values.map(_.attributeType).toSet)
@@ -36,6 +36,12 @@ object GoServiceGenerator extends ServiceGenerator {
     val clientAttributes = root.attributes.filterNot {
       case (_, attr) =>
         attr.accessAnnotation.contains(Annotation.Server) || attr.accessAnnotation.contains(Annotation.ServerSet)
+    }
+
+    // Whether or not this service has an auth block
+    val hasAuthBlock = root.createdByAttribute match {
+      case CreatedByAttribute.None                                                         => true
+      case _: CreatedByAttribute.EnumerateByCreator | _: CreatedByAttribute.EnumerateByAll => false
     }
 
     (Map(
@@ -51,7 +57,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainGenerator.generateRouter(root, operations),
         GoCommonMainGenerator.generateMain(root.name, root.port, usesComms, isAuth = false),
         GoCommonMainGenerator.generateJsonMiddleware(),
-        GoServiceMainHandlersGenerator.generateHandlers(root, operations, clientAttributes, usesComms),
+        GoServiceMainHandlersGenerator.generateHandlers(root, operations, clientAttributes, usesComms, hasAuthBlock),
       ),
       File(root.name, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),

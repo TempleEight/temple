@@ -177,6 +177,56 @@ func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, errMsg, http.StatusBadRequest)
 		return
 	}
+
+	userOneValid, err := env.comm.CheckUser(*req.UserOne, r.Header.Get("Authorization"))
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Unable to reach user service: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
+	if !userOneValid {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Unknown User: %s", req.UserOne.String()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	userTwoValid, err := env.comm.CheckUser(*req.UserTwo, r.Header.Get("Authorization"))
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Unable to reach user service: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
+	if !userTwoValid {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Unknown User: %s", req.UserTwo.String()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	uuid, err := uuid.NewUUID()
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not create UUID: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
+
+	match, err := env.dao.CreateMatch(dao.CreateMatchInput{
+		ID:      uuid,
+		AuthID:  auth.ID,
+		UserOne: *req.UserOne,
+		UserTwo: *req.UserTwo,
+	})
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
+
+	json.NewEncoder(w).Encode(createMatchResponse{
+		ID:        match.ID,
+		UserOne:   match.UserOne,
+		UserTwo:   match.UserTwo,
+		MatchedOn: match.MatchedOn.Format(time.RFC3339),
+	})
 }
 
 func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
