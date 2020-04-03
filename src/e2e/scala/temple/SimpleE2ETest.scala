@@ -32,6 +32,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
         "templeuser-db",
         "templeuser",
         "auth",
+        "auth-db",
         "api",
         "booking-db",
         "booking",
@@ -178,7 +179,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
     // Only these files should be present in the grafana/provisioning/dashboards folder
     val expectedGrafanaDashboardsFolders =
-      Set("booking.json", "event.json", "templeuser.json", "dashboards.yml").map(dir =>
+      Set("booking.json", "event.json", "templeuser.json", "auth.json", "dashboards.yml").map(dir =>
         basePath.resolve("grafana/provisioning/dashboards").resolve(dir),
       )
 
@@ -219,13 +220,18 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
     // Exactly these files should be in the auth directory
     val exepectedAuthFolderFiles =
-      Set("auth.go", "go.mod", "hook.go", "dao", "comm", "util", "metric").map(dir =>
+      Set("Dockerfile", "auth.go", "go.mod", "hook.go", "dao", "comm", "util", "metric").map(dir =>
         basePath.resolve("auth").resolve(dir),
       )
 
     Files
       .list(basePath.resolve("auth"))
       .toScala(Set) shouldBe exepectedAuthFolderFiles
+
+    // the content of the auth/Dockerfile should be correct
+    val authDockerfile =
+      Files.readString(basePath.resolve("auth").resolve("Dockerfile"))
+    authDockerfile shouldBe SimpleE2ETestData.authDockerfile
 
     // The content of the auth/auth.go file should be correct
     val authGoFile =
@@ -281,5 +287,13 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     // The contents of the auth/metric/metric.go file should be correct
     val authMetricFile = Files.readString(basePath.resolve("auth/metric").resolve("metric.go"))
     authMetricFile shouldBe SimpleE2ETestData.authMetricFile
+
+    // The auth-db folder should contain exactly one file
+    val expectedAuthDbFiles = Set("init.sql").map(dir => basePath.resolve("auth-db").resolve(dir))
+    Files.list(basePath.resolve("auth-db")).toScala(Set) shouldBe expectedAuthDbFiles
+
+    //The auth-db/init.sql file should be correct
+    val authDbInitSqlFile = Files.readString(basePath.resolve("auth-db").resolve("init.sql"))
+    authDbInitSqlFile shouldBe SimpleE2ETestData.authDbInitSqlFile
   }
 }

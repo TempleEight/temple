@@ -63,6 +63,11 @@ object SimpleE2ETestData {
       |  --data 'url=http://event:1029/event'
       |
       |curl -X POST \
+      |  --url $KONG_ADMIN/services/ \
+      |  --data 'name=auth-service' \
+      |  --data 'url=http://auth:1024/auth'
+      |
+      |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/routes \
       |  --data "hosts[]=$KONG_ENTRY" \
       |  --data 'paths[]=/api/temple-user'
@@ -76,6 +81,11 @@ object SimpleE2ETestData {
       |  --url $KONG_ADMIN/services/event-service/routes \
       |  --data "hosts[]=$KONG_ENTRY" \
       |  --data 'paths[]=/api/event'
+      |
+      |curl -X POST \
+      |  --url $KONG_ADMIN/services/auth-service/routes \
+      |  --data "hosts[]=$KONG_ENTRY" \
+      |  --data 'paths[]=/api/auth'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/plugins \
@@ -293,6 +303,10 @@ object SimpleE2ETestData {
       |  static_configs:
       |  - targets:
       |    - event:1030
+      |- job_name: auth
+      |  static_configs:
+      |  - targets:
+      |    - auth:1025
       |""".stripMargin
 
   val authGoFile: String      = FileUtils.readResources("go/auth/auth.go.snippet")
@@ -303,4 +317,31 @@ object SimpleE2ETestData {
   val authErrorsFile: String  = FileUtils.readResources("go/auth/dao/errors.go.snippet")
   val authHandlerFile: String = FileUtils.readResources("go/auth/comm/handler.go.snippet")
   val authMetricFile: String  = FileUtils.readResources("go/auth/metric/metric.go.snippet")
+
+  val authDbInitSqlFile: String =
+    """CREATE TABLE auth (
+      |  id UUID UNIQUE NOT NULL,
+      |  email TEXT UNIQUE NOT NULL,
+      |  password TEXT NOT NULL
+      |);""".stripMargin
+
+  val authDockerfile: String =
+    """FROM golang:1.13.7-alpine
+      |
+      |WORKDIR /auth
+      |
+      |COPY go.mod go.sum ./
+      |
+      |RUN ["go", "mod", "download"]
+      |
+      |COPY . .
+      |
+      |COPY config.json /etc/auth-service/
+      |
+      |RUN ["go", "build", "-o", "auth"]
+      |
+      |ENTRYPOINT ["./auth"]
+      |
+      |EXPOSE 1024
+      |""".stripMargin
 }
