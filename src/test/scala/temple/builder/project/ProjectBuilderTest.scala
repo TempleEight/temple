@@ -112,6 +112,7 @@ class ProjectBuilderTest extends FlatSpec with Matchers {
       File("auth/dao", "dao.go")                                  -> ProjectBuilderTestData.complexTemplefileAuthDaoFile,
       File("auth/dao", "errors.go")                               -> ProjectBuilderTestData.complexTemplefileAuthErrorsFile,
       File("auth/comm", "handler.go")                             -> ProjectBuilderTestData.complexTemplefileAuthHandlerFile,
+      File("auth/metric", "metric.go")                            -> ProjectBuilderTestData.complexTemplefileAuthMetricFile,
       File("kube/complex-user", "deployment.yaml")                -> ProjectBuilderTestData.complexTemplefileKubeDeployment,
       File("kube/complex-user", "db-deployment.yaml")             -> ProjectBuilderTestData.complexTemplefileKubeDbDeployment,
       File("kube/complex-user", "service.yaml")                   -> ProjectBuilderTestData.complexTemplefileKubeService,

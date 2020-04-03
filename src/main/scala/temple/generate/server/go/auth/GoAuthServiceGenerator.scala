@@ -1,6 +1,7 @@
 package temple.generate.server.go.auth
 
 import temple.generate.FileSystem._
+import temple.generate.server.go.GoCommonMetricGenerator
 import temple.generate.server.go.common._
 import temple.generate.server.{AuthServiceGenerator, AuthServiceRoot}
 import temple.generate.utils.CodeTerm.mkCode
@@ -48,6 +49,11 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoCommonUtilGenerator.generateConfigStruct(),
         GoCommonUtilGenerator.generateGetConfig(),
         GoCommonUtilGenerator.generateCreateErrorJSON(),
+      ),
+      File("auth/metric", "metric.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("metric"),
+        GoCommonMetricGenerator.generateImports(),
+        GoAuthServiceMetricGenerator.generateVars(),
       ),
     ).map { case (path, contents) => path -> (contents + "\n") }
 }

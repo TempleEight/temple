@@ -15,6 +15,6 @@ object GoServiceMetricGenerator {
       (s"Request${operation.toString.capitalize}", doubleQuote(operation.toString.toLowerCase))
     }, separator = " = ")
 
-    GoCommonMetricGenerator.generateVars(serviceGlobals, root)
+    GoCommonMetricGenerator.generateVars(serviceGlobals, root.name)
   }
 }
