@@ -41,7 +41,7 @@ object SimpleE2ETestData {
       |
       |ENTRYPOINT ["./templeuser"]
       |
-      |EXPOSE 1025
+      |EXPOSE 1026
       |""".stripMargin
 
   val configureKong: String =
@@ -50,17 +50,17 @@ object SimpleE2ETestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=temple-user-service' \
-      |  --data 'url=http://temple-user:1025/temple-user'
+      |  --data 'url=http://temple-user:1026/temple-user'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=booking-service' \
-      |  --data 'url=http://booking:1027/booking'
+      |  --data 'url=http://booking:1028/booking'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=event-service' \
-      |  --data 'url=http://event:1029/event'
+      |  --data 'url=http://event:1030/event'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
@@ -128,7 +128,7 @@ object SimpleE2ETestData {
       |      - image: simple-temple-test-temple-user
       |        name: temple-user
       |        ports:
-      |        - containerPort: 1025
+      |        - containerPort: 1026
       |      imagePullSecrets:
       |      - name: regcred
       |      restartPolicy: Always
@@ -198,8 +198,8 @@ object SimpleE2ETestData {
       |spec:
       |  ports:
       |  - name: api
-      |    port: 1025
-      |    targetPort: 1025
+      |    port: 1026
+      |    targetPort: 1026
       |  selector:
       |    app: temple-user
       |    kind: service
@@ -294,15 +294,15 @@ object SimpleE2ETestData {
       |- job_name: templeuser
       |  static_configs:
       |  - targets:
-      |    - templeuser:1026
+      |    - templeuser:1027
       |- job_name: booking
       |  static_configs:
       |  - targets:
-      |    - booking:1028
+      |    - booking:1029
       |- job_name: event
       |  static_configs:
       |  - targets:
-      |    - event:1030
+      |    - event:1031
       |- job_name: auth
       |  static_configs:
       |  - targets:

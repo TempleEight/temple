@@ -27,10 +27,10 @@ case class Templefile(
 
   def allServicesWithPorts: Iterable[(String, GeneratedBlock, Ports)] =
     services
-      .zip(Iterator.from(1025, step = 2)) // 1024 is reserved for auth service
+      .zip(Iterator.from(ProjectConfig.serviceStartPort, step = 2)) // 1024 is reserved for auth service
       .map {
         case ((name, service), port) =>
-          if (service == AuthServiceBlock) (name, service, Ports(ProjectConfig.authPort, ProjectConfig.authPort + 1))
+          if (service == AuthServiceBlock) (name, service, Ports(ProjectConfig.authPort, ProjectConfig.authMetricPort))
           else (name, service, Ports(port, port + 1))
       }
 
