@@ -111,38 +111,31 @@ object NameClashes {
     "with",
   )
 
-  case class NameValidator private (private[NameClashes] val isValid: (String, Set[String]) => Boolean) {
+  case class NameValidator private (private[NameClashes] val isValid: String => Boolean)
 
-    def &(other: NameValidator): NameValidator = NameValidator { (str, taken) =>
-      this.isValid(str, taken) && other.isValid(str, taken)
+  private[NameClashes] object NameValidator {
+    private val acceptEverything = NameValidator(_ => true)
+
+    def combine(validators: IterableOnce[NameValidator]): NameValidator =
+      validators.iterator.foldLeft(acceptEverything) { (v1, v2) =>
+        NameValidator(str => v1.isValid(str) && v2.isValid(str))
+      }
+
+    def fromIterable(strings: Set[String]): NameValidator = NameValidator { name =>
+      !strings.iterator.contains(name.toLowerCase)
     }
-
-    def join(others: IterableOnce[NameValidator]): NameValidator = others.iterator.fold(this) { _ & _ }
   }
 
-  private def iterableValidator(strings: Set[String]): NameValidator = NameValidator { (name, taken) =>
-    !strings.iterator.contains(name) && !taken.contains(name)
-  }
+  val postgresValidator: NameValidator = NameValidator.fromIterable(postgresNames)
 
-  private def caseInsensitiveIterableValidator(strings: Set[String]): NameValidator = NameValidator { (name, taken) =>
-    val lowerName = name.toLowerCase
-    !strings.iterator.contains(lowerName) && !taken.contains(lowerName)
-  }
-
-  val postgresValidator: NameValidator = caseInsensitiveIterableValidator(postgresNames)
-
+  /** Repeatedly add the project name to the start of the string */
   def nameSuggestions(name: String, project: String, decapitalize: Boolean = false): Iterator[String] =
-    iterate(name.capitalize) { project + _ }.map {
-      if (decapitalize) StringUtils.decapitalize
-      else identity
-    }
+    iterate(name.capitalize) { project + _ }.map { if (decapitalize) StringUtils.decapitalize else identity }
 
   def dodgeNames(name: String, project: String, takenNames: Set[String], decapitalize: Boolean = false)(
-    nameValidator1: NameValidator,
-    nameValidators: NameValidator*,
+    validators: NameValidator*,
   ): String = {
-    val nameValidator = nameValidator1.join(nameValidators)
-    nameSuggestions(name, project, decapitalize).filter { nameValidator.isValid(_, takenNames) }.next
+    val validator = NameValidator.combine(Iterator(NameValidator.fromIterable(takenNames)) ++ validators)
+    nameSuggestions(name, project, decapitalize).filter { validator.isValid(_) }.next
   }
-
 }

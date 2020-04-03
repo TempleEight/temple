@@ -4,12 +4,13 @@ import temple.DSL.semantics.NameClashes._
 import temple.DSL.semantics.Validator._
 import temple.ast.AttributeType._
 import temple.ast.{Metadata, _}
+import temple.builder.project.ProjectConfig
 
 import scala.collection.mutable
 import scala.reflect.{ClassTag, classTag}
 
 private class Validator(templefile: Templefile) {
-  var errors: mutable.Set[String] = mutable.SortedSet()
+  var errors: mutable.Buffer[String] = mutable.Buffer()
 
   private val allStructs: Iterable[String] = templefile.services.flatMap {
     case _ -> service => service.structs.keys
@@ -28,40 +29,40 @@ private class Validator(templefile: Templefile) {
 
   private def validateAttributes(
     attributes: Map[String, Attribute],
-    projectName: String,
     context: SemanticContext,
   ): Map[String, Attribute] = {
     foreachValueWithContext(attributes, context, validateAttribute)
 
-    val newAttributes = mutable.LinkedHashMap[String, Attribute]()
-    attributes.foreach {
-      case (attributeName, value) =>
+    // This looks like a map, but it isn’t because the accumulator `newAttributes`’ names are accessed during iteration
+    attributes.foldLeft(attributes.mapFactory[String, Attribute]()) {
+      case (newAttributes, (attributeName, value)) =>
         if (attributeName.headOption.exists(!_.isLower))
           errors += context.errorMessage(
             s"Invalid attribute name $attributeName, it must start with a lowercase letter,",
           )
         val newName = dodgeNames(
           attributeName,
-          projectName,
+          templefile.projectName,
           (newAttributes.keys ++ attributes.keys).toSet - attributeName,
           decapitalize = true,
         )(postgresValidator)
-        newAttributes += newName -> value
+        newAttributes + (newName -> value)
     }
-    newAttributes.to(attributes.mapFactory)
   }
 
-  private def renameBlock(name: String, block: TempleBlock[_]): Unit =
-    if (block.lookupMetadata[Metadata.Database].forall(_ == Metadata.Database.Postgres)) {
+  private def renameBlock(name: String, block: TempleBlock[_]): Unit = {
+    val database = block.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
+    if (database == Metadata.Database.Postgres) {
       val newServiceName = dodgeNames(name, templefile.projectName, allGlobalNames - name)(postgresValidator)
       globalRenaming += name -> newServiceName
     }
+  }
 
   private val validateService: EntryTransformer[ServiceBlock] = (serviceName, service, context) => {
     renameBlock(serviceName, service)
 
     val newStructs    = mapEntryWithContext(service.structs, context, validateStruct)
-    val newAttributes = validateAttributes(service.attributes, templefile.projectName, context)
+    val newAttributes = validateAttributes(service.attributes, context)
     validateMetadata(service.metadata, context)
 
     ServiceBlock(newAttributes, service.metadata, newStructs)
@@ -70,7 +71,7 @@ private class Validator(templefile: Templefile) {
   private val validateStruct: EntryTransformer[StructBlock] = (structName, struct, context) => {
     renameBlock(structName, struct)
 
-    val newAttributes = validateAttributes(struct.attributes, templefile.projectName, context)
+    val newAttributes = validateAttributes(struct.attributes, context)
     validateMetadata(struct.metadata, context)
 
     StructBlock(newAttributes, struct.metadata)
@@ -155,9 +156,9 @@ private class Validator(templefile: Templefile) {
     validateBlockOfMetadata(templefile.projectBlock, context :+ s"${templefile.projectName} project")
 
     val rootNames =
-      allServices.toSeq.map { _       -> "service" } ++
-      allStructs.map { _              -> "struct" } ++
-      templefile.targets.keys.map { _ -> "target" } :+
+      allServices.toSeq.map(_       -> "service") ++
+      allStructs.map(_              -> "struct") ++
+      templefile.targets.keys.map(_ -> "target") :+
       (templefile.projectName -> "project")
     val duplicates = rootNames
       .groupBy(_._1)
@@ -204,7 +205,7 @@ object Validator {
 
 //  private type EntryValidator[T] = (String, T, SemanticContext) => Unit
 //
-//  private def foreachEntryWithContext[T](
+//  @inline final private def foreachEntryWithContext[T](
 //    map: Map[String, T],
 //    context: SemanticContext,
 //    validate: EntryValidator[T],
@@ -212,7 +213,7 @@ object Validator {
 
   private type ValueValidator[T] = (T, SemanticContext) => Unit
 
-  private def foreachValueWithContext[T](
+  @inline final private def foreachValueWithContext[T](
     map: Map[String, T],
     context: SemanticContext,
     validate: ValueValidator[T],
@@ -220,7 +221,7 @@ object Validator {
 
   private type EntryTransformer[T] = (String, T, SemanticContext) => T
 
-  private def mapEntryWithContext[T](
+  @inline final private def mapEntryWithContext[T](
     map: Map[String, T],
     context: SemanticContext,
     transform: EntryTransformer[T],
@@ -228,7 +229,7 @@ object Validator {
 
 //  private type ValueTransformer[T] = (T, SemanticContext) => T
 //
-//  private def mapValueWithContext[T](
+//  @inline final private def mapValueWithContext[T](
 //    map: Map[String, T],
 //    context: SemanticContext,
 //    transform: ValueTransformer[T],
