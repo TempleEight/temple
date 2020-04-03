@@ -55,10 +55,10 @@ object GoServiceGenerator extends ServiceGenerator {
       ),
       File(root.name, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoServiceHookGenerator.generateImports(root),
+        GoCommonHookGenerator.generateImports(root.module),
         GoServiceHookGenerator.generateHookStruct(root, operations),
-        GoServiceHookGenerator.generateHookErrorStruct,
-        GoServiceHookGenerator.generateHookErrorFunction,
+        GoCommonHookGenerator.generateHookErrorStruct,
+        GoCommonHookGenerator.generateHookErrorFunction,
         GoServiceHookGenerator.generateAddHookMethods(root, operations),
       ),
       File(s"${root.name}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),
