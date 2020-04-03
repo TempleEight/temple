@@ -1,7 +1,7 @@
 package temple.generate.server.go.service.main
 
 import temple.ast.AttributeType.DateTimeType
-import temple.ast.{Annotation, AttributeType}
+import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
@@ -68,13 +68,64 @@ object GoServiceMainHandlersGenerator {
       ),
     )
 
+  /** Generate the block for decoding an incoming request JSON into a request object */
+  private[main] def generateDecodeRequestBlock(typePrefix: String): String =
+    mkCode.lines(
+      genVar("req", s"${typePrefix}Request"),
+      genAssign(genMethodCall(genMethodCall("json", "NewDecoder", "r.Body"), "Decode", "&req"), "err"),
+      genIfErr(
+        mkCode.lines(
+          generateHTTPError("StatusBadRequest", "Invalid request parameters: %s", genMethodCall("err", "Error")),
+          genReturn(),
+        ),
+      ),
+    )
+
+  /** Generate the block for validating the request object */
+  private[main] def generateValidateStructBlock(): String =
+    mkCode.lines(
+      genAssign(genMethodCall("valid", "ValidateStruct", "req"), "_", "err"),
+      genIfErr(
+        mkCode.lines(
+          generateHTTPError("StatusBadRequest", "Invalid request parameters: %s", genMethodCall("err", "Error")),
+          genReturn(),
+        ),
+      ),
+    )
+
+  private def generateForeignKeyCheckBlock(root: ServiceRoot, name: String): String =
+    mkCode.lines(
+      // TODO: Return here
+      genDeclareAndAssign(genMethodCall(genMethodCall("env.Comm", s"Check${root.name.capitalize}"))),
+    )
+
+  /** Generate the block for checking foreign keys against other services */
+  private[main] def generateForeignKeyCheckBlocks(
+    root: ServiceRoot,
+    clientAttributes: ListMap[String, Attribute],
+  ): String =
+    mkCode.doubleLines(
+      clientAttributes.map {
+        case name -> attribute =>
+          attribute.attributeType match {
+            case _: AttributeType.ForeignKey | AttributeType.UUIDType => generateForeignKeyCheckBlock(root, name)
+            case _                                                    => ""
+          }
+      },
+    )
+
   /** Generate the env handler functions */
-  private[service] def generateHandlers(root: ServiceRoot, operations: Set[CRUD]): String = {
+  private[service] def generateHandlers(
+    root: ServiceRoot,
+    operations: Set[CRUD],
+    clientAttributes: ListMap[String, Attribute],
+    usesComms: Boolean,
+  ): String = {
     val responseMap = generateResponseMap(root)
     mkCode.doubleLines(
       operations.toSeq.sorted.map {
         case List   => generateListHandler(root, responseMap)
-        case Create => generateCreateHandler(root)
+        case Create => generateCreateHandler(root, clientAttributes, usesComms)
         case Read   => generateReadHandler(root)
         case Update => generateUpdateHandler(root)
         case Delete => generateDeleteHandler(root)

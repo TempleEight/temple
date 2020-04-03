@@ -150,7 +150,33 @@ func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
 
+	var req createMatchRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	if req.UserOne == nil || req.UserTwo == nil {
+		errMsg := util.CreateErrorJSON("Missing request parameter(s)")
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	_, err = valid.ValidateStruct(req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
 }
 
 func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {

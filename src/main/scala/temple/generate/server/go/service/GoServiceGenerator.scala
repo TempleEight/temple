@@ -51,7 +51,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainGenerator.generateRouter(root, operations),
         GoCommonMainGenerator.generateMain(root.name, root.port, usesComms, isAuth = false),
         GoCommonMainGenerator.generateJsonMiddleware(),
-        GoServiceMainHandlersGenerator.generateHandlers(root, operations),
+        GoServiceMainHandlersGenerator.generateHandlers(root, operations, clientAttributes, usesComms),
       ),
       File(root.name, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
