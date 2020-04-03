@@ -20,19 +20,19 @@ trait CodeTerm {
 
 object CodeTerm {
 
-  /** Turns a [[String]] into a [[CodeTerm]], with a trivial iterator of just the single string */
-  implicit class CodeTermString(string: String) extends CodeTerm {
-    override def flatIterator: Iterator[String] = Iterable.single(string).iterator
+  // https://scalac.io/typeclasses-in-scala/
+  trait CodeTermClass[-C] {
+    def flatIterator(code: C): Iterator[String]
   }
 
-  /** Turns a [[None]] into a [[CodeTerm]], with a trivial iterator of nothing */
-  implicit class CodeTermNone(none: None.type) extends CodeTerm {
-    override def flatIterator: Iterator[String] = Iterator.empty
+  /** Add the flatIterator method to anything that is a codeterm*/
+  implicit class CodeTermOps[C](codeTerm: C)(implicit codeTermClass: CodeTermClass[C]) extends CodeTerm {
+    def flatIterator: Iterator[String] = codeTermClass.flatIterator(codeTerm)
   }
 
   /**
     * Turns a list of items into a string with separators, constructed with
-    * [[temple.generate.utils.CodeTerm.mkCode#list(temple.generate.utils.CodeTerm.CodeTermIterableString)]]
+    * [[temple.generate.utils.CodeTerm.mkCode#list(scala.collection.immutable.Seq)]]
     *
     * @param strings a list of strings to be separated
     * @param separator the separator between the items
@@ -45,18 +45,19 @@ object CodeTerm {
 
     /** Add newlines after each separator */
     def spaced: CodeTermList = new CodeTermList(strings, ",\n")
-
   }
 
-  /** Turns a [[IterableOnce]] of [[CodeTerm]]s into a [[CodeTerm]], with an iterator that visits
-    * every child */
-  implicit class CodeTermIterable(strings: IterableOnce[CodeTerm]) extends CodeTerm {
-    override def flatIterator: Iterator[String] = strings.iterator.flatMap(_.flatIterator)
-  }
+  /** Turns a [[String]] into a [[CodeTerm]], with a trivial iterator of just the single string */
+  implicit val stringCodeTerm: CodeTermClass[String] = Iterable.single(_).iterator
 
-  /** An iterable of strings can be treated as an iterable of CodeTerms, but can also be turned into a list. */
-  implicit class CodeTermIterableString(strings: IterableOnce[String])
-      extends CodeTermIterable(strings.iterator.map(CodeTermString))
+  /** Turns a [[None]] into a [[CodeTerm]], with a trivial iterator of nothing */
+  implicit val noneCodeTerm: CodeTermClass[None.type] = _ => Iterator.empty
+
+  /** Turns an [[IterableOnce]] into a [[CodeTerm]], with a trivial iterator of nothing */
+  implicit def iterableCodeTerm[C: CodeTermClass]: CodeTermClass[IterableOnce[C]] = _.iterator.flatMap(_.flatIterator)
+
+  /** Turns a [[CodeTerm]] into a [[CodeTerm]], necessary for nested code terms */
+  implicit val codeTermCodeTerm: CodeTermClass[CodeTerm] = _.flatIterator
 
   /** Handles the case of an iterable of optional strings */
   implicit class CodeTermDoubleIterable(options: IterableOnce[IterableOnce[String]]) extends CodeTerm {
@@ -129,11 +130,8 @@ object CodeTerm {
     /** Wrap a (newline-separated list of) code snippet in parentheses, indenting with tabs */
     def tabbed(string: CodeTerm*): String = mkCode(start, "\n", tabIndent(mkCode.lines(string)), "\n", end)
 
-    /** Wrap a (comma-separated list of) code snippet in parentheses, with no indent */
-    def noIndentList(string: CodeTerm*): String = mkCode(start, "\n", mkCode.spacedList(string), "\n", end)
-
     /** Wrap a (newline-separated list of) code snippet in parentheses, with no indent */
-    def noIndent(string: CodeTerm*): String = mkCode(start, "\n", mkCode.lines(string), "\n", end)
+    def lines(string: CodeTerm*): String = mkCode(start, "\n", mkCode.lines(string), "\n", end)
 
     /** Wrap a (trailing-comma-separated list of) code snippet in parentheses, indenting with spaces */
     def spacedTrailingList(string: CodeTerm*): String =
@@ -149,5 +147,4 @@ object CodeTerm {
     val curly  = new CodeWrap("{", "}")
     val square = new CodeWrap("[", "]")
   }
-
 }
