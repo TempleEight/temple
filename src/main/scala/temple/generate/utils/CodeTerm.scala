@@ -59,6 +59,11 @@ object CodeTerm {
   /** Turns a [[CodeTerm]] into a [[CodeTerm]], necessary for nested code terms */
   implicit val codeTermCodeTerm: CodeTermClass[CodeTerm] = _.flatIterator
 
+  /** Handles the case of an iterable of optional strings */
+  implicit class CodeTermDoubleIterable(options: IterableOnce[IterableOnce[String]]) extends CodeTerm {
+    override def flatIterator: Iterator[String] = options.iterator.flatMap(_.flatIterator)
+  }
+
   object mkCode {
 
     /** Turn a list of terms into a comma-separated string */

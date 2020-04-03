@@ -31,6 +31,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
       Set(
         "templeuser-db",
         "templeuser",
+        "auth",
         "api",
         "booking-db",
         "booking",

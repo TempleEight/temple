@@ -112,7 +112,7 @@ func main() {
 
 	env := env{d}
 
-	log.Fatal(http.ListenAndServe(":1024", env.router()))
+	log.Fatal(http.ListenAndServe(":1025", env.router()))
 }
 
 func jsonMiddleware(next http.Handler) http.Handler {
@@ -123,10 +123,18 @@ func jsonMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (env *env) createTempleuserHandler(w http.ResponseWriter, r *http.Request) {}
+func (env *env) createTempleuserHandler(w http.ResponseWriter, r *http.Request) {
 
-func (env *env) readTempleuserHandler(w http.ResponseWriter, r *http.Request) {}
+}
 
-func (env *env) updateTempleuserHandler(w http.ResponseWriter, r *http.Request) {}
+func (env *env) readTempleuserHandler(w http.ResponseWriter, r *http.Request) {
 
-func (env *env) deleteTempleuserHandler(w http.ResponseWriter, r *http.Request) {}
+}
+
+func (env *env) updateTempleuserHandler(w http.ResponseWriter, r *http.Request) {
+
+}
+
+func (env *env) deleteTempleuserHandler(w http.ResponseWriter, r *http.Request) {
+
+}

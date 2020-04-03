@@ -46,7 +46,7 @@ object ServerBuilder {
 
     val queries: ListMap[CRUD, String] =
       DatabaseBuilder
-        .buildQuery(serviceName, serviceBlock.attributes, endpoints, idAttribute, createdBy)
+        .buildQuery(serviceName, serviceBlock.attributes, endpoints, createdBy, selectionAttribute = idAttribute.name)
         .map {
           case (crud, statement) =>
             crud -> (database match {
@@ -98,19 +98,23 @@ object ServerBuilder {
       case ServiceAuth.Email =>
         Map(
           "id"       -> Attribute(AttributeType.UUIDType),
+          "email"    -> Attribute(AttributeType.StringType()),
           "password" -> Attribute(AttributeType.StringType()),
-          "email"    -> Attribute(AttributeType.StringType(), valueAnnotations = Set(Annotation.Unique)),
         )
     }
-
-    val idAttribute = IDAttribute("id")
 
     val (createQuery: String, readQuery: String) =
       templefile.projectBlock.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase) match {
         case Database.Postgres =>
           implicit val postgresContext: PostgresContext = PostgresContext(PreparedType.DollarNumbers)
           val queries =
-            DatabaseBuilder.buildQuery("auth", attributes, Set(Create, Read), idAttribute, CreatedByAttribute.None)
+            DatabaseBuilder.buildQuery(
+              "auth",
+              attributes,
+              Set(Create, Read),
+              CreatedByAttribute.None,
+              selectionAttribute = "email",
+            )
           val createQuery = PostgresGenerator.generate(queries(Create))
           val readQuery   = PostgresGenerator.generate(queries(Read))
           (createQuery, readQuery)
@@ -120,7 +124,7 @@ object ServerBuilder {
       moduleName,
       port,
       AuthAttribute(serviceAuth, AttributeType.StringType()),
-      idAttribute,
+      IDAttribute("id"),
       createQuery,
       readQuery,
     )
