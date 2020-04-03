@@ -301,4 +301,5 @@ object SimpleE2ETestData {
   val authDaoFile: String     = FileUtils.readResources("go/auth/dao/dao.go.snippet")
   val authErrorsFile: String  = FileUtils.readResources("go/auth/dao/errors.go.snippet")
   val authHandlerFile: String = FileUtils.readResources("go/auth/comm/handler.go.snippet")
+  val authMetricFile: String  = FileUtils.readResources("go/auth/metric/metric.go.snippet")
 }
