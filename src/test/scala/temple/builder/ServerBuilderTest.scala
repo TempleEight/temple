@@ -15,7 +15,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
   behavior of "ServerBuilderTest"
 
   it should "build a correct simple ServiceRoot with all endpoints" in {
-    val serviceRoot: ServiceRoot = BuilderTestData.simpleTemplefile.servicesWithPorts.head match {
+    val serviceRoot: ServiceRoot = BuilderTestData.simpleTemplefile.allServicesWithPorts.head match {
       case (name, service, port) =>
         ServerBuilder
           .buildServiceRoot(
@@ -55,7 +55,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "build a correct simple ServiceRoot with no endpoints" in {
-    val serviceRoot: ServiceRoot = BuilderTestData.simpleTemplefile.servicesWithPorts.head match {
+    val serviceRoot: ServiceRoot = BuilderTestData.simpleTemplefile.allServicesWithPorts.head match {
       case (name, service, port) =>
         ServerBuilder
           .buildServiceRoot(
@@ -89,7 +89,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "build a correct complex ServiceRoot with all endpoints" in {
-    val serviceRoot: ServiceRoot = BuilderTestData.complexTemplefile.servicesWithPorts.head match {
+    val serviceRoot: ServiceRoot = BuilderTestData.complexTemplefile.allServicesWithPorts.head match {
       case (name, service, port) =>
         ServerBuilder
           .buildServiceRoot(

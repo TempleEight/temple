@@ -70,7 +70,7 @@ object ProjectBuilder {
         }
     }
 
-    val dockerfiles = templefile.servicesWithPorts.map {
+    val dockerfiles = templefile.allServicesWithPorts.map {
       case (name, service, port) =>
         val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, port.service)
         val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)
@@ -82,7 +82,7 @@ object ProjectBuilder {
 
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(
       StringUtils.kebabCase(templefile.projectName),
-      templefile.servicesWithPorts.map { case (name, block, ports) => (name, block, ports.service) }.toSeq,
+      templefile.allServicesWithPorts.map { case (name, block, ports) => (name, block, ports.service) }.toSeq,
     )
     val kubeFiles = KubernetesGenerator.generate(orchestrationRoot)
 
@@ -101,14 +101,14 @@ object ProjectBuilder {
         GrafanaDatasourceConfigGenerator.generate(datasource),
         File(s"prometheus", "prometheus.yml") ->
         PrometheusConfigGenerator.generate(
-          templefile.servicesWithPorts.map {
+          templefile.allServicesWithPorts.map {
             case (serviceName, _, ports) =>
               PrometheusJob(serviceName.toLowerCase, s"${serviceName.toLowerCase}:${ports.metrics}")
           }.toSeq,
         ),
       )
 
-    var serverFiles = templefile.servicesWithPortsWithoutAuth.flatMap {
+    var serverFiles = templefile.providedServicesWithPorts.flatMap {
       case (name, service, port) =>
         val serviceRoot =
           ServerBuilder.buildServiceRoot(name.toLowerCase, service, port.service, endpoints(service), detail)

@@ -17,11 +17,15 @@ case class Templefile(
     block.setParent(this)
   }
 
+  /**
+    * The services provided in the templefile, i.e the ServiceBlocks, not the AuthServiceBlocks
+    * @return
+    */
   def providedServices: Map[String, ServiceBlock] = services.collect {
     case (name: String, service: ServiceBlock) => name -> service
   }
 
-  def servicesWithPorts: Iterable[(String, GeneratedBlock, Ports)] =
+  def allServicesWithPorts: Iterable[(String, GeneratedBlock, Ports)] =
     services
       .zip(Iterator.from(1025, step = 2)) // 1024 is reserved for auth service
       .map {
@@ -30,8 +34,8 @@ case class Templefile(
           else (name, service, Ports(port, port + 1))
       }
 
-  def servicesWithPortsWithoutAuth: Iterable[(String, GeneratedBlock, Ports)] =
-    servicesWithPorts.filterNot { case (_, service, _) => service == AuthServiceBlock }
+  def providedServicesWithPorts: Iterable[(String, ServiceBlock, Ports)] =
+    allServicesWithPorts.collect { case (name, service: ServiceBlock, ports) => (name, service, ports) }
 
   /**
     * Add an extra service to an exisiting Templefile - useful for adding auth when needed.
