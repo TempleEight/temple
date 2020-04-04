@@ -154,9 +154,9 @@ private class Validator(templefile: Templefile) {
     validateBlockOfMetadata(templefile.projectBlock, context :+ s"${templefile.projectName} project")
 
     val rootNames =
-      allServices.toSeq.map { _       -> "service" } ++
-      allStructs.map { _              -> "struct" } ++
-      templefile.targets.keys.map { _ -> "target" } :+
+      allServices.toSeq.map(_       -> "service") ++
+      allStructs.map(_              -> "struct") ++
+      templefile.targets.keys.map(_ -> "target") :+
       (templefile.projectName -> "project")
     val duplicates = rootNames
       .groupBy(_._1)
@@ -203,7 +203,7 @@ object Validator {
 
 //  private type EntryValidator[T] = (String, T, SemanticContext) => Unit
 //
-//  private def foreachEntryWithContext[T](
+//  @inline final private def foreachEntryWithContext[T](
 //    map: Map[String, T],
 //    context: SemanticContext,
 //    validate: EntryValidator[T],
@@ -211,7 +211,7 @@ object Validator {
 
   private type ValueValidator[T] = (T, SemanticContext) => Unit
 
-  private def foreachValueWithContext[T](
+  @inline final private def foreachValueWithContext[T](
     map: Map[String, T],
     context: SemanticContext,
     validate: ValueValidator[T],
@@ -219,7 +219,7 @@ object Validator {
 
   private type EntryTransformer[T] = (String, T, SemanticContext) => T
 
-  private def mapEntryWithContext[T](
+  @inline final private def mapEntryWithContext[T](
     map: Map[String, T],
     context: SemanticContext,
     transform: EntryTransformer[T],
@@ -227,7 +227,7 @@ object Validator {
 
 //  private type ValueTransformer[T] = (T, SemanticContext) => T
 //
-//  private def mapValueWithContext[T](
+//  @inline final private def mapValueWithContext[T](
 //    map: Map[String, T],
 //    context: SemanticContext,
 //    transform: ValueTransformer[T],
