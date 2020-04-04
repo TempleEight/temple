@@ -16,9 +16,9 @@ private class Validator(templefile: Templefile) {
     case _ -> service => service.structs.keys
   }
 
-  private var newServices = templefile.services
-
   private val allServices: Set[String] = templefile.services.keys.toSet
+
+  private var newServices: Map[String, ServiceBlock] = templefile.services
 
   private val allStructsAndServices: Set[String] = allServices ++ allStructs
 
