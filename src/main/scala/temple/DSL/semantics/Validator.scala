@@ -1,44 +1,46 @@
 package temple.DSL.semantics
 
+import temple.DSL.semantics.Validator._
 import temple.ast.AttributeType._
 import temple.ast.{Metadata, _}
 
 import scala.collection.mutable
 import scala.reflect.{ClassTag, classTag}
 
-private class Validator private (templefile: Templefile) {
+private class Validator(templefile: Templefile) {
   var errors: mutable.Set[String] = mutable.SortedSet()
 
-  private lazy val allStructs: Iterable[String] = templefile.services.flatMap {
-    case (name, service) => service.structs.keys
+  private val allStructs: Iterable[String] = templefile.services.flatMap {
+    case _ -> service => service.structs.keys
   }
 
-  private lazy val allServices: Set[String] = templefile.services.keys.toSet
+  private val allServices: Set[String] = templefile.services.keys.toSet
 
-  private lazy val allStructsAndServices: Set[String] = allServices ++ allStructs
+  private val allStructsAndServices: Set[String] = allServices ++ allStructs
 
-  private def validateAttributes(attributes: Map[String, Attribute])(context: SemanticContext): Unit = {
+  private val globalRenaming      = mutable.Map[String, String]()
+  def allGlobalNames: Set[String] = globalRenaming.valuesIterator.toSet ++ allStructsAndServices
+
+  private def validateAttributes(attributes: Map[String, Attribute], context: SemanticContext): Unit = {
     attributes.keys.foreach { attributeName =>
       if (attributeName.headOption.forall(!_.isLower))
         errors += context.errorMessage(s"Invalid attribute name $attributeName, it must start with a lowercase letter,")
     }
-    attributes.foreachEntry(context(validateAttribute))
+    foreachValueWithContext(attributes, context, validateAttribute)
   }
 
-  private def validateService(service: ServiceBlock)(context: SemanticContext): Unit = {
-    service.structs.foreachEntry(context(validateStruct))
-    validateAttributes(service.attributes)(context)
-    validateMetadata(service.metadata, service.attributes)(context)
+  private val validateService: EntryValidator[ServiceBlock] = (serviceName, service, context) => {
+    foreachValueWithContext(service.structs, context, validateStruct)
+    validateAttributes(service.attributes, context)
+    validateMetadata(service.metadata, context)
   }
 
-  private def validateStruct(struct: StructBlock)(context: SemanticContext): Unit = {
-    struct.attributes.foreachEntry(context(validateAttribute))
-    validateMetadata(struct.metadata, struct.attributes)(context)
+  private val validateStruct: ValueValidator[StructBlock] = (struct, context) => {
+    foreachValueWithContext(struct.attributes, context, validateAttribute)
+    validateMetadata(struct.metadata, context)
   }
 
-  private def validateMetadata(metadata: Seq[Metadata], attributes: Map[String, Attribute] = Map())(
-    context: SemanticContext,
-  ): Unit = {
+  private val validateMetadata: ValueValidator[Seq[Metadata]] = (metadata, context) => {
     def assertUnique[T <: Metadata: ClassTag](): Unit =
       if (metadata.collect { case m: T => m }.sizeIs > 1)
         errors += context.errorMessage(s"Multiple occurrences of ${classTag[T].runtimeClass.getSimpleName} metadata")
@@ -62,8 +64,8 @@ private class Validator private (templefile: Templefile) {
     }
   }
 
-  private def validateAttribute(attribute: Attribute)(context: SemanticContext): Unit = {
-    validateAttributeType(attribute.attributeType)(context)
+  private val validateAttribute: ValueValidator[Attribute] = (attribute, context) => {
+    validateAttributeType(attribute.attributeType, context)
     attribute.accessAnnotation match {
       case Some(Annotation.Client)    => // nothing to validate
       case Some(Annotation.Server)    => // nothing to validate
@@ -76,7 +78,7 @@ private class Validator private (templefile: Templefile) {
     }
   }
 
-  private def validateAttributeType(attributeType: AttributeType)(context: SemanticContext): Unit =
+  private def validateAttributeType(attributeType: AttributeType, context: SemanticContext): Unit =
     attributeType match {
       case ForeignKey(references) if !allStructsAndServices.contains(references) =>
         errors += context.errorMessage(s"Invalid foreign key $references")
@@ -105,20 +107,21 @@ private class Validator private (templefile: Templefile) {
       case FloatType(_, _, _) => // all good
     }
 
-  private def validateBlockOfMetadata[T <: Metadata](target: TempleBlock[T])(context: SemanticContext): Unit =
-    validateMetadata(target.metadata)(context)
+  private def validateBlockOfMetadata[T <: Metadata]: ValueValidator[TempleBlock[T]] = (target, context) => {
+    validateMetadata(target.metadata, context)
+  }
 
   def validate(): Seq[String] = {
     val context = SemanticContext.empty
 
-    templefile.services.foreachEntry(context(validateService))
-    templefile.targets.foreachEntry(context(validateBlockOfMetadata))
-    validateBlockOfMetadata(templefile.projectBlock)(context :+ s"${templefile.projectName} project")
+    foreachEntryWithContext(templefile.services, context, validateService)
+    foreachValueWithContext(templefile.targets, context, validateBlockOfMetadata[Metadata.TargetMetadata])
+    validateBlockOfMetadata(templefile.projectBlock, context :+ s"${templefile.projectName} project")
 
     val rootNames =
-      allServices.toSeq.map(_       -> "service") ++
-      allStructs.map(_              -> "struct") ++
-      templefile.targets.keys.map(_ -> "target") :+
+      allServices.toSeq.map { _       -> "service" } ++
+      allStructs.map { _              -> "struct" } ++
+      templefile.targets.keys.map { _ -> "target" } :+
       (templefile.projectName -> "project")
     val duplicates = rootNames
       .groupBy(_._1)
@@ -160,4 +163,20 @@ object Validator {
     }
     templefile
   }
+
+  private type EntryValidator[T] = (String, T, SemanticContext) => Unit
+
+  private def foreachEntryWithContext[T](
+    map: Map[String, T],
+    context: SemanticContext,
+    validate: EntryValidator[T],
+  ): Unit = map.foreachEntry { case (name, t) => validate(name, t, context :+ name) }
+
+  private type ValueValidator[T] = (T, SemanticContext) => Unit
+
+  private def foreachValueWithContext[T](
+    map: Map[String, T],
+    context: SemanticContext,
+    validate: ValueValidator[T],
+  ): Unit = map.foreachEntry((name: String, t: T) => validate(t, context :+ name))
 }
