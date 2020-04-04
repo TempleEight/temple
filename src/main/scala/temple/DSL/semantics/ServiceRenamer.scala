@@ -2,7 +2,10 @@ package temple.DSL.semantics
 
 import temple.ast._
 
-case class ServiceRenamer(renaming: Map[String, String]) {
+case class ServiceRenamer(renamingMap: Map[String, String]) {
+
+  private def rename(string: String): String =
+    renamingMap.getOrElse(string, { throw new NoSuchElementException(s"Key $string missing from renaming map") })
 
   private def renameTargetBlock(block: TargetBlock): TargetBlock =
     // currently `identity`, as language is the only metadata
@@ -27,7 +30,7 @@ case class ServiceRenamer(renaming: Map[String, String]) {
 
   private def renameServiceMetadata(metadata: Metadata.ServiceMetadata): Metadata.ServiceMetadata = metadata match {
     // rename any services referenced in #uses
-    case Metadata.Uses(services) => Metadata.Uses(services.map(renaming))
+    case Metadata.Uses(services) => Metadata.Uses(services.map(rename))
     // otherwise just return the other metadata, as it contains no service names
     case language: Metadata.ServiceLanguage     => language
     case database: Metadata.Database            => database
@@ -50,11 +53,11 @@ case class ServiceRenamer(renaming: Map[String, String]) {
     StructBlock(renameAttributes(block.attributes), block.metadata.map(renameStructMetadata))
 
   private def renameStructBlocks(structs: Map[String, StructBlock]): Map[String, StructBlock] = structs.map {
-    case (name, block) => renaming(name) -> renameStructBlock(block)
+    case (name, block) => rename(name) -> renameStructBlock(block)
   }
 
   private def renameAttributeType(attributeType: AttributeType): AttributeType = attributeType match {
-    case AttributeType.ForeignKey(references)                => AttributeType.ForeignKey(renaming(references))
+    case AttributeType.ForeignKey(references)                => AttributeType.ForeignKey(rename(references))
     case attributeType: AttributeType.PrimitiveAttributeType => attributeType
   }
 
@@ -75,7 +78,7 @@ case class ServiceRenamer(renaming: Map[String, String]) {
     )
 
   private def renameServiceBlocks(services: Map[String, ServiceBlock]): Map[String, ServiceBlock] = services.map {
-    case (name, block) => renaming(name) -> renameServiceBlock(block)
+    case (name, block) => rename(name) -> renameServiceBlock(block)
   }
 
   def apply(templefile: Templefile): Templefile =
