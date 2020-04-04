@@ -38,7 +38,7 @@ private class Validator(templefile: Templefile) {
           errors += context.errorMessage(
             s"Invalid attribute name $attributeName, it must start with a lowercase letter,",
           )
-        val newName = dodgeNames(
+        val newName = constructUniqueName(
           attributeName,
           templefile.projectName,
           (newAttributes.keys ++ attributes.keys).toSet - attributeName,
@@ -51,7 +51,7 @@ private class Validator(templefile: Templefile) {
   private def renameBlock(name: String, block: TempleBlock[_]): Unit = {
     val database = block.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
     if (database == Metadata.Database.Postgres) {
-      val newServiceName = dodgeNames(name, templefile.projectName, allGlobalNames - name)(postgresValidator)
+      val newServiceName = constructUniqueName(name, templefile.projectName, allGlobalNames - name)(postgresValidator)
       globalRenaming += name -> newServiceName
     }
   }

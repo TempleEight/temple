@@ -129,13 +129,24 @@ object NameClashes {
   val postgresValidator: NameValidator = NameValidator.fromIterable(postgresNames)
 
   /** Repeatedly add the project name to the start of the string */
-  def nameSuggestions(name: String, project: String, decapitalize: Boolean = false): Iterator[String] =
-    iterate(name.capitalize) { project + _ }.map { if (decapitalize) StringUtils.decapitalize else identity }
+  private def nameSuggestions(name: String, project: String, decapitalize: Boolean = false): Iterator[String] = {
+    val iterator = iterate(name.capitalize)(project + _)
+    if (decapitalize) iterator.map(StringUtils.decapitalize)
+    else iterator
+  }
 
-  def dodgeNames(name: String, project: String, takenNames: Set[String], decapitalize: Boolean = false)(
+  /** Given a service/struct/field name, prepend the project name until it becomes unique and free of conflicts with
+    * the host languages */
+  def constructUniqueName(name: String, project: String, takenNames: Set[String], decapitalize: Boolean = false)(
     validators: NameValidator*,
   ): String = {
-    val validator = NameValidator.combine(Iterator(NameValidator.fromIterable(takenNames)) ++ validators)
-    nameSuggestions(name, project, decapitalize).filter { validator.isValid(_) }.next
+    // A validator for checking a name isn’t taken locally by their own code
+    val takenNamesValidator = NameValidator.fromIterable(takenNames)
+
+    // Combine the validators they provided with the validator of taken names
+    val combinedValidator = NameValidator.combine(Iterator(takenNamesValidator) ++ validators)
+
+    // Find the first valid name in the iterator of possible names
+    nameSuggestions(name, project, decapitalize).find(combinedValidator.isValid).get
   }
 }
