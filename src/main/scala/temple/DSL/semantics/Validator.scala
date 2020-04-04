@@ -1,7 +1,6 @@
 package temple.DSL.semantics
 
 import temple.DSL.semantics.NameClashes._
-import temple.DSL.semantics.Validator._
 import temple.ast.AttributeType._
 import temple.ast.{Metadata, _}
 import temple.builder.project.ProjectConfig
@@ -9,15 +8,14 @@ import temple.builder.project.ProjectConfig
 import scala.collection.mutable
 import scala.reflect.{ClassTag, classTag}
 
-private class Validator(templefile: Templefile) {
+private class Validator private (templefile: Templefile) {
   var errors: mutable.Buffer[String] = mutable.Buffer()
 
   private val allStructs: Iterable[String] = templefile.services.flatMap {
     case _ -> service => service.structs.keys
   }
 
-  private val allServices: Set[String] = templefile.services.keys.toSet
-
+  private val allServices: Set[String]           = templefile.services.keys.toSet
   private val allStructsAndServices: Set[String] = allServices ++ allStructs
 
   private var newServices: Map[String, ServiceBlock] = templefile.services
@@ -29,7 +27,7 @@ private class Validator(templefile: Templefile) {
     attributes: Map[String, Attribute],
     context: SemanticContext,
   ): Map[String, Attribute] = {
-    foreachValueWithContext(attributes, context, validateAttribute)
+    attributes.foreach { case (name, t) => validateAttribute(t, context :+ name) }
 
     // This looks like a map, but it isn’t because the accumulator `newAttributes`’ names are accessed during iteration
     attributes.foldLeft(attributes.mapFactory[String, Attribute]()) {
@@ -56,17 +54,19 @@ private class Validator(templefile: Templefile) {
     }
   }
 
-  private val validateService: EntryTransformer[ServiceBlock] = (serviceName, service, context) => {
+  private def validateService(serviceName: String, service: ServiceBlock, context: SemanticContext): ServiceBlock = {
     renameBlock(serviceName, service)
 
-    val newStructs    = mapEntryWithContext(service.structs, context, validateStruct)
+    val newStructs = service.structs.transform {
+      case (name, struct) => validateStruct(name, struct, context :+ name)
+    }
     val newAttributes = validateAttributes(service.attributes, context)
     validateMetadata(service.metadata, context)
 
     ServiceBlock(newAttributes, service.metadata, newStructs)
   }
 
-  private val validateStruct: EntryTransformer[StructBlock] = (structName, struct, context) => {
+  private def validateStruct(structName: String, struct: StructBlock, context: SemanticContext): StructBlock = {
     renameBlock(structName, struct)
 
     val newAttributes = validateAttributes(struct.attributes, context)
@@ -75,7 +75,7 @@ private class Validator(templefile: Templefile) {
     StructBlock(newAttributes, struct.metadata)
   }
 
-  private val validateMetadata: ValueValidator[Seq[Metadata]] = (metadata, context) => {
+  private def validateMetadata(metadata: Seq[Metadata], context: SemanticContext): Unit = {
     def assertUnique[T <: Metadata: ClassTag](): Unit =
       if (metadata.collect { case m: T => m }.sizeIs > 1)
         errors += context.errorMessage(s"Multiple occurrences of ${classTag[T].runtimeClass.getSimpleName} metadata")
@@ -99,7 +99,7 @@ private class Validator(templefile: Templefile) {
     }
   }
 
-  private val validateAttribute: ValueValidator[Attribute] = (attribute, context) => {
+  private def validateAttribute(attribute: Attribute, context: SemanticContext): Unit = {
     validateAttributeType(attribute.attributeType, context)
     attribute.accessAnnotation match {
       case Some(Annotation.Client)    => // nothing to validate
@@ -142,15 +142,19 @@ private class Validator(templefile: Templefile) {
       case FloatType(_, _, _) => // all good
     }
 
-  private def validateBlockOfMetadata[T <: Metadata]: ValueValidator[TempleBlock[T]] = (target, context) => {
+  private def validateBlockOfMetadata[T <: Metadata](target: TempleBlock[T], context: SemanticContext): Unit =
     validateMetadata(target.metadata, context)
-  }
 
   def validate(): Seq[String] = {
     val context = SemanticContext.empty
 
-    newServices = mapEntryWithContext(templefile.services, context, validateService)
-    foreachValueWithContext(templefile.targets, context, validateBlockOfMetadata[Metadata.TargetMetadata])
+    newServices = templefile.services.transform {
+      case (name, service) => validateService(name, service, context :+ name)
+    }
+    templefile.targets.foreach {
+      case (name, block) => validateBlockOfMetadata(block, context :+ name)
+    }
+
     validateBlockOfMetadata(templefile.projectBlock, context :+ s"${templefile.projectName} project")
 
     val rootNames =
@@ -200,36 +204,4 @@ object Validator {
     }
     validator.transformed
   }
-
-//  private type EntryValidator[T] = (String, T, SemanticContext) => Unit
-//
-//  @inline final private def foreachEntryWithContext[T](
-//    map: Map[String, T],
-//    context: SemanticContext,
-//    validate: EntryValidator[T],
-//  ): Unit = map.foreachEntry { case (name, t) => validate(name, t, context :+ name) }
-
-  private type ValueValidator[T] = (T, SemanticContext) => Unit
-
-  @inline final private def foreachValueWithContext[T](
-    map: Map[String, T],
-    context: SemanticContext,
-    validate: ValueValidator[T],
-  ): Unit = map.foreachEntry((name: String, t: T) => validate(t, context :+ name))
-
-  private type EntryTransformer[T] = (String, T, SemanticContext) => T
-
-  @inline final private def mapEntryWithContext[T](
-    map: Map[String, T],
-    context: SemanticContext,
-    transform: EntryTransformer[T],
-  ): Map[String, T] = map.transform { case (name, t) => transform(name, t, context :+ name) }
-
-//  private type ValueTransformer[T] = (T, SemanticContext) => T
-//
-//  @inline final private def mapValueWithContext[T](
-//    map: Map[String, T],
-//    context: SemanticContext,
-//    transform: ValueTransformer[T],
-//  ): Map[String, T] = map.transform { case (name, t) => transform(t, context :+ name) }
 }
