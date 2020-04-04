@@ -4,6 +4,7 @@ import temple.DSL.semantics.NameClashes._
 import temple.DSL.semantics.Validator._
 import temple.ast.AttributeType._
 import temple.ast.{Metadata, _}
+import temple.builder.project.ProjectConfig
 
 import scala.collection.mutable
 import scala.reflect.{ClassTag, classTag}
@@ -47,11 +48,13 @@ private class Validator(templefile: Templefile) {
     }
   }
 
-  private def renameBlock(name: String, block: TempleBlock[_]): Unit =
-    if (block.lookupMetadata[Metadata.Database].forall(_ == Metadata.Database.Postgres)) {
+  private def renameBlock(name: String, block: TempleBlock[_]): Unit = {
+    val database = block.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
+    if (database == Metadata.Database.Postgres) {
       val newServiceName = dodgeNames(name, templefile.projectName, allGlobalNames - name)(postgresValidator)
       globalRenaming += name -> newServiceName
     }
+  }
 
   private val validateService: EntryTransformer[ServiceBlock] = (serviceName, service, context) => {
     renameBlock(serviceName, service)
