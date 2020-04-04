@@ -16,6 +16,8 @@ private class Validator(templefile: Templefile) {
 
   private val allServices: Set[String] = templefile.services.keys.toSet
 
+  private var newServices: Map[String, ServiceBlock] = templefile.services
+
   private val allStructsAndServices: Set[String] = allServices ++ allStructs
 
   private val globalRenaming      = mutable.Map[String, String]()
