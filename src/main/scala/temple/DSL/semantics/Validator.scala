@@ -1,27 +1,28 @@
 package temple.DSL.semantics
 
 import temple.DSL.semantics.NameClashes._
-import temple.DSL.semantics.Validator._
 import temple.ast.AttributeType._
 import temple.ast.{Metadata, _}
 import temple.builder.project.ProjectConfig
+import temple.utils.MonadUtils.FromEither
 
 import scala.collection.mutable
 import scala.reflect.{ClassTag, classTag}
 
-private class Validator(templefile: Templefile) {
-  var errors: mutable.Buffer[String] = mutable.Buffer()
+private class Validator private (templefile: Templefile) {
+  var errors: mutable.Set[String] = mutable.Set()
 
   private val allStructs: Iterable[String] = templefile.services.flatMap {
     case _ -> service => service.structs.keys
   }
 
-  private val allServices: Set[String] = templefile.services.keys.toSet
-
+  private val allServices: Set[String]           = templefile.services.keys.toSet
   private val allStructsAndServices: Set[String] = allServices ++ allStructs
 
+  // The services, updated with renamed attributes
   private var newServices: Map[String, ServiceBlock] = templefile.services
 
+  // A mapping from every service/struct name in the input Templefile to its new name
   private val globalRenaming      = mutable.Map[String, String]()
   def allGlobalNames: Set[String] = globalRenaming.valuesIterator.toSet ++ allStructsAndServices
 
@@ -29,44 +30,56 @@ private class Validator(templefile: Templefile) {
     attributes: Map[String, Attribute],
     context: SemanticContext,
   ): Map[String, Attribute] = {
-    foreachValueWithContext(attributes, context, validateAttribute)
+    attributes.foreach { case (name, t) => validateAttribute(t, context :+ name) }
 
-    // This looks like a map, but it isn’t because the accumulator `newAttributes`’ names are accessed during iteration
-    attributes.foldLeft(attributes.mapFactory[String, Attribute]()) {
-      case (newAttributes, (attributeName, value)) =>
+    // Keep a set of names that have been used already
+    val takenNames: mutable.Set[String] = mutable.Set(attributes.keys)
+
+    attributes.map {
+      case (attributeName, value) =>
         if (attributeName.headOption.exists(!_.isLower))
           errors += context.errorMessage(
             s"Invalid attribute name $attributeName, it must start with a lowercase letter,",
           )
-        val newName = dodgeNames(
+        val newName = constructUniqueName(
           attributeName,
           templefile.projectName,
-          (newAttributes.keys ++ attributes.keys).toSet - attributeName,
+          // takenNames includes this attribute’s names, so remove it
+          takenNames.toSet - attributeName,
           decapitalize = true,
         )(postgresValidator)
-        newAttributes + (newName -> value)
+
+        // Prevent this new name from being used by other attributes
+        takenNames += newName
+
+        newName -> value
     }
   }
 
+  /** Given a service block or a struct block, find a valid name for it (taking into account the clashes from all the
+    * languages that are generated from the block), and entering it into the map of renamings. Note that an entry is
+    * always inserted into this block, even if the same name is kept. */
   private def renameBlock(name: String, block: TempleBlock[_]): Unit = {
     val database = block.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
     if (database == Metadata.Database.Postgres) {
-      val newServiceName = dodgeNames(name, templefile.projectName, allGlobalNames - name)(postgresValidator)
+      val newServiceName = constructUniqueName(name, templefile.projectName, allGlobalNames - name)(postgresValidator)
       globalRenaming += name -> newServiceName
     }
   }
 
-  private val validateService: EntryTransformer[ServiceBlock] = (serviceName, service, context) => {
+  private def validateService(serviceName: String, service: ServiceBlock, context: SemanticContext): ServiceBlock = {
     renameBlock(serviceName, service)
 
-    val newStructs    = mapEntryWithContext(service.structs, context, validateStruct)
+    val newStructs = service.structs.transform {
+      case (name, struct) => validateStruct(name, struct, context :+ name)
+    }
     val newAttributes = validateAttributes(service.attributes, context)
     validateMetadata(service.metadata, context)
 
     ServiceBlock(newAttributes, service.metadata, newStructs)
   }
 
-  private val validateStruct: EntryTransformer[StructBlock] = (structName, struct, context) => {
+  private def validateStruct(structName: String, struct: StructBlock, context: SemanticContext): StructBlock = {
     renameBlock(structName, struct)
 
     val newAttributes = validateAttributes(struct.attributes, context)
@@ -75,7 +88,7 @@ private class Validator(templefile: Templefile) {
     StructBlock(newAttributes, struct.metadata)
   }
 
-  private val validateMetadata: ValueValidator[Seq[Metadata]] = (metadata, context) => {
+  private def validateMetadata(metadata: Seq[Metadata], context: SemanticContext): Unit = {
     def assertUnique[T <: Metadata: ClassTag](): Unit =
       if (metadata.collect { case m: T => m }.sizeIs > 1)
         errors += context.errorMessage(s"Multiple occurrences of ${classTag[T].runtimeClass.getSimpleName} metadata")
@@ -99,7 +112,7 @@ private class Validator(templefile: Templefile) {
     }
   }
 
-  private val validateAttribute: ValueValidator[Attribute] = (attribute, context) => {
+  private def validateAttribute(attribute: Attribute, context: SemanticContext): Unit = {
     validateAttributeType(attribute.attributeType, context)
     attribute.accessAnnotation match {
       case Some(Annotation.Client)    => // nothing to validate
@@ -142,15 +155,19 @@ private class Validator(templefile: Templefile) {
       case FloatType(_, _, _) => // all good
     }
 
-  private def validateBlockOfMetadata[T <: Metadata]: ValueValidator[TempleBlock[T]] = (target, context) => {
+  private def validateBlockOfMetadata[T <: Metadata](target: TempleBlock[T], context: SemanticContext): Unit =
     validateMetadata(target.metadata, context)
-  }
 
   def validate(): Seq[String] = {
     val context = SemanticContext.empty
 
-    newServices = mapEntryWithContext(templefile.services, context, validateService)
-    foreachValueWithContext(templefile.targets, context, validateBlockOfMetadata[Metadata.TargetMetadata])
+    newServices = templefile.services.transform {
+      case (name, service) => validateService(name, service, context :+ name)
+    }
+    templefile.targets.foreach {
+      case (name, block) => validateBlockOfMetadata(block, context :+ name)
+    }
+
     validateBlockOfMetadata(templefile.projectBlock, context :+ s"${templefile.projectName} project")
 
     val rootNames =
@@ -178,58 +195,37 @@ private class Validator(templefile: Templefile) {
     errors.toSeq
   }
 
+  /** Perform the renaming at the struct level, using the renamed services */
   def transformed: Templefile = ServiceRenamer(globalRenaming.toMap)(templefile.copy(services = newServices))
 }
 
 object Validator {
 
+  /** Take a Templefile and get a set of errors with it */
   def validationErrors(templefile: Templefile): Set[String] = {
     val validator = new Validator(templefile)
     validator.validate()
     validator.errors.toSet
   }
 
-  def validate(templefile: Templefile): Templefile = {
+  /** Take a Templefile and find any errors with it, or return a version valid for use in all the languages it will be
+    * deployed to */
+  def validateEither(templefile: Templefile): Either[Set[String], Templefile] = {
     val validator   = new Validator(templefile)
     val parseErrors = validator.validate()
-    if (parseErrors.nonEmpty) {
+    if (parseErrors.nonEmpty) Left(parseErrors.toSet)
+    else Right(validator.transformed)
+  }
+
+  /** Take a Templefile and convert it to a version valid for use in all the languages it will be deployed to
+    *
+    * @throws SemanticParsingException a non-empty set of strings representing parse errors
+    */
+  def validate(templefile: Templefile): Templefile =
+    validateEither(templefile) fromEither { parseErrors =>
       val errorsWere = if (parseErrors.sizeIs == 1) "An error was" else s"${parseErrors.size} errors were"
       throw new SemanticParsingException(
         s"$errorsWere encountered while validating the Templefile\n${parseErrors.mkString("\n")}",
       )
     }
-    validator.transformed
-  }
-
-//  private type EntryValidator[T] = (String, T, SemanticContext) => Unit
-//
-//  @inline final private def foreachEntryWithContext[T](
-//    map: Map[String, T],
-//    context: SemanticContext,
-//    validate: EntryValidator[T],
-//  ): Unit = map.foreachEntry { case (name, t) => validate(name, t, context :+ name) }
-
-  private type ValueValidator[T] = (T, SemanticContext) => Unit
-
-  @inline final private def foreachValueWithContext[T](
-    map: Map[String, T],
-    context: SemanticContext,
-    validate: ValueValidator[T],
-  ): Unit = map.foreachEntry((name: String, t: T) => validate(t, context :+ name))
-
-  private type EntryTransformer[T] = (String, T, SemanticContext) => T
-
-  @inline final private def mapEntryWithContext[T](
-    map: Map[String, T],
-    context: SemanticContext,
-    transform: EntryTransformer[T],
-  ): Map[String, T] = map.transform { case (name, t) => transform(name, t, context :+ name) }
-
-//  private type ValueTransformer[T] = (T, SemanticContext) => T
-//
-//  @inline final private def mapValueWithContext[T](
-//    map: Map[String, T],
-//    context: SemanticContext,
-//    transform: ValueTransformer[T],
-//  ): Map[String, T] = map.transform { case (name, t) => transform(t, context :+ name) }
 }
