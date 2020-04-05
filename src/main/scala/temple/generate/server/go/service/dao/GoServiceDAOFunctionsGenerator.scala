@@ -10,10 +10,11 @@ import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
 
 import scala.collection.immutable.ListMap
+import scala.Option.when
 
 object GoServiceDAOFunctionsGenerator {
 
-  private def generateDAOFunctionComment(root: ServiceRoot, operation: CRUD): String =
+  private def generateDAOFunctionComment(root: ServiceRoot, operation: CRUD, enumeratingByCreator: Boolean): String =
     mkCode(
       "//",
       generateDAOFunctionName(root, operation),
@@ -26,11 +27,7 @@ object GoServiceDAOFunctionsGenerator {
       },
       "in the datastore",
       operation match {
-        case List =>
-          root.createdByAttribute match {
-            case Some(CreatedByAttribute(_, _, true)) => "for a given ID"
-            case _                                    => ""
-          }
+        case List   => when(enumeratingByCreator) { "for a given ID" }
         case Create => s", returning the newly created ${root.decapitalizedName}"
         case Read   => "for a given ID"
         case Update => s"for a given ID, returning the newly updated ${root.decapitalizedName}"
@@ -105,10 +102,8 @@ object GoServiceDAOFunctionsGenerator {
       .prefix("Scan")
       .list(
         s"&${root.decapitalizedName}.${root.idAttribute.name.toUpperCase}",
-        root.createdByAttribute match {
-          case None => None
-          case Some(enumerating: CreatedByAttribute) =>
-            Some(s"&${root.decapitalizedName}.${enumerating.name.capitalize}")
+        root.createdByAttribute.map { enumerating =>
+          Some(s"&${root.decapitalizedName}.${enumerating.name.capitalize}")
         },
         root.attributes.map { case (name, _) => s"&${root.decapitalizedName}.${name.capitalize}" },
       )
@@ -185,7 +180,7 @@ object GoServiceDAOFunctionsGenerator {
     enumeratingByCreator: Boolean,
   ): String =
     mkCode.lines(
-      generateDAOFunctionComment(root, operation),
+      generateDAOFunctionComment(root, operation, enumeratingByCreator),
       mkCode(
         "func (dao *DAO)",
         generateInterfaceFunction(root, operation, enumeratingByCreator),

@@ -30,25 +30,13 @@ object ServerBuilder {
       case ServiceLanguage.Go => GoLanguageConfig
     }
 
-    // TODO: This could be nicer
-    val createdBy: Option[CreatedByAttribute] = serviceBlock.lookupMetadata[ServiceEnumerable] match {
-      case Some(ServiceEnumerable(true)) =>
-        Some(
-          CreatedByAttribute(
-            languageConfig.createdByInputName,
-            languageConfig.createdByName,
-            filterEnumeration = true,
-          ),
+    val createdBy: Option[CreatedByAttribute] = serviceBlock.lookupMetadata[ServiceEnumerable].map {
+      case ServiceEnumerable(byThis) =>
+        CreatedByAttribute(
+          languageConfig.createdByInputName,
+          languageConfig.createdByName,
+          filterEnumeration = byThis,
         )
-      case Some(ServiceEnumerable(false)) =>
-        Some(
-          CreatedByAttribute(
-            languageConfig.createdByInputName,
-            languageConfig.createdByName,
-            filterEnumeration = false,
-          ),
-        )
-      case None => None
     }
 
     val idAttribute = IDAttribute("id")

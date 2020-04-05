@@ -39,10 +39,7 @@ object GoServiceGenerator extends ServiceGenerator {
     }
 
     // Whether or not this service has an auth block
-    val hasAuthBlock = root.createdByAttribute match {
-      case None                        => true
-      case Some(_: CreatedByAttribute) => false
-    }
+    val hasAuthBlock = root.createdByAttribute.isEmpty
 
     // Whether or not this service is enumerating by creator
     val enumeratingByCreator = root.createdByAttribute match {

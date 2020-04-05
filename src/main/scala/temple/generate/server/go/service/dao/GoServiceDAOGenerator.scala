@@ -35,11 +35,8 @@ object GoServiceDAOGenerator {
 
   private[service] def generateDatastoreObjectStruct(root: ServiceRoot): String = {
     val idMap = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(AttributeType.UUIDType))
-    val createdByMap = root.createdByAttribute match {
-      case None =>
-        ListMap.empty
-      case Some(enumerating: CreatedByAttribute) =>
-        ListMap(enumerating.name.capitalize -> generateGoType(AttributeType.UUIDType))
+    val createdByMap = root.createdByAttribute.fold(ListMap[String, String]()) { enumerating =>
+      ListMap(enumerating.name.capitalize -> generateGoType(AttributeType.UUIDType))
     }
     val attributesMap = root.attributes.map {
       case (name, attribute) => name.capitalize -> generateGoType(attribute.attributeType)

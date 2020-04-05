@@ -27,11 +27,8 @@ object GoServiceDAOInputStructsGenerator {
     lazy val idMap = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(AttributeType.UUIDType))
 
     // Note we use the createdBy input name, rather than name
-    lazy val createdByMap = root.createdByAttribute match {
-      case None =>
-        ListMap.empty
-      case Some(enumerating: CreatedByAttribute) =>
-        ListMap(enumerating.inputName.capitalize -> generateGoType(AttributeType.UUIDType))
+    lazy val createdByMap = root.createdByAttribute.fold(ListMap[String, String]()) { enumerating =>
+      ListMap(enumerating.inputName.capitalize -> generateGoType(AttributeType.UUIDType))
     }
 
     // Omit attribute from input struct fields if server set
