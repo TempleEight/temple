@@ -6,11 +6,12 @@ import temple.ast.{Metadata, _}
 import temple.builder.project.ProjectConfig
 import temple.utils.MonadUtils.FromEither
 
+import scala.collection.immutable.SortedSet
 import scala.collection.mutable
 import scala.reflect.{ClassTag, classTag}
 
 private class Validator private (templefile: Templefile) {
-  var errors: mutable.Set[String] = mutable.Set()
+  private var errors: mutable.Set[String] = mutable.Set()
 
   private val allStructs: Iterable[String] = templefile.services.flatMap {
     case _ -> service => service.structs.keys
@@ -33,7 +34,7 @@ private class Validator private (templefile: Templefile) {
     attributes.foreach { case (name, t) => validateAttribute(t, context :+ name) }
 
     // Keep a set of names that have been used already
-    val takenNames: mutable.Set[String] = mutable.Set(attributes.keys)
+    val takenNames: mutable.Set[String] = attributes.keys.to(mutable.Set)
 
     attributes.map {
       case (attributeName, value) =>
@@ -204,8 +205,7 @@ object Validator {
   /** Take a Templefile and get a set of errors with it */
   def validationErrors(templefile: Templefile): Set[String] = {
     val validator = new Validator(templefile)
-    validator.validate()
-    validator.errors.toSet
+    validator.validate().to(SortedSet)
   }
 
   /** Take a Templefile and find any errors with it, or return a version valid for use in all the languages it will be
@@ -213,7 +213,7 @@ object Validator {
   def validateEither(templefile: Templefile): Either[Set[String], Templefile] = {
     val validator   = new Validator(templefile)
     val parseErrors = validator.validate()
-    if (parseErrors.nonEmpty) Left(parseErrors.toSet)
+    if (parseErrors.nonEmpty) Left(parseErrors.to(SortedSet))
     else Right(validator.transformed)
   }
 
