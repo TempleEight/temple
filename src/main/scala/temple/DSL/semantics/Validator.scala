@@ -4,12 +4,13 @@ import temple.DSL.semantics.NameClashes._
 import temple.ast.AttributeType._
 import temple.ast.{Metadata, _}
 import temple.builder.project.ProjectConfig
+import temple.utils.MonadUtils.FromEither
 
 import scala.collection.mutable
 import scala.reflect.{ClassTag, classTag}
 
 private class Validator private (templefile: Templefile) {
-  var errors: mutable.Buffer[String] = mutable.Buffer()
+  var errors: mutable.Set[String] = mutable.Set()
 
   private val allStructs: Iterable[String] = templefile.services.flatMap {
     case _ -> service => service.structs.keys
@@ -18,8 +19,10 @@ private class Validator private (templefile: Templefile) {
   private val allServices: Set[String]           = templefile.services.keys.toSet
   private val allStructsAndServices: Set[String] = allServices ++ allStructs
 
+  // The services, updated with renamed attributes
   private var newServices: Map[String, ServiceBlock] = templefile.services
 
+  // A mapping from every service/struct name in the input Templefile to its new name
   private val globalRenaming      = mutable.Map[String, String]()
   def allGlobalNames: Set[String] = globalRenaming.valuesIterator.toSet ++ allStructsAndServices
 
@@ -29,9 +32,11 @@ private class Validator private (templefile: Templefile) {
   ): Map[String, Attribute] = {
     attributes.foreach { case (name, t) => validateAttribute(t, context :+ name) }
 
-    // This looks like a map, but it isn’t because the accumulator `newAttributes`’ names are accessed during iteration
-    attributes.foldLeft(attributes.mapFactory[String, Attribute]()) {
-      case (newAttributes, (attributeName, value)) =>
+    // Keep a set of names that have been used already
+    val takenNames: mutable.Set[String] = mutable.Set(attributes.keys)
+
+    attributes.map {
+      case (attributeName, value) =>
         if (attributeName.headOption.exists(!_.isLower))
           errors += context.errorMessage(
             s"Invalid attribute name $attributeName, it must start with a lowercase letter,",
@@ -39,13 +44,21 @@ private class Validator private (templefile: Templefile) {
         val newName = constructUniqueName(
           attributeName,
           templefile.projectName,
-          (newAttributes.keys ++ attributes.keys).toSet - attributeName,
+          // takenNames includes this attribute’s names, so remove it
+          takenNames.toSet - attributeName,
           decapitalize = true,
         )(postgresValidator)
-        newAttributes + (newName -> value)
+
+        // Prevent this new name from being used by other attributes
+        takenNames += newName
+
+        newName -> value
     }
   }
 
+  /** Given a service block or a struct block, find a valid name for it (taking into account the clashes from all the
+    * languages that are generated from the block), and entering it into the map of renamings. Note that an entry is
+    * always inserted into this block, even if the same name is kept. */
   private def renameBlock(name: String, block: TempleBlock[_]): Unit = {
     val database = block.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
     if (database == Metadata.Database.Postgres) {
@@ -182,26 +195,37 @@ private class Validator private (templefile: Templefile) {
     errors.toSeq
   }
 
+  /** Perform the renaming at the struct level, using the renamed services */
   def transformed: Templefile = ServiceRenamer(globalRenaming.toMap)(templefile.copy(services = newServices))
 }
 
 object Validator {
 
+  /** Take a Templefile and get a set of errors with it */
   def validationErrors(templefile: Templefile): Set[String] = {
     val validator = new Validator(templefile)
     validator.validate()
     validator.errors.toSet
   }
 
-  def validate(templefile: Templefile): Templefile = {
+  /** Take a Templefile and find any errors with it, or return a version valid for use in all the languages it will be
+    * deployed to */
+  def validateEither(templefile: Templefile): Either[Set[String], Templefile] = {
     val validator   = new Validator(templefile)
     val parseErrors = validator.validate()
-    if (parseErrors.nonEmpty) {
+    if (parseErrors.nonEmpty) Left(parseErrors.toSet)
+    else Right(validator.transformed)
+  }
+
+  /** Take a Templefile and convert it to a version valid for use in all the languages it will be deployed to
+    *
+    * @throws SemanticParsingException a non-empty set of strings representing parse errors
+    */
+  def validate(templefile: Templefile): Templefile =
+    validateEither(templefile) fromEither { parseErrors =>
       val errorsWere = if (parseErrors.sizeIs == 1) "An error was" else s"${parseErrors.size} errors were"
       throw new SemanticParsingException(
         s"$errorsWere encountered while validating the Templefile\n${parseErrors.mkString("\n")}",
       )
     }
-    validator.transformed
-  }
 }
