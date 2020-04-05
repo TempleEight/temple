@@ -33,7 +33,7 @@ private class Validator private (templefile: Templefile) {
     attributes.foreach { case (name, t) => validateAttribute(t, context :+ name) }
 
     // Keep a set of names that have been used already
-    val takenNames: mutable.Set[String] = mutable.Set(attributes.keys)
+    val takenNames: mutable.Set[String] = attributes.keys.to(mutable.Set)
 
     attributes.map {
       case (attributeName, value) =>
