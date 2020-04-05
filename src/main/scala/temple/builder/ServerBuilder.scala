@@ -30,18 +30,25 @@ object ServerBuilder {
       case ServiceLanguage.Go => GoLanguageConfig
     }
 
-    val createdBy: CreatedByAttribute = serviceBlock.lookupMetadata[ServiceEnumerable] match {
+    // TODO: This could be nicer
+    val createdBy: Option[CreatedByAttribute] = serviceBlock.lookupMetadata[ServiceEnumerable] match {
       case Some(ServiceEnumerable(true)) =>
-        CreatedByAttribute.EnumerateByCreator(
-          languageConfig.createdByInputName,
-          languageConfig.createdByName,
+        Some(
+          CreatedByAttribute(
+            languageConfig.createdByInputName,
+            languageConfig.createdByName,
+            filterEnumeration = true,
+          ),
         )
       case Some(ServiceEnumerable(false)) =>
-        CreatedByAttribute.EnumerateByAll(
-          languageConfig.createdByInputName,
-          languageConfig.createdByName,
+        Some(
+          CreatedByAttribute(
+            languageConfig.createdByInputName,
+            languageConfig.createdByName,
+            filterEnumeration = false,
+          ),
         )
-      case None => CreatedByAttribute.None
+      case None => None
     }
 
     val idAttribute = IDAttribute("id")
@@ -113,7 +120,7 @@ object ServerBuilder {
               "auth",
               attributes,
               Set(Create, Read),
-              CreatedByAttribute.None,
+              None,
               selectionAttribute = "email",
             )
           val createQuery = PostgresGenerator.generate(queries(Create))

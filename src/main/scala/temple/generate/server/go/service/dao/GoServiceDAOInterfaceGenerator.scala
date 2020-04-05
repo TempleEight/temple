@@ -15,12 +15,12 @@ object GoServiceDAOInterfaceGenerator {
       case Delete                 => "error"
     }
 
-  private[dao] def generateInterfaceFunction(root: ServiceRoot, operation: CRUD): String = {
+  private[dao] def generateInterfaceFunction(
+    root: ServiceRoot,
+    operation: CRUD,
+    enumeratingByCreator: Boolean,
+  ): String = {
     val functionName = generateDAOFunctionName(root, operation)
-    val enumeratingByCreator = root.createdByAttribute match {
-      case _: CreatedByAttribute.EnumerateByCreator => true
-      case _                                        => false
-    }
     val functionArgs = if (enumeratingByCreator || operation != CRUD.List) s"input ${functionName}Input" else ""
     mkCode(
       s"$functionName($functionArgs)",
@@ -28,14 +28,18 @@ object GoServiceDAOInterfaceGenerator {
     )
   }
 
-  private[service] def generateInterface(root: ServiceRoot, operations: Set[CRUD]): String =
+  private[service] def generateInterface(
+    root: ServiceRoot,
+    operations: Set[CRUD],
+    enumeratingByCreator: Boolean,
+  ): String =
     mkCode.lines(
       "// Datastore provides the interface adopted by the DAO, allowing for mocking",
       mkCode(
         "type Datastore interface",
         CodeWrap.curly.tabbed(
           for (operation <- operations.toSeq.sorted)
-            yield generateInterfaceFunction(root, operation),
+            yield generateInterfaceFunction(root, operation, enumeratingByCreator),
         ),
       ),
     )

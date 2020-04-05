@@ -28,9 +28,9 @@ object GoServiceDAOInputStructsGenerator {
 
     // Note we use the createdBy input name, rather than name
     lazy val createdByMap = root.createdByAttribute match {
-      case CreatedByAttribute.None =>
+      case None =>
         ListMap.empty
-      case enumerating: CreatedByAttribute.Enumerating =>
+      case Some(enumerating: CreatedByAttribute) =>
         ListMap(enumerating.inputName.capitalize -> generateGoType(AttributeType.UUIDType))
     }
 
@@ -60,15 +60,14 @@ object GoServiceDAOInputStructsGenerator {
     )
   }
 
-  private[service] def generateStructs(root: ServiceRoot, operations: Set[CRUD]): String = {
-    val enumeratingByCreator = root.createdByAttribute match {
-      case _: CreatedByAttribute.EnumerateByCreator => true
-      case _                                        => false
-    }
+  private[service] def generateStructs(
+    root: ServiceRoot,
+    operations: Set[CRUD],
+    enumeratingByCreator: Boolean,
+  ): String =
     mkCode.doubleLines(
       // Generate input struct for each operation, except for List when not enumerating by creator
       for (operation <- operations.toSeq.sorted if operation != CRUD.List || enumeratingByCreator)
         yield generateStruct(root, operation),
     )
-  }
 }

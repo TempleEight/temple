@@ -2,7 +2,6 @@ package temple.generate.server.go.service.dao
 
 import temple.ast.Annotation
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
-import temple.generate.server.CreatedByAttribute.EnumerateByCreator
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.server.go.service.dao.GoServiceDAOInterfaceGenerator.generateInterfaceFunction
@@ -29,8 +28,8 @@ object GoServiceDAOFunctionsGenerator {
       operation match {
         case List =>
           root.createdByAttribute match {
-            case _: EnumerateByCreator => "for a given ID"
-            case _                     => ""
+            case Some(CreatedByAttribute(_, _, true)) => "for a given ID"
+            case _                                    => ""
           }
         case Create => s", returning the newly created ${root.decapitalizedName}"
         case Read   => "for a given ID"
@@ -43,8 +42,8 @@ object GoServiceDAOFunctionsGenerator {
     val prefix  = "input"
     lazy val id = Seq(s"$prefix.${root.idAttribute.name.toUpperCase}")
     lazy val createdBy = root.createdByAttribute match {
-      case EnumerateByCreator(inputName, _) => Seq(s"$prefix.${inputName.capitalize}")
-      case _                                => Seq.empty
+      case Some(CreatedByAttribute(inputName, _, true)) => Seq(s"$prefix.${inputName.capitalize}")
+      case _                                            => Seq.empty
     }
     lazy val filteredAttributes = root.attributes.collect {
       case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.ServerSet) =>
@@ -107,8 +106,8 @@ object GoServiceDAOFunctionsGenerator {
       .list(
         s"&${root.decapitalizedName}.${root.idAttribute.name.toUpperCase}",
         root.createdByAttribute match {
-          case CreatedByAttribute.None => None
-          case enumerating: CreatedByAttribute.Enumerating =>
+          case None => None
+          case Some(enumerating: CreatedByAttribute) =>
             Some(s"&${root.decapitalizedName}.${enumerating.name.capitalize}")
         },
         root.attributes.map { case (name, _) => s"&${root.decapitalizedName}.${name.capitalize}" },
@@ -179,12 +178,17 @@ object GoServiceDAOFunctionsGenerator {
       case Delete                 => Seq("nil")
     }
 
-  private def generateDAOFunction(root: ServiceRoot, operation: CRUD, query: String): String =
+  private def generateDAOFunction(
+    root: ServiceRoot,
+    operation: CRUD,
+    query: String,
+    enumeratingByCreator: Boolean,
+  ): String =
     mkCode.lines(
       generateDAOFunctionComment(root, operation),
       mkCode(
         "func (dao *DAO)",
-        generateInterfaceFunction(root, operation),
+        generateInterfaceFunction(root, operation, enumeratingByCreator),
         CodeWrap.curly.tabbed(
           mkCode.doubleLines(
             generateQueryBlock(root, operation, query),
@@ -195,9 +199,9 @@ object GoServiceDAOFunctionsGenerator {
       ),
     )
 
-  private[service] def generateDAOFunctions(root: ServiceRoot): String =
+  private[service] def generateDAOFunctions(root: ServiceRoot, enumeratingByCreator: Boolean): String =
     mkCode.doubleLines(
       for ((operation, query) <- root.opQueries)
-        yield generateDAOFunction(root, operation, query),
+        yield generateDAOFunction(root, operation, query, enumeratingByCreator),
     )
 }

@@ -40,7 +40,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         List   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test_service;",
       ),
       idAttribute = IDAttribute("id"),
-      createdByAttribute = CreatedByAttribute.None,
+      createdByAttribute = None,
       attributes = ListMap(
         "id"          -> Attribute(IntType()),
         "bankBalance" -> Attribute(FloatType()),
@@ -77,7 +77,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       port = 1025,
       opQueries = ListMap(),
       idAttribute = IDAttribute("id"),
-      createdByAttribute = CreatedByAttribute.None,
+      createdByAttribute = None,
       attributes = ListMap(
         "id"          -> Attribute(IntType()),
         "bankBalance" -> Attribute(FloatType()),
@@ -120,7 +120,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         List   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test_complex_service;",
       ),
       idAttribute = IDAttribute("id"),
-      createdByAttribute = CreatedByAttribute.None,
+      createdByAttribute = None,
       attributes = ListMap(
         "id"             -> Attribute(IntType(max = Some(100), min = Some(10), precision = 2)),
         "anotherId"      -> Attribute(IntType(max = Some(100), min = Some(10))),
