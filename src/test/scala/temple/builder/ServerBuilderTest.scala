@@ -54,6 +54,8 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       datastore = Database.Postgres,
       readable = Readable.All,
       writable = Writable.All,
+      projectUsesAuth = false,
+      hasAuthBlock = false,
     )
   }
 
@@ -91,6 +93,8 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       datastore = Database.Postgres,
       readable = Readable.All,
       writable = Writable.All,
+      projectUsesAuth = false,
+      hasAuthBlock = false,
     )
   }
 
@@ -138,6 +142,8 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       datastore = Database.Postgres,
       readable = Readable.All,
       writable = Writable.All,
+      projectUsesAuth = false,
+      hasAuthBlock = false,
     )
   }
 

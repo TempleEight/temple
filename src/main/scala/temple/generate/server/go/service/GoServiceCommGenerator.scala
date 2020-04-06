@@ -7,6 +7,7 @@ import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
 
 import scala.collection.immutable.ListMap
+import scala.Option.when
 
 object GoServiceCommGenerator {
 
@@ -28,7 +29,7 @@ object GoServiceCommGenerator {
       genFunctionCall(
         s"Check${serviceName.capitalize}",
         s"${serviceName}${root.idAttribute.name.toUpperCase} ${generateGoType(AttributeType.UUIDType)}",
-        "token string",
+        when(root.projectUsesAuth) { "token string" },
       ),
       "(bool, error)",
     )
@@ -72,8 +73,12 @@ object GoServiceCommGenerator {
           ),
           generateCheckAndReturnError("false"),
           "",
-          "// Token should already be in the form `Bearer <token>`",
-          s"req.Header.Set(${doubleQuote("Authorization")}, token)",
+          when(root.projectUsesAuth) {
+            mkCode.lines(
+              "// Token should already be in the form `Bearer <token>`",
+              s"req.Header.Set(${doubleQuote("Authorization")}, token)",
+            )
+          },
           genDeclareAndAssign("new(http.Client).Do(req)", "resp", "err"),
           generateCheckAndReturnError("false"),
           "defer resp.Body.Close()",
