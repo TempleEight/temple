@@ -85,19 +85,10 @@ object DatabaseBuilder {
             condition = Some(PreparedComparison(selectionAttribute, ComparisonOperator.Equal)),
           )
         case List =>
-          createdByAttribute match {
-            case Some(CreatedByAttribute(_, _, true)) =>
-              List -> Statement.Read(
-                tableName,
-                columns = columns,
-                condition = Some(PreparedComparison("created_by", ComparisonOperator.Equal)),
-              )
-            case _ =>
-              List -> Statement.Read(
-                tableName,
-                columns = columns,
-              )
-          }
+          List -> Statement.Read(
+            tableName,
+            columns = columns,
+          )
       },
     )
   }

@@ -35,7 +35,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
             "breakfastTime"        -> Attribute(TimeType),
           ),
           metadata = Seq(
-            ServiceEnumerable(),
+            ServiceEnumerable,
             Omit(Set(Endpoint.Delete)),
             Readable.All,
             Writable.This,
@@ -49,7 +49,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
                 "friend" -> Attribute(ForeignKey("SimpleTempleTestUser")),
                 "image"  -> Attribute(BlobType(size = Some(10_000_000))),
               ),
-              Seq(ServiceEnumerable(byThis = true), Readable.This),
+              Seq(ServiceEnumerable, Readable.This),
             ),
           ),
         ),

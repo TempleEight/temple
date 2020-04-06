@@ -31,11 +31,11 @@ object ServerBuilder {
     }
 
     val createdBy: Option[CreatedByAttribute] = serviceBlock.lookupMetadata[ServiceEnumerable].map {
-      case ServiceEnumerable(byThis) =>
+      case ServiceEnumerable =>
         CreatedByAttribute(
           languageConfig.createdByInputName,
           languageConfig.createdByName,
-          filterEnumeration = byThis,
+          filterEnumeration = false,
         )
     }
 
