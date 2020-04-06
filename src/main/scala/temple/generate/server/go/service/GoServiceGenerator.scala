@@ -16,11 +16,6 @@ import scala.Option.when
 object GoServiceGenerator extends ServiceGenerator {
 
   override def generate(root: ServiceRoot): Files = {
-    /* TODO
-     * handlers in <>.go
-     * config.json
-     */
-
     // Set of CRUD operations the service uses
     val operations = root.opQueries.keySet
 
@@ -38,9 +33,6 @@ object GoServiceGenerator extends ServiceGenerator {
       case (_, attr) =>
         attr.accessAnnotation.contains(Annotation.Server) || attr.accessAnnotation.contains(Annotation.ServerSet)
     }
-
-    // Whether or not this service has an auth block
-    val hasAuthBlock = root.createdByAttribute.isEmpty
 
     // Whether or not this service is enumerating by creator
     lazy val enumeratingByCreator = root.readable match {
@@ -62,7 +54,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonMainGenerator.generateMain(root, root.port, usesComms, isAuth = false),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoServiceMainHandlersGenerator
-          .generateHandlers(root, operations, clientAttributes, usesComms, hasAuthBlock, enumeratingByCreator),
+          .generateHandlers(root, operations, clientAttributes, usesComms, enumeratingByCreator),
       ),
       File(root.kebabName, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
