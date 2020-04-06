@@ -1,6 +1,9 @@
 package temple.builder.project
 
+import java.nio.file.Paths
+
 import org.scalatest.FlatSpec
+import temple.TestUtils
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.FileMatchers
 import temple.generate.FileSystem.File

@@ -1,14 +1,14 @@
 package temple
 
 import java.io.IOException
-import java.nio.file.{FileVisitResult, FileVisitor, Files, Path}
 import java.nio.file.attribute.BasicFileAttributes
+import java.nio.file.{FileVisitResult, FileVisitor, Files, Path}
 
 import temple.generate.FileSystem
 import temple.generate.FileSystem.File
 import temple.utils.FileUtils
 
-object E2ETestUtils {
+object TestUtils {
 
   /**
     * Build a map of files present in the provided filepath
