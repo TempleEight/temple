@@ -41,74 +41,72 @@ object ProjectBuilder {
     service.lookupMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + List)
   }
 
-  /**
-    * Converts a Templefile to an associated project, containing all generated code
-    *
-    * @param templefile The semantically correct Templefile
-    * @return the associated generated project
-    */
-  def build(templefile: Templefile, detail: LanguageDetail): Project = {
-
-    // Whether or not to generate an auth service - based on whether any service has #auth
-    val usesAuth = templefile.services.exists {
-      case (_, service) => service.lookupMetadata[ServiceAuth].nonEmpty
-    }
-
-    implicit val dbContext: PostgresContext = PostgresContext(DollarNumbers)
-
-    val databaseCreationScripts = templefile.allServices.map {
+  private def buildDatabaseCreationScripts(templefile: Templefile): Files =
+    templefile.allServices.map {
       case (name, service) =>
         val createStatements: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
         service.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase) match {
           case Database.Postgres =>
-            val postgresStatements = createStatements.map(PostgresGenerator.generate).mkString("\n\n")
+            implicit val dbContext: PostgresContext = PostgresContext(ProjectConfig.defaultPreparedType)
+            val postgresStatements                  = createStatements.map(PostgresGenerator.generate).mkString("\n\n")
             (File(s"${kebabCase(name)}-db", "init.sql"), postgresStatements)
-
         }
     }
 
-    val dockerfiles = templefile.allServicesWithPorts.map {
+  private def buildDockerfiles(templefile: Templefile): Files =
+    templefile.allServicesWithPorts.map {
       case (name, service, port) =>
         val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(kebabCase(name), service, port.service)
         val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)
         (File(s"${kebabCase(name)}", "Dockerfile"), dockerfileContents)
-    }
+    }.toMap
 
+  private def buildOpenAPI(templefile: Templefile): Files = {
     val openAPIRoot = OpenAPIBuilder.createOpenAPI(templefile)
-    val apiFiles    = OpenAPIGenerator.generate(openAPIRoot)
+    OpenAPIGenerator.generate(openAPIRoot)
+  }
 
+  private def buildOrchestration(templefile: Templefile): Files = {
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(templefile)
-    val kubeFiles         = KubernetesGenerator.generate(orchestrationRoot)
+    KubernetesGenerator.generate(orchestrationRoot)
+  }
 
+  private def buildMetrics(templefile: Templefile): Files = {
     // TODO: Get this from templefile and project settings
     val datasource: Datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
     // TODO: Take all of this inside MetricsBuilder
-    val metrics = templefile.allServices.map {
-        case (name, service) =>
-          val rows             = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
-          val grafanaDashboard = GrafanaDashboardGenerator.generate(kebabCase(name), name, rows)
-          File(s"grafana/provisioning/dashboards", s"${kebabCase(name)}.json") -> grafanaDashboard
-      } ++ Map(
-        File(s"grafana/provisioning/dashboards", "dashboards.yml") ->
-        GrafanaDashboardConfigGenerator.generate(datasource),
-        File(s"grafana/provisioning/datasources", "datasource.yml") ->
-        GrafanaDatasourceConfigGenerator.generate(datasource),
-        File(s"prometheus", "prometheus.yml") ->
-        PrometheusConfigGenerator.generate(
-          templefile.allServicesWithPorts.map {
-            case (serviceName, _, ports) =>
-              PrometheusJob(kebabCase(serviceName), s"${kebabCase(serviceName)}:${ports.metrics}")
-          }.toSeq,
-        ),
-      )
+    templefile.allServices.map {
+      case (name, service) =>
+        val rows             = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
+        val grafanaDashboard = GrafanaDashboardGenerator.generate(kebabCase(name), name, rows)
+        File(s"grafana/provisioning/dashboards", s"${kebabCase(name)}.json") -> grafanaDashboard
+    } ++ Map(
+      File(s"grafana/provisioning/dashboards", "dashboards.yml") ->
+      GrafanaDashboardConfigGenerator.generate(datasource),
+      File(s"grafana/provisioning/datasources", "datasource.yml") ->
+      GrafanaDatasourceConfigGenerator.generate(datasource),
+      File(s"prometheus", "prometheus.yml") ->
+      PrometheusConfigGenerator.generate(
+        templefile.allServicesWithPorts.map {
+          case (serviceName, _, ports) =>
+            PrometheusJob(kebabCase(serviceName), s"${kebabCase(serviceName)}:${ports.metrics}")
+        }.toSeq,
+      ),
+    )
+  }
+
+  private def buildServerFiles(templefile: Templefile, detail: LanguageDetail): Files = {
+    // Whether or not to generate an auth service - based on whether any service has #auth
+    val usesAuth = templefile.services.exists {
+      case (_, service) => service.lookupMetadata[ServiceAuth].nonEmpty
+    }
 
     var serverFiles = templefile.providedServicesWithPorts.flatMap {
       case (name, service, port) =>
         val serviceRoot =
           ServerBuilder.buildServiceRoot(name, service, port.service, endpoints(service), detail, usesAuth)
         service.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
-          case ServiceLanguage.Go =>
-            GoServiceGenerator.generate(serviceRoot)
+          case ServiceLanguage.Go => GoServiceGenerator.generate(serviceRoot)
         }
     }
 
@@ -121,13 +119,22 @@ object ProjectBuilder {
       }
     }
 
-    Project(
-      databaseCreationScripts ++
-      dockerfiles ++
-      kubeFiles ++
-      apiFiles ++
-      serverFiles ++
-      metrics,
-    )
+    serverFiles.toMap
   }
+
+  /**
+    * Converts a Templefile to an associated project, containing all generated code
+    *
+    * @param templefile The semantically correct Templefile
+    * @return the associated generated project
+    */
+  def build(templefile: Templefile, detail: LanguageDetail): Project =
+    Project(
+      buildDatabaseCreationScripts(templefile) ++
+      buildDockerfiles(templefile) ++
+      buildOrchestration(templefile) ++
+      buildOpenAPI(templefile) ++
+      buildServerFiles(templefile, detail) ++
+      buildMetrics(templefile),
+    )
 }

@@ -1,6 +1,7 @@
 package temple.builder.project
 
 import temple.ast.Metadata._
+import temple.generate.database.PreparedType
 import temple.generate.kube.ast.OrchestrationType.DbStorage
 
 object ProjectConfig {
@@ -9,12 +10,13 @@ object ProjectConfig {
     override def toString: String = image + ":" + version
   }
 
-  val defaultLanguage: ServiceLanguage = ServiceLanguage.Go
-  val defaultDatabase: Database        = Database.Postgres
-  val defaultAuth: ServiceAuth         = ServiceAuth.Email
-  val authPort: Int                    = 1024
-  val authMetricPort: Int              = 1025
-  val serviceStartPort: Int            = 1026
+  val defaultLanguage: ServiceLanguage  = ServiceLanguage.Go
+  val defaultDatabase: Database         = Database.Postgres
+  val defaultAuth: ServiceAuth          = ServiceAuth.Email
+  val defaultPreparedType: PreparedType = PreparedType.DollarNumbers
+  val authPort: Int                     = 1024
+  val authMetricPort: Int               = 1025
+  val serviceStartPort: Int             = 1026
 
   def dockerImage(language: ServiceLanguage): DockerImage = language match {
     case ServiceLanguage.Go => DockerImage("golang", "1.13.7-alpine")
