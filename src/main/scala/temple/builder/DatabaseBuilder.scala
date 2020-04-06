@@ -105,8 +105,8 @@ object DatabaseBuilder {
     */
   def createServiceTables(serviceName: String, service: AbstractServiceBlock): Seq[Statement.Create] = {
     service.structIterator(serviceName).map {
-      case (tableName, attributes) =>
-        val columns = attributes.map { case (name, attributes) => toColDef(name, attributes) }
+      case (tableName, structBlock) =>
+        val columns = structBlock.attributes.map { case (name, attributes) => toColDef(name, attributes) }
         Statement.Create(StringUtils.snakeCase(tableName), columns.toSeq)
     }
   }.toSeq
