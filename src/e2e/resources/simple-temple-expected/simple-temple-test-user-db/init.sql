@@ -8,11 +8,13 @@ CREATE TABLE simple_temple_test_user (
   yeets BOOLEAN UNIQUE NOT NULL,
   currentBankBalance REAL CHECK (currentBankBalance >= 0.0) NOT NULL,
   birthDate DATE NOT NULL,
-  breakfastTime TIME NOT NULL
+  breakfastTime TIME NOT NULL,
+  id UUID NOT NULL PRIMARY KEY
 );
 
 CREATE TABLE fred (
   field TEXT,
   friend UUID NOT NULL,
-  image BYTEA CHECK (octet_length(image) <= 10000000) NOT NULL
+  image BYTEA CHECK (octet_length(image) <= 10000000) NOT NULL,
+  id UUID NOT NULL PRIMARY KEY
 );

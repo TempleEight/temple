@@ -56,6 +56,7 @@ object NameClashes {
     "grant",
     "group",
     "having",
+    "id",
     "ilike", // sql, it’s my favourite language
     "in",
     "initially",

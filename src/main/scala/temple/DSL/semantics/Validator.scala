@@ -55,7 +55,7 @@ private class Validator private (templefile: Templefile) {
         takenNames += newName
 
         newName -> value
-    }
+    } + ("id" -> IDAttribute) // Add the implicit IDAttribute
   }
 
   /** Given a service block or a struct block, find a valid name for it (taking into account the clashes from all the

@@ -1,7 +1,7 @@
 package temple.builder
 
 import temple.ast.Annotation.Nullable
-import temple.ast.{AbstractServiceBlock, Annotation, Attribute, AttributeType}
+import temple.ast._
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
 import temple.generate.database.ast.ColumnConstraint.Check
 import temple.generate.database.ast.Condition.PreparedComparison
@@ -24,10 +24,15 @@ object DatabaseBuilder {
   private def toColDef(name: String, attribute: Attribute): ColumnDef = {
     val nonNullConstraint = Option.when(!attribute.valueAnnotations.contains(Nullable)) { ColumnConstraint.NonNull }
 
+    val primaryKeyConstraint = attribute match {
+      case IDAttribute => Some(ColumnConstraint.PrimaryKey)
+      case _           => None
+    }
+
     val valueConstraints = attribute.valueAnnotations.flatMap {
         case Annotation.Unique   => Some(ColumnConstraint.Unique)
         case Annotation.Nullable => None
-      } ++ nonNullConstraint
+      } ++ nonNullConstraint ++ primaryKeyConstraint
 
     val (colType, typeConstraints) = attribute.attributeType match {
       case AttributeType.BoolType      => (ColType.BoolCol, Nil)
