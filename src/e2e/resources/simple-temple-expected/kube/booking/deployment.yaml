@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: booking
+  labels:
+    app: booking
+    kind: service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: booking
+      kind: service
+  template:
+    metadata:
+      name: booking
+      labels:
+        app: booking
+        kind: service
+    spec:
+      hostname: booking
+      containers:
+      - image: simple-temple-test-booking
+        name: booking
+        ports:
+        - containerPort: 1028
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always

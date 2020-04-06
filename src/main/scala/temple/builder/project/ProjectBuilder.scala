@@ -77,11 +77,8 @@ object ProjectBuilder {
     val openAPIRoot = OpenAPIBuilder.createOpenAPI(templefile)
     val apiFiles    = OpenAPIGenerator.generate(openAPIRoot)
 
-    val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(
-      kebabCase(templefile.projectName),
-      templefile.allServicesWithPorts.map { case (name, block, ports) => (name, block, ports.service) }.toSeq,
-    )
-    val kubeFiles = KubernetesGenerator.generate(orchestrationRoot)
+    val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(templefile)
+    val kubeFiles         = KubernetesGenerator.generate(orchestrationRoot)
 
     // TODO: Get this from templefile and project settings
     val datasource: Datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")

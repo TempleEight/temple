@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: simple-temple-test-user-db-volume
+  labels:
+    app: simple-temple-test-user
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1.0Gi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete
+  hostPath:
+    path: /data/simple-temple-test-user-db
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: simple-temple-test-user-db-claim
+  labels:
+    app: simple-temple-test-user
+spec:
+  accessModes:
+  - ReadWriteMany
+  volumeName: simple-temple-test-user-db-volume
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 100.0Mi

@@ -1,0 +1,31 @@
+apiVersion: v1
+kind: PersistentVolume
+metadata:
+  name: booking-db-volume
+  labels:
+    app: booking
+    type: local
+spec:
+  storageClassName: manual
+  capacity:
+    storage: 1.0Gi
+  accessModes:
+  - ReadWriteMany
+  persistentVolumeReclaimPolicy: Delete
+  hostPath:
+    path: /data/booking-db
+---
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: booking-db-claim
+  labels:
+    app: booking
+spec:
+  accessModes:
+  - ReadWriteMany
+  volumeName: booking-db-volume
+  storageClassName: manual
+  resources:
+    requests:
+      storage: 100.0Mi

@@ -520,12 +520,7 @@ object ProjectBuilderTestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/routes \
       |  --data "hosts[]=$KONG_ENTRY" \
-      |  --data 'paths[]=/api/temple-user'
-      |
-      |curl -X POST \
-      |  --url $KONG_ADMIN/services/temple-user-service/plugins \
-      |  --data 'name=jwt' \
-      |  --data 'config.claims_to_verify=exp'""".stripMargin
+      |  --data 'paths[]=/api/temple-user'""".stripMargin
 
   val simpleTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/temple-user.json").stripLineEnd
 

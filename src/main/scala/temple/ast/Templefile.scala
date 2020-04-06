@@ -22,7 +22,7 @@ case class Templefile(
   val providedServices: Map[String, ServiceBlock] = services
 
   // Whether or not to generate an auth service - based on whether any service has #auth
-  private val usesAuth = services.exists {
+  val usesAuth: Boolean = services.exists {
     case (_, service) => service.lookupMetadata[ServiceAuth].nonEmpty
   }
 
