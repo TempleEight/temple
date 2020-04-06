@@ -3,12 +3,12 @@ package temple.DSL.semantics
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.semantics.Validator._
 import temple.DSL.semantics.ValidatorTest._
-import temple.ast.Annotation
+import temple.ast.AbstractServiceBlock._
 import temple.ast.Annotation.{Nullable, Unique}
 import temple.ast.AttributeType._
 import temple.ast.Metadata.Endpoint.Delete
 import temple.ast.Metadata._
-import temple.ast._
+import temple.ast.{Annotation, _}
 
 class ValidatorTest extends FlatSpec with Matchers {
 

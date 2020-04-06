@@ -2,8 +2,7 @@ package temple.generate.server.go.common
 
 import temple.ast.AttributeType
 import temple.ast.AttributeType._
-import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
-import temple.generate.utils.CodeTerm._
+import temple.generate.utils.CodeTerm.{CodeWrap, mkCode, _}
 import temple.generate.utils.{CodeTerm, CodeUtils}
 import temple.utils.StringUtils.tabIndent
 

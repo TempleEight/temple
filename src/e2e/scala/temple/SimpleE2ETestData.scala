@@ -41,7 +41,7 @@ object SimpleE2ETestData {
       |
       |ENTRYPOINT ["./simple-temple-test-user"]
       |
-      |EXPOSE 1025
+      |EXPOSE 1026
       |""".stripMargin
 
   val configureKong: String =
@@ -50,17 +50,22 @@ object SimpleE2ETestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=simple-temple-test-user-service' \
-      |  --data 'url=http://simple-temple-test-user:1025/simple-temple-test-user'
+      |  --data 'url=http://simple-temple-test-user:1026/simple-temple-test-user'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=booking-service' \
-      |  --data 'url=http://booking:1027/booking'
+      |  --data 'url=http://booking:1028/booking'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=simple-temple-test-group-service' \
-      |  --data 'url=http://simple-temple-test-group:1029/simple-temple-test-group'
+      |  --data 'url=http://simple-temple-test-group:1030/simple-temple-test-group'
+      |
+      |curl -X POST \
+      |  --url $KONG_ADMIN/services/ \
+      |  --data 'name=auth-service' \
+      |  --data 'url=http://auth:1024/auth'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/simple-temple-test-user-service/routes \
@@ -76,6 +81,11 @@ object SimpleE2ETestData {
       |  --url $KONG_ADMIN/services/simple-temple-test-group-service/routes \
       |  --data "hosts[]=$KONG_ENTRY" \
       |  --data 'paths[]=/api/simple-temple-test-group'
+      |
+      |curl -X POST \
+      |  --url $KONG_ADMIN/services/auth-service/routes \
+      |  --data "hosts[]=$KONG_ENTRY" \
+      |  --data 'paths[]=/api/auth'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/simple-temple-test-user-service/plugins \
@@ -118,7 +128,7 @@ object SimpleE2ETestData {
       |      - image: simple-temple-test-simple-temple-test-user
       |        name: simple-temple-test-user
       |        ports:
-      |        - containerPort: 1025
+      |        - containerPort: 1026
       |      imagePullSecrets:
       |      - name: regcred
       |      restartPolicy: Always
@@ -188,8 +198,8 @@ object SimpleE2ETestData {
       |spec:
       |  ports:
       |  - name: api
-      |    port: 1025
-      |    targetPort: 1025
+      |    port: 1026
+      |    targetPort: 1026
       |  selector:
       |    app: simple-temple-test-user
       |    kind: service
@@ -285,15 +295,19 @@ object SimpleE2ETestData {
       |- job_name: simple-temple-test-user
       |  static_configs:
       |  - targets:
-      |    - simple-temple-test-user:1026
+      |    - simple-temple-test-user:1027
       |- job_name: booking
       |  static_configs:
       |  - targets:
-      |    - booking:1028
+      |    - booking:1029
       |- job_name: simple-temple-test-group
       |  static_configs:
       |  - targets:
-      |    - simple-temple-test-group:1030
+      |    - simple-temple-test-group:1031
+      |- job_name: auth
+      |  static_configs:
+      |  - targets:
+      |    - auth:1025
       |""".stripMargin
 
   val authGoFile: String      = FileUtils.readResources("go/auth/auth.go.snippet")
@@ -304,4 +318,31 @@ object SimpleE2ETestData {
   val authErrorsFile: String  = FileUtils.readResources("go/auth/dao/errors.go.snippet")
   val authHandlerFile: String = FileUtils.readResources("go/auth/comm/handler.go.snippet")
   val authMetricFile: String  = FileUtils.readResources("go/auth/metric/metric.go.snippet")
+
+  val authDbInitSqlFile: String =
+    """CREATE TABLE auth (
+      |  id UUID UNIQUE NOT NULL,
+      |  email TEXT UNIQUE NOT NULL,
+      |  password TEXT NOT NULL
+      |);""".stripMargin
+
+  val authDockerfile: String =
+    """FROM golang:1.13.7-alpine
+      |
+      |WORKDIR /auth
+      |
+      |COPY go.mod go.sum ./
+      |
+      |RUN ["go", "mod", "download"]
+      |
+      |COPY . .
+      |
+      |COPY config.json /etc/auth-service/
+      |
+      |RUN ["go", "build", "-o", "auth"]
+      |
+      |ENTRYPOINT ["./auth"]
+      |
+      |EXPOSE 1024
+      |""".stripMargin
 }

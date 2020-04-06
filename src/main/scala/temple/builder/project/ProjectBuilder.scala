@@ -1,13 +1,13 @@
 package temple.builder.project
 
 import temple.ast.Metadata._
-import temple.ast.{Metadata, TempleBlock, Templefile}
+import temple.ast._
 import temple.builder._
 import temple.detail.LanguageDetail
 import temple.generate.CRUD
 import temple.generate.CRUD._
 import temple.generate.FileSystem._
-import temple.generate.database.PreparedType.QuestionMarks
+import temple.generate.database.PreparedType.DollarNumbers
 import temple.generate.database.ast.Statement
 import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.docker.DockerfileGenerator
@@ -49,22 +49,25 @@ object ProjectBuilder {
     */
   def build(templefile: Templefile, detail: LanguageDetail): Project = {
 
+    // Whether or not to generate an auth service - based on whether any service has #auth
     val usesAuth = templefile.services.exists {
       case (_, service) => service.lookupMetadata[ServiceAuth].nonEmpty
     }
 
-    val databaseCreationScripts = templefile.services.map {
+    implicit val dbContext: PostgresContext = PostgresContext(DollarNumbers)
+
+    val databaseCreationScripts = templefile.allServices.map {
       case (name, service) =>
         val createStatements: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
         service.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase) match {
           case Database.Postgres =>
-            implicit val context: PostgresContext = PostgresContext(QuestionMarks)
-            val postgresStatements                = createStatements.map(PostgresGenerator.generate).mkString("\n\n")
+            val postgresStatements = createStatements.map(PostgresGenerator.generate).mkString("\n\n")
             (File(s"${kebabCase(name)}-db", "init.sql"), postgresStatements)
+
         }
     }
 
-    val dockerfiles = templefile.servicesWithPorts.map {
+    val dockerfiles = templefile.allServicesWithPorts.map {
       case (name, service, port) =>
         val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(kebabCase(name), service, port.service)
         val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)
@@ -74,16 +77,13 @@ object ProjectBuilder {
     val openAPIRoot = OpenAPIBuilder.createOpenAPI(templefile)
     val apiFiles    = OpenAPIGenerator.generate(openAPIRoot)
 
-    val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(
-      kebabCase(templefile.projectName),
-      templefile.servicesWithPorts.map { case (name, block, ports) => (name, block, ports.service) }.toSeq,
-    )
-    val kubeFiles = KubernetesGenerator.generate(orchestrationRoot)
+    val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(templefile)
+    val kubeFiles         = KubernetesGenerator.generate(orchestrationRoot)
 
     // TODO: Get this from templefile and project settings
     val datasource: Datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
     // TODO: Take all of this inside MetricsBuilder
-    val metrics = templefile.services.map {
+    val metrics = templefile.allServices.map {
         case (name, service) =>
           val rows             = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
           val grafanaDashboard = GrafanaDashboardGenerator.generate(kebabCase(name), name, rows)
@@ -95,14 +95,14 @@ object ProjectBuilder {
         GrafanaDatasourceConfigGenerator.generate(datasource),
         File(s"prometheus", "prometheus.yml") ->
         PrometheusConfigGenerator.generate(
-          templefile.servicesWithPorts.map {
+          templefile.allServicesWithPorts.map {
             case (serviceName, _, ports) =>
               PrometheusJob(kebabCase(serviceName), s"${kebabCase(serviceName)}:${ports.metrics}")
           }.toSeq,
         ),
       )
 
-    var serverFiles = templefile.servicesWithPorts.flatMap {
+    var serverFiles = templefile.providedServicesWithPorts.flatMap {
       case (name, service, port) =>
         val serviceRoot =
           ServerBuilder.buildServiceRoot(name, service, port.service, endpoints(service), detail, usesAuth)

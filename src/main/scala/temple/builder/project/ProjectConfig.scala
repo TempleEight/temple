@@ -12,7 +12,9 @@ object ProjectConfig {
   val defaultLanguage: ServiceLanguage = ServiceLanguage.Go
   val defaultDatabase: Database        = Database.Postgres
   val defaultAuth: ServiceAuth         = ServiceAuth.Email
-  val authPort: Int                    = 1024 //* One before the [[Templefile]] start point
+  val authPort: Int                    = 1024
+  val authMetricPort: Int              = 1025
+  val serviceStartPort: Int            = 1026
 
   def dockerImage(language: ServiceLanguage): DockerImage = language match {
     case ServiceLanguage.Go => DockerImage("golang", "1.13.7-alpine")

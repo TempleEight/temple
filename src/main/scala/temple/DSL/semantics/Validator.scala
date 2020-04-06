@@ -1,6 +1,7 @@
 package temple.DSL.semantics
 
 import temple.DSL.semantics.NameClashes._
+import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
 import temple.ast.{Metadata, _}
 import temple.builder.project.ProjectConfig

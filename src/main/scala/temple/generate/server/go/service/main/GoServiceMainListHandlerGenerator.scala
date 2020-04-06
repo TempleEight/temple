@@ -1,11 +1,11 @@
 package temple.generate.server.go.service.main
 
 import temple.generate.CRUD.List
-import temple.generate.server.go.common.GoCommonGenerator._
-import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.{generateHandlerDecl, generateExtractAuthBlock, generateHTTPError}
-import temple.generate.server.{CreatedByAttribute, ServiceRoot}
-import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
+import temple.generate.server.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
+import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.{generateExtractAuthBlock, generateHTTPError, generateHandlerDecl}
+import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
 import scala.Option.when
 import scala.collection.immutable.ListMap

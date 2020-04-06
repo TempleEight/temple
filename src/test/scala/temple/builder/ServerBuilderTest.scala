@@ -15,7 +15,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
   behavior of "ServerBuilderTest"
 
   it should "build a correct simple ServiceRoot with all endpoints" in {
-    val serviceRoot: ServiceRoot = BuilderTestData.simpleTemplefile.servicesWithPorts.head match {
+    val serviceRoot: ServiceRoot = BuilderTestData.simpleTemplefile.allServicesWithPorts.head match {
       case (name, service, port) =>
         ServerBuilder
           .buildServiceRoot(
@@ -31,7 +31,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       "TestService",
       "github.com/squat/and/dab/test-service",
       comms = Seq(),
-      port = 1025,
+      port = 1026,
       opQueries = ListMap(
         Create -> "INSERT INTO test_service (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image;",
         Read   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test_service WHERE id = $1;",
@@ -58,7 +58,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "build a correct simple ServiceRoot with no endpoints" in {
-    val serviceRoot: ServiceRoot = BuilderTestData.simpleTemplefile.servicesWithPorts.head match {
+    val serviceRoot: ServiceRoot = BuilderTestData.simpleTemplefile.allServicesWithPorts.head match {
       case (name, service, port) =>
         ServerBuilder
           .buildServiceRoot(
@@ -74,7 +74,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       "TestService",
       "github.com/squat/and/dab/test-service",
       comms = Seq(),
-      port = 1025,
+      port = 1026,
       opQueries = ListMap(),
       idAttribute = IDAttribute("id"),
       createdByAttribute = None,
@@ -95,7 +95,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "build a correct complex ServiceRoot with all endpoints" in {
-    val serviceRoot: ServiceRoot = BuilderTestData.complexTemplefile.servicesWithPorts.head match {
+    val serviceRoot: ServiceRoot = BuilderTestData.complexTemplefile.allServicesWithPorts.head match {
       case (name, service, port) =>
         ServerBuilder
           .buildServiceRoot(
@@ -111,7 +111,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       "TestComplexService",
       "github.com/squat/and/dab/test-complex-service",
       comms = Seq(),
-      port = 1025,
+      port = 1026,
       opQueries = ListMap(
         Create -> "INSERT INTO test_complex_service (id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image;",
         Read   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test_complex_service WHERE id = $1;",

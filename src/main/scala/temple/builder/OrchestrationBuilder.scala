@@ -1,7 +1,9 @@
 package temple.builder
 
+import temple.ast.AbstractServiceBlock.AuthServiceBlock
 import temple.ast.Metadata.Database
-import temple.ast.{Metadata, ServiceBlock}
+import temple.ast.Templefile.Ports
+import temple.ast.{AbstractServiceBlock, Metadata, Templefile}
 import temple.builder.project.ProjectConfig
 import temple.generate.kube.ast.OrchestrationType.{OrchestrationRoot, Service}
 import temple.generate.kube.ast.gen.LifecycleCommand
@@ -9,14 +11,11 @@ import temple.utils.StringUtils
 
 object OrchestrationBuilder {
 
-  def createServiceOrchestrationRoot(
-    projectName: String,
-    services: Seq[(String, ServiceBlock, Int)],
-  ): OrchestrationRoot =
-    OrchestrationRoot(
-      services map {
-        case (name, service, port) =>
+  def createServiceOrchestrationRoot(templefile: Templefile): OrchestrationRoot = {
+    val services: Iterable[Service] = templefile.allServicesWithPorts map {
+        case (name: String, service: AbstractServiceBlock, port: Ports) =>
           val kebabName   = StringUtils.kebabCase(name)
+          val projectName = StringUtils.kebabCase(templefile.projectName)
           val dockerImage = s"$projectName-$kebabName"
           val dbLanguage  = service.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
           val dbImage     = ProjectConfig.dockerImage(dbLanguage)
@@ -24,7 +23,7 @@ object OrchestrationBuilder {
             name = kebabName,
             image = dockerImage,
             dbImage = dbImage.toString,
-            ports = Seq(("api", port)),
+            ports = Seq(("api", port.service)),
             //This value assumed to be one
             replicas = 1,
             secretName = "regcred",
@@ -36,8 +35,9 @@ object OrchestrationBuilder {
             dbLifecycleCommand = dbLanguage match {
               case Database.Postgres => LifecycleCommand.psqlSetup.toString
             },
-            usesAuth = true,
+            usesAuth = service != AuthServiceBlock && templefile.usesAuth,
           )
-      },
-    )
+      }
+    OrchestrationRoot(services.toSeq)
+  }
 }

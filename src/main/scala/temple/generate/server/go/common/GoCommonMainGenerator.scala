@@ -1,8 +1,8 @@
 package temple.generate.server.go.common
 
 import temple.generate.server.ServiceRoot
-import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
 
 import scala.Option.when
