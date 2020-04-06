@@ -39,9 +39,12 @@ object GoServiceGenerator extends ServiceGenerator {
     }
 
     // Whether or not this service has an auth block
-    val hasAuthBlock = root.createdByAttribute match {
-      case CreatedByAttribute.None                                                         => true
-      case _: CreatedByAttribute.EnumerateByCreator | _: CreatedByAttribute.EnumerateByAll => false
+    val hasAuthBlock = root.createdByAttribute.isEmpty
+
+    // Whether or not this service is enumerating by creator
+    val enumeratingByCreator = root.createdByAttribute match {
+      case Some(CreatedByAttribute(_, _, true)) => true
+      case _                                    => false
     }
 
     (Map(
@@ -57,7 +60,8 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainGenerator.generateRouter(root, operations),
         GoCommonMainGenerator.generateMain(root, root.port, usesComms, isAuth = false),
         GoCommonMainGenerator.generateJsonMiddleware(),
-        GoServiceMainHandlersGenerator.generateHandlers(root, operations, clientAttributes, usesComms, hasAuthBlock),
+        GoServiceMainHandlersGenerator
+          .generateHandlers(root, operations, clientAttributes, usesComms, hasAuthBlock, enumeratingByCreator),
       ),
       File(root.kebabName, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
@@ -71,13 +75,13 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${root.kebabName}/dao", "dao.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("dao"),
         GoServiceDAOGenerator.generateImports(root, usesTime),
-        GoServiceDAOInterfaceGenerator.generateInterface(root, operations),
+        GoServiceDAOInterfaceGenerator.generateInterface(root, operations, enumeratingByCreator),
         GoCommonDAOGenerator.generateDAOStruct(),
         GoServiceDAOGenerator.generateDatastoreObjectStruct(root),
-        GoServiceDAOInputStructsGenerator.generateStructs(root, operations),
+        GoServiceDAOInputStructsGenerator.generateStructs(root, operations, enumeratingByCreator),
         GoCommonDAOGenerator.generateInit(),
         GoServiceDAOGenerator.generateQueryFunctions(operations),
-        GoServiceDAOFunctionsGenerator.generateDAOFunctions(root),
+        GoServiceDAOFunctionsGenerator.generateDAOFunctions(root, enumeratingByCreator),
       ),
       File(s"${root.kebabName}/util", "util.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("util"),

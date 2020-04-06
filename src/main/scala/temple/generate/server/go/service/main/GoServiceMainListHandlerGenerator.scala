@@ -13,21 +13,18 @@ import scala.collection.immutable.ListMap
 object GoServiceMainListHandlerGenerator {
 
   /** Generate the list handler function */
-  private[main] def generateListHandler(root: ServiceRoot, responseMap: ListMap[String, String]): String = {
-    // Whether enumerating by created_by field or not
-    val byCreator = root.createdByAttribute match {
-      case CreatedByAttribute.None                  => false
-      case _: CreatedByAttribute.EnumerateByCreator => true
-      case _: CreatedByAttribute.EnumerateByAll     => false
-    }
-
+  private[main] def generateListHandler(
+    root: ServiceRoot,
+    responseMap: ListMap[String, String],
+    enumeratingByCreator: Boolean,
+  ): String = {
     // Fetch list from DAO
     val queryDAOBlock =
       genDeclareAndAssign(
         genMethodCall(
           "env.dao",
           s"List${root.name}",
-          when(byCreator) {
+          when(enumeratingByCreator) {
             genPopulateStruct(
               s"dao.List${root.name}Input",
               ListMap(s"AuthID" -> "auth.ID"),
@@ -78,7 +75,7 @@ object GoServiceMainListHandlerGenerator {
       generateHandlerDecl(root, List),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(byCreator) { generateExtractAuthBlock() },
+          when(enumeratingByCreator) { generateExtractAuthBlock() },
           mkCode.lines(
             queryDAOBlock,
             queryDAOErrorBlock,
