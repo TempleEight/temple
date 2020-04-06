@@ -580,7 +580,7 @@ object ProjectBuilderTestData {
       "ComplexUser" -> ServiceBlock(
         complexServiceAttributes,
         metadata = Seq(ServiceAuth.Email),
-        structs = Map("TempleUser" -> StructBlock(simpleServiceAttributes)),
+        structs = Map("TempleUser" -> NestedStructBlock(simpleServiceAttributes)),
       ),
     ),
   )

@@ -1,7 +1,7 @@
 package temple.builder.project
 
 import temple.ast.Metadata._
-import temple.ast.{Metadata, TempleBlock, Templefile}
+import temple.ast.{Metadata, StructBlock, Templefile}
 import temple.builder._
 import temple.detail.LanguageDetail
 import temple.generate.CRUD
@@ -23,7 +23,7 @@ import temple.utils.StringUtils._
 
 object ProjectBuilder {
 
-  def endpoints(service: TempleBlock[ServiceOrStructMetadata]): Set[CRUD] = {
+  def endpoints(service: StructBlock[_]): Set[CRUD] = {
     val endpoints: Set[CRUD] = service
       .lookupMetadata[Metadata.Omit]
       .map(_.endpoints)

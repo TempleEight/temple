@@ -198,7 +198,7 @@ object Analyzer {
     // LinkedHashMap is used to preserve order in the map
     val attributes = mutable.LinkedHashMap[String, Attribute]()
     val metadatas  = mutable.ListBuffer[ServiceMetadata]()
-    val structs    = mutable.LinkedHashMap[String, StructBlock]()
+    val structs    = mutable.LinkedHashMap[String, NestedStructBlock]()
     entries.foreach {
       case Entry.Attribute(key, dataType, annotations) =>
         attributes.safeInsert(key -> parseAttribute(dataType, annotations)(context :+ key))
@@ -245,14 +245,14 @@ object Analyzer {
   private def parseTargetBlock(entries: Seq[Entry])(implicit context: SemanticContext): TargetBlock =
     TargetBlock(parseMetadataBlock(entries, parseTargetMetadata))
 
-  private def parseStructBlock(entries: Seq[Entry])(implicit context: SemanticContext): StructBlock = {
+  private def parseStructBlock(entries: Seq[Entry])(implicit context: SemanticContext): NestedStructBlock = {
     val attributes = mutable.LinkedHashMap[String, Attribute]()
     val metadata = parseBlockWithMetadata(entries, parseStructMetadata) {
       case Entry.Attribute(key, dataType, annotations) =>
         attributes.safeInsert(key -> parseAttribute(dataType, annotations)(context :+ key))
     }
 
-    StructBlock(attributes.toMap, metadata)
+    NestedStructBlock(attributes.toMap, metadata)
   }
 
   /**

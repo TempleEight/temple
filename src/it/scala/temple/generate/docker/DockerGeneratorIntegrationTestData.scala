@@ -1,7 +1,7 @@
 package temple.generate.docker
 
 import temple.ast.AttributeType._
-import temple.ast.{Annotation, Attribute, ServiceBlock, StructBlock}
+import temple.ast.{Annotation, Attribute, NestedStructBlock, ServiceBlock}
 
 import scala.collection.immutable.ListMap
 
@@ -23,7 +23,7 @@ object DockerGeneratorIntegrationTestData {
       "image"          -> Attribute(BlobType()),
     ),
     structs = ListMap(
-      "Test" -> StructBlock(
+      "Test" -> NestedStructBlock(
         ListMap(
           "favouriteColour" -> Attribute(StringType(), valueAnnotations = Set(Annotation.Unique)),
           "bedTime"         -> Attribute(TimeType, valueAnnotations = Set(Annotation.Nullable)),

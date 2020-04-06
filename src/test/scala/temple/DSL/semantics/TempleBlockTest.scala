@@ -35,7 +35,7 @@ class TempleBlockTest extends FlatSpec with Matchers {
 
   it should "lookupMetadata in a struct block in a project file" in {
     val projectBlock = ProjectBlock(Seq(Metadata.Database.Postgres))
-    val structBlock  = StructBlock(Map.empty)
+    val structBlock  = NestedStructBlock(Map.empty)
     val serviceBlock = ServiceBlock(Map.empty, Seq(Metadata.ServiceLanguage.Go), Map("Struct" -> structBlock))
 
     Templefile("TestProject", projectBlock, services = Map("Users" -> serviceBlock))

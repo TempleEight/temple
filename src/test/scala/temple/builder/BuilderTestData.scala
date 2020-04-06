@@ -46,7 +46,7 @@ object BuilderTestData {
       "image"          -> Attribute(BlobType()),
     ),
     structs = ListMap(
-      "Test" -> StructBlock(
+      "Test" -> NestedStructBlock(
         ListMap(
           "favouriteColour" -> Attribute(StringType(), valueAnnotations = Set(Annotation.Unique)),
           "bedTime"         -> Attribute(TimeType, valueAnnotations = Set(Annotation.Nullable)),

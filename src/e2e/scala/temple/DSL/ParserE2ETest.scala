@@ -43,7 +43,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
             Uses(Seq("Booking", "SimpleTempleTestGroup")),
           ),
           structs = Map(
-            "Fred" -> StructBlock(
+            "Fred" -> NestedStructBlock(
               Map(
                 "field"  -> Attribute(StringType(), valueAnnotations = Set(Nullable)),
                 "friend" -> Attribute(ForeignKey("SimpleTempleTestUser")),

@@ -60,7 +60,7 @@ private class Validator private (templefile: Templefile) {
   /** Given a service block or a struct block, find a valid name for it (taking into account the clashes from all the
     * languages that are generated from the block), and entering it into the map of renamings. Note that an entry is
     * always inserted into this block, even if the same name is kept. */
-  private def renameBlock(name: String, block: TempleBlock[_]): Unit = {
+  private def renameBlock(name: String, block: StructBlock[_]): Unit = {
     val database = block.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
     if (database == Metadata.Database.Postgres) {
       val newServiceName = constructUniqueName(name, templefile.projectName, allGlobalNames - name)(postgresValidator)
@@ -80,13 +80,17 @@ private class Validator private (templefile: Templefile) {
     ServiceBlock(newAttributes, service.metadata, newStructs)
   }
 
-  private def validateStruct(structName: String, struct: StructBlock, context: SemanticContext): StructBlock = {
+  private def validateStruct(
+    structName: String,
+    struct: NestedStructBlock,
+    context: SemanticContext,
+  ): NestedStructBlock = {
     renameBlock(structName, struct)
 
     val newAttributes = validateAttributes(struct.attributes, context)
     validateMetadata(struct.metadata, context)
 
-    StructBlock(newAttributes, struct.metadata)
+    NestedStructBlock(newAttributes, struct.metadata)
   }
 
   private def validateMetadata(metadata: Seq[Metadata], context: SemanticContext): Unit = {

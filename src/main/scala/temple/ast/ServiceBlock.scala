@@ -6,8 +6,8 @@ import temple.ast.Metadata.ServiceMetadata
 case class ServiceBlock(
   attributes: Map[String, Attribute],
   metadata: Seq[ServiceMetadata] = Nil,
-  structs: Map[String, StructBlock] = Map.empty,
-) extends TempleBlock[ServiceMetadata] {
+  structs: Map[String, NestedStructBlock] = Map.empty,
+) extends StructBlock[ServiceMetadata] {
 
   /**
     * Flatten a service block into a sequence of structs, including the service’s root struct.
@@ -16,8 +16,8 @@ case class ServiceBlock(
     * @return An iterator of pairs of names and struct blocks,
     *         represented as an iterator of pairs of names and attributes
     */
-  def structIterator(rootName: String): Iterator[(String, Map[String, Attribute])] =
-    Iterator((rootName, attributes)) ++ structs.iterator.map { case (str, block) => (str, block.attributes) }
+  def structIterator(rootName: String): Iterator[(String, StructBlock[_])] =
+    Iterator(rootName -> this) ++ structs
 
   /** Set the parent that this Templefile is within */
   override private[temple] def setParent(parent: TempleNode): Unit = {
