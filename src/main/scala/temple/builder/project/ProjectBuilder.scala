@@ -47,8 +47,11 @@ object ProjectBuilder {
         val createStatements: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
         service.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase) match {
           case Database.Postgres =>
-            implicit val dbContext: PostgresContext = PostgresContext(ProjectConfig.defaultPreparedType)
-            val postgresStatements                  = createStatements.map(PostgresGenerator.generate).mkString("", "\n\n", "\n")
+            implicit val dbContext: PostgresContext = PostgresContext(
+              ProjectConfig
+                .preparedType(service.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)),
+            )
+            val postgresStatements = createStatements.map(PostgresGenerator.generate).mkString("", "\n\n", "\n")
             (File(s"${kebabCase(name)}-db", "init.sql"), postgresStatements)
         }
     }

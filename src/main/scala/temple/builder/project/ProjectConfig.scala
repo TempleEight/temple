@@ -10,13 +10,12 @@ object ProjectConfig {
     override def toString: String = image + ":" + version
   }
 
-  val defaultLanguage: ServiceLanguage  = ServiceLanguage.Go
-  val defaultDatabase: Database         = Database.Postgres
-  val defaultAuth: ServiceAuth          = ServiceAuth.Email
-  val defaultPreparedType: PreparedType = PreparedType.DollarNumbers
-  val authPort: Int                     = 1024
-  val authMetricPort: Int               = 1025
-  val serviceStartPort: Int             = 1026
+  val defaultLanguage: ServiceLanguage = ServiceLanguage.Go
+  val defaultDatabase: Database        = Database.Postgres
+  val defaultAuth: ServiceAuth         = ServiceAuth.Email
+  val authPort: Int                    = 1024
+  val authMetricPort: Int              = 1025
+  val serviceStartPort: Int            = 1026
 
   def dockerImage(language: ServiceLanguage): DockerImage = language match {
     case ServiceLanguage.Go => DockerImage("golang", "1.13.7-alpine")
@@ -24,6 +23,10 @@ object ProjectConfig {
 
   def dockerImage(database: Database): DockerImage = database match {
     case Database.Postgres => DockerImage("postgres", "12.1")
+  }
+
+  def preparedType(language: ServiceLanguage): PreparedType = language match {
+    case ServiceLanguage.Go => PreparedType.DollarNumbers
   }
 
   def databaseStorage(database: Database, serviceName: String): DbStorage = database match {
