@@ -23,7 +23,7 @@ import temple.utils.StringUtils._
 
 object ProjectBuilder {
 
-  def endpoints(service: StructBlock[_]): Set[CRUD] = {
+  def endpoints(service: AttributeBlock[_]): Set[CRUD] = {
     val endpoints: Set[CRUD] = service
       .lookupMetadata[Metadata.Omit]
       .map(_.endpoints)

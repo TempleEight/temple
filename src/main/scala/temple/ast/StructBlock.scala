@@ -2,7 +2,8 @@ package temple.ast
 
 import temple.ast.Metadata.StructMetadata
 
-trait StructBlock[M >: StructMetadata <: Metadata] extends TempleBlock[M] {
-  def attributes: Map[String, Attribute]
-  def metadata: Seq[M]
-}
+/** A nested struct within a service, representing a second table/domain in the same datastore */
+case class StructBlock(
+  attributes: Map[String, Attribute],
+  metadata: Seq[StructMetadata] = Nil,
+) extends AttributeBlock[StructMetadata]

@@ -54,7 +54,7 @@ class ValidatorTest extends FlatSpec with Matchers {
               "a" -> Attribute(IntType()),
             ),
             structs = Map(
-              "User" -> NestedStructBlock(Map()),
+              "User" -> StructBlock(Map()),
             ),
           ),
         ),
@@ -74,8 +74,8 @@ class ValidatorTest extends FlatSpec with Matchers {
               "a" -> Attribute(IntType()),
             ),
             structs = Map(
-              "User" -> NestedStructBlock(Map()),
-              "Box"  -> NestedStructBlock(Map()),
+              "User" -> StructBlock(Map()),
+              "Box"  -> StructBlock(Map()),
             ),
           ),
         ),
@@ -215,7 +215,7 @@ class ValidatorTest extends FlatSpec with Matchers {
                 "a" -> Attribute(IntType()),
               ),
               structs = Map(
-                "User" -> NestedStructBlock(Map()),
+                "User" -> StructBlock(Map()),
               ),
             ),
           ),

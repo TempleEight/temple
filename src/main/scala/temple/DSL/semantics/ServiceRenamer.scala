@@ -50,10 +50,10 @@ case class ServiceRenamer(renamingMap: Map[String, String]) {
     case Metadata.ServiceEnumerable  => Metadata.ServiceEnumerable
   }
 
-  private def renameStructBlock(block: NestedStructBlock): NestedStructBlock =
-    NestedStructBlock(renameAttributes(block.attributes), block.metadata.map(renameStructMetadata))
+  private def renameStructBlock(block: StructBlock): StructBlock =
+    StructBlock(renameAttributes(block.attributes), block.metadata.map(renameStructMetadata))
 
-  private def renameStructBlocks(structs: Map[String, NestedStructBlock]): Map[String, NestedStructBlock] =
+  private def renameStructBlocks(structs: Map[String, StructBlock]): Map[String, StructBlock] =
     structs.map { case (name, block) => rename(name) -> renameStructBlock(block) }
 
   private def renameAttributeType(attributeType: AttributeType): AttributeType = attributeType match {

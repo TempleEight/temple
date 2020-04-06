@@ -2,19 +2,18 @@ package temple.ast
 
 import temple.ast.Metadata.{Endpoint, Omit, ServiceMetadata}
 
-sealed trait AbstractServiceBlock extends StructBlock[ServiceMetadata] {
+sealed trait AbstractServiceBlock extends AttributeBlock[ServiceMetadata] {
   def attributes: Map[String, Attribute]
   def metadata: Seq[ServiceMetadata]
-  def structs: Map[String, NestedStructBlock]
+  def structs: Map[String, StructBlock]
 
   /**
     * Flatten a service block into a sequence of structs, including the service's root struct.
     *
     * @param rootName The name of the root struct, typically the name of the service.
-    * @return An iterator of pairs of names and struct blocks,
-    *         represented as an iterator of pairs of names and attributes
+    * @return An iterator of pairs of names and struct blocks
     */
-  def structIterator(rootName: String): Iterator[(String, StructBlock[_])] =
+  def structIterator(rootName: String): Iterator[(String, AttributeBlock[_])] =
     Iterator(rootName -> this) ++ structs
 
   /** Set the parent that this Templefile is within */
@@ -30,7 +29,7 @@ object AbstractServiceBlock {
   case class ServiceBlock(
     attributes: Map[String, Attribute],
     metadata: Seq[ServiceMetadata] = Nil,
-    structs: Map[String, NestedStructBlock] = Map.empty,
+    structs: Map[String, StructBlock] = Map.empty,
   ) extends AbstractServiceBlock
 
   case object AuthServiceBlock extends AbstractServiceBlock {
@@ -41,7 +40,7 @@ object AbstractServiceBlock {
       "password" -> Attribute(AttributeType.StringType()),
     )
 
-    override val metadata                                = Seq(Omit(Set(Endpoint.Update, Endpoint.Delete)))
-    override val structs: Map[String, NestedStructBlock] = Map()
+    override val metadata                          = Seq(Omit(Set(Endpoint.Update, Endpoint.Delete)))
+    override val structs: Map[String, StructBlock] = Map()
   }
 }
