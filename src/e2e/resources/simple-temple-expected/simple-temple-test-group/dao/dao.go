@@ -26,12 +26,14 @@ type DAO struct {
 
 // SimpleTempleTestGroup encapsulates the object stored in the datastore
 type SimpleTempleTestGroup struct {
-	ID uuid.UUID
+	ID        uuid.UUID
+	CreatedBy uuid.UUID
 }
 
 // CreateSimpleTempleTestGroupInput encapsulates the information required to create a single simpleTempleTestGroup in the datastore
 type CreateSimpleTempleTestGroupInput struct {
-	ID uuid.UUID
+	ID     uuid.UUID
+	AuthID uuid.UUID
 }
 
 // ReadSimpleTempleTestGroupInput encapsulates the information required to read a single simpleTempleTestGroup in the datastore
@@ -75,10 +77,10 @@ func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) 
 
 // CreateSimpleTempleTestGroup creates a new simpleTempleTestGroup in the datastore, returning the newly created simpleTempleTestGroup
 func (dao *DAO) CreateSimpleTempleTestGroup(input CreateSimpleTempleTestGroupInput) (*SimpleTempleTestGroup, error) {
-	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO simple_temple_test_group () VALUES ();", input.ID)
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO simple_temple_test_group () VALUES ();", input.ID, input.AuthID)
 
 	var simpleTempleTestGroup SimpleTempleTestGroup
-	err := row.Scan(&simpleTempleTestGroup.ID)
+	err := row.Scan(&simpleTempleTestGroup.ID, &simpleTempleTestGroup.CreatedBy)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +93,7 @@ func (dao *DAO) ReadSimpleTempleTestGroup(input ReadSimpleTempleTestGroupInput) 
 	row := executeQueryWithRowResponse(dao.DB, "SELECT FROM simple_temple_test_group WHERE id = $1;", input.ID)
 
 	var simpleTempleTestGroup SimpleTempleTestGroup
-	err := row.Scan(&simpleTempleTestGroup.ID)
+	err := row.Scan(&simpleTempleTestGroup.ID, &simpleTempleTestGroup.CreatedBy)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
@@ -109,7 +111,7 @@ func (dao *DAO) UpdateSimpleTempleTestGroup(input UpdateSimpleTempleTestGroupInp
 	row := executeQueryWithRowResponse(dao.DB, "UPDATE simple_temple_test_group SET WHERE id = $1;", input.ID)
 
 	var simpleTempleTestGroup SimpleTempleTestGroup
-	err := row.Scan(&simpleTempleTestGroup.ID)
+	err := row.Scan(&simpleTempleTestGroup.ID, &simpleTempleTestGroup.CreatedBy)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
