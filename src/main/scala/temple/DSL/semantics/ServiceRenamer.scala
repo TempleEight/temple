@@ -33,21 +33,21 @@ case class ServiceRenamer(renamingMap: Map[String, String]) {
     // rename any services referenced in #uses
     case Metadata.Uses(services) => Metadata.Uses(services.map(rename))
     // otherwise just return the other metadata, as it contains no service names
-    case language: Metadata.ServiceLanguage     => language
-    case database: Metadata.Database            => database
-    case readable: Metadata.Readable            => readable
-    case writable: Metadata.Writable            => writable
-    case omit: Metadata.Omit                    => omit
-    case auth: Metadata.ServiceAuth             => auth
-    case enumerable: Metadata.ServiceEnumerable => enumerable
+    case language: Metadata.ServiceLanguage => language
+    case database: Metadata.Database        => database
+    case readable: Metadata.Readable        => readable
+    case writable: Metadata.Writable        => writable
+    case omit: Metadata.Omit                => omit
+    case auth: Metadata.ServiceAuth         => auth
+    case Metadata.ServiceEnumerable         => Metadata.ServiceEnumerable
   }
 
   def renameStructMetadata(metadata: Metadata.StructMetadata): Metadata.StructMetadata = metadata match {
     // currently `identity`, as no metadata contains a service name
-    case readable: Metadata.Readable            => readable
-    case writable: Metadata.Writable            => writable
-    case omit: Metadata.Omit                    => omit
-    case enumerable: Metadata.ServiceEnumerable => enumerable
+    case readable: Metadata.Readable => readable
+    case writable: Metadata.Writable => writable
+    case omit: Metadata.Omit         => omit
+    case Metadata.ServiceEnumerable  => Metadata.ServiceEnumerable
   }
 
   private def renameStructBlock(block: NestedStructBlock): NestedStructBlock =

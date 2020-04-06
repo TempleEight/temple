@@ -38,11 +38,13 @@ class ProjectBuilderTest extends FlatSpec with FileMatchers {
   }
 
   it should "use postgres when defined at the project level" in {
-    projectFilesShouldMatch(
-      ProjectBuilder.build(
-        ProjectBuilderTestData.simpleTemplefilePostgresProject,
-        GoLanguageDetail("github.com/squat/and/dab"),
-      ),
+    filesShouldMatch(
+      ProjectBuilder
+        .build(
+          ProjectBuilderTestData.simpleTemplefilePostgresProject,
+          GoLanguageDetail("github.com/squat/and/dab"),
+        )
+        .files,
       Map(
         File("temple-user-db", "init.sql")                          -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("temple-user", "Dockerfile")                           -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,
@@ -69,9 +71,10 @@ class ProjectBuilderTest extends FlatSpec with FileMatchers {
   }
 
   it should "use postgres when defined at the service level" in {
-    projectFilesShouldMatch(
+    filesShouldMatch(
       ProjectBuilder
-        .build(ProjectBuilderTestData.simpleTemplefilePostgresService, GoLanguageDetail("github.com/squat/and/dab")),
+        .build(ProjectBuilderTestData.simpleTemplefilePostgresService, GoLanguageDetail("github.com/squat/and/dab"))
+        .files,
       Map(
         File("temple-user-db", "init.sql")                          -> ProjectBuilderTestData.simpleTemplefilePostgresCreateOutput,
         File("temple-user", "Dockerfile")                           -> ProjectBuilderTestData.simpleTemplefileUsersDockerfile,

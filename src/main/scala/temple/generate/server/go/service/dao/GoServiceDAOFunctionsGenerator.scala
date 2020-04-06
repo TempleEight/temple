@@ -39,8 +39,9 @@ object GoServiceDAOFunctionsGenerator {
     val prefix  = "input"
     lazy val id = Seq(s"$prefix.${root.idAttribute.name.toUpperCase}")
     lazy val createdBy = root.createdByAttribute match {
-      case Some(CreatedByAttribute(inputName, _, true)) => Seq(s"$prefix.${inputName.capitalize}")
-      case _                                            => Seq.empty
+      // TODO: Fix this behaviour
+      case Some(CreatedByAttribute(inputName, _)) => Seq(s"$prefix.${inputName.capitalize}")
+      case _                                      => Seq.empty
     }
     lazy val filteredAttributes = root.attributes.collect {
       case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.ServerSet) =>

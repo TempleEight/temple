@@ -26,12 +26,14 @@ type DAO struct {
 
 // Booking encapsulates the object stored in the datastore
 type Booking struct {
-	ID uuid.UUID
+	ID        uuid.UUID
+	CreatedBy uuid.UUID
 }
 
 // CreateBookingInput encapsulates the information required to create a single booking in the datastore
 type CreateBookingInput struct {
-	ID uuid.UUID
+	ID     uuid.UUID
+	AuthID uuid.UUID
 }
 
 // ReadBookingInput encapsulates the information required to read a single booking in the datastore
@@ -75,10 +77,10 @@ func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) 
 
 // CreateBooking creates a new booking in the datastore, returning the newly created booking
 func (dao *DAO) CreateBooking(input CreateBookingInput) (*Booking, error) {
-	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO booking () VALUES ();", input.ID)
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO booking () VALUES ();", input.ID, input.AuthID)
 
 	var booking Booking
-	err := row.Scan(&booking.ID)
+	err := row.Scan(&booking.ID, &booking.CreatedBy)
 	if err != nil {
 		return nil, err
 	}
@@ -91,7 +93,7 @@ func (dao *DAO) ReadBooking(input ReadBookingInput) (*Booking, error) {
 	row := executeQueryWithRowResponse(dao.DB, "SELECT FROM booking WHERE id = $1;", input.ID)
 
 	var booking Booking
-	err := row.Scan(&booking.ID)
+	err := row.Scan(&booking.ID, &booking.CreatedBy)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
@@ -109,7 +111,7 @@ func (dao *DAO) UpdateBooking(input UpdateBookingInput) (*Booking, error) {
 	row := executeQueryWithRowResponse(dao.DB, "UPDATE booking SET WHERE id = $1;", input.ID)
 
 	var booking Booking
-	err := row.Scan(&booking.ID)
+	err := row.Scan(&booking.ID, &booking.CreatedBy)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:

@@ -2,7 +2,7 @@ package temple.builder
 
 import temple.ast.AttributeType.ForeignKey
 import temple.ast.Metadata.{Database, ServiceAuth, ServiceEnumerable, ServiceLanguage}
-import temple.ast._
+import temple.ast.{Metadata, _}
 import temple.builder.project.LanguageConfig.GoLanguageConfig
 import temple.builder.project.ProjectConfig
 import temple.detail.LanguageDetail
@@ -30,26 +30,31 @@ object ServerBuilder {
       case ServiceLanguage.Go => GoLanguageConfig
     }
 
-    val createdBy: Option[CreatedByAttribute] = serviceBlock.lookupMetadata[ServiceEnumerable].map {
-      case ServiceEnumerable(byThis) =>
-        CreatedByAttribute(
-          languageConfig.createdByInputName,
-          languageConfig.createdByName,
-          filterEnumeration = byThis,
-        )
-    }
+    // Whether or not this service has an auth block
+    val hasAuthBlock = serviceBlock.lookupLocalMetadata[ServiceAuth].isDefined
+
+    // The created by attribute exists if the project has auth and this service does not have an auth block
+    val createdBy =
+      if (projectUsesAuth && !hasAuthBlock)
+        Some(CreatedByAttribute(languageConfig.createdByInputName, languageConfig.createdByName))
+      else None
 
     val idAttribute = IDAttribute("id")
 
+    val readable =
+      serviceBlock.lookupLocalMetadata[Metadata.Readable].getOrElse(ProjectConfig.getDefaultReadable(projectUsesAuth))
+    val writable =
+      serviceBlock.lookupLocalMetadata[Metadata.Writable].getOrElse(ProjectConfig.getDefaultWritable(projectUsesAuth))
+
     val queries: ListMap[CRUD, String] =
       DatabaseBuilder
-        .buildQuery(serviceName, serviceBlock.attributes, endpoints, createdBy, selectionAttribute = idAttribute.name)
+        .buildQuery(serviceName, serviceBlock.attributes, endpoints, readable, selectionAttribute = idAttribute.name)
         .map {
           case (crud, statement) =>
             crud -> (database match {
               case Database.Postgres =>
-                implicit val context
-                  : PostgresContext = PostgresContext(PreparedType.DollarNumbers) //TODO: Does this need to change with server lang?
+                //TODO: Does this need to change with server lang?
+                implicit val context: PostgresContext = PostgresContext(PreparedType.DollarNumbers)
                 PostgresGenerator.generate(statement)
             })
         }
@@ -62,11 +67,6 @@ object ServerBuilder {
     val comms: Seq[String] = serviceBlock.attributes.collect {
       case (_, Attribute(x: ForeignKey, _, _)) => x.references
     }.toSeq
-
-    val readable =
-      serviceBlock.lookupLocalMetadata[Metadata.Readable].getOrElse(ProjectConfig.getDefaultReadable(projectUsesAuth))
-    val writable =
-      serviceBlock.lookupLocalMetadata[Metadata.Writable].getOrElse(ProjectConfig.getDefaultWritable(projectUsesAuth))
 
     ServiceRoot(
       serviceName,
@@ -108,7 +108,6 @@ object ServerBuilder {
               "auth",
               attributes,
               Set(Create, Read),
-              None,
               selectionAttribute = "email",
             )
           val createQuery = PostgresGenerator.generate(queries(Create))

@@ -96,7 +96,7 @@ object Metadata {
     case object Email extends ServiceAuth("email")
   }
 
-  case class ServiceEnumerable(byThis: Boolean = false) extends StructMetadata
-  case class Uses(services: Seq[String])                extends ServiceMetadata
-
+  type ServiceEnumerable = ServiceEnumerable.type
+  case object ServiceEnumerable          extends StructMetadata
+  case class Uses(services: Seq[String]) extends ServiceMetadata
 }

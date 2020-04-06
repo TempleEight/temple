@@ -28,6 +28,6 @@ class SimpleE2ETest extends FlatSpec with FileMatchers {
 
     val expected = E2ETestUtils.buildFileMap(Paths.get("src/e2e/resources/simple-temple-expected"))
     val found    = E2ETestUtils.buildFileMap(basePath)
-    filesShouldMatch(expected, found)
+    filesShouldMatch(found, expected)
   }
 }
