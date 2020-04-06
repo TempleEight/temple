@@ -1,7 +1,7 @@
 package temple.builder
 
 import temple.ast.Annotation.Nullable
-import temple.ast.{Annotation, Attribute, AttributeType, GeneratedBlock, ServiceBlock}
+import temple.ast.{AbstractServiceBlock, Annotation, Attribute, AttributeType}
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
 import temple.generate.database.ast.ColumnConstraint.Check
 import temple.generate.database.ast.Condition.PreparedComparison
@@ -109,7 +109,7 @@ object DatabaseBuilder {
     * @param service     The ServiceBlock to generate
     * @return the associated create statement
     */
-  def createServiceTables(serviceName: String, service: GeneratedBlock): Seq[Statement.Create] = {
+  def createServiceTables(serviceName: String, service: AbstractServiceBlock): Seq[Statement.Create] = {
     service.structIterator(serviceName).map {
       case (tableName, attributes) =>
         val columns = attributes.map { case (name, attributes) => toColDef(name, attributes) }

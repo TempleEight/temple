@@ -17,7 +17,7 @@ object ServerBuilder {
 
   def buildServiceRoot(
     serviceName: String,
-    serviceBlock: GeneratedBlock,
+    serviceBlock: AbstractServiceBlock,
     port: Int,
     endpoints: Set[CRUD],
     detail: LanguageDetail,

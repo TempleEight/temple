@@ -1,5 +1,6 @@
 package temple.DSL.semantics
 
+import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
 import temple.ast.{Metadata, _}
 

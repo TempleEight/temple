@@ -1,5 +1,6 @@
 package temple.builder.project
 
+import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
 import temple.ast.Metadata.{Database, ServiceAuth}
 import temple.ast._

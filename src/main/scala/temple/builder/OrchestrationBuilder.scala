@@ -1,7 +1,7 @@
 package temple.builder
 
 import temple.ast.Metadata.Database
-import temple.ast.{GeneratedBlock, Metadata, ServiceBlock}
+import temple.ast.{AbstractServiceBlock, Metadata}
 import temple.builder.project.ProjectConfig
 import temple.generate.kube.ast.OrchestrationType.{OrchestrationRoot, Service}
 import temple.generate.kube.ast.gen.LifecycleCommand
@@ -11,7 +11,7 @@ object OrchestrationBuilder {
 
   def createServiceOrchestrationRoot(
     projectName: String,
-    services: Seq[(String, GeneratedBlock, Int)],
+    services: Seq[(String, AbstractServiceBlock, Int)],
   ): OrchestrationRoot =
     OrchestrationRoot(
       services map {

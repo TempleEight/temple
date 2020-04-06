@@ -1,5 +1,6 @@
 package temple.builder.project
 
+import temple.ast.AbstractServiceBlock._
 import temple.ast.Metadata._
 import temple.ast._
 import temple.builder._

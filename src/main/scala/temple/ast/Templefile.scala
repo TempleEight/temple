@@ -1,5 +1,6 @@
 package temple.ast
 
+import temple.ast.AbstractServiceBlock._
 import temple.ast.Templefile.Ports
 import temple.builder.project.ProjectConfig
 
@@ -10,7 +11,7 @@ case class Templefile(
   projectName: String,
   projectBlock: ProjectBlock = ProjectBlock(),
   targets: Map[String, TargetBlock] = Map(),
-  var services: Map[String, GeneratedBlock] = Map(),
+  var services: Map[String, AbstractServiceBlock] = Map(),
 ) extends TempleNode {
   // Inform every child node of their parent, so that they can access the project information
   for (block <- Iterator(projectBlock) ++ targets.valuesIterator ++ services.valuesIterator) {
@@ -19,13 +20,13 @@ case class Templefile(
 
   /**
     * The services provided in the templefile, i.e the ServiceBlocks, not the AuthServiceBlocks
-    * @return
+    * @return Map of service name to service blocks that appear in Templefile
     */
   def providedServices: Map[String, ServiceBlock] = services.collect {
     case (name: String, service: ServiceBlock) => name -> service
   }
 
-  def allServicesWithPorts: Iterable[(String, GeneratedBlock, Ports)] =
+  def allServicesWithPorts: Iterable[(String, AbstractServiceBlock, Ports)] =
     services
       .zip(Iterator.from(ProjectConfig.serviceStartPort, step = 2)) // 1024 is reserved for auth service
       .map {
@@ -42,7 +43,7 @@ case class Templefile(
     * @param name - the name of the new service
     * @param block - the [[ServiceBlock]] to add
     */
-  def addService(name: String, block: GeneratedBlock): Unit = {
+  def addService(name: String, block: AbstractServiceBlock): Unit = {
     block.setParent(this)
     services += name -> block
   }
