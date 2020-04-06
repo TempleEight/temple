@@ -27,6 +27,7 @@ object GoGeneratorIntegrationTestData {
     readable = Readable.All,
     writable = Writable.This,
     projectUsesAuth = true,
+    hasAuthBlock = true,
   )
 
   val simpleServiceRootWithComms: ServiceRoot = ServiceRoot(
@@ -52,5 +53,6 @@ object GoGeneratorIntegrationTestData {
     readable = Readable.This,
     writable = Writable.This,
     projectUsesAuth = true,
+    hasAuthBlock = false,
   )
 }

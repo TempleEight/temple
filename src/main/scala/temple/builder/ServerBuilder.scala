@@ -81,6 +81,7 @@ object ServerBuilder {
       readable = readable,
       writable = writable,
       projectUsesAuth = projectUsesAuth,
+      hasAuthBlock = hasAuthBlock,
     )
   }
 

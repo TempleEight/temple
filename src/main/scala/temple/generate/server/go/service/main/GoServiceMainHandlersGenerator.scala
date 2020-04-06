@@ -155,14 +155,13 @@ object GoServiceMainHandlersGenerator {
     operations: Set[CRUD],
     clientAttributes: ListMap[String, Attribute],
     usesComms: Boolean,
-    hasAuthBlock: Boolean,
     enumeratingByCreator: Boolean,
   ): String = {
     val responseMap = generateResponseMap(root)
     mkCode.doubleLines(
       operations.toSeq.sorted.map {
         case List   => generateListHandler(root, responseMap, enumeratingByCreator)
-        case Create => generateCreateHandler(root, clientAttributes, usesComms, hasAuthBlock, responseMap)
+        case Create => generateCreateHandler(root, clientAttributes, usesComms, responseMap)
         case Read   => generateReadHandler(root)
         case Update => generateUpdateHandler(root)
         case Delete => generateDeleteHandler(root)

@@ -30,6 +30,7 @@ object GoServiceGeneratorTestData {
     readable = Readable.All,
     writable = Writable.This,
     projectUsesAuth = true,
+    hasAuthBlock = true,
   )
 
   val simpleServiceFiles: Files = Map(
@@ -76,6 +77,7 @@ object GoServiceGeneratorTestData {
       readable = Readable.This,
       writable = Writable.This,
       projectUsesAuth = true,
+      hasAuthBlock = false,
     )
 
   val simpleServiceFilesWithComms: Files = Map(

@@ -34,9 +34,6 @@ object GoServiceGenerator extends ServiceGenerator {
         attr.accessAnnotation.contains(Annotation.Server) || attr.accessAnnotation.contains(Annotation.ServerSet)
     }
 
-    // Whether or not this service has an auth block
-    val hasAuthBlock = root.createdByAttribute.isEmpty
-
     // Whether or not this service is enumerating by creator
     lazy val enumeratingByCreator = root.readable match {
       case Readable.All  => false
@@ -57,7 +54,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonMainGenerator.generateMain(root, root.port, usesComms, isAuth = false),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoServiceMainHandlersGenerator
-          .generateHandlers(root, operations, clientAttributes, usesComms, hasAuthBlock, enumeratingByCreator),
+          .generateHandlers(root, operations, clientAttributes, usesComms, enumeratingByCreator),
       ),
       File(root.kebabName, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
