@@ -1,15 +1,15 @@
 package temple.builder
 
 import temple.ast.Annotation.Nullable
-import temple.ast.{AbstractServiceBlock, Annotation, Attribute, AttributeType}
+import temple.ast._
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
 import temple.generate.database.ast.ColumnConstraint.Check
 import temple.generate.database.ast.Condition.PreparedComparison
 import temple.generate.database.ast.Expression.PreparedValue
 import temple.generate.database.ast._
-import temple.generate.server.CreatedByAttribute
 import temple.utils.StringUtils
 
+import scala.Option.when
 import scala.collection.immutable.ListMap
 
 /** Construct database queries from a Templefile structure */
@@ -22,7 +22,7 @@ object DatabaseBuilder {
   }
 
   private def toColDef(name: String, attribute: Attribute): ColumnDef = {
-    val nonNullConstraint = Option.when(!attribute.valueAnnotations.contains(Nullable)) { ColumnConstraint.NonNull }
+    val nonNullConstraint = when(!attribute.valueAnnotations.contains(Nullable)) { ColumnConstraint.NonNull }
 
     val valueConstraints = attribute.valueAnnotations.flatMap {
         case Annotation.Unique   => Some(ColumnConstraint.Unique)
@@ -53,7 +53,7 @@ object DatabaseBuilder {
     serviceName: String,
     attributes: Map[String, Attribute],
     endpoints: Set[CRUD],
-    createdByAttribute: Option[CreatedByAttribute],
+    readable: Metadata.Readable = Metadata.Readable.This,
     selectionAttribute: String = "id",
   ): ListMap[CRUD, Statement] = {
     val tableName = StringUtils.snakeCase(serviceName)
@@ -88,6 +88,9 @@ object DatabaseBuilder {
           List -> Statement.Read(
             tableName,
             columns = columns,
+            condition = when(readable == Metadata.Readable.This) {
+              PreparedComparison("created_by", ComparisonOperator.Equal)
+            },
           )
       },
     )
