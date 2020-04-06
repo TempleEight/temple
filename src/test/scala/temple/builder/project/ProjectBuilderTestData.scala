@@ -101,19 +101,28 @@ object ProjectBuilderTestData {
   val simpleTemplefileKubeDbService: String =
     FileUtils.readResources("project-builder-simple/kube/temple-user/db-service.yaml")
 
-  val simpleTemplefileConfigureKong: String    = FileUtils.readResources("project-builder-simple/kong/configure-kong.sh")
-  val simpleTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/temple-user.json").stripLineEnd
+  val simpleTemplefileConfigureKong: String = FileUtils.readResources("project-builder-simple/kong/configure-kong.sh")
+
+  val simpleTemplefileGrafanaDashboard: String =
+    FileUtils.readResources("project-builder-simple/grafana/provisioning/dashboards/temple-user.json").stripLineEnd
 
   val simpleTemplefileGrafanaDashboardConfig: String =
     FileUtils.readResources("project-builder-simple/grafana/provisioning/dashboards/dashboards.yml")
 
-  val simpleTemplefileTempleUserGoFile: String = FileUtils.readResources("go/simple-user/simple-user.go.snippet")
-  val simpleTemplefileHookGoFile: String       = FileUtils.readResources("go/simple-user/hook.go.snippet")
-  val simpleTemplefileGoModFile: String        = FileUtils.readResources("go/simple-user/go.mod.snippet")
-  val simpleTemplefileDaoFile: String          = FileUtils.readResources("go/simple-user/dao/dao.go.snippet")
-  val simpleTemplefileErrorsFile: String       = FileUtils.readResources("go/simple-user/dao/errors.go.snippet")
-  val simpleTemplefileUtilFile: String         = FileUtils.readResources("go/simple-user/util/util.go.snippet")
-  val simpleTemplefileMetricFile: String       = FileUtils.readResources("go/simple-user/metric/metric.go.snippet")
+  val simpleTemplefileTempleUserGoFile: String =
+    FileUtils.readResources("project-builder-simple/temple-user/temple-user.go")
+  val simpleTemplefileHookGoFile: String = FileUtils.readResources("project-builder-simple/temple-user/hook.go")
+  val simpleTemplefileGoModFile: String  = FileUtils.readResources("project-builder-simple/temple-user/go.mod")
+  val simpleTemplefileDaoFile: String    = FileUtils.readResources("project-builder-simple/temple-user/dao/dao.go")
+
+  val simpleTemplefileErrorsFile: String =
+    FileUtils.readResources("project-builder-simple/temple-user/dao/errors.go")
+
+  val simpleTemplefileUtilFile: String =
+    FileUtils.readResources("project-builder-simple/temple-user/util/util.go")
+
+  val simpleTemplefileMetricFile: String =
+    FileUtils.readResources("project-builder-simple/temple-user/metric/metric.go")
 
   val simpleTemplefileGrafanaDatasourceConfig: String =
     FileUtils.readResources("project-builder-simple/grafana/provisioning/datasources/datasource.yml")
@@ -148,28 +157,52 @@ object ProjectBuilderTestData {
   val complexTemplefileConfigureKong: String =
     FileUtils.readResources("project-builder-complex/kong/configure-kong.sh")
 
-  val complexTemplefileGrafanaDashboard: String     = FileUtils.readResources("grafana/complex-user.json").init
-  val complexTemplefileAuthGrafanaDashboard: String = FileUtils.readResources("grafana/auth.json").init
+  val complexTemplefileGrafanaDashboard: String =
+    FileUtils.readResources("project-builder-complex/grafana/provisioning/dashboards/complex-user.json").init
+
+  val complexTemplefileAuthGrafanaDashboard: String =
+    FileUtils.readResources("project-builder-complex/grafana/provisioning/dashboards/auth.json").init
 
   val complexTemplefileGrafanaDashboardConfig: String =
     FileUtils.readResources("project-builder-complex/grafana/provisioning/dashboards/dashboards.yml")
 
-  val complexTemplefileTempleUserGoFile: String = FileUtils.readResources("go/complex-user/complex-user.go.snippet")
-  val complexTemplefileHookGoFile: String       = FileUtils.readResources("go/complex-user/hook.go.snippet")
-  val complexTemplefileGoModFile: String        = FileUtils.readResources("go/complex-user/go.mod.snippet")
-  val complexTemplefileDaoFile: String          = FileUtils.readResources("go/complex-user/dao/dao.go.snippet")
-  val complexTemplefileErrorsFile: String       = FileUtils.readResources("go/complex-user/dao/errors.go.snippet")
-  val complexTemplefileUtilFile: String         = FileUtils.readResources("go/complex-user/util/util.go.snippet")
-  val complexTemplefileMetricFile: String       = FileUtils.readResources("go/complex-user/metric/metric.go.snippet")
+  val complexTemplefileTempleUserGoFile: String =
+    FileUtils.readResources("project-builder-complex/complex-user/complex-user.go.snippet")
 
-  val complexTemplefileAuthGoFile: String      = FileUtils.readResources("go/auth/auth.go.snippet")
-  val complexTemplefileAuthHookGoFile: String  = FileUtils.readResources("go/auth/hook.go.snippet")
-  val complexTemplefileAuthGoModFile: String   = FileUtils.readResources("go/auth/go.mod.snippet")
-  val complexTemplefileAuthUtilFile: String    = FileUtils.readResources("go/auth/util/util.go.snippet")
-  val complexTemplefileAuthDaoFile: String     = FileUtils.readResources("go/auth/dao/dao.go.snippet")
-  val complexTemplefileAuthErrorsFile: String  = FileUtils.readResources("go/auth/dao/errors.go.snippet")
-  val complexTemplefileAuthHandlerFile: String = FileUtils.readResources("go/auth/comm/handler.go.snippet")
-  val complexTemplefileAuthMetricFile: String  = FileUtils.readResources("go/auth/metric/metric.go.snippet")
+  val complexTemplefileHookGoFile: String =
+    FileUtils.readResources("project-builder-complex/complex-user/hook.go.snippet")
+
+  val complexTemplefileGoModFile: String =
+    FileUtils.readResources("project-builder-complex/complex-user/go.mod.snippet")
+
+  val complexTemplefileDaoFile: String =
+    FileUtils.readResources("project-builder-complex/complex-user/dao/dao.go.snippet")
+
+  val complexTemplefileErrorsFile: String =
+    FileUtils.readResources("project-builder-complex/complex-user/dao/errors.go.snippet")
+
+  val complexTemplefileUtilFile: String =
+    FileUtils.readResources("project-builder-complex/complex-user/util/util.go.snippet")
+
+  val complexTemplefileMetricFile: String =
+    FileUtils.readResources("project-builder-complex/complex-user/metric/metric.go.snippet")
+
+  val complexTemplefileAuthGoFile: String     = FileUtils.readResources("project-builder-complex/auth/auth.go.snippet")
+  val complexTemplefileAuthHookGoFile: String = FileUtils.readResources("project-builder-complex/auth/hook.go.snippet")
+  val complexTemplefileAuthGoModFile: String  = FileUtils.readResources("project-builder-complex/auth/go.mod.snippet")
+
+  val complexTemplefileAuthUtilFile: String =
+    FileUtils.readResources("project-builder-complex/auth/util/util.go.snippet")
+  val complexTemplefileAuthDaoFile: String = FileUtils.readResources("project-builder-complex/auth/dao/dao.go.snippet")
+
+  val complexTemplefileAuthErrorsFile: String =
+    FileUtils.readResources("project-builder-complex/auth/dao/errors.go.snippet")
+
+  val complexTemplefileAuthHandlerFile: String =
+    FileUtils.readResources("project-builder-complex/auth/comm/handler.go.snippet")
+
+  val complexTemplefileAuthMetricFile: String =
+    FileUtils.readResources("project-builder-complex/auth/metric/metric.go.snippet")
 
   val complexTemplefileGrafanaDatasourceConfig: String =
     FileUtils.readResources("project-builder-complex/grafana/provisioning/datasources/datasource.yml")
@@ -183,9 +216,18 @@ object ProjectBuilderTestData {
   val complexTemplefileAuthDockerfile: String =
     FileUtils.readResources("project-builder-complex/auth/Dockerfile")
 
-  val complexTemplefileAuthKubeDeployment: String   = FileUtils.readResources("kube/auth/auth-deployment.yaml")
-  val complexTemplefileAuthKubeService: String      = FileUtils.readResources("kube/auth/auth-service.yaml")
-  val complexTemplefileAuthKubeDbDeployment: String = FileUtils.readResources("kube/auth/auth-db-deployment.yaml")
-  val complexTemplefileAuthKubeDbService: String    = FileUtils.readResources("kube/auth/auth-db-service.yaml")
-  val complexTemplefileAuthKubeDbStorage: String    = FileUtils.readResources("kube/auth/auth-db-storage.yaml")
+  val complexTemplefileAuthKubeDeployment: String =
+    FileUtils.readResources("project-builder-complex/kube/auth/deployment.yaml")
+
+  val complexTemplefileAuthKubeService: String =
+    FileUtils.readResources("project-builder-complex/kube/auth/service.yaml")
+
+  val complexTemplefileAuthKubeDbDeployment: String =
+    FileUtils.readResources("project-builder-complex/kube/auth/db-deployment.yaml")
+
+  val complexTemplefileAuthKubeDbService: String =
+    FileUtils.readResources("project-builder-complex/kube/auth/db-service.yaml")
+
+  val complexTemplefileAuthKubeDbStorage: String =
+    FileUtils.readResources("project-builder-complex/kube/auth/db-storage.yaml")
 }
