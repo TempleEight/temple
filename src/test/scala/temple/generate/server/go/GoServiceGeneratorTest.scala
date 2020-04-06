@@ -1,17 +1,24 @@
 package temple.generate.server.go
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.FlatSpec
+import temple.generate.FileMatchers
 import temple.generate.server.go.service.GoServiceGenerator
 
-class GoServiceGeneratorTest extends FlatSpec with Matchers {
+class GoServiceGeneratorTest extends FlatSpec with FileMatchers {
 
   behavior of "GoServiceGenerator"
 
   it should "generate simple services correctly" in {
-    GoServiceGenerator.generate(GoServiceGeneratorTestData.simpleServiceRoot) shouldBe GoServiceGeneratorTestData.simpleServiceFiles
+    filesShouldMatch(
+      GoServiceGenerator.generate(GoServiceGeneratorTestData.simpleServiceRoot),
+      GoServiceGeneratorTestData.simpleServiceFiles,
+    )
   }
 
   it should "generate simple services with inter-service communication correctly" in {
-    GoServiceGenerator.generate(GoServiceGeneratorTestData.simpleServiceRootWithComms) shouldBe GoServiceGeneratorTestData.simpleServiceFilesWithComms
+    filesShouldMatch(
+      GoServiceGenerator.generate(GoServiceGeneratorTestData.simpleServiceRootWithComms),
+      GoServiceGeneratorTestData.simpleServiceFilesWithComms,
+    )
   }
 }

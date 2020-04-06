@@ -56,12 +56,12 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "rate(templeuser_request_success_total{request_type=\"create\"}[5m])",
+          "expr" : "rate(simpletempletestuser_request_success_total{request_type=\"create\"}[5m])",
           "legendFormat" : "Success",
           "refId" : "A"
         },
         {
-          "expr" : "rate(templeuser_request_failure_total{request_type=\"create\"}[5m])",
+          "expr" : "rate(simpletempletestuser_request_failure_total{request_type=\"create\"}[5m])",
           "legendFormat" : "{{error_code}}",
           "refId" : "B"
         }
@@ -72,7 +72,7 @@
       "timeRegions" : [
       ],
       "timeShift" : null,
-      "title" : "Create TempleUser Requests",
+      "title" : "Create SimpleTempleTestUser Requests",
       "tooltip" : {
         "shared" : true,
         "sort" : 0,
@@ -156,22 +156,22 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.5\",query_type=\"create\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.5\",query_type=\"create\"}",
           "legendFormat" : "50th Percentile",
           "refId" : "A"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.9\",query_type=\"create\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.9\",query_type=\"create\"}",
           "legendFormat" : "90th Percentile",
           "refId" : "B"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.95\",query_type=\"create\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.95\",query_type=\"create\"}",
           "legendFormat" : "95th Percentile",
           "refId" : "C"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.99\",query_type=\"create\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.99\",query_type=\"create\"}",
           "legendFormat" : "99th Percentile",
           "refId" : "D"
         }
@@ -266,12 +266,12 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "rate(templeuser_request_success_total{request_type=\"read\"}[5m])",
+          "expr" : "rate(simpletempletestuser_request_success_total{request_type=\"read\"}[5m])",
           "legendFormat" : "Success",
           "refId" : "A"
         },
         {
-          "expr" : "rate(templeuser_request_failure_total{request_type=\"read\"}[5m])",
+          "expr" : "rate(simpletempletestuser_request_failure_total{request_type=\"read\"}[5m])",
           "legendFormat" : "{{error_code}}",
           "refId" : "B"
         }
@@ -282,7 +282,7 @@
       "timeRegions" : [
       ],
       "timeShift" : null,
-      "title" : "Read TempleUser Requests",
+      "title" : "Read SimpleTempleTestUser Requests",
       "tooltip" : {
         "shared" : true,
         "sort" : 0,
@@ -366,22 +366,22 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.5\",query_type=\"read\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.5\",query_type=\"read\"}",
           "legendFormat" : "50th Percentile",
           "refId" : "A"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.9\",query_type=\"read\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.9\",query_type=\"read\"}",
           "legendFormat" : "90th Percentile",
           "refId" : "B"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.95\",query_type=\"read\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.95\",query_type=\"read\"}",
           "legendFormat" : "95th Percentile",
           "refId" : "C"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.99\",query_type=\"read\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.99\",query_type=\"read\"}",
           "legendFormat" : "99th Percentile",
           "refId" : "D"
         }
@@ -476,12 +476,12 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "rate(templeuser_request_success_total{request_type=\"update\"}[5m])",
+          "expr" : "rate(simpletempletestuser_request_success_total{request_type=\"update\"}[5m])",
           "legendFormat" : "Success",
           "refId" : "A"
         },
         {
-          "expr" : "rate(templeuser_request_failure_total{request_type=\"update\"}[5m])",
+          "expr" : "rate(simpletempletestuser_request_failure_total{request_type=\"update\"}[5m])",
           "legendFormat" : "{{error_code}}",
           "refId" : "B"
         }
@@ -492,7 +492,7 @@
       "timeRegions" : [
       ],
       "timeShift" : null,
-      "title" : "Update TempleUser Requests",
+      "title" : "Update SimpleTempleTestUser Requests",
       "tooltip" : {
         "shared" : true,
         "sort" : 0,
@@ -576,22 +576,22 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.5\",query_type=\"update\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.5\",query_type=\"update\"}",
           "legendFormat" : "50th Percentile",
           "refId" : "A"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.9\",query_type=\"update\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.9\",query_type=\"update\"}",
           "legendFormat" : "90th Percentile",
           "refId" : "B"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.95\",query_type=\"update\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.95\",query_type=\"update\"}",
           "legendFormat" : "95th Percentile",
           "refId" : "C"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.99\",query_type=\"update\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.99\",query_type=\"update\"}",
           "legendFormat" : "99th Percentile",
           "refId" : "D"
         }
@@ -686,12 +686,12 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "rate(templeuser_request_success_total{request_type=\"list\"}[5m])",
+          "expr" : "rate(simpletempletestuser_request_success_total{request_type=\"list\"}[5m])",
           "legendFormat" : "Success",
           "refId" : "A"
         },
         {
-          "expr" : "rate(templeuser_request_failure_total{request_type=\"list\"}[5m])",
+          "expr" : "rate(simpletempletestuser_request_failure_total{request_type=\"list\"}[5m])",
           "legendFormat" : "{{error_code}}",
           "refId" : "B"
         }
@@ -702,7 +702,7 @@
       "timeRegions" : [
       ],
       "timeShift" : null,
-      "title" : "List TempleUser Requests",
+      "title" : "List SimpleTempleTestUser Requests",
       "tooltip" : {
         "shared" : true,
         "sort" : 0,
@@ -786,22 +786,22 @@
       "steppedLine" : false,
       "targets" : [
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.5\",query_type=\"list\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.5\",query_type=\"list\"}",
           "legendFormat" : "50th Percentile",
           "refId" : "A"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.9\",query_type=\"list\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.9\",query_type=\"list\"}",
           "legendFormat" : "90th Percentile",
           "refId" : "B"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.95\",query_type=\"list\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.95\",query_type=\"list\"}",
           "legendFormat" : "95th Percentile",
           "refId" : "C"
         },
         {
-          "expr" : "templeuser_database_request_seconds{quantile=\"0.99\",query_type=\"list\"}",
+          "expr" : "simpletempletestuser_database_request_seconds{quantile=\"0.99\",query_type=\"list\"}",
           "legendFormat" : "99th Percentile",
           "refId" : "D"
         }
@@ -879,7 +879,7 @@
     ]
   },
   "timezone" : "",
-  "title" : "TempleUser Dashboard",
-  "uid" : "templeuser",
+  "title" : "SimpleTempleTestUser Dashboard",
+  "uid" : "simple-temple-test-user",
   "version" : 1
 }

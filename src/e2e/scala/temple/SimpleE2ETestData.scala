@@ -5,8 +5,8 @@ import temple.utils.FileUtils
 object SimpleE2ETestData {
 
   val createStatement: String =
-    """CREATE TABLE temple_user (
-      |  username TEXT NOT NULL,
+    """CREATE TABLE simple_temple_test_user (
+      |  simpleTempleTestUser TEXT NOT NULL,
       |  email VARCHAR(40) CHECK (length(email) >= 5) NOT NULL,
       |  firstName TEXT NOT NULL,
       |  lastName TEXT NOT NULL,
@@ -27,7 +27,7 @@ object SimpleE2ETestData {
   val dockerfile: String =
     """FROM golang:1.13.7-alpine
       |
-      |WORKDIR /templeuser
+      |WORKDIR /simple-temple-test-user
       |
       |COPY go.mod go.sum ./
       |
@@ -35,11 +35,11 @@ object SimpleE2ETestData {
       |
       |COPY . .
       |
-      |COPY config.json /etc/templeuser-service/
+      |COPY config.json /etc/simple-temple-test-user-service/
       |
-      |RUN ["go", "build", "-o", "templeuser"]
+      |RUN ["go", "build", "-o", "simple-temple-test-user"]
       |
-      |ENTRYPOINT ["./templeuser"]
+      |ENTRYPOINT ["./simple-temple-test-user"]
       |
       |EXPOSE 1026
       |""".stripMargin
@@ -49,8 +49,8 @@ object SimpleE2ETestData {
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
-      |  --data 'name=temple-user-service' \
-      |  --data 'url=http://temple-user:1026/temple-user'
+      |  --data 'name=simple-temple-test-user-service' \
+      |  --data 'url=http://simple-temple-test-user:1026/simple-temple-test-user'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
@@ -59,8 +59,8 @@ object SimpleE2ETestData {
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
-      |  --data 'name=event-service' \
-      |  --data 'url=http://event:1030/event'
+      |  --data 'name=simple-temple-test-group-service' \
+      |  --data 'url=http://simple-temple-test-group:1030/simple-temple-test-group'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
@@ -68,9 +68,9 @@ object SimpleE2ETestData {
       |  --data 'url=http://auth:1024/auth'
       |
       |curl -X POST \
-      |  --url $KONG_ADMIN/services/temple-user-service/routes \
+      |  --url $KONG_ADMIN/services/simple-temple-test-user-service/routes \
       |  --data "hosts[]=$KONG_ENTRY" \
-      |  --data 'paths[]=/api/temple-user'
+      |  --data 'paths[]=/api/simple-temple-test-user'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/booking-service/routes \
@@ -78,9 +78,9 @@ object SimpleE2ETestData {
       |  --data 'paths[]=/api/booking'
       |
       |curl -X POST \
-      |  --url $KONG_ADMIN/services/event-service/routes \
+      |  --url $KONG_ADMIN/services/simple-temple-test-group-service/routes \
       |  --data "hosts[]=$KONG_ENTRY" \
-      |  --data 'paths[]=/api/event'
+      |  --data 'paths[]=/api/simple-temple-test-group'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/auth-service/routes \
@@ -88,7 +88,7 @@ object SimpleE2ETestData {
       |  --data 'paths[]=/api/auth'
       |
       |curl -X POST \
-      |  --url $KONG_ADMIN/services/temple-user-service/plugins \
+      |  --url $KONG_ADMIN/services/simple-temple-test-user-service/plugins \
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'
       |
@@ -98,7 +98,7 @@ object SimpleE2ETestData {
       |  --data 'config.claims_to_verify=exp'
       |
       |curl -X POST \
-      |  --url $KONG_ADMIN/services/event-service/plugins \
+      |  --url $KONG_ADMIN/services/simple-temple-test-group-service/plugins \
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
 
@@ -106,27 +106,27 @@ object SimpleE2ETestData {
     """apiVersion: apps/v1
       |kind: Deployment
       |metadata:
-      |  name: temple-user
+      |  name: simple-temple-test-user
       |  labels:
-      |    app: temple-user
+      |    app: simple-temple-test-user
       |    kind: service
       |spec:
       |  replicas: 1
       |  selector:
       |    matchLabels:
-      |      app: temple-user
+      |      app: simple-temple-test-user
       |      kind: service
       |  template:
       |    metadata:
-      |      name: temple-user
+      |      name: simple-temple-test-user
       |      labels:
-      |        app: temple-user
+      |        app: simple-temple-test-user
       |        kind: service
       |    spec:
-      |      hostname: temple-user
+      |      hostname: simple-temple-test-user
       |      containers:
-      |      - image: simple-temple-test-temple-user
-      |        name: temple-user
+      |      - image: simple-temple-test-simple-temple-test-user
+      |        name: simple-temple-test-user
       |        ports:
       |        - containerPort: 1026
       |      imagePullSecrets:
@@ -138,38 +138,38 @@ object SimpleE2ETestData {
     """apiVersion: apps/v1
       |kind: Deployment
       |metadata:
-      |  name: temple-user-db
+      |  name: simple-temple-test-user-db
       |  labels:
-      |    app: temple-user
+      |    app: simple-temple-test-user
       |    kind: db
       |spec:
       |  replicas: 1
       |  selector:
       |    matchLabels:
-      |      app: temple-user
+      |      app: simple-temple-test-user
       |      kind: db
       |  strategy:
       |    type: Recreate
       |  template:
       |    metadata:
-      |      name: temple-user-db
+      |      name: simple-temple-test-user-db
       |      labels:
-      |        app: temple-user
+      |        app: simple-temple-test-user
       |        kind: db
       |    spec:
-      |      hostname: temple-user-db
+      |      hostname: simple-temple-test-user-db
       |      containers:
       |      - env:
       |        - name: PGUSER
       |          value: postgres
       |        image: postgres:12.1
-      |        name: temple-user-db
+      |        name: simple-temple-test-user-db
       |        volumeMounts:
       |        - mountPath: /var/lib/postgresql/data
-      |          name: temple-user-db-claim
+      |          name: simple-temple-test-user-db-claim
       |        - mountPath: /docker-entrypoint-initdb.d/init.sql
       |          subPath: init.sql
-      |          name: temple-user-db-init
+      |          name: simple-temple-test-user-db-init
       |        lifecycle:
       |          postStart:
       |            exec:
@@ -179,21 +179,21 @@ object SimpleE2ETestData {
       |              - psql -U postgres -f /docker-entrypoint-initdb.d/init.sql && echo done
       |      restartPolicy: Always
       |      volumes:
-      |      - name: temple-user-db-init
+      |      - name: simple-temple-test-user-db-init
       |        configMap:
-      |          name: temple-user-db-config
-      |      - name: temple-user-db-claim
+      |          name: simple-temple-test-user-db-config
+      |      - name: simple-temple-test-user-db-claim
       |        persistentVolumeClaim:
-      |          claimName: temple-user-db-claim
+      |          claimName: simple-temple-test-user-db-claim
       |""".stripMargin
 
   val kubeService: String =
     """apiVersion: v1
       |kind: Service
       |metadata:
-      |  name: temple-user
+      |  name: simple-temple-test-user
       |  labels:
-      |    app: temple-user
+      |    app: simple-temple-test-user
       |    kind: service
       |spec:
       |  ports:
@@ -201,7 +201,7 @@ object SimpleE2ETestData {
       |    port: 1026
       |    targetPort: 1026
       |  selector:
-      |    app: temple-user
+      |    app: simple-temple-test-user
       |    kind: service
       |""".stripMargin
 
@@ -209,9 +209,9 @@ object SimpleE2ETestData {
     """apiVersion: v1
       |kind: PersistentVolume
       |metadata:
-      |  name: temple-user-db-volume
+      |  name: simple-temple-test-user-db-volume
       |  labels:
-      |    app: temple-user
+      |    app: simple-temple-test-user
       |    type: local
       |spec:
       |  storageClassName: manual
@@ -221,18 +221,18 @@ object SimpleE2ETestData {
       |  - ReadWriteMany
       |  persistentVolumeReclaimPolicy: Delete
       |  hostPath:
-      |    path: /data/temple-user-db
+      |    path: /data/simple-temple-test-user-db
       |---
       |apiVersion: v1
       |kind: PersistentVolumeClaim
       |metadata:
-      |  name: temple-user-db-claim
+      |  name: simple-temple-test-user-db-claim
       |  labels:
-      |    app: temple-user
+      |    app: simple-temple-test-user
       |spec:
       |  accessModes:
       |  - ReadWriteMany
-      |  volumeName: temple-user-db-volume
+      |  volumeName: simple-temple-test-user-db-volume
       |  storageClassName: manual
       |  resources:
       |    requests:
@@ -243,9 +243,9 @@ object SimpleE2ETestData {
     """apiVersion: v1
       |kind: Service
       |metadata:
-      |  name: temple-user-db
+      |  name: simple-temple-test-user-db
       |  labels:
-      |    app: temple-user
+      |    app: simple-temple-test-user
       |    kind: db
       |spec:
       |  ports:
@@ -253,11 +253,12 @@ object SimpleE2ETestData {
       |    port: 5432
       |    targetPort: 5432
       |  selector:
-      |    app: temple-user
+      |    app: simple-temple-test-user
       |    kind: db
       |""".stripMargin
 
-  val grafanaDashboard: String = FileUtils.readResources("grafana/simple-templeuser.json").init
+  val grafanaDashboard: String =
+    FileUtils.readResources("grafana/simple-temple-user.json").stripLineEnd
 
   val grafanaDashboardConfig: String =
     """apiVersion: 1
@@ -291,18 +292,18 @@ object SimpleE2ETestData {
       |  scrape_interval: 15s
       |  evaluation_interval: 15s
       |scrape_configs:
-      |- job_name: templeuser
+      |- job_name: simple-temple-test-user
       |  static_configs:
       |  - targets:
-      |    - templeuser:1027
+      |    - simple-temple-test-user:1027
       |- job_name: booking
       |  static_configs:
       |  - targets:
       |    - booking:1029
-      |- job_name: event
+      |- job_name: simple-temple-test-group
       |  static_configs:
       |  - targets:
-      |    - event:1031
+      |    - simple-temple-test-group:1031
       |- job_name: auth
       |  static_configs:
       |  - targets:

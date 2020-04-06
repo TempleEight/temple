@@ -1,11 +1,11 @@
 package temple.generate.server.go.service.main
 
 import temple.generate.CRUD.List
-import temple.generate.server.go.common.GoCommonGenerator._
-import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.{generateHandlerDecl, generateExtractAuthBlock, generateHTTPError}
-import temple.generate.server.{CreatedByAttribute, ServiceRoot}
-import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
+import temple.generate.server.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
+import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.{generateExtractAuthBlock, generateHTTPError, generateHandlerDecl}
+import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
 import scala.Option.when
 import scala.collection.immutable.ListMap
@@ -13,28 +13,25 @@ import scala.collection.immutable.ListMap
 object GoServiceMainListHandlerGenerator {
 
   /** Generate the list handler function */
-  private[main] def generateListHandler(root: ServiceRoot, responseMap: ListMap[String, String]): String = {
-    // Whether enumerating by created_by field or not
-    val byCreator = root.createdByAttribute match {
-      case CreatedByAttribute.None                  => false
-      case _: CreatedByAttribute.EnumerateByCreator => true
-      case _: CreatedByAttribute.EnumerateByAll     => false
-    }
-
+  private[main] def generateListHandler(
+    root: ServiceRoot,
+    responseMap: ListMap[String, String],
+    enumeratingByCreator: Boolean,
+  ): String = {
     // Fetch list from DAO
     val queryDAOBlock =
       genDeclareAndAssign(
         genMethodCall(
           "env.dao",
-          s"List${root.name.capitalize}",
-          when(byCreator) {
+          s"List${root.name}",
+          when(enumeratingByCreator) {
             genPopulateStruct(
-              s"dao.List${root.name.capitalize}Input",
+              s"dao.List${root.name}Input",
               ListMap(s"AuthID" -> "auth.ID"),
             )
           },
         ),
-        s"${root.name}List",
+        s"${root.decapitalizedName}List",
         "err",
       )
 
@@ -53,24 +50,24 @@ object GoServiceMainListHandlerGenerator {
     // Instantiate list response object
     val instantiateResponseBlock = genDeclareAndAssign(
       genPopulateStruct(
-        s"list${root.name.capitalize}Response",
+        s"list${root.name}Response",
         ListMap(
-          s"${root.name.capitalize}List" -> genFunctionCall("make", s"[]list${root.name.capitalize}Element", "0"),
+          s"${root.name}List" -> genFunctionCall("make", s"[]list${root.name}Element", "0"),
         ),
       ),
-      s"${root.name}ListResp",
+      s"${root.decapitalizedName}ListResp",
     )
 
     // Map DAO result into response object
     val mapResponseBlock = genForLoop(
-      genDeclareAndAssign(s"range *${root.name}List", "_", root.name),
+      genDeclareAndAssign(s"range *${root.decapitalizedName}List", "_", root.decapitalizedName),
       genAssign(
         genFunctionCall(
           "append",
-          s"${root.name}ListResp.${root.name.capitalize}List",
-          genPopulateStruct(s"list${root.name.capitalize}Element", responseMap),
+          s"${root.decapitalizedName}ListResp.${root.name}List",
+          genPopulateStruct(s"list${root.name}Element", responseMap),
         ),
-        s"${root.name}ListResp.${root.name.capitalize}List",
+        s"${root.decapitalizedName}ListResp.${root.name}List",
       ),
     )
 
@@ -78,14 +75,14 @@ object GoServiceMainListHandlerGenerator {
       generateHandlerDecl(root, List),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(byCreator) { generateExtractAuthBlock() },
+          when(enumeratingByCreator) { generateExtractAuthBlock() },
           mkCode.lines(
             queryDAOBlock,
             queryDAOErrorBlock,
           ),
           instantiateResponseBlock,
           mapResponseBlock,
-          genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", s"${root.name}ListResp"),
+          genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", s"${root.decapitalizedName}ListResp"),
         ),
       ),
     )

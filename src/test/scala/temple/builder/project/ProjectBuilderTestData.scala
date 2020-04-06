@@ -329,7 +329,7 @@ object ProjectBuilderTestData {
   val simpleTemplefileUsersDockerfile: String =
     """FROM golang:1.13.7-alpine
       |
-      |WORKDIR /templeuser
+      |WORKDIR /temple-user
       |
       |COPY go.mod go.sum ./
       |
@@ -337,11 +337,11 @@ object ProjectBuilderTestData {
       |
       |COPY . .
       |
-      |COPY config.json /etc/templeuser-service/
+      |COPY config.json /etc/temple-user-service/
       |
-      |RUN ["go", "build", "-o", "templeuser"]
+      |RUN ["go", "build", "-o", "temple-user"]
       |
-      |ENTRYPOINT ["./templeuser"]
+      |ENTRYPOINT ["./temple-user"]
       |
       |EXPOSE 1026
       |""".stripMargin
@@ -527,7 +527,7 @@ object ProjectBuilderTestData {
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
 
-  val simpleTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/templeuser.json").init
+  val simpleTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/temple-user.json").stripLineEnd
 
   val simpleTemplefileGrafanaDashboardConfig: String =
     """apiVersion: 1
@@ -543,7 +543,7 @@ object ProjectBuilderTestData {
       |    path: /etc/grafana/provisioning/dashboards
       |""".stripMargin
 
-  val simpleTemplefileTempleUserGoFile: String = FileUtils.readResources("go/simple-user/user.go.snippet")
+  val simpleTemplefileTempleUserGoFile: String = FileUtils.readResources("go/simple-user/simple-user.go.snippet")
   val simpleTemplefileHookGoFile: String       = FileUtils.readResources("go/simple-user/hook.go.snippet")
   val simpleTemplefileGoModFile: String        = FileUtils.readResources("go/simple-user/go.mod.snippet")
   val simpleTemplefileDaoFile: String          = FileUtils.readResources("go/simple-user/dao/dao.go.snippet")
@@ -569,10 +569,10 @@ object ProjectBuilderTestData {
       |  scrape_interval: 15s
       |  evaluation_interval: 15s
       |scrape_configs:
-      |- job_name: templeuser
+      |- job_name: temple-user
       |  static_configs:
       |  - targets:
-      |    - templeuser:1027
+      |    - temple-user:1027
       |""".stripMargin
 
   val complexTemplefile: Templefile = Templefile(
@@ -980,7 +980,7 @@ object ProjectBuilderTestData {
   val complexTemplefileUsersDockerfile: String =
     """FROM golang:1.13.7-alpine
       |
-      |WORKDIR /complexuser
+      |WORKDIR /complex-user
       |
       |COPY go.mod go.sum ./
       |
@@ -988,11 +988,11 @@ object ProjectBuilderTestData {
       |
       |COPY . .
       |
-      |COPY config.json /etc/complexuser-service/
+      |COPY config.json /etc/complex-user-service/
       |
-      |RUN ["go", "build", "-o", "complexuser"]
+      |RUN ["go", "build", "-o", "complex-user"]
       |
-      |ENTRYPOINT ["./complexuser"]
+      |ENTRYPOINT ["./complex-user"]
       |
       |EXPOSE 1026
       |""".stripMargin
@@ -1180,7 +1180,7 @@ object ProjectBuilderTestData {
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
 
-  val complexTemplefileGrafanaDashboard: String     = FileUtils.readResources("grafana/complexuser.json").init
+  val complexTemplefileGrafanaDashboard: String     = FileUtils.readResources("grafana/complex-user.json").init
   val complexTemplefileAuthGrafanaDashboard: String = FileUtils.readResources("grafana/auth.json").init
 
   val complexTemplefileGrafanaDashboardConfig: String =
@@ -1197,7 +1197,7 @@ object ProjectBuilderTestData {
       |    path: /etc/grafana/provisioning/dashboards
       |""".stripMargin
 
-  val complexTemplefileTempleUserGoFile: String = FileUtils.readResources("go/complex-user/complexuser.go.snippet")
+  val complexTemplefileTempleUserGoFile: String = FileUtils.readResources("go/complex-user/complex-user.go.snippet")
   val complexTemplefileHookGoFile: String       = FileUtils.readResources("go/complex-user/hook.go.snippet")
   val complexTemplefileGoModFile: String        = FileUtils.readResources("go/complex-user/go.mod.snippet")
   val complexTemplefileDaoFile: String          = FileUtils.readResources("go/complex-user/dao/dao.go.snippet")
@@ -1232,10 +1232,10 @@ object ProjectBuilderTestData {
       |  scrape_interval: 15s
       |  evaluation_interval: 15s
       |scrape_configs:
-      |- job_name: complexuser
+      |- job_name: complex-user
       |  static_configs:
       |  - targets:
-      |    - complexuser:1027
+      |    - complex-user:1027
       |- job_name: auth
       |  static_configs:
       |  - targets:

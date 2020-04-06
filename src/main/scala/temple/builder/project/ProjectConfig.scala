@@ -33,4 +33,10 @@ object ProjectConfig {
         hostPath = s"/data/$serviceName-db",
       )
   }
+
+  def getDefaultReadable(projectHasAuthBlock: Boolean): Readable =
+    if (projectHasAuthBlock) Readable.This else Readable.All
+
+  def getDefaultWritable(projectHasAuthBlock: Boolean): Writable =
+    if (projectHasAuthBlock) Writable.This else Writable.All
 }

@@ -1,7 +1,8 @@
 package temple.generate.server.go.common
 
-import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
+import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
 
 import scala.Option.when
@@ -28,7 +29,7 @@ object GoCommonMainGenerator {
       ),
     )
 
-  private[go] def generateMain(serviceName: String, port: Int, usesComms: Boolean, isAuth: Boolean): String =
+  private[go] def generateMain(service: ServiceRoot.Name, port: Int, usesComms: Boolean, isAuth: Boolean): String =
     mkCode(
       "func main()",
       CodeWrap.curly.tabbed(
@@ -37,7 +38,7 @@ object GoCommonMainGenerator {
             "flag",
             "String",
             doubleQuote("config"),
-            doubleQuote(s"/etc/$serviceName-service/config.json"),
+            doubleQuote(s"/etc/${service.kebabName}-service/config.json"),
             doubleQuote("configuration filepath"),
           ),
           "configPtr",

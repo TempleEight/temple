@@ -22,18 +22,18 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
     semantics shouldBe Templefile(
       projectName = "SimpleTempleTest",
       services = Map(
-        "TempleUser" -> ServiceBlock(
+        "SimpleTempleTestUser" -> ServiceBlock(
           attributes = ListMap(
-            "username"           -> Attribute(StringType()),
-            "email"              -> Attribute(StringType(Some(40), Some(5))),
-            "firstName"          -> Attribute(StringType()),
-            "lastName"           -> Attribute(StringType()),
-            "createdAt"          -> Attribute(DateTimeType),
-            "numberOfDogs"       -> Attribute(IntType()),
-            "yeets"              -> Attribute(BoolType, Some(Server), Set(Unique)),
-            "currentBankBalance" -> Attribute(FloatType(min = Some(0.0), precision = 2)),
-            "birthDate"          -> Attribute(DateType),
-            "breakfastTime"      -> Attribute(TimeType),
+            "simpleTempleTestUser" -> Attribute(StringType()),
+            "email"                -> Attribute(StringType(Some(40), Some(5))),
+            "firstName"            -> Attribute(StringType()),
+            "lastName"             -> Attribute(StringType()),
+            "createdAt"            -> Attribute(DateTimeType),
+            "numberOfDogs"         -> Attribute(IntType()),
+            "yeets"                -> Attribute(BoolType, Some(Server), Set(Unique)),
+            "currentBankBalance"   -> Attribute(FloatType(min = Some(0.0), precision = 2)),
+            "birthDate"            -> Attribute(DateType),
+            "breakfastTime"        -> Attribute(TimeType),
           ),
           metadata = Seq(
             ServiceEnumerable(),
@@ -41,21 +41,21 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
             Readable.All,
             Writable.This,
             ServiceAuth.Email,
-            Uses(Seq("Booking", "Event")),
+            Uses(Seq("Booking", "SimpleTempleTestGroup")),
           ),
           structs = Map(
             "Fred" -> StructBlock(
               Map(
                 "field"  -> Attribute(StringType(), valueAnnotations = Set(Nullable)),
-                "friend" -> Attribute(ForeignKey("TempleUser")),
+                "friend" -> Attribute(ForeignKey("SimpleTempleTestUser")),
                 "image"  -> Attribute(BlobType(size = Some(10_000_000))),
               ),
               Seq(ServiceEnumerable(byThis = true), Readable.This),
             ),
           ),
         ),
-        "Booking" -> ServiceBlock(Map()),
-        "Event"   -> ServiceBlock(Map()),
+        "Booking"               -> ServiceBlock(Map()),
+        "SimpleTempleTestGroup" -> ServiceBlock(Map()),
       ),
     )
   }

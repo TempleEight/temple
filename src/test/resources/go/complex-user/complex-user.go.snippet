@@ -8,8 +8,8 @@ import (
 	"net/http"
 	"time"
 
-	"github.com/squat/and/dab/complexuser/dao"
-	"github.com/squat/and/dab/complexuser/util"
+	"github.com/squat/and/dab/complex-user/dao"
+	"github.com/squat/and/dab/complex-user/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -20,8 +20,8 @@ type env struct {
 	dao dao.Datastore
 }
 
-// createComplexuserRequest contains the client-provided information required to create a single complexuser
-type createComplexuserRequest struct {
+// createComplexUserRequest contains the client-provided information required to create a single complexUser
+type createComplexUserRequest struct {
 	SmallIntField      *uint16    `valid:"type(uint16),required,range(10|100)"`
 	IntField           *uint32    `valid:"type(uint32),required,range(10|100)"`
 	BigIntField        *uint64    `valid:"type(uint64),required,range(10|100)"`
@@ -36,8 +36,8 @@ type createComplexuserRequest struct {
 	BlobField          *[]byte    `valid:"type(string),base64,required"`
 }
 
-// updateComplexuserRequest contains the client-provided information required to update a single complexuser
-type updateComplexuserRequest struct {
+// updateComplexUserRequest contains the client-provided information required to update a single complexUser
+type updateComplexUserRequest struct {
 	SmallIntField      *uint16    `valid:"type(uint16),required,range(10|100)"`
 	IntField           *uint32    `valid:"type(uint32),required,range(10|100)"`
 	BigIntField        *uint64    `valid:"type(uint64),required,range(10|100)"`
@@ -52,8 +52,8 @@ type updateComplexuserRequest struct {
 	BlobField          *[]byte    `valid:"type(string),base64,required"`
 }
 
-// createComplexuserResponse contains a newly created complexuser to be returned to the client
-type createComplexuserResponse struct {
+// createComplexUserResponse contains a newly created complexUser to be returned to the client
+type createComplexUserResponse struct {
 	ID                 uuid.UUID
 	SmallIntField      uint16
 	IntField           uint32
@@ -69,8 +69,8 @@ type createComplexuserResponse struct {
 	BlobField          string
 }
 
-// readComplexuserResponse contains a single complexuser to be returned to the client
-type readComplexuserResponse struct {
+// readComplexUserResponse contains a single complexUser to be returned to the client
+type readComplexUserResponse struct {
 	ID                 uuid.UUID
 	SmallIntField      uint16
 	IntField           uint32
@@ -86,8 +86,8 @@ type readComplexuserResponse struct {
 	BlobField          string
 }
 
-// updateComplexuserResponse contains a newly updated complexuser to be returned to the client
-type updateComplexuserResponse struct {
+// updateComplexUserResponse contains a newly updated complexUser to be returned to the client
+type updateComplexUserResponse struct {
 	ID                 uuid.UUID
 	SmallIntField      uint16
 	IntField           uint32
@@ -107,16 +107,16 @@ type updateComplexuserResponse struct {
 func (env *env) router() *mux.Router {
 	r := mux.NewRouter()
 	// Mux directs to first matching route, i.e. the order matters
-	r.HandleFunc("/complexuser", env.createComplexuserHandler).Methods(http.MethodPost)
-	r.HandleFunc("/complexuser/{id}", env.readComplexuserHandler).Methods(http.MethodGet)
-	r.HandleFunc("/complexuser/{id}", env.updateComplexuserHandler).Methods(http.MethodPut)
-	r.HandleFunc("/complexuser/{id}", env.deleteComplexuserHandler).Methods(http.MethodDelete)
+	r.HandleFunc("/complex-user", env.createComplexUserHandler).Methods(http.MethodPost)
+	r.HandleFunc("/complex-user/{id}", env.readComplexUserHandler).Methods(http.MethodGet)
+	r.HandleFunc("/complex-user/{id}", env.updateComplexUserHandler).Methods(http.MethodPut)
+	r.HandleFunc("/complex-user/{id}", env.deleteComplexUserHandler).Methods(http.MethodDelete)
 	r.Use(jsonMiddleware)
 	return r
 }
 
 func main() {
-	configPtr := flag.String("config", "/etc/complexuser-service/config.json", "configuration filepath")
+	configPtr := flag.String("config", "/etc/complex-user-service/config.json", "configuration filepath")
 	flag.Parse()
 
 	// Require all struct fields by default
@@ -145,7 +145,7 @@ func jsonMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func (env *env) createComplexuserHandler(w http.ResponseWriter, r *http.Request) {
+func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
@@ -153,7 +153,7 @@ func (env *env) createComplexuserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	var req createComplexuserRequest
+	var req createComplexUserRequest
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
@@ -174,7 +174,7 @@ func (env *env) createComplexuserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	complexuser, err := env.dao.CreateComplexuser(dao.CreateComplexuserInput{
+	complexUser, err := env.dao.CreateComplexUser(dao.CreateComplexUserInput{
 		ID:                 auth.ID,
 		SmallIntField:      *req.SmallIntField,
 		IntField:           *req.IntField,
@@ -195,31 +195,31 @@ func (env *env) createComplexuserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	json.NewEncoder(w).Encode(createComplexuserResponse{
-		ID:                 complexuser.ID,
-		SmallIntField:      complexuser.SmallIntField,
-		IntField:           complexuser.IntField,
-		BigIntField:        complexuser.BigIntField,
-		FloatField:         complexuser.FloatField,
-		DoubleField:        complexuser.DoubleField,
-		StringField:        complexuser.StringField,
-		BoundedStringField: complexuser.BoundedStringField,
-		BoolField:          complexuser.BoolField,
-		DateField:          complexuser.DateField,
-		TimeField:          complexuser.TimeField,
-		DateTimeField:      complexuser.DateTimeField.Format(time.RFC3339),
-		BlobField:          complexuser.BlobField,
+	json.NewEncoder(w).Encode(createComplexUserResponse{
+		ID:                 complexUser.ID,
+		SmallIntField:      complexUser.SmallIntField,
+		IntField:           complexUser.IntField,
+		BigIntField:        complexUser.BigIntField,
+		FloatField:         complexUser.FloatField,
+		DoubleField:        complexUser.DoubleField,
+		StringField:        complexUser.StringField,
+		BoundedStringField: complexUser.BoundedStringField,
+		BoolField:          complexUser.BoolField,
+		DateField:          complexUser.DateField,
+		TimeField:          complexUser.TimeField,
+		DateTimeField:      complexUser.DateTimeField.Format(time.RFC3339),
+		BlobField:          complexUser.BlobField,
 	})
 }
 
-func (env *env) readComplexuserHandler(w http.ResponseWriter, r *http.Request) {
+func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (env *env) updateComplexuserHandler(w http.ResponseWriter, r *http.Request) {
+func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 
 }
 
-func (env *env) deleteComplexuserHandler(w http.ResponseWriter, r *http.Request) {
+func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 
 }

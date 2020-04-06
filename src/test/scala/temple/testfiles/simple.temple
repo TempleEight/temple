@@ -1,7 +1,7 @@
 SimpleTempleTest: project {}
 
-TempleUser: service {
-  username: string;
+User: service {
+  user: string;
   email: string(40,5);
   firstName: string;
   lastName: string;
@@ -14,7 +14,7 @@ TempleUser: service {
 
   Fred: struct {
     field: string @nullable;
-    friend: TempleUser;
+    friend: User;
     image: data(10M);
     #enumerableByThis;
     #readable(by: this);
@@ -26,8 +26,8 @@ TempleUser: service {
   #writable(by: this);
 
   #auth(email);
-  #uses [Booking, Event, /* Reservations */];
+  #uses [Booking, Group, /* Reservations */];
 }
 
 Booking: service {}
-Event: service {}
+Group: service {}

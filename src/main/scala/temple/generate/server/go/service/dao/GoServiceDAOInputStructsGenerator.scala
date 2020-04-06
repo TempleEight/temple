@@ -1,11 +1,11 @@
 package temple.generate.server.go.service.dao
 
-import temple.ast.{Annotation, Attribute, AttributeType}
+import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
+import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
-import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceRoot}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
 
@@ -15,8 +15,8 @@ object GoServiceDAOInputStructsGenerator {
 
   private def generateStructCommentSubstring(root: ServiceRoot, operation: CRUD): String =
     operation match {
-      case List                            => s"read a ${root.name} list"
-      case Create | Read | Update | Delete => s"${operation.toString.toLowerCase} a single ${root.name}"
+      case List                            => s"read a ${root.decapitalizedName} list"
+      case Create | Read | Update | Delete => s"${operation.toString.toLowerCase} a single ${root.decapitalizedName}"
     }
 
   private def generateStruct(root: ServiceRoot, operation: CRUD): String = {
@@ -27,11 +27,8 @@ object GoServiceDAOInputStructsGenerator {
     lazy val idMap = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(AttributeType.UUIDType))
 
     // Note we use the createdBy input name, rather than name
-    lazy val createdByMap = root.createdByAttribute match {
-      case CreatedByAttribute.None =>
-        ListMap.empty
-      case enumerating: CreatedByAttribute.Enumerating =>
-        ListMap(enumerating.inputName.capitalize -> generateGoType(AttributeType.UUIDType))
+    lazy val createdByMap = root.createdByAttribute.fold(ListMap[String, String]()) { enumerating =>
+      ListMap(enumerating.inputName.capitalize -> generateGoType(AttributeType.UUIDType))
     }
 
     // Omit attribute from input struct fields if server set
@@ -60,15 +57,14 @@ object GoServiceDAOInputStructsGenerator {
     )
   }
 
-  private[service] def generateStructs(root: ServiceRoot, operations: Set[CRUD]): String = {
-    val enumeratingByCreator = root.createdByAttribute match {
-      case _: CreatedByAttribute.EnumerateByCreator => true
-      case _                                        => false
-    }
+  private[service] def generateStructs(
+    root: ServiceRoot,
+    operations: Set[CRUD],
+    enumeratingByCreator: Boolean,
+  ): String =
     mkCode.doubleLines(
       // Generate input struct for each operation, except for List when not enumerating by creator
       for (operation <- operations.toSeq.sorted if operation != CRUD.List || enumeratingByCreator)
         yield generateStruct(root, operation),
     )
-  }
 }

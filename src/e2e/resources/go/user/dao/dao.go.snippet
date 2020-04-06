@@ -5,7 +5,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/squat/and/dab/templeuser/util"
+	"github.com/squat/and/dab/simple-temple-test-user/util"
 	"github.com/google/uuid"
 
 	// pq acts as the driver for SQL requests
@@ -14,10 +14,10 @@ import (
 
 // Datastore provides the interface adopted by the DAO, allowing for mocking
 type Datastore interface {
-	ListTempleuser() (*[]Templeuser, error)
-	CreateTempleuser(input CreateTempleuserInput) (*Templeuser, error)
-	ReadTempleuser(input ReadTempleuserInput) (*Templeuser, error)
-	UpdateTempleuser(input UpdateTempleuserInput) (*Templeuser, error)
+	ListSimpleTempleTestUser() (*[]SimpleTempleTestUser, error)
+	CreateSimpleTempleTestUser(input CreateSimpleTempleTestUserInput) (*SimpleTempleTestUser, error)
+	ReadSimpleTempleTestUser(input ReadSimpleTempleTestUserInput) (*SimpleTempleTestUser, error)
+	UpdateSimpleTempleTestUser(input UpdateSimpleTempleTestUserInput) (*SimpleTempleTestUser, error)
 }
 
 // DAO encapsulates access to the datastore
@@ -25,56 +25,56 @@ type DAO struct {
 	DB *sql.DB
 }
 
-// Templeuser encapsulates the object stored in the datastore
-type Templeuser struct {
-	ID                 uuid.UUID
-	CreatedBy          uuid.UUID
-	Username           string
-	Email              string
-	FirstName          string
-	LastName           string
-	CreatedAt          time.Time
-	NumberOfDogs       int32
-	Yeets              bool
-	CurrentBankBalance float32
-	BirthDate          time.Time
-	BreakfastTime      time.Time
+// SimpleTempleTestUser encapsulates the object stored in the datastore
+type SimpleTempleTestUser struct {
+	ID                   uuid.UUID
+	CreatedBy            uuid.UUID
+	SimpleTempleTestUser string
+	Email                string
+	FirstName            string
+	LastName             string
+	CreatedAt            time.Time
+	NumberOfDogs         int32
+	Yeets                bool
+	CurrentBankBalance   float32
+	BirthDate            time.Time
+	BreakfastTime        time.Time
 }
 
-// CreateTempleuserInput encapsulates the information required to create a single templeuser in the datastore
-type CreateTempleuserInput struct {
-	ID                 uuid.UUID
-	AuthID             uuid.UUID
-	Username           string
-	Email              string
-	FirstName          string
-	LastName           string
-	CreatedAt          time.Time
-	NumberOfDogs       int32
-	Yeets              bool
-	CurrentBankBalance float32
-	BirthDate          time.Time
-	BreakfastTime      time.Time
+// CreateSimpleTempleTestUserInput encapsulates the information required to create a single simpleTempleTestUser in the datastore
+type CreateSimpleTempleTestUserInput struct {
+	ID                   uuid.UUID
+	AuthID               uuid.UUID
+	SimpleTempleTestUser string
+	Email                string
+	FirstName            string
+	LastName             string
+	CreatedAt            time.Time
+	NumberOfDogs         int32
+	Yeets                bool
+	CurrentBankBalance   float32
+	BirthDate            time.Time
+	BreakfastTime        time.Time
 }
 
-// ReadTempleuserInput encapsulates the information required to read a single templeuser in the datastore
-type ReadTempleuserInput struct {
+// ReadSimpleTempleTestUserInput encapsulates the information required to read a single simpleTempleTestUser in the datastore
+type ReadSimpleTempleTestUserInput struct {
 	ID uuid.UUID
 }
 
-// UpdateTempleuserInput encapsulates the information required to update a single templeuser in the datastore
-type UpdateTempleuserInput struct {
-	ID                 uuid.UUID
-	Username           string
-	Email              string
-	FirstName          string
-	LastName           string
-	CreatedAt          time.Time
-	NumberOfDogs       int32
-	Yeets              bool
-	CurrentBankBalance float32
-	BirthDate          time.Time
-	BreakfastTime      time.Time
+// UpdateSimpleTempleTestUserInput encapsulates the information required to update a single simpleTempleTestUser in the datastore
+type UpdateSimpleTempleTestUserInput struct {
+	ID                   uuid.UUID
+	SimpleTempleTestUser string
+	Email                string
+	FirstName            string
+	LastName             string
+	CreatedAt            time.Time
+	NumberOfDogs         int32
+	Yeets                bool
+	CurrentBankBalance   float32
+	BirthDate            time.Time
+	BreakfastTime        time.Time
 }
 
 // Init opens the datastore connection, returning a DAO
@@ -97,75 +97,75 @@ func executeQueryWithRowResponse(db *sql.DB, query string, args ...interface{}) 
 	return db.QueryRow(query, args...)
 }
 
-// CreateTempleuser creates a new templeuser in the datastore, returning the newly created templeuser
-func (dao *DAO) CreateTempleuser(input CreateTempleuserInput) (*Templeuser, error) {
-	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO templeuser (username, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING username, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime;", input.ID, input.Username, input.Email, input.FirstName, input.LastName, input.CreatedAt, input.NumberOfDogs, input.Yeets, input.CurrentBankBalance, input.BirthDate, input.BreakfastTime)
+// CreateSimpleTempleTestUser creates a new simpleTempleTestUser in the datastore, returning the newly created simpleTempleTestUser
+func (dao *DAO) CreateSimpleTempleTestUser(input CreateSimpleTempleTestUserInput) (*SimpleTempleTestUser, error) {
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO simple_temple_test_user (simpleTempleTestUser, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING simpleTempleTestUser, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime;", input.ID, input.SimpleTempleTestUser, input.Email, input.FirstName, input.LastName, input.CreatedAt, input.NumberOfDogs, input.Yeets, input.CurrentBankBalance, input.BirthDate, input.BreakfastTime)
 
-	var templeuser Templeuser
-	err := row.Scan(&templeuser.ID, &templeuser.CreatedBy, &templeuser.Username, &templeuser.Email, &templeuser.FirstName, &templeuser.LastName, &templeuser.CreatedAt, &templeuser.NumberOfDogs, &templeuser.Yeets, &templeuser.CurrentBankBalance, &templeuser.BirthDate, &templeuser.BreakfastTime)
+	var simpleTempleTestUser SimpleTempleTestUser
+	err := row.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.CreatedBy, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
 	if err != nil {
 		return nil, err
 	}
 
-	return &templeuser, nil
+	return &simpleTempleTestUser, nil
 }
 
-// ReadTempleuser returns the templeuser in the datastore for a given ID
-func (dao *DAO) ReadTempleuser(input ReadTempleuserInput) (*Templeuser, error) {
-	row := executeQueryWithRowResponse(dao.DB, "SELECT username, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime FROM templeuser WHERE id = $1;", input.ID)
+// ReadSimpleTempleTestUser returns the simpleTempleTestUser in the datastore for a given ID
+func (dao *DAO) ReadSimpleTempleTestUser(input ReadSimpleTempleTestUserInput) (*SimpleTempleTestUser, error) {
+	row := executeQueryWithRowResponse(dao.DB, "SELECT simpleTempleTestUser, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime FROM simple_temple_test_user WHERE id = $1;", input.ID)
 
-	var templeuser Templeuser
-	err := row.Scan(&templeuser.ID, &templeuser.CreatedBy, &templeuser.Username, &templeuser.Email, &templeuser.FirstName, &templeuser.LastName, &templeuser.CreatedAt, &templeuser.NumberOfDogs, &templeuser.Yeets, &templeuser.CurrentBankBalance, &templeuser.BirthDate, &templeuser.BreakfastTime)
+	var simpleTempleTestUser SimpleTempleTestUser
+	err := row.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.CreatedBy, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
-			return nil, ErrTempleuserNotFound(input.ID.String())
+			return nil, ErrSimpleTempleTestUserNotFound(input.ID.String())
 		default:
 			return nil, err
 		}
 	}
 
-	return &templeuser, nil
+	return &simpleTempleTestUser, nil
 }
 
-// UpdateTempleuser updates the templeuser in the datastore for a given ID, returning the newly updated templeuser
-func (dao *DAO) UpdateTempleuser(input UpdateTempleuserInput) (*Templeuser, error) {
-	row := executeQueryWithRowResponse(dao.DB, "UPDATE templeuser SET username = $1, email = $2, firstName = $3, lastName = $4, createdAt = $5, numberOfDogs = $6, yeets = $7, currentBankBalance = $8, birthDate = $9, breakfastTime = $10 WHERE id = $11 RETURNING username, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime;", input.Username, input.Email, input.FirstName, input.LastName, input.CreatedAt, input.NumberOfDogs, input.Yeets, input.CurrentBankBalance, input.BirthDate, input.BreakfastTime, input.ID)
+// UpdateSimpleTempleTestUser updates the simpleTempleTestUser in the datastore for a given ID, returning the newly updated simpleTempleTestUser
+func (dao *DAO) UpdateSimpleTempleTestUser(input UpdateSimpleTempleTestUserInput) (*SimpleTempleTestUser, error) {
+	row := executeQueryWithRowResponse(dao.DB, "UPDATE simple_temple_test_user SET simpleTempleTestUser = $1, email = $2, firstName = $3, lastName = $4, createdAt = $5, numberOfDogs = $6, yeets = $7, currentBankBalance = $8, birthDate = $9, breakfastTime = $10 WHERE id = $11 RETURNING simpleTempleTestUser, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime;", input.SimpleTempleTestUser, input.Email, input.FirstName, input.LastName, input.CreatedAt, input.NumberOfDogs, input.Yeets, input.CurrentBankBalance, input.BirthDate, input.BreakfastTime, input.ID)
 
-	var templeuser Templeuser
-	err := row.Scan(&templeuser.ID, &templeuser.CreatedBy, &templeuser.Username, &templeuser.Email, &templeuser.FirstName, &templeuser.LastName, &templeuser.CreatedAt, &templeuser.NumberOfDogs, &templeuser.Yeets, &templeuser.CurrentBankBalance, &templeuser.BirthDate, &templeuser.BreakfastTime)
+	var simpleTempleTestUser SimpleTempleTestUser
+	err := row.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.CreatedBy, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
-			return nil, ErrTempleuserNotFound(input.ID.String())
+			return nil, ErrSimpleTempleTestUserNotFound(input.ID.String())
 		default:
 			return nil, err
 		}
 	}
 
-	return &templeuser, nil
+	return &simpleTempleTestUser, nil
 }
 
-// ListTempleuser returns a list containing every templeuser in the datastore
-func (dao *DAO) ListTempleuser() (*[]Templeuser, error) {
-	rows, err := executeQueryWithRowResponses(dao.DB, "SELECT username, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime FROM templeuser;")
+// ListSimpleTempleTestUser returns a list containing every simpleTempleTestUser in the datastore
+func (dao *DAO) ListSimpleTempleTestUser() (*[]SimpleTempleTestUser, error) {
+	rows, err := executeQueryWithRowResponses(dao.DB, "SELECT simpleTempleTestUser, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime FROM simple_temple_test_user;")
 	if err != nil {
 		return nil, err
 	}
 
-	templeuserList := make([]Templeuser, 0)
+	simpleTempleTestUserList := make([]SimpleTempleTestUser, 0)
 	for rows.Next() {
-		var templeuser Templeuser
-		err = rows.Scan(&templeuser.ID, &templeuser.CreatedBy, &templeuser.Username, &templeuser.Email, &templeuser.FirstName, &templeuser.LastName, &templeuser.CreatedAt, &templeuser.NumberOfDogs, &templeuser.Yeets, &templeuser.CurrentBankBalance, &templeuser.BirthDate, &templeuser.BreakfastTime)
+		var simpleTempleTestUser SimpleTempleTestUser
+		err = rows.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.CreatedBy, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
 		if err != nil {
 			return nil, err
 		}
-		templeuserList = append(templeuserList, templeuser)
+		simpleTempleTestUserList = append(simpleTempleTestUserList, simpleTempleTestUser)
 	}
 	err = rows.Err()
 	if err != nil {
 		return nil, err
 	}
 
-	return &templeuserList, nil
+	return &simpleTempleTestUserList, nil
 }

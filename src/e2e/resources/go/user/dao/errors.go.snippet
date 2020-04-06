@@ -2,9 +2,9 @@ package dao
 
 import "fmt"
 
-// ErrTempleuserNotFound is returned when a templeuser for the provided ID was not found
-type ErrTempleuserNotFound string
+// ErrSimpleTempleTestUserNotFound is returned when a simpleTempleTestUser for the provided ID was not found
+type ErrSimpleTempleTestUserNotFound string
 
-func (e ErrTempleuserNotFound) Error() string {
-	return fmt.Sprintf("templeuser not found with ID %d", string(e))
+func (e ErrSimpleTempleTestUserNotFound) Error() string {
+	return fmt.Sprintf("simpleTempleTestUser not found with ID %d", string(e))
 }

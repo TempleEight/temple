@@ -2,8 +2,8 @@ package temple.generate.target.openapi
 
 import io.circe.syntax._
 import io.circe.yaml.Printer
-import temple.ast.{Annotation, Attribute}
 import temple.ast.AttributeType._
+import temple.ast.{Annotation, Attribute}
 import temple.collection.FlagMapView
 import temple.generate.CRUD._
 import temple.generate.FileSystem._
@@ -12,6 +12,7 @@ import temple.generate.target.openapi.ast.OpenAPIFile.{Components, Info}
 import temple.generate.target.openapi.ast.OpenAPIType._
 import temple.generate.target.openapi.ast.Parameter.InPath
 import temple.generate.target.openapi.ast._
+import temple.utils.StringUtils
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
@@ -198,7 +199,7 @@ object OpenAPIGenerator {
     Printer(preserveOrder = true, dropNullKeys = true).pretty(build(root).asJson)
 
   def generate(root: OpenAPIRoot): Files = Map(
-    File("api", s"${root.name}.openapi.yaml") -> render(root),
+    File("api", s"${StringUtils.kebabCase(root.name)}.openapi.yaml") -> render(root),
   )
 
   /** Create a Response representation for an error */
