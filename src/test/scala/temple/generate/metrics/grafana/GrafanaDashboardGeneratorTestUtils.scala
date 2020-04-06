@@ -169,6 +169,7 @@ object GrafanaDashboardGeneratorTestUtils {
         |  "title" : "$title",
         |  "uid" : "$uid",
         |  "version" : 1
-        |}""".stripMargin
+        |}
+        |""".stripMargin
   }
 }

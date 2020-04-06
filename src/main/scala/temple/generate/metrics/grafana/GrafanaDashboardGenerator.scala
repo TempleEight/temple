@@ -39,6 +39,7 @@ object GrafanaDashboardGenerator {
             )
         }
     }
-    GrafanaRoot(uid, serviceName, grafanaPanels).asJson.toString()
+
+    GrafanaRoot(uid, serviceName, grafanaPanels).asJson.toString() + "\n"
   }
 }

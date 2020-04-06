@@ -324,7 +324,8 @@ object ProjectBuilderTestData {
       |  timeField TIME NOT NULL,
       |  dateTimeField TIMESTAMPTZ NOT NULL,
       |  blobField BYTEA NOT NULL
-      |);""".stripMargin
+      |);
+      |""".stripMargin
 
   val simpleTemplefileUsersDockerfile: String =
     """FROM golang:1.13.7-alpine
@@ -520,7 +521,8 @@ object ProjectBuilderTestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/routes \
       |  --data "hosts[]=$KONG_ENTRY" \
-      |  --data 'paths[]=/api/temple-user'""".stripMargin
+      |  --data 'paths[]=/api/temple-user'
+      |""".stripMargin
 
   val simpleTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/temple-user.json").stripLineEnd
 
@@ -1177,7 +1179,8 @@ object ProjectBuilderTestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/complex-user-service/plugins \
       |  --data 'name=jwt' \
-      |  --data 'config.claims_to_verify=exp'""".stripMargin
+      |  --data 'config.claims_to_verify=exp'
+      |""".stripMargin
 
   val complexTemplefileGrafanaDashboard: String     = FileUtils.readResources("grafana/complex-user.json").init
   val complexTemplefileAuthGrafanaDashboard: String = FileUtils.readResources("grafana/auth.json").init
@@ -1246,7 +1249,8 @@ object ProjectBuilderTestData {
       |  id UUID UNIQUE NOT NULL,
       |  email TEXT UNIQUE NOT NULL,
       |  password TEXT NOT NULL
-      |);""".stripMargin
+      |);
+      |""".stripMargin
 
   val complexTemplefileAuthDockerfile: String =
     """FROM golang:1.13.7-alpine

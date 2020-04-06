@@ -50,11 +50,11 @@ object KongConfigGenerator {
     */
   def generate(orchestrationRoot: OrchestrationRoot): (File, FileContent) = {
     val config = mkCode.doubleLines(
-      shebang,
-      orchestrationRoot.services.map(generateServiceDef),
-      orchestrationRoot.services.map(generateServiceRoute),
-      orchestrationRoot.services.filter(_.usesAuth).map(generateAuthRequirement),
-    )
+        shebang,
+        orchestrationRoot.services.map(generateServiceDef),
+        orchestrationRoot.services.map(generateServiceRoute),
+        orchestrationRoot.services.filter(_.usesAuth).map(generateAuthRequirement),
+      ) + "\n"
     File("kong", "configure-kong.sh") -> config
   }
 }
