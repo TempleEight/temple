@@ -53,6 +53,9 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainGenerator.generateRouter(root, operations),
         GoCommonMainGenerator.generateMain(root, root.port, usesComms, isAuth = false),
         GoCommonMainGenerator.generateJsonMiddleware(),
+        when(root.readable == Readable.This) {
+          GoServiceMainGenerator.generateCheckAuthorization(root)
+        },
         GoServiceMainHandlersGenerator
           .generateHandlers(root, operations, clientAttributes, usesComms, enumeratingByCreator),
       ),

@@ -75,7 +75,7 @@ object GoServiceMainListHandlerGenerator {
       generateHandlerDecl(root, List),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(enumeratingByCreator) { generateExtractAuthBlock() },
+          when(enumeratingByCreator) { generateExtractAuthBlock(usesVar = true) },
           mkCode.lines(
             queryDAOBlock,
             queryDAOErrorBlock,

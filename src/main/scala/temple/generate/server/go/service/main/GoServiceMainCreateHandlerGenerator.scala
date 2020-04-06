@@ -72,14 +72,14 @@ object GoServiceMainCreateHandlerGenerator {
       generateHandlerDecl(root, Create),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(root.projectUsesAuth) { generateExtractAuthBlock() },
-          generateDecodeRequestBlock(s"create${root.name.capitalize}"),
+          when(root.projectUsesAuth) { generateExtractAuthBlock(usesVar = true) },
+          generateDecodeRequestBlock(s"create${root.name}"),
           generateRequestNilCheck(root, clientAttributes),
           generateValidateStructBlock(),
           when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
           when(!root.hasAuthBlock) { generateNewUUIDBlock() },
           generateDAOCallBlock(root, clientAttributes),
-          generateJSONResponse(s"create${root.name.capitalize}", responseMap),
+          generateJSONResponse(s"create${root.name}", responseMap),
         ),
       ),
     )

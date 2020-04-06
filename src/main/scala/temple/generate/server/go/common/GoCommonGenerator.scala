@@ -34,7 +34,7 @@ object GoCommonGenerator {
       case BlobType(_)                                    => "[]byte"
     }
 
-  private[go] def generateCheckAndReturnError(returnValues: String*): String =
+  private[go] def genCheckAndReturnError(returnValues: String*): String =
     mkCode(
       "if err != nil",
       CodeWrap.curly.tabbed(
@@ -139,9 +139,23 @@ object GoCommonGenerator {
     mkCode(
       "func",
       CodeWrap.parens(objectName, objectType),
-      CodeWrap.parens.prefix(methodName)(methodArgs),
+      CodeWrap.parens.prefix(methodName)(mkCode.list(methodArgs)),
       methodReturn,
       CodeWrap.curly.tabbed(methodBody),
+    )
+
+  /** Generation function */
+  private[go] def genFunc(
+    funcName: String,
+    funcArgs: Seq[String],
+    funcReturn: Option[String],
+    funcBody: String,
+  ): String =
+    mkCode(
+      "func",
+      CodeWrap.parens.prefix(funcName)(mkCode.list(funcArgs)),
+      funcReturn,
+      CodeWrap.curly.tabbed(funcBody),
     )
 
   /** Generate if statement */
@@ -170,6 +184,13 @@ object GoCommonGenerator {
         "default:",
         tabIndent(default),
       ),
+    )
+
+  /** Generate switch statement and return */
+  private[go] def genSwitchReturn(expr: String, cases: ListMap[String, String], default: String): String =
+    mkCode.lines(
+      genSwitch(expr, cases, default),
+      genReturn(),
     )
 
   /** Generate return statement */
