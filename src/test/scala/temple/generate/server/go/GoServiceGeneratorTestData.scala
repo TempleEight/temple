@@ -29,6 +29,7 @@ object GoServiceGeneratorTestData {
     datastore = Postgres,
     readable = Readable.All,
     writable = Writable.This,
+    projectUsesAuth = true,
   )
 
   val simpleServiceFiles: Files = Map(
@@ -74,6 +75,7 @@ object GoServiceGeneratorTestData {
       datastore = Postgres,
       readable = Readable.This,
       writable = Writable.This,
+      projectUsesAuth = true,
     )
 
   val simpleServiceFilesWithComms: Files = Map(

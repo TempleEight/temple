@@ -16,11 +16,6 @@ import scala.Option.when
 object GoServiceGenerator extends ServiceGenerator {
 
   override def generate(root: ServiceRoot): Files = {
-    /* TODO
-     * handlers in <>.go
-     * config.json
-     */
-
     // Set of CRUD operations the service uses
     val operations = root.opQueries.keySet
 

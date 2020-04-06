@@ -22,6 +22,7 @@ import scala.collection.immutable.ListMap
   * @param datastore the datastore being used
   * @param readable whether this service is readable by this or by all
   * @param writable whether this service is writable by this or by all
+  * @param projectUsesAuth whether or not the project uses auth
   */
 case class ServiceRoot(
   override val name: String,
@@ -35,6 +36,7 @@ case class ServiceRoot(
   datastore: Database,
   readable: Readable,
   writable: Writable,
+  projectUsesAuth: Boolean,
 ) extends ServiceRoot.Name(name)
 
 object ServiceRoot {

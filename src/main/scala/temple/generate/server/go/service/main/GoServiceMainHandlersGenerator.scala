@@ -15,6 +15,7 @@ import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.StringUtils.{decapitalize, doubleQuote}
 
 import scala.collection.immutable.ListMap
+import scala.Option.when
 
 object GoServiceMainHandlersGenerator {
 
@@ -103,7 +104,7 @@ object GoServiceMainHandlersGenerator {
           "env.comm",
           s"Check$reference",
           s"*req.${name.capitalize}",
-          genMethodCall("r.Header", "Get", doubleQuote("Authorization")),
+          when(root.projectUsesAuth) { genMethodCall("r.Header", "Get", doubleQuote("Authorization")) },
         ),
         s"${name}Valid",
         "err",

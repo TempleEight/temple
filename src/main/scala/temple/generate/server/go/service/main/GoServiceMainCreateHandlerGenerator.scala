@@ -37,8 +37,8 @@ object GoServiceMainCreateHandlerGenerator {
     val idCapitalized = root.idAttribute.name.toUpperCase
     // If service has auth block then an AuthID is passed in as ID, otherwise a created uuid is passed in
     val createInput = ListMap(idCapitalized -> (if (hasAuthBlock) s"auth.$idCapitalized" else "uuid")) ++
-      // If service does not have auth block AuthID is passed for created_by field
-      when(!hasAuthBlock) { s"Auth$idCapitalized" -> s"auth.$idCapitalized" } ++
+      // If the project uses auth, but this service does not have an auth block, AuthID is passed for created_by field
+      when(!hasAuthBlock && root.projectUsesAuth) { s"Auth$idCapitalized" -> s"auth.$idCapitalized" } ++
       // TODO: ServerSet values need to be passed in, not just client-provided attributes
       clientAttributes.map { case str -> _ => str.capitalize -> s"*req.${str.capitalize}" }
 
@@ -74,7 +74,7 @@ object GoServiceMainCreateHandlerGenerator {
       generateHandlerDecl(root, Create),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          generateExtractAuthBlock(),
+          when(root.projectUsesAuth) { generateExtractAuthBlock() },
           generateDecodeRequestBlock(s"create${root.name.capitalize}"),
           generateRequestNilCheck(root, clientAttributes),
           generateValidateStructBlock(),
