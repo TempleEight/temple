@@ -80,6 +80,8 @@ object ServerBuilder {
       datastore = serviceBlock.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase),
       readable = readable,
       writable = writable,
+      projectUsesAuth = projectUsesAuth,
+      hasAuthBlock = hasAuthBlock,
     )
   }
 
