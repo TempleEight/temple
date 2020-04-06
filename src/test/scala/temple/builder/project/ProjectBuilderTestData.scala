@@ -538,13 +538,17 @@ object ProjectBuilderTestData {
       |    path: /etc/grafana/provisioning/dashboards
       |""".stripMargin
 
-  val simpleTemplefileTempleUserGoFile: String = FileUtils.readResources("go/simple-user/simple-user.go.snippet")
-  val simpleTemplefileHookGoFile: String       = FileUtils.readResources("go/simple-user/hook.go.snippet")
-  val simpleTemplefileGoModFile: String        = FileUtils.readResources("go/simple-user/go.mod.snippet")
-  val simpleTemplefileDaoFile: String          = FileUtils.readResources("go/simple-user/dao/dao.go.snippet")
-  val simpleTemplefileErrorsFile: String       = FileUtils.readResources("go/simple-user/dao/errors.go.snippet")
-  val simpleTemplefileUtilFile: String         = FileUtils.readResources("go/simple-user/util/util.go.snippet")
-  val simpleTemplefileMetricFile: String       = FileUtils.readResources("go/simple-user/metric/metric.go.snippet")
+  // These files differ from the server builder test files, as the project builder test uses auth
+  val simpleTemplefileTempleUserGoFile: String =
+    FileUtils.readResources("project/go/no-auth-simple-user.go.snippet")
+
+  // These files are the same as the server builder test files, i.e. presence of auth has no effect
+  val simpleTemplefileHookGoFile: String = FileUtils.readResources("go/simple-user/hook.go.snippet")
+  val simpleTemplefileGoModFile: String  = FileUtils.readResources("go/simple-user/go.mod.snippet")
+  val simpleTemplefileDaoFile: String    = FileUtils.readResources("go/simple-user/dao/dao.go.snippet")
+  val simpleTemplefileErrorsFile: String = FileUtils.readResources("go/simple-user/dao/errors.go.snippet")
+  val simpleTemplefileUtilFile: String   = FileUtils.readResources("go/simple-user/util/util.go.snippet")
+  val simpleTemplefileMetricFile: String = FileUtils.readResources("go/simple-user/metric/metric.go.snippet")
 
   val simpleTemplefileGrafanaDatasourceConfig: String =
     """apiVersion: 1
