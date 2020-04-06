@@ -29,14 +29,14 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     // Exactly these folders should have been generated
     val expectedFolders =
       Set(
-        "temple-user-db",
-        "temple-user",
+        "simple-temple-test-user-db",
+        "simple-temple-test-user",
         "auth",
         "api",
         "booking-db",
         "booking",
-        "event-db",
-        "event",
+        "simple-temple-test-group-db",
+        "simple-temple-test-group",
         "kong",
         "kube",
         "grafana",
@@ -45,65 +45,68 @@ class SimpleE2ETest extends FlatSpec with Matchers {
     Files.list(basePath).toScala(Set) shouldBe expectedFolders
 
     // Only one file should be present in the temple-user-db folder
-    val expectedTempleUserDbFiles = Set("init.sql").map(dir => basePath.resolve("temple-user-db").resolve(dir))
-    Files.list(basePath.resolve("temple-user-db")).toScala(Set) shouldBe expectedTempleUserDbFiles
+    val expectedTempleUserDbFiles =
+      Set("init.sql").map(dir => basePath.resolve("simple-temple-test-user-db").resolve(dir))
+    Files.list(basePath.resolve("simple-temple-test-user-db")).toScala(Set) shouldBe expectedTempleUserDbFiles
 
-    // The content of the temple-user-db/init.sql file should be correct
-    val initSql = Files.readString(basePath.resolve("temple-user-db").resolve("init.sql"))
+    // The content of the simple-temple-test-user-db/init.sql file should be correct
+    val initSql = Files.readString(basePath.resolve("simple-temple-test-user-db").resolve("init.sql"))
     initSql shouldBe SimpleE2ETestData.createStatement
 
-    // Only these files should be present in the temple-user folder
+    // Only these files should be present in the simple-temple-test-user folder
     val expectedTempleUserFiles =
-      Set("Dockerfile", "dao", "temple-user.go", "util", "go.mod", "metric", "hook.go").map(dir =>
-        basePath.resolve("temple-user").resolve(dir),
+      Set("Dockerfile", "dao", "simple-temple-test-user.go", "util", "go.mod", "metric", "hook.go").map(dir =>
+        basePath.resolve("simple-temple-test-user").resolve(dir),
       )
-    Files.list(basePath.resolve("temple-user")).toScala(Set) shouldBe expectedTempleUserFiles
+    Files.list(basePath.resolve("simple-temple-test-user")).toScala(Set) shouldBe expectedTempleUserFiles
 
-    // The content of the temple-user/Dockerfile file should be correct
-    val templeUserDockerfile = Files.readString(basePath.resolve("temple-user").resolve("Dockerfile"))
+    // The content of the simple-temple-test-user/Dockerfile file should be correct
+    val templeUserDockerfile = Files.readString(basePath.resolve("simple-temple-test-user").resolve("Dockerfile"))
     templeUserDockerfile shouldBe SimpleE2ETestData.dockerfile
 
-    // The content of the main temple-user go file should be correct
-    val templeUserGoFile = Files.readString(basePath.resolve("temple-user").resolve("temple-user.go"))
+    // The content of the main simple-temple-test-user go file should be correct
+    val templeUserGoFile =
+      Files.readString(basePath.resolve("simple-temple-test-user").resolve("simple-temple-test-user.go"))
     templeUserGoFile shouldBe FileUtils.readResources("go/user/user.go.snippet")
 
     // The content of hook.go should be correct
-    val templeUserHookGoFile = Files.readString(basePath.resolve("temple-user").resolve("hook.go"))
+    val templeUserHookGoFile = Files.readString(basePath.resolve("simple-temple-test-user").resolve("hook.go"))
     templeUserHookGoFile shouldBe FileUtils.readResources("go/user/hook.go.snippet")
 
     // The content of the go.mod should be correct
-    val templeUserGoModFile = Files.readString(basePath.resolve("temple-user").resolve("go.mod"))
+    val templeUserGoModFile = Files.readString(basePath.resolve("simple-temple-test-user").resolve("go.mod"))
     templeUserGoModFile shouldBe FileUtils.readResources("go/user/go.mod.snippet")
 
-    // Only these files should be present in the temple-user/dao folder
+    // Only these files should be present in the simple-temple-test-user/dao folder
     val expectedTempleUserDaoFiles =
-      Set("dao.go", "errors.go").map(dir => basePath.resolve("temple-user/dao").resolve(dir))
-    Files.list(basePath.resolve("temple-user/dao")).toScala(Set) shouldBe expectedTempleUserDaoFiles
+      Set("dao.go", "errors.go").map(dir => basePath.resolve("simple-temple-test-user/dao").resolve(dir))
+    Files.list(basePath.resolve("simple-temple-test-user/dao")).toScala(Set) shouldBe expectedTempleUserDaoFiles
 
-    // The content of the temple-user dao file should be correct
-    val templeUserDaoFile = Files.readString(basePath.resolve("temple-user/dao").resolve("dao.go"))
+    // The content of the simple-temple-test-user dao file should be correct
+    val templeUserDaoFile = Files.readString(basePath.resolve("simple-temple-test-user/dao").resolve("dao.go"))
     templeUserDaoFile shouldBe FileUtils.readResources("go/user/dao/dao.go.snippet")
 
-    // The content of the temple-user dao errors file should be correct
-    val templeUserErrorsFile = Files.readString(basePath.resolve("temple-user/dao").resolve("errors.go"))
+    // The content of the simple-temple-test-user dao errors file should be correct
+    val templeUserErrorsFile = Files.readString(basePath.resolve("simple-temple-test-user/dao").resolve("errors.go"))
     templeUserErrorsFile shouldBe FileUtils.readResources("go/user/dao/errors.go.snippet")
 
-    // Only these files should be present in the temple-user/util folder
+    // Only these files should be present in the simple-temple-test-user/util folder
     val expectedTempleUserUtilFiles =
-      Set("util.go").map(dir => basePath.resolve("temple-user/util").resolve(dir))
-    Files.list(basePath.resolve("temple-user/util")).toScala(Set) shouldBe expectedTempleUserUtilFiles
+      Set("util.go").map(dir => basePath.resolve("simple-temple-test-user/util").resolve(dir))
+    Files.list(basePath.resolve("simple-temple-test-user/util")).toScala(Set) shouldBe expectedTempleUserUtilFiles
 
-    // The content of the temple-user util file should be correct
-    val templeUserUtilFile = Files.readString(basePath.resolve("temple-user/util").resolve("util.go"))
+    // The content of the simple-temple-test-user util file should be correct
+    val templeUserUtilFile = Files.readString(basePath.resolve("simple-temple-test-user/util").resolve("util.go"))
     templeUserUtilFile shouldBe FileUtils.readResources("go/user/util/util.go.snippet")
 
-    // Only these files should be present in the temple-user/metric folder
+    // Only these files should be present in the simple-temple-test-user/metric folder
     val expectedTempleUserMetricFiles =
-      Set("metric.go").map(dir => basePath.resolve("temple-user/metric").resolve(dir))
-    Files.list(basePath.resolve("temple-user/metric")).toScala(Set) shouldBe expectedTempleUserMetricFiles
+      Set("metric.go").map(dir => basePath.resolve("simple-temple-test-user/metric").resolve(dir))
+    Files.list(basePath.resolve("simple-temple-test-user/metric")).toScala(Set) shouldBe expectedTempleUserMetricFiles
 
-    // The content of the temple-user util file should be correct
-    val templeUserMetricFile = Files.readString(basePath.resolve("temple-user/metric").resolve("metric.go"))
+    // The content of the simple-temple-test-user util file should be correct
+    val templeUserMetricFile = Files.readString(basePath.resolve("simple-temple-test-user/metric").resolve("metric.go"))
+
     templeUserMetricFile shouldBe FileUtils.readResources("go/user/metric/metric.go.snippet")
 
     // Only one file should be present in the kong folder
@@ -147,24 +150,28 @@ class SimpleE2ETest extends FlatSpec with Matchers {
       "db-deployment.yaml",
       "db-service.yaml",
       "db-storage.yaml",
-    ).map(dir => basePath.resolve("kube/temple-user").resolve(dir))
-    Files.list(basePath.resolve("kube/temple-user")).toScala(Set) shouldBe expectedUserKubeFiles
+    ).map(dir => basePath.resolve("kube/simple-temple-test-user").resolve(dir))
+    Files.list(basePath.resolve("kube/simple-temple-test-user")).toScala(Set) shouldBe expectedUserKubeFiles
 
     // The content of the kube/temple-user/ files should be correct
-    val templeUserKubeDeployment = Files.readString(basePath.resolve("kube/temple-user").resolve("deployment.yaml"))
+    val templeUserKubeDeployment =
+      Files.readString(basePath.resolve("kube/simple-temple-test-user").resolve("deployment.yaml"))
     templeUserKubeDeployment shouldBe SimpleE2ETestData.kubeDeployment
 
     val templeUserKubeDbDeployment =
-      Files.readString(basePath.resolve("kube/temple-user").resolve("db-deployment.yaml"))
+      Files.readString(basePath.resolve("kube/simple-temple-test-user").resolve("db-deployment.yaml"))
     templeUserKubeDbDeployment shouldBe SimpleE2ETestData.kubeDbDeployment
 
-    val templeUserKubeService = Files.readString(basePath.resolve("kube/temple-user").resolve("service.yaml"))
+    val templeUserKubeService =
+      Files.readString(basePath.resolve("kube/simple-temple-test-user").resolve("service.yaml"))
     templeUserKubeService shouldBe SimpleE2ETestData.kubeService
 
-    val templeUserKubeDbService = Files.readString(basePath.resolve("kube/temple-user").resolve("db-service.yaml"))
+    val templeUserKubeDbService =
+      Files.readString(basePath.resolve("kube/simple-temple-test-user").resolve("db-service.yaml"))
     templeUserKubeDbService shouldBe SimpleE2ETestData.kubeDbService
 
-    val templeUserKubeStorage = Files.readString(basePath.resolve("kube/temple-user").resolve("db-storage.yaml"))
+    val templeUserKubeStorage =
+      Files.readString(basePath.resolve("kube/simple-temple-test-user").resolve("db-storage.yaml"))
     templeUserKubeStorage shouldBe SimpleE2ETestData.kubeDbStorage
 
     // Only these folders should be present in the grafana folder
@@ -178,7 +185,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
     // Only these files should be present in the grafana/provisioning/dashboards folder
     val expectedGrafanaDashboardsFolders =
-      Set("booking.json", "event.json", "temple-user.json", "dashboards.yml").map(dir =>
+      Set("booking.json", "simple-temple-test-group.json", "simple-temple-test-user.json", "dashboards.yml").map(dir =>
         basePath.resolve("grafana/provisioning/dashboards").resolve(dir),
       )
 
@@ -188,7 +195,7 @@ class SimpleE2ETest extends FlatSpec with Matchers {
 
     // The content of the grafana/provisioning/dashboards files should be correct
     val templeUserGrafanaDashboard =
-      Files.readString(basePath.resolve("grafana/provisioning/dashboards").resolve("temple-user.json"))
+      Files.readString(basePath.resolve("grafana/provisioning/dashboards").resolve("simple-temple-test-user.json"))
     templeUserGrafanaDashboard shouldBe SimpleE2ETestData.grafanaDashboard
 
     val templeUserGrafanaDashboardConfig =
