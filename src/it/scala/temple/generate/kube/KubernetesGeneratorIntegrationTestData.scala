@@ -11,7 +11,7 @@ object KubernetesGeneratorIntegrationTestData {
         name = "user",
         image = "temple-user-service",
         dbImage = "postgres:12.1",
-        ports = Seq("project-builder-simple/api" -> 80),
+        ports = Seq("api" -> 80),
         replicas = 1,
         secretName = "regcred",
         appEnvVars = Seq(),
