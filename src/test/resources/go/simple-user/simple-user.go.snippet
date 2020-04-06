@@ -126,13 +126,6 @@ func jsonMiddleware(next http.Handler) http.Handler {
 }
 
 func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) {
-	auth, err := util.ExtractAuthIDFromRequest(r.Header)
-	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusUnauthorized)
-		return
-	}
-
 	var req createTempleUserRequest
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
@@ -154,8 +147,15 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	uuid, err := uuid.NewUUID()
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not create UUID: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
+
 	templeUser, err := env.dao.CreateTempleUser(dao.CreateTempleUserInput{
-		ID:            auth.ID,
+		ID:            uuid,
 		IntField:      *req.IntField,
 		DoubleField:   *req.DoubleField,
 		StringField:   *req.StringField,
