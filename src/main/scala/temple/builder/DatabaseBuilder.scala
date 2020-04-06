@@ -53,7 +53,7 @@ object DatabaseBuilder {
     serviceName: String,
     attributes: Map[String, Attribute],
     endpoints: Set[CRUD],
-    createdByAttribute: CreatedByAttribute,
+    createdByAttribute: Option[CreatedByAttribute],
     selectionAttribute: String = "id",
   ): ListMap[CRUD, Statement] = {
     val tableName = StringUtils.snakeCase(serviceName)
@@ -86,7 +86,7 @@ object DatabaseBuilder {
           )
         case List =>
           createdByAttribute match {
-            case CreatedByAttribute.EnumerateByCreator(_, _) =>
+            case Some(CreatedByAttribute(_, _, true)) =>
               List -> Statement.Read(
                 tableName,
                 columns = columns,

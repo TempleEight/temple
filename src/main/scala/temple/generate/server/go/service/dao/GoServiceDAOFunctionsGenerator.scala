@@ -2,7 +2,6 @@ package temple.generate.server.go.service.dao
 
 import temple.ast.Annotation
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
-import temple.generate.server.CreatedByAttribute.EnumerateByCreator
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.server.go.service.dao.GoServiceDAOInterfaceGenerator.generateInterfaceFunction
@@ -11,10 +10,11 @@ import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
 
 import scala.collection.immutable.ListMap
+import scala.Option.when
 
 object GoServiceDAOFunctionsGenerator {
 
-  private def generateDAOFunctionComment(root: ServiceRoot, operation: CRUD): String =
+  private def generateDAOFunctionComment(root: ServiceRoot, operation: CRUD, enumeratingByCreator: Boolean): String =
     mkCode(
       "//",
       generateDAOFunctionName(root, operation),
@@ -27,11 +27,7 @@ object GoServiceDAOFunctionsGenerator {
       },
       "in the datastore",
       operation match {
-        case List =>
-          root.createdByAttribute match {
-            case _: EnumerateByCreator => "for a given ID"
-            case _                     => ""
-          }
+        case List   => when(enumeratingByCreator) { "for a given ID" }
         case Create => s", returning the newly created ${root.decapitalizedName}"
         case Read   => "for a given ID"
         case Update => s"for a given ID, returning the newly updated ${root.decapitalizedName}"
@@ -43,8 +39,8 @@ object GoServiceDAOFunctionsGenerator {
     val prefix  = "input"
     lazy val id = Seq(s"$prefix.${root.idAttribute.name.toUpperCase}")
     lazy val createdBy = root.createdByAttribute match {
-      case EnumerateByCreator(inputName, _) => Seq(s"$prefix.${inputName.capitalize}")
-      case _                                => Seq.empty
+      case Some(CreatedByAttribute(inputName, _, true)) => Seq(s"$prefix.${inputName.capitalize}")
+      case _                                            => Seq.empty
     }
     lazy val filteredAttributes = root.attributes.collect {
       case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.ServerSet) =>
@@ -106,10 +102,8 @@ object GoServiceDAOFunctionsGenerator {
       .prefix("Scan")
       .list(
         s"&${root.decapitalizedName}.${root.idAttribute.name.toUpperCase}",
-        root.createdByAttribute match {
-          case CreatedByAttribute.None => None
-          case enumerating: CreatedByAttribute.Enumerating =>
-            Some(s"&${root.decapitalizedName}.${enumerating.name.capitalize}")
+        root.createdByAttribute.map { enumerating =>
+          Some(s"&${root.decapitalizedName}.${enumerating.name.capitalize}")
         },
         root.attributes.map { case (name, _) => s"&${root.decapitalizedName}.${name.capitalize}" },
       )
@@ -179,12 +173,17 @@ object GoServiceDAOFunctionsGenerator {
       case Delete                 => Seq("nil")
     }
 
-  private def generateDAOFunction(root: ServiceRoot, operation: CRUD, query: String): String =
+  private def generateDAOFunction(
+    root: ServiceRoot,
+    operation: CRUD,
+    query: String,
+    enumeratingByCreator: Boolean,
+  ): String =
     mkCode.lines(
-      generateDAOFunctionComment(root, operation),
+      generateDAOFunctionComment(root, operation, enumeratingByCreator),
       mkCode(
         "func (dao *DAO)",
-        generateInterfaceFunction(root, operation),
+        generateInterfaceFunction(root, operation, enumeratingByCreator),
         CodeWrap.curly.tabbed(
           mkCode.doubleLines(
             generateQueryBlock(root, operation, query),
@@ -195,9 +194,9 @@ object GoServiceDAOFunctionsGenerator {
       ),
     )
 
-  private[service] def generateDAOFunctions(root: ServiceRoot): String =
+  private[service] def generateDAOFunctions(root: ServiceRoot, enumeratingByCreator: Boolean): String =
     mkCode.doubleLines(
       for ((operation, query) <- root.opQueries)
-        yield generateDAOFunction(root, operation, query),
+        yield generateDAOFunction(root, operation, query, enumeratingByCreator),
     )
 }
