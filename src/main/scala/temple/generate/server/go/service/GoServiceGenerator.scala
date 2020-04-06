@@ -1,5 +1,6 @@
 package temple.generate.server.go.service
 
+import temple.ast.Metadata.Readable
 import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
@@ -42,9 +43,9 @@ object GoServiceGenerator extends ServiceGenerator {
     val hasAuthBlock = root.createdByAttribute.isEmpty
 
     // Whether or not this service is enumerating by creator
-    val enumeratingByCreator = root.createdByAttribute match {
-      case Some(CreatedByAttribute(_, _, true)) => true
-      case _                                    => false
+    lazy val enumeratingByCreator = root.readable match {
+      case Readable.All  => false
+      case Readable.This => true
     }
 
     (Map(

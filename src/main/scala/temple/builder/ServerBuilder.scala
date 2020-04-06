@@ -30,14 +30,14 @@ object ServerBuilder {
       case ServiceLanguage.Go => GoLanguageConfig
     }
 
-    val createdBy: Option[CreatedByAttribute] = serviceBlock.lookupMetadata[ServiceEnumerable].map {
-      case ServiceEnumerable =>
-        CreatedByAttribute(
-          languageConfig.createdByInputName,
-          languageConfig.createdByName,
-          filterEnumeration = false,
-        )
-    }
+    // Whether or not this service has an auth block
+    val hasAuthBlock = serviceBlock.lookupLocalMetadata[ServiceAuth].isDefined
+
+    // The created by attribute exists if the project has auth and this service does not have an auth block
+    val createdBy =
+      if (projectUsesAuth && !hasAuthBlock)
+        Some(CreatedByAttribute(languageConfig.createdByInputName, languageConfig.createdByName))
+      else None
 
     val idAttribute = IDAttribute("id")
 

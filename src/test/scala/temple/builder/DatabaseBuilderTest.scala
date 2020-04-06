@@ -1,6 +1,7 @@
 package temple.builder
 
 import org.scalatest.{FlatSpec, Matchers}
+import temple.ast.Metadata
 import temple.generate.CRUD
 import temple.generate.server.CreatedByAttribute
 
@@ -23,7 +24,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Create),
-      createdByAttribute = None,
+      Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.Create)
     queries(CRUD.Create) shouldBe DatabaseBuilderTestData.sampleInsertStatement
@@ -34,7 +35,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Read),
-      createdByAttribute = None,
+      Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.Read)
     queries(CRUD.Read) shouldBe DatabaseBuilderTestData.sampleReadStatement
@@ -45,7 +46,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Update),
-      createdByAttribute = None,
+      Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.Update)
     queries(CRUD.Update) shouldBe DatabaseBuilderTestData.sampleUpdateStatement
@@ -56,7 +57,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Delete),
-      createdByAttribute = None,
+      Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.Delete)
     queries(CRUD.Delete) shouldBe DatabaseBuilderTestData.sampleDeleteStatement
@@ -67,7 +68,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
-      createdByAttribute = None,
+      Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.List)
     queries(CRUD.List) shouldBe DatabaseBuilderTestData.sampleListStatementEnumerateByAll
@@ -78,7 +79,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
-      Some(CreatedByAttribute("created_by", "created_by", filterEnumeration = false)),
+      Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.List)
     queries(CRUD.List) shouldBe DatabaseBuilderTestData.sampleListStatementEnumerateByAll
@@ -89,7 +90,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
-      Some(CreatedByAttribute("created_by", "created_by", filterEnumeration = true)),
+      Metadata.Readable.This,
     )
     queries.keys should contain(CRUD.List)
     queries(CRUD.List) shouldBe DatabaseBuilderTestData.sampleListStatementEnumerateByCreator
