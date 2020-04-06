@@ -6,4 +6,4 @@ import temple.ast.Metadata.StructMetadata
 case class StructBlock(
   attributes: Map[String, Attribute],
   metadata: Seq[StructMetadata] = Nil,
-) extends TempleBlock[StructMetadata]
+) extends AttributeBlock[StructMetadata]

@@ -1,6 +1,6 @@
 package temple.generate.docker
 
-import temple.ast.AbstractServiceBlock._
+import temple.ast.AbstractServiceBlock.ServiceBlock
 import temple.ast.AttributeType._
 import temple.ast.{Annotation, Attribute, StructBlock}
 
