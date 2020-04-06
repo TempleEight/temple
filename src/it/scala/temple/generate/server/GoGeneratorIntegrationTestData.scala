@@ -41,7 +41,7 @@ object GoGeneratorIntegrationTestData {
     ),
     port = 81,
     idAttribute = IDAttribute("id"),
-    createdByAttribute = Some(CreatedByAttribute("authID", "createdBy", filterEnumeration = true)),
+    createdByAttribute = Some(CreatedByAttribute("authID", "createdBy")),
     attributes = ListMap(
       "userOne"   -> Attribute(AttributeType.ForeignKey("User")),
       "userTwo"   -> Attribute(AttributeType.ForeignKey("User")),

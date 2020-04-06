@@ -34,7 +34,7 @@ class ValidatorTest extends FlatSpec with Matchers {
               Writable.This,
               Readable.All,
               Database.Postgres,
-              ServiceEnumerable(),
+              ServiceEnumerable,
               ServiceLanguage.Go,
               Omit(Set(Delete)),
             ),

@@ -103,10 +103,10 @@ private class Validator private (templefile: Templefile) {
       case _: Metadata.Readable        => assertUnique[Metadata.Readable]()
       case Metadata.Writable.All if metadata contains Metadata.Readable.This =>
         errors += context.errorMessage(s"#writable(all) is not compatible with #readable(this)")
-      case _: Metadata.Writable          => assertUnique[Metadata.Writable]()
-      case Metadata.Omit(_)              => assertUnique[Metadata.Omit]()
-      case Metadata.ServiceEnumerable(_) => assertUnique[Metadata.ServiceEnumerable]()
-      case _: Metadata.Provider          => assertUnique[Metadata.Provider]()
+      case _: Metadata.Writable       => assertUnique[Metadata.Writable]()
+      case Metadata.Omit(_)           => assertUnique[Metadata.Omit]()
+      case Metadata.ServiceEnumerable => assertUnique[Metadata.ServiceEnumerable]()
+      case _: Metadata.Provider       => assertUnique[Metadata.Provider]()
       case Metadata.Uses(services) =>
         assertUnique[Metadata.Uses]()
         for (service <- services if !allServices.contains(service))
