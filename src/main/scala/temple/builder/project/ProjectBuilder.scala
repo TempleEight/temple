@@ -1,6 +1,5 @@
 package temple.builder.project
 
-import temple.ast.AbstractServiceBlock._
 import temple.ast.Metadata._
 import temple.ast._
 import temple.builder._
@@ -55,13 +54,9 @@ object ProjectBuilder {
       case (_, service) => service.lookupMetadata[ServiceAuth].nonEmpty
     }
 
-    if (usesAuth) {
-      templefile.addService("Auth", AuthServiceBlock)
-    }
-
     implicit val dbContext: PostgresContext = PostgresContext(DollarNumbers)
 
-    val databaseCreationScripts = templefile.services.map {
+    val databaseCreationScripts = templefile.allServices.map {
       case (name, service) =>
         val createStatements: Seq[Statement.Create] = DatabaseBuilder.createServiceTables(name, service)
         service.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase) match {
@@ -90,7 +85,7 @@ object ProjectBuilder {
     // TODO: Get this from templefile and project settings
     val datasource: Datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
     // TODO: Take all of this inside MetricsBuilder
-    val metrics = templefile.services.map {
+    val metrics = templefile.allServices.map {
         case (name, service) =>
           val rows             = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
           val grafanaDashboard = GrafanaDashboardGenerator.generate(name.toLowerCase, name, rows)

@@ -1,5 +1,6 @@
 package temple.builder
 
+import temple.ast.AbstractServiceBlock.AuthServiceBlock
 import temple.ast.Metadata.Database
 import temple.ast.{AbstractServiceBlock, Metadata}
 import temple.builder.project.ProjectConfig
@@ -36,7 +37,7 @@ object OrchestrationBuilder {
             dbLifecycleCommand = dbLanguage match {
               case Database.Postgres => LifecycleCommand.psqlSetup.toString
             },
-            usesAuth = name != "Auth",
+            usesAuth = service != AuthServiceBlock,
           )
       },
     )

@@ -1,6 +1,7 @@
 package temple.ast
 
 import temple.ast.AbstractServiceBlock._
+import temple.ast.Metadata.ServiceAuth
 import temple.ast.Templefile.Ports
 import temple.builder.project.ProjectConfig
 
@@ -11,42 +12,38 @@ case class Templefile(
   projectName: String,
   projectBlock: ProjectBlock = ProjectBlock(),
   targets: Map[String, TargetBlock] = Map(),
-  var services: Map[String, AbstractServiceBlock] = Map(),
+  services: Map[String, ServiceBlock] = Map(),
 ) extends TempleNode {
   // Inform every child node of their parent, so that they can access the project information
   for (block <- Iterator(projectBlock) ++ targets.valuesIterator ++ services.valuesIterator) {
     block.setParent(this)
   }
 
-  /**
-    * The services provided in the templefile, i.e the ServiceBlocks, not the AuthServiceBlocks
-    * @return Map of service name to service blocks that appear in Templefile
-    */
-  def providedServices: Map[String, ServiceBlock] = services.collect {
-    case (name: String, service: ServiceBlock) => name -> service
+  val providedServices: Map[String, ServiceBlock] = services
+
+  // Whether or not to generate an auth service - based on whether any service has #auth
+  private val usesAuth = services.exists {
+    case (_, service) => service.lookupMetadata[ServiceAuth].nonEmpty
   }
 
-  def allServicesWithPorts: Iterable[(String, AbstractServiceBlock, Ports)] =
-    services
-      .zip(Iterator.from(ProjectConfig.serviceStartPort, step = 2)) // 1024 is reserved for auth service
-      .map {
-        case ((name, service), port) =>
-          if (service == AuthServiceBlock) (name, service, Ports(ProjectConfig.authPort, ProjectConfig.authMetricPort))
-          else (name, service, Ports(port, port + 1))
-      }
+  val providedServicesWithPorts: Iterable[(String, ServiceBlock, Ports)] =
+    providedServices
+      .zip(Iterator.from(ProjectConfig.serviceStartPort, step = 2))
+      .map { case ((name, service), port) => (name, service, Templefile.Ports(port, port + 1)) }
 
-  def providedServicesWithPorts: Iterable[(String, ServiceBlock, Ports)] =
-    allServicesWithPorts.collect { case (name, service: ServiceBlock, ports) => (name, service, ports) }
-
-  /**
-    * Add an extra service to an exisiting Templefile - useful for adding auth when needed.
-    * @param name - the name of the new service
-    * @param block - the [[ServiceBlock]] to add
-    */
-  def addService(name: String, block: AbstractServiceBlock): Unit = {
-    block.setParent(this)
-    services += name -> block
+  val allServicesWithPorts: Iterable[(String, AbstractServiceBlock, Ports)] = {
+    if (usesAuth) {
+      val authBlock = AuthServiceBlock
+      authBlock.setParent(this)
+      providedServicesWithPorts ++ Iterable(
+        ("Auth", authBlock, Ports(ProjectConfig.authPort, ProjectConfig.authMetricPort)),
+      )
+    } else providedServicesWithPorts
   }
+
+  val allServices: Map[String, AbstractServiceBlock] = allServicesWithPorts.map {
+    case (name, service, _) => (name, service)
+  }.toMap
 
   /** Fall back to the default metadata for the project */
   override protected def lookupDefaultMetadata[T <: Metadata: ClassTag]: Option[T] = None
