@@ -9,8 +9,8 @@ import temple.generate.server.{CreatedByAttribute, ServiceRoot}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
 
-import scala.collection.immutable.ListMap
 import scala.Option.when
+import scala.collection.immutable.ListMap
 
 object GoServiceDAOFunctionsGenerator {
 

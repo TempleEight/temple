@@ -3,14 +3,13 @@ package temple.generate.server.go.service.main
 import temple.ast.Attribute
 import temple.generate.CRUD.Create
 import temple.generate.server.ServiceRoot
-import temple.generate.server.go.common.GoCommonGenerator._
-import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.generateHandlerDecl
-import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
-import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.server.go.GoHTTPStatus.{StatusBadRequest, StatusInternalServerError}
+import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.{generateHandlerDecl, _}
+import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
-import scala.collection.immutable.ListMap
 import scala.Option.when
+import scala.collection.immutable.ListMap
 
 object GoServiceMainCreateHandlerGenerator {
 

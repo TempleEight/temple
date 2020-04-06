@@ -1,5 +1,6 @@
 package temple.DSL.semantics
 
+import temple.ast.AbstractServiceBlock._
 import temple.ast._
 
 case class ServiceRenamer(renamingMap: Map[String, String]) {

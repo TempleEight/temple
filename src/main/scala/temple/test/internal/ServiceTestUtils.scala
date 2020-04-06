@@ -4,12 +4,13 @@ import java.sql.{Date, Time, Timestamp}
 import java.util.UUID
 
 import io.circe.parser.parse
+import io.circe.syntax._
 import io.circe.{Json, JsonObject}
 import scalaj.http.Http
-import temple.utils.StringUtils
+import temple.ast.AbstractServiceBlock.ServiceBlock
+import temple.ast.{Annotation, Attribute, AttributeType, Metadata}
 import temple.utils.MonadUtils.FromEither
-import io.circe.syntax._
-import temple.ast.{Annotation, Attribute, AttributeType, Metadata, ServiceBlock}
+import temple.utils.StringUtils
 
 import scala.util.Random
 

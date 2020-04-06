@@ -2,8 +2,8 @@ package temple.generate.target.openapi
 
 import io.circe.syntax._
 import io.circe.yaml.Printer
-import temple.ast.{Annotation, Attribute}
 import temple.ast.AttributeType._
+import temple.ast.{Annotation, Attribute}
 import temple.collection.FlagMapView
 import temple.generate.CRUD._
 import temple.generate.FileSystem._

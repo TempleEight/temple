@@ -6,8 +6,9 @@ import temple.DSL.semantics.SemanticAnalyzerTest._
 import temple.DSL.syntax
 import temple.DSL.syntax.Arg._
 import temple.DSL.syntax.{Args, DSLRootItem, Entry}
+import temple.ast.AbstractServiceBlock.ServiceBlock
 import temple.ast.AttributeType._
-import temple.ast.{Attribute, ProjectBlock, ServiceBlock, Templefile}
+import temple.ast.{Attribute, Templefile}
 
 class SemanticAnalyzerTest extends FlatSpec with Matchers {
 

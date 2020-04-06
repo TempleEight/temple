@@ -1,6 +1,6 @@
 package temple.test.internal
 
-import temple.ast.ServiceBlock
+import temple.ast.AbstractServiceBlock.ServiceBlock
 import temple.builder.project.ProjectBuilder
 import temple.generate.CRUD
 
