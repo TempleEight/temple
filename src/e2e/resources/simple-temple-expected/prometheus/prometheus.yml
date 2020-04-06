@@ -1,0 +1,20 @@
+global:
+  scrape_interval: 15s
+  evaluation_interval: 15s
+scrape_configs:
+- job_name: simple-temple-test-user
+  static_configs:
+  - targets:
+    - simple-temple-test-user:1027
+- job_name: booking
+  static_configs:
+  - targets:
+    - booking:1029
+- job_name: simple-temple-test-group
+  static_configs:
+  - targets:
+    - simple-temple-test-group:1031
+- job_name: auth
+  static_configs:
+  - targets:
+    - auth:1025

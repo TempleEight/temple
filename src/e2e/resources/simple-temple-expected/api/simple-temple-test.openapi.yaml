@@ -1,0 +1,500 @@
+openapi: 3.0.0
+info:
+  title: SimpleTempleTest
+  version: 0.0.1
+paths:
+  /simpletempletestuser:
+    post:
+      summary: Register a new simpletempletestuser
+      tags:
+      - SimpleTempleTestUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                simpleTempleTestUser:
+                  type: string
+                email:
+                  type: string
+                  minLength: 5
+                  maxLength: 40
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                createdAt:
+                  type: string
+                  format: date-time
+                numberOfDogs:
+                  type: number
+                  format: int32
+                currentBankBalance:
+                  type: number
+                  format: float
+                  minimum: 0.0
+                birthDate:
+                  type: string
+                  format: date
+                breakfastTime:
+                  type: string
+                  format: time
+      responses:
+        '200':
+          description: SimpleTempleTestUser successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  simpleTempleTestUser:
+                    type: string
+                  email:
+                    type: string
+                    minLength: 5
+                    maxLength: 40
+                  firstName:
+                    type: string
+                  lastName:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+                  numberOfDogs:
+                    type: number
+                    format: int32
+                  currentBankBalance:
+                    type: number
+                    format: float
+                    minimum: 0.0
+                  birthDate:
+                    type: string
+                    format: date
+                  breakfastTime:
+                    type: string
+                    format: time
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /simpletempletestuser/{id}:
+    parameters:
+    - in: path
+      name: id
+      schema:
+        type: number
+        format: int32
+      required: true
+      description: ID of the simpletempletestuser to perform operations on
+    get:
+      summary: Look up a single simpletempletestuser
+      tags:
+      - SimpleTempleTestUser
+      responses:
+        '200':
+          description: SimpleTempleTestUser details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  simpleTempleTestUser:
+                    type: string
+                  email:
+                    type: string
+                    minLength: 5
+                    maxLength: 40
+                  firstName:
+                    type: string
+                  lastName:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+                  numberOfDogs:
+                    type: number
+                    format: int32
+                  currentBankBalance:
+                    type: number
+                    format: float
+                    minimum: 0.0
+                  birthDate:
+                    type: string
+                    format: date
+                  breakfastTime:
+                    type: string
+                    format: time
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    put:
+      summary: Update a single simpletempletestuser
+      tags:
+      - SimpleTempleTestUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                simpleTempleTestUser:
+                  type: string
+                email:
+                  type: string
+                  minLength: 5
+                  maxLength: 40
+                firstName:
+                  type: string
+                lastName:
+                  type: string
+                createdAt:
+                  type: string
+                  format: date-time
+                numberOfDogs:
+                  type: number
+                  format: int32
+                currentBankBalance:
+                  type: number
+                  format: float
+                  minimum: 0.0
+                birthDate:
+                  type: string
+                  format: date
+                breakfastTime:
+                  type: string
+                  format: time
+      responses:
+        '200':
+          description: SimpleTempleTestUser successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  simpleTempleTestUser:
+                    type: string
+                  email:
+                    type: string
+                    minLength: 5
+                    maxLength: 40
+                  firstName:
+                    type: string
+                  lastName:
+                    type: string
+                  createdAt:
+                    type: string
+                    format: date-time
+                  numberOfDogs:
+                    type: number
+                    format: int32
+                  currentBankBalance:
+                    type: number
+                    format: float
+                    minimum: 0.0
+                  birthDate:
+                    type: string
+                    format: date
+                  breakfastTime:
+                    type: string
+                    format: time
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /simpletempletestuser/all:
+    get:
+      summary: Get a list of every simpletempletestuser
+      tags:
+      - SimpleTempleTestUser
+      responses:
+        '200':
+          description: SimpleTempleTestUser list successfully fetched
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    simpleTempleTestUser:
+                      type: string
+                    email:
+                      type: string
+                      minLength: 5
+                      maxLength: 40
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    createdAt:
+                      type: string
+                      format: date-time
+                    numberOfDogs:
+                      type: number
+                      format: int32
+                    currentBankBalance:
+                      type: number
+                      format: float
+                      minimum: 0.0
+                    birthDate:
+                      type: string
+                      format: date
+                    breakfastTime:
+                      type: string
+                      format: time
+        '500':
+          $ref: '#/components/responses/Error500'
+  /booking:
+    post:
+      summary: Register a new booking
+      tags:
+      - Booking
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+      responses:
+        '200':
+          description: Booking successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /booking/{id}:
+    parameters:
+    - in: path
+      name: id
+      schema:
+        type: number
+        format: int32
+      required: true
+      description: ID of the booking to perform operations on
+    get:
+      summary: Look up a single booking
+      tags:
+      - Booking
+      responses:
+        '200':
+          description: Booking details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    put:
+      summary: Update a single booking
+      tags:
+      - Booking
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+      responses:
+        '200':
+          description: Booking successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      summary: Delete a single booking
+      tags:
+      - Booking
+      responses:
+        '200':
+          description: Booking successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /simpletempletestgroup:
+    post:
+      summary: Register a new simpletempletestgroup
+      tags:
+      - SimpleTempleTestGroup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+      responses:
+        '200':
+          description: SimpleTempleTestGroup successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /simpletempletestgroup/{id}:
+    parameters:
+    - in: path
+      name: id
+      schema:
+        type: number
+        format: int32
+      required: true
+      description: ID of the simpletempletestgroup to perform operations on
+    get:
+      summary: Look up a single simpletempletestgroup
+      tags:
+      - SimpleTempleTestGroup
+      responses:
+        '200':
+          description: SimpleTempleTestGroup details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    put:
+      summary: Update a single simpletempletestgroup
+      tags:
+      - SimpleTempleTestGroup
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties: {}
+      responses:
+        '200':
+          description: SimpleTempleTestGroup successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      summary: Delete a single simpletempletestgroup
+      tags:
+      - SimpleTempleTestGroup
+      responses:
+        '200':
+          description: SimpleTempleTestGroup successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+components:
+  responses:
+    Error400:
+      description: Invalid request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: 'Invalid request parameters: name'
+    Error401:
+      description: Valid request but forbidden by server
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Not authorised to create this object
+    Error404:
+      description: ID not found
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: Object not found with ID 1
+    Error500:
+      description: The server encountered an error while serving this request
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: 'Unable to reach user service: connection timeout'
