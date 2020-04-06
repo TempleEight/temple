@@ -1239,7 +1239,7 @@ object ProjectBuilderTestData {
 
   val complexTemplefilePostgresAuthOutput: String =
     """CREATE TABLE auth (
-      |  id UUID UNIQUE NOT NULL,
+      |  id UUID NOT NULL PRIMARY KEY,
       |  email TEXT UNIQUE NOT NULL,
       |  password TEXT NOT NULL
       |);""".stripMargin
