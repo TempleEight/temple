@@ -3,6 +3,7 @@ package temple.DSL
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.parser.DSLParserMatchers
 import temple.DSL.semantics.Analyzer.parseAndValidate
+import temple.ast.AbstractServiceBlock._
 import temple.ast.Annotation.{Nullable, Server, Unique}
 import temple.ast.AttributeType._
 import temple.ast.Metadata._

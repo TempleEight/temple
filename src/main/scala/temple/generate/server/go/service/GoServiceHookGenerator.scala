@@ -1,8 +1,7 @@
 package temple.generate.server.go.service
 
 import temple.generate.CRUD
-import temple.generate.CRUD.CRUD
-import temple.generate.CRUD.presentParticiple
+import temple.generate.CRUD.{CRUD, presentParticiple}
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonHookGenerator

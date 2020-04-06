@@ -3,6 +3,7 @@ package temple.DSL.semantics
 import temple.DSL.semantics.MetadataParser.assertNoParameters
 import temple.DSL.syntax
 import temple.DSL.syntax.{Arg, Args, DSLRootItem, Entry}
+import temple.ast.AbstractServiceBlock._
 import temple.ast.ArgType._
 import temple.ast.Metadata._
 import temple.ast._
@@ -192,7 +193,7 @@ object Analyzer {
     *
     * @param entries The list of entries in the block from the AST
     * @param context The location in the AST, used for error messages
-    * @return A semantic representation of a [[temple.ast.ServiceBlock]]
+    * @return A semantic representation of a [[temple.ast.AbstractServiceBlock.ServiceBlock]]
     */
   private def parseServiceBlock(entries: Seq[Entry])(implicit context: SemanticContext): ServiceBlock = {
     // LinkedHashMap is used to preserve order in the map

@@ -1,6 +1,9 @@
 package temple.ast
 
+import temple.ast.AbstractServiceBlock._
+import temple.ast.Metadata.ServiceAuth
 import temple.ast.Templefile.Ports
+import temple.builder.project.ProjectConfig
 
 import scala.reflect.ClassTag
 
@@ -16,10 +19,31 @@ case class Templefile(
     block.setParent(this)
   }
 
-  def servicesWithPorts: Iterable[(String, ServiceBlock, Ports)] =
-    services
-      .zip(Iterator.from(1025, step = 2)) // 1024 is reserved for auth service
-      .map { case ((name, service), port) => (name, service, Ports(port, port + 1)) }
+  val providedServices: Map[String, ServiceBlock] = services
+
+  // Whether or not to generate an auth service - based on whether any service has #auth
+  private val usesAuth = services.exists {
+    case (_, service) => service.lookupMetadata[ServiceAuth].nonEmpty
+  }
+
+  val providedServicesWithPorts: Iterable[(String, ServiceBlock, Ports)] =
+    providedServices
+      .zip(Iterator.from(ProjectConfig.serviceStartPort, step = 2))
+      .map { case ((name, service), port) => (name, service, Templefile.Ports(port, port + 1)) }
+
+  val allServicesWithPorts: Iterable[(String, AbstractServiceBlock, Ports)] = {
+    if (usesAuth) {
+      val authBlock = AuthServiceBlock
+      authBlock.setParent(this)
+      providedServicesWithPorts ++ Iterable(
+        ("Auth", authBlock, Ports(ProjectConfig.authPort, ProjectConfig.authMetricPort)),
+      )
+    } else providedServicesWithPorts
+  }
+
+  val allServices: Map[String, AbstractServiceBlock] = allServicesWithPorts.map {
+    case (name, service, _) => (name, service)
+  }.toMap
 
   /** Fall back to the default metadata for the project */
   override protected def lookupDefaultMetadata[T <: Metadata: ClassTag]: Option[T] = None

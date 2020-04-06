@@ -1,7 +1,8 @@
 package temple.builder
 
+import temple.ast.AbstractServiceBlock.AuthServiceBlock
 import temple.ast.Metadata.Database
-import temple.ast.{Metadata, ServiceBlock}
+import temple.ast.{AbstractServiceBlock, Metadata}
 import temple.builder.project.ProjectConfig
 import temple.generate.kube.ast.OrchestrationType.{OrchestrationRoot, Service}
 import temple.generate.kube.ast.gen.LifecycleCommand
@@ -11,7 +12,7 @@ object OrchestrationBuilder {
 
   def createServiceOrchestrationRoot(
     projectName: String,
-    services: Seq[(String, ServiceBlock, Int)],
+    services: Seq[(String, AbstractServiceBlock, Int)],
   ): OrchestrationRoot =
     OrchestrationRoot(
       services map {
@@ -36,7 +37,7 @@ object OrchestrationBuilder {
             dbLifecycleCommand = dbLanguage match {
               case Database.Postgres => LifecycleCommand.psqlSetup.toString
             },
-            usesAuth = true,
+            usesAuth = service != AuthServiceBlock,
           )
       },
     )

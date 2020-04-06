@@ -1,5 +1,6 @@
 package temple.builder.project
 
+import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
 import temple.ast.Metadata.{Database, ServiceAuth}
 import temple.ast._
@@ -342,7 +343,7 @@ object ProjectBuilderTestData {
       |
       |ENTRYPOINT ["./temple-user"]
       |
-      |EXPOSE 1025
+      |EXPOSE 1026
       |""".stripMargin
 
   val kongFiles: Map[File, FileContent] = Map(
@@ -379,7 +380,7 @@ object ProjectBuilderTestData {
       |      - image: sample-project-temple-user
       |        name: temple-user
       |        ports:
-      |        - containerPort: 1025
+      |        - containerPort: 1026
       |      imagePullSecrets:
       |      - name: regcred
       |      restartPolicy: Always
@@ -449,8 +450,8 @@ object ProjectBuilderTestData {
       |spec:
       |  ports:
       |  - name: api
-      |    port: 1025
-      |    targetPort: 1025
+      |    port: 1026
+      |    targetPort: 1026
       |  selector:
       |    app: temple-user
       |    kind: service
@@ -514,7 +515,7 @@ object ProjectBuilderTestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=temple-user-service' \
-      |  --data 'url=http://temple-user:1025/temple-user'
+      |  --data 'url=http://temple-user:1026/temple-user'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/temple-user-service/routes \
@@ -571,7 +572,7 @@ object ProjectBuilderTestData {
       |- job_name: temple-user
       |  static_configs:
       |  - targets:
-      |    - temple-user:1026
+      |    - temple-user:1027
       |""".stripMargin
 
   val complexTemplefile: Templefile = Templefile(
@@ -993,7 +994,7 @@ object ProjectBuilderTestData {
       |
       |ENTRYPOINT ["./complex-user"]
       |
-      |EXPOSE 1025
+      |EXPOSE 1026
       |""".stripMargin
 
   val complexTemplefileKubeDeployment: String =
@@ -1022,7 +1023,7 @@ object ProjectBuilderTestData {
       |      - image: sample-complex-project-complex-user
       |        name: complex-user
       |        ports:
-      |        - containerPort: 1025
+      |        - containerPort: 1026
       |      imagePullSecrets:
       |      - name: regcred
       |      restartPolicy: Always
@@ -1092,8 +1093,8 @@ object ProjectBuilderTestData {
       |spec:
       |  ports:
       |  - name: api
-      |    port: 1025
-      |    targetPort: 1025
+      |    port: 1026
+      |    targetPort: 1026
       |  selector:
       |    app: complex-user
       |    kind: service
@@ -1157,7 +1158,12 @@ object ProjectBuilderTestData {
       |curl -X POST \
       |  --url $KONG_ADMIN/services/ \
       |  --data 'name=complex-user-service' \
-      |  --data 'url=http://complex-user:1025/complex-user'
+      |  --data 'url=http://complex-user:1026/complex-user'
+      |
+      |curl -X POST \
+      |  --url $KONG_ADMIN/services/ \
+      |  --data 'name=auth-service' \
+      |  --data 'url=http://auth:1024/auth'
       |
       |curl -X POST \
       |  --url $KONG_ADMIN/services/complex-user-service/routes \
@@ -1165,11 +1171,17 @@ object ProjectBuilderTestData {
       |  --data 'paths[]=/api/complex-user'
       |
       |curl -X POST \
+      |  --url $KONG_ADMIN/services/auth-service/routes \
+      |  --data "hosts[]=$KONG_ENTRY" \
+      |  --data 'paths[]=/api/auth'
+      |
+      |curl -X POST \
       |  --url $KONG_ADMIN/services/complex-user-service/plugins \
       |  --data 'name=jwt' \
       |  --data 'config.claims_to_verify=exp'""".stripMargin
 
-  val complexTemplefileGrafanaDashboard: String = FileUtils.readResources("grafana/complex-user.json").stripLineEnd
+  val complexTemplefileGrafanaDashboard: String     = FileUtils.readResources("grafana/complex-user.json").init
+  val complexTemplefileAuthGrafanaDashboard: String = FileUtils.readResources("grafana/auth.json").init
 
   val complexTemplefileGrafanaDashboardConfig: String =
     """apiVersion: 1
@@ -1223,6 +1235,43 @@ object ProjectBuilderTestData {
       |- job_name: complex-user
       |  static_configs:
       |  - targets:
-      |    - complex-user:1026
+      |    - complex-user:1027
+      |- job_name: auth
+      |  static_configs:
+      |  - targets:
+      |    - auth:1025
       |""".stripMargin
+
+  val complexTemplefilePostgresAuthOutput: String =
+    """CREATE TABLE auth (
+      |  id UUID UNIQUE NOT NULL,
+      |  email TEXT UNIQUE NOT NULL,
+      |  password TEXT NOT NULL
+      |);""".stripMargin
+
+  val complexTemplefileAuthDockerfile: String =
+    """FROM golang:1.13.7-alpine
+      |
+      |WORKDIR /auth
+      |
+      |COPY go.mod go.sum ./
+      |
+      |RUN ["go", "mod", "download"]
+      |
+      |COPY . .
+      |
+      |COPY config.json /etc/auth-service/
+      |
+      |RUN ["go", "build", "-o", "auth"]
+      |
+      |ENTRYPOINT ["./auth"]
+      |
+      |EXPOSE 1024
+      |""".stripMargin
+
+  val complexTemplefileAuthKubeDeployment: String   = FileUtils.readResources("kube/auth/auth-deployment.yaml")
+  val complexTemplefileAuthKubeService: String      = FileUtils.readResources("kube/auth/auth-service.yaml")
+  val complexTemplefileAuthKubeDbDeployment: String = FileUtils.readResources("kube/auth/auth-db-deployment.yaml")
+  val complexTemplefileAuthKubeDbService: String    = FileUtils.readResources("kube/auth/auth-db-service.yaml")
+  val complexTemplefileAuthKubeDbStorage: String    = FileUtils.readResources("kube/auth/auth-db-storage.yaml")
 }
