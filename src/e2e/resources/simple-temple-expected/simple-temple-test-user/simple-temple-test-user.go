@@ -208,16 +208,8 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	uuid, err := uuid.NewUUID()
-	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not create UUID: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusInternalServerError)
-		return
-	}
-
 	simpleTempleTestUser, err := env.dao.CreateSimpleTempleTestUser(dao.CreateSimpleTempleTestUserInput{
-		ID:                   uuid,
-		AuthID:               auth.ID,
+		ID:                   auth.ID,
 		SimpleTempleTestUser: *req.SimpleTempleTestUser,
 		Email:                *req.Email,
 		FirstName:            *req.FirstName,
