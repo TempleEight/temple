@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-temple-test-user-db
+  labels:
+    app: simple-temple-test-user
+    kind: db
+spec:
+  ports:
+  - name: db
+    port: 5432
+    targetPort: 5432
+  selector:
+    app: simple-temple-test-user
+    kind: db

@@ -12,10 +12,10 @@ import scala.collection.immutable.SortedMap
 trait FileMatchers extends Matchers {
 
   final protected def filesShouldMatch(expected: Files, actual: Files)(implicit here: Position): Unit =
-    WrappedFiles(expected) shouldBe WrappedFiles(actual)
+    WrappedFiles(actual) shouldBe WrappedFiles(expected)
 
   final protected def projectFilesShouldMatch(expected: Project, actual: Files)(implicit here: Position): Unit =
-    WrappedFiles(expected.files) shouldBe WrappedFiles(actual)
+    WrappedFiles(actual) shouldBe WrappedFiles(expected.files)
 }
 
 object FileMatchers {

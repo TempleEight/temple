@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: auth
+  labels:
+    app: auth
+    kind: service
+spec:
+  ports:
+  - name: api
+    port: 1024
+    targetPort: 1024
+  selector:
+    app: auth
+    kind: service
