@@ -205,8 +205,8 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		StringField:        complexUser.StringField,
 		BoundedStringField: complexUser.BoundedStringField,
 		BoolField:          complexUser.BoolField,
-		DateField:          complexUser.DateField.Format("2020-12-31"),
-		TimeField:          complexUser.TimeField.Format("12:30:59.000000000"),
+		DateField:          complexUser.DateField.Format("2006-01-02"),
+		TimeField:          complexUser.TimeField.Format("15:04:05.999999999"),
 		DateTimeField:      complexUser.DateTimeField.Format(time.RFC3339),
 		BlobField:          complexUser.BlobField,
 	})
@@ -256,8 +256,8 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 		StringField:        complexUser.StringField,
 		BoundedStringField: complexUser.BoundedStringField,
 		BoolField:          complexUser.BoolField,
-		DateField:          complexUser.DateField.Format("2020-12-31"),
-		TimeField:          complexUser.TimeField.Format("12:30:59.000000000"),
+		DateField:          complexUser.DateField.Format("2006-01-02"),
+		TimeField:          complexUser.TimeField.Format("15:04:05.999999999"),
 		DateTimeField:      complexUser.DateTimeField.Format(time.RFC3339),
 		BlobField:          complexUser.BlobField,
 	})
@@ -340,8 +340,8 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		StringField:        complexUser.StringField,
 		BoundedStringField: complexUser.BoundedStringField,
 		BoolField:          complexUser.BoolField,
-		DateField:          complexUser.DateField.Format("2020-12-31"),
-		TimeField:          complexUser.TimeField.Format("12:30:59.000000000"),
+		DateField:          complexUser.DateField.Format("2006-01-02"),
+		TimeField:          complexUser.TimeField.Format("15:04:05.999999999"),
 		DateTimeField:      complexUser.DateTimeField.Format(time.RFC3339),
 		BlobField:          complexUser.BlobField,
 	})

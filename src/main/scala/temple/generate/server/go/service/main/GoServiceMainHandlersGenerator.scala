@@ -22,8 +22,8 @@ object GoServiceMainHandlersGenerator {
   private def generateResponseMapFormat(attributeType: AttributeType): String = {
     // Must add formatting to attributes with date, time or datetime type
     val layout = attributeType match {
-      case DateType     => doubleQuote("2020-12-31")
-      case TimeType     => doubleQuote("12:30:59.000000000")
+      case DateType     => doubleQuote("2006-01-02")
+      case TimeType     => doubleQuote("15:04:05.999999999")
       case DateTimeType => "time.RFC3339"
       case _            => ""
     }
