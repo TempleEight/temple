@@ -849,6 +849,846 @@
         "align" : false,
         "alignLevel" : null
       }
+    },
+    {
+      "aliasColors" : {
+        
+      },
+      "bars" : false,
+      "dashLength" : 10,
+      "dashes" : false,
+      "datasource" : "Prometheus",
+      "fill" : 1,
+      "fillGradient" : 0,
+      "gridPos" : {
+        "h" : 5,
+        "w" : 12,
+        "x" : 0,
+        "y" : 20
+      },
+      "hiddenSeries" : false,
+      "id" : 0,
+      "legend" : {
+        "avg" : false,
+        "current" : false,
+        "max" : false,
+        "min" : false,
+        "rightSide" : true,
+        "show" : true,
+        "total" : false,
+        "values" : false
+      },
+      "lines" : true,
+      "linewidth" : 1,
+      "nullPointMode" : "null",
+      "options" : {
+        "dataLinks" : [
+        ]
+      },
+      "percentage" : false,
+      "pointradius" : 2,
+      "points" : false,
+      "renderer" : "flot",
+      "seriesOverrides" : [
+      ],
+      "spaceLength" : 10,
+      "stack" : false,
+      "steppedLine" : false,
+      "targets" : [
+        {
+          "expr" : "rate(complexuser_request_success_total{request_type=\"create_templeuser\"}[5m])",
+          "legendFormat" : "Success",
+          "refId" : "A"
+        },
+        {
+          "expr" : "rate(complexuser_request_failure_total{request_type=\"create_templeuser\"}[5m])",
+          "legendFormat" : "{{error_code}}",
+          "refId" : "B"
+        }
+      ],
+      "thresholds" : [
+      ],
+      "timeFrom" : null,
+      "timeRegions" : [
+      ],
+      "timeShift" : null,
+      "title" : "Create TempleUser Requests",
+      "tooltip" : {
+        "shared" : true,
+        "sort" : 0,
+        "value_type" : "individual"
+      },
+      "type" : "graph",
+      "xaxis" : {
+        "buckets" : null,
+        "mode" : "time",
+        "name" : null,
+        "show" : true,
+        "values" : [
+        ]
+      },
+      "yaxes" : [
+        {
+          "format" : "short",
+          "label" : "QPS",
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        },
+        {
+          "format" : "short",
+          "label" : null,
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        }
+      ],
+      "yaxis" : {
+        "align" : false,
+        "alignLevel" : null
+      }
+    },
+    {
+      "aliasColors" : {
+        
+      },
+      "bars" : false,
+      "dashLength" : 10,
+      "dashes" : false,
+      "datasource" : "Prometheus",
+      "fill" : 1,
+      "fillGradient" : 0,
+      "gridPos" : {
+        "h" : 5,
+        "w" : 12,
+        "x" : 12,
+        "y" : 20
+      },
+      "hiddenSeries" : false,
+      "id" : 1,
+      "legend" : {
+        "avg" : false,
+        "current" : false,
+        "max" : false,
+        "min" : false,
+        "rightSide" : true,
+        "show" : true,
+        "total" : false,
+        "values" : false
+      },
+      "lines" : true,
+      "linewidth" : 1,
+      "nullPointMode" : "null",
+      "options" : {
+        "dataLinks" : [
+        ]
+      },
+      "percentage" : false,
+      "pointradius" : 2,
+      "points" : false,
+      "renderer" : "flot",
+      "seriesOverrides" : [
+      ],
+      "spaceLength" : 10,
+      "stack" : false,
+      "steppedLine" : false,
+      "targets" : [
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.5\",query_type=\"create_templeuser\"}",
+          "legendFormat" : "50th Percentile",
+          "refId" : "A"
+        },
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.9\",query_type=\"create_templeuser\"}",
+          "legendFormat" : "90th Percentile",
+          "refId" : "B"
+        },
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.95\",query_type=\"create_templeuser\"}",
+          "legendFormat" : "95th Percentile",
+          "refId" : "C"
+        },
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.99\",query_type=\"create_templeuser\"}",
+          "legendFormat" : "99th Percentile",
+          "refId" : "D"
+        }
+      ],
+      "thresholds" : [
+      ],
+      "timeFrom" : null,
+      "timeRegions" : [
+      ],
+      "timeShift" : null,
+      "title" : "DB Create TempleUser Queries",
+      "tooltip" : {
+        "shared" : true,
+        "sort" : 0,
+        "value_type" : "individual"
+      },
+      "type" : "graph",
+      "xaxis" : {
+        "buckets" : null,
+        "mode" : "time",
+        "name" : null,
+        "show" : true,
+        "values" : [
+        ]
+      },
+      "yaxes" : [
+        {
+          "format" : "short",
+          "label" : "Time (seconds)",
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        },
+        {
+          "format" : "short",
+          "label" : null,
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        }
+      ],
+      "yaxis" : {
+        "align" : false,
+        "alignLevel" : null
+      }
+    },
+    {
+      "aliasColors" : {
+        
+      },
+      "bars" : false,
+      "dashLength" : 10,
+      "dashes" : false,
+      "datasource" : "Prometheus",
+      "fill" : 1,
+      "fillGradient" : 0,
+      "gridPos" : {
+        "h" : 5,
+        "w" : 12,
+        "x" : 0,
+        "y" : 25
+      },
+      "hiddenSeries" : false,
+      "id" : 2,
+      "legend" : {
+        "avg" : false,
+        "current" : false,
+        "max" : false,
+        "min" : false,
+        "rightSide" : true,
+        "show" : true,
+        "total" : false,
+        "values" : false
+      },
+      "lines" : true,
+      "linewidth" : 1,
+      "nullPointMode" : "null",
+      "options" : {
+        "dataLinks" : [
+        ]
+      },
+      "percentage" : false,
+      "pointradius" : 2,
+      "points" : false,
+      "renderer" : "flot",
+      "seriesOverrides" : [
+      ],
+      "spaceLength" : 10,
+      "stack" : false,
+      "steppedLine" : false,
+      "targets" : [
+        {
+          "expr" : "rate(complexuser_request_success_total{request_type=\"read_templeuser\"}[5m])",
+          "legendFormat" : "Success",
+          "refId" : "A"
+        },
+        {
+          "expr" : "rate(complexuser_request_failure_total{request_type=\"read_templeuser\"}[5m])",
+          "legendFormat" : "{{error_code}}",
+          "refId" : "B"
+        }
+      ],
+      "thresholds" : [
+      ],
+      "timeFrom" : null,
+      "timeRegions" : [
+      ],
+      "timeShift" : null,
+      "title" : "Read TempleUser Requests",
+      "tooltip" : {
+        "shared" : true,
+        "sort" : 0,
+        "value_type" : "individual"
+      },
+      "type" : "graph",
+      "xaxis" : {
+        "buckets" : null,
+        "mode" : "time",
+        "name" : null,
+        "show" : true,
+        "values" : [
+        ]
+      },
+      "yaxes" : [
+        {
+          "format" : "short",
+          "label" : "QPS",
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        },
+        {
+          "format" : "short",
+          "label" : null,
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        }
+      ],
+      "yaxis" : {
+        "align" : false,
+        "alignLevel" : null
+      }
+    },
+    {
+      "aliasColors" : {
+        
+      },
+      "bars" : false,
+      "dashLength" : 10,
+      "dashes" : false,
+      "datasource" : "Prometheus",
+      "fill" : 1,
+      "fillGradient" : 0,
+      "gridPos" : {
+        "h" : 5,
+        "w" : 12,
+        "x" : 12,
+        "y" : 25
+      },
+      "hiddenSeries" : false,
+      "id" : 3,
+      "legend" : {
+        "avg" : false,
+        "current" : false,
+        "max" : false,
+        "min" : false,
+        "rightSide" : true,
+        "show" : true,
+        "total" : false,
+        "values" : false
+      },
+      "lines" : true,
+      "linewidth" : 1,
+      "nullPointMode" : "null",
+      "options" : {
+        "dataLinks" : [
+        ]
+      },
+      "percentage" : false,
+      "pointradius" : 2,
+      "points" : false,
+      "renderer" : "flot",
+      "seriesOverrides" : [
+      ],
+      "spaceLength" : 10,
+      "stack" : false,
+      "steppedLine" : false,
+      "targets" : [
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.5\",query_type=\"read_templeuser\"}",
+          "legendFormat" : "50th Percentile",
+          "refId" : "A"
+        },
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.9\",query_type=\"read_templeuser\"}",
+          "legendFormat" : "90th Percentile",
+          "refId" : "B"
+        },
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.95\",query_type=\"read_templeuser\"}",
+          "legendFormat" : "95th Percentile",
+          "refId" : "C"
+        },
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.99\",query_type=\"read_templeuser\"}",
+          "legendFormat" : "99th Percentile",
+          "refId" : "D"
+        }
+      ],
+      "thresholds" : [
+      ],
+      "timeFrom" : null,
+      "timeRegions" : [
+      ],
+      "timeShift" : null,
+      "title" : "DB Read TempleUser Queries",
+      "tooltip" : {
+        "shared" : true,
+        "sort" : 0,
+        "value_type" : "individual"
+      },
+      "type" : "graph",
+      "xaxis" : {
+        "buckets" : null,
+        "mode" : "time",
+        "name" : null,
+        "show" : true,
+        "values" : [
+        ]
+      },
+      "yaxes" : [
+        {
+          "format" : "short",
+          "label" : "Time (seconds)",
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        },
+        {
+          "format" : "short",
+          "label" : null,
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        }
+      ],
+      "yaxis" : {
+        "align" : false,
+        "alignLevel" : null
+      }
+    },
+    {
+      "aliasColors" : {
+        
+      },
+      "bars" : false,
+      "dashLength" : 10,
+      "dashes" : false,
+      "datasource" : "Prometheus",
+      "fill" : 1,
+      "fillGradient" : 0,
+      "gridPos" : {
+        "h" : 5,
+        "w" : 12,
+        "x" : 0,
+        "y" : 30
+      },
+      "hiddenSeries" : false,
+      "id" : 4,
+      "legend" : {
+        "avg" : false,
+        "current" : false,
+        "max" : false,
+        "min" : false,
+        "rightSide" : true,
+        "show" : true,
+        "total" : false,
+        "values" : false
+      },
+      "lines" : true,
+      "linewidth" : 1,
+      "nullPointMode" : "null",
+      "options" : {
+        "dataLinks" : [
+        ]
+      },
+      "percentage" : false,
+      "pointradius" : 2,
+      "points" : false,
+      "renderer" : "flot",
+      "seriesOverrides" : [
+      ],
+      "spaceLength" : 10,
+      "stack" : false,
+      "steppedLine" : false,
+      "targets" : [
+        {
+          "expr" : "rate(complexuser_request_success_total{request_type=\"update_templeuser\"}[5m])",
+          "legendFormat" : "Success",
+          "refId" : "A"
+        },
+        {
+          "expr" : "rate(complexuser_request_failure_total{request_type=\"update_templeuser\"}[5m])",
+          "legendFormat" : "{{error_code}}",
+          "refId" : "B"
+        }
+      ],
+      "thresholds" : [
+      ],
+      "timeFrom" : null,
+      "timeRegions" : [
+      ],
+      "timeShift" : null,
+      "title" : "Update TempleUser Requests",
+      "tooltip" : {
+        "shared" : true,
+        "sort" : 0,
+        "value_type" : "individual"
+      },
+      "type" : "graph",
+      "xaxis" : {
+        "buckets" : null,
+        "mode" : "time",
+        "name" : null,
+        "show" : true,
+        "values" : [
+        ]
+      },
+      "yaxes" : [
+        {
+          "format" : "short",
+          "label" : "QPS",
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        },
+        {
+          "format" : "short",
+          "label" : null,
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        }
+      ],
+      "yaxis" : {
+        "align" : false,
+        "alignLevel" : null
+      }
+    },
+    {
+      "aliasColors" : {
+        
+      },
+      "bars" : false,
+      "dashLength" : 10,
+      "dashes" : false,
+      "datasource" : "Prometheus",
+      "fill" : 1,
+      "fillGradient" : 0,
+      "gridPos" : {
+        "h" : 5,
+        "w" : 12,
+        "x" : 12,
+        "y" : 30
+      },
+      "hiddenSeries" : false,
+      "id" : 5,
+      "legend" : {
+        "avg" : false,
+        "current" : false,
+        "max" : false,
+        "min" : false,
+        "rightSide" : true,
+        "show" : true,
+        "total" : false,
+        "values" : false
+      },
+      "lines" : true,
+      "linewidth" : 1,
+      "nullPointMode" : "null",
+      "options" : {
+        "dataLinks" : [
+        ]
+      },
+      "percentage" : false,
+      "pointradius" : 2,
+      "points" : false,
+      "renderer" : "flot",
+      "seriesOverrides" : [
+      ],
+      "spaceLength" : 10,
+      "stack" : false,
+      "steppedLine" : false,
+      "targets" : [
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.5\",query_type=\"update_templeuser\"}",
+          "legendFormat" : "50th Percentile",
+          "refId" : "A"
+        },
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.9\",query_type=\"update_templeuser\"}",
+          "legendFormat" : "90th Percentile",
+          "refId" : "B"
+        },
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.95\",query_type=\"update_templeuser\"}",
+          "legendFormat" : "95th Percentile",
+          "refId" : "C"
+        },
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.99\",query_type=\"update_templeuser\"}",
+          "legendFormat" : "99th Percentile",
+          "refId" : "D"
+        }
+      ],
+      "thresholds" : [
+      ],
+      "timeFrom" : null,
+      "timeRegions" : [
+      ],
+      "timeShift" : null,
+      "title" : "DB Update TempleUser Queries",
+      "tooltip" : {
+        "shared" : true,
+        "sort" : 0,
+        "value_type" : "individual"
+      },
+      "type" : "graph",
+      "xaxis" : {
+        "buckets" : null,
+        "mode" : "time",
+        "name" : null,
+        "show" : true,
+        "values" : [
+        ]
+      },
+      "yaxes" : [
+        {
+          "format" : "short",
+          "label" : "Time (seconds)",
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        },
+        {
+          "format" : "short",
+          "label" : null,
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        }
+      ],
+      "yaxis" : {
+        "align" : false,
+        "alignLevel" : null
+      }
+    },
+    {
+      "aliasColors" : {
+        
+      },
+      "bars" : false,
+      "dashLength" : 10,
+      "dashes" : false,
+      "datasource" : "Prometheus",
+      "fill" : 1,
+      "fillGradient" : 0,
+      "gridPos" : {
+        "h" : 5,
+        "w" : 12,
+        "x" : 0,
+        "y" : 35
+      },
+      "hiddenSeries" : false,
+      "id" : 6,
+      "legend" : {
+        "avg" : false,
+        "current" : false,
+        "max" : false,
+        "min" : false,
+        "rightSide" : true,
+        "show" : true,
+        "total" : false,
+        "values" : false
+      },
+      "lines" : true,
+      "linewidth" : 1,
+      "nullPointMode" : "null",
+      "options" : {
+        "dataLinks" : [
+        ]
+      },
+      "percentage" : false,
+      "pointradius" : 2,
+      "points" : false,
+      "renderer" : "flot",
+      "seriesOverrides" : [
+      ],
+      "spaceLength" : 10,
+      "stack" : false,
+      "steppedLine" : false,
+      "targets" : [
+        {
+          "expr" : "rate(complexuser_request_success_total{request_type=\"delete_templeuser\"}[5m])",
+          "legendFormat" : "Success",
+          "refId" : "A"
+        },
+        {
+          "expr" : "rate(complexuser_request_failure_total{request_type=\"delete_templeuser\"}[5m])",
+          "legendFormat" : "{{error_code}}",
+          "refId" : "B"
+        }
+      ],
+      "thresholds" : [
+      ],
+      "timeFrom" : null,
+      "timeRegions" : [
+      ],
+      "timeShift" : null,
+      "title" : "Delete TempleUser Requests",
+      "tooltip" : {
+        "shared" : true,
+        "sort" : 0,
+        "value_type" : "individual"
+      },
+      "type" : "graph",
+      "xaxis" : {
+        "buckets" : null,
+        "mode" : "time",
+        "name" : null,
+        "show" : true,
+        "values" : [
+        ]
+      },
+      "yaxes" : [
+        {
+          "format" : "short",
+          "label" : "QPS",
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        },
+        {
+          "format" : "short",
+          "label" : null,
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        }
+      ],
+      "yaxis" : {
+        "align" : false,
+        "alignLevel" : null
+      }
+    },
+    {
+      "aliasColors" : {
+        
+      },
+      "bars" : false,
+      "dashLength" : 10,
+      "dashes" : false,
+      "datasource" : "Prometheus",
+      "fill" : 1,
+      "fillGradient" : 0,
+      "gridPos" : {
+        "h" : 5,
+        "w" : 12,
+        "x" : 12,
+        "y" : 35
+      },
+      "hiddenSeries" : false,
+      "id" : 7,
+      "legend" : {
+        "avg" : false,
+        "current" : false,
+        "max" : false,
+        "min" : false,
+        "rightSide" : true,
+        "show" : true,
+        "total" : false,
+        "values" : false
+      },
+      "lines" : true,
+      "linewidth" : 1,
+      "nullPointMode" : "null",
+      "options" : {
+        "dataLinks" : [
+        ]
+      },
+      "percentage" : false,
+      "pointradius" : 2,
+      "points" : false,
+      "renderer" : "flot",
+      "seriesOverrides" : [
+      ],
+      "spaceLength" : 10,
+      "stack" : false,
+      "steppedLine" : false,
+      "targets" : [
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.5\",query_type=\"delete_templeuser\"}",
+          "legendFormat" : "50th Percentile",
+          "refId" : "A"
+        },
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.9\",query_type=\"delete_templeuser\"}",
+          "legendFormat" : "90th Percentile",
+          "refId" : "B"
+        },
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.95\",query_type=\"delete_templeuser\"}",
+          "legendFormat" : "95th Percentile",
+          "refId" : "C"
+        },
+        {
+          "expr" : "complexuser_database_request_seconds{quantile=\"0.99\",query_type=\"delete_templeuser\"}",
+          "legendFormat" : "99th Percentile",
+          "refId" : "D"
+        }
+      ],
+      "thresholds" : [
+      ],
+      "timeFrom" : null,
+      "timeRegions" : [
+      ],
+      "timeShift" : null,
+      "title" : "DB Delete TempleUser Queries",
+      "tooltip" : {
+        "shared" : true,
+        "sort" : 0,
+        "value_type" : "individual"
+      },
+      "type" : "graph",
+      "xaxis" : {
+        "buckets" : null,
+        "mode" : "time",
+        "name" : null,
+        "show" : true,
+        "values" : [
+        ]
+      },
+      "yaxes" : [
+        {
+          "format" : "short",
+          "label" : "Time (seconds)",
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        },
+        {
+          "format" : "short",
+          "label" : null,
+          "logBase" : 1,
+          "max" : null,
+          "min" : null,
+          "show" : true
+        }
+      ],
+      "yaxis" : {
+        "align" : false,
+        "alignLevel" : null
+      }
     }
   ],
   "refresh" : "5s",

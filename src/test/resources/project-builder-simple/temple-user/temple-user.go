@@ -223,5 +223,25 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func (env *env) deleteTempleUserHandler(w http.ResponseWriter, r *http.Request) {
+	templeUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		return
+	}
 
+	err = env.dao.DeleteTempleUser(dao.DeleteTempleUserInput{
+		ID: templeUserID,
+	})
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrTempleUserNotFound:
+			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+		default:
+			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+			http.Error(w, errMsg, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	json.NewEncoder(w).Encode(struct{}{})
 }
