@@ -3,7 +3,7 @@ package temple.generate.kube.ast
 object OrchestrationType {
 
   /** Input information to generate kubernetes scripts */
-  case class OrchestrationRoot(services: Seq[Service])
+  case class OrchestrationRoot(services: Seq[Service], usesMetrics: Boolean)
 
   /**
     * Describes one microservice deployment in Kubernetes
