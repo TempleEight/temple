@@ -92,4 +92,10 @@ class KubernetesGeneratorTest extends FlatSpec with Matchers {
     output.keys should contain(File("kong", "configure-kong.sh"))
   }
 
+  it should "generate a correct deploy script" in {
+    val output = KubernetesGenerator.generate(UnitTestData.basicOrchestrationRoot)
+    output.keys should contain(File("", "deploy.sh"))
+    output(File("", "deploy.sh")) should be(UnitTestData.userDeployScript)
+  }
+
 }

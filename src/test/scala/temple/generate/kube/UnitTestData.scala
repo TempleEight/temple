@@ -91,4 +91,6 @@ object UnitTestData {
   val userDbStorage: String = FileUtils.readResources("kube/user-db-storage.yaml")
 
   val userKongConfig: String = FileUtils.readResources("kong/configure-kong.sh")
+
+  val userDeployScript: String = FileUtils.readResources("shell/deploy.sh")
 }
