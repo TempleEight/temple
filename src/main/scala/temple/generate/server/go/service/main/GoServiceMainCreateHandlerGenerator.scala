@@ -3,7 +3,7 @@ package temple.generate.server.go.service.main
 import temple.ast.Attribute
 import temple.generate.CRUD.Create
 import temple.generate.server.ServiceRoot
-import temple.generate.server.go.GoHTTPStatus.{StatusBadRequest, StatusInternalServerError}
+import temple.generate.server.go.GoHTTPStatus.{StatusInternalServerError}
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.{generateHandlerDecl, _}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -31,7 +31,7 @@ object GoServiceMainCreateHandlerGenerator {
     val createInput = ListMap(idCapitalized -> (if (root.hasAuthBlock) s"auth.$idCapitalized" else "uuid")) ++
       // If the project uses auth, but this service does not have an auth block, AuthID is passed for created_by field
       when(!root.hasAuthBlock && root.projectUsesAuth) { s"Auth$idCapitalized" -> s"auth.$idCapitalized" } ++
-      // TODO: ServerSet values need to be passed in, not just client-provided attributes
+      // ServerSet values must not be passed, as this will cause a nil pointer dereference error
       clientAttributes.map { case str -> _ => str.capitalize -> s"*req.${str.capitalize}" }
 
     mkCode.lines(

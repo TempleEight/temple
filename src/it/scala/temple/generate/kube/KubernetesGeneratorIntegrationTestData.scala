@@ -26,5 +26,6 @@ object KubernetesGeneratorIntegrationTestData {
         usesAuth = true,
       ),
     ),
+    usesMetrics = true,
   )
 }

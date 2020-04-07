@@ -38,6 +38,6 @@ object OrchestrationBuilder {
             usesAuth = service != AuthServiceBlock && templefile.usesAuth,
           )
       }
-    OrchestrationRoot(services.toSeq)
+    OrchestrationRoot(services.toSeq, templefile.lookupMetadata[Metadata.Metrics].nonEmpty)
   }
 }

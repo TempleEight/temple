@@ -64,15 +64,21 @@ object ServerBuilder {
       case GoLanguageDetail(modulePath) => s"$modulePath/${StringUtils.kebabCase(serviceName)}"
     }
 
-    // The names of each service this service communicates with, i.e all the foreign key attributes of the service
-    val comms: Seq[String] = serviceBlock.attributes.collect {
-      case (_, Attribute(x: ForeignKey, _, _)) => x.references
-    }.toSeq
+    // The names of each service this service communicates with, i.e all the foreign key attributes of the service and any inner structs
+    // TODO: Does this work for service referencing the struct? Is that allowed?
+    val comms = serviceBlock.attributes.collect {
+        case (_, Attribute(x: ForeignKey, _, _)) => x.references
+      } ++ serviceBlock.structs.values
+        .flatMap { block =>
+          block.attributes.collect {
+            case (_, Attribute(x: ForeignKey, _, _)) if x.references != serviceName => x.references
+          }
+        }
 
     ServiceRoot(
       serviceName,
       module = moduleName,
-      comms = comms,
+      comms = comms.toSeq,
       opQueries = queries,
       port = port,
       idAttribute = idAttribute,
