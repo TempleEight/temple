@@ -4,13 +4,13 @@ import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
 import temple.ast.Metadata.{Database, ServiceAuth}
 import temple.ast._
-import temple.utils.FileUtils
 
 import scala.collection.immutable.ListMap
 
 object ProjectBuilderTestData {
 
   private val simpleServiceAttributes = ListMap(
+    "id"            -> IDAttribute,
     "intField"      -> Attribute(IntType()),
     "doubleField"   -> Attribute(FloatType()),
     "stringField"   -> Attribute(StringType()),
@@ -22,6 +22,7 @@ object ProjectBuilderTestData {
   )
 
   private val complexServiceAttributes = ListMap(
+    "id"                 -> IDAttribute,
     "smallIntField"      -> Attribute(IntType(max = Some(100), min = Some(10), precision = 2)),
     "intField"           -> Attribute(IntType(max = Some(100), min = Some(10))),
     "bigIntField"        -> Attribute(IntType(max = Some(100), min = Some(10), precision = 8)),
