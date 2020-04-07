@@ -31,10 +31,8 @@ object GoServiceDAOInputStructsGenerator {
       ListMap(enumerating.inputName.capitalize -> generateGoType(AttributeType.UUIDType))
     }
 
-    // Omit attribute from input struct fields if server set
-    lazy val attributesMap = root.attributes.collect {
-      case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.ServerSet) =>
-        (name.capitalize, generateGoType(attribute.attributeType))
+    lazy val attributesMap = root.attributes.map {
+      case (name, attribute) => (name.capitalize, generateGoType(attribute.attributeType))
     }
 
     mkCode.lines(
