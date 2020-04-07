@@ -185,7 +185,37 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 }
 
 func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
+	templeUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		return
+	}
 
+	templeUser, err := env.dao.ReadTempleUser(dao.ReadTempleUserInput{
+		ID: templeUserID,
+	})
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrTempleUserNotFound:
+			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+		default:
+			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+			http.Error(w, errMsg, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	json.NewEncoder(w).Encode(readTempleUserResponse{
+		ID:            templeUser.ID,
+		IntField:      templeUser.IntField,
+		DoubleField:   templeUser.DoubleField,
+		StringField:   templeUser.StringField,
+		BoolField:     templeUser.BoolField,
+		DateField:     templeUser.DateField,
+		TimeField:     templeUser.TimeField,
+		DateTimeField: templeUser.DateTimeField.Format(time.RFC3339),
+		BlobField:     templeUser.BlobField,
+	})
 }
 
 func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) {

@@ -71,7 +71,7 @@ object GoServiceCommGenerator {
             "req",
             "err",
           ),
-          generateCheckAndReturnError("false"),
+          genCheckAndReturnError("false"),
           "",
           when(root.projectUsesAuth) {
             mkCode.lines(
@@ -80,7 +80,7 @@ object GoServiceCommGenerator {
             )
           },
           genDeclareAndAssign("new(http.Client).Do(req)", "resp", "err"),
-          generateCheckAndReturnError("false"),
+          genCheckAndReturnError("false"),
           "defer resp.Body.Close()",
           "",
           genReturn("resp.StatusCode == http.StatusOK", "nil"),
