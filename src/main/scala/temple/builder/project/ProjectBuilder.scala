@@ -15,6 +15,7 @@ import temple.generate.metrics.grafana.ast.Datasource
 import temple.generate.metrics.grafana.{GrafanaDashboardConfigGenerator, GrafanaDashboardGenerator, GrafanaDatasourceConfigGenerator}
 import temple.generate.metrics.prometheus.PrometheusConfigGenerator
 import temple.generate.metrics.prometheus.ast.PrometheusJob
+import temple.generate.server.config.ServerConfigGenerator
 import temple.generate.server.go.auth.GoAuthServiceGenerator
 import temple.generate.server.go.service.GoServiceGenerator
 import temple.generate.target.openapi.OpenAPIGenerator
@@ -114,9 +115,18 @@ object ProjectBuilder {
       case (name, service, port) =>
         val serviceRoot =
           ServerBuilder.buildServiceRoot(name, service, port.service, endpoints(service), detail, usesAuth)
-        service.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
+        val serverFiles = service.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
           case ServiceLanguage.Go => GoServiceGenerator.generate(serviceRoot)
         }
+
+        val serviceComms = serviceRoot.comms.map { service =>
+          val (_, _, ports) = templefile.providedServicesWithPorts.find { _._1 == service }.get
+          service -> s"http://${kebabCase(service)}:${ports.service}"
+        }.toMap
+
+        val configFileContents =
+          ServerConfigGenerator.generate(serviceRoot.kebabName, serviceRoot.datastore, serviceComms, port)
+        serverFiles + (File(serviceRoot.kebabName, "config.json") -> configFileContents)
     }
 
     if (usesAuth) {
