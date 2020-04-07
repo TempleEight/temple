@@ -175,7 +175,6 @@ object NameClashes {
     "group",
     "having",
     "ilike", // sql, it’s my favourite language
-    "ilike", // sql, it’s my favourite language
     "in",
     "initially",
     "inner",
