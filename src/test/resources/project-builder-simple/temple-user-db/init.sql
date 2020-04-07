@@ -1,4 +1,5 @@
 CREATE TABLE temple_user (
+  id UUID NOT NULL PRIMARY KEY,
   intField INT NOT NULL,
   doubleField DOUBLE PRECISION NOT NULL,
   stringField TEXT NOT NULL,

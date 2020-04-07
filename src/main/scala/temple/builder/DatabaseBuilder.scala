@@ -24,10 +24,12 @@ object DatabaseBuilder {
   private def toColDef(name: String, attribute: Attribute): ColumnDef = {
     val nonNullConstraint = when(!attribute.valueAnnotations.contains(Nullable)) { ColumnConstraint.NonNull }
 
+    val primaryKeyConstraint = when(attribute == IDAttribute) { ColumnConstraint.PrimaryKey }
+
     val valueConstraints = attribute.valueAnnotations.flatMap {
         case Annotation.Unique   => Some(ColumnConstraint.Unique)
         case Annotation.Nullable => None
-      } ++ nonNullConstraint
+      } ++ nonNullConstraint ++ primaryKeyConstraint
 
     val (colType, typeConstraints) = attribute.attributeType match {
       case AttributeType.BoolType      => (ColType.BoolCol, Nil)
@@ -56,8 +58,9 @@ object DatabaseBuilder {
     readable: Metadata.Readable = Metadata.Readable.This,
     selectionAttribute: String = "id",
   ): ListMap[CRUD, Statement] = {
-    val tableName = StringUtils.snakeCase(serviceName)
-    val columns   = attributes.keys.map(Column).toSeq
+    val tableName        = StringUtils.snakeCase(serviceName)
+    val columns          = attributes.keys.map(Column).toSeq
+    val columnsWithoutID = attributes.filter { case (_, attr) => attr != IDAttribute }.keys.map(Column).toSeq
     ListMap.from(
       endpoints.map {
         case Create =>
@@ -75,7 +78,7 @@ object DatabaseBuilder {
         case Update =>
           Update -> Statement.Update(
             tableName,
-            assignments = columns.map(Assignment(_, PreparedValue)),
+            assignments = columnsWithoutID.map(Assignment(_, PreparedValue)),
             condition = Some(PreparedComparison(selectionAttribute, ComparisonOperator.Equal)),
             returnColumns = columns,
           )

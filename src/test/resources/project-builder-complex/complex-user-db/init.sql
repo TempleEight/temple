@@ -1,4 +1,5 @@
 CREATE TABLE complex_user (
+  id UUID NOT NULL PRIMARY KEY,
   smallIntField SMALLINT CHECK (smallIntField <= 100) CHECK (smallIntField >= 10) NOT NULL,
   intField INT CHECK (intField <= 100) CHECK (intField >= 10) NOT NULL,
   bigIntField BIGINT CHECK (bigIntField <= 100) CHECK (bigIntField >= 10) NOT NULL,
@@ -14,6 +15,7 @@ CREATE TABLE complex_user (
 );
 
 CREATE TABLE temple_user (
+  id UUID NOT NULL PRIMARY KEY,
   intField INT NOT NULL,
   doubleField DOUBLE PRECISION NOT NULL,
   stringField TEXT NOT NULL,

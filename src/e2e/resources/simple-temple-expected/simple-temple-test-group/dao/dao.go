@@ -77,7 +77,7 @@ func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) 
 
 // CreateSimpleTempleTestGroup creates a new simpleTempleTestGroup in the datastore, returning the newly created simpleTempleTestGroup
 func (dao *DAO) CreateSimpleTempleTestGroup(input CreateSimpleTempleTestGroupInput) (*SimpleTempleTestGroup, error) {
-	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO simple_temple_test_group () VALUES ();", input.ID, input.AuthID)
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO simple_temple_test_group (id) VALUES ($1) RETURNING id;", input.ID, input.AuthID)
 
 	var simpleTempleTestGroup SimpleTempleTestGroup
 	err := row.Scan(&simpleTempleTestGroup.ID, &simpleTempleTestGroup.CreatedBy)
@@ -90,7 +90,7 @@ func (dao *DAO) CreateSimpleTempleTestGroup(input CreateSimpleTempleTestGroupInp
 
 // ReadSimpleTempleTestGroup returns the simpleTempleTestGroup in the datastore for a given ID
 func (dao *DAO) ReadSimpleTempleTestGroup(input ReadSimpleTempleTestGroupInput) (*SimpleTempleTestGroup, error) {
-	row := executeQueryWithRowResponse(dao.DB, "SELECT FROM simple_temple_test_group WHERE id = $1;", input.ID)
+	row := executeQueryWithRowResponse(dao.DB, "SELECT id FROM simple_temple_test_group WHERE id = $1;", input.ID)
 
 	var simpleTempleTestGroup SimpleTempleTestGroup
 	err := row.Scan(&simpleTempleTestGroup.ID, &simpleTempleTestGroup.CreatedBy)
@@ -108,7 +108,7 @@ func (dao *DAO) ReadSimpleTempleTestGroup(input ReadSimpleTempleTestGroupInput) 
 
 // UpdateSimpleTempleTestGroup updates the simpleTempleTestGroup in the datastore for a given ID, returning the newly updated simpleTempleTestGroup
 func (dao *DAO) UpdateSimpleTempleTestGroup(input UpdateSimpleTempleTestGroupInput) (*SimpleTempleTestGroup, error) {
-	row := executeQueryWithRowResponse(dao.DB, "UPDATE simple_temple_test_group SET WHERE id = $1;", input.ID)
+	row := executeQueryWithRowResponse(dao.DB, "UPDATE simple_temple_test_group SET WHERE id = $1 RETURNING id;", input.ID)
 
 	var simpleTempleTestGroup SimpleTempleTestGroup
 	err := row.Scan(&simpleTempleTestGroup.ID, &simpleTempleTestGroup.CreatedBy)

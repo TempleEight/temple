@@ -16,6 +16,9 @@ sealed trait AbstractServiceBlock extends AttributeBlock[ServiceMetadata] {
   def structIterator(rootName: String): Iterator[(String, AttributeBlock[_])] =
     Iterator(rootName -> this) ++ structs
 
+  /** Return this service's attributes, minus the ID */
+  lazy val attributesWithoutID: Map[String, Attribute] = attributes.filterNot { case (_, attr) => attr == IDAttribute }
+
   /** Set the parent that this Templefile is within */
   override private[temple] def setParent(parent: TempleNode): Unit = {
     super.setParent(parent)
@@ -35,7 +38,7 @@ object AbstractServiceBlock {
   case object AuthServiceBlock extends AbstractServiceBlock {
 
     override val attributes: Map[String, Attribute] = Map(
-      "id"       -> Attribute(AttributeType.UUIDType, valueAnnotations = Set(Annotation.Unique)),
+      "id"       -> IDAttribute,
       "email"    -> Attribute(AttributeType.StringType(), valueAnnotations = Set(Annotation.Unique)),
       "password" -> Attribute(AttributeType.StringType()),
     )
