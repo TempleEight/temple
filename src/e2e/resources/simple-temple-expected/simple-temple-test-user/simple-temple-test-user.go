@@ -171,8 +171,8 @@ func (env *env) listSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 			CreatedAt:            simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
 			NumberOfDogs:         simpleTempleTestUser.NumberOfDogs,
 			CurrentBankBalance:   simpleTempleTestUser.CurrentBankBalance,
-			BirthDate:            simpleTempleTestUser.BirthDate,
-			BreakfastTime:        simpleTempleTestUser.BreakfastTime,
+			BirthDate:            simpleTempleTestUser.BirthDate.Format("2020-12-31"),
+			BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("12:30:59.000000000"),
 		})
 	}
 
@@ -235,8 +235,8 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		CreatedAt:            simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
 		NumberOfDogs:         simpleTempleTestUser.NumberOfDogs,
 		CurrentBankBalance:   simpleTempleTestUser.CurrentBankBalance,
-		BirthDate:            simpleTempleTestUser.BirthDate,
-		BreakfastTime:        simpleTempleTestUser.BreakfastTime,
+		BirthDate:            simpleTempleTestUser.BirthDate.Format("2020-12-31"),
+		BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("12:30:59.000000000"),
 	})
 }
 
@@ -277,8 +277,8 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 		CreatedAt:            simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
 		NumberOfDogs:         simpleTempleTestUser.NumberOfDogs,
 		CurrentBankBalance:   simpleTempleTestUser.CurrentBankBalance,
-		BirthDate:            simpleTempleTestUser.BirthDate,
-		BreakfastTime:        simpleTempleTestUser.BreakfastTime,
+		BirthDate:            simpleTempleTestUser.BirthDate.Format("2020-12-31"),
+		BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("12:30:59.000000000"),
 	})
 }
 
@@ -355,7 +355,7 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		CreatedAt:            simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
 		NumberOfDogs:         simpleTempleTestUser.NumberOfDogs,
 		CurrentBankBalance:   simpleTempleTestUser.CurrentBankBalance,
-		BirthDate:            simpleTempleTestUser.BirthDate,
-		BreakfastTime:        simpleTempleTestUser.BreakfastTime,
+		BirthDate:            simpleTempleTestUser.BirthDate.Format("2020-12-31"),
+		BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("12:30:59.000000000"),
 	})
 }

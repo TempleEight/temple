@@ -94,21 +94,6 @@ func (env *env) createSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
-	var req createSimpleTempleTestGroupRequest
-	err = json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
-		return
-	}
-
-	_, err = valid.ValidateStruct(req)
-	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
-		return
-	}
-
 	uuid, err := uuid.NewUUID()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not create UUID: %s", err.Error()))
@@ -211,21 +196,6 @@ func (env *env) updateSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 	if !authorized {
 		errMsg := util.CreateErrorJSON("Unauthorized")
 		http.Error(w, errMsg, http.StatusUnauthorized)
-		return
-	}
-
-	var req updateSimpleTempleTestGroupRequest
-	err = json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
-		return
-	}
-
-	_, err = valid.ValidateStruct(req)
-	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
 		return
 	}
 

@@ -1,6 +1,6 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.AttributeType.DateTimeType
+import temple.ast.AttributeType.{DateTimeType, DateType, TimeType}
 import temple.ast.{Annotation, Attribute, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.ServiceRoot
@@ -19,12 +19,16 @@ import scala.Option.when
 
 object GoServiceMainHandlersGenerator {
 
-  private def generateResponseMapFormat(attributeType: AttributeType): String =
-    // Must add formatting to attributes with datetime type
-    attributeType match {
-      case DateTimeType => s".${genFunctionCall("Format", "time.RFC3339")}"
+  private def generateResponseMapFormat(attributeType: AttributeType): String = {
+    // Must add formatting to attributes with date, time or datetime type
+    val layout = attributeType match {
+      case DateType     => doubleQuote("2020-12-31")
+      case TimeType     => doubleQuote("12:30:59.000000000")
+      case DateTimeType => "time.RFC3339"
       case _            => ""
     }
+    if (layout.nonEmpty) s".${genFunctionCall("Format", layout)}" else ""
+  }
 
   /** Generate a map for converting the fields of the DAO response to the JSON response */
   private def generateResponseMap(root: ServiceRoot): ListMap[String, String] =

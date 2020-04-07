@@ -177,8 +177,8 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		DoubleField:   templeUser.DoubleField,
 		StringField:   templeUser.StringField,
 		BoolField:     templeUser.BoolField,
-		DateField:     templeUser.DateField,
-		TimeField:     templeUser.TimeField,
+		DateField:     templeUser.DateField.Format("2020-12-31"),
+		TimeField:     templeUser.TimeField.Format("12:30:59.000000000"),
 		DateTimeField: templeUser.DateTimeField.Format(time.RFC3339),
 		BlobField:     templeUser.BlobField,
 	})
@@ -211,8 +211,8 @@ func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 		DoubleField:   templeUser.DoubleField,
 		StringField:   templeUser.StringField,
 		BoolField:     templeUser.BoolField,
-		DateField:     templeUser.DateField,
-		TimeField:     templeUser.TimeField,
+		DateField:     templeUser.DateField.Format("2020-12-31"),
+		TimeField:     templeUser.TimeField.Format("12:30:59.000000000"),
 		DateTimeField: templeUser.DateTimeField.Format(time.RFC3339),
 		BlobField:     templeUser.BlobField,
 	})
@@ -274,8 +274,8 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		DoubleField:   templeUser.DoubleField,
 		StringField:   templeUser.StringField,
 		BoolField:     templeUser.BoolField,
-		DateField:     templeUser.DateField,
-		TimeField:     templeUser.TimeField,
+		DateField:     templeUser.DateField.Format("2020-12-31"),
+		TimeField:     templeUser.TimeField.Format("12:30:59.000000000"),
 		DateTimeField: templeUser.DateTimeField.Format(time.RFC3339),
 		BlobField:     templeUser.BlobField,
 	})

@@ -108,8 +108,7 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
         entryFile = File(service, s"$service.go"),
       )
 
-    // TODO: Uncomment me, and fix the bugs!
-//      validationErrors shouldBe empty
+      validationErrors shouldBe empty
     }
 
   }
