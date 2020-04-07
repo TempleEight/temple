@@ -1,0 +1,5 @@
+# Prometheus
+kubectl create configmap prometheus-file-config --from-file "$BASEDIR/prometheus/prometheus.yml" -o=yaml
+
+# Grafana
+kubectl create configmap grafana-datasource-config --from-file "$BASEDIR/grafana/provisioning/datasources/datasource.yml" -o=yaml

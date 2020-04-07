@@ -2,7 +2,7 @@ package temple.builder.project
 
 import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
-import temple.ast.Metadata.{Database, ServiceAuth}
+import temple.ast.Metadata.{Database, Metrics, ServiceAuth}
 import temple.ast._
 
 import scala.collection.immutable.ListMap
@@ -61,6 +61,7 @@ object ProjectBuilderTestData {
 
   val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
+    ProjectBlock(Seq(Metrics.Prometheus)),
     services = Map(
       "ComplexUser" -> ServiceBlock(
         complexServiceAttributes,

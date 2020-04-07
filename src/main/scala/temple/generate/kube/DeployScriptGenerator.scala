@@ -11,6 +11,8 @@ object DeployScriptGenerator {
 
   private val scriptTemplateBody: String = FileUtils.readResources("shell/deploy.sh.body.snippet")
 
+  private val scriptMetricsBlock: String = FileUtils.readResources("shell/deploy.sh.metrics.snippet")
+
   def generate(orchestrationRoot: OrchestrationRoot): (File, FileContent) = File("", "deploy.sh") -> mkCode.lines(
     scriptTemplateHeader,
     "",
@@ -19,6 +21,7 @@ object DeployScriptGenerator {
       s"""kubectl create configmap ${service.name}-db-config --from-file "$$BASEDIR/${service.name}-db/init.sql" -o=yaml"""
     },
     "",
+    Option.when(orchestrationRoot.usesMetrics) { scriptMetricsBlock + "\n" },
     scriptTemplateBody,
   )
 }

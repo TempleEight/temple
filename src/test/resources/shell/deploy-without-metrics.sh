@@ -1,3 +1,27 @@
+#! /bin/sh
+# Deployment script for kube - generates configmaps from SQL init files and provisions everything
+
+BASEDIR=$(dirname "$BASH_SOURCE")
+
+GREEN="\033[1;32m"
+BLUE="\033[1;34m"
+YELLOW="\033[1;33m"
+PURPLE="\033[1;34m"
+NOCOLOR="\033[0m"
+
+minikube start --vm-driver=virtualbox
+
+echo $GREEN
+
+kubectl create secret docker-registry regcred --docker-server=$REG_URL --docker-username=$REG_USERNAME --docker-password=$REG_PASSWORD --docker-email=$REG_EMAIL
+
+echo
+echo Creating ConfigMaps...
+echo
+
+# DB init scripts
+kubectl create configmap user-db-config --from-file "$BASEDIR/user-db/init.sql" -o=yaml
+
 for file in "$BASEDIR/grafana/provisioning/dashboards/"*
 do
   filename=$(basename $file) # Get everything after the final /

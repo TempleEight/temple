@@ -22,12 +22,6 @@ echo
 # DB init scripts
 kubectl create configmap temple-user-db-config --from-file "$BASEDIR/temple-user-db/init.sql" -o=yaml
 
-# Prometheus
-kubectl create configmap prometheus-file-config --from-file "$BASEDIR/prometheus/prometheus.yml" -o=yaml
-
-# Grafana
-kubectl create configmap grafana-datasource-config --from-file "$BASEDIR/grafana/provisioning/datasources/datasource.yml" -o=yaml
-
 for file in "$BASEDIR/grafana/provisioning/dashboards/"*
 do
   filename=$(basename $file) # Get everything after the final /
