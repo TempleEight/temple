@@ -7,7 +7,7 @@ import temple.ast.{Metadata, _}
 import temple.builder.project.ProjectConfig
 import temple.utils.MonadUtils.FromEither
 
-import scala.collection.immutable.SortedSet
+import scala.collection.immutable.{ListMap, SortedSet}
 import scala.collection.mutable
 import scala.reflect.{ClassTag, classTag}
 
@@ -37,7 +37,8 @@ private class Validator private (templefile: Templefile) {
     // Keep a set of names that have been used already
     val takenNames: mutable.Set[String] = attributes.keys.to(mutable.Set)
 
-    attributes.map {
+    // Add implicit ID Attribute
+    ListMap("id" -> IDAttribute) ++ attributes.map {
       case (attributeName, value) =>
         if (attributeName.headOption.exists(!_.isLower))
           errors += context.errorMessage(
@@ -55,7 +56,7 @@ private class Validator private (templefile: Templefile) {
         takenNames += newName
 
         newName -> value
-    } + ("id" -> IDAttribute) // Add the implicit IDAttribute
+    }
   }
 
   /** Given a service block or a struct block, find a valid name for it (taking into account the clashes from all the

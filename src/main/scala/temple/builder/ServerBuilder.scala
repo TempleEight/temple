@@ -46,7 +46,7 @@ object ServerBuilder {
       DatabaseBuilder
         .buildQuery(
           serviceName,
-          serviceBlock.attributesWithoutID,
+          serviceBlock.attributes,
           endpoints,
           createdBy,
           selectionAttribute = idAttribute.name,
