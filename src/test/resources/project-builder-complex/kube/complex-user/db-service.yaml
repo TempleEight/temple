@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: complex-user-db
+  labels:
+    app: complex-user
+    kind: db
+spec:
+  ports:
+  - name: db
+    port: 5432
+    targetPort: 5432
+  selector:
+    app: complex-user
+    kind: db

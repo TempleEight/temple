@@ -1,0 +1,40 @@
+# Deployment to manage Kong Postgres
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: kong-db
+  name: kong-db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: kong-db
+  template:
+    metadata:
+      labels:
+        app: kong-db
+    spec:
+      containers:
+      - env:
+        - name: POSTGRES_DB
+          value: kong
+        - name: POSTGRES_PASSWORD
+          value: kong
+        - name: POSTGRES_USER
+          value: kong
+        image: postgres:12.1
+        ports:
+        - containerPort: 5432
+        livenessProbe:
+          exec:
+            command:
+            - pg_isready
+            - -U
+            - kong
+          failureThreshold: 3
+          periodSeconds: 30
+          timeoutSeconds: 30
+        name: kong-db
+        stdin: true
+        tty: true

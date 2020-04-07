@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: temple-user-db
+  labels:
+    app: temple-user
+    kind: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: temple-user
+      kind: db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: temple-user-db
+      labels:
+        app: temple-user
+        kind: db
+    spec:
+      hostname: temple-user-db
+      containers:
+      - env:
+        - name: PGUSER
+          value: postgres
+        image: postgres:12.1
+        name: temple-user-db
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: temple-user-db-claim
+        - mountPath: /docker-entrypoint-initdb.d/init.sql
+          subPath: init.sql
+          name: temple-user-db-init
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - psql -U postgres -f /docker-entrypoint-initdb.d/init.sql && echo done
+      restartPolicy: Always
+      volumes:
+      - name: temple-user-db-init
+        configMap:
+          name: temple-user-db-config
+      - name: temple-user-db-claim
+        persistentVolumeClaim:
+          claimName: temple-user-db-claim
