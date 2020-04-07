@@ -26,8 +26,8 @@ class SimpleE2ETest extends FlatSpec with FileMatchers {
       PoliceSergeantNicholasAngel,
     )
 
-    val expected = E2ETestUtils.buildFileMap(Paths.get("src/e2e/resources/simple-temple-expected"))
-    val found    = E2ETestUtils.buildFileMap(basePath)
-    filesShouldMatch(expected, found)
+    val expected = TestUtils.buildFileMap(Paths.get("src/e2e/resources/simple-temple-expected"))
+    val found    = TestUtils.buildFileMap(basePath)
+    filesShouldMatch(found, expected)
   }
 }

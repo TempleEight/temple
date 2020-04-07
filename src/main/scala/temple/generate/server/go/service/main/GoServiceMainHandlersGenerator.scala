@@ -15,6 +15,7 @@ import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.StringUtils.{decapitalize, doubleQuote}
 
 import scala.collection.immutable.ListMap
+import scala.Option.when
 
 object GoServiceMainHandlersGenerator {
 
@@ -103,7 +104,7 @@ object GoServiceMainHandlersGenerator {
           "env.comm",
           s"Check$reference",
           s"*req.${name.capitalize}",
-          genMethodCall("r.Header", "Get", doubleQuote("Authorization")),
+          when(root.projectUsesAuth) { genMethodCall("r.Header", "Get", doubleQuote("Authorization")) },
         ),
         s"${name}Valid",
         "err",
@@ -154,14 +155,13 @@ object GoServiceMainHandlersGenerator {
     operations: Set[CRUD],
     clientAttributes: ListMap[String, Attribute],
     usesComms: Boolean,
-    hasAuthBlock: Boolean,
     enumeratingByCreator: Boolean,
   ): String = {
     val responseMap = generateResponseMap(root)
     mkCode.doubleLines(
       operations.toSeq.sorted.map {
         case List   => generateListHandler(root, responseMap, enumeratingByCreator)
-        case Create => generateCreateHandler(root, clientAttributes, usesComms, hasAuthBlock, responseMap)
+        case Create => generateCreateHandler(root, clientAttributes, usesComms, responseMap)
         case Read   => generateReadHandler(root)
         case Update => generateUpdateHandler(root)
         case Delete => generateDeleteHandler(root)

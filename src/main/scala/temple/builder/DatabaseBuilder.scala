@@ -7,9 +7,9 @@ import temple.generate.database.ast.ColumnConstraint.Check
 import temple.generate.database.ast.Condition.PreparedComparison
 import temple.generate.database.ast.Expression.PreparedValue
 import temple.generate.database.ast._
-import temple.generate.server.CreatedByAttribute
 import temple.utils.StringUtils
 
+import scala.Option.when
 import scala.collection.immutable.ListMap
 
 /** Construct database queries from a Templefile structure */
@@ -22,7 +22,7 @@ object DatabaseBuilder {
   }
 
   private def toColDef(name: String, attribute: Attribute): ColumnDef = {
-    val nonNullConstraint = Option.when(!attribute.valueAnnotations.contains(Nullable)) { ColumnConstraint.NonNull }
+    val nonNullConstraint = when(!attribute.valueAnnotations.contains(Nullable)) { ColumnConstraint.NonNull }
 
     val primaryKeyConstraint = attribute match {
       case IDAttribute => Some(ColumnConstraint.PrimaryKey)
@@ -58,7 +58,7 @@ object DatabaseBuilder {
     serviceName: String,
     attributes: Map[String, Attribute],
     endpoints: Set[CRUD],
-    createdByAttribute: Option[CreatedByAttribute],
+    readable: Metadata.Readable = Metadata.Readable.This,
     selectionAttribute: String = "id",
   ): ListMap[CRUD, Statement] = {
     val tableName        = StringUtils.snakeCase(serviceName)
@@ -91,19 +91,13 @@ object DatabaseBuilder {
             condition = Some(PreparedComparison(selectionAttribute, ComparisonOperator.Equal)),
           )
         case List =>
-          createdByAttribute match {
-            case Some(CreatedByAttribute(_, _, true)) =>
-              List -> Statement.Read(
-                tableName,
-                columns = columns,
-                condition = Some(PreparedComparison("created_by", ComparisonOperator.Equal)),
-              )
-            case _ =>
-              List -> Statement.Read(
-                tableName,
-                columns = columns,
-              )
-          }
+          List -> Statement.Read(
+            tableName,
+            columns = columns,
+            condition = when(readable == Metadata.Readable.This) {
+              PreparedComparison("created_by", ComparisonOperator.Equal)
+            },
+          )
       },
     )
   }
@@ -117,8 +111,8 @@ object DatabaseBuilder {
     */
   def createServiceTables(serviceName: String, service: AbstractServiceBlock): Seq[Statement.Create] = {
     service.structIterator(serviceName).map {
-      case (tableName, attributes) =>
-        val columns = attributes.map { case (name, attributes) => toColDef(name, attributes) }
+      case (tableName, structBlock) =>
+        val columns = structBlock.attributes.map { case (name, attributes) => toColDef(name, attributes) }
         Statement.Create(StringUtils.snakeCase(tableName), columns.toSeq)
     }
   }.toSeq

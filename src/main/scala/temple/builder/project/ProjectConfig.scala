@@ -1,6 +1,7 @@
 package temple.builder.project
 
 import temple.ast.Metadata._
+import temple.generate.database.PreparedType
 import temple.generate.kube.ast.OrchestrationType.DbStorage
 
 object ProjectConfig {
@@ -22,6 +23,10 @@ object ProjectConfig {
 
   def dockerImage(database: Database): DockerImage = database match {
     case Database.Postgres => DockerImage("postgres", "12.1")
+  }
+
+  def preparedType(language: ServiceLanguage): PreparedType = language match {
+    case ServiceLanguage.Go => PreparedType.DollarNumbers
   }
 
   def databaseStorage(database: Database, serviceName: String): DbStorage = database match {

@@ -28,7 +28,6 @@ type DAO struct {
 // SimpleTempleTestUser encapsulates the object stored in the datastore
 type SimpleTempleTestUser struct {
 	ID                   uuid.UUID
-	CreatedBy            uuid.UUID
 	SimpleTempleTestUser string
 	Email                string
 	FirstName            string
@@ -44,7 +43,6 @@ type SimpleTempleTestUser struct {
 // CreateSimpleTempleTestUserInput encapsulates the information required to create a single simpleTempleTestUser in the datastore
 type CreateSimpleTempleTestUserInput struct {
 	ID                   uuid.UUID
-	AuthID               uuid.UUID
 	SimpleTempleTestUser string
 	Email                string
 	FirstName            string
@@ -102,7 +100,7 @@ func (dao *DAO) CreateSimpleTempleTestUser(input CreateSimpleTempleTestUserInput
 	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO simple_temple_test_user (id, simpleTempleTestUser, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id, simpleTempleTestUser, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime;", input.ID, input.SimpleTempleTestUser, input.Email, input.FirstName, input.LastName, input.CreatedAt, input.NumberOfDogs, input.Yeets, input.CurrentBankBalance, input.BirthDate, input.BreakfastTime)
 
 	var simpleTempleTestUser SimpleTempleTestUser
-	err := row.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.CreatedBy, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
+	err := row.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
 	if err != nil {
 		return nil, err
 	}
@@ -115,7 +113,7 @@ func (dao *DAO) ReadSimpleTempleTestUser(input ReadSimpleTempleTestUserInput) (*
 	row := executeQueryWithRowResponse(dao.DB, "SELECT id, simpleTempleTestUser, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime FROM simple_temple_test_user WHERE id = $1;", input.ID)
 
 	var simpleTempleTestUser SimpleTempleTestUser
-	err := row.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.CreatedBy, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
+	err := row.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
@@ -133,7 +131,7 @@ func (dao *DAO) UpdateSimpleTempleTestUser(input UpdateSimpleTempleTestUserInput
 	row := executeQueryWithRowResponse(dao.DB, "UPDATE simple_temple_test_user SET simpleTempleTestUser = $1, email = $2, firstName = $3, lastName = $4, createdAt = $5, numberOfDogs = $6, yeets = $7, currentBankBalance = $8, birthDate = $9, breakfastTime = $10 WHERE id = $11 RETURNING id, simpleTempleTestUser, email, firstName, lastName, createdAt, numberOfDogs, yeets, currentBankBalance, birthDate, breakfastTime;", input.SimpleTempleTestUser, input.Email, input.FirstName, input.LastName, input.CreatedAt, input.NumberOfDogs, input.Yeets, input.CurrentBankBalance, input.BirthDate, input.BreakfastTime, input.ID)
 
 	var simpleTempleTestUser SimpleTempleTestUser
-	err := row.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.CreatedBy, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
+	err := row.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
@@ -156,7 +154,7 @@ func (dao *DAO) ListSimpleTempleTestUser() (*[]SimpleTempleTestUser, error) {
 	simpleTempleTestUserList := make([]SimpleTempleTestUser, 0)
 	for rows.Next() {
 		var simpleTempleTestUser SimpleTempleTestUser
-		err = rows.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.CreatedBy, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
+		err = rows.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
 		if err != nil {
 			return nil, err
 		}

@@ -7,11 +7,10 @@ import temple.errors.ErrorHandlingContext
 sealed trait Metadata
 
 object Metadata {
-  sealed trait TargetMetadata          extends Metadata
-  sealed trait ProjectMetadata         extends Metadata
-  sealed trait ServiceOrStructMetadata extends Metadata
-  sealed trait ServiceMetadata         extends ServiceOrStructMetadata
-  sealed trait StructMetadata          extends ServiceOrStructMetadata
+  sealed trait TargetMetadata  extends Metadata
+  sealed trait ProjectMetadata extends Metadata
+  sealed trait ServiceMetadata extends Metadata
+  sealed trait StructMetadata  extends ServiceMetadata
 
   sealed abstract class TargetLanguage private (name: String, aliases: String*)
       extends EnumEntry(name, aliases)
@@ -64,11 +63,7 @@ object Metadata {
     case object This extends Readable("this")
   }
 
-  sealed abstract class Writable private (name: String)
-      extends EnumEntry(name)
-      with ServiceMetadata
-      with StructMetadata
-      with ProjectMetadata
+  sealed abstract class Writable private (name: String) extends EnumEntry(name) with StructMetadata with ProjectMetadata
 
   object Writable extends Enum[Writable] {
     override def values: IndexedSeq[Writable] = findValues
@@ -86,7 +81,7 @@ object Metadata {
     case object Delete extends Endpoint("delete")
   }
 
-  case class Omit(endpoints: Set[Endpoint]) extends ServiceMetadata with StructMetadata
+  case class Omit(endpoints: Set[Endpoint]) extends StructMetadata
 
   object Omit extends EnumParser[Omit, Seq[String]] {
 
@@ -101,7 +96,7 @@ object Metadata {
     case object Email extends ServiceAuth("email")
   }
 
-  case class ServiceEnumerable(byThis: Boolean = false) extends ServiceMetadata with StructMetadata
-  case class Uses(services: Seq[String])                extends ServiceMetadata
-
+  type ServiceEnumerable = ServiceEnumerable.type
+  case object ServiceEnumerable          extends StructMetadata
+  case class Uses(services: Seq[String]) extends ServiceMetadata
 }

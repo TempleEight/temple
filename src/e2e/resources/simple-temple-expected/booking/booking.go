@@ -105,8 +105,16 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	uuid, err := uuid.NewUUID()
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not create UUID: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
+
 	booking, err := env.dao.CreateBooking(dao.CreateBookingInput{
-		ID: auth.ID,
+		ID:     uuid,
+		AuthID: auth.ID,
 	})
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))

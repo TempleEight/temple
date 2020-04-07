@@ -105,8 +105,16 @@ func (env *env) createSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
+	uuid, err := uuid.NewUUID()
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not create UUID: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusInternalServerError)
+		return
+	}
+
 	simpleTempleTestGroup, err := env.dao.CreateSimpleTempleTestGroup(dao.CreateSimpleTempleTestGroupInput{
-		ID: auth.ID,
+		ID:     uuid,
+		AuthID: auth.ID,
 	})
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))

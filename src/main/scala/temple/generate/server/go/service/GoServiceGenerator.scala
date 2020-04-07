@@ -1,5 +1,6 @@
 package temple.generate.server.go.service
 
+import temple.ast.Metadata.Readable
 import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
@@ -15,11 +16,6 @@ import scala.Option.when
 object GoServiceGenerator extends ServiceGenerator {
 
   override def generate(root: ServiceRoot): Files = {
-    /* TODO
-     * handlers in <>.go
-     * config.json
-     */
-
     // Set of CRUD operations the service uses
     val operations = root.opQueries.keySet
 
@@ -38,13 +34,10 @@ object GoServiceGenerator extends ServiceGenerator {
         attr.accessAnnotation.contains(Annotation.Server) || attr.accessAnnotation.contains(Annotation.ServerSet)
     }
 
-    // Whether or not this service has an auth block
-    val hasAuthBlock = root.createdByAttribute.isEmpty
-
     // Whether or not this service is enumerating by creator
-    val enumeratingByCreator = root.createdByAttribute match {
-      case Some(CreatedByAttribute(_, _, true)) => true
-      case _                                    => false
+    lazy val enumeratingByCreator = root.readable match {
+      case Readable.All  => false
+      case Readable.This => true
     }
 
     (Map(
@@ -61,7 +54,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonMainGenerator.generateMain(root, root.port, usesComms, isAuth = false),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoServiceMainHandlersGenerator
-          .generateHandlers(root, operations, clientAttributes, usesComms, hasAuthBlock, enumeratingByCreator),
+          .generateHandlers(root, operations, clientAttributes, usesComms, enumeratingByCreator),
       ),
       File(root.kebabName, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),

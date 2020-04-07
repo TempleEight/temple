@@ -2,7 +2,7 @@ package temple.ast
 
 import temple.ast.Metadata.{Endpoint, Omit, ServiceMetadata}
 
-sealed trait AbstractServiceBlock extends TempleBlock[ServiceMetadata] {
+sealed trait AbstractServiceBlock extends AttributeBlock[ServiceMetadata] {
   def attributes: Map[String, Attribute]
   def metadata: Seq[ServiceMetadata]
   def structs: Map[String, StructBlock]
@@ -11,11 +11,10 @@ sealed trait AbstractServiceBlock extends TempleBlock[ServiceMetadata] {
     * Flatten a service block into a sequence of structs, including the service's root struct.
     *
     * @param rootName The name of the root struct, typically the name of the service.
-    * @return An iterator of pairs of names and struct blocks,
-    *         represented as an iterator of pairs of names and attributes
+    * @return An iterator of pairs of names and struct blocks
     */
-  def structIterator(rootName: String): Iterator[(String, Map[String, Attribute])] =
-    Iterator((rootName, attributes)) ++ structs.iterator.map { case (str, block) => (str, block.attributes) }
+  def structIterator(rootName: String): Iterator[(String, AttributeBlock[_])] =
+    Iterator(rootName -> this) ++ structs
 
   /** Return this service's attributes, minus the ID */
   lazy val attributesWithoutID: Map[String, Attribute] = attributes.filterNot { case (_, attr) => attr == IDAttribute }
