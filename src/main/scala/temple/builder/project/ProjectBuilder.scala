@@ -74,8 +74,15 @@ object ProjectBuilder {
   }
 
   private def buildMetrics(templefile: Templefile): Files = {
-    // TODO: Get this from templefile and project settings
-    val datasource: Datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
+    // Only generate metrics if explicitly given
+    val metric = templefile.lookupMetadata[Metrics].getOrElse {
+      return Map.empty
+    }
+
+    val datasource = metric match {
+      case Metrics.Prometheus => Datasource.Prometheus("Prometheus", "http://prom:9090")
+    }
+
     val dashboardJSONs = templefile.allServices.map {
       case (name, service) =>
         // Create row for every endpoint in the service
