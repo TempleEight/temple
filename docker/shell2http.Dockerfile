@@ -6,6 +6,7 @@ FROM msoap/shell2http:1.13
 RUN apk update
 RUN apk upgrade
 RUN apk add python3
+RUN apk add git
 RUN apk add --update nodejs
 
 # Handolint config

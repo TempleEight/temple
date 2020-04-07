@@ -46,7 +46,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonGenerator.generatePackage("main"),
         GoServiceMainGenerator.generateImports(root, usesTime, usesComms, clientAttributes, operations),
         GoServiceMainStructGenerator.generateEnvStruct(usesComms),
-        when(clientAttributes.nonEmpty && (operations.contains(CRUD.Create) || operations.contains(CRUD.Read))) {
+        when(clientAttributes.nonEmpty && (operations.contains(CRUD.Create) || operations.contains(CRUD.Update))) {
           GoServiceMainStructGenerator.generateRequestStructs(root, operations, clientAttributes)
         },
         GoServiceMainStructGenerator.generateResponseStructs(root, operations),
