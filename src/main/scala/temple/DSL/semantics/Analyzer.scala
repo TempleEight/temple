@@ -177,6 +177,7 @@ object Analyzer {
     registerKeywordWithContext("language", TokenArgType)(ServiceLanguage)
     registerKeywordWithContext("database", TokenArgType)(Database)
     registerKeywordWithContext("provider", TokenArgType)(Provider)
+    registerKeywordWithContext("metrics", TokenArgType)(Metrics)
     registerKeywordWithContext("readable", "by", TokenArgType)(Readable)
     registerKeywordWithContext("writable", "by", TokenArgType)(Writable)
   }

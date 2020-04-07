@@ -21,6 +21,11 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
     val semantics   = parseAndValidate(parseResult)
     semantics shouldBe Templefile(
       projectName = "SimpleTempleTest",
+      projectBlock = ProjectBlock(
+        metadata = Seq(
+          Metrics.Prometheus,
+        ),
+      ),
       services = Map(
         "SimpleTempleTestUser" -> ServiceBlock(
           attributes = ListMap(

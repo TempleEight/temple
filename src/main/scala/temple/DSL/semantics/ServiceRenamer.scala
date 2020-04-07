@@ -23,6 +23,7 @@ case class ServiceRenamer(renamingMap: Map[String, String]) {
         case database: Metadata.Database        => database
         case readable: Metadata.Readable        => readable
         case writable: Metadata.Writable        => writable
+        case metrics: Metadata.Metrics          => metrics
       },
     )
 

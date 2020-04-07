@@ -125,6 +125,7 @@ private class Validator private (templefile: Templefile) {
       case Metadata.Omit(_)           => assertUnique[Metadata.Omit]()
       case Metadata.ServiceEnumerable => assertUnique[Metadata.ServiceEnumerable]()
       case _: Metadata.Provider       => assertUnique[Metadata.Provider]()
+      case _: Metadata.Metrics        => assertUnique[Metadata.Metrics]()
       case Metadata.Uses(services) =>
         assertUnique[Metadata.Uses]()
         for (service <- services if !allServices.contains(service))
