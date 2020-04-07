@@ -8,7 +8,7 @@ import temple.builder.project.ProjectConfig
 import temple.utils.MonadUtils.FromEither
 
 import scala.Option.when
-import scala.collection.immutable.SortedSet
+import scala.collection.immutable.{ListMap, SortedSet}
 import scala.collection.mutable
 import scala.reflect.{ClassTag, classTag}
 
@@ -38,7 +38,8 @@ private class Validator private (templefile: Templefile) {
     // Keep a set of names that have been used already
     val takenNames: mutable.Set[String] = block.attributes.keys.to(mutable.Set)
 
-    block.attributes.map {
+    // Add implicit ID Attribute
+    ListMap("id" -> IDAttribute) ++ block.attributes.map {
       case (attributeName, value) =>
         if (attributeName.headOption.exists(!_.isLower))
           errors += context.errorMessage(
