@@ -204,7 +204,8 @@ object KubernetesGenerator {
     val kubeFiles: Files    = orchestrationRoot.services.flatMap(buildKubeFiles).toMap
     val kongConfig: Files   = Map(KongConfigGenerator.generate(orchestrationRoot))
     val deployScript: Files = Map(DeployScriptGenerator.generate(orchestrationRoot))
-    kubeFiles ++ kongConfig ++ kongFiles ++ deployScript
+    val pushScript: Files   = Map(PushImageScriptGenerator.generate(orchestrationRoot))
+    kubeFiles ++ kongConfig ++ kongFiles ++ deployScript ++ pushScript
   }
 
 }
