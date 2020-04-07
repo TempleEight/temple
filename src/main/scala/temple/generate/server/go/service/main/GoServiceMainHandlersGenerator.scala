@@ -82,7 +82,12 @@ object GoServiceMainHandlersGenerator {
       genReturn(),
     )
 
-  /** Generate the block for extracting an AuthID from the request header */
+  /**
+    * Generate the block for extracting an AuthID from the request header
+    *
+    * @param usesVar indicates whether to assign the auth to a variable, i.e. "auth" | "_"
+    * @return extract auth block string
+    */
   private[main] def generateExtractAuthBlock(usesVar: Boolean): String =
     mkCode.lines(
       genDeclareAndAssign(
