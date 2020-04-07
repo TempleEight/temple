@@ -283,5 +283,79 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 }
 
 func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
 
+	simpleTempleTestUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	if auth.ID != simpleTempleTestUserID {
+		errMsg := util.CreateErrorJSON("Unauthorized")
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
+
+	var req updateSimpleTempleTestUserRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	if req.SimpleTempleTestUser == nil || req.Email == nil || req.FirstName == nil || req.LastName == nil || req.CreatedAt == nil || req.NumberOfDogs == nil || req.CurrentBankBalance == nil || req.BirthDate == nil || req.BreakfastTime == nil {
+		errMsg := util.CreateErrorJSON("Missing request parameter(s)")
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	_, err = valid.ValidateStruct(req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	simpleTempleTestUser, err := env.dao.UpdateSimpleTempleTestUser(dao.UpdateSimpleTempleTestUserInput{
+		ID:                   simpleTempleTestUserID,
+		SimpleTempleTestUser: *req.SimpleTempleTestUser,
+		Email:                *req.Email,
+		FirstName:            *req.FirstName,
+		LastName:             *req.LastName,
+		CreatedAt:            *req.CreatedAt,
+		NumberOfDogs:         *req.NumberOfDogs,
+		CurrentBankBalance:   *req.CurrentBankBalance,
+		BirthDate:            *req.BirthDate,
+		BreakfastTime:        *req.BreakfastTime,
+	})
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrSimpleTempleTestUserNotFound:
+			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+		default:
+			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+			http.Error(w, errMsg, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	json.NewEncoder(w).Encode(updateSimpleTempleTestUserResponse{
+		ID:                   simpleTempleTestUser.ID,
+		SimpleTempleTestUser: simpleTempleTestUser.SimpleTempleTestUser,
+		Email:                simpleTempleTestUser.Email,
+		FirstName:            simpleTempleTestUser.FirstName,
+		LastName:             simpleTempleTestUser.LastName,
+		CreatedAt:            simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
+		NumberOfDogs:         simpleTempleTestUser.NumberOfDogs,
+		CurrentBankBalance:   simpleTempleTestUser.CurrentBankBalance,
+		BirthDate:            simpleTempleTestUser.BirthDate,
+		BreakfastTime:        simpleTempleTestUser.BreakfastTime,
+	})
 }

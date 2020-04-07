@@ -264,7 +264,87 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
 
+	complexUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	if auth.ID != complexUserID {
+		errMsg := util.CreateErrorJSON("Unauthorized")
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
+
+	var req updateComplexUserRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	if req.SmallIntField == nil || req.IntField == nil || req.BigIntField == nil || req.FloatField == nil || req.DoubleField == nil || req.StringField == nil || req.BoundedStringField == nil || req.BoolField == nil || req.DateField == nil || req.TimeField == nil || req.DateTimeField == nil || req.BlobField == nil {
+		errMsg := util.CreateErrorJSON("Missing request parameter(s)")
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	_, err = valid.ValidateStruct(req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	complexUser, err := env.dao.UpdateComplexUser(dao.UpdateComplexUserInput{
+		ID:                 complexUserID,
+		SmallIntField:      *req.SmallIntField,
+		IntField:           *req.IntField,
+		BigIntField:        *req.BigIntField,
+		FloatField:         *req.FloatField,
+		DoubleField:        *req.DoubleField,
+		StringField:        *req.StringField,
+		BoundedStringField: *req.BoundedStringField,
+		BoolField:          *req.BoolField,
+		DateField:          *req.DateField,
+		TimeField:          *req.TimeField,
+		DateTimeField:      *req.DateTimeField,
+		BlobField:          *req.BlobField,
+	})
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrComplexUserNotFound:
+			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+		default:
+			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+			http.Error(w, errMsg, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	json.NewEncoder(w).Encode(updateComplexUserResponse{
+		ID:                 complexUser.ID,
+		SmallIntField:      complexUser.SmallIntField,
+		IntField:           complexUser.IntField,
+		BigIntField:        complexUser.BigIntField,
+		FloatField:         complexUser.FloatField,
+		DoubleField:        complexUser.DoubleField,
+		StringField:        complexUser.StringField,
+		BoundedStringField: complexUser.BoundedStringField,
+		BoolField:          complexUser.BoolField,
+		DateField:          complexUser.DateField,
+		TimeField:          complexUser.TimeField,
+		DateTimeField:      complexUser.DateTimeField.Format(time.RFC3339),
+		BlobField:          complexUser.BlobField,
+	})
 }
 
 func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request) {
