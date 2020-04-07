@@ -13,13 +13,6 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainCreateHandlerGenerator {
 
-  /** Generate the checking that incoming request parameters are not nil */
-  private def generateRequestNilCheck(root: ServiceRoot, clientAttributes: ListMap[String, Attribute]): String =
-    genIf(
-      clientAttributes.map { case name -> _ => s"req.${name.capitalize} == nil" }.mkString(" || "),
-      generateHTTPErrorReturn(StatusBadRequest, "Missing request parameter(s)"),
-    )
-
   /** Generate new UUID block */
   private def generateNewUUIDBlock(): String =
     mkCode.lines(
@@ -74,7 +67,8 @@ object GoServiceMainCreateHandlerGenerator {
         mkCode.doubleLines(
           when(root.projectUsesAuth) { generateExtractAuthBlock(usesVar = true) },
           generateDecodeRequestBlock(s"create${root.name}"),
-          generateRequestNilCheck(root, clientAttributes),
+          // TODO: Handle this properly, there could be serverSet attributes
+          when(clientAttributes.nonEmpty) { generateRequestNilCheck(root, clientAttributes) },
           generateValidateStructBlock(),
           when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
           when(!root.hasAuthBlock) { generateNewUUIDBlock() },
