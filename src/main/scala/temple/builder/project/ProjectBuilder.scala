@@ -74,8 +74,8 @@ object ProjectBuilder {
   }
 
   private def buildMetrics(templefile: Templefile): Files = {
-    // Only generate metrics if explicitly given
     val metric = templefile.lookupMetadata[Metrics].getOrElse {
+      // If no explicit metrics tag is given, no files are to be generated, therefore can early return
       return Map.empty
     }
 
