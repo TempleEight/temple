@@ -5,7 +5,7 @@ import "github.com/squat/and/dab/simple-temple-test-user/dao"
 // Hook allows additional code to be executed before and after every datastore interaction
 // Hooks are executed in the order they are defined, such that if any hook errors, future hooks are not executed and the request is terminated
 type Hook struct {
-	beforeListHooks   []*func(env *env, input *dao.ListSimpleTempleTestUserInput) *HookError
+	beforeListHooks   []*func(env *env) *HookError
 	beforeCreateHooks []*func(env *env, req createSimpleTempleTestUserRequest, input *dao.CreateSimpleTempleTestUserInput) *HookError
 	beforeReadHooks   []*func(env *env, input *dao.ReadSimpleTempleTestUserInput) *HookError
 	beforeUpdateHooks []*func(env *env, req updateSimpleTempleTestUserRequest, input *dao.UpdateSimpleTempleTestUserInput) *HookError
@@ -26,7 +26,7 @@ func (e *HookError) Error() string {
 }
 
 // BeforeList adds a new hook to be executed before listing the objects in the datastore
-func (h *Hook) BeforeList(hook func(env *env, input *dao.ListSimpleTempleTestUserInput) *HookError) {
+func (h *Hook) BeforeList(hook func(env *env) *HookError) {
 	h.beforeListHooks = append(h.beforeListHooks, &hook)
 }
 
