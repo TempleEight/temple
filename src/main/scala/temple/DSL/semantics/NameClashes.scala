@@ -7,12 +7,12 @@ import scala.collection.Iterator.iterate
 
 object NameClashes {
 
-  val templeAttributeNameValidator: NameValidator = NameValidator.from(
+  val templeAttributeNameValidator: NameValidator = NameValidator.fromBlacklist(
     "id",
     "createdBy",
   )
 
-  val templeServiceNameValidator: NameValidator = NameValidator.from(
+  val templeServiceNameValidator: NameValidator = NameValidator.fromBlacklist(
     "auth",
     "api",
     "kong",
@@ -21,8 +21,33 @@ object NameClashes {
     "prometheus",
   )
 
+  private val goGlobalsValidator: NameValidator = NameValidator.fromBlacklist(
+    //constants
+    "true",
+    "false",
+    "iota",
+    // variables
+    "nil",
+    // functions
+    "append",
+    "cap",
+    "close",
+    "complex",
+    "copy",
+    "delete",
+    "imag",
+    "len",
+    "make",
+    "new",
+    "panic",
+    "print",
+    "println",
+    "real",
+    "recover",
+  )
+
   // https://golang.org/ref/spec#Keywords
-  private val goKeywordValidator = NameValidator.from(
+  private val goKeywordValidator = NameValidator.fromBlacklist(
     "break",
     "default",
     "func",
@@ -57,35 +82,51 @@ object NameClashes {
     suffixes.iterator.exists(string.endsWith)
 
   // DAO clashes
-  private val goNameValidator = NameValidator.fromFunction(name =>
-    startsWithAny(name, CRUD.values.map(_.toString.toLowerCase)) || endsWithAny(name, Seq("List", "Input", "Response")),
+  private def templeGoNameValidator: NameValidator = {
+    val crudStrings   = CRUD.values.map(_.toString.toLowerCase)
+    val suffixStrings = Seq("list", "input", "response")
+
+    var lastBaseName: Option[String] = None
+    NameValidator.fromFunction { name =>
+      val baseName = lastBaseName getOrElse name
+      val valid    = !startsWithAny(name, crudStrings) && !endsWithAny(name, suffixStrings)
+      if (!valid && lastBaseName.nonEmpty)
+        throw new SemanticParsingException(
+          s"""Cannot generate good name for "$baseName", names of projects and blocks cannot """
+          + s"start with [${crudStrings.mkString(", ")}] or end with [${crudStrings.mkString(", ")}]",
+        )
+      lastBaseName = Some(baseName)
+      valid
+    }
+  }
+
+  private val templeGoServiceValidator = NameValidator.fromBlacklist(
+    // <struct-name>.go clashes
+    "auth",
+    "err",
+    "req",
+    "uuid",
+    "errMsg",
+    "json",
+    "flag",
+    "fmt",
+    "log",
+    "http",
+    "time",
+    "dao",
+    "util",
+    "valid",
+    "mux",
   )
 
-  val goServiceValidator: NameValidator = goKeywordValidator & templeServiceNameValidator &
-    NameValidator.from(
-      // <struct-name>.go clashes
-      "auth",
-      "err",
-      "req",
-      "uuid",
-      "errMsg",
-      "json",
-      "flag",
-      "fmt",
-      "log",
-      "net/http",
-      "time",
-      "dao",
-      "util",
-      "valid",
-      "mux",
-    ) & goNameValidator
+  def goServiceValidator: NameValidator =
+    templeGoNameValidator & goGlobalsValidator & goKeywordValidator & templeServiceNameValidator & templeGoServiceValidator
 
   val goAttributeValidator: NameValidator = goKeywordValidator & templeAttributeNameValidator
 
   // https://www.postgresql.org/docs/10/sql-keywords-appendix.html
   // only those marked as "reserved"/"reserved (can be function or type)" in Postgres
-  val postgresValidator: NameValidator = NameValidator.from(
+  val postgresValidator: NameValidator = NameValidator.fromBlacklist(
     "all",
     "analyse",
     "analyze",
@@ -188,9 +229,12 @@ object NameClashes {
     "with",
   )
 
-  case class NameValidator private (private val validators: Set[String => Boolean]) {
+  case class NameValidator private (private val validators: Iterable[String => Boolean]) {
 
-    def isValid(word: String): Boolean = validators.exists(validator => validator(NameValidator.normalize(word)))
+    def isValid(word: String): Boolean = validators.forall { validator =>
+      val normalized = NameValidator.normalize(word)
+      validator(normalized)
+    }
 
     // Combine two validators
     def &(that: NameValidator): NameValidator = NameValidator(this.validators ++ that.validators)
@@ -201,16 +245,16 @@ object NameClashes {
 
     // Combine many validators
     def combine(validators: IterableOnce[NameValidator]): NameValidator =
-      NameValidator(validators.iterator.flatMap(_.validators).toSet)
+      NameValidator(validators.iterator.flatMap(_.validators).to(Seq))
 
-    def fromSet(strings: Set[String]): NameValidator = {
+    def fromBlacklistSet(strings: Set[String]): NameValidator = {
       val strippedStrings = strings.map(normalize)
-      NameValidator(Set(strippedStrings.contains))
+      NameValidator(Seq(!strippedStrings.contains(_)))
     }
 
-    def from(strings: String*): NameValidator = fromSet(strings.toSet)
+    def fromBlacklist(strings: String*): NameValidator = fromBlacklistSet(strings.toSet)
 
-    def fromFunction(validator: String => Boolean): NameValidator = NameValidator(Set(validator))
+    def fromFunction(validator: String => Boolean): NameValidator = NameValidator(Seq(validator))
   }
 
   /** Repeatedly add the project name to the start of the string */
@@ -226,7 +270,7 @@ object NameClashes {
     validators: NameValidator*,
   ): String = {
     // A validator for checking a name isn’t taken locally by their own code
-    val takenNamesValidator = NameValidator.fromSet(takenNames)
+    val takenNamesValidator = NameValidator.fromBlacklistSet(takenNames)
 
     // Combine the validators they provided with the validator of taken names
     val combinedValidator = NameValidator.combine(Iterator(takenNamesValidator) ++ validators)
