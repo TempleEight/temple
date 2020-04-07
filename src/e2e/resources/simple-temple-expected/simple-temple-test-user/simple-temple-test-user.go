@@ -241,7 +241,45 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 }
 
 func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
+	_, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
 
+	simpleTempleTestUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	simpleTempleTestUser, err := env.dao.ReadSimpleTempleTestUser(dao.ReadSimpleTempleTestUserInput{
+		ID: simpleTempleTestUserID,
+	})
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrSimpleTempleTestUserNotFound:
+			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+		default:
+			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+			http.Error(w, errMsg, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	json.NewEncoder(w).Encode(readSimpleTempleTestUserResponse{
+		ID:                   simpleTempleTestUser.ID,
+		SimpleTempleTestUser: simpleTempleTestUser.SimpleTempleTestUser,
+		Email:                simpleTempleTestUser.Email,
+		FirstName:            simpleTempleTestUser.FirstName,
+		LastName:             simpleTempleTestUser.LastName,
+		CreatedAt:            simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
+		NumberOfDogs:         simpleTempleTestUser.NumberOfDogs,
+		CurrentBankBalance:   simpleTempleTestUser.CurrentBankBalance,
+		BirthDate:            simpleTempleTestUser.BirthDate,
+		BreakfastTime:        simpleTempleTestUser.BreakfastTime,
+	})
 }
 
 func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {

@@ -59,11 +59,11 @@ object GoServiceDAOFunctionsGenerator {
   private def generateQueryBlockErrorHandling(root: ServiceRoot, operation: CRUD): Option[String] =
     operation match {
       case List =>
-        Some(generateCheckAndReturnError("nil"))
+        Some(genCheckAndReturnError("nil"))
       case Delete =>
         Some(
           mkCode(
-            generateCheckAndReturnError(),
+            genCheckAndReturnError(),
             "else if rowsAffected == 0",
             CodeWrap.curly.tabbed(
               s"return Err${root.name}NotFound(input.${root.idAttribute.name.toUpperCase}.String())",
@@ -117,7 +117,7 @@ object GoServiceDAOFunctionsGenerator {
         mkCode.lines(
           genVar(root.decapitalizedName, root.name),
           genAssign(s"rows.$scanFunctionCall", "err"),
-          generateCheckAndReturnError("nil"),
+          genCheckAndReturnError("nil"),
           genAssign(
             genFunctionCall("append", s"${root.decapitalizedName}List", root.decapitalizedName),
             s"${root.decapitalizedName}List",
@@ -125,14 +125,14 @@ object GoServiceDAOFunctionsGenerator {
         ),
       ),
       genAssign("rows.Err()", "err"),
-      generateCheckAndReturnError("nil"),
+      genCheckAndReturnError("nil"),
     )
 
   private def generateCreateScanBlock(root: ServiceRoot, scanFunctionCall: String): String =
     mkCode.lines(
       genVar(root.decapitalizedName, root.name),
       genDeclareAndAssign(s"row.$scanFunctionCall", "err"),
-      generateCheckAndReturnError("nil"),
+      genCheckAndReturnError("nil"),
     )
 
   private def generateReadUpdateScanBlock(root: ServiceRoot, scanFunctionCall: String): String =

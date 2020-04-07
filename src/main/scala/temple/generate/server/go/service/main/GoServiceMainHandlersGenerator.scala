@@ -65,10 +65,36 @@ object GoServiceMainHandlersGenerator {
       genReturn(),
     )
 
-  /** Generate the block for extracting an AuthID from the request header */
-  private[main] def generateExtractAuthBlock(): String =
+  /** Generate one line http.Error call */
+  private[main] def generateOneLineHTTPError(statusCodeEnum: GoHTTPStatus): String =
+    genMethodCall(
+      "http",
+      "Error",
+      "w",
+      genMethodCall("util", "CreateErrorJSON", genMethodCall("err", "Error")),
+      s"http.$statusCodeEnum",
+    )
+
+  /** Generate one line http.Error call and return */
+  private[main] def generateOneLineHTTPErrorReturn(statusCodeEnum: GoHTTPStatus): String =
     mkCode.lines(
-      genDeclareAndAssign(genMethodCall("util", "ExtractAuthIDFromRequest", "r.Header"), "auth", "err"),
+      generateOneLineHTTPError(statusCodeEnum),
+      genReturn(),
+    )
+
+  /**
+    * Generate the block for extracting an AuthID from the request header
+    *
+    * @param usesVar indicates whether to assign the auth to a variable, i.e. "auth" | "_"
+    * @return extract auth block string
+    */
+  private[main] def generateExtractAuthBlock(usesVar: Boolean): String =
+    mkCode.lines(
+      genDeclareAndAssign(
+        genMethodCall("util", "ExtractAuthIDFromRequest", "r.Header"),
+        if (usesVar) "auth" else "_",
+        "err",
+      ),
       genIfErr(
         generateHTTPErrorReturn(
           StatusUnauthorized,
@@ -76,6 +102,35 @@ object GoServiceMainHandlersGenerator {
           genMethodCall("err", "Error"),
         ),
       ),
+    )
+
+  /** Generate the block for extracting and ID from the request URL */
+  private[main] def generateExtractIDBlock(varPrefix: String): String =
+    mkCode.lines(
+      genDeclareAndAssign(
+        genMethodCall("util", "ExtractIDFromRequest", genMethodCall("mux", "Vars", "r")),
+        s"${varPrefix}ID",
+        "err",
+      ),
+      genIfErr(generateOneLineHTTPErrorReturn(StatusBadRequest)),
+    )
+
+  /** Generate the block for checking if a request is authorized to perform operation  */
+  private[main] def generateCheckAuthorizationBlock(root: ServiceRoot): String =
+    mkCode.lines(
+      genDeclareAndAssign(
+        genFunctionCall("checkAuthorization", "env", s"${root.decapitalizedName}ID", "auth"),
+        "authorized",
+        "err",
+      ),
+      genIfErr(
+        genSwitchReturn(
+          "err.(type)",
+          ListMap(s"dao.Err${root.name}NotFound" -> generateHTTPError(StatusUnauthorized, "Unauthorized")),
+          generateHTTPError(StatusInternalServerError, "Something went wrong: %s", genMethodCall("err", "Error")),
+        ),
+      ),
+      genIf("!authorized", generateHTTPErrorReturn(StatusUnauthorized, "Unauthorized")),
     )
 
   /** Generate the block for decoding an incoming request JSON into a request object */
@@ -162,7 +217,7 @@ object GoServiceMainHandlersGenerator {
       operations.toSeq.sorted.map {
         case List   => generateListHandler(root, responseMap, enumeratingByCreator)
         case Create => generateCreateHandler(root, clientAttributes, usesComms, responseMap)
-        case Read   => generateReadHandler(root)
+        case Read   => generateReadHandler(root, responseMap)
         case Update => generateUpdateHandler(root)
         case Delete => generateDeleteHandler(root)
       },
