@@ -15,7 +15,6 @@ object GoServiceMainUpdateHandlerGenerator {
 
   private def generateDAOCallBlock(root: ServiceRoot, clientAttributes: ListMap[String, Attribute]): String = {
     val createInput = ListMap("ID" -> s"${root.decapitalizedName}ID") ++
-      // TODO: Consider if server set attributes need to be updated and add them in
       clientAttributes.map { case str -> _ => str.capitalize -> s"*req.${str.capitalize}" }
     mkCode.lines(
       genDeclareAndAssign(
