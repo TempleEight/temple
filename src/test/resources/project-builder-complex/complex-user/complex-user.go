@@ -145,16 +145,6 @@ func jsonMiddleware(next http.Handler) http.Handler {
 	})
 }
 
-func checkAuthorization(env *env, complexUserID uuid.UUID, auth *util.Auth) (bool, error) {
-	complexUser, err := env.dao.ReadComplexUser(dao.ReadComplexUserInput{
-		ID: complexUserID,
-	})
-	if err != nil {
-		return false, err
-	}
-	return complexUser.CreatedBy == auth.ID, nil
-}
-
 func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
@@ -236,19 +226,7 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	authorized, err := checkAuthorization(env, complexUserID, auth)
-	if err != nil {
-		switch err.(type) {
-		case dao.ErrComplexUserNotFound:
-			errMsg := util.CreateErrorJSON("Unauthorized")
-			http.Error(w, errMsg, http.StatusUnauthorized)
-		default:
-			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
-			http.Error(w, errMsg, http.StatusInternalServerError)
-		}
-		return
-	}
-	if !authorized {
+	if auth.ID != complexUserID {
 		errMsg := util.CreateErrorJSON("Unauthorized")
 		http.Error(w, errMsg, http.StatusUnauthorized)
 		return
@@ -290,5 +268,38 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
 
+	complexUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	if auth.ID != complexUserID {
+		errMsg := util.CreateErrorJSON("Unauthorized")
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
+
+	err = env.dao.DeleteComplexUser(dao.DeleteComplexUserInput{
+		ID: complexUserID,
+	})
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrComplexUserNotFound:
+			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+		default:
+			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+			http.Error(w, errMsg, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	json.NewEncoder(w).Encode(struct{}{})
 }
