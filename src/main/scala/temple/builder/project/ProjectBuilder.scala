@@ -7,7 +7,6 @@ import temple.detail.LanguageDetail
 import temple.generate.CRUD
 import temple.generate.CRUD._
 import temple.generate.FileSystem._
-import temple.generate.database.PreparedType.DollarNumbers
 import temple.generate.database.ast.Statement
 import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.docker.DockerfileGenerator
@@ -77,24 +76,31 @@ object ProjectBuilder {
   private def buildMetrics(templefile: Templefile): Files = {
     // TODO: Get this from templefile and project settings
     val datasource: Datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
-    // TODO: Take all of this inside MetricsBuilder
-    templefile.allServices.map {
+    val dashboardJSONs = templefile.allServices.map {
       case (name, service) =>
-        val rows             = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
-        val grafanaDashboard = GrafanaDashboardGenerator.generate(kebabCase(name), name, rows)
+        // Create row for every endpoint in the service
+        val serviceRows = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
+        val structRows = service.structs.flatMap {
+          case (structName, struct) =>
+            MetricsBuilder.createDashboardRows(name, datasource, endpoints(struct), Some(structName))
+        }
+        val grafanaDashboard = GrafanaDashboardGenerator.generate(kebabCase(name), name, serviceRows ++ structRows)
         File(s"grafana/provisioning/dashboards", s"${kebabCase(name)}.json") -> grafanaDashboard
-    } ++ Map(
-      File(s"grafana/provisioning/dashboards", "dashboards.yml") ->
-      GrafanaDashboardConfigGenerator.generate(datasource),
-      File(s"grafana/provisioning/datasources", "datasource.yml") ->
-      GrafanaDatasourceConfigGenerator.generate(datasource),
-      File(s"prometheus", "prometheus.yml") ->
-      PrometheusConfigGenerator.generate(
-        templefile.allServicesWithPorts.map {
-          case (serviceName, _, ports) =>
-            PrometheusJob(kebabCase(serviceName), s"${kebabCase(serviceName)}:${ports.metrics}")
-        }.toSeq,
-      ),
+    }
+    val dashboardYML  = GrafanaDashboardConfigGenerator.generate(datasource)
+    val datasourceYML = GrafanaDatasourceConfigGenerator.generate(datasource)
+
+    // Create a job for every service
+    val prometheusJobs = templefile.allServicesWithPorts.map {
+      case (serviceName, _, ports) =>
+        PrometheusJob(kebabCase(serviceName), s"${kebabCase(serviceName)}:${ports.metrics}")
+    }.toSeq
+    val prometheusYML = PrometheusConfigGenerator.generate(prometheusJobs)
+
+    dashboardJSONs ++ Map(
+      File(s"grafana/provisioning/dashboards", "dashboards.yml")  -> dashboardYML,
+      File(s"grafana/provisioning/datasources", "datasource.yml") -> datasourceYML,
+      File(s"prometheus", "prometheus.yml")                       -> prometheusYML,
     )
   }
 

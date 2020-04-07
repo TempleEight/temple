@@ -1,6 +1,6 @@
 package temple.generate.server.go.service
 
-import temple.ast.Metadata.Readable
+import temple.ast.Metadata.{Readable, Writable}
 import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
@@ -53,7 +53,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainGenerator.generateRouter(root, operations),
         GoCommonMainGenerator.generateMain(root, root.port, usesComms, isAuth = false),
         GoCommonMainGenerator.generateJsonMiddleware(),
-        when(root.readable == Readable.This) {
+        when((root.readable == Readable.This || root.writable == Writable.This) && !root.hasAuthBlock) {
           GoServiceMainGenerator.generateCheckAuthorization(root)
         },
         GoServiceMainHandlersGenerator
