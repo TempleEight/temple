@@ -169,11 +169,40 @@ class ValidatorTest extends FlatSpec with Matchers {
         services = Map(
           "User" -> ServiceBlock(
             attributes = Map("a" -> Attribute(IntType())),
-            metadata = Seq(Readable.All, Readable.This),
+            metadata = Seq(ServiceAuth.Email, Readable.All, Readable.This),
           ),
         ),
       ),
     ) shouldBe Set("Multiple occurrences of Readable metadata in User")
+
+    // check that the auth block is found, regardless of which block it’s in
+    validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
+          "User" -> ServiceBlock(
+            attributes = Map("a" -> Attribute(IntType())),
+            metadata = Seq(ServiceAuth.Email),
+          ),
+          "Box" -> ServiceBlock(
+            attributes = Map(),
+            metadata = Seq(Readable.All, Readable.This),
+          ),
+        ),
+      ),
+    ) shouldBe Set("Multiple occurrences of Readable metadata in Box")
+
+    validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
+          "User" -> ServiceBlock(
+            attributes = Map("a" -> Attribute(IntType())),
+            metadata = Seq(Readable.This),
+          ),
+        ),
+      ),
+    ) shouldBe Set("#readable(this) requires at least one service to have #auth in User")
 
     validationErrors(
       Templefile(

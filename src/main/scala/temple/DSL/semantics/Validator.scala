@@ -118,9 +118,13 @@ private class Validator private (templefile: Templefile) {
       case _: Metadata.ServiceLanguage => assertUnique[Metadata.ServiceLanguage]()
       case _: Metadata.Database        => assertUnique[Metadata.Database]()
       case _: Metadata.ServiceAuth     => assertUnique[Metadata.ServiceAuth]()
-      case _: Metadata.Readable        => assertUnique[Metadata.Readable]()
+      case Metadata.Readable.This if !templefile.usesAuth =>
+        errors += context.errorMessage(s"#readable(this) requires at least one service to have #auth")
+      case _: Metadata.Readable => assertUnique[Metadata.Readable]()
       case Metadata.Writable.All if metadata contains Metadata.Readable.This =>
         errors += context.errorMessage(s"#writable(all) is not compatible with #readable(this)")
+      case Metadata.Writable.This if !templefile.usesAuth =>
+        errors += context.errorMessage(s"#writable(this) requires at least one service to have #auth")
       case _: Metadata.Writable       => assertUnique[Metadata.Writable]()
       case Metadata.Omit(_)           => assertUnique[Metadata.Omit]()
       case Metadata.ServiceEnumerable => assertUnique[Metadata.ServiceEnumerable]()
