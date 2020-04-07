@@ -210,7 +210,7 @@ class ValidatorTest extends FlatSpec with Matchers {
         services = Map(
           "User" -> ServiceBlock(
             attributes = Map("a" -> Attribute(IntType())),
-            metadata = Seq(Writable.All, Readable.This),
+            metadata = Seq(ServiceAuth.Email, Writable.All, Readable.This),
           ),
         ),
       ),
