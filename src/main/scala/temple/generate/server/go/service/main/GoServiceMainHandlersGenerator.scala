@@ -150,6 +150,13 @@ object GoServiceMainHandlersGenerator {
       ),
     )
 
+  /** Generate the checking that incoming request parameters are not nil */
+  private[main] def generateRequestNilCheck(root: ServiceRoot, clientAttributes: ListMap[String, Attribute]): String =
+    genIf(
+      clientAttributes.map { case name -> _ => s"req.${name.capitalize} == nil" }.mkString(" || "),
+      generateHTTPErrorReturn(StatusBadRequest, "Missing request parameter(s)"),
+    )
+
   /** Generate the block for validating the request object */
   private[main] def generateValidateStructBlock(): String =
     mkCode.lines(
@@ -235,7 +242,7 @@ object GoServiceMainHandlersGenerator {
         case List   => generateListHandler(root, responseMap, enumeratingByCreator)
         case Create => generateCreateHandler(root, clientAttributes, usesComms, responseMap)
         case Read   => generateReadHandler(root, responseMap)
-        case Update => generateUpdateHandler(root)
+        case Update => generateUpdateHandler(root, clientAttributes, usesComms, responseMap)
         case Delete => generateDeleteHandler(root)
       },
     )

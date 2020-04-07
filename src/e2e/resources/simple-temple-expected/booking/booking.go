@@ -189,7 +189,75 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *env) updateBookingHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
 
+	bookingID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	authorized, err := checkAuthorization(env, bookingID, auth)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrBookingNotFound:
+			errMsg := util.CreateErrorJSON("Unauthorized")
+			http.Error(w, errMsg, http.StatusUnauthorized)
+		default:
+			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+			http.Error(w, errMsg, http.StatusInternalServerError)
+		}
+		return
+	}
+	if !authorized {
+		errMsg := util.CreateErrorJSON("Unauthorized")
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
+
+	var req updateBookingRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	if {
+		errMsg := util.CreateErrorJSON("Missing request parameter(s)")
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	_, err = valid.ValidateStruct(req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	booking, err := env.dao.UpdateBooking(dao.UpdateBookingInput{
+		ID: bookingID,
+	})
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrBookingNotFound:
+			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+		default:
+			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+			http.Error(w, errMsg, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	json.NewEncoder(w).Encode(updateBookingResponse{
+		ID: booking.ID,
+	})
 }
 
 func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
