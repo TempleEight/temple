@@ -15,5 +15,6 @@ object ServerConfigGeneratorTestData {
       |    "service" : 81,
       |    "prometheus" : 2113
       |  }
-      |}""".stripMargin
+      |}
+      |""".stripMargin
 }
