@@ -42,7 +42,8 @@ object GoServiceMainUpdateHandlerGenerator {
           generateExtractIDBlock(root.decapitalizedName),
           when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root) },
           generateDecodeRequestBlock(s"update${root.name}"),
-          generateRequestNilCheck(root, clientAttributes),
+          // TODO: Handle this properly, there could be serverSet attributes
+          when(clientAttributes.nonEmpty) { generateRequestNilCheck(root, clientAttributes) },
           generateValidateStructBlock(),
           when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
           generateDAOCallBlock(root, clientAttributes),

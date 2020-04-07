@@ -67,7 +67,8 @@ object GoServiceMainCreateHandlerGenerator {
         mkCode.doubleLines(
           when(root.projectUsesAuth) { generateExtractAuthBlock(usesVar = true) },
           generateDecodeRequestBlock(s"create${root.name}"),
-          generateRequestNilCheck(root, clientAttributes),
+          // TODO: Handle this properly, there could be serverSet attributes
+          when(clientAttributes.nonEmpty) { generateRequestNilCheck(root, clientAttributes) },
           generateValidateStructBlock(),
           when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
           when(!root.hasAuthBlock) { generateNewUUIDBlock() },
