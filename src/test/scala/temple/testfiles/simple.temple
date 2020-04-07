@@ -1,4 +1,6 @@
-SimpleTempleTest: project {}
+SimpleTempleTest: project {
+  #metrics(prometheus);
+}
 
 User: service {
   user: string;
