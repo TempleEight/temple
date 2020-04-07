@@ -1,9 +1,15 @@
 package temple.generate.server
 
 import org.scalatest.{BeforeAndAfter, Matchers}
+import temple.DSL.DSLProcessor
+import temple.DSL.semantics.Analyzer
+import temple.builder.project.ProjectBuilder
 import temple.containers.GolangSpec
+import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.FileSystem._
 import temple.generate.server.go.service.GoServiceGenerator
+import temple.utils.{FileUtils, StringUtils}
+import temple.utils.MonadUtils.FromEither
 
 class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAndAfter {
 
@@ -84,5 +90,27 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
     )
 
     validationErrors shouldBe ""
+  }
+
+  it should "generate the entire simple.temple project" in {
+    val simpleTemple = FileUtils.readFile("src/test/scala/temple/testfiles/simple.temple")
+    val parsed = DSLProcessor.parse(simpleTemple) fromEither { error =>
+      throw new RuntimeException(error)
+    }
+    val analyzedTemplefile = Analyzer.parseAndValidate(parsed)
+    val detail             = GoLanguageDetail("example.com")
+    val project            = ProjectBuilder.build(analyzedTemplefile, detail)
+
+    analyzedTemplefile.allServices.keys.map(StringUtils.kebabCase).foreach { service =>
+      val filesInService = project.files.filter { case (file, _) => file.folder.startsWith(service) }
+      val validationErrors = validateAll(
+        filesInService,
+        entryFile = File(service, s"$service.go"),
+      )
+
+    // TODO: Uncomment me, and fix the bugs!
+//      validationErrors shouldBe empty
+    }
+
   }
 }
