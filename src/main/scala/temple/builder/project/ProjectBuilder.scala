@@ -126,6 +126,7 @@ object ProjectBuilder {
 
         val configFileContents =
           ServerConfigGenerator.generate(serviceRoot.kebabName, serviceRoot.datastore, serviceComms, port)
+          
         serverFiles + (File(serviceRoot.kebabName, "config.json") -> configFileContents)
     }
 
