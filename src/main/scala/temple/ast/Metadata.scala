@@ -96,6 +96,13 @@ object Metadata {
     case object Email extends ServiceAuth("email")
   }
 
+  sealed abstract class Metrics private (name: String) extends EnumEntry(name) with ProjectMetadata
+
+  object Metrics extends Enum[Metrics] {
+    override def values: IndexedSeq[Metrics] = findValues
+    case object Prometheus extends Metrics("prometheus")
+  }
+
   type ServiceEnumerable = ServiceEnumerable.type
   case object ServiceEnumerable          extends StructMetadata
   case class Uses(services: Seq[String]) extends ServiceMetadata

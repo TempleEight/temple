@@ -33,7 +33,7 @@ class DSLParserTest extends FlatSpec with Matchers with DSLParserMatchers {
     val parseResult = DSLProcessor.parse(source).shouldParse
 
     parseResult shouldBe Seq(
-      DSLRootItem("SimpleTempleTest", "project", Nil),
+      DSLRootItem("SimpleTempleTest", "project", Seq(Metadata("metrics", Args(Seq(Arg.TokenArg("prometheus")))))),
       DSLRootItem(
         "User",
         "service",

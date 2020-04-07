@@ -105,6 +105,15 @@ class ValidatorTest extends FlatSpec with Matchers {
     )
 
     validationErrors(
+      Templefile(
+        "User",
+        projectBlock = ProjectBlock(Seq(Metrics.Prometheus, Metrics.Prometheus)),
+      ),
+    ) shouldBe Set(
+      "Multiple occurrences of Metrics metadata in User project",
+    )
+
+    validationErrors(
       templefileWithUserAttributes("A" -> Attribute(BoolType)),
     ) shouldBe Set("Invalid attribute name A, it must start with a lowercase letter, in User")
 
