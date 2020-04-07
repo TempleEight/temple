@@ -17,7 +17,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
 
   it should "parse and analyze simple.temple correctly" in {
     val source      = readFile("src/test/scala/temple/testfiles/simple.temple")
-    val parseResult = DSLProcessor.parse(source).shouldParse
+    val parseResult = DSLProcessor.parse(source) should parse
     val semantics   = parseAndValidate(parseResult)
     semantics shouldBe Templefile(
       projectName = "SimpleTempleTest",
