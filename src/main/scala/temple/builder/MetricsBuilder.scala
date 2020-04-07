@@ -3,7 +3,6 @@ package temple.builder
 import temple.generate.CRUD.CRUD
 import temple.generate.metrics.grafana.ast.Row.{Metric, Query}
 import temple.generate.metrics.grafana.ast.{Datasource, Row}
-import Option.when
 
 object MetricsBuilder {
 

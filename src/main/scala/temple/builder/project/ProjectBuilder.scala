@@ -7,7 +7,6 @@ import temple.detail.LanguageDetail
 import temple.generate.CRUD
 import temple.generate.CRUD._
 import temple.generate.FileSystem._
-import temple.generate.database.PreparedType.DollarNumbers
 import temple.generate.database.ast.Statement
 import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.docker.DockerfileGenerator
