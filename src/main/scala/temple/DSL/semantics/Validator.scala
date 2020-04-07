@@ -7,10 +7,8 @@ import temple.ast.{Metadata, _}
 import temple.builder.project.ProjectConfig
 import temple.utils.MonadUtils.FromEither
 
-
-import scala.collection.immutable.{ListMap, SortedSet}
-
 import scala.Option.when
+import scala.collection.immutable.{ListMap, SortedSet}
 import scala.collection.mutable
 import scala.reflect.{ClassTag, classTag}
 

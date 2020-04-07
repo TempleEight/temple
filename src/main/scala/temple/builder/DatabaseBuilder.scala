@@ -24,10 +24,7 @@ object DatabaseBuilder {
   private def toColDef(name: String, attribute: Attribute): ColumnDef = {
     val nonNullConstraint = when(!attribute.valueAnnotations.contains(Nullable)) { ColumnConstraint.NonNull }
 
-    val primaryKeyConstraint = attribute match {
-      case IDAttribute => Some(ColumnConstraint.PrimaryKey)
-      case _           => None
-    }
+    val primaryKeyConstraint = when(attribute == IDAttribute) { ColumnConstraint.PrimaryKey }
 
     val valueConstraints = attribute.valueAnnotations.flatMap {
         case Annotation.Unique   => Some(ColumnConstraint.Unique)
