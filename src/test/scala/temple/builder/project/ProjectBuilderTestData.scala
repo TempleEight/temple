@@ -81,7 +81,11 @@ object ProjectBuilderTestData {
 
   val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
-    ProjectBlock(Seq(Metrics.Prometheus)),
+    projectBlock = ProjectBlock(
+      metadata = Seq(
+        Metadata.Metrics.Prometheus,
+      ),
+    ),
     services = Map(
       "ComplexUser" -> ServiceBlock(
         complexServiceAttributes,
