@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: complex-user-db
+  labels:
+    app: complex-user
+    kind: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: complex-user
+      kind: db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: complex-user-db
+      labels:
+        app: complex-user
+        kind: db
+    spec:
+      hostname: complex-user-db
+      containers:
+      - env:
+        - name: PGUSER
+          value: postgres
+        image: postgres:12.1
+        name: complex-user-db
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: complex-user-db-claim
+        - mountPath: /docker-entrypoint-initdb.d/init.sql
+          subPath: init.sql
+          name: complex-user-db-init
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - psql -U postgres -f /docker-entrypoint-initdb.d/init.sql && echo done
+      restartPolicy: Always
+      volumes:
+      - name: complex-user-db-init
+        configMap:
+          name: complex-user-db-config
+      - name: complex-user-db-claim
+        persistentVolumeClaim:
+          claimName: complex-user-db-claim

@@ -1,0 +1,29 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: complex-user
+  labels:
+    app: complex-user
+    kind: service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: complex-user
+      kind: service
+  template:
+    metadata:
+      name: complex-user
+      labels:
+        app: complex-user
+        kind: service
+    spec:
+      hostname: complex-user
+      containers:
+      - image: sample-complex-project-complex-user
+        name: complex-user
+        ports:
+        - containerPort: 1026
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always
