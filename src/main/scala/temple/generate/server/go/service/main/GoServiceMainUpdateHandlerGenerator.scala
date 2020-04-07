@@ -40,11 +40,15 @@ object GoServiceMainUpdateHandlerGenerator {
           when(root.projectUsesAuth) { generateExtractAuthBlock(root.writable == Writable.This) },
           generateExtractIDBlock(root.decapitalizedName),
           when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root) },
-          generateDecodeRequestBlock(s"update${root.name}"),
-          // TODO: Handle this properly, there could be serverSet attributes
-          when(clientAttributes.nonEmpty) { generateRequestNilCheck(root, clientAttributes) },
-          generateValidateStructBlock(),
-          when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
+          // Only need to handle request JSONs when there are client attributes
+          when(clientAttributes.nonEmpty) {
+            mkCode.doubleLines(
+              generateDecodeRequestBlock(s"update${root.name}"),
+              generateRequestNilCheck(root, clientAttributes),
+              generateValidateStructBlock(),
+              when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
+            )
+          },
           generateDAOCallBlock(root, clientAttributes),
           generateJSONResponse(s"update${root.name}", responseMap),
         ),
