@@ -68,4 +68,28 @@ object GoServiceMainGenerator {
       ),
     )
   }
+
+  private[main] def generateDAOReadCall(root: ServiceRoot): String =
+    genDeclareAndAssign(
+      genMethodCall(
+        "env.dao",
+        s"Read${root.name}",
+        genPopulateStruct(s"dao.Read${root.name}Input", ListMap("ID" -> s"${root.decapitalizedName}ID")),
+      ),
+      root.decapitalizedName,
+      "err",
+    )
+
+  private[service] def generateCheckAuthorization(root: ServiceRoot): String =
+    genFunc(
+      "checkAuthorization",
+      Seq("env *env", s"${root.decapitalizedName}ID uuid.UUID", "auth *util.Auth"),
+      Some(CodeWrap.parens(mkCode.list("bool", "error"))),
+      mkCode.lines(
+        generateDAOReadCall(root),
+        genCheckAndReturnError("false"),
+        genReturn(s"${root.decapitalizedName}.CreatedBy == auth.ID", "nil"),
+      ),
+    )
+
 }

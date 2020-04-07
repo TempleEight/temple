@@ -76,6 +76,16 @@ func jsonMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func checkAuthorization(env *env, bookingID uuid.UUID, auth *util.Auth) (bool, error) {
+	booking, err := env.dao.ReadBooking(dao.ReadBookingInput{
+		ID: bookingID,
+	})
+	if err != nil {
+		return false, err
+	}
+	return booking.CreatedBy == auth.ID, nil
+}
+
 func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
@@ -128,7 +138,54 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
 
+	bookingID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	authorized, err := checkAuthorization(env, bookingID, auth)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrBookingNotFound:
+			errMsg := util.CreateErrorJSON("Unauthorized")
+			http.Error(w, errMsg, http.StatusUnauthorized)
+		default:
+			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+			http.Error(w, errMsg, http.StatusInternalServerError)
+		}
+		return
+	}
+	if !authorized {
+		errMsg := util.CreateErrorJSON("Unauthorized")
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
+
+	booking, err := env.dao.ReadBooking(dao.ReadBookingInput{
+		ID: bookingID,
+	})
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrBookingNotFound:
+			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+		default:
+			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+			http.Error(w, errMsg, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	json.NewEncoder(w).Encode(readBookingResponse{
+		ID: booking.ID,
+	})
 }
 
 func (env *env) updateBookingHandler(w http.ResponseWriter, r *http.Request) {

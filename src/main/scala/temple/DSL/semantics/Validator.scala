@@ -7,6 +7,7 @@ import temple.ast.{Metadata, _}
 import temple.builder.project.ProjectConfig
 import temple.utils.MonadUtils.FromEither
 
+import scala.Option.when
 import scala.collection.immutable.SortedSet
 import scala.collection.mutable
 import scala.reflect.{ClassTag, classTag}
@@ -29,27 +30,35 @@ private class Validator private (templefile: Templefile) {
   def allGlobalNames: Set[String] = globalRenaming.valuesIterator.toSet ++ allStructsAndServices
 
   private def validateAttributes(
-    attributes: Map[String, Attribute],
+    block: AttributeBlock[_],
     context: SemanticContext,
   ): Map[String, Attribute] = {
-    attributes.foreach { case (name, t) => validateAttribute(t, context :+ name) }
+    block.attributes.foreach { case (name, t) => validateAttribute(t, context :+ name) }
 
     // Keep a set of names that have been used already
-    val takenNames: mutable.Set[String] = attributes.keys.to(mutable.Set)
+    val takenNames: mutable.Set[String] = block.attributes.keys.to(mutable.Set)
 
-    attributes.map {
+    block.attributes.map {
       case (attributeName, value) =>
         if (attributeName.headOption.exists(!_.isLower))
           errors += context.errorMessage(
             s"Invalid attribute name $attributeName, it must start with a lowercase letter,",
           )
+        val database = block.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
+        val language = block.lookupMetadata[Metadata.ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
+
+        // takenNames includes this attribute’s names, so remove it
         val newName = constructUniqueName(
           attributeName,
           templefile.projectName,
-          // takenNames includes this attribute’s names, so remove it
           takenNames.toSet - attributeName,
-          decapitalize = true,
-        )(postgresValidator)
+        )(
+          validators = Seq(
+            Some(templeAttributeNameValidator),
+            when(database == Metadata.Database.Postgres) { postgresValidator },
+            when(language == Metadata.ServiceLanguage.Go) { goAttributeValidator },
+          ).flatten: _*,
+        )
 
         // Prevent this new name from being used by other attributes
         takenNames += newName
@@ -63,10 +72,15 @@ private class Validator private (templefile: Templefile) {
     * always inserted into this block, even if the same name is kept. */
   private def renameBlock(name: String, block: AttributeBlock[_]): Unit = {
     val database = block.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
-    if (database == Metadata.Database.Postgres) {
-      val newServiceName = constructUniqueName(name, templefile.projectName, allGlobalNames - name)(postgresValidator)
-      globalRenaming += name -> newServiceName
-    }
+    val language = block.lookupMetadata[Metadata.ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
+    val newServiceName = constructUniqueName(name, templefile.projectName, allGlobalNames - name)(
+      validators = Seq(
+        Some(templeServiceNameValidator),
+        when(database == Metadata.Database.Postgres) { postgresValidator },
+        when(language == Metadata.ServiceLanguage.Go) { goServiceValidator },
+      ).flatten: _*,
+    )
+    globalRenaming += name -> newServiceName
   }
 
   private def validateService(serviceName: String, service: ServiceBlock, context: SemanticContext): ServiceBlock = {
@@ -75,7 +89,7 @@ private class Validator private (templefile: Templefile) {
     val newStructs = service.structs.transform {
       case (name, struct) => validateStruct(name, struct, context :+ name)
     }
-    val newAttributes = validateAttributes(service.attributes, context)
+    val newAttributes = validateAttributes(service, context)
     validateMetadata(service.metadata, context)
 
     ServiceBlock(newAttributes, service.metadata, newStructs)
@@ -88,7 +102,7 @@ private class Validator private (templefile: Templefile) {
   ): StructBlock = {
     renameBlock(structName, struct)
 
-    val newAttributes = validateAttributes(struct.attributes, context)
+    val newAttributes = validateAttributes(struct, context)
     validateMetadata(struct.metadata, context)
 
     StructBlock(newAttributes, struct.metadata)

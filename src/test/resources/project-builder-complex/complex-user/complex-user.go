@@ -145,6 +145,16 @@ func jsonMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+func checkAuthorization(env *env, complexUserID uuid.UUID, auth *util.Auth) (bool, error) {
+	complexUser, err := env.dao.ReadComplexUser(dao.ReadComplexUserInput{
+		ID: complexUserID,
+	})
+	if err != nil {
+		return false, err
+	}
+	return complexUser.CreatedBy == auth.ID, nil
+}
+
 func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
@@ -213,7 +223,66 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
 
+	complexUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		return
+	}
+
+	authorized, err := checkAuthorization(env, complexUserID, auth)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrComplexUserNotFound:
+			errMsg := util.CreateErrorJSON("Unauthorized")
+			http.Error(w, errMsg, http.StatusUnauthorized)
+		default:
+			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+			http.Error(w, errMsg, http.StatusInternalServerError)
+		}
+		return
+	}
+	if !authorized {
+		errMsg := util.CreateErrorJSON("Unauthorized")
+		http.Error(w, errMsg, http.StatusUnauthorized)
+		return
+	}
+
+	complexUser, err := env.dao.ReadComplexUser(dao.ReadComplexUserInput{
+		ID: complexUserID,
+	})
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrComplexUserNotFound:
+			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+		default:
+			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+			http.Error(w, errMsg, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	json.NewEncoder(w).Encode(readComplexUserResponse{
+		ID:                 complexUser.ID,
+		SmallIntField:      complexUser.SmallIntField,
+		IntField:           complexUser.IntField,
+		BigIntField:        complexUser.BigIntField,
+		FloatField:         complexUser.FloatField,
+		DoubleField:        complexUser.DoubleField,
+		StringField:        complexUser.StringField,
+		BoundedStringField: complexUser.BoundedStringField,
+		BoolField:          complexUser.BoolField,
+		DateField:          complexUser.DateField,
+		TimeField:          complexUser.TimeField,
+		DateTimeField:      complexUser.DateTimeField.Format(time.RFC3339),
+		BlobField:          complexUser.BlobField,
+	})
 }
 
 func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request) {

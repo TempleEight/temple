@@ -34,7 +34,7 @@ object GoCommonGenerator {
       case BlobType(_)                                    => "[]byte"
     }
 
-  private[go] def generateCheckAndReturnError(returnValues: String*): String =
+  private[go] def genCheckAndReturnError(returnValues: String*): String =
     mkCode(
       "if err != nil",
       CodeWrap.curly.tabbed(
@@ -53,7 +53,7 @@ object GoCommonGenerator {
       ),
     )
 
-  /** Generate constant */
+  /** Generate a constant */
   private[go] def genConst(identifier: String, expr: String): String =
     mkCode(
       "const",
@@ -62,7 +62,7 @@ object GoCommonGenerator {
       expr,
     )
 
-  /** Generate interface */
+  /** Generate an interface */
   private[go] def genInterface(identifier: String, methods: Seq[String]): String =
     mkCode(
       "type",
@@ -73,7 +73,7 @@ object GoCommonGenerator {
       ),
     )
 
-  /** Generate struct */
+  /** Generate a struct */
   private[go] def genStruct(identifier: String, fields: Iterable[(String, String)]): String =
     mkCode(
       "type",
@@ -84,7 +84,7 @@ object GoCommonGenerator {
       ),
     )
 
-  //** Generate struct with annotations */
+  //** Generate a struct with annotations */
   private[go] def genStructWithAnnotations(identifier: String, fields: Iterable[(String, String, String)]): String =
     mkCode(
       "type",
@@ -95,11 +95,11 @@ object GoCommonGenerator {
       ),
     )
 
-  /** Generate declaration and assignment statement */
+  /** Generate a declaration and assignment statement */
   private[go] def genDeclareAndAssign(expr: String, identifiers: String*): String =
     mkCode.list(identifiers) + " := " + expr // mkCode doesn't put a space before the colon
 
-  /** Generate assignment */
+  /** Generate an assignment */
   private[go] def genAssign(expr: String, identifiers: String*): String =
     mkCode(
       mkCode.list(identifiers),
@@ -107,7 +107,7 @@ object GoCommonGenerator {
       expr,
     )
 
-  /** Generate variable declaration */
+  /** Generate a variable declaration */
   private[go] def genVar(identifier: String, typ: String): String =
     mkCode(
       "var",
@@ -115,19 +115,19 @@ object GoCommonGenerator {
       typ,
     )
 
-  /** Generate function call */
+  /** Generate a function call */
   private[go] def genFunctionCall(name: String, args: CodeTerm*): String =
     CodeWrap.parens.prefix(name).list(args)
 
-  /** Generate function call, but with optional arguments */
+  /** Generate a function call, but with optional arguments */
   private[go] def genFunctionCall(name: String, firstArg: Option[String], otherArgs: Option[String]*): String =
     CodeWrap.parens.prefix(name).list(firstArg, otherArgs)
 
-  /** Generate method call */
+  /** Generate a method call */
   private[go] def genMethodCall(objectName: String, methodName: String, args: CodeTerm*): String =
     s"$objectName.${genFunctionCall(methodName, args: _*)}"
 
-  /** Generate method definition */
+  /** Generate a method definition */
   private[go] def genMethod(
     objectName: String,
     objectType: String,
@@ -139,12 +139,26 @@ object GoCommonGenerator {
     mkCode(
       "func",
       CodeWrap.parens(objectName, objectType),
-      CodeWrap.parens.prefix(methodName)(methodArgs),
+      CodeWrap.parens.prefix(methodName).list(methodArgs),
       methodReturn,
       CodeWrap.curly.tabbed(methodBody),
     )
 
-  /** Generate if statement */
+  /** Generation a function */
+  private[go] def genFunc(
+    funcName: String,
+    funcArgs: Seq[String],
+    funcReturn: Option[String],
+    funcBody: String,
+  ): String =
+    mkCode(
+      "func",
+      CodeWrap.parens.prefix(funcName).list(funcArgs),
+      funcReturn,
+      CodeWrap.curly.tabbed(funcBody),
+    )
+
+  /** Generate an if statement */
   private[go] def genIf(expr: String, body: String): String =
     mkCode(
       "if",
@@ -152,7 +166,7 @@ object GoCommonGenerator {
       CodeWrap.curly.tabbed(body),
     )
 
-  /** Generate for loop with expression */
+  /** Generate a for loop with expression */
   private[go] def genForLoop(expr: String, body: String): String =
     mkCode(
       "for",
@@ -160,7 +174,7 @@ object GoCommonGenerator {
       CodeWrap.curly.tabbed(body),
     )
 
-  /** Generate switch statement */
+  /** Generate a switch statement */
   private[go] def genSwitch(expr: String, cases: ListMap[String, String], default: String): String =
     mkCode(
       "switch",
@@ -172,7 +186,14 @@ object GoCommonGenerator {
       ),
     )
 
-  /** Generate return statement */
+  /** Generate a switch statement and return */
+  private[go] def genSwitchReturn(expr: String, cases: ListMap[String, String], default: String): String =
+    mkCode.lines(
+      genSwitch(expr, cases, default),
+      genReturn(),
+    )
+
+  /** Generate a return statement */
   private[go] def genReturn(exprs: String*): String =
     mkCode(
       "return",
