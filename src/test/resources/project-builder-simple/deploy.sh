@@ -22,13 +22,6 @@ echo
 # DB init scripts
 kubectl create configmap temple-user-db-config --from-file "$BASEDIR/temple-user-db/init.sql" -o=yaml
 
-for file in "$BASEDIR/grafana/provisioning/dashboards/"*
-do
-  filename=$(basename $file) # Get everything after the final /
-  file=$(echo $filename | cut -f 1 -d '.') # Get everything before the . (filename without extension)
-  kubectl create configmap "grafana-$file-config" --from-file "$BASEDIR/grafana/provisioning/dashboards/$filename" -o=yaml
-done
-
 for dir in "$BASEDIR/kube/"*
 do
   kubectl create -f $dir
