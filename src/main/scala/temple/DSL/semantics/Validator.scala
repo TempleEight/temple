@@ -52,7 +52,6 @@ private class Validator private (templefile: Templefile) {
           attributeName,
           templefile.projectName,
           takenNames.toSet - attributeName,
-          decapitalize = true,
         )(
           validators = Seq(
             Some(templeAttributeNameValidator),

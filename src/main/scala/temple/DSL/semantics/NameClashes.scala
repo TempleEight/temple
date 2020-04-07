@@ -266,9 +266,12 @@ object NameClashes {
 
   /** Given a service/struct/field name, prepend the project name until it becomes unique and free of conflicts with
     * the host languages */
-  def constructUniqueName(name: String, project: String, takenNames: Set[String], decapitalize: Boolean = false)(
+  def constructUniqueName(name: String, project: String, takenNames: Set[String])(
     validators: NameValidator*,
   ): String = {
+    // if the name starts with a lower-case letter, transform the output
+    val decapitalize = name.head.isLower
+
     // A validator for checking a name isn’t taken locally by their own code
     val takenNamesValidator = NameValidator.fromBlacklistSet(takenNames)
 
