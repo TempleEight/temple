@@ -3,6 +3,7 @@ package temple.builder
 import temple.generate.CRUD.CRUD
 import temple.generate.metrics.grafana.ast.Row.{Metric, Query}
 import temple.generate.metrics.grafana.ast.{Datasource, Row}
+import Option.when
 
 object MetricsBuilder {
 
@@ -40,23 +41,34 @@ object MetricsBuilder {
       ),
     )
 
-  def createDashboardRows(serviceName: String, datasource: Datasource, endpoints: Set[CRUD]): Seq[Row] =
+  def createDashboardRows(
+    serviceName: String,
+    datasource: Datasource,
+    endpoints: Set[CRUD],
+    structName: Option[String] = None,
+  ): Seq[Row] =
     endpoints.zipWithIndex.map {
       case (endpoint, index) =>
         Row(
           Metric(
             index * 2,
-            s"$endpoint $serviceName Requests",
+            s"$endpoint ${structName.getOrElse(serviceName)} Requests",
             datasource,
             "QPS",
-            qpsQueries(serviceName.toLowerCase, endpoint.toString.toLowerCase),
+            qpsQueries(
+              serviceName.toLowerCase,
+              (endpoint.toString + structName.fold("")(name => s"_$name")).toLowerCase,
+            ),
           ),
           Metric(
             index * 2 + 1,
-            s"DB $endpoint Queries",
+            s"DB $endpoint ${structName.fold("Queries")(name => s"$name Queries")}",
             datasource,
             "Time (seconds)",
-            databaseDurationQueries(serviceName.toLowerCase, endpoint.toString.toLowerCase),
+            databaseDurationQueries(
+              serviceName.toLowerCase,
+              (endpoint.toString + structName.fold("")(name => s"_$name")).toLowerCase,
+            ),
           ),
         )
     }.toSeq
