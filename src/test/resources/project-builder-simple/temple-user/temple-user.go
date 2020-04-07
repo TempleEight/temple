@@ -219,7 +219,66 @@ func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) {
+	templeUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		return
+	}
 
+	var req updateTempleUserRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	if req.IntField == nil || req.DoubleField == nil || req.StringField == nil || req.BoolField == nil || req.DateField == nil || req.TimeField == nil || req.DateTimeField == nil || req.BlobField == nil {
+		errMsg := util.CreateErrorJSON("Missing request parameter(s)")
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	_, err = valid.ValidateStruct(req)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	templeUser, err := env.dao.UpdateTempleUser(dao.UpdateTempleUserInput{
+		ID:            templeUserID,
+		IntField:      *req.IntField,
+		DoubleField:   *req.DoubleField,
+		StringField:   *req.StringField,
+		BoolField:     *req.BoolField,
+		DateField:     *req.DateField,
+		TimeField:     *req.TimeField,
+		DateTimeField: *req.DateTimeField,
+		BlobField:     *req.BlobField,
+	})
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrTempleUserNotFound:
+			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+		default:
+			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
+			http.Error(w, errMsg, http.StatusInternalServerError)
+		}
+		return
+	}
+
+	json.NewEncoder(w).Encode(updateTempleUserResponse{
+		ID:            templeUser.ID,
+		IntField:      templeUser.IntField,
+		DoubleField:   templeUser.DoubleField,
+		StringField:   templeUser.StringField,
+		BoolField:     templeUser.BoolField,
+		DateField:     templeUser.DateField,
+		TimeField:     templeUser.TimeField,
+		DateTimeField: templeUser.DateTimeField.Format(time.RFC3339),
+		BlobField:     templeUser.BlobField,
+	})
 }
 
 func (env *env) deleteTempleUserHandler(w http.ResponseWriter, r *http.Request) {

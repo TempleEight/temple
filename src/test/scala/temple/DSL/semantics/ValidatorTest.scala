@@ -105,6 +105,15 @@ class ValidatorTest extends FlatSpec with Matchers {
     )
 
     validationErrors(
+      Templefile(
+        "User",
+        projectBlock = ProjectBlock(Seq(Metrics.Prometheus, Metrics.Prometheus)),
+      ),
+    ) shouldBe Set(
+      "Multiple occurrences of Metrics metadata in User project",
+    )
+
+    validationErrors(
       templefileWithUserAttributes("A" -> Attribute(BoolType)),
     ) shouldBe Set("Invalid attribute name A, it must start with a lowercase letter, in User")
 
@@ -169,11 +178,28 @@ class ValidatorTest extends FlatSpec with Matchers {
         services = Map(
           "User" -> ServiceBlock(
             attributes = Map("a" -> Attribute(IntType())),
-            metadata = Seq(Readable.All, Readable.This),
+            metadata = Seq(ServiceAuth.Email, Readable.All, Readable.This),
           ),
         ),
       ),
     ) shouldBe Set("Multiple occurrences of Readable metadata in User")
+
+    // check that the auth block is found, regardless of which block it’s in
+    validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
+          "User" -> ServiceBlock(
+            attributes = Map("a" -> Attribute(IntType())),
+            metadata = Seq(ServiceAuth.Email),
+          ),
+          "Box" -> ServiceBlock(
+            attributes = Map(),
+            metadata = Seq(Readable.All, Readable.This),
+          ),
+        ),
+      ),
+    ) shouldBe Set("Multiple occurrences of Readable metadata in Box")
 
     validationErrors(
       Templefile(
@@ -181,7 +207,19 @@ class ValidatorTest extends FlatSpec with Matchers {
         services = Map(
           "User" -> ServiceBlock(
             attributes = Map("a" -> Attribute(IntType())),
-            metadata = Seq(Writable.All, Readable.This),
+            metadata = Seq(Readable.This),
+          ),
+        ),
+      ),
+    ) shouldBe Set("#readable(this) requires at least one service to have #auth in User")
+
+    validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
+          "User" -> ServiceBlock(
+            attributes = Map("a" -> Attribute(IntType())),
+            metadata = Seq(ServiceAuth.Email, Writable.All, Readable.This),
           ),
         ),
       ),
