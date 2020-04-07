@@ -117,21 +117,28 @@ object GoServiceMainHandlersGenerator {
 
   /** Generate the block for checking if a request is authorized to perform operation  */
   private[main] def generateCheckAuthorizationBlock(root: ServiceRoot): String =
-    mkCode.lines(
-      genDeclareAndAssign(
-        genFunctionCall("checkAuthorization", "env", s"${root.decapitalizedName}ID", "auth"),
-        "authorized",
-        "err",
-      ),
-      genIfErr(
-        genSwitchReturn(
-          "err.(type)",
-          ListMap(s"dao.Err${root.name}NotFound" -> generateHTTPError(StatusUnauthorized, "Unauthorized")),
-          generateHTTPError(StatusInternalServerError, "Something went wrong: %s", genMethodCall("err", "Error")),
+    // If the service has an auth block, we can simply check the AuthID is the same as the resource ID being requested
+    if (root.hasAuthBlock) {
+      mkCode.lines(
+        genIf(s"auth.ID != ${root.decapitalizedName}ID", generateHTTPErrorReturn(StatusUnauthorized, "Unauthorized")),
+      )
+    } else {
+      mkCode.lines(
+        genDeclareAndAssign(
+          genFunctionCall("checkAuthorization", "env", s"${root.decapitalizedName}ID", "auth"),
+          "authorized",
+          "err",
         ),
-      ),
-      genIf("!authorized", generateHTTPErrorReturn(StatusUnauthorized, "Unauthorized")),
-    )
+        genIfErr(
+          genSwitchReturn(
+            "err.(type)",
+            ListMap(s"dao.Err${root.name}NotFound" -> generateHTTPError(StatusUnauthorized, "Unauthorized")),
+            generateHTTPError(StatusInternalServerError, "Something went wrong: %s", genMethodCall("err", "Error")),
+          ),
+        ),
+        genIf("!authorized", generateHTTPErrorReturn(StatusUnauthorized, "Unauthorized")),
+      )
+    }
 
   /** Generate the block for decoding an incoming request JSON into a request object */
   private[main] def generateDecodeRequestBlock(typePrefix: String): String =
@@ -194,6 +201,16 @@ object GoServiceMainHandlersGenerator {
             case _                                   => ""
           }
       },
+    )
+
+  /** Generate DAO call block error handling for Read, Update and Delete*/
+  private[main] def generateDAOCallErrorBlock(root: ServiceRoot): String =
+    genIfErr(
+      genSwitchReturn(
+        "err.(type)",
+        ListMap(s"dao.Err${root.name}NotFound" -> generateOneLineHTTPError(StatusNotFound)),
+        generateHTTPError(StatusInternalServerError, "Something went wrong: %s", genMethodCall("err", "Error")),
+      ),
     )
 
   /** Generate JSON response from DAO response */

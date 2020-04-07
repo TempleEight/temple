@@ -17,13 +17,7 @@ object GoServiceMainReadHandlerGenerator {
   private def generateDAOCallBlock(root: ServiceRoot): String =
     mkCode.lines(
       generateDAOReadCall(root),
-      genIfErr(
-        genSwitchReturn(
-          "err.(type)",
-          ListMap(s"dao.Err${root.name}NotFound" -> generateOneLineHTTPError(StatusNotFound)),
-          generateHTTPError(StatusInternalServerError, "Something went wrong: %s", genMethodCall("err", "Error")),
-        ),
-      ),
+      generateDAOCallErrorBlock(root),
     )
 
   /** Generate the read handler function */
