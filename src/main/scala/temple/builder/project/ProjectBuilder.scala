@@ -1,6 +1,7 @@
 package temple.builder.project
 
 import temple.ast.Metadata._
+import temple.ast.Templefile.Ports
 import temple.ast._
 import temple.builder._
 import temple.detail.LanguageDetail
@@ -133,9 +134,16 @@ object ProjectBuilder {
     if (usesAuth) {
       templefile.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
         case ServiceLanguage.Go =>
-          serverFiles = serverFiles ++ GoAuthServiceGenerator.generate(
-              ServerBuilder.buildAuthRoot(templefile, detail, ProjectConfig.authPort),
+          val authRoot = ServerBuilder.buildAuthRoot(templefile, detail, ProjectConfig.authPort)
+          // TODO: Use authRoot.datastore when it's defined
+          val configFileContents =
+            ServerConfigGenerator.generate(
+              "auth",
+              Database.Postgres,
+              Map("kong-admin" -> "http://kong:8001"),
+              Ports(ProjectConfig.authPort, ProjectConfig.authMetricPort),
             )
+          serverFiles = serverFiles ++ (GoAuthServiceGenerator.generate(authRoot) + (File("auth", "config.json") -> configFileContents))
       }
     }
 

@@ -1,0 +1,13 @@
+{
+  "user" : "postgres",
+  "dbName" : "postgres",
+  "host" : "auth-db",
+  "sslMode" : "disable",
+  "services" : {
+    "kong-admin" : "http://kong:8001"
+  },
+  "ports" : {
+    "service" : 1024,
+    "prometheus" : 1025
+  }
+}
