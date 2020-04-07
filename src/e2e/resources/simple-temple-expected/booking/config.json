@@ -1,0 +1,13 @@
+{
+  "user" : "postgres",
+  "dbName" : "postgres",
+  "host" : "booking-db",
+  "sslMode" : "disable",
+  "services" : {
+    
+  },
+  "ports" : {
+    "service" : 1028,
+    "prometheus" : 1029
+  }
+}
