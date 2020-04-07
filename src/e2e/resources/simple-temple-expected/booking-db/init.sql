@@ -1,3 +1,3 @@
 CREATE TABLE booking (
-
+  id UUID NOT NULL PRIMARY KEY
 );

@@ -112,7 +112,7 @@ func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) 
 
 // CreateComplexUser creates a new complexUser in the datastore, returning the newly created complexUser
 func (dao *DAO) CreateComplexUser(input CreateComplexUserInput) (*ComplexUser, error) {
-	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO complex_user (smallIntField, intField, bigIntField, floatField, doubleField, stringField, boundedStringField, boolField, dateField, timeField, dateTimeField, blobField) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING smallIntField, intField, bigIntField, floatField, doubleField, stringField, boundedStringField, boolField, dateField, timeField, dateTimeField, blobField;", input.ID, input.SmallIntField, input.IntField, input.BigIntField, input.FloatField, input.DoubleField, input.StringField, input.BoundedStringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField)
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO complex_user (id, smallIntField, intField, bigIntField, floatField, doubleField, stringField, boundedStringField, boolField, dateField, timeField, dateTimeField, blobField) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13) RETURNING id, smallIntField, intField, bigIntField, floatField, doubleField, stringField, boundedStringField, boolField, dateField, timeField, dateTimeField, blobField;", input.ID, input.SmallIntField, input.IntField, input.BigIntField, input.FloatField, input.DoubleField, input.StringField, input.BoundedStringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField)
 
 	var complexUser ComplexUser
 	err := row.Scan(&complexUser.ID, &complexUser.SmallIntField, &complexUser.IntField, &complexUser.BigIntField, &complexUser.FloatField, &complexUser.DoubleField, &complexUser.StringField, &complexUser.BoundedStringField, &complexUser.BoolField, &complexUser.DateField, &complexUser.TimeField, &complexUser.DateTimeField, &complexUser.BlobField)
@@ -125,7 +125,7 @@ func (dao *DAO) CreateComplexUser(input CreateComplexUserInput) (*ComplexUser, e
 
 // ReadComplexUser returns the complexUser in the datastore for a given ID
 func (dao *DAO) ReadComplexUser(input ReadComplexUserInput) (*ComplexUser, error) {
-	row := executeQueryWithRowResponse(dao.DB, "SELECT smallIntField, intField, bigIntField, floatField, doubleField, stringField, boundedStringField, boolField, dateField, timeField, dateTimeField, blobField FROM complex_user WHERE id = $1;", input.ID)
+	row := executeQueryWithRowResponse(dao.DB, "SELECT id, smallIntField, intField, bigIntField, floatField, doubleField, stringField, boundedStringField, boolField, dateField, timeField, dateTimeField, blobField FROM complex_user WHERE id = $1;", input.ID)
 
 	var complexUser ComplexUser
 	err := row.Scan(&complexUser.ID, &complexUser.SmallIntField, &complexUser.IntField, &complexUser.BigIntField, &complexUser.FloatField, &complexUser.DoubleField, &complexUser.StringField, &complexUser.BoundedStringField, &complexUser.BoolField, &complexUser.DateField, &complexUser.TimeField, &complexUser.DateTimeField, &complexUser.BlobField)
@@ -143,7 +143,7 @@ func (dao *DAO) ReadComplexUser(input ReadComplexUserInput) (*ComplexUser, error
 
 // UpdateComplexUser updates the complexUser in the datastore for a given ID, returning the newly updated complexUser
 func (dao *DAO) UpdateComplexUser(input UpdateComplexUserInput) (*ComplexUser, error) {
-	row := executeQueryWithRowResponse(dao.DB, "UPDATE complex_user SET smallIntField = $1, intField = $2, bigIntField = $3, floatField = $4, doubleField = $5, stringField = $6, boundedStringField = $7, boolField = $8, dateField = $9, timeField = $10, dateTimeField = $11, blobField = $12 WHERE id = $13 RETURNING smallIntField, intField, bigIntField, floatField, doubleField, stringField, boundedStringField, boolField, dateField, timeField, dateTimeField, blobField;", input.SmallIntField, input.IntField, input.BigIntField, input.FloatField, input.DoubleField, input.StringField, input.BoundedStringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField, input.ID)
+	row := executeQueryWithRowResponse(dao.DB, "UPDATE complex_user SET smallIntField = $1, intField = $2, bigIntField = $3, floatField = $4, doubleField = $5, stringField = $6, boundedStringField = $7, boolField = $8, dateField = $9, timeField = $10, dateTimeField = $11, blobField = $12 WHERE id = $13 RETURNING id, smallIntField, intField, bigIntField, floatField, doubleField, stringField, boundedStringField, boolField, dateField, timeField, dateTimeField, blobField;", input.SmallIntField, input.IntField, input.BigIntField, input.FloatField, input.DoubleField, input.StringField, input.BoundedStringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField, input.ID)
 
 	var complexUser ComplexUser
 	err := row.Scan(&complexUser.ID, &complexUser.SmallIntField, &complexUser.IntField, &complexUser.BigIntField, &complexUser.FloatField, &complexUser.DoubleField, &complexUser.StringField, &complexUser.BoundedStringField, &complexUser.BoolField, &complexUser.DateField, &complexUser.TimeField, &complexUser.DateTimeField, &complexUser.BlobField)
