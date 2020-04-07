@@ -9,6 +9,7 @@ import temple.detail.LanguageDetail
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
 import temple.generate.database.{PostgresContext, PostgresGenerator, PreparedType}
+import temple.generate.server
 import temple.generate.server._
 import temple.utils.StringUtils
 
@@ -39,7 +40,7 @@ object ServerBuilder {
         Some(CreatedByAttribute(languageConfig.createdByInputName, languageConfig.createdByName))
       else None
 
-    val idAttribute = IDAttribute("id")
+    val idAttribute = server.IDAttribute("id")
 
     val readable =
       serviceBlock.lookupLocalMetadata[Metadata.Readable].getOrElse(ProjectConfig.getDefaultReadable(projectUsesAuth))
@@ -76,7 +77,7 @@ object ServerBuilder {
       port = port,
       idAttribute = idAttribute,
       createdByAttribute = createdBy,
-      attributes = ListMap.from(serviceBlock.attributes),
+      attributes = ListMap.from(serviceBlock.attributesWithoutID),
       datastore = serviceBlock.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase),
       readable = readable,
       writable = writable,
@@ -121,7 +122,7 @@ object ServerBuilder {
       moduleName,
       port,
       AuthAttribute(serviceAuth, AttributeType.StringType()),
-      IDAttribute("id"),
+      server.IDAttribute("id"),
       createQuery,
       readQuery,
     )
