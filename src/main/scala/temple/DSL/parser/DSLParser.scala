@@ -11,11 +11,14 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   /** A parser generator for an entire Templefile */
   protected def templefile: Parser[Templefile] = repAll(rootItem)
 
+  /** A parser generator for an identifier beginning in a letter */
+  protected def templeIdent: Parser[String] = """[a-zA-Z][a-zA-Z0-9]*""".r
+
   /** A parser generator for an identifier beginning in a lowercase letter */
-  protected def lowerIdent: Parser[String] = guard("""[a-z]""".r) ~> ident
+  protected def lowerIdent: Parser[String] = guard("""[a-z]""".r) ~> templeIdent
 
   /** A parser generator for an identifier beginning in an uppercase letter */
-  protected def upperIdent: Parser[String] = guard("""[A-Z]""".r) ~> ident
+  protected def upperIdent: Parser[String] = guard("""[A-Z]""".r) ~> templeIdent
 
   /** A parser generator for each item at the root level, i.e. a name, tag and block */
   protected def rootItem: Parser[DSLRootItem] = (upperIdent <~ ":") ~ (ident <~ "{") ~ repUntil(entry, "}") ^^ {
