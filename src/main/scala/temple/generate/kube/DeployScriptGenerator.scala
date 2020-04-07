@@ -15,13 +15,12 @@ object DeployScriptGenerator {
 
   def generate(orchestrationRoot: OrchestrationRoot): (File, FileContent) = File("", "deploy.sh") -> mkCode.lines(
     scriptTemplateHeader,
-    "",
     "# DB init scripts",
     orchestrationRoot.services.map { service =>
       s"""kubectl create configmap ${service.name}-db-config --from-file "$$BASEDIR/${service.name}-db/init.sql" -o=yaml"""
     },
     "",
-    Option.when(orchestrationRoot.usesMetrics) { scriptMetricsBlock + "\n" },
+    Option.when(orchestrationRoot.usesMetrics) { scriptMetricsBlock },
     scriptTemplateBody,
   )
 }
