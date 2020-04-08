@@ -1,5 +1,6 @@
 package temple.builder
 
+import temple.ast.AbstractAttribute.Attribute
 import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
 import temple.ast.Metadata.ServiceLanguage

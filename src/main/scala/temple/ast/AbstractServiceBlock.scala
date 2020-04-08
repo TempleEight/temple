@@ -1,9 +1,10 @@
 package temple.ast
 
+import temple.ast.AbstractAttribute.{Attribute, IDAttribute}
 import temple.ast.Metadata.{Endpoint, Omit, ServiceMetadata}
 
 sealed trait AbstractServiceBlock extends AttributeBlock[ServiceMetadata] {
-  def attributes: Map[String, Attribute]
+  def attributes: Map[String, AbstractAttribute]
   def metadata: Seq[ServiceMetadata]
   def structs: Map[String, StructBlock]
 
@@ -16,8 +17,10 @@ sealed trait AbstractServiceBlock extends AttributeBlock[ServiceMetadata] {
   def structIterator(rootName: String): Iterator[(String, AttributeBlock[_])] =
     Iterator(rootName -> this) ++ structs
 
-  /** Return this service's attributes, minus the ID */
-  lazy val attributesWithoutID: Map[String, Attribute] = attributes.filterNot { case (_, attr) => attr == IDAttribute }
+  /** Return this service's attributes, minus the ID and CreatedBy */
+  lazy val providedAttributes: Map[String, Attribute] = attributes.collect {
+    case (name: String, x: Attribute) => name -> x
+  }
 
   /** Set the parent that this Templefile is within */
   override private[temple] def setParent(parent: TempleNode): Unit = {
@@ -30,14 +33,14 @@ object AbstractServiceBlock {
 
   /** A service block, representing one microservice on its own isolated server */
   case class ServiceBlock(
-    attributes: Map[String, Attribute],
+    attributes: Map[String, AbstractAttribute],
     metadata: Seq[ServiceMetadata] = Nil,
     structs: Map[String, StructBlock] = Map.empty,
   ) extends AbstractServiceBlock
 
   case object AuthServiceBlock extends AbstractServiceBlock {
 
-    override val attributes: Map[String, Attribute] = Map(
+    override val attributes: Map[String, AbstractAttribute] = Map(
       "id"       -> IDAttribute,
       "email"    -> Attribute(AttributeType.StringType(), valueAnnotations = Set(Annotation.Unique)),
       "password" -> Attribute(AttributeType.StringType()),

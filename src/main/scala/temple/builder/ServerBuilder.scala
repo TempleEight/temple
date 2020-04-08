@@ -1,7 +1,8 @@
 package temple.builder
 
+import temple.ast.AbstractAttribute.Attribute
 import temple.ast.AttributeType.ForeignKey
-import temple.ast.Metadata.{Database, ServiceAuth, ServiceEnumerable, ServiceLanguage}
+import temple.ast.Metadata.{Database, ServiceAuth, ServiceLanguage}
 import temple.ast.{Metadata, _}
 import temple.builder.project.LanguageConfig.GoLanguageConfig
 import temple.builder.project.ProjectConfig
@@ -83,7 +84,7 @@ object ServerBuilder {
       port = port,
       idAttribute = idAttribute,
       createdByAttribute = createdBy,
-      attributes = ListMap.from(serviceBlock.attributesWithoutID),
+      attributes = ListMap.from(serviceBlock.providedAttributes),
       datastore = serviceBlock.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase),
       readable = readable,
       writable = writable,

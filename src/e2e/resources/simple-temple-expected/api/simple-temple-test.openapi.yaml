@@ -14,9 +14,6 @@ paths:
             schema:
               type: object
               properties:
-                id:
-                  type: string
-                  format: uuid
                 simpleTempleTestUser:
                   type: string
                 email:
@@ -154,9 +151,6 @@ paths:
             schema:
               type: object
               properties:
-                id:
-                  type: string
-                  format: uuid
                 simpleTempleTestUser:
                   type: string
                 email:
@@ -284,10 +278,7 @@ paths:
           application/json:
             schema:
               type: object
-              properties:
-                id:
-                  type: string
-                  format: uuid
+              properties: {}
       responses:
         '200':
           description: Booking successfully created
@@ -297,6 +288,9 @@ paths:
                 type: object
                 properties:
                   id:
+                    type: string
+                    format: uuid
+                  createdBy:
                     type: string
                     format: uuid
         '400':
@@ -329,6 +323,9 @@ paths:
                   id:
                     type: string
                     format: uuid
+                  createdBy:
+                    type: string
+                    format: uuid
         '400':
           $ref: '#/components/responses/Error400'
         '401':
@@ -346,10 +343,7 @@ paths:
           application/json:
             schema:
               type: object
-              properties:
-                id:
-                  type: string
-                  format: uuid
+              properties: {}
       responses:
         '200':
           description: Booking successfully updated
@@ -359,6 +353,9 @@ paths:
                 type: object
                 properties:
                   id:
+                    type: string
+                    format: uuid
+                  createdBy:
                     type: string
                     format: uuid
         '400':
@@ -399,10 +396,7 @@ paths:
           application/json:
             schema:
               type: object
-              properties:
-                id:
-                  type: string
-                  format: uuid
+              properties: {}
       responses:
         '200':
           description: SimpleTempleTestGroup successfully created
@@ -412,6 +406,9 @@ paths:
                 type: object
                 properties:
                   id:
+                    type: string
+                    format: uuid
+                  createdBy:
                     type: string
                     format: uuid
         '400':
@@ -444,6 +441,9 @@ paths:
                   id:
                     type: string
                     format: uuid
+                  createdBy:
+                    type: string
+                    format: uuid
         '400':
           $ref: '#/components/responses/Error400'
         '401':
@@ -461,10 +461,7 @@ paths:
           application/json:
             schema:
               type: object
-              properties:
-                id:
-                  type: string
-                  format: uuid
+              properties: {}
       responses:
         '200':
           description: SimpleTempleTestGroup successfully updated
@@ -474,6 +471,9 @@ paths:
                 type: object
                 properties:
                   id:
+                    type: string
+                    format: uuid
+                  createdBy:
                     type: string
                     format: uuid
         '400':

@@ -1,6 +1,6 @@
 package temple.generate.server.go.service
 
-import temple.ast.Attribute
+import temple.ast.AbstractAttribute
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, presentParticiple}
@@ -15,7 +15,7 @@ object GoServiceHookGenerator {
 
   private def generateBeforeHookType(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
     operation: CRUD,
   ): String = operation match {
     case CRUD.List =>
@@ -46,7 +46,7 @@ object GoServiceHookGenerator {
 
   private[service] def generateHookStruct(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
     operations: Set[CRUD],
   ): String = {
     val beforeCreate = operations.toSeq.sorted.map { op =>
@@ -88,7 +88,7 @@ object GoServiceHookGenerator {
 
   private[service] def generateAddHookMethods(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
     operations: Set[CRUD],
   ): String = {
     val beforeHooks = operations.toSeq.sorted.map { op =>
