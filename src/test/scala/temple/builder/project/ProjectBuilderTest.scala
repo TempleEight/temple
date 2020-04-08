@@ -10,6 +10,10 @@ import temple.generate.FileSystem.File
 
 class ProjectBuilderTest extends FlatSpec with FileMatchers {
 
+  // In order to update a test because you believe what the generator is outputting is entirely correct, call
+  // temple.utils.FileUtils.outputProject(src/test/resources/my-project, actual)
+  // and then check the diff on that folder to ensure it looks correct
+
   behavior of "ProjectBuilder"
 
   it should "correctly create a simple project using postgres as the default" in {
