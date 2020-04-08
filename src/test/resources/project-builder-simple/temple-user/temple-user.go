@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -127,7 +128,7 @@ func jsonMiddleware(next http.Handler) http.Handler {
 
 func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 	var req createTempleUserRequest
-	err = json.NewDecoder(r.Body).Decode(&req)
+	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusBadRequest)
@@ -180,7 +181,7 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		DateField:     templeUser.DateField.Format("2006-01-02"),
 		TimeField:     templeUser.TimeField.Format("15:04:05.999999999"),
 		DateTimeField: templeUser.DateTimeField.Format(time.RFC3339),
-		BlobField:     templeUser.BlobField,
+		BlobField:     base64.StdEncoding.EncodeToString(templeUser.BlobField),
 	})
 }
 
@@ -214,7 +215,7 @@ func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 		DateField:     templeUser.DateField.Format("2006-01-02"),
 		TimeField:     templeUser.TimeField.Format("15:04:05.999999999"),
 		DateTimeField: templeUser.DateTimeField.Format(time.RFC3339),
-		BlobField:     templeUser.BlobField,
+		BlobField:     base64.StdEncoding.EncodeToString(templeUser.BlobField),
 	})
 }
 
@@ -277,7 +278,7 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		DateField:     templeUser.DateField.Format("2006-01-02"),
 		TimeField:     templeUser.TimeField.Format("15:04:05.999999999"),
 		DateTimeField: templeUser.DateTimeField.Format(time.RFC3339),
-		BlobField:     templeUser.BlobField,
+		BlobField:     base64.StdEncoding.EncodeToString(templeUser.BlobField),
 	})
 }
 

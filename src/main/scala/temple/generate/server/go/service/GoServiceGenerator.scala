@@ -22,11 +22,15 @@ object GoServiceGenerator extends ServiceGenerator {
     // Whether or not the service uses inter-service communication
     val usesComms = root.comms.nonEmpty
 
+    // TODO: what if these attributes are serverSet, will time and base64 still be used?
     // Whether or not this service uses the time type, by checking for attributes of type date, time or datetime
     val usesTime =
       Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateTimeType)
         .intersect(root.attributes.values.map(_.attributeType).toSet)
         .nonEmpty
+
+    // Whether or not this service uses base64, by checking for attributes of type blob
+    val usesBase64 = root.attributes.values.map(_.attributeType).toSet.contains(AttributeType.BlobType())
 
     // Attributes filtered by which are client-provided
     val clientAttributes = root.attributes.filterNot {
@@ -44,7 +48,7 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${root.kebabName}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
       File(root.kebabName, s"${root.kebabName}.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoServiceMainGenerator.generateImports(root, usesTime, usesComms, clientAttributes, operations),
+        GoServiceMainGenerator.generateImports(root, usesBase64, usesTime, usesComms, clientAttributes, operations),
         GoServiceMainStructGenerator.generateEnvStruct(usesComms),
         when(clientAttributes.nonEmpty && (operations.contains(CRUD.Create) || operations.contains(CRUD.Update))) {
           GoServiceMainStructGenerator.generateRequestStructs(root, operations, clientAttributes)
