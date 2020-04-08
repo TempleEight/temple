@@ -1,4 +1,4 @@
-package temple.generate.kube.ast
+package temple.generate.orchestration.ast
 
 object OrchestrationType {
 
