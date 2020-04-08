@@ -11,11 +11,12 @@ import temple.generate.FileSystem._
 import temple.generate.database.ast.Statement
 import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.docker.DockerfileGenerator
-import temple.generate.orchestration.kube.KubernetesGenerator
 import temple.generate.metrics.grafana.ast.Datasource
 import temple.generate.metrics.grafana.{GrafanaDashboardConfigGenerator, GrafanaDashboardGenerator, GrafanaDatasourceConfigGenerator}
 import temple.generate.metrics.prometheus.PrometheusConfigGenerator
 import temple.generate.metrics.prometheus.ast.PrometheusJob
+import temple.generate.orchestration.dockercompose.DockerComposeGenerator
+import temple.generate.orchestration.kube.KubernetesGenerator
 import temple.generate.server.config.ServerConfigGenerator
 import temple.generate.server.go.auth.GoAuthServiceGenerator
 import temple.generate.server.go.service.GoServiceGenerator
@@ -72,7 +73,10 @@ object ProjectBuilder {
 
   private def buildOrchestration(templefile: Templefile): Files = {
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(templefile)
-    KubernetesGenerator.generate(templefile.projectName, orchestrationRoot)
+    templefile.lookupMetadata[Provider].getOrElse(return Map()) match {
+      case Provider.Kubernetes    => KubernetesGenerator.generate(templefile.projectName, orchestrationRoot)
+      case Provider.DockerCompose => DockerComposeGenerator.generate(templefile.projectName, orchestrationRoot)
+    }
   }
 
   private def buildMetrics(templefile: Templefile): Files = {
