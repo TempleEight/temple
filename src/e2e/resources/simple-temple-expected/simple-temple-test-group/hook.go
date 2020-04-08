@@ -5,9 +5,9 @@ import "github.com/squat/and/dab/simple-temple-test-group/dao"
 // Hook allows additional code to be executed before and after every datastore interaction
 // Hooks are executed in the order they are defined, such that if any hook errors, future hooks are not executed and the request is terminated
 type Hook struct {
-	beforeCreateHooks []*func(env *env, req createSimpleTempleTestGroupRequest, input *dao.CreateSimpleTempleTestGroupInput) *HookError
+	beforeCreateHooks []*func(env *env, input *dao.CreateSimpleTempleTestGroupInput) *HookError
 	beforeReadHooks   []*func(env *env, input *dao.ReadSimpleTempleTestGroupInput) *HookError
-	beforeUpdateHooks []*func(env *env, req updateSimpleTempleTestGroupRequest, input *dao.UpdateSimpleTempleTestGroupInput) *HookError
+	beforeUpdateHooks []*func(env *env, input *dao.UpdateSimpleTempleTestGroupInput) *HookError
 	beforeDeleteHooks []*func(env *env, input *dao.DeleteSimpleTempleTestGroupInput) *HookError
 	afterCreateHooks  []*func(env *env, simpleTempleTestGroup *dao.SimpleTempleTestGroup) *HookError
 	afterReadHooks    []*func(env *env, simpleTempleTestGroup *dao.SimpleTempleTestGroup) *HookError
@@ -26,7 +26,7 @@ func (e *HookError) Error() string {
 }
 
 // BeforeCreate adds a new hook to be executed before creating an object in the datastore
-func (h *Hook) BeforeCreate(hook func(env *env, req createSimpleTempleTestGroupRequest, input *dao.CreateSimpleTempleTestGroupInput) *HookError) {
+func (h *Hook) BeforeCreate(hook func(env *env, input *dao.CreateSimpleTempleTestGroupInput) *HookError) {
 	h.beforeCreateHooks = append(h.beforeCreateHooks, &hook)
 }
 
@@ -36,7 +36,7 @@ func (h *Hook) BeforeRead(hook func(env *env, input *dao.ReadSimpleTempleTestGro
 }
 
 // BeforeUpdate adds a new hook to be executed before updating an object in the datastore
-func (h *Hook) BeforeUpdate(hook func(env *env, req updateSimpleTempleTestGroupRequest, input *dao.UpdateSimpleTempleTestGroupInput) *HookError) {
+func (h *Hook) BeforeUpdate(hook func(env *env, input *dao.UpdateSimpleTempleTestGroupInput) *HookError) {
 	h.beforeUpdateHooks = append(h.beforeUpdateHooks, &hook)
 }
 

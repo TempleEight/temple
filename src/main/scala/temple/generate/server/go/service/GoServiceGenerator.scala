@@ -66,10 +66,10 @@ object GoServiceGenerator extends ServiceGenerator {
       File(root.kebabName, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
         GoCommonHookGenerator.generateImports(root.module),
-        GoServiceHookGenerator.generateHookStruct(root, operations),
+        GoServiceHookGenerator.generateHookStruct(root, clientAttributes, operations),
         GoCommonHookGenerator.generateHookErrorStruct,
         GoCommonHookGenerator.generateHookErrorFunction,
-        GoServiceHookGenerator.generateAddHookMethods(root, operations),
+        GoServiceHookGenerator.generateAddHookMethods(root, clientAttributes, operations),
       ),
       File(s"${root.kebabName}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),
       File(s"${root.kebabName}/dao", "dao.go") -> mkCode.doubleLines(
