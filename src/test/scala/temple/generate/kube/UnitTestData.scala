@@ -8,7 +8,7 @@ object UnitTestData {
 
   val basicOrchestrationService: Service = Service(
     name = "user",
-    image = "temple-user-service",
+    image = "localhost:5000/temple-user-service",
     dbImage = "postgres:12.1",
     ports = Seq("api" -> 80),
     replicas = 1,

@@ -10,6 +10,7 @@ object ProjectConfig {
     override def toString: String = image + ":" + version
   }
 
+  val registryURL                      = "localhost:5000"
   val defaultLanguage: ServiceLanguage = ServiceLanguage.Go
   val defaultDatabase: Database        = Database.Postgres
   val defaultAuth: ServiceAuth         = ServiceAuth.Email

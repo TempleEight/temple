@@ -13,6 +13,8 @@ object DeployScriptGenerator {
 
   private val scriptMetricsBlock: String = FileUtils.readResources("shell/deploy.sh.metrics.snippet")
 
+  private val scriptTemplateDeployment: String = FileUtils.readResources("shell/deploy.sh.deployment.snippet")
+
   def generate(orchestrationRoot: OrchestrationRoot): (File, FileContent) = File("", "deploy.sh") -> mkCode.lines(
     scriptTemplateHeader,
     "# DB init scripts",
@@ -21,6 +23,7 @@ object DeployScriptGenerator {
     },
     "",
     Option.when(orchestrationRoot.usesMetrics) { scriptMetricsBlock },
+    scriptTemplateDeployment,
     scriptTemplateBody,
   )
 }
