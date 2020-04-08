@@ -25,6 +25,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
       projectBlock = ProjectBlock(
         metadata = Seq(
           Metrics.Prometheus,
+          Provider.Kubernetes,
         ),
       ),
       services = Map(
