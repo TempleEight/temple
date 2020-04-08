@@ -1,5 +1,6 @@
 package temple.builder.project
 
+import temple.ast.Metadata.Provider.DockerCompose
 import temple.ast.Metadata._
 import temple.ast.Templefile.Ports
 import temple.ast._
@@ -21,7 +22,10 @@ import temple.generate.server.config.ServerConfigGenerator
 import temple.generate.server.go.auth.GoAuthServiceGenerator
 import temple.generate.server.go.service.GoServiceGenerator
 import temple.generate.target.openapi.OpenAPIGenerator
+import temple.utils.FileUtils
 import temple.utils.StringUtils._
+
+import Option.when
 
 object ProjectBuilder {
 
@@ -60,12 +64,15 @@ object ProjectBuilder {
 
   private def buildDockerfiles(templefile: Templefile): Files = {
     val provider = templefile.lookupMetadata[Provider]
-    templefile.allServicesWithPorts.map {
+    val dockerfiles = templefile.allServicesWithPorts.map {
       case (name, service, port) =>
         val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(kebabCase(name), service, port.service, provider)
         val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)
         (File(s"${kebabCase(name)}", "Dockerfile"), dockerfileContents)
     }.toMap
+    dockerfiles ++ when(templefile.usesAuth && provider.contains(DockerCompose)) {
+      File(s"auth", "wait-for-kong.sh") -> FileUtils.readResources("shell/wait-for-kong.sh")
+    }
   }
 
   private def buildOpenAPI(templefile: Templefile): Files = {
