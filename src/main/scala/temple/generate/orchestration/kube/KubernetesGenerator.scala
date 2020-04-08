@@ -1,14 +1,14 @@
-package temple.generate.kube
+package temple.generate.orchestration.kube
 
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.yaml.Printer
 import temple.generate.FileSystem._
-import temple.generate.kube.ast.OrchestrationType._
-import temple.generate.kube.ast.gen.KubeType._
-import temple.generate.kube.ast.gen.Spec._
-import temple.generate.kube.ast.gen.volume.{AccessMode, ReclaimPolicy, StorageClass}
-import temple.generate.kube.ast.gen.{PlacementStrategy, RestartPolicy}
+import temple.generate.orchestration.ast.OrchestrationType._
+import temple.generate.orchestration.kube.ast.KubeType._
+import temple.generate.orchestration.kube.ast.Spec._
+import temple.generate.orchestration.kube.ast.{PlacementStrategy, RestartPolicy}
+import temple.generate.orchestration.kube.ast.volume.{AccessMode, ReclaimPolicy, StorageClass}
 import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.FileUtils
 

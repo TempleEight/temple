@@ -1,4 +1,4 @@
-package temple.generate.kube
+package temple.generate.orchestration.kube
 
 /** Case class to encapsulate which Kubernetes object kind being generated */
 sealed trait GenType

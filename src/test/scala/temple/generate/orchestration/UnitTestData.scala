@@ -1,7 +1,7 @@
-package temple.generate.kube
+package temple.generate.orchestration
 
-import temple.generate.kube.ast.OrchestrationType._
-import temple.generate.kube.ast.gen.LifecycleCommand
+import temple.generate.orchestration.ast.OrchestrationType.{DbStorage, OrchestrationRoot, Service}
+import temple.generate.orchestration.kube.ast.LifecycleCommand
 import temple.utils.FileUtils
 
 object UnitTestData {

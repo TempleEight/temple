@@ -5,8 +5,8 @@ import temple.ast.Metadata.Database
 import temple.ast.Templefile.Ports
 import temple.ast.{AbstractServiceBlock, Metadata, Templefile}
 import temple.builder.project.ProjectConfig
-import temple.generate.kube.ast.OrchestrationType.{OrchestrationRoot, Service}
-import temple.generate.kube.ast.gen.LifecycleCommand
+import temple.generate.orchestration.ast.OrchestrationType.{OrchestrationRoot, Service}
+import temple.generate.orchestration.kube.ast.LifecycleCommand
 import temple.utils.StringUtils
 
 object OrchestrationBuilder {

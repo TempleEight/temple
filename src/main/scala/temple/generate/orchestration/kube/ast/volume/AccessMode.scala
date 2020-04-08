@@ -1,4 +1,4 @@
-package temple.generate.kube.ast.gen.volume
+package temple.generate.orchestration.kube.ast.volume
 
 object AccessMode extends Enumeration {
   type AccessMode = Value

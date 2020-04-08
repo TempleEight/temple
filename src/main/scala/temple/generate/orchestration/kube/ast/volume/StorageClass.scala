@@ -1,4 +1,4 @@
-package temple.generate.kube.ast.gen.volume
+package temple.generate.orchestration.kube.ast.volume
 
 object StorageClass extends Enumeration {
   type StorageClass = Value
