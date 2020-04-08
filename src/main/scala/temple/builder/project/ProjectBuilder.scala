@@ -58,13 +58,15 @@ object ProjectBuilder {
         }
     }
 
-  private def buildDockerfiles(templefile: Templefile): Files =
+  private def buildDockerfiles(templefile: Templefile): Files = {
+    val provider = templefile.lookupMetadata[Provider]
     templefile.allServicesWithPorts.map {
       case (name, service, port) =>
-        val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(kebabCase(name), service, port.service)
+        val dockerfileRoot     = DockerfileBuilder.createServiceDockerfile(kebabCase(name), service, port.service, provider)
         val dockerfileContents = DockerfileGenerator.generate(dockerfileRoot)
         (File(s"${kebabCase(name)}", "Dockerfile"), dockerfileContents)
     }.toMap
+  }
 
   private def buildOpenAPI(templefile: Templefile): Files = {
     val openAPIRoot = OpenAPIBuilder.createOpenAPI(templefile)
