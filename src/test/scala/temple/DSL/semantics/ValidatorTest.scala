@@ -3,7 +3,7 @@ package temple.DSL.semantics
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.semantics.Validator._
 import temple.DSL.semantics.ValidatorTest._
-import temple.ast.AbstractAttribute.Attribute
+import temple.ast.AbstractAttribute.{Attribute, IDAttribute}
 import temple.ast.AbstractServiceBlock._
 import temple.ast.Annotation.{Nullable, Unique}
 import temple.ast.AttributeType._
@@ -276,6 +276,51 @@ class ValidatorTest extends FlatSpec with Matchers {
       s"""2 errors were encountered while validating the Templefile
          |FloatType max not above min in b, in User
          |FloatType precision not between 1 and 8 in c, in User""".stripMargin
+    }
+  }
+
+  it should "validate to the correct result" in {
+    validate(
+      Templefile(
+        "Fleet",
+        projectBlock = ProjectBlock(),
+        services = Map(
+          "Driver" -> ServiceBlock(
+            attributes = Map("a" -> Attribute(IntType())),
+          ),
+          "Car" -> ServiceBlock(attributes = Map()),
+          "Van" -> ServiceBlock(
+            attributes = Map(),
+            metadata = Seq(Omit(Set(Endpoint.Update, Endpoint.Delete))),
+          ),
+          "Bus" -> ServiceBlock(
+            attributes = Map(),
+            metadata = Seq(Omit(Set(Endpoint.Delete))),
+          ),
+        ),
+      ),
+    ) shouldBe {
+      Templefile(
+        "Fleet",
+        projectBlock = ProjectBlock(),
+        services = Map(
+          "Driver" -> ServiceBlock(
+            attributes = Map("id" -> IDAttribute, "a" -> Attribute(IntType())),
+          ),
+          "Car" -> ServiceBlock(
+            attributes = Map("id" -> IDAttribute),
+            metadata = Seq(Omit(Set(Endpoint.Update))),
+          ),
+          "Van" -> ServiceBlock(
+            attributes = Map("id" -> IDAttribute),
+            metadata = Seq(Omit(Set(Endpoint.Update, Endpoint.Delete))),
+          ),
+          "Bus" -> ServiceBlock(
+            attributes = Map("id" -> IDAttribute),
+            metadata = Seq(Omit(Set(Endpoint.Update, Endpoint.Delete))),
+          ),
+        ),
+      )
     }
   }
 }

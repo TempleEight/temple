@@ -334,38 +334,6 @@ paths:
           $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
-    put:
-      summary: Update a single booking
-      tags:
-      - Booking
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties: {}
-      responses:
-        '200':
-          description: Booking successfully updated
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                  createdBy:
-                    type: string
-                    format: uuid
-        '400':
-          $ref: '#/components/responses/Error400'
-        '401':
-          $ref: '#/components/responses/Error401'
-        '404':
-          $ref: '#/components/responses/Error404'
-        '500':
-          $ref: '#/components/responses/Error500'
     delete:
       summary: Delete a single booking
       tags:
@@ -433,38 +401,6 @@ paths:
       responses:
         '200':
           description: SimpleTempleTestGroup details
-          content:
-            application/json:
-              schema:
-                type: object
-                properties:
-                  id:
-                    type: string
-                    format: uuid
-                  createdBy:
-                    type: string
-                    format: uuid
-        '400':
-          $ref: '#/components/responses/Error400'
-        '401':
-          $ref: '#/components/responses/Error401'
-        '404':
-          $ref: '#/components/responses/Error404'
-        '500':
-          $ref: '#/components/responses/Error500'
-    put:
-      summary: Update a single simpletempletestgroup
-      tags:
-      - SimpleTempleTestGroup
-      requestBody:
-        content:
-          application/json:
-            schema:
-              type: object
-              properties: {}
-      responses:
-        '200':
-          description: SimpleTempleTestGroup successfully updated
           content:
             application/json:
               schema:
