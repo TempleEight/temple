@@ -23,7 +23,7 @@ echo
 kubectl create configmap user-db-config --from-file "$BASEDIR/user-db/init.sql" -o=yaml
 
 # Create private registry
-kubectl create -f kube/deploy
+kubectl create -f "$BASEDIR/kube/deploy"
 sleep 5
 
 # Forward ports from minikube to localhost
@@ -37,10 +37,13 @@ do
 done
 
 kubectl port-forward --namespace kube-system $REGISTRY_NAME 5000:5000 2>&1 1>/dev/null &
+PORT_FORWARD_PID=$!
 sleep 5
 
 # Push images to private repo
-sh push-image.sh
+sh "$BASEDIR/push-image.sh"
+
+kill $PORT_FORWARD_PID
 
 for dir in "$BASEDIR/kube/"*
 do

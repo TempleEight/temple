@@ -3,10 +3,25 @@ package temple.utils
 import java.nio.charset.Charset
 import java.nio.file.{Files, Paths}
 
+import temple.builder.project.Project
+
 import scala.io.{Source, StdIn}
 
 /** Helper functions useful for manipulating files */
 object FileUtils {
+
+  def outputProject(directory: String, project: Project): Unit = {
+    FileUtils.createDirectory(directory)
+    project.files.foreach {
+      case (file, contents) =>
+        val subfolder = s"$directory/${file.folder}"
+        FileUtils.createDirectory(subfolder)
+        FileUtils.writeToFile(
+          s"$subfolder/${file.filename}",
+          contents,
+        )
+    }
+  }
 
   def createDirectory(directory: String): Unit =
     Files.createDirectories(Paths.get(directory))

@@ -4,7 +4,6 @@ import temple.DSL.semantics.NameClashes._
 import temple.ast.AbstractAttribute.{CreatedByAttribute, IDAttribute}
 import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
-import temple.ast.Metadata.ServiceAuth
 import temple.ast.{Metadata, _}
 import temple.builder.project.ProjectConfig
 import temple.utils.MonadUtils.FromEither
@@ -40,7 +39,7 @@ private class Validator private (templefile: Templefile) {
     // Keep a set of names that have been used already
     val takenNames: mutable.Set[String] = block.attributes.keys.to(mutable.Set)
 
-    val usesCreatedBy: Boolean = templefile.usesAuth && block.lookupLocalMetadata[ServiceAuth].isEmpty
+    val usesCreatedBy: Boolean = templefile.usesAuth && block.lookupLocalMetadata[Metadata.ServiceAuth].isEmpty
 
     val implicitAttributes: ListMap[String, AbstractAttribute] = ListMap("id" -> IDAttribute) ++ when(usesCreatedBy) {
         "createdBy" -> CreatedByAttribute
@@ -99,9 +98,9 @@ private class Validator private (templefile: Templefile) {
       case (name, struct) => validateStruct(name, struct, context :+ name)
     }
     val newAttributes = validateAttributes(service, context)
-    validateMetadata(service.metadata, context)
+    val newMetadata   = validateStructMetadata(service.metadata, newAttributes, context)
 
-    ServiceBlock(newAttributes, service.metadata, newStructs)
+    ServiceBlock(newAttributes, newMetadata, newStructs)
   }
 
   private def validateStruct(
@@ -112,9 +111,29 @@ private class Validator private (templefile: Templefile) {
     renameBlock(structName, struct)
 
     val newAttributes = validateAttributes(struct, context)
-    validateMetadata(struct.metadata, context)
+    val newMetadata   = validateStructMetadata(struct.metadata, newAttributes, context)
 
-    StructBlock(newAttributes, struct.metadata)
+    StructBlock(newAttributes, newMetadata)
+  }
+
+  private def validateStructMetadata[M >: Metadata.StructMetadata <: Metadata](
+    metadata: Seq[M],
+    attributes: Map[String, AbstractAttribute],
+    context: SemanticContext,
+  ): Seq[M] = {
+    validateMetadata(metadata, context)
+
+    val removeUpdateEndpoint = attributes.valuesIterator.forall(attributes =>
+      attributes.accessAnnotation.contains(Annotation.Server)
+      || attributes.accessAnnotation.contains(Annotation.ServerSet),
+    )
+    if (removeUpdateEndpoint) {
+      val (endpoints, otherMetadata) = metadata partitionMap {
+          case Metadata.Omit(endpoints) => Left(endpoints)
+          case m                        => Right(m)
+        }
+      otherMetadata :+ Metadata.Omit(endpoints.flatten.toSet + Metadata.Endpoint.Update)
+    } else metadata
   }
 
   private def validateMetadata(metadata: Seq[Metadata], context: SemanticContext): Unit = {

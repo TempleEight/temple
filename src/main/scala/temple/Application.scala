@@ -23,16 +23,8 @@ object Application {
     val detail             = LanguageSpecificDetailBuilder.build(analyzedTemplefile, questionAsker)
     val project            = ProjectBuilder.build(analyzedTemplefile, detail)
 
-    FileUtils.createDirectory(outputDirectory)
-    project.files.foreach {
-      case (file, contents) =>
-        val subfolder = s"$outputDirectory/${file.folder}"
-        FileUtils.createDirectory(subfolder)
-        FileUtils.writeToFile(
-          s"$subfolder/${file.filename}",
-          contents,
-        )
-    }
+    FileUtils.outputProject(outputDirectory, project)
+
     println(s"Generated project in $outputDirectory")
   }
 
