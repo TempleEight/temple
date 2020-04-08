@@ -1,4 +1,4 @@
-package temple.generate.kube
+package temple.generate.orchestration.kube
 
 import org.scalatest.{BeforeAndAfter, Matchers}
 import temple.containers.KubeSpec

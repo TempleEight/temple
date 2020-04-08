@@ -1,7 +1,7 @@
-package temple.generate.kube
+package temple.generate.orchestration.kube
 
 import temple.generate.FileSystem.{File, FileContent}
-import temple.generate.kube.ast.OrchestrationType.OrchestrationRoot
+import temple.generate.orchestration.ast.OrchestrationType.OrchestrationRoot
 import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.FileUtils
 
