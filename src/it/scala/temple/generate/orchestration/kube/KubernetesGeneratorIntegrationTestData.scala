@@ -1,7 +1,7 @@
-package temple.generate.kube
+package temple.generate.orchestration.kube
 
-import temple.generate.kube.ast.OrchestrationType.{DbStorage, OrchestrationRoot, Service}
-import temple.generate.kube.ast.gen.LifecycleCommand
+import temple.generate.orchestration.ast.OrchestrationType.{DbStorage, OrchestrationRoot, Service}
+import temple.generate.orchestration.kube.ast.LifecycleCommand
 
 object KubernetesGeneratorIntegrationTestData {
 

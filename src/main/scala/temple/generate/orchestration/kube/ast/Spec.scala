@@ -1,11 +1,11 @@
-package temple.generate.kube.ast.gen
+package temple.generate.orchestration.kube.ast
 
 import io.circe.Json
 import temple.generate.JsonEncodable
-import temple.generate.kube.ast.gen.KubeType.{Labels, Metadata}
-import temple.generate.kube.ast.gen.volume.AccessMode.AccessMode
-import temple.generate.kube.ast.gen.volume.ReclaimPolicy.ReclaimPolicy
-import temple.generate.kube.ast.gen.volume.StorageClass.StorageClass
+import temple.generate.orchestration.kube.ast.KubeType.{Labels, Metadata}
+import temple.generate.orchestration.kube.ast.volume.AccessMode.AccessMode
+import temple.generate.orchestration.kube.ast.volume.ReclaimPolicy.ReclaimPolicy
+import temple.generate.orchestration.kube.ast.volume.StorageClass.StorageClass
 
 import scala.Option.when
 

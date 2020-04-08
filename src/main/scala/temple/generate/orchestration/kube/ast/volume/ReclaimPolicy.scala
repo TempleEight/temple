@@ -1,4 +1,4 @@
-package temple.generate.kube.ast.gen.volume
+package temple.generate.orchestration.kube.ast.volume
 
 object ReclaimPolicy extends Enumeration {
   type ReclaimPolicy = Value

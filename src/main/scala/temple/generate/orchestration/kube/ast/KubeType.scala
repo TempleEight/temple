@@ -1,8 +1,8 @@
-package temple.generate.kube.ast.gen
+package temple.generate.orchestration.kube.ast
 
 import io.circe.Json
 import temple.generate.JsonEncodable
-import temple.generate.kube.GenType
+import temple.generate.orchestration.kube.GenType
 
 import scala.Option.when
 

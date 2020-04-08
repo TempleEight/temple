@@ -1,4 +1,4 @@
-package temple.generate.kube.ast.gen
+package temple.generate.orchestration.kube.ast
 
 object RestartPolicy extends Enumeration {
   type RestartPolicy = Value
