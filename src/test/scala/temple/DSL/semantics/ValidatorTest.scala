@@ -19,7 +19,7 @@ class ValidatorTest extends FlatSpec with Matchers {
     validationErrors(
       Templefile(
         "MyProject",
-        projectBlock = ProjectBlock(Seq(Database.Postgres, Provider.AWS)),
+        projectBlock = ProjectBlock(Seq(Database.Postgres, Provider.Kubernetes)),
         services = Map(
           "User" -> ServiceBlock(
             attributes = Map(
@@ -232,7 +232,7 @@ class ValidatorTest extends FlatSpec with Matchers {
       validate(
         Templefile(
           "MyProject",
-          projectBlock = ProjectBlock(Seq(Database.Postgres, Provider.AWS)),
+          projectBlock = ProjectBlock(Seq(Database.Postgres, Provider.Kubernetes)),
           services = Map(
             "User" -> ServiceBlock(
               attributes = Map("a" -> Attribute(IntType())),
