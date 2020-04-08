@@ -1,6 +1,7 @@
 package temple.test.internal
 
 import java.sql.{Date, Time, Timestamp}
+import java.text.SimpleDateFormat
 import java.util.UUID
 
 import io.circe.parser.parse
@@ -29,15 +30,17 @@ object ServiceTestUtils {
   }
 
   private def executeRequest(method: String, test: EndpointTest, url: String, token: String): JsonObject = {
-    val response = Http(url).method(method).header("Authorization", s"Bearer $token").asString
-    test.assertEqual(200, response.code)
-    decodeJSON(test, response.body)
+    val response     = Http(url).method(method).header("Authorization", s"Bearer $token").asString
+    val jsonResponse = decodeJSON(test, response.body)
+    test.assertEqual(200, response.code, s"Response from $url was: $jsonResponse")
+    jsonResponse
   }
 
   private def executeRequest(method: String, test: EndpointTest, url: String, body: Json, token: String) = {
-    val response = Http(url).postData(body.toString).method(method).header("Authorization", s"Bearer $token").asString
-    test.assertEqual(200, response.code)
-    decodeJSON(test, response.body)
+    val response     = Http(url).postData(body.toString).method(method).header("Authorization", s"Bearer $token").asString
+    val jsonResponse = decodeJSON(test, response.body)
+    test.assertEqual(200, response.code, s"Response from $url was: $jsonResponse,\nwith request body: $body")
+    jsonResponse
   }
 
   /**
@@ -129,11 +132,13 @@ object ServiceTestUtils {
             case AttributeType.BoolType =>
               Random.nextBoolean().asJson
             case AttributeType.DateType =>
-              new Date(Random.nextLong()).toString.asJson
+              new SimpleDateFormat("yyyy-MM-dd").format(new Date(Random.between(0, 100000000000000L))).asJson
             case AttributeType.DateTimeType =>
-              new Timestamp(Random.nextLong()).toString.asJson
+              new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ssXXX")
+                .format(new Date(Random.between(0, 100000000000000L)))
+                .asJson
             case AttributeType.TimeType =>
-              new Time(Random.nextLong()).toString.asJson
+              new SimpleDateFormat("HH:mm:ss").format(new Date(Random.between(0, 100000000000000L))).asJson
             case AttributeType.BlobType(_) =>
               // TODO
               "todo".asJson
@@ -176,7 +181,7 @@ object ServiceTestUtils {
     val createJSON = ServiceTestUtils
       .postRequest(
         test,
-        s"http://$baseURL/api/${serviceName.toLowerCase}",
+        s"http://$baseURL/api/${StringUtils.kebabCase(serviceName)}",
         requestBody,
         newAccessToken,
       )
