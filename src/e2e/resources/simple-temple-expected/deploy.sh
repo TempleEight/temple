@@ -39,7 +39,7 @@ do
 done
 
 # Create private registry
-kubectl create -f $BASEDIR/kube/deploy
+kubectl create -f "$BASEDIR/kube/deploy"
 sleep 5
 
 # Forward ports from minikube to localhost
@@ -57,7 +57,7 @@ PORT_FORWARD_PID=$!
 sleep 5
 
 # Push images to private repo
-sh $BASEDIR/push-image.sh
+sh "$BASEDIR/push-image.sh"
 
 kill $PORT_FORWARD_PID
 

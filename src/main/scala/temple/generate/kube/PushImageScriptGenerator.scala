@@ -19,7 +19,7 @@ object PushImageScriptGenerator {
        |BASEDIR=$$(dirname "$$BASH_SOURCE")
        |
        |for service in $directories; do
-       |  docker build -t "$$REGISTRY_URL/${StringUtils.kebabCase(projectName)}-$$service" $$BASEDIR/$$service
+       |  docker build -t "$$REGISTRY_URL/${StringUtils.kebabCase(projectName)}-$$service" "$$BASEDIR/$$service"
        |  docker push "$$REGISTRY_URL/${StringUtils.kebabCase(projectName)}-$$service"
        |done
        |""".stripMargin

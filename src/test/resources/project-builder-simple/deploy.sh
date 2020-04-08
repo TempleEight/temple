@@ -23,7 +23,7 @@ echo
 kubectl create configmap temple-user-db-config --from-file "$BASEDIR/temple-user-db/init.sql" -o=yaml
 
 # Create private registry
-kubectl create -f $BASEDIR/kube/deploy
+kubectl create -f "$BASEDIR/kube/deploy"
 sleep 5
 
 # Forward ports from minikube to localhost
@@ -41,7 +41,7 @@ PORT_FORWARD_PID=$!
 sleep 5
 
 # Push images to private repo
-sh $BASEDIR/push-image.sh
+sh "$BASEDIR/push-image.sh"
 
 kill $PORT_FORWARD_PID
 
