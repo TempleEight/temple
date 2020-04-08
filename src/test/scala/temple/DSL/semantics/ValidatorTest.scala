@@ -3,6 +3,7 @@ package temple.DSL.semantics
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.semantics.Validator._
 import temple.DSL.semantics.ValidatorTest._
+import temple.ast.AbstractAttribute.Attribute
 import temple.ast.AbstractServiceBlock._
 import temple.ast.Annotation.{Nullable, Unique}
 import temple.ast.AttributeType._

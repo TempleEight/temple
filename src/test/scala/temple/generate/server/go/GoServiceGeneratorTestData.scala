@@ -1,8 +1,9 @@
 package temple.generate.server.go
 
+import temple.ast.AbstractAttribute.Attribute
 import temple.ast.Metadata.Database.Postgres
 import temple.ast.Metadata.{Readable, Writable}
-import temple.ast.{Annotation, Attribute, AttributeType}
+import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
 import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceRoot}

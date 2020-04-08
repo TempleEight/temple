@@ -1,8 +1,9 @@
 package temple.builder.project
 
+import temple.ast.AbstractAttribute.{Attribute, IDAttribute}
 import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
-import temple.ast.Metadata.{Database, Metrics, ServiceAuth}
+import temple.ast.Metadata.{Database, ServiceAuth}
 import temple.ast._
 
 import scala.collection.immutable.ListMap

@@ -1,8 +1,9 @@
 package temple.generate.docker
 
+import temple.ast.AbstractAttribute.Attribute
 import temple.ast.AbstractServiceBlock.ServiceBlock
 import temple.ast.AttributeType._
-import temple.ast.{Annotation, Attribute, StructBlock}
+import temple.ast.{Annotation, StructBlock}
 
 import scala.collection.immutable.ListMap
 

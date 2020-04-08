@@ -3,6 +3,7 @@ package temple.DSL.semantics
 import temple.DSL.semantics.MetadataParser.assertNoParameters
 import temple.DSL.syntax
 import temple.DSL.syntax.{Arg, Args, DSLRootItem, Entry}
+import temple.ast.AbstractAttribute.Attribute
 import temple.ast.AbstractServiceBlock._
 import temple.ast.ArgType._
 import temple.ast.Metadata._
@@ -130,7 +131,7 @@ object Analyzer {
   private def parseAttribute(
     dataType: syntax.AttributeType,
     annotations: Seq[syntax.Annotation],
-  )(implicit context: SemanticContext): Attribute = {
+  )(implicit context: SemanticContext): AbstractAttribute = {
     var accessAnnotation: Option[Annotation.AccessAnnotation] = None
 
     def setAccessAnnotation(annotation: Annotation.AccessAnnotation): Unit =
@@ -196,7 +197,7 @@ object Analyzer {
     */
   private def parseServiceBlock(entries: Seq[Entry])(implicit context: SemanticContext): ServiceBlock = {
     // LinkedHashMap is used to preserve order in the map
-    val attributes = mutable.LinkedHashMap[String, Attribute]()
+    val attributes = mutable.LinkedHashMap[String, AbstractAttribute]()
     val metadatas  = mutable.ListBuffer[ServiceMetadata]()
     val structs    = mutable.LinkedHashMap[String, StructBlock]()
     entries.foreach {
@@ -246,7 +247,7 @@ object Analyzer {
     TargetBlock(parseMetadataBlock(entries, parseTargetMetadata))
 
   private def parseStructBlock(entries: Seq[Entry])(implicit context: SemanticContext): StructBlock = {
-    val attributes = mutable.LinkedHashMap[String, Attribute]()
+    val attributes = mutable.LinkedHashMap[String, AbstractAttribute]()
     val metadata = parseBlockWithMetadata(entries, parseStructMetadata) {
       case Entry.Attribute(key, dataType, annotations) =>
         attributes.safeInsert(key -> parseAttribute(dataType, annotations)(context :+ key))

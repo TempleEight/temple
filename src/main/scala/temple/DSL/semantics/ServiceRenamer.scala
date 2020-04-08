@@ -1,5 +1,6 @@
 package temple.DSL.semantics
 
+import temple.ast.AbstractAttribute.Attribute
 import temple.ast.AbstractServiceBlock._
 import temple.ast._
 
@@ -62,13 +63,17 @@ case class ServiceRenamer(renamingMap: Map[String, String]) {
     case attributeType: AttributeType.PrimitiveAttributeType => attributeType
   }
 
-  private def renameAttribute(attribute: Attribute): Attribute = Attribute(
-    renameAttributeType(attribute.attributeType),
-    attribute.accessAnnotation,
-    attribute.valueAnnotations,
-  )
+  private def renameAttribute(attribute: AbstractAttribute): AbstractAttribute = attribute match {
+    case _: Attribute =>
+      Attribute(
+        renameAttributeType(attribute.attributeType),
+        attribute.accessAnnotation,
+        attribute.valueAnnotations,
+      )
+    case default => default
+  }
 
-  private def renameAttributes(attributes: Map[String, Attribute]): Map[String, Attribute] =
+  private def renameAttributes(attributes: Map[String, AbstractAttribute]): Map[String, AbstractAttribute] =
     attributes.view.mapValues(renameAttribute).to(attributes.mapFactory)
 
   private def renameServiceBlock(block: ServiceBlock): ServiceBlock =

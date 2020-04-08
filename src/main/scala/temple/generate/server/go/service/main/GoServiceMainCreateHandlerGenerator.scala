@@ -1,9 +1,9 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.Attribute
+import temple.ast.AbstractAttribute
 import temple.generate.CRUD.Create
 import temple.generate.server.ServiceRoot
-import temple.generate.server.go.GoHTTPStatus.{StatusInternalServerError}
+import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.{generateHandlerDecl, _}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -24,7 +24,7 @@ object GoServiceMainCreateHandlerGenerator {
 
   private def generateDAOCallBlock(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
   ): String = {
     val idCapitalized = root.idAttribute.name.toUpperCase
     // If service has auth block then an AuthID is passed in as ID, otherwise a created uuid is passed in
@@ -57,7 +57,7 @@ object GoServiceMainCreateHandlerGenerator {
   /** Generate the create handler function */
   private[main] def generateCreateHandler(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     responseMap: ListMap[String, String],
   ): String =

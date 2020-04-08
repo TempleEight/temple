@@ -1,8 +1,10 @@
 package temple.DSL.semantics
 
 import temple.DSL.semantics.NameClashes._
+import temple.ast.AbstractAttribute.{CreatedByAttribute, IDAttribute}
 import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
+import temple.ast.Metadata.ServiceAuth
 import temple.ast.{Metadata, _}
 import temple.builder.project.ProjectConfig
 import temple.utils.MonadUtils.FromEither
@@ -32,14 +34,20 @@ private class Validator private (templefile: Templefile) {
   private def validateAttributes(
     block: AttributeBlock[_],
     context: SemanticContext,
-  ): Map[String, Attribute] = {
+  ): Map[String, AbstractAttribute] = {
     block.attributes.foreach { case (name, t) => validateAttribute(t, context :+ name) }
 
     // Keep a set of names that have been used already
     val takenNames: mutable.Set[String] = block.attributes.keys.to(mutable.Set)
 
-    // Add implicit ID Attribute
-    ListMap("id" -> IDAttribute) ++ block.attributes.map {
+    val usesCreatedBy: Boolean = templefile.usesAuth && block.lookupLocalMetadata[ServiceAuth].isEmpty
+
+    val implicitAttributes: ListMap[String, AbstractAttribute] = ListMap("id" -> IDAttribute) ++ when(usesCreatedBy) {
+        "createdBy" -> CreatedByAttribute
+      }
+
+    // Add implicit attributes
+    implicitAttributes ++ block.attributes.map {
       case (attributeName, value) =>
         if (attributeName.headOption.exists(!_.isLower))
           errors += context.errorMessage(
@@ -138,7 +146,7 @@ private class Validator private (templefile: Templefile) {
     }
   }
 
-  private def validateAttribute(attribute: Attribute, context: SemanticContext): Unit = {
+  private def validateAttribute(attribute: AbstractAttribute, context: SemanticContext): Unit = {
     validateAttributeType(attribute.attributeType, context)
     attribute.accessAnnotation match {
       case Some(Annotation.Client)    => // nothing to validate

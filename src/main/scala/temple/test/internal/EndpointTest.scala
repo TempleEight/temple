@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.UUID
 
 import io.circe.{Json, JsonObject}
-import temple.ast.{Annotation, Attribute, AttributeType}
+import temple.ast.{AbstractAttribute, Annotation, AttributeType}
 import temple.utils.StringUtils
 
 import scala.util.Try
@@ -13,7 +13,7 @@ private[internal] class EndpointTest(service: String, endpointName: String) {
   class TestFailedException(msg: String) extends RuntimeException(msg)
 
   // Validate that the response JSON for the provided key matches the Attribute
-  private def validateResponseType(key: String, responseForKey: Json, attribute: Attribute): Unit =
+  private def validateResponseType(key: String, responseForKey: Json, attribute: AbstractAttribute): Unit =
     attribute.attributeType match {
       case AttributeType.ForeignKey(_) | AttributeType.UUIDType =>
         val stringValue = responseForKey.asString.getOrElse(fail(s"$key is not a valid string"))
@@ -65,7 +65,7 @@ private[internal] class EndpointTest(service: String, endpointName: String) {
   def validateResponseBody(
     request: Option[JsonObject],
     response: JsonObject,
-    attributes: Map[String, Attribute],
+    attributes: Map[String, AbstractAttribute],
   ): Unit = {
     // The response should contain exactly the keys in attributes, PLUS an ID attribute, MINUS anything that is @server
     val expectedAttributes = attributes.filter {
