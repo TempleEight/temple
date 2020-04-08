@@ -20,7 +20,7 @@ spec:
     spec:
       hostname: auth
       containers:
-      - image: sample-complex-project-auth
+      - image: localhost:5000/sample-complex-project-auth
         name: auth
         ports:
         - containerPort: 1024
