@@ -38,7 +38,8 @@ object Metadata {
 
   object Provider extends Enum[Provider] {
     val values: IndexedSeq[Provider] = findValues
-    case object AWS extends Provider("aws")
+    case object Kubernetes    extends Provider("kubernetes")
+    case object DockerCompose extends Provider("docker-compose")
   }
 
   sealed abstract class Database private (name: String, aliases: String*)
