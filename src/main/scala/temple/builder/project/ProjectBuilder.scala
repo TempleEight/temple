@@ -72,7 +72,7 @@ object ProjectBuilder {
 
   private def buildOrchestration(templefile: Templefile): Files = {
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(templefile)
-    KubernetesGenerator.generate(orchestrationRoot)
+    KubernetesGenerator.generate(templefile.projectName, orchestrationRoot)
   }
 
   private def buildMetrics(templefile: Templefile): Files = {

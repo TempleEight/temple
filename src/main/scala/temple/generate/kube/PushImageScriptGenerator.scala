@@ -6,14 +6,14 @@ import temple.utils.StringUtils
 
 object PushImageScriptGenerator {
 
-  def generate(orchestrationRoot: OrchestrationRoot): (File, FileContent) =
+  def generate(projectName: String, orchestrationRoot: OrchestrationRoot): (File, FileContent) =
     File("", "push-image.sh") ->
     s"""#!/bin/sh
        |REGISTRY_URL="localhost:5000"
        |
        |for service in ${orchestrationRoot.services.map(_.name).map(StringUtils.doubleQuote).mkString(" ")}; do
-       |  docker build -t "$$REGISTRY_URL/temple-$$service-service" $$service
-       |  docker push "$$REGISTRY_URL/temple-$$service-service"
+       |  docker build -t "$$REGISTRY_URL/${StringUtils.kebabCase(projectName)}-$$service" $$service
+       |  docker push "$$REGISTRY_URL/${StringUtils.kebabCase(projectName)}-$$service"
        |done
        |""".stripMargin
 }
