@@ -3,6 +3,7 @@ package temple.test.internal
 import temple.ast.AbstractServiceBlock.ServiceBlock
 import temple.builder.project.ProjectBuilder
 import temple.generate.CRUD
+import temple.utils.StringUtils
 
 class CRUDServiceTest(name: String, service: ServiceBlock, allServices: Map[String, ServiceBlock], baseURL: String)
     extends ServiceTest(name) {
@@ -12,7 +13,8 @@ class CRUDServiceTest(name: String, service: ServiceBlock, allServices: Map[Stri
       val requestBody =
         ServiceTestUtils.constructRequestBody(test, service.attributes, allServices, baseURL, accessToken)
       val createJSON =
-        ServiceTestUtils.postRequest(test, s"http://$baseURL/api/${name.toLowerCase}", requestBody, accessToken)
+        ServiceTestUtils
+          .postRequest(test, s"http://$baseURL/api/${StringUtils.kebabCase(name)}", requestBody, accessToken)
       test.validateResponseBody(requestBody.asObject, createJSON, service.attributes)
     }
 
@@ -20,7 +22,11 @@ class CRUDServiceTest(name: String, service: ServiceBlock, allServices: Map[Stri
     testEndpoint("read") { test =>
       val createResponse = ServiceTestUtils.create(test, name, allServices, baseURL, accessToken)
       val getJSON = ServiceTestUtils
-        .getRequest(test, s"http://$baseURL/api/${name.toLowerCase}/${createResponse.id}", createResponse.accessToken)
+        .getRequest(
+          test,
+          s"http://$baseURL/api/${StringUtils.kebabCase(name)}/${createResponse.id}",
+          createResponse.accessToken,
+        )
       test.validateResponseBody(None, getJSON, service.attributes)
     }
 
@@ -33,7 +39,7 @@ class CRUDServiceTest(name: String, service: ServiceBlock, allServices: Map[Stri
       val updateJSON =
         ServiceTestUtils.putRequest(
           test,
-          s"http://$baseURL/api/${name.toLowerCase}/${createResponse.id}",
+          s"http://$baseURL/api/${StringUtils.kebabCase(name)}/${createResponse.id}",
           requestBody,
           createResponse.accessToken,
         )
@@ -46,7 +52,7 @@ class CRUDServiceTest(name: String, service: ServiceBlock, allServices: Map[Stri
       val deleteJSON =
         ServiceTestUtils.deleteRequest(
           test,
-          s"http://$baseURL/api/${name.toLowerCase}/${createResponse.id}",
+          s"http://$baseURL/api/${StringUtils.kebabCase(name)}/${createResponse.id}",
           createResponse.accessToken,
         )
       test.assert(deleteJSON.isEmpty, "delete response was not empty")

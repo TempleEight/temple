@@ -91,9 +91,9 @@ private[internal] class EndpointTest(service: String, endpointName: String) {
     }
   }
 
-  def assertEqual(expected: Any, found: Any): Unit =
+  def assertEqual(expected: Any, found: Any, message: String = ""): Unit =
     if (!expected.equals(found))
-      fail(s"Expected $expected but found $found")
+      fail(s"Expected $expected but found $found.\n$message")
 
   def assert(value: Boolean, failMsg: String): Unit =
     if (!value) fail(failMsg)
