@@ -1,6 +1,6 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.{AbstractAttribute, AttributeType}
+import temple.ast.AbstractAttribute
 import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Update
 import temple.generate.server.ServiceRoot

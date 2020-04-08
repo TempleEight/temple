@@ -1,7 +1,6 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.AttributeType.{DateTimeType, DateType, TimeType}
-import temple.ast.{AbstractAttribute, AttributeType}
+import temple.ast.AbstractAttribute
 import temple.generate.CRUD.Create
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
