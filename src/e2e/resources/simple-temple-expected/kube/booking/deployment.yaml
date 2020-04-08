@@ -20,7 +20,7 @@ spec:
     spec:
       hostname: booking
       containers:
-      - image: simple-temple-test-booking
+      - image: localhost:5000/simple-temple-test-booking
         name: booking
         ports:
         - containerPort: 1028
