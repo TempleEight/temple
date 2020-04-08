@@ -25,7 +25,7 @@ class KubernetesGeneratorIntegrationTest extends KubeSpec with Matchers with Bef
 
   it should "generate valid simple services" in {
     val results = validateAll(
-      KubernetesGenerator.generate(KubernetesGeneratorIntegrationTestData.basicOrchestrationRoot),
+      KubernetesGenerator.generate("example", KubernetesGeneratorIntegrationTestData.basicOrchestrationRoot),
       File("kube/user", ""),
     ).split('\n')
 

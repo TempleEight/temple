@@ -5,9 +5,9 @@ import "github.com/squat/and/dab/booking/dao"
 // Hook allows additional code to be executed before and after every datastore interaction
 // Hooks are executed in the order they are defined, such that if any hook errors, future hooks are not executed and the request is terminated
 type Hook struct {
-	beforeCreateHooks []*func(env *env, req createBookingRequest, input *dao.CreateBookingInput) *HookError
+	beforeCreateHooks []*func(env *env, input *dao.CreateBookingInput) *HookError
 	beforeReadHooks   []*func(env *env, input *dao.ReadBookingInput) *HookError
-	beforeUpdateHooks []*func(env *env, req updateBookingRequest, input *dao.UpdateBookingInput) *HookError
+	beforeUpdateHooks []*func(env *env, input *dao.UpdateBookingInput) *HookError
 	beforeDeleteHooks []*func(env *env, input *dao.DeleteBookingInput) *HookError
 	afterCreateHooks  []*func(env *env, booking *dao.Booking) *HookError
 	afterReadHooks    []*func(env *env, booking *dao.Booking) *HookError
@@ -26,7 +26,7 @@ func (e *HookError) Error() string {
 }
 
 // BeforeCreate adds a new hook to be executed before creating an object in the datastore
-func (h *Hook) BeforeCreate(hook func(env *env, req createBookingRequest, input *dao.CreateBookingInput) *HookError) {
+func (h *Hook) BeforeCreate(hook func(env *env, input *dao.CreateBookingInput) *HookError) {
 	h.beforeCreateHooks = append(h.beforeCreateHooks, &hook)
 }
 
@@ -36,7 +36,7 @@ func (h *Hook) BeforeRead(hook func(env *env, input *dao.ReadBookingInput) *Hook
 }
 
 // BeforeUpdate adds a new hook to be executed before updating an object in the datastore
-func (h *Hook) BeforeUpdate(hook func(env *env, req updateBookingRequest, input *dao.UpdateBookingInput) *HookError) {
+func (h *Hook) BeforeUpdate(hook func(env *env, input *dao.UpdateBookingInput) *HookError) {
 	h.beforeUpdateHooks = append(h.beforeUpdateHooks, &hook)
 }
 

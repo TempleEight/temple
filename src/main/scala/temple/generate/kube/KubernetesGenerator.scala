@@ -208,11 +208,12 @@ object KubernetesGenerator {
     )
 
   /** Given an [[OrchestrationRoot]], check the services inside it and generate deployment scripts */
-  def generate(orchestrationRoot: OrchestrationRoot): Files = {
+  def generate(projectName: String, orchestrationRoot: OrchestrationRoot): Files = {
     val kubeFiles: Files    = orchestrationRoot.services.flatMap(buildKubeFiles).toMap
     val kongConfig: Files   = Map(KongConfigGenerator.generate(orchestrationRoot))
     val deployScript: Files = Map(DeployScriptGenerator.generate(orchestrationRoot))
-    kubeFiles ++ kongConfig ++ kongFiles ++ deployFiles ++ deployScript
+    val pushScript: Files   = Map(PushImageScriptGenerator.generate(projectName, orchestrationRoot))
+    kubeFiles ++ kongConfig ++ kongFiles ++ deployFiles ++ deployScript ++ pushScript
   }
 
 }

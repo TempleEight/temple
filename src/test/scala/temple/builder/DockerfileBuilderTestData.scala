@@ -9,7 +9,7 @@ object DockerfileBuilderTestData {
     From("golang", Some("1.13.7-alpine")),
     Seq(
       WorkDir("/sampleservice"),
-      Copy("go.mod go.sum", "./"),
+      Copy("go.mod", "./"),
       Run("go", Seq("mod", "download")),
       Copy(".", "."),
       Copy("config.json", "/etc/sampleservice-service/"),
@@ -23,7 +23,7 @@ object DockerfileBuilderTestData {
     From("golang", Some("1.13.7-alpine")),
     Seq(
       WorkDir("/complexservice"),
-      Copy("go.mod go.sum", "./"),
+      Copy("go.mod", "./"),
       Run("go", Seq("mod", "download")),
       Copy(".", "."),
       Copy("config.json", "/etc/complexservice-service/"),
