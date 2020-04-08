@@ -1,9 +1,7 @@
 package temple.generate.server.go.service.main
 
-
-import temple.ast.{AbstractAttribute, Annotation, AttributeType}
 import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
-
+import temple.ast.{AbstractAttribute, Annotation, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus._
