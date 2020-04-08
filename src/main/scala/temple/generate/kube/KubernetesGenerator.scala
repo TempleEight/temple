@@ -190,6 +190,14 @@ object KubernetesGenerator {
     File("kube/kong", "kong-service.yaml")       -> FileUtils.readResources("kube/kong/kong-service.yaml"),
   )
 
+  private val deployFiles: Files = Map(
+    File("kube/deploy", "deploy-daemon-set.yaml") -> FileUtils.readResources("kube/deploy/deploy-daemon-set.yaml"),
+    File("kube/deploy", "deploy-replication-controller.yaml") -> FileUtils.readResources(
+      "kube/deploy/deploy-replication-controller.yaml",
+    ),
+    File("kube/deploy", "deploy-service.yaml") -> FileUtils.readResources("kube/deploy/deploy-service.yaml"),
+  )
+
   private def buildKubeFiles(service: Service) =
     Seq(
       File(s"kube/${service.name}", "deployment.yaml")    -> generateDeployment(service),
@@ -205,7 +213,7 @@ object KubernetesGenerator {
     val kongConfig: Files   = Map(KongConfigGenerator.generate(orchestrationRoot))
     val deployScript: Files = Map(DeployScriptGenerator.generate(orchestrationRoot))
     val pushScript: Files   = Map(PushImageScriptGenerator.generate(projectName, orchestrationRoot))
-    kubeFiles ++ kongConfig ++ kongFiles ++ deployScript ++ pushScript
+    kubeFiles ++ kongConfig ++ kongFiles ++ deployFiles ++ deployScript ++ pushScript
   }
 
 }
