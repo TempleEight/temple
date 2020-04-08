@@ -34,12 +34,14 @@ object Metadata {
     case object Go extends ServiceLanguage("Go", "golang")
   }
 
-  sealed abstract class Provider private (name: String) extends EnumEntry(name) with ProjectMetadata
+  sealed abstract class Provider private (name: String, aliases: String*)
+      extends EnumEntry(name, aliases)
+      with ProjectMetadata
 
   object Provider extends Enum[Provider] {
     val values: IndexedSeq[Provider] = findValues
-    case object Kubernetes    extends Provider("kubernetes")
-    case object DockerCompose extends Provider("docker-compose")
+    case object Kubernetes    extends Provider("kubernetes", "kube", "k8s", "kubernooties")
+    case object DockerCompose extends Provider("dockerCompose", "dc")
   }
 
   sealed abstract class Database private (name: String, aliases: String*)
