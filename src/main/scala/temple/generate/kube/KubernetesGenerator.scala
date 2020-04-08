@@ -3,7 +3,7 @@ package temple.generate.kube
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.yaml.Printer
-import temple.generate.FileSystem._
+import temple.generate.FileSystem.{File, _}
 import temple.generate.kube.ast.OrchestrationType._
 import temple.generate.kube.ast.gen.KubeType._
 import temple.generate.kube.ast.gen.Spec._
@@ -190,6 +190,14 @@ object KubernetesGenerator {
     File("kube/kong", "kong-service.yaml")       -> FileUtils.readResources("kube/kong/kong-service.yaml"),
   )
 
+  private val deployFiles: Files = Map(
+    File("kube/deploy", "deploy-daemon-set.yaml") -> FileUtils.readResources("kube/deploy/deploy-daemon-set.yaml"),
+    File("kube/deploy", "deploy-replication-controller.yaml") -> FileUtils.readResources(
+      "kube/deploy/deploy-replication-controller.yaml",
+    ),
+    File("kube/deploy", "deploy-service.yaml") -> FileUtils.readResources("kube/deploy/deploy-service.yaml"),
+  )
+
   private def buildKubeFiles(service: Service) =
     Seq(
       File(s"kube/${service.name}", "deployment.yaml")    -> generateDeployment(service),
@@ -204,7 +212,7 @@ object KubernetesGenerator {
     val kubeFiles: Files    = orchestrationRoot.services.flatMap(buildKubeFiles).toMap
     val kongConfig: Files   = Map(KongConfigGenerator.generate(orchestrationRoot))
     val deployScript: Files = Map(DeployScriptGenerator.generate(orchestrationRoot))
-    kubeFiles ++ kongConfig ++ kongFiles ++ deployScript
+    kubeFiles ++ kongConfig ++ kongFiles ++ deployFiles ++ deployScript
   }
 
 }
