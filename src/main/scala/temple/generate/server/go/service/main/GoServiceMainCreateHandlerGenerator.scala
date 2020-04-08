@@ -69,7 +69,7 @@ object GoServiceMainCreateHandlerGenerator {
           // Only need to handle request JSONs when there are client attributes
           when(clientAttributes.nonEmpty) {
             mkCode.doubleLines(
-              generateDecodeRequestBlock(s"create${root.name}"),
+              generateDecodeRequestBlock(root, Create, s"create${root.name}"),
               generateRequestNilCheck(root, clientAttributes),
               generateValidateStructBlock(),
               when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
