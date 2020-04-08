@@ -16,7 +16,7 @@ object DockerfileBuilder {
       case Metadata.ServiceLanguage.Go =>
         Seq(
           WorkDir(s"/$serviceName"),
-          Copy("go.mod go.sum", "./"),
+          Copy("go.mod", "./"),
           Run("go", Seq("mod", "download")),
           Copy(".", "."),
           Copy("config.json", s"/etc/$serviceName-service/"),
