@@ -14,9 +14,6 @@ paths:
             schema:
               type: object
               properties:
-                id:
-                  type: string
-                  format: uuid
                 simpleTempleTestUser:
                   type: string
                 email:
@@ -154,9 +151,6 @@ paths:
             schema:
               type: object
               properties:
-                id:
-                  type: string
-                  format: uuid
                 simpleTempleTestUser:
                   type: string
                 email:
@@ -284,10 +278,7 @@ paths:
           application/json:
             schema:
               type: object
-              properties:
-                id:
-                  type: string
-                  format: uuid
+              properties: {}
       responses:
         '200':
           description: Booking successfully created
@@ -346,10 +337,7 @@ paths:
           application/json:
             schema:
               type: object
-              properties:
-                id:
-                  type: string
-                  format: uuid
+              properties: {}
       responses:
         '200':
           description: Booking successfully updated
@@ -399,10 +387,7 @@ paths:
           application/json:
             schema:
               type: object
-              properties:
-                id:
-                  type: string
-                  format: uuid
+              properties: {}
       responses:
         '200':
           description: SimpleTempleTestGroup successfully created
@@ -461,10 +446,7 @@ paths:
           application/json:
             schema:
               type: object
-              properties:
-                id:
-                  type: string
-                  format: uuid
+              properties: {}
       responses:
         '200':
           description: SimpleTempleTestGroup successfully updated

@@ -14,9 +14,6 @@ paths:
             schema:
               type: object
               properties:
-                id:
-                  type: string
-                  format: uuid
                 intField:
                   type: number
                   format: int32
@@ -139,9 +136,6 @@ paths:
             schema:
               type: object
               properties:
-                id:
-                  type: string
-                  format: uuid
                 intField:
                   type: number
                   format: int32

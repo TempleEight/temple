@@ -6,4 +6,4 @@ case class Attribute(
   valueAnnotations: Set[Annotation.ValueAnnotation] = Set.empty,
 )
 
-object IDAttribute extends Attribute(AttributeType.UUIDType)
+object IDAttribute extends Attribute(AttributeType.UUIDType, accessAnnotation = Some(Annotation.ServerSet))

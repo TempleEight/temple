@@ -39,7 +39,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
             "currentBankBalance"   -> Attribute(FloatType(min = Some(0.0), precision = 2)),
             "birthDate"            -> Attribute(DateType),
             "breakfastTime"        -> Attribute(TimeType),
-            "id"                   -> Attribute(UUIDType),
+            "id"                   -> Attribute(UUIDType, Some(Annotation.ServerSet)),
           ),
           metadata = Seq(
             ServiceEnumerable,
@@ -55,7 +55,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
                 "field"  -> Attribute(StringType(), valueAnnotations = Set(Nullable)),
                 "friend" -> Attribute(ForeignKey("SimpleTempleTestUser")),
                 "image"  -> Attribute(BlobType(size = Some(10_000_000))),
-                "id"     -> Attribute(UUIDType),
+                "id"     -> Attribute(UUIDType, Some(Annotation.ServerSet)),
               ),
               Seq(ServiceEnumerable, Readable.This),
             ),
@@ -63,12 +63,12 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
         ),
         "Booking" -> ServiceBlock(
           attributes = ListMap(
-            "id" -> Attribute(UUIDType),
+            "id" -> Attribute(UUIDType, Some(Annotation.ServerSet)),
           ),
         ),
         "SimpleTempleTestGroup" -> ServiceBlock(
           attributes = ListMap(
-            "id" -> Attribute(UUIDType),
+            "id" -> Attribute(UUIDType, Some(Annotation.ServerSet)),
           ),
         ),
       ),
