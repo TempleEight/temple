@@ -43,7 +43,7 @@ object GoServiceMainUpdateHandlerGenerator {
           // Only need to handle request JSONs when there are client attributes
           when(clientAttributes.nonEmpty) {
             mkCode.doubleLines(
-              generateDecodeRequestBlock(s"update${root.name}"),
+              generateDecodeRequestBlock(root, Update, s"update${root.name}"),
               generateRequestNilCheck(root, clientAttributes),
               generateValidateStructBlock(),
               when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },

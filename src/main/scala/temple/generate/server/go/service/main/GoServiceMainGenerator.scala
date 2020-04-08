@@ -14,6 +14,7 @@ object GoServiceMainGenerator {
 
   private[service] def generateImports(
     root: ServiceRoot,
+    usesBase64: Boolean,
     usesTime: Boolean,
     usesComms: Boolean,
     clientAttributes: ListMap[String, AbstractAttribute],
@@ -22,6 +23,7 @@ object GoServiceMainGenerator {
     mkCode(
       "import",
       CodeWrap.parens.tabbed(
+        when(usesBase64) { doubleQuote("encoding/base64") },
         doubleQuote("encoding/json"),
         doubleQuote("flag"),
         doubleQuote("fmt"),
