@@ -38,6 +38,26 @@ do
   kubectl create configmap "grafana-$file-config" --from-file "$BASEDIR/grafana/provisioning/dashboards/$filename" -o=yaml
 done
 
+# Create private registry
+kubectl create -f kube/deploy
+sleep 5
+
+# Forward ports from minikube to localhost
+REGISTRY_NAME=$(kubectl get pod -n kube-system | grep kube-registry-v0 | awk '{ print $1 ;}')
+echo $REGISTRY_NAME
+
+# Until all of the pods have status of either "Running" or "Completed"
+until ! kubectl get pod -n kube-system | awk '{ if (NR != 1) printf $3 "\n" }' | grep -s -q -E "Running|Completed" --invert
+do
+  sleep 1
+done
+
+kubectl port-forward --namespace kube-system $REGISTRY_NAME 5000:5000 2>&1 1>/dev/null &
+sleep 5
+
+# Push images to private repo
+sh push-image.sh
+
 for dir in "$BASEDIR/kube/"*
 do
   kubectl create -f $dir
@@ -72,7 +92,7 @@ echo Configuring Kong...
 
 sleep 1
 
-sh "$BASEDIR/kong/configure-kong-k8s.sh"
+sh "$BASEDIR/kong/configure-kong.sh"
 
 echo $PURPLE
 
