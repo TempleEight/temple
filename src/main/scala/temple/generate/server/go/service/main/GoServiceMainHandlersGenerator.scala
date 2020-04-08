@@ -211,7 +211,7 @@ object GoServiceMainHandlersGenerator {
       ),
     )
 
-  /** Generate the block for checking foreign keys against other services */
+  /** Generate the blocks for checking foreign keys against other services */
   private[main] def generateForeignKeyCheckBlocks(
     root: ServiceRoot,
     clientAttributes: ListMap[String, AbstractAttribute],
@@ -225,6 +225,64 @@ object GoServiceMainHandlersGenerator {
           }
       },
     )
+
+  private def generateParseTimeBlock(name: String, attributeType: AttributeType): String =
+    mkCode.lines(
+      genDeclareAndAssign(
+        genMethodCall(
+          "time",
+          "Parse",
+          attributeType match {
+            case DateType     => doubleQuote("2006-01-02")
+            case TimeType     => doubleQuote("15:04:05.999999999")
+            case DateTimeType => "time.RFC3339Nano"
+            case _            => ""
+          },
+          s"*req.${name.capitalize}",
+        ),
+        name,
+        "err",
+      ),
+      genIfErr(
+        generateHTTPErrorReturn(
+          StatusBadRequest,
+          s"Invalid ${attributeType match {
+            case DateType     => "date"
+            case TimeType     => "time"
+            case DateTimeType => "datetime"
+            case _            => ""
+          }} string: %s",
+          genMethodCall("err", "Error"),
+        ),
+      ),
+    )
+
+  /** Generate the blocks for parsing attributes of type date, time or datetime */
+  private[main] def generateParseTimeBlocks(clientAttributes: ListMap[String, AbstractAttribute]): String =
+    mkCode.doubleLines(
+      clientAttributes.collect {
+        case name -> attr
+            if attr.attributeType == DateType || attr.attributeType == TimeType || attr.attributeType == DateTimeType =>
+          generateParseTimeBlock(name, attr.attributeType)
+      },
+    )
+
+  /** Generate a map of the client attributes to pass into the Create or Update DAO input struct */
+  private[main] def generateDAOInputClientMap(
+    clientAttributes: ListMap[String, AbstractAttribute],
+  ): ListMap[String, String] =
+    clientAttributes.map {
+      case (str, attr) =>
+        (
+          str.capitalize,
+          // Date, time or datetime attributes pass a pre-parsed variable of the same name
+          if (attr.attributeType == DateType || attr.attributeType == TimeType || attr.attributeType == DateTimeType) {
+            str
+          } else {
+            s"*req.${str.capitalize}"
+          },
+        )
+    }
 
   /** Generate DAO call block error handling for Read, Update and Delete*/
   private[main] def generateDAOCallErrorBlock(root: ServiceRoot): String =
@@ -253,12 +311,18 @@ object GoServiceMainHandlersGenerator {
     enumeratingByCreator: Boolean,
   ): String = {
     val responseMap = generateResponseMap(root)
+
+    // Whether or not the client attributes contain attributes of type date, time or datetime
+    val clientUsesTime = Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateType)
+      .intersect(clientAttributes.values.map(_.attributeType).toSet)
+      .nonEmpty
+
     mkCode.doubleLines(
       operations.toSeq.sorted.map {
         case List   => generateListHandler(root, responseMap, enumeratingByCreator)
-        case Create => generateCreateHandler(root, clientAttributes, usesComms, responseMap)
+        case Create => generateCreateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime)
         case Read   => generateReadHandler(root, responseMap)
-        case Update => generateUpdateHandler(root, clientAttributes, usesComms, responseMap)
+        case Update => generateUpdateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime)
         case Delete => generateDeleteHandler(root)
       },
     )

@@ -22,28 +22,28 @@ type env struct {
 
 // createSimpleTempleTestUserRequest contains the client-provided information required to create a single simpleTempleTestUser
 type createSimpleTempleTestUserRequest struct {
-	SimpleTempleTestUser *string    `valid:"type(string),required"`
-	Email                *string    `valid:"type(string),required,stringlength(5|40)"`
-	FirstName            *string    `valid:"type(string),required"`
-	LastName             *string    `valid:"type(string),required"`
-	CreatedAt            *time.Time `valid:"type(string),rfc3339,required"`
-	NumberOfDogs         *int32     `valid:"type(int32),required"`
-	CurrentBankBalance   *float32   `valid:"type(float32),required"`
-	BirthDate            *time.Time `valid:"type(string),required"`
-	BreakfastTime        *time.Time `valid:"type(string),required"`
+	SimpleTempleTestUser *string  `valid:"type(string),required"`
+	Email                *string  `valid:"type(string),required,stringlength(5|40)"`
+	FirstName            *string  `valid:"type(string),required"`
+	LastName             *string  `valid:"type(string),required"`
+	CreatedAt            *string  `valid:"type(string),rfc3339,required"`
+	NumberOfDogs         *int32   `valid:"type(int32),required"`
+	CurrentBankBalance   *float32 `valid:"type(float32),required"`
+	BirthDate            *string  `valid:"type(string),required"`
+	BreakfastTime        *string  `valid:"type(string),required"`
 }
 
 // updateSimpleTempleTestUserRequest contains the client-provided information required to update a single simpleTempleTestUser
 type updateSimpleTempleTestUserRequest struct {
-	SimpleTempleTestUser *string    `valid:"type(string),required"`
-	Email                *string    `valid:"type(string),required,stringlength(5|40)"`
-	FirstName            *string    `valid:"type(string),required"`
-	LastName             *string    `valid:"type(string),required"`
-	CreatedAt            *time.Time `valid:"type(string),rfc3339,required"`
-	NumberOfDogs         *int32     `valid:"type(int32),required"`
-	CurrentBankBalance   *float32   `valid:"type(float32),required"`
-	BirthDate            *time.Time `valid:"type(string),required"`
-	BreakfastTime        *time.Time `valid:"type(string),required"`
+	SimpleTempleTestUser *string  `valid:"type(string),required"`
+	Email                *string  `valid:"type(string),required,stringlength(5|40)"`
+	FirstName            *string  `valid:"type(string),required"`
+	LastName             *string  `valid:"type(string),required"`
+	CreatedAt            *string  `valid:"type(string),rfc3339,required"`
+	NumberOfDogs         *int32   `valid:"type(int32),required"`
+	CurrentBankBalance   *float32 `valid:"type(float32),required"`
+	BirthDate            *string  `valid:"type(string),required"`
+	BreakfastTime        *string  `valid:"type(string),required"`
 }
 
 // listSimpleTempleTestUserElement contains a single simpleTempleTestUser list element
@@ -208,17 +208,38 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		return
 	}
 
+	createdAt, err := time.Parse(time.RFC3339Nano, *req.CreatedAt)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid datetime string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	birthDate, err := time.Parse("2006-01-02", *req.BirthDate)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid date string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	breakfastTime, err := time.Parse("15:04:05.999999999", *req.BreakfastTime)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid time string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
 	simpleTempleTestUser, err := env.dao.CreateSimpleTempleTestUser(dao.CreateSimpleTempleTestUserInput{
 		ID:                   auth.ID,
 		SimpleTempleTestUser: *req.SimpleTempleTestUser,
 		Email:                *req.Email,
 		FirstName:            *req.FirstName,
 		LastName:             *req.LastName,
-		CreatedAt:            *req.CreatedAt,
+		CreatedAt:            createdAt,
 		NumberOfDogs:         *req.NumberOfDogs,
 		CurrentBankBalance:   *req.CurrentBankBalance,
-		BirthDate:            *req.BirthDate,
-		BreakfastTime:        *req.BreakfastTime,
+		BirthDate:            birthDate,
+		BreakfastTime:        breakfastTime,
 	})
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
@@ -323,17 +344,38 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		return
 	}
 
+	createdAt, err := time.Parse(time.RFC3339Nano, *req.CreatedAt)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid datetime string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	birthDate, err := time.Parse("2006-01-02", *req.BirthDate)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid date string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	breakfastTime, err := time.Parse("15:04:05.999999999", *req.BreakfastTime)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid time string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
 	simpleTempleTestUser, err := env.dao.UpdateSimpleTempleTestUser(dao.UpdateSimpleTempleTestUserInput{
 		ID:                   simpleTempleTestUserID,
 		SimpleTempleTestUser: *req.SimpleTempleTestUser,
 		Email:                *req.Email,
 		FirstName:            *req.FirstName,
 		LastName:             *req.LastName,
-		CreatedAt:            *req.CreatedAt,
+		CreatedAt:            createdAt,
 		NumberOfDogs:         *req.NumberOfDogs,
 		CurrentBankBalance:   *req.CurrentBankBalance,
-		BirthDate:            *req.BirthDate,
-		BreakfastTime:        *req.BreakfastTime,
+		BirthDate:            birthDate,
+		BreakfastTime:        breakfastTime,
 	})
 	if err != nil {
 		switch err.(type) {
