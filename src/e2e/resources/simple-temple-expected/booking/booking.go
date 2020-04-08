@@ -29,18 +29,12 @@ type readBookingResponse struct {
 	ID uuid.UUID
 }
 
-// updateBookingResponse contains a newly updated booking to be returned to the client
-type updateBookingResponse struct {
-	ID uuid.UUID
-}
-
 // router generates a router for this service
 func (env *env) router() *mux.Router {
 	r := mux.NewRouter()
 	// Mux directs to first matching route, i.e. the order matters
 	r.HandleFunc("/booking", env.createBookingHandler).Methods(http.MethodPost)
 	r.HandleFunc("/booking/{id}", env.readBookingHandler).Methods(http.MethodGet)
-	r.HandleFunc("/booking/{id}", env.updateBookingHandler).Methods(http.MethodPut)
 	r.HandleFunc("/booking/{id}", env.deleteBookingHandler).Methods(http.MethodDelete)
 	r.Use(jsonMiddleware)
 	return r
@@ -178,72 +172,6 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(readBookingResponse{
-		ID: booking.ID,
-	})
-}
-
-func (env *env) updateBookingHandler(w http.ResponseWriter, r *http.Request) {
-	auth, err := util.ExtractAuthIDFromRequest(r.Header)
-	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusUnauthorized)
-		return
-	}
-
-	bookingID, err := util.ExtractIDFromRequest(mux.Vars(r))
-	if err != nil {
-		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
-		return
-	}
-
-	authorized, err := checkAuthorization(env, bookingID, auth)
-	if err != nil {
-		switch err.(type) {
-		case dao.ErrBookingNotFound:
-			errMsg := util.CreateErrorJSON("Unauthorized")
-			http.Error(w, errMsg, http.StatusUnauthorized)
-		default:
-			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
-			http.Error(w, errMsg, http.StatusInternalServerError)
-		}
-		return
-	}
-	if !authorized {
-		errMsg := util.CreateErrorJSON("Unauthorized")
-		http.Error(w, errMsg, http.StatusUnauthorized)
-		return
-	}
-
-	var req updateBookingRequest
-	err = json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
-		return
-	}
-
-	_, err = valid.ValidateStruct(req)
-	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
-		return
-	}
-
-	booking, err := env.dao.UpdateBooking(dao.UpdateBookingInput{
-		ID: bookingID,
-	})
-	if err != nil {
-		switch err.(type) {
-		case dao.ErrBookingNotFound:
-			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
-		default:
-			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
-			http.Error(w, errMsg, http.StatusInternalServerError)
-		}
-		return
-	}
-
-	json.NewEncoder(w).Encode(updateBookingResponse{
 		ID: booking.ID,
 	})
 }

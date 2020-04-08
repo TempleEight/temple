@@ -15,7 +15,6 @@ import (
 type Datastore interface {
 	CreateBooking(input CreateBookingInput) (*Booking, error)
 	ReadBooking(input ReadBookingInput) (*Booking, error)
-	UpdateBooking(input UpdateBookingInput) (*Booking, error)
 	DeleteBooking(input DeleteBookingInput) error
 }
 
@@ -38,11 +37,6 @@ type CreateBookingInput struct {
 
 // ReadBookingInput encapsulates the information required to read a single booking in the datastore
 type ReadBookingInput struct {
-	ID uuid.UUID
-}
-
-// UpdateBookingInput encapsulates the information required to update a single booking in the datastore
-type UpdateBookingInput struct {
 	ID uuid.UUID
 }
 
@@ -91,24 +85,6 @@ func (dao *DAO) CreateBooking(input CreateBookingInput) (*Booking, error) {
 // ReadBooking returns the booking in the datastore for a given ID
 func (dao *DAO) ReadBooking(input ReadBookingInput) (*Booking, error) {
 	row := executeQueryWithRowResponse(dao.DB, "SELECT id FROM booking WHERE id = $1;", input.ID)
-
-	var booking Booking
-	err := row.Scan(&booking.ID, &booking.CreatedBy)
-	if err != nil {
-		switch err {
-		case sql.ErrNoRows:
-			return nil, ErrBookingNotFound(input.ID.String())
-		default:
-			return nil, err
-		}
-	}
-
-	return &booking, nil
-}
-
-// UpdateBooking updates the booking in the datastore for a given ID, returning the newly updated booking
-func (dao *DAO) UpdateBooking(input UpdateBookingInput) (*Booking, error) {
-	row := executeQueryWithRowResponse(dao.DB, "UPDATE booking SET WHERE id = $1 RETURNING id;", input.ID)
 
 	var booking Booking
 	err := row.Scan(&booking.ID, &booking.CreatedBy)

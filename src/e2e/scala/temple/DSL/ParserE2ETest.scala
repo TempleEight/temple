@@ -65,11 +65,13 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
           attributes = ListMap(
             "id" -> Attribute(UUIDType, Some(Annotation.ServerSet)),
           ),
+          metadata = List(Omit(Set(Endpoint.Update))),
         ),
         "SimpleTempleTestGroup" -> ServiceBlock(
           attributes = ListMap(
             "id" -> Attribute(UUIDType, Some(Annotation.ServerSet)),
           ),
+          metadata = List(Omit(Set(Endpoint.Update))),
         ),
       ),
     )

@@ -91,9 +91,9 @@ private class Validator private (templefile: Templefile) {
       case (name, struct) => validateStruct(name, struct, context :+ name)
     }
     val newAttributes = validateAttributes(service, context)
-    validateMetadata(service.metadata, context)
+    val newMetadata   = validateStructMetadata(service.metadata, newAttributes, context)
 
-    ServiceBlock(newAttributes, service.metadata, newStructs)
+    ServiceBlock(newAttributes, newMetadata, newStructs)
   }
 
   private def validateStruct(
@@ -104,9 +104,33 @@ private class Validator private (templefile: Templefile) {
     renameBlock(structName, struct)
 
     val newAttributes = validateAttributes(struct, context)
-    validateMetadata(struct.metadata, context)
+    val newMetadata   = validateStructMetadata(struct.metadata, newAttributes, context)
 
-    StructBlock(newAttributes, struct.metadata)
+    StructBlock(newAttributes, newMetadata)
+  }
+
+  private def validateStructMetadata[M >: Metadata.StructMetadata <: Metadata](
+    metadata: Seq[M],
+    attributes: Map[String, Attribute],
+    context: SemanticContext,
+  ): Seq[M] = {
+    validateMetadata(metadata, context)
+
+    val noUpdates = attributes.valuesIterator.forall(attributes =>
+      attributes.accessAnnotation.contains(Annotation.Server)
+      || attributes.accessAnnotation.contains(Annotation.ServerSet),
+    )
+    if (noUpdates) {
+      var foundOmit = false
+      val newMetadata = metadata map {
+          case Metadata.Omit(endpoints) =>
+            foundOmit = true
+            Metadata.Omit(endpoints + Metadata.Endpoint.Update)
+          case m => m
+        }
+      if (foundOmit) newMetadata
+      else newMetadata :+ Metadata.Omit(Set(Metadata.Endpoint.Update))
+    } else metadata
   }
 
   private def validateMetadata(metadata: Seq[Metadata], context: SemanticContext): Unit = {

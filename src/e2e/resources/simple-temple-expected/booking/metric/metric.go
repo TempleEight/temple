@@ -8,7 +8,6 @@ import (
 var (
 	RequestCreate = "create"
 	RequestRead   = "read"
-	RequestUpdate = "update"
 	RequestDelete = "delete"
 
 	RequestSuccess = promauto.NewCounterVec(prometheus.CounterOpts{

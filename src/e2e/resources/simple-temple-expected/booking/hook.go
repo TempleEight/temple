@@ -7,11 +7,9 @@ import "github.com/squat/and/dab/booking/dao"
 type Hook struct {
 	beforeCreateHooks []*func(env *env, req createBookingRequest, input *dao.CreateBookingInput) *HookError
 	beforeReadHooks   []*func(env *env, input *dao.ReadBookingInput) *HookError
-	beforeUpdateHooks []*func(env *env, req updateBookingRequest, input *dao.UpdateBookingInput) *HookError
 	beforeDeleteHooks []*func(env *env, input *dao.DeleteBookingInput) *HookError
 	afterCreateHooks  []*func(env *env, booking *dao.Booking) *HookError
 	afterReadHooks    []*func(env *env, booking *dao.Booking) *HookError
-	afterUpdateHooks  []*func(env *env, booking *dao.Booking) *HookError
 	afterDeleteHooks  []*func(env *env) *HookError
 }
 
@@ -35,11 +33,6 @@ func (h *Hook) BeforeRead(hook func(env *env, input *dao.ReadBookingInput) *Hook
 	h.beforeReadHooks = append(h.beforeReadHooks, &hook)
 }
 
-// BeforeUpdate adds a new hook to be executed before updating an object in the datastore
-func (h *Hook) BeforeUpdate(hook func(env *env, req updateBookingRequest, input *dao.UpdateBookingInput) *HookError) {
-	h.beforeUpdateHooks = append(h.beforeUpdateHooks, &hook)
-}
-
 // BeforeDelete adds a new hook to be executed before deleting an object in the datastore
 func (h *Hook) BeforeDelete(hook func(env *env, input *dao.DeleteBookingInput) *HookError) {
 	h.beforeDeleteHooks = append(h.beforeDeleteHooks, &hook)
@@ -53,11 +46,6 @@ func (h *Hook) AfterCreate(hook func(env *env, booking *dao.Booking) *HookError)
 // AfterRead adds a new hook to be executed after reading an object in the datastore
 func (h *Hook) AfterRead(hook func(env *env, booking *dao.Booking) *HookError) {
 	h.afterReadHooks = append(h.afterReadHooks, &hook)
-}
-
-// AfterUpdate adds a new hook to be executed after updating an object in the datastore
-func (h *Hook) AfterUpdate(hook func(env *env, booking *dao.Booking) *HookError) {
-	h.afterUpdateHooks = append(h.afterUpdateHooks, &hook)
 }
 
 // AfterDelete adds a new hook to be executed after deleting an object in the datastore
