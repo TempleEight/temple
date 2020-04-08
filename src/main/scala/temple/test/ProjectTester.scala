@@ -28,7 +28,7 @@ object ProjectTester {
 
     // Running deploy.sh doesn't set Kong up correctly for some reason. I couldn't figure it out, so manually call that part
     exec(
-      s"KONG_ADMIN=${config.kongAdminURL} KONG_ENTRY=${config.baseIP} sh $generatedPath/kong/configure-kong-k8s.sh",
+      s"KONG_ADMIN=${config.kongAdminURL} KONG_ENTRY=${config.baseIP} sh $generatedPath/kong/configure-kong.sh",
     )
 
     config

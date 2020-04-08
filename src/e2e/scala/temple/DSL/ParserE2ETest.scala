@@ -69,12 +69,14 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
             "id"        -> IDAttribute,
             "createdBy" -> CreatedByAttribute,
           ),
+          metadata = List(Omit(Set(Endpoint.Update))),
         ),
         "SimpleTempleTestGroup" -> ServiceBlock(
           attributes = ListMap(
             "id"        -> IDAttribute,
             "createdBy" -> CreatedByAttribute,
           ),
+          metadata = List(Omit(Set(Endpoint.Update))),
         ),
       ),
     )

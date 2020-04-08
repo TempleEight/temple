@@ -1,0 +1,41 @@
+version: '3'
+services:
+  user:
+    build: ./user
+    ports:
+    - 80:80
+    networks:
+    - user-network
+    - kong-network
+  user-db:
+    image: postgres:12.1
+    environment:
+    - PGUSER=postgres
+    volumes:
+    - ./user-db/init.sql:/docker-entrypoint-initdb.d/init.sql
+    ports: []
+    networks:
+    - user-network
+  grafana:
+    image: grafana/grafana:6.6.2
+    environment: []
+    volumes:
+    - ./grafana/provisioning:/etc/grafana/provisioning
+    ports:
+    - 3000:3000
+    networks:
+    - metrics-network
+  prometheus:
+    image: prom/prometheus:v2.16.0
+    environment: []
+    volumes:
+    - ./prometheus:/etc/prometheus
+    ports:
+    - 9090:9090
+    networks:
+    - user-network
+    - metrics-network
+networks:
+- user-network
+- kong-network
+- metrics-network
