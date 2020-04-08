@@ -8,7 +8,7 @@ import io.circe.syntax._
 import io.circe.{Json, JsonObject}
 import scalaj.http.Http
 import temple.ast.AbstractServiceBlock.ServiceBlock
-import temple.ast.{Annotation, Attribute, AttributeType, Metadata}
+import temple.ast.{AbstractAttribute, Annotation, AttributeType, Metadata}
 import temple.utils.MonadUtils.FromEither
 import temple.utils.StringUtils
 
@@ -106,7 +106,7 @@ object ServiceTestUtils {
     */
   def constructRequestBody(
     test: EndpointTest,
-    attributes: Map[String, Attribute],
+    attributes: Map[String, AbstractAttribute],
     allServices: Map[String, ServiceBlock],
     baseURL: String,
     accessToken: String,

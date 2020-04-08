@@ -1,6 +1,6 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.Attribute
+import temple.ast.AbstractAttribute
 import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Update
 import temple.generate.server.ServiceRoot
@@ -13,7 +13,7 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainUpdateHandlerGenerator {
 
-  private def generateDAOCallBlock(root: ServiceRoot, clientAttributes: ListMap[String, Attribute]): String = {
+  private def generateDAOCallBlock(root: ServiceRoot, clientAttributes: ListMap[String, AbstractAttribute]): String = {
     val createInput = ListMap("ID" -> s"${root.decapitalizedName}ID") ++
       clientAttributes.map { case str -> _ => str.capitalize -> s"*req.${str.capitalize}" }
     mkCode.lines(
@@ -29,7 +29,7 @@ object GoServiceMainUpdateHandlerGenerator {
   /** Generate the update handler function */
   private[main] def generateUpdateHandler(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     responseMap: ListMap[String, String],
   ): String =

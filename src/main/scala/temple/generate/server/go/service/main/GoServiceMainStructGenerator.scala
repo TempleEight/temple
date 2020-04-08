@@ -1,7 +1,7 @@
 package temple.generate.server.go.service.main
 
 import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
-import temple.ast.{Annotation, Attribute, AttributeType}
+import temple.ast.{AbstractAttribute, Annotation, AttributeType}
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, Create, Read, Update}
 import temple.generate.server.ServiceRoot
@@ -61,7 +61,7 @@ object GoServiceMainStructGenerator {
   private[service] def generateRequestStructs(
     root: ServiceRoot,
     operations: Set[CRUD],
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
   ): String = {
     val fields = clientAttributes.map {
       case (name, attr) =>

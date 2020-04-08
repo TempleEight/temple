@@ -1,7 +1,7 @@
 package temple.generate.server.go.service.main
 
 import temple.ast.AttributeType.{DateTimeType, DateType, TimeType}
-import temple.ast.{Annotation, Attribute, AttributeType}
+import temple.ast.{AbstractAttribute, Annotation, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus._
@@ -14,8 +14,8 @@ import temple.generate.server.go.service.main.GoServiceMainUpdateHandlerGenerato
 import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.StringUtils.{decapitalize, doubleQuote}
 
-import scala.collection.immutable.ListMap
 import scala.Option.when
+import scala.collection.immutable.ListMap
 
 object GoServiceMainHandlersGenerator {
 
@@ -155,7 +155,10 @@ object GoServiceMainHandlersGenerator {
     )
 
   /** Generate the checking that incoming request parameters are not nil */
-  private[main] def generateRequestNilCheck(root: ServiceRoot, clientAttributes: ListMap[String, Attribute]): String =
+  private[main] def generateRequestNilCheck(
+    root: ServiceRoot,
+    clientAttributes: ListMap[String, AbstractAttribute],
+  ): String =
     genIf(
       clientAttributes.map { case name -> _ => s"req.${name.capitalize} == nil" }.mkString(" || "),
       generateHTTPErrorReturn(StatusBadRequest, "Missing request parameter(s)"),
@@ -202,7 +205,7 @@ object GoServiceMainHandlersGenerator {
   /** Generate the block for checking foreign keys against other services */
   private[main] def generateForeignKeyCheckBlocks(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
   ): String =
     mkCode.doubleLines(
       clientAttributes.map {
@@ -236,7 +239,7 @@ object GoServiceMainHandlersGenerator {
   private[service] def generateHandlers(
     root: ServiceRoot,
     operations: Set[CRUD],
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     enumeratingByCreator: Boolean,
   ): String = {

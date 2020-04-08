@@ -1,6 +1,6 @@
 package temple.generate.server.go.service.dao
 
-import temple.ast.{Annotation, AttributeType}
+import temple.ast.AttributeType
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
 import temple.generate.server.ServiceRoot

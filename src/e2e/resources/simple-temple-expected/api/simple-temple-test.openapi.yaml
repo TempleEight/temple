@@ -288,6 +288,9 @@ paths:
                 id:
                   type: string
                   format: uuid
+                createdBy:
+                  type: string
+                  format: uuid
       responses:
         '200':
           description: Booking successfully created
@@ -297,6 +300,9 @@ paths:
                 type: object
                 properties:
                   id:
+                    type: string
+                    format: uuid
+                  createdBy:
                     type: string
                     format: uuid
         '400':
@@ -329,6 +335,9 @@ paths:
                   id:
                     type: string
                     format: uuid
+                  createdBy:
+                    type: string
+                    format: uuid
         '400':
           $ref: '#/components/responses/Error400'
         '401':
@@ -350,6 +359,9 @@ paths:
                 id:
                   type: string
                   format: uuid
+                createdBy:
+                  type: string
+                  format: uuid
       responses:
         '200':
           description: Booking successfully updated
@@ -359,6 +371,9 @@ paths:
                 type: object
                 properties:
                   id:
+                    type: string
+                    format: uuid
+                  createdBy:
                     type: string
                     format: uuid
         '400':
@@ -403,6 +418,9 @@ paths:
                 id:
                   type: string
                   format: uuid
+                createdBy:
+                  type: string
+                  format: uuid
       responses:
         '200':
           description: SimpleTempleTestGroup successfully created
@@ -412,6 +430,9 @@ paths:
                 type: object
                 properties:
                   id:
+                    type: string
+                    format: uuid
+                  createdBy:
                     type: string
                     format: uuid
         '400':
@@ -444,6 +465,9 @@ paths:
                   id:
                     type: string
                     format: uuid
+                  createdBy:
+                    type: string
+                    format: uuid
         '400':
           $ref: '#/components/responses/Error400'
         '401':
@@ -465,6 +489,9 @@ paths:
                 id:
                   type: string
                   format: uuid
+                createdBy:
+                  type: string
+                  format: uuid
       responses:
         '200':
           description: SimpleTempleTestGroup successfully updated
@@ -474,6 +501,9 @@ paths:
                 type: object
                 properties:
                   id:
+                    type: string
+                    format: uuid
+                  createdBy:
                     type: string
                     format: uuid
         '400':

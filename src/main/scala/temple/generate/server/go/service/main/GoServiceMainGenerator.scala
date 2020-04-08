@@ -1,6 +1,6 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.Attribute
+import temple.ast.AbstractAttribute
 import temple.generate.CRUD._
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
@@ -16,7 +16,7 @@ object GoServiceMainGenerator {
     root: ServiceRoot,
     usesTime: Boolean,
     usesComms: Boolean,
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
     operations: Set[CRUD],
   ): String =
     mkCode(
