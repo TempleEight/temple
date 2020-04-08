@@ -85,6 +85,7 @@ object ProjectBuilderTestData {
     projectBlock = ProjectBlock(
       metadata = Seq(
         Metadata.Metrics.Prometheus,
+        Metadata.Provider.Kubernetes,
       ),
     ),
     services = Map(
