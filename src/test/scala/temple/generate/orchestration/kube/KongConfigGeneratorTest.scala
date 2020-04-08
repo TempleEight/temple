@@ -2,7 +2,7 @@ package temple.generate.orchestration.kube
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.generate.FileSystem.File
-import temple.generate.orchestration.UnitTestData
+import temple.generate.orchestration.{KongConfigGenerator, UnitTestData}
 
 class KongConfigGeneratorTest extends FlatSpec with Matchers {
 
