@@ -3,7 +3,7 @@ package temple.generate.kube
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.yaml.Printer
-import temple.generate.FileSystem.{File, _}
+import temple.generate.FileSystem._
 import temple.generate.kube.ast.OrchestrationType._
 import temple.generate.kube.ast.gen.KubeType._
 import temple.generate.kube.ast.gen.Spec._
