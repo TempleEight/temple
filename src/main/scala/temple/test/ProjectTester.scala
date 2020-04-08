@@ -1,10 +1,12 @@
 package temple.test
 
-import temple.ast.Metadata.ServiceAuth
-import temple.ast.Templefile
+import scalaj.http.Http
+import temple.ast.Metadata.{Provider, ServiceAuth}
+import temple.ast.{Metadata, Templefile}
 import temple.test.internal.{AuthServiceTest, CRUDServiceTest, ProjectConfig}
 
 import scala.sys.process._
+import scala.util.Try
 
 object ProjectTester {
 
@@ -17,27 +19,56 @@ object ProjectTester {
 
   /** Configure the infrastructure for testing */
   private def performSetup(templefile: Templefile, generatedPath: String): ProjectConfig = {
-    println("🍪 Spinning up Kubernetes infrastructure...")
-    // Deploy Kubernetes
-    exec(s"sh $generatedPath/deploy.sh")
+    val provider = templefile
+      .lookupMetadata[Metadata.Provider]
+      .getOrElse(throw new RuntimeException("Could not find deployment information"))
 
-    // Grab Kong's URL for future requests
-    val Array(baseURL, kongAdmin, _*) = exec("minikube service kong --url").split("\n")
-    val baseIP                        = baseURL.replaceAll("http[s]*://", "")
-    val config                        = ProjectConfig(baseIP, kongAdmin)
+    val config = provider match {
+      case Provider.Kubernetes =>
+        println("🍪 Spinning up Kubernetes infrastructure...")
+        exec(s"sh $generatedPath/deploy.sh")
 
-    // Running deploy.sh doesn't set Kong up correctly for some reason. I couldn't figure it out, so manually call that part
+        // Grab Kong's URL for future requests
+        val Array(baseURL, kongAdmin, _*) = exec("minikube service kong --url").split("\n")
+        val baseIP                        = baseURL.replaceAll("http[s]*://", "")
+        ProjectConfig(baseIP, kongAdmin)
+      case Provider.DockerCompose =>
+        println("🐳 Spinning up Docker Compose infrastructure...")
+        exec(
+          s"cd $generatedPath && docker ps -a -q | xargs docker rm -f && docker volume prune -f && docker-compose up --build -d",
+        )
+
+        var finishedStarting = false
+        while (!finishedStarting) {
+          val kongRequest = Try(Http("http://localhost:8001/status").asString)
+          kongRequest.map { request =>
+            finishedStarting = request.code == 200
+          }
+          exec("sleep 5")
+        }
+        ProjectConfig("localhost:8000", "localhost:8001")
+    }
+
     exec(
       s"KONG_ADMIN=${config.kongAdminURL} KONG_ENTRY=${config.baseIP} sh $generatedPath/kong/configure-kong.sh",
     )
-
     config
   }
 
   /** Gracefully shutdown the infrastructure */
   private def performShutdown(templefile: Templefile, generatedPath: String): Unit = {
-    println(s"💀 Shutting down Kubernetes infrastructure...")
-    exec("kubectl drain minikube && minikube delete")
+    val provider = templefile
+      .lookupMetadata[Metadata.Provider]
+      .getOrElse(throw new RuntimeException("Could not find deployment information"))
+
+    provider match {
+      case Provider.Kubernetes =>
+        println(s"💀 Shutting down Kubernetes infrastructure...")
+        exec("kubectl drain minikube && minikube delete")
+      case Provider.DockerCompose =>
+        println(s"💀 Shutting down Docker Compose infrastructure...")
+        exec(s"cd $generatedPath && docker-compose down")
+    }
   }
 
   /** Execute the tests on each generated service */
