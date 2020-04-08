@@ -1,0 +1,13 @@
+{
+  "user" : "postgres",
+  "dbName" : "postgres",
+  "host" : "simple-temple-test-group-db",
+  "sslMode" : "disable",
+  "services" : {
+    
+  },
+  "ports" : {
+    "service" : 1030,
+    "prometheus" : 1031
+  }
+}

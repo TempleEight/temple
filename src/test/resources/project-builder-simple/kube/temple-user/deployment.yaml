@@ -20,7 +20,7 @@ spec:
     spec:
       hostname: temple-user
       containers:
-      - image: sample-project-temple-user
+      - image: localhost:5000/sample-project-temple-user
         name: temple-user
         ports:
         - containerPort: 1026

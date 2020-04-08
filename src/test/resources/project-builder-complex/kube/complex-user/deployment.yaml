@@ -20,7 +20,7 @@ spec:
     spec:
       hostname: complex-user
       containers:
-      - image: sample-complex-project-complex-user
+      - image: localhost:5000/sample-complex-project-complex-user
         name: complex-user
         ports:
         - containerPort: 1026

@@ -20,7 +20,7 @@ spec:
     spec:
       hostname: simple-temple-test-group
       containers:
-      - image: simple-temple-test-simple-temple-test-group
+      - image: localhost:5000/simple-temple-test-simple-temple-test-group
         name: simple-temple-test-group
         ports:
         - containerPort: 1030

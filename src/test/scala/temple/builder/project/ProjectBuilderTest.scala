@@ -6,6 +6,7 @@ import org.scalatest.FlatSpec
 import temple.TestUtils
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.FileMatchers
+import temple.generate.FileSystem.File
 
 class ProjectBuilderTest extends FlatSpec with FileMatchers {
 
@@ -37,6 +38,14 @@ class ProjectBuilderTest extends FlatSpec with FileMatchers {
     val actual = ProjectBuilder
       .build(ProjectBuilderTestData.simpleTemplefilePostgresService, GoLanguageDetail("github.com/squat/and/dab"))
     projectFilesShouldMatch(actual, expected)
+  }
+
+  it should "correctly generate config.json for cross service communication" in {
+    val project = ProjectBuilder
+      .build(ProjectBuilderTestData.simpleTemplefileForeignKeyService, GoLanguageDetail("github.com/squat/and/dab"))
+    val actualConfig   = project.files(File("a", "config.json"))
+    val expectedConfig = ProjectBuilderTestData.foreignKeyConfigJson
+    actualConfig shouldBe expectedConfig
   }
 
   it should "correctly create a complex service with nested struct" in {

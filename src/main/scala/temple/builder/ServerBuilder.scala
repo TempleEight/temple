@@ -1,7 +1,8 @@
 package temple.builder
 
+import temple.ast.AbstractAttribute.Attribute
 import temple.ast.AttributeType.ForeignKey
-import temple.ast.Metadata.{Database, ServiceAuth, ServiceEnumerable, ServiceLanguage}
+import temple.ast.Metadata.{Database, ServiceAuth, ServiceLanguage}
 import temple.ast.{Metadata, _}
 import temple.builder.project.LanguageConfig.GoLanguageConfig
 import temple.builder.project.ProjectConfig
@@ -64,20 +65,26 @@ object ServerBuilder {
       case GoLanguageDetail(modulePath) => s"$modulePath/${StringUtils.kebabCase(serviceName)}"
     }
 
-    // The names of each service this service communicates with, i.e all the foreign key attributes of the service
-    val comms: Seq[String] = serviceBlock.attributes.collect {
-      case (_, Attribute(x: ForeignKey, _, _)) => x.references
-    }.toSeq
+    // The names of each service this service communicates with, i.e all the foreign key attributes of the service and any inner structs
+    // TODO: Does this work for service referencing the struct? Is that allowed?
+    val comms = serviceBlock.attributes.collect {
+        case (_, Attribute(x: ForeignKey, _, _)) => x.references
+      } ++ serviceBlock.structs.values
+        .flatMap { block =>
+          block.attributes.collect {
+            case (_, Attribute(x: ForeignKey, _, _)) if x.references != serviceName => x.references
+          }
+        }
 
     ServiceRoot(
       serviceName,
       module = moduleName,
-      comms = comms,
+      comms = comms.toSeq,
       opQueries = queries,
       port = port,
       idAttribute = idAttribute,
       createdByAttribute = createdBy,
-      attributes = ListMap.from(serviceBlock.attributesWithoutID),
+      attributes = ListMap.from(serviceBlock.providedAttributes),
       datastore = serviceBlock.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase),
       readable = readable,
       writable = writable,

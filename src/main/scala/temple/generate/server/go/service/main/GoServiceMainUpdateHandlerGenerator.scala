@@ -1,6 +1,6 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.Attribute
+import temple.ast.AbstractAttribute
 import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Update
 import temple.generate.server.ServiceRoot
@@ -13,9 +13,8 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainUpdateHandlerGenerator {
 
-  private def generateDAOCallBlock(root: ServiceRoot, clientAttributes: ListMap[String, Attribute]): String = {
+  private def generateDAOCallBlock(root: ServiceRoot, clientAttributes: ListMap[String, AbstractAttribute]): String = {
     val createInput = ListMap("ID" -> s"${root.decapitalizedName}ID") ++
-      // TODO: Consider if server set attributes need to be updated and add them in
       clientAttributes.map { case str -> _ => str.capitalize -> s"*req.${str.capitalize}" }
     mkCode.lines(
       genDeclareAndAssign(
@@ -30,7 +29,7 @@ object GoServiceMainUpdateHandlerGenerator {
   /** Generate the update handler function */
   private[main] def generateUpdateHandler(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     responseMap: ListMap[String, String],
   ): String =
@@ -41,11 +40,15 @@ object GoServiceMainUpdateHandlerGenerator {
           when(root.projectUsesAuth) { generateExtractAuthBlock(root.writable == Writable.This) },
           generateExtractIDBlock(root.decapitalizedName),
           when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root) },
-          generateDecodeRequestBlock(s"update${root.name}"),
-          // TODO: Handle this properly, there could be serverSet attributes
-          when(clientAttributes.nonEmpty) { generateRequestNilCheck(root, clientAttributes) },
-          generateValidateStructBlock(),
-          when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
+          // Only need to handle request JSONs when there are client attributes
+          when(clientAttributes.nonEmpty) {
+            mkCode.doubleLines(
+              generateDecodeRequestBlock(root, Update, s"update${root.name}"),
+              generateRequestNilCheck(root, clientAttributes),
+              generateValidateStructBlock(),
+              when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
+            )
+          },
           generateDAOCallBlock(root, clientAttributes),
           generateJSONResponse(s"update${root.name}", responseMap),
         ),

@@ -16,7 +16,7 @@ object OrchestrationBuilder {
         case (name: String, service: AbstractServiceBlock, port: Ports) =>
           val kebabName   = StringUtils.kebabCase(name)
           val projectName = StringUtils.kebabCase(templefile.projectName)
-          val dockerImage = s"$projectName-$kebabName"
+          val dockerImage = s"${ProjectConfig.registryURL}/$projectName-$kebabName"
           val dbLanguage  = service.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
           val dbImage     = ProjectConfig.dockerImage(dbLanguage)
           Service(
@@ -38,6 +38,6 @@ object OrchestrationBuilder {
             usesAuth = service != AuthServiceBlock && templefile.usesAuth,
           )
       }
-    OrchestrationRoot(services.toSeq)
+    OrchestrationRoot(services.toSeq, templefile.lookupMetadata[Metadata.Metrics].nonEmpty)
   }
 }

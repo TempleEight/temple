@@ -1,9 +1,9 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.Attribute
+import temple.ast.AbstractAttribute
 import temple.generate.CRUD.Create
 import temple.generate.server.ServiceRoot
-import temple.generate.server.go.GoHTTPStatus.{StatusBadRequest, StatusInternalServerError}
+import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.{generateHandlerDecl, _}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -24,14 +24,14 @@ object GoServiceMainCreateHandlerGenerator {
 
   private def generateDAOCallBlock(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
   ): String = {
     val idCapitalized = root.idAttribute.name.toUpperCase
     // If service has auth block then an AuthID is passed in as ID, otherwise a created uuid is passed in
     val createInput = ListMap(idCapitalized -> (if (root.hasAuthBlock) s"auth.$idCapitalized" else "uuid")) ++
       // If the project uses auth, but this service does not have an auth block, AuthID is passed for created_by field
       when(!root.hasAuthBlock && root.projectUsesAuth) { s"Auth$idCapitalized" -> s"auth.$idCapitalized" } ++
-      // TODO: ServerSet values need to be passed in, not just client-provided attributes
+      // ServerSet values must not be passed, as this will cause a nil pointer dereference error
       clientAttributes.map { case str -> _ => str.capitalize -> s"*req.${str.capitalize}" }
 
     mkCode.lines(
@@ -57,7 +57,7 @@ object GoServiceMainCreateHandlerGenerator {
   /** Generate the create handler function */
   private[main] def generateCreateHandler(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     responseMap: ListMap[String, String],
   ): String =
@@ -66,11 +66,15 @@ object GoServiceMainCreateHandlerGenerator {
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
           when(root.projectUsesAuth) { generateExtractAuthBlock(usesVar = true) },
-          generateDecodeRequestBlock(s"create${root.name}"),
-          // TODO: Handle this properly, there could be serverSet attributes
-          when(clientAttributes.nonEmpty) { generateRequestNilCheck(root, clientAttributes) },
-          generateValidateStructBlock(),
-          when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
+          // Only need to handle request JSONs when there are client attributes
+          when(clientAttributes.nonEmpty) {
+            mkCode.doubleLines(
+              generateDecodeRequestBlock(root, Create, s"create${root.name}"),
+              generateRequestNilCheck(root, clientAttributes),
+              generateValidateStructBlock(),
+              when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
+            )
+          },
           when(!root.hasAuthBlock) { generateNewUUIDBlock() },
           generateDAOCallBlock(root, clientAttributes),
           generateJSONResponse(s"create${root.name}", responseMap),

@@ -190,6 +190,14 @@ object KubernetesGenerator {
     File("kube/kong", "kong-service.yaml")       -> FileUtils.readResources("kube/kong/kong-service.yaml"),
   )
 
+  private val deployFiles: Files = Map(
+    File("kube/deploy", "deploy-daemon-set.yaml") -> FileUtils.readResources("kube/deploy/deploy-daemon-set.yaml"),
+    File("kube/deploy", "deploy-replication-controller.yaml") -> FileUtils.readResources(
+      "kube/deploy/deploy-replication-controller.yaml",
+    ),
+    File("kube/deploy", "deploy-service.yaml") -> FileUtils.readResources("kube/deploy/deploy-service.yaml"),
+  )
+
   private def buildKubeFiles(service: Service) =
     Seq(
       File(s"kube/${service.name}", "deployment.yaml")    -> generateDeployment(service),
@@ -200,10 +208,12 @@ object KubernetesGenerator {
     )
 
   /** Given an [[OrchestrationRoot]], check the services inside it and generate deployment scripts */
-  def generate(orchestrationRoot: OrchestrationRoot): Files = {
-    val kubeFiles: Files  = orchestrationRoot.services.flatMap(buildKubeFiles).toMap
-    val kongConfig: Files = Map(KongConfigGenerator.generate(orchestrationRoot))
-    kubeFiles ++ kongConfig ++ kongFiles
+  def generate(projectName: String, orchestrationRoot: OrchestrationRoot): Files = {
+    val kubeFiles: Files    = orchestrationRoot.services.flatMap(buildKubeFiles).toMap
+    val kongConfig: Files   = Map(KongConfigGenerator.generate(orchestrationRoot))
+    val deployScript: Files = Map(DeployScriptGenerator.generate(orchestrationRoot))
+    val pushScript: Files   = Map(PushImageScriptGenerator.generate(projectName, orchestrationRoot))
+    kubeFiles ++ kongConfig ++ kongFiles ++ deployFiles ++ deployScript ++ pushScript
   }
 
 }

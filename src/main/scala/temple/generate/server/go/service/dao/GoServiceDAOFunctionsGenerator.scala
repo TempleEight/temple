@@ -43,16 +43,13 @@ object GoServiceDAOFunctionsGenerator {
       case Some(CreatedByAttribute(inputName, _)) => Seq(s"$prefix.${inputName.capitalize}")
       case _                                      => Seq.empty
     }
-    lazy val filteredAttributes = root.attributes.collect {
-      case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.ServerSet) =>
-        s"$prefix.${name.capitalize}"
-    }.toSeq
+    lazy val attributes = root.attributes.map { case name -> _ => s"$prefix.${name.capitalize}" }.toSeq
 
     operation match {
       case List          => createdBy
-      case Create        => id ++ createdBy ++ filteredAttributes
+      case Create        => id ++ createdBy ++ attributes
       case Read | Delete => id
-      case Update        => filteredAttributes ++ id
+      case Update        => attributes ++ id
     }
   }
 

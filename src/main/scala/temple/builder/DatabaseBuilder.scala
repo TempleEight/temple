@@ -1,5 +1,6 @@
 package temple.builder
 
+import temple.ast.AbstractAttribute.{CreatedByAttribute, IDAttribute}
 import temple.ast.Annotation.Nullable
 import temple.ast._
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
@@ -21,7 +22,7 @@ object DatabaseBuilder {
     Seq(maxCondition, minCondition).flatten
   }
 
-  private def toColDef(name: String, attribute: Attribute): ColumnDef = {
+  private def toColDef(name: String, attribute: AbstractAttribute): ColumnDef = {
     val nonNullConstraint = when(!attribute.valueAnnotations.contains(Nullable)) { ColumnConstraint.NonNull }
 
     val primaryKeyConstraint = when(attribute == IDAttribute) { ColumnConstraint.PrimaryKey }
@@ -53,14 +54,15 @@ object DatabaseBuilder {
 
   def buildQuery(
     serviceName: String,
-    attributes: Map[String, Attribute],
+    attributes: Map[String, AbstractAttribute],
     endpoints: Set[CRUD],
     readable: Metadata.Readable = Metadata.Readable.This,
     selectionAttribute: String = "id",
   ): ListMap[CRUD, Statement] = {
-    val tableName        = StringUtils.snakeCase(serviceName)
-    val columns          = attributes.keys.map(Column).toSeq
-    val columnsWithoutID = attributes.filter { case (_, attr) => attr != IDAttribute }.keys.map(Column).toSeq
+    val tableName = StringUtils.snakeCase(serviceName)
+    val columns   = attributes.keys.map(Column).toSeq
+    val providedColumns =
+      attributes.filter { case (_, attr) => attr != IDAttribute && attr != CreatedByAttribute }.keys.map(Column).toSeq
     ListMap.from(
       endpoints.map {
         case Create =>
@@ -78,7 +80,7 @@ object DatabaseBuilder {
         case Update =>
           Update -> Statement.Update(
             tableName,
-            assignments = columnsWithoutID.map(Assignment(_, PreparedValue)),
+            assignments = providedColumns.map(Assignment(_, PreparedValue)),
             condition = Some(PreparedComparison(selectionAttribute, ComparisonOperator.Equal)),
             returnColumns = columns,
           )

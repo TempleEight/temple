@@ -1,5 +1,6 @@
 package temple.builder.project
 
+import temple.ast.AbstractAttribute.{Attribute, IDAttribute}
 import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
 import temple.ast.Metadata.{Database, ServiceAuth}
@@ -59,8 +60,33 @@ object ProjectBuilderTestData {
     ),
   )
 
+  val simpleTemplefileForeignKeyService: Templefile = Templefile(
+    "SampleProject",
+    services = Map(
+      "A" -> ServiceBlock(
+        attributes = Map("myB" -> Attribute(ForeignKey("B"))),
+        structs = Map(
+          "InnerStruct" -> StructBlock(
+            attributes = Map("myC" -> Attribute(ForeignKey("C"))),
+          ),
+        ),
+      ),
+      "B" -> ServiceBlock(
+        attributes = Map("example" -> Attribute(IntType())),
+      ),
+      "C" -> ServiceBlock(
+        attributes = Map("anotherExample" -> Attribute(IntType())),
+      ),
+    ),
+  )
+
   val complexTemplefile: Templefile = Templefile(
     "SampleComplexProject",
+    projectBlock = ProjectBlock(
+      metadata = Seq(
+        Metadata.Metrics.Prometheus,
+      ),
+    ),
     services = Map(
       "ComplexUser" -> ServiceBlock(
         complexServiceAttributes,
@@ -69,4 +95,21 @@ object ProjectBuilderTestData {
       ),
     ),
   )
+
+  val foreignKeyConfigJson: String =
+    """|{
+       |  "user" : "postgres",
+       |  "dbName" : "postgres",
+       |  "host" : "a-db",
+       |  "sslMode" : "disable",
+       |  "services" : {
+       |    "B" : "http://b:1028",
+       |    "C" : "http://c:1030"
+       |  },
+       |  "ports" : {
+       |    "service" : 1026,
+       |    "prometheus" : 1027
+       |  }
+       |}
+       |""".stripMargin
 }

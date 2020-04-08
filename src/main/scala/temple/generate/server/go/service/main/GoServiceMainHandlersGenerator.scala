@@ -1,7 +1,7 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.AttributeType.DateTimeType
-import temple.ast.{Annotation, Attribute, AttributeType}
+import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
+import temple.ast.{AbstractAttribute, Annotation, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus._
@@ -14,17 +14,25 @@ import temple.generate.server.go.service.main.GoServiceMainUpdateHandlerGenerato
 import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.StringUtils.{decapitalize, doubleQuote}
 
-import scala.collection.immutable.ListMap
 import scala.Option.when
+import scala.collection.immutable.ListMap
 
 object GoServiceMainHandlersGenerator {
 
-  private def generateResponseMapFormat(attributeType: AttributeType): String =
-    // Must add formatting to attributes with datetime type
+  private def generateResponseMapFormat(root: ServiceRoot, name: String, attributeType: AttributeType): String = {
+    val responseFieldName = s"${root.decapitalizedName}.${name.capitalize}"
     attributeType match {
-      case DateTimeType => s".${genFunctionCall("Format", "time.RFC3339")}"
-      case _            => ""
+      case DateType =>
+        s"$responseFieldName.${genFunctionCall("Format", doubleQuote("2006-01-02"))}"
+      case TimeType =>
+        s"$responseFieldName.${genFunctionCall("Format", doubleQuote("15:04:05.999999999"))}"
+      case DateTimeType =>
+        s"$responseFieldName.${genFunctionCall("Format", "time.RFC3339")}"
+      case _: BlobType =>
+        genMethodCall("base64.StdEncoding", "EncodeToString", responseFieldName)
+      case _ => responseFieldName
     }
+  }
 
   /** Generate a map for converting the fields of the DAO response to the JSON response */
   private def generateResponseMap(root: ServiceRoot): ListMap[String, String] =
@@ -32,7 +40,7 @@ object GoServiceMainHandlersGenerator {
     ListMap(root.idAttribute.name.toUpperCase -> s"${root.decapitalizedName}.${root.idAttribute.name.toUpperCase}") ++
     root.attributes.collect {
       case name -> attribute if !attribute.accessAnnotation.contains(Annotation.Server) =>
-        name.capitalize -> s"${root.decapitalizedName}.${name.capitalize}${generateResponseMapFormat(attribute.attributeType)}"
+        name.capitalize -> generateResponseMapFormat(root, name, attribute.attributeType)
     }
 
   /** Generate a handler method declaration */
@@ -141,17 +149,25 @@ object GoServiceMainHandlersGenerator {
     }
 
   /** Generate the block for decoding an incoming request JSON into a request object */
-  private[main] def generateDecodeRequestBlock(typePrefix: String): String =
+  private[main] def generateDecodeRequestBlock(root: ServiceRoot, op: CRUD, typePrefix: String): String = {
+    val jsonDecodeCall = genMethodCall(genMethodCall("json", "NewDecoder", "r.Body"), "Decode", "&req")
     mkCode.lines(
       genVar("req", s"${typePrefix}Request"),
-      genAssign(genMethodCall(genMethodCall("json", "NewDecoder", "r.Body"), "Decode", "&req"), "err"),
+      if (!root.projectUsesAuth && op == Create) genDeclareAndAssign(jsonDecodeCall, "err")
+      else {
+        genAssign(jsonDecodeCall, "err")
+      },
       genIfErr(
         generateHTTPErrorReturn(StatusBadRequest, "Invalid request parameters: %s", genMethodCall("err", "Error")),
       ),
     )
+  }
 
   /** Generate the checking that incoming request parameters are not nil */
-  private[main] def generateRequestNilCheck(root: ServiceRoot, clientAttributes: ListMap[String, Attribute]): String =
+  private[main] def generateRequestNilCheck(
+    root: ServiceRoot,
+    clientAttributes: ListMap[String, AbstractAttribute],
+  ): String =
     genIf(
       clientAttributes.map { case name -> _ => s"req.${name.capitalize} == nil" }.mkString(" || "),
       generateHTTPErrorReturn(StatusBadRequest, "Missing request parameter(s)"),
@@ -198,7 +214,7 @@ object GoServiceMainHandlersGenerator {
   /** Generate the block for checking foreign keys against other services */
   private[main] def generateForeignKeyCheckBlocks(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
   ): String =
     mkCode.doubleLines(
       clientAttributes.map {
@@ -232,7 +248,7 @@ object GoServiceMainHandlersGenerator {
   private[service] def generateHandlers(
     root: ServiceRoot,
     operations: Set[CRUD],
-    clientAttributes: ListMap[String, Attribute],
+    clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     enumeratingByCreator: Boolean,
   ): String = {

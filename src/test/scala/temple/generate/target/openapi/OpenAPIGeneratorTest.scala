@@ -3,8 +3,9 @@ package temple.generate.target.openapi
 import io.circe.syntax._
 import io.circe.yaml.syntax.AsYaml
 import org.scalatest.{FlatSpec, Matchers}
+import temple.ast.AbstractAttribute.Attribute
+import temple.ast.Annotation
 import temple.ast.AttributeType._
-import temple.ast.{Annotation, Attribute}
 import temple.generate.CRUD
 import temple.generate.target.openapi.OpenAPIGenerator.generateError
 import temple.generate.target.openapi.ast.{OpenAPIRoot, Response, Service}

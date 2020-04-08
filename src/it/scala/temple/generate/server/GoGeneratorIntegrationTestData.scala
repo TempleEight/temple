@@ -1,8 +1,9 @@
 package temple.generate.server
 
+import temple.ast.AbstractAttribute.Attribute
 import temple.ast.Metadata.Database.Postgres
 import temple.ast.Metadata.{Readable, Writable}
-import temple.ast.{Annotation, Attribute, AttributeType}
+import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
 
 import scala.collection.immutable.ListMap
@@ -36,9 +37,9 @@ object GoGeneratorIntegrationTestData {
     comms = Seq("user"),
     opQueries = ListMap(
       CRUD.List   -> "SELECT id, created_by, userOne, userTwo, matchedOn FROM match WHERE created_by = $1",
-      CRUD.Create -> "INSERT INTO match (id, created_by, userOne, userTwo, matchedOn) VALUES ($1, $2, $3, $4, NOW()) RETURNING id, created_by, userOne, userTwo, matchedOn",
+      CRUD.Create -> "INSERT INTO match (id, created_by, userOne, userTwo, matchedOn) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_by, userOne, userTwo, matchedOn",
       CRUD.Read   -> "SELECT id, created_by, userOne, userTwo, matchedOn FROM match WHERE id = $1",
-      CRUD.Update -> "UPDATE match SET userOne = $1, userTwo = $2, matchedOn = NOW() WHERE id = $3 RETURNING id, created_by, userOne, userTwo, matchedOn",
+      CRUD.Update -> "UPDATE match SET userOne = $1, userTwo = $2, matchedOn = $3 WHERE id = $4 RETURNING id, created_by, userOne, userTwo, matchedOn",
       CRUD.Delete -> "DELETE FROM match WHERE id = $1",
     ),
     port = 81,

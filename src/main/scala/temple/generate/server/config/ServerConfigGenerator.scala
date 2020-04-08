@@ -11,6 +11,6 @@ object ServerConfigGenerator {
     val databaseConfig = database match {
       case Database.Postgres => PostgresConfig(serviceName + "-db")
     }
-    ServerConfig(databaseConfig, services, ports).asJson.toString
+    ServerConfig(databaseConfig, services, ports).asJson.toString + "\n"
   }
 }

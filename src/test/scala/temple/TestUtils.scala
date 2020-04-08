@@ -24,7 +24,10 @@ object TestUtils {
           FileVisitResult.CONTINUE
 
         override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
-          foundFiles += File(path.relativize(file).getParent.toString, file.getFileName.toString) -> FileUtils.readFile(
+          foundFiles += File(
+            Option(path.relativize(file).getParent).map(_.toString).getOrElse(""),
+            file.getFileName.toString,
+          ) -> FileUtils.readFile(
             file.toString,
           )
           FileVisitResult.CONTINUE

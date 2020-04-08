@@ -88,21 +88,6 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	var req createBookingRequest
-	err = json.NewDecoder(r.Body).Decode(&req)
-	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
-		return
-	}
-
-	_, err = valid.ValidateStruct(req)
-	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
-		return
-	}
-
 	uuid, err := uuid.NewUUID()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not create UUID: %s", err.Error()))

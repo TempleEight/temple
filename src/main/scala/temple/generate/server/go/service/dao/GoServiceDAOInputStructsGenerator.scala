@@ -1,6 +1,6 @@
 package temple.generate.server.go.service.dao
 
-import temple.ast.{Annotation, AttributeType}
+import temple.ast.AttributeType
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
 import temple.generate.server.ServiceRoot
@@ -31,10 +31,8 @@ object GoServiceDAOInputStructsGenerator {
       ListMap(enumerating.inputName.capitalize -> generateGoType(AttributeType.UUIDType))
     }
 
-    // Omit attribute from input struct fields if server set
-    lazy val attributesMap = root.attributes.collect {
-      case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.ServerSet) =>
-        (name.capitalize, generateGoType(attribute.attributeType))
+    lazy val attributesMap = root.attributes.map {
+      case (name, attribute) => (name.capitalize, generateGoType(attribute.attributeType))
     }
 
     mkCode.lines(

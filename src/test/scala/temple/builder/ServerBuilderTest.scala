@@ -1,9 +1,10 @@
 package temple.builder
 
 import org.scalatest.{FlatSpec, Matchers}
+import temple.ast.AbstractAttribute.Attribute
+import temple.ast.AttributeType
 import temple.ast.AttributeType._
 import temple.ast.Metadata.{Database, Readable, ServiceAuth, Writable}
-import temple.ast.{Attribute, AttributeType}
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
 import temple.generate.server._

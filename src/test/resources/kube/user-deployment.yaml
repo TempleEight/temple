@@ -20,7 +20,7 @@ spec:
     spec:
       hostname: user
       containers:
-      - image: temple-user-service
+      - image: localhost:5000/temple-user-service
         name: user
         ports:
         - containerPort: 80

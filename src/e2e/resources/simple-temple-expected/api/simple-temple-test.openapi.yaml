@@ -290,6 +290,9 @@ paths:
                   id:
                     type: string
                     format: uuid
+                  createdBy:
+                    type: string
+                    format: uuid
         '400':
           $ref: '#/components/responses/Error400'
         '401':
@@ -318,6 +321,9 @@ paths:
                 type: object
                 properties:
                   id:
+                    type: string
+                    format: uuid
+                  createdBy:
                     type: string
                     format: uuid
         '400':
@@ -370,6 +376,9 @@ paths:
                   id:
                     type: string
                     format: uuid
+                  createdBy:
+                    type: string
+                    format: uuid
         '400':
           $ref: '#/components/responses/Error400'
         '401':
@@ -398,6 +407,9 @@ paths:
                 type: object
                 properties:
                   id:
+                    type: string
+                    format: uuid
+                  createdBy:
                     type: string
                     format: uuid
         '400':

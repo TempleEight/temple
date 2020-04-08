@@ -1,6 +1,7 @@
 package temple.builder.project
 
 import temple.ast.Metadata._
+import temple.ast.Templefile.Ports
 import temple.ast._
 import temple.builder._
 import temple.detail.LanguageDetail
@@ -15,6 +16,7 @@ import temple.generate.metrics.grafana.ast.Datasource
 import temple.generate.metrics.grafana.{GrafanaDashboardConfigGenerator, GrafanaDashboardGenerator, GrafanaDatasourceConfigGenerator}
 import temple.generate.metrics.prometheus.PrometheusConfigGenerator
 import temple.generate.metrics.prometheus.ast.PrometheusJob
+import temple.generate.server.config.ServerConfigGenerator
 import temple.generate.server.go.auth.GoAuthServiceGenerator
 import temple.generate.server.go.service.GoServiceGenerator
 import temple.generate.target.openapi.OpenAPIGenerator
@@ -70,12 +72,19 @@ object ProjectBuilder {
 
   private def buildOrchestration(templefile: Templefile): Files = {
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(templefile)
-    KubernetesGenerator.generate(orchestrationRoot)
+    KubernetesGenerator.generate(templefile.projectName, orchestrationRoot)
   }
 
   private def buildMetrics(templefile: Templefile): Files = {
-    // TODO: Get this from templefile and project settings
-    val datasource: Datasource = Datasource.Prometheus("Prometheus", "http://prom:9090")
+    val metric = templefile.lookupMetadata[Metrics].getOrElse {
+      // If no explicit metrics tag is given, no files are to be generated, therefore can early return
+      return Map.empty
+    }
+
+    val datasource = metric match {
+      case Metrics.Prometheus => Datasource.Prometheus("Prometheus", "http://prom:9090")
+    }
+
     val dashboardJSONs = templefile.allServices.map {
       case (name, service) =>
         // Create row for every endpoint in the service
@@ -114,17 +123,34 @@ object ProjectBuilder {
       case (name, service, port) =>
         val serviceRoot =
           ServerBuilder.buildServiceRoot(name, service, port.service, endpoints(service), detail, usesAuth)
-        service.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
+        val serverFiles = service.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
           case ServiceLanguage.Go => GoServiceGenerator.generate(serviceRoot)
         }
+
+        val serviceComms = serviceRoot.comms.map { service =>
+          val (_, _, ports) = templefile.providedServicesWithPorts.find { _._1 == service }.get
+          service -> s"http://${kebabCase(service)}:${ports.service}"
+        }.toMap
+
+        val configFileContents =
+          ServerConfigGenerator.generate(serviceRoot.kebabName, serviceRoot.datastore, serviceComms, port)
+
+        serverFiles + (File(serviceRoot.kebabName, "config.json") -> configFileContents)
     }
 
     if (usesAuth) {
       templefile.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
         case ServiceLanguage.Go =>
-          serverFiles = serverFiles ++ GoAuthServiceGenerator.generate(
-              ServerBuilder.buildAuthRoot(templefile, detail, ProjectConfig.authPort),
+          val authRoot = ServerBuilder.buildAuthRoot(templefile, detail, ProjectConfig.authPort)
+          // TODO: Use authRoot.datastore when it's defined
+          val configFileContents =
+            ServerConfigGenerator.generate(
+              "auth",
+              Database.Postgres,
+              Map("kong-admin" -> "http://kong:8001"),
+              Ports(ProjectConfig.authPort, ProjectConfig.authMetricPort),
             )
+          serverFiles = serverFiles ++ (GoAuthServiceGenerator.generate(authRoot) + (File("auth", "config.json") -> configFileContents))
       }
     }
 

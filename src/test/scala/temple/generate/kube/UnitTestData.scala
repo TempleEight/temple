@@ -6,27 +6,37 @@ import temple.utils.FileUtils
 
 object UnitTestData {
 
-  val basicOrchestrationRoot: OrchestrationRoot = OrchestrationRoot(
-    Seq(
-      Service(
-        name = "user",
-        image = "temple-user-service",
-        dbImage = "postgres:12.1",
-        ports = Seq("api" -> 80),
-        replicas = 1,
-        secretName = "regcred",
-        appEnvVars = Seq(),
-        dbEnvVars = Seq("PGUSER" -> "postgres"),
-        dbStorage = DbStorage(
-          dataMount = "/var/lib/postgresql/data",
-          initMount = "/docker-entrypoint-initdb.d/init.sql",
-          initFile = "init.sql",
-          hostPath = "/data/user-db",
-        ),
-        dbLifecycleCommand = LifecycleCommand.echoDone.toString,
-        usesAuth = true,
-      ),
+  val basicOrchestrationService: Service = Service(
+    name = "user",
+    image = "localhost:5000/temple-user-service",
+    dbImage = "postgres:12.1",
+    ports = Seq("api" -> 80),
+    replicas = 1,
+    secretName = "regcred",
+    appEnvVars = Seq(),
+    dbEnvVars = Seq("PGUSER" -> "postgres"),
+    dbStorage = DbStorage(
+      dataMount = "/var/lib/postgresql/data",
+      initMount = "/docker-entrypoint-initdb.d/init.sql",
+      initFile = "init.sql",
+      hostPath = "/data/user-db",
     ),
+    dbLifecycleCommand = LifecycleCommand.echoDone.toString,
+    usesAuth = true,
+  )
+
+  val basicOrchestrationRootWithMetrics: OrchestrationRoot = OrchestrationRoot(
+    Seq(
+      basicOrchestrationService,
+    ),
+    usesMetrics = true,
+  )
+
+  val basicOrchestrationRootWithoutMetrics: OrchestrationRoot = OrchestrationRoot(
+    Seq(
+      basicOrchestrationService,
+    ),
+    usesMetrics = false,
   )
 
   val userDeploymentHeader: String =
@@ -91,4 +101,8 @@ object UnitTestData {
   val userDbStorage: String = FileUtils.readResources("kube/user-db-storage.yaml")
 
   val userKongConfig: String = FileUtils.readResources("kong/configure-kong.sh")
+
+  val userDeployScriptWithMetrics: String = FileUtils.readResources("shell/deploy.sh")
+
+  val userDeployScriptWithoutMetrics: String = FileUtils.readResources("shell/deploy-without-metrics.sh")
 }

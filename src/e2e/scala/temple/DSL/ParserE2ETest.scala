@@ -3,7 +3,8 @@ package temple.DSL
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.parser.DSLParserMatchers
 import temple.DSL.semantics.Analyzer.parseAndValidate
-import temple.ast.AbstractServiceBlock._
+import temple.ast.AbstractAttribute.{Attribute, CreatedByAttribute, IDAttribute}
+import temple.ast.AbstractServiceBlock.ServiceBlock
 import temple.ast.Annotation.{Nullable, Server, Unique}
 import temple.ast.AttributeType._
 import temple.ast.Metadata._
@@ -29,6 +30,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
       services = Map(
         "SimpleTempleTestUser" -> ServiceBlock(
           attributes = ListMap(
+            "id"                   -> IDAttribute,
             "simpleTempleTestUser" -> Attribute(StringType()),
             "email"                -> Attribute(StringType(Some(40), Some(5))),
             "firstName"            -> Attribute(StringType()),
@@ -39,7 +41,6 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
             "currentBankBalance"   -> Attribute(FloatType(min = Some(0.0), precision = 2)),
             "birthDate"            -> Attribute(DateType),
             "breakfastTime"        -> Attribute(TimeType),
-            "id"                   -> Attribute(UUIDType, Some(Annotation.ServerSet)),
           ),
           metadata = Seq(
             ServiceEnumerable,
@@ -52,10 +53,11 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
           structs = Map(
             "Fred" -> StructBlock(
               Map(
-                "field"  -> Attribute(StringType(), valueAnnotations = Set(Nullable)),
-                "friend" -> Attribute(ForeignKey("SimpleTempleTestUser")),
-                "image"  -> Attribute(BlobType(size = Some(10_000_000))),
-                "id"     -> Attribute(UUIDType, Some(Annotation.ServerSet)),
+                "id"        -> IDAttribute,
+                "createdBy" -> CreatedByAttribute,
+                "field"     -> Attribute(StringType(), valueAnnotations = Set(Nullable)),
+                "friend"    -> Attribute(ForeignKey("SimpleTempleTestUser")),
+                "image"     -> Attribute(BlobType(size = Some(10_000_000))),
               ),
               Seq(ServiceEnumerable, Readable.This),
             ),
@@ -63,13 +65,15 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
         ),
         "Booking" -> ServiceBlock(
           attributes = ListMap(
-            "id" -> Attribute(UUIDType, Some(Annotation.ServerSet)),
+            "id"        -> IDAttribute,
+            "createdBy" -> CreatedByAttribute,
           ),
           metadata = List(Omit(Set(Endpoint.Update))),
         ),
         "SimpleTempleTestGroup" -> ServiceBlock(
           attributes = ListMap(
-            "id" -> Attribute(UUIDType, Some(Annotation.ServerSet)),
+            "id"        -> IDAttribute,
+            "createdBy" -> CreatedByAttribute,
           ),
           metadata = List(Omit(Set(Endpoint.Update))),
         ),

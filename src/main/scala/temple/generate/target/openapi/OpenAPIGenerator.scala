@@ -3,7 +3,7 @@ package temple.generate.target.openapi
 import io.circe.syntax._
 import io.circe.yaml.Printer
 import temple.ast.AttributeType._
-import temple.ast.{Annotation, Attribute}
+import temple.ast.{AbstractAttribute, Annotation}
 import temple.collection.FlagMapView
 import temple.generate.CRUD._
 import temple.generate.FileSystem._
@@ -45,12 +45,13 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     paths.getOrElseUpdate(url, Path.Mutable(parameters = Seq(parameter))).handlers
   }
 
-  private def isServerAttribute(attribute: Attribute): Boolean = attribute.accessAnnotation contains Annotation.Server
+  private def isServerAttribute(attribute: AbstractAttribute): Boolean =
+    attribute.accessAnnotation contains Annotation.Server
 
-  private def isClientAttribute(attribute: Attribute): Boolean =
+  private def isClientAttribute(attribute: AbstractAttribute): Boolean =
     attribute.accessAnnotation.isEmpty || (attribute.accessAnnotation contains Annotation.Client)
 
-  private def attributeToOpenAPIType(attribute: Attribute): OpenAPISimpleType = attribute.attributeType match {
+  private def attributeToOpenAPIType(attribute: AbstractAttribute): OpenAPISimpleType = attribute.attributeType match {
     case UUIDType     => OpenAPISimpleType("string", "uuid")
     case BoolType     => OpenAPISimpleType("boolean")
     case DateType     => OpenAPISimpleType("string", "date")
@@ -75,14 +76,14 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
       OpenAPISimpleType("number", "int32", "description" -> s"Reference to $references ID".asJson)
   }
 
-  private def generateItemType(attributes: Map[String, Attribute]): OpenAPIObject = OpenAPIObject(
+  private def generateItemType(attributes: Map[String, AbstractAttribute]): OpenAPIObject = OpenAPIObject(
     attributes.iterator
       .filter { case _ -> attribute => !isServerAttribute(attribute) }
       .map { case str -> attribute => str -> attributeToOpenAPIType(attribute) }
       .to(attributes.mapFactory),
   )
 
-  private def generateItemInputType(attributes: Map[String, Attribute]): OpenAPIObject = OpenAPIObject(
+  private def generateItemInputType(attributes: Map[String, AbstractAttribute]): OpenAPIObject = OpenAPIObject(
     attributes.iterator
       .filter { case _ -> attribute => isClientAttribute(attribute) }
       .map { case str -> attribute => str -> attributeToOpenAPIType(attribute) }

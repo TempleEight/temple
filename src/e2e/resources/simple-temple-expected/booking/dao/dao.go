@@ -71,7 +71,7 @@ func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) 
 
 // CreateBooking creates a new booking in the datastore, returning the newly created booking
 func (dao *DAO) CreateBooking(input CreateBookingInput) (*Booking, error) {
-	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO booking (id) VALUES ($1) RETURNING id;", input.ID, input.AuthID)
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO booking (id, createdBy) VALUES ($1, $2) RETURNING id, createdBy;", input.ID, input.AuthID)
 
 	var booking Booking
 	err := row.Scan(&booking.ID, &booking.CreatedBy)
@@ -84,7 +84,7 @@ func (dao *DAO) CreateBooking(input CreateBookingInput) (*Booking, error) {
 
 // ReadBooking returns the booking in the datastore for a given ID
 func (dao *DAO) ReadBooking(input ReadBookingInput) (*Booking, error) {
-	row := executeQueryWithRowResponse(dao.DB, "SELECT id FROM booking WHERE id = $1;", input.ID)
+	row := executeQueryWithRowResponse(dao.DB, "SELECT id, createdBy FROM booking WHERE id = $1;", input.ID)
 
 	var booking Booking
 	err := row.Scan(&booking.ID, &booking.CreatedBy)
