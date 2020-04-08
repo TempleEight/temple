@@ -2,7 +2,7 @@ package temple.builder.project
 
 import temple.ast.Metadata._
 import temple.generate.database.PreparedType
-import temple.generate.kube.ast.OrchestrationType.DbStorage
+import temple.generate.orchestration.ast.OrchestrationType.DbStorage
 
 object ProjectConfig {
 
