@@ -61,7 +61,7 @@ object DatabaseBuilder {
   ): ListMap[CRUD, Statement] = {
     val tableName = StringUtils.snakeCase(serviceName)
     val columns   = attributes.keys.map(Column).toSeq
-    val columnsWithoutID =
+    val providedColumns =
       attributes.filter { case (_, attr) => attr != IDAttribute && attr != CreatedByAttribute }.keys.map(Column).toSeq
     ListMap.from(
       endpoints.map {
@@ -80,7 +80,7 @@ object DatabaseBuilder {
         case Update =>
           Update -> Statement.Update(
             tableName,
-            assignments = columnsWithoutID.map(Assignment(_, PreparedValue)),
+            assignments = providedColumns.map(Assignment(_, PreparedValue)),
             condition = Some(PreparedComparison(selectionAttribute, ComparisonOperator.Equal)),
             returnColumns = columns,
           )
