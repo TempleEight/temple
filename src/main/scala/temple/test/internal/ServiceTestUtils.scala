@@ -147,13 +147,15 @@ object ServiceTestUtils {
               val minValue: Int  = min.getOrElse(0)
               val random         = Random.between(minValue, maxValue)
               StringUtils.randomString(random.toInt).asJson
-            case AttributeType.IntType(max, min, _) =>
-              // TODO: Switch on precision
+            case AttributeType.IntType(max, min, precision) =>
               val maxValue: Long = max.getOrElse(Long.MaxValue)
               val minValue: Long = min.getOrElse(Long.MinValue)
+              (Random.between(minValue, maxValue) % math.pow(2, precision)).toLong.asJson
+            case AttributeType.FloatType(max, min, precision) if precision <= 4 =>
+              val maxValue = max.getOrElse(Float.MaxValue.toDouble)
+              val minValue = min.getOrElse(Float.MinValue.toDouble)
               Random.between(minValue, maxValue).asJson
             case AttributeType.FloatType(max, min, _) =>
-              // TODO: Switch on precision
               val maxValue = max.getOrElse(Double.MaxValue)
               val minValue = min.getOrElse(Double.MinValue)
               Random.between(minValue, maxValue).asJson

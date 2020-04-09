@@ -1,7 +1,8 @@
 package temple.generate.orchestration.dockercompose
 
-import io.circe.yaml.Printer
 import io.circe.syntax._
+import io.circe.yaml.Printer
+import temple.ast.Metadata.Provider
 import temple.generate.FileSystem.{File, Files}
 import temple.generate.orchestration.KongConfigGenerator
 import temple.generate.orchestration.ast.OrchestrationType
@@ -9,8 +10,9 @@ import temple.generate.orchestration.ast.OrchestrationType.OrchestrationRoot
 import temple.generate.orchestration.dockercompose.ast.Service.{ExternalService, LocalService}
 import temple.generate.orchestration.dockercompose.ast.kong.{KongDatabase, KongMigrations, KongService}
 import temple.generate.orchestration.dockercompose.ast.{DockerComposeRoot, Service}
+import temple.generate.orchestration.kube.DeployScriptGenerator
 
-import Option.when
+import scala.Option.when
 import scala.collection.immutable.ListMap
 
 object DockerComposeGenerator {
@@ -70,6 +72,10 @@ object DockerComposeGenerator {
 
     val composeRoot = DockerComposeRoot(services, networksMap)
     val yaml        = Printer(preserveOrder = true).pretty(composeRoot.asJson)
-    Map(File("", "docker-compose.yml") -> yaml, KongConfigGenerator.generate(orchestrationRoot))
+    Map(
+      File("", "docker-compose.yml") -> yaml,
+      KongConfigGenerator.generate(orchestrationRoot),
+      DeployScriptGenerator.generate(orchestrationRoot, Provider.DockerCompose),
+    )
   }
 }

@@ -3,13 +3,14 @@ package temple.generate.orchestration.kube
 import io.circe.generic.auto._
 import io.circe.syntax._
 import io.circe.yaml.Printer
+import temple.ast.Metadata.Provider
 import temple.generate.FileSystem._
 import temple.generate.orchestration.KongConfigGenerator
 import temple.generate.orchestration.ast.OrchestrationType._
 import temple.generate.orchestration.kube.ast.KubeType._
 import temple.generate.orchestration.kube.ast.Spec._
-import temple.generate.orchestration.kube.ast.{PlacementStrategy, RestartPolicy}
 import temple.generate.orchestration.kube.ast.volume.{AccessMode, ReclaimPolicy, StorageClass}
+import temple.generate.orchestration.kube.ast.{PlacementStrategy, RestartPolicy}
 import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.FileUtils
 
@@ -212,7 +213,7 @@ object KubernetesGenerator {
   def generate(projectName: String, orchestrationRoot: OrchestrationRoot): Files = {
     val kubeFiles: Files    = orchestrationRoot.services.flatMap(buildKubeFiles).toMap
     val kongConfig: Files   = Map(KongConfigGenerator.generate(orchestrationRoot))
-    val deployScript: Files = Map(DeployScriptGenerator.generate(orchestrationRoot))
+    val deployScript: Files = Map(DeployScriptGenerator.generate(orchestrationRoot, Provider.Kubernetes))
     val pushScript: Files   = Map(PushImageScriptGenerator.generate(projectName, orchestrationRoot))
     kubeFiles ++ kongConfig ++ kongFiles ++ deployFiles ++ deployScript ++ pushScript
   }
