@@ -23,7 +23,7 @@ object GoServiceMainStructGenerator {
   private def generateValidatorAnnotation(attrType: AttributeType): String =
     s"`valid:${doubleQuote(
       attrType match {
-        case AttributeType.ForeignKey(_) | AttributeType.UUIDType => "type(*string),uuid,required"
+        case AttributeType.ForeignKey(_) | AttributeType.UUIDType => "type(*uuid.UUID),uuid,required"
         case AttributeType.BoolType                               => "type(*bool),required"
         case AttributeType.DateType                               => "type(*string),required"
         case AttributeType.DateTimeType                           => "type(*string),rfc3339,required"
