@@ -57,7 +57,7 @@ object GoServiceCommGenerator {
       mkCode(
         s"func (comm *Handler) ${generateCommFunctionDecl(root, serviceName)}",
         CodeWrap.curly.tabbed(
-          genDeclareAndAssign(s"comm.Services[${doubleQuote(serviceName.decapitalizedName)}]", "hostname", "ok"),
+          genDeclareAndAssign(s"comm.Services[${doubleQuote(serviceName.kebabName)}]", "hostname", "ok"),
           genIf(
             "!ok",
             genReturn(
