@@ -248,6 +248,31 @@ class ValidatorTest extends FlatSpec with Matchers {
     ) shouldBe Set("#writable(all) is not compatible with #readable(this) in User")
   }
 
+  it should "find cycles in dependencies, but only if they are not nullable" in {
+    validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
+          "User" -> ServiceBlock(Map("box"  -> Attribute(ForeignKey("Box")))),
+          "Box"  -> ServiceBlock(Map("fred" -> Attribute(ForeignKey("Fred"), None, Set(Nullable)))),
+          "Fred" -> ServiceBlock(Map("user" -> Attribute(ForeignKey("User")))),
+        ),
+      ),
+    ) shouldBe Set()
+
+    validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
+          "User"   -> ServiceBlock(Map("box"    -> Attribute(ForeignKey("Box")))),
+          "Box"    -> ServiceBlock(Map("cube"   -> Attribute(ForeignKey("Cube")))),
+          "Cube"   -> ServiceBlock(Map("square" -> Attribute(ForeignKey("Square")))),
+          "Square" -> ServiceBlock(Map("user"   -> Attribute(ForeignKey("User")))),
+        ),
+      ),
+    ) shouldBe Set("Cycle(s) were detected in foreign keys: (User -> Box -> Cube -> Square -> User)")
+  }
+
   it should "throw errors when validating" in {
     noException shouldBe thrownBy {
       validate(
