@@ -1,6 +1,6 @@
 SimpleTempleTest: project {
   #metrics(prometheus);
-  #provider(dockerCompose);
+  #provider(kubernetes);
 }
 
 User: service {
