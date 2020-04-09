@@ -10,7 +10,7 @@ User: service {
   lastName: string;
   createdAt: datetime;
   numberOfDogs: int;
-  yeets: bool @unique @server; // Don't send this to the client
+  yeets: bool @server; // Don't send this to the client
   currentBankBalance: float(min: 0.0, precision: 2);
   birthDate: date;
   breakfastTime: time;
