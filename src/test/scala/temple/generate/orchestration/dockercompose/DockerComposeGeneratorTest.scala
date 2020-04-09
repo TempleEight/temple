@@ -18,4 +18,10 @@ class DockerComposeGeneratorTest extends FlatSpec with Matchers {
       DockerComposeGenerator.generate("example", UnitTestData.basicOrchestrationRootWithMetrics).head
     fileContents shouldBe DockerComposeGeneratorTestData.dockerComposeWithMetrics
   }
+
+  it should "generate a correct docker-compose deploy script" in {
+    val (_, deploy) =
+      DockerComposeGenerator.generate("example", UnitTestData.basicOrchestrationRootWithMetrics).last
+    deploy shouldBe DockerComposeGeneratorTestData.dockerComposeDeployScript
+  }
 }
