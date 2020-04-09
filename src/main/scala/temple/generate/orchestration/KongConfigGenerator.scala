@@ -1,4 +1,4 @@
-package temple.generate.orchestration.kube
+package temple.generate.orchestration
 
 import temple.generate.FileSystem.{File, FileContent}
 import temple.generate.orchestration.ast.OrchestrationType.{OrchestrationRoot, Service}

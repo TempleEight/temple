@@ -5,6 +5,7 @@ import io.circe.syntax._
 import io.circe.yaml.Printer
 import temple.ast.Metadata.Provider
 import temple.generate.FileSystem._
+import temple.generate.orchestration.KongConfigGenerator
 import temple.generate.orchestration.ast.OrchestrationType._
 import temple.generate.orchestration.kube.ast.KubeType._
 import temple.generate.orchestration.kube.ast.Spec._
