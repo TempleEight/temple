@@ -59,7 +59,7 @@ class CRUDServiceTest(name: String, service: ServiceBlock, allServices: Map[Stri
     }
 
   // Test each type of endpoint that is present in the service
-  def test(): Unit = {
+  def test(): Boolean = {
     val accessToken = ServiceTestUtils.getAuthTokenWithEmail(name, baseURL)
     ProjectBuilder.endpoints(service).foreach {
       case CRUD.List   => // TODO
@@ -68,11 +68,12 @@ class CRUDServiceTest(name: String, service: ServiceBlock, allServices: Map[Stri
       case CRUD.Update => testUpdateEndpoint(accessToken)
       case CRUD.Delete => testDeleteEndpoint(accessToken)
     }
+    anyTestFailed
   }
 }
 
 object CRUDServiceTest {
 
-  def test(name: String, service: ServiceBlock, allServices: Map[String, ServiceBlock], baseURL: String): Unit =
+  def test(name: String, service: ServiceBlock, allServices: Map[String, ServiceBlock], baseURL: String): Boolean =
     new CRUDServiceTest(name, service, allServices, baseURL).test()
 }
