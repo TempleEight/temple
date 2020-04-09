@@ -9,8 +9,9 @@ import temple.utils.StringUtils
 
 import scala.util.Try
 
+class TestFailedException(msg: String) extends RuntimeException(msg)
+
 private[internal] class EndpointTest(service: String, endpointName: String) {
-  class TestFailedException(msg: String) extends RuntimeException(msg)
 
   // Validate that the response JSON for the provided key matches the Attribute
   private def validateResponseType(key: String, responseForKey: Json, attribute: AbstractAttribute): Unit =
