@@ -1,6 +1,7 @@
 package temple.generate.docker
 
 import org.scalatest.{BeforeAndAfter, Matchers}
+import temple.ast.Metadata.Provider
 import temple.ast.{ProjectBlock, Templefile}
 import temple.builder.DockerfileBuilder
 import temple.containers.HadolintSpec
@@ -53,7 +54,8 @@ class DockerGeneratorIntegrationTest extends HadolintSpec with Matchers with Bef
 
     templefile.services.foreach {
       case (name, service) =>
-        val dockerfile          = DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, 80)
+        val dockerfile =
+          DockerfileBuilder.createServiceDockerfile(name.toLowerCase, service, 80, Some(Provider.DockerCompose))
         val generatedDockerfile = DockerfileGenerator.generate(dockerfile)
         val validationErrors    = validate(generatedDockerfile)
         validationErrors shouldBe empty

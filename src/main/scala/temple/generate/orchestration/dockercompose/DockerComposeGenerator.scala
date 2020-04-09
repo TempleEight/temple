@@ -7,9 +7,11 @@ import temple.generate.orchestration.KongConfigGenerator
 import temple.generate.orchestration.ast.OrchestrationType
 import temple.generate.orchestration.ast.OrchestrationType.OrchestrationRoot
 import temple.generate.orchestration.dockercompose.ast.Service.{ExternalService, LocalService}
+import temple.generate.orchestration.dockercompose.ast.kong.{KongDatabase, KongMigrations, KongService}
 import temple.generate.orchestration.dockercompose.ast.{DockerComposeRoot, Service}
 
 import Option.when
+import scala.collection.immutable.ListMap
 
 object DockerComposeGenerator {
 
@@ -30,9 +32,13 @@ object DockerComposeGenerator {
     )
 
   def generate(projectName: String, orchestrationRoot: OrchestrationRoot): Files = {
-    var services: Map[String, Service] = orchestrationRoot.services.flatMap { service =>
-      Seq(generateService(service), generateDatabaseService(service))
-    }.toMap
+    var services: ListMap[String, Service] = ListMap(
+        "kong"            -> KongService,
+        "kong-db"         -> KongDatabase,
+        "kong-migrations" -> KongMigrations,
+      ) ++ orchestrationRoot.services.flatMap { service =>
+        Seq(generateService(service), generateDatabaseService(service))
+      }
 
     val serviceNetworks: Seq[String] = orchestrationRoot.services.map { svc =>
       s"${svc.name}-network"
@@ -60,8 +66,9 @@ object DockerComposeGenerator {
     val allNetworks: Seq[String] = (serviceNetworks :+ "kong-network") ++ when(orchestrationRoot.usesMetrics) {
         "metrics-network"
       }
+    val networksMap: Map[String, Map[String, String]] = allNetworks.map(name => (name, Map[String, String]())).toMap
 
-    val composeRoot = DockerComposeRoot(services, allNetworks)
+    val composeRoot = DockerComposeRoot(services, networksMap)
     val yaml        = Printer(preserveOrder = true).pretty(composeRoot.asJson)
     Map(File("", "docker-compose.yml") -> yaml, KongConfigGenerator.generate(orchestrationRoot))
   }

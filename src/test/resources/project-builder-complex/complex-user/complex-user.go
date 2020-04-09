@@ -23,34 +23,34 @@ type env struct {
 
 // createComplexUserRequest contains the client-provided information required to create a single complexUser
 type createComplexUserRequest struct {
-	SmallIntField      *uint16    `valid:"type(uint16),required,range(10|100)"`
-	IntField           *uint32    `valid:"type(uint32),required,range(10|100)"`
-	BigIntField        *uint64    `valid:"type(uint64),required,range(10|100)"`
-	FloatField         *float32   `valid:"type(float32),required,range(0.0|300.0)"`
-	DoubleField        *float64   `valid:"type(float64),required,range(0.0|123.0)"`
-	StringField        *string    `valid:"type(string),required"`
-	BoundedStringField *string    `valid:"type(string),required,stringlength(0|5)"`
-	BoolField          *bool      `valid:"type(bool),required"`
-	DateField          *time.Time `valid:"type(string),required"`
-	TimeField          *time.Time `valid:"type(string),required"`
-	DateTimeField      *time.Time `valid:"type(string),rfc3339,required"`
-	BlobField          *[]byte    `valid:"type(string),base64,required"`
+	SmallIntField      *uint16  `valid:"type(uint16),required,range(10|100)"`
+	IntField           *uint32  `valid:"type(uint32),required,range(10|100)"`
+	BigIntField        *uint64  `valid:"type(uint64),required,range(10|100)"`
+	FloatField         *float32 `valid:"type(float32),required,range(0.0|300.0)"`
+	DoubleField        *float64 `valid:"type(float64),required,range(0.0|123.0)"`
+	StringField        *string  `valid:"type(string),required"`
+	BoundedStringField *string  `valid:"type(string),required,stringlength(0|5)"`
+	BoolField          *bool    `valid:"type(bool),required"`
+	DateField          *string  `valid:"type(string),required"`
+	TimeField          *string  `valid:"type(string),required"`
+	DateTimeField      *string  `valid:"type(string),rfc3339,required"`
+	BlobField          *string  `valid:"type(string),base64,required"`
 }
 
 // updateComplexUserRequest contains the client-provided information required to update a single complexUser
 type updateComplexUserRequest struct {
-	SmallIntField      *uint16    `valid:"type(uint16),required,range(10|100)"`
-	IntField           *uint32    `valid:"type(uint32),required,range(10|100)"`
-	BigIntField        *uint64    `valid:"type(uint64),required,range(10|100)"`
-	FloatField         *float32   `valid:"type(float32),required,range(0.0|300.0)"`
-	DoubleField        *float64   `valid:"type(float64),required,range(0.0|123.0)"`
-	StringField        *string    `valid:"type(string),required"`
-	BoundedStringField *string    `valid:"type(string),required,stringlength(0|5)"`
-	BoolField          *bool      `valid:"type(bool),required"`
-	DateField          *time.Time `valid:"type(string),required"`
-	TimeField          *time.Time `valid:"type(string),required"`
-	DateTimeField      *time.Time `valid:"type(string),rfc3339,required"`
-	BlobField          *[]byte    `valid:"type(string),base64,required"`
+	SmallIntField      *uint16  `valid:"type(uint16),required,range(10|100)"`
+	IntField           *uint32  `valid:"type(uint32),required,range(10|100)"`
+	BigIntField        *uint64  `valid:"type(uint64),required,range(10|100)"`
+	FloatField         *float32 `valid:"type(float32),required,range(0.0|300.0)"`
+	DoubleField        *float64 `valid:"type(float64),required,range(0.0|123.0)"`
+	StringField        *string  `valid:"type(string),required"`
+	BoundedStringField *string  `valid:"type(string),required,stringlength(0|5)"`
+	BoolField          *bool    `valid:"type(bool),required"`
+	DateField          *string  `valid:"type(string),required"`
+	TimeField          *string  `valid:"type(string),required"`
+	DateTimeField      *string  `valid:"type(string),rfc3339,required"`
+	BlobField          *string  `valid:"type(string),base64,required"`
 }
 
 // createComplexUserResponse contains a newly created complexUser to be returned to the client
@@ -175,6 +175,27 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	dateField, err := time.Parse("2006-01-02", *req.DateField)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid date string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	timeField, err := time.Parse("15:04:05.999999999", *req.TimeField)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid time string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	dateTimeField, err := time.Parse(time.RFC3339Nano, *req.DateTimeField)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid datetime string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
 	complexUser, err := env.dao.CreateComplexUser(dao.CreateComplexUserInput{
 		ID:                 auth.ID,
 		SmallIntField:      *req.SmallIntField,
@@ -185,9 +206,9 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		StringField:        *req.StringField,
 		BoundedStringField: *req.BoundedStringField,
 		BoolField:          *req.BoolField,
-		DateField:          *req.DateField,
-		TimeField:          *req.TimeField,
-		DateTimeField:      *req.DateTimeField,
+		DateField:          dateField,
+		TimeField:          timeField,
+		DateTimeField:      dateTimeField,
 		BlobField:          *req.BlobField,
 	})
 	if err != nil {
@@ -305,6 +326,27 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	dateField, err := time.Parse("2006-01-02", *req.DateField)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid date string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	timeField, err := time.Parse("15:04:05.999999999", *req.TimeField)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid time string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	dateTimeField, err := time.Parse(time.RFC3339Nano, *req.DateTimeField)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid datetime string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
 	complexUser, err := env.dao.UpdateComplexUser(dao.UpdateComplexUserInput{
 		ID:                 complexUserID,
 		SmallIntField:      *req.SmallIntField,
@@ -315,9 +357,9 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		StringField:        *req.StringField,
 		BoundedStringField: *req.BoundedStringField,
 		BoolField:          *req.BoolField,
-		DateField:          *req.DateField,
-		TimeField:          *req.TimeField,
-		DateTimeField:      *req.DateTimeField,
+		DateField:          dateField,
+		TimeField:          timeField,
+		DateTimeField:      dateTimeField,
 		BlobField:          *req.BlobField,
 	})
 	if err != nil {

@@ -32,4 +32,34 @@ object DockerfileBuilderTestData {
       Expose(80),
     ),
   )
+
+  val sampleAuthServiceDockerComposeDockerfile: DockerfileRoot = DockerfileRoot(
+    From("golang", Some("1.13.7-alpine")),
+    Seq(
+      WorkDir("/auth"),
+      Copy("go.mod", "./"),
+      Run("go", Seq("mod", "download")),
+      Copy(".", "."),
+      Copy("config.json", "/etc/auth-service/"),
+      Run("go", Seq("build", "-o", "auth")),
+      Run("apk", Seq("add", "curl")),
+      Run("chmod", Seq("+x", "wait-for-kong.sh")),
+      Cmd("./wait-for-kong.sh", Seq("kong:8001", "--", "./auth")),
+      Expose(80),
+    ),
+  )
+
+  val sampleAuthServiceKubernetesDockerfile: DockerfileRoot = DockerfileRoot(
+    From("golang", Some("1.13.7-alpine")),
+    Seq(
+      WorkDir("/auth"),
+      Copy("go.mod", "./"),
+      Run("go", Seq("mod", "download")),
+      Copy(".", "."),
+      Copy("config.json", "/etc/auth-service/"),
+      Run("go", Seq("build", "-o", "auth")),
+      Entrypoint("./auth", Seq()),
+      Expose(80),
+    ),
+  )
 }
