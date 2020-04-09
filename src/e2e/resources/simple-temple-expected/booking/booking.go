@@ -21,12 +21,12 @@ type env struct {
 
 // createBookingResponse contains a newly created booking to be returned to the client
 type createBookingResponse struct {
-	ID uuid.UUID
+	ID uuid.UUID `json:"id"`
 }
 
 // readBookingResponse contains a single booking to be returned to the client
 type readBookingResponse struct {
-	ID uuid.UUID
+	ID uuid.UUID `json:"id"`
 }
 
 // router generates a router for this service

@@ -21,30 +21,30 @@ type env struct {
 
 // createUserRequest contains the client-provided information required to create a single user
 type createUserRequest struct {
-	Name *string `valid:"type(*string),required,stringlength(2|255)"`
+	Name *string `json:"name" valid:"type(*string),required,stringlength(2|255)"`
 }
 
 // updateUserRequest contains the client-provided information required to update a single user
 type updateUserRequest struct {
-	Name *string `valid:"type(*string),required,stringlength(2|255)"`
+	Name *string `json:"name" valid:"type(*string),required,stringlength(2|255)"`
 }
 
 // createUserResponse contains a newly created user to be returned to the client
 type createUserResponse struct {
-	ID   uuid.UUID
-	Name string
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 // readUserResponse contains a single user to be returned to the client
 type readUserResponse struct {
-	ID   uuid.UUID
-	Name string
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 // updateUserResponse contains a newly updated user to be returned to the client
 type updateUserResponse struct {
-	ID   uuid.UUID
-	Name string
+	ID   uuid.UUID `json:"id"`
+	Name string    `json:"name"`
 }
 
 // router generates a router for this service

@@ -53,6 +53,9 @@ object StringUtils {
   /** Wrap a string in single quotes, note that this does not perform any escaping */
   val singleQuote: StringWrap = stringWrap("\'")
 
+  /** Wrap a string in backticks, note that this does not perform any escaping */
+  val backTick: StringWrap = stringWrap("`")
+
   /** Wrap a string in Spanish question marks, tenga en cuenta que esto no realiza ningún escape */
   val españolQue: StringWrap = stringWrap("¿", "?")
 
