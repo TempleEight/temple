@@ -45,9 +45,6 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     paths.getOrElseUpdate(url, Path.Mutable(parameters = Seq(parameter))).handlers
   }
 
-  private def isClientAttribute(attribute: AbstractAttribute): Boolean =
-    attribute.accessAnnotation.isEmpty || (attribute.accessAnnotation contains Annotation.Client)
-
   private def attributeToOpenAPIType(attribute: AbstractAttribute): OpenAPISimpleType = attribute.attributeType match {
     case UUIDType     => OpenAPISimpleType("string", "uuid")
     case BoolType     => OpenAPISimpleType("boolean")
@@ -82,7 +79,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
 
   private def generateItemInputType(attributes: Map[String, AbstractAttribute]): OpenAPIObject = OpenAPIObject(
     attributes.iterator
-      .filter { case _ -> attribute => attribute.inResponse }
+      .filter { case _ -> attribute => attribute.inRequest }
       .map { case str -> attribute => str -> attributeToOpenAPIType(attribute) }
       .to(attributes.mapFactory),
   )
