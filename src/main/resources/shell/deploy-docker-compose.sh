@@ -8,4 +8,4 @@ until curl -s localhost:8001 2>&1 1>/dev/null; do
 done
 export KONG_ENTRY="localhost:8000"
 export KONG_ADMIN="localhost:8001"
-sh kong/configure-kong-k8s.sh
+sh kong/configure-kong.sh
