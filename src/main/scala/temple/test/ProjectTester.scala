@@ -1,5 +1,7 @@
 package temple.test
 
+import java.net.HttpURLConnection
+
 import scalaj.http.Http
 import temple.ast.Metadata.{Provider, ServiceAuth}
 import temple.ast.{Metadata, Templefile}
@@ -16,6 +18,27 @@ object ProjectTester {
   /** Execute a command, returning the stdout */
   private def exec(command: String): String =
     s"sh -c '$command'".!!
+
+  /** Configure Kong using the generated script, waiting until this is successful */
+  private def configureKong(usesAuth: Boolean, config: ProjectConfig, generatedPath: String): Unit = {
+    var configuredKong = false
+    while (!configuredKong) {
+      exec(
+        s"KONG_ADMIN=${config.kongAdminURL} KONG_ENTRY=${config.baseIP} sh $generatedPath/kong/configure-kong.sh",
+      )
+
+      if (usesAuth) {
+        // Kong is correctly configured if the auth service responds with invalid request
+        val sampleRequest = Try(Http("http://localhost:8000/api/auth/login").method("POST").asString)
+        configuredKong = sampleRequest.fold(_ => false, { _.code == HttpURLConnection.HTTP_BAD_REQUEST })
+        if (!configuredKong) println("Kong wasn't configured correctly - trying again")
+        exec("sleep 5")
+      } else {
+        // TODO: this might not be true, needs investigating
+        configuredKong = true
+      }
+    }
+  }
 
   /** Configure the infrastructure for testing */
   private def performSetup(templefile: Templefile, generatedPath: String): ProjectConfig = {
@@ -37,31 +60,22 @@ object ProjectTester {
         exec(
           s"cd $generatedPath && docker ps -a -q | xargs docker rm -f && docker volume prune -f && docker-compose up --build -d",
         )
-
         var finishedStarting = false
         while (!finishedStarting) {
-          // TODO: this only works if the service has auth
-          val kongRequest = Try(Http("http://localhost:1024/api/auth/login").asString)
-          kongRequest.map { request =>
-            finishedStarting = request.code == 404
+          if (templefile.usesAuth) {
+            // If the service uses auth, wait for that service to respond
+            val authRequest = Try(Http("http://localhost:1024/api/auth/login").asString)
+            finishedStarting = authRequest.fold(_ => false, { _.code == HttpURLConnection.HTTP_NOT_FOUND })
+          } else {
+            // Otherwise wait for kong to be available
+            val kongRequest = Try(Http("http://localhost:8001/status").asString)
+            finishedStarting = kongRequest.fold(_ => false, { _.code == HttpURLConnection.HTTP_OK })
           }
           exec("sleep 5")
         }
         ProjectConfig("localhost:8000", "localhost:8001")
     }
-
-    var configuredKong = false
-    while (!configuredKong) {
-      exec(
-        s"KONG_ADMIN=${config.kongAdminURL} KONG_ENTRY=${config.baseIP} sh $generatedPath/kong/configure-kong.sh",
-      )
-      val sampleRequest = Try(Http("http://localhost:8000/api/auth/login").method("POST").asString)
-      sampleRequest.map { request =>
-        configuredKong = request.code == 400
-      }
-      if (!configuredKong) println("Kong wasn't configured correctly - trying again")
-      exec("sleep 5")
-    }
+    configureKong(templefile.usesAuth, config, generatedPath)
     config
   }
 
