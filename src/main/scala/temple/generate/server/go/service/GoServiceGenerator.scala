@@ -1,7 +1,7 @@
 package temple.generate.server.go.service
 
+import temple.ast.AttributeType
 import temple.ast.Metadata.{Readable, Writable}
-import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
 import temple.generate.server.go.common._
@@ -33,10 +33,7 @@ object GoServiceGenerator extends ServiceGenerator {
     val usesBase64 = root.attributes.values.map(_.attributeType).toSet.contains(AttributeType.BlobType())
 
     // Attributes filtered by which are client-provided
-    val clientAttributes = root.attributes.filterNot {
-      case (_, attr) =>
-        attr.accessAnnotation.contains(Annotation.Server) || attr.accessAnnotation.contains(Annotation.ServerSet)
-    }
+    val clientAttributes = root.attributes.filter { case (_, attr) => attr.inRequest }
 
     // Whether or not this service is enumerating by creator
     lazy val enumeratingByCreator = root.readable match {
