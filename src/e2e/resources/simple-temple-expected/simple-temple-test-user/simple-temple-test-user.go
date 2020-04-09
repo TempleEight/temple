@@ -22,28 +22,28 @@ type env struct {
 
 // createSimpleTempleTestUserRequest contains the client-provided information required to create a single simpleTempleTestUser
 type createSimpleTempleTestUserRequest struct {
-	SimpleTempleTestUser *string  `valid:"type(string),required"`
-	Email                *string  `valid:"type(string),required,stringlength(5|40)"`
-	FirstName            *string  `valid:"type(string),required"`
-	LastName             *string  `valid:"type(string),required"`
-	CreatedAt            *string  `valid:"type(string),rfc3339,required"`
-	NumberOfDogs         *int32   `valid:"type(int32),required"`
-	CurrentBankBalance   *float32 `valid:"type(float32),required"`
-	BirthDate            *string  `valid:"type(string),required"`
-	BreakfastTime        *string  `valid:"type(string),required"`
+	SimpleTempleTestUser *string  `valid:"type(*string),required"`
+	Email                *string  `valid:"type(*string),required,stringlength(5|40)"`
+	FirstName            *string  `valid:"type(*string),required"`
+	LastName             *string  `valid:"type(*string),required"`
+	CreatedAt            *string  `valid:"type(*string),rfc3339,required"`
+	NumberOfDogs         *int32   `valid:"type(*int32),required"`
+	CurrentBankBalance   *float32 `valid:"type(*float32),required"`
+	BirthDate            *string  `valid:"type(*string),required"`
+	BreakfastTime        *string  `valid:"type(*string),required"`
 }
 
 // updateSimpleTempleTestUserRequest contains the client-provided information required to update a single simpleTempleTestUser
 type updateSimpleTempleTestUserRequest struct {
-	SimpleTempleTestUser *string  `valid:"type(string),required"`
-	Email                *string  `valid:"type(string),required,stringlength(5|40)"`
-	FirstName            *string  `valid:"type(string),required"`
-	LastName             *string  `valid:"type(string),required"`
-	CreatedAt            *string  `valid:"type(string),rfc3339,required"`
-	NumberOfDogs         *int32   `valid:"type(int32),required"`
-	CurrentBankBalance   *float32 `valid:"type(float32),required"`
-	BirthDate            *string  `valid:"type(string),required"`
-	BreakfastTime        *string  `valid:"type(string),required"`
+	SimpleTempleTestUser *string  `valid:"type(*string),required"`
+	Email                *string  `valid:"type(*string),required,stringlength(5|40)"`
+	FirstName            *string  `valid:"type(*string),required"`
+	LastName             *string  `valid:"type(*string),required"`
+	CreatedAt            *string  `valid:"type(*string),rfc3339,required"`
+	NumberOfDogs         *int32   `valid:"type(*int32),required"`
+	CurrentBankBalance   *float32 `valid:"type(*float32),required"`
+	BirthDate            *string  `valid:"type(*string),required"`
+	BreakfastTime        *string  `valid:"type(*string),required"`
 }
 
 // listSimpleTempleTestUserElement contains a single simpleTempleTestUser list element

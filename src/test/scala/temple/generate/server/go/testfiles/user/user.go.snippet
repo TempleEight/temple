@@ -21,12 +21,12 @@ type env struct {
 
 // createUserRequest contains the client-provided information required to create a single user
 type createUserRequest struct {
-	Name *string `valid:"type(string),required,stringlength(2|255)"`
+	Name *string `valid:"type(*string),required,stringlength(2|255)"`
 }
 
 // updateUserRequest contains the client-provided information required to update a single user
 type updateUserRequest struct {
-	Name *string `valid:"type(string),required,stringlength(2|255)"`
+	Name *string `valid:"type(*string),required,stringlength(2|255)"`
 }
 
 // createUserResponse contains a newly created user to be returned to the client
