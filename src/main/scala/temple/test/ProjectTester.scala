@@ -21,7 +21,7 @@ object ProjectTester {
   private def performSetup(templefile: Templefile, generatedPath: String): ProjectConfig = {
     val provider = templefile
       .lookupMetadata[Metadata.Provider]
-      .getOrElse(throw new RuntimeException("Could not find deployment information"))
+      .getOrElse { throw new RuntimeException("Could not find deployment information") }
 
     val config = provider match {
       case Provider.Kubernetes =>
@@ -40,18 +40,28 @@ object ProjectTester {
 
         var finishedStarting = false
         while (!finishedStarting) {
-          val kongRequest = Try(Http("http://localhost:8001/status").asString)
+          // TODO: this only works if the service has auth
+          val kongRequest = Try(Http("http://localhost:1024/api/auth/login").asString)
           kongRequest.map { request =>
-            finishedStarting = request.code == 200
+            finishedStarting = request.code == 404
           }
           exec("sleep 5")
         }
         ProjectConfig("localhost:8000", "localhost:8001")
     }
 
-    exec(
-      s"KONG_ADMIN=${config.kongAdminURL} KONG_ENTRY=${config.baseIP} sh $generatedPath/kong/configure-kong.sh",
-    )
+    var configuredKong = false
+    while (!configuredKong) {
+      exec(
+        s"KONG_ADMIN=${config.kongAdminURL} KONG_ENTRY=${config.baseIP} sh $generatedPath/kong/configure-kong.sh",
+      )
+      val sampleRequest = Try(Http("http://localhost:8000/api/auth/login").method("POST").asString)
+      sampleRequest.map { request =>
+        configuredKong = request.code == 400
+      }
+      if (!configuredKong) println("Kong wasn't configured correctly - trying again")
+      exec("sleep 5")
+    }
     config
   }
 
