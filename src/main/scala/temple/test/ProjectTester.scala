@@ -1,5 +1,6 @@
 package temple.test
 
+import java.io.IOException
 import java.net.HttpURLConnection
 
 import scalaj.http.Http
@@ -28,14 +29,22 @@ object ProjectTester {
       )
 
       if (usesAuth) {
-        // Kong is correctly configured if the auth service responds with invalid request
-        val sampleRequest = Try(Http("http://localhost:8000/api/auth/login").method("POST").asString)
-        configuredKong = sampleRequest.fold(_ => false, { _.code == HttpURLConnection.HTTP_BAD_REQUEST })
-        if (!configuredKong) println("Kong wasn't configured correctly - trying again")
-        exec("sleep 5")
-      } else {
-        // TODO: this might not be true, needs investigating
-        configuredKong = true
+        try {
+          configuredKong =
+            if (usesAuth)
+              Http("http://localhost:8000/api/auth/login")
+                .method("POST")
+                .asString
+                .code == HttpURLConnection.HTTP_BAD_REQUEST
+            // TODO: this might not be true, needs investigating
+            else true
+          if (!configuredKong) {
+            println("Kong wasn't configured correctly - trying again")
+            exec("sleep 5")
+          }
+        } catch {
+          case _: IOException => // Keep trying
+        }
       }
     }
   }
@@ -60,18 +69,22 @@ object ProjectTester {
         exec(
           s"cd $generatedPath && docker ps -a -q | xargs docker rm -f && docker volume prune -f && docker-compose up --build -d",
         )
-        var finishedStarting = false
-        while (!finishedStarting) {
-          if (templefile.usesAuth) {
-            // If the service uses auth, wait for that service to respond
-            val authRequest = Try(Http("http://localhost:1024/api/auth/login").asString)
-            finishedStarting = authRequest.fold(_ => false, { _.code == HttpURLConnection.HTTP_NOT_FOUND })
-          } else {
-            // Otherwise wait for kong to be available
-            val kongRequest = Try(Http("http://localhost:8001/status").asString)
-            finishedStarting = kongRequest.fold(_ => false, { _.code == HttpURLConnection.HTTP_OK })
+
+        var successfullyStarted = false
+        while (!successfullyStarted) {
+          // If the service uses auth, wait for that service to respond, otherwise wait for kong to be available
+          try {
+            successfullyStarted =
+              if (templefile.usesAuth)
+                Http("http://localhost:1024/auth/login")
+                  .method("POST")
+                  .asString
+                  .code == HttpURLConnection.HTTP_BAD_REQUEST
+              else Http("http://localhost:8001/status").asString.code == HttpURLConnection.HTTP_OK
+          } catch {
+            case _: IOException => // Keep trying
           }
-          exec("sleep 5")
+          if (!successfullyStarted) exec("sleep 5")
         }
         ProjectConfig("localhost:8000", "localhost:8001")
     }
