@@ -1,7 +1,7 @@
 package temple.generate.server.go.service.main
 
 import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
-import temple.ast.{AbstractAttribute, Annotation, AttributeType}
+import temple.ast.{AbstractAttribute, AttributeType}
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, Create, Read, Update}
 import temple.generate.server.ServiceRoot
@@ -118,8 +118,8 @@ object GoServiceMainStructGenerator {
     // Response struct fields include ID and user-defined attributes without the @server annotation
     val fields = ListMap(root.idAttribute.name.toUpperCase -> generateRequestResponseType(AttributeType.UUIDType)) ++
       root.attributes.collect {
-        case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.Server) =>
-          (name.capitalize, generateRequestResponseType(attribute.attributeType))
+        case (name, attribute) if attribute.inResponse =>
+          name.capitalize -> generateRequestResponseType(attribute.attributeType)
       }
     mkCode.doubleLines(
       when(operations.contains(CRUD.List)) { generateListResponseStructs(root, fields) },
