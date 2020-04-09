@@ -1,6 +1,5 @@
 package temple.ast
 
-import temple.DSL.semantics.SemanticParsingException
 import temple.ast.AbstractServiceBlock._
 import temple.ast.Metadata.ServiceAuth
 import temple.ast.Templefile.Ports
@@ -64,11 +63,9 @@ case class Templefile(
   def structNames: Iterable[String]        = structLocations.keys
   lazy val providedBlockNames: Set[String] = (services.keys ++ structNames).toSet
 
-  /** Get a block by name, either as a service or a block. If neither exist, throw an error */
+  /** Get a block by name, either as a service or a block */
   def getBlock(name: String): AttributeBlock[_] =
-    services.get(name).orElse(services.get(structLocations(name)).map(_.structs(name))).getOrElse {
-      throw new SemanticParsingException(s"Cannot find block with name $name")
-    }
+    services.getOrElse(name, services(structLocations(name)).structs(name))
 }
 
 object Templefile {
