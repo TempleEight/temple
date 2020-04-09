@@ -9,7 +9,6 @@ import temple.ast.{Metadata, Templefile}
 import temple.test.internal.{AuthServiceTest, CRUDServiceTest, ProjectConfig}
 
 import scala.sys.process._
-import scala.util.Try
 
 object ProjectTester {
 
@@ -58,6 +57,10 @@ object ProjectTester {
     val config = provider match {
       case Provider.Kubernetes =>
         println("🍪 Spinning up Kubernetes infrastructure...")
+        // Require certain env vars to be set
+        Seq("REG_URL", "REG_USERNAME", "REG_PASSWORD", "REG_EMAIL").foreach { envVar =>
+          if (System.getenv(envVar) == null) throw new EnvironmentVariableNotSetException(envVar)
+        }
         exec(s"sh $generatedPath/deploy.sh")
 
         // Grab Kong's URL for future requests
@@ -67,7 +70,7 @@ object ProjectTester {
       case Provider.DockerCompose =>
         println("🐳 Spinning up Docker Compose infrastructure...")
         exec(
-          s"cd $generatedPath && docker ps -a -q | xargs docker rm -f && docker volume prune -f && docker-compose up --build -d",
+          s"cd $generatedPath && docker ps -a -q | xargs docker rm -f && docker volume prune -f && docker-compose up --build -d 2>&1",
         )
 
         var successfullyStarted = false
@@ -104,20 +107,25 @@ object ProjectTester {
         exec("kubectl drain minikube && minikube delete")
       case Provider.DockerCompose =>
         println(s"💀 Shutting down Docker Compose infrastructure...")
-        exec(s"cd $generatedPath && docker-compose down")
+        exec(s"cd $generatedPath && docker-compose down 2>&1")
     }
   }
 
   /** Execute the tests on each generated service */
   private def performTests(templefile: Templefile, generatedPath: String, url: String): Unit = {
     val serviceAuths = templefile.services.values.flatMap(_.lookupMetadata[ServiceAuth]).toSet
+    var anyFailed    = false
     if (serviceAuths.nonEmpty) {
-      AuthServiceTest.test(serviceAuths, url)
+      anyFailed = AuthServiceTest.test(serviceAuths, url) || anyFailed
     }
     templefile.providedServices.foreach {
       case (name, block) =>
-        CRUDServiceTest.test(name, block, templefile.providedServices, url)
+        anyFailed = CRUDServiceTest.test(name, block, templefile.providedServices, url) || anyFailed
     }
+
+    // Propagate exception up so that the exit code is relevant
+    if (anyFailed) throw new RuntimeException("😢 Looks like a test didn't go as planned")
+    else println("🎉 Everything passed")
   }
 
   /**
@@ -126,18 +134,11 @@ object ProjectTester {
     * @param templefile The parsed & validated templefile
     * @param generatedPath The root of the project where the generated code resides
     */
-  def test(templefile: Templefile, generatedPath: String): Unit = {
-    // Require certain env vars to be set
-    Seq("REG_URL", "REG_USERNAME", "REG_PASSWORD", "REG_EMAIL").foreach { envVar =>
-      if (System.getenv(envVar) == null) throw new EnvironmentVariableNotSetException(envVar)
-    }
-
+  def test(templefile: Templefile, generatedPath: String): Unit =
     try {
       val config = performSetup(templefile, generatedPath)
       performTests(templefile, generatedPath, config.baseIP)
     } finally {
       performShutdown(templefile, generatedPath)
     }
-  }
-
 }

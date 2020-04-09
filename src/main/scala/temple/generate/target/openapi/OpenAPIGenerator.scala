@@ -45,12 +45,6 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     paths.getOrElseUpdate(url, Path.Mutable(parameters = Seq(parameter))).handlers
   }
 
-  private def isServerAttribute(attribute: AbstractAttribute): Boolean =
-    attribute.accessAnnotation contains Annotation.Server
-
-  private def isClientAttribute(attribute: AbstractAttribute): Boolean =
-    attribute.accessAnnotation.isEmpty || (attribute.accessAnnotation contains Annotation.Client)
-
   private def attributeToOpenAPIType(attribute: AbstractAttribute): OpenAPISimpleType = attribute.attributeType match {
     case UUIDType     => OpenAPISimpleType("string", "uuid")
     case BoolType     => OpenAPISimpleType("boolean")
@@ -68,24 +62,24 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
       val minimum = min.map("minimum" -> _.asJson)
       val maximum = max.map("maximum" -> _.asJson)
       OpenAPISimpleType("number", if (precision > 4) "int64" else "int32", Seq(minimum, maximum).flatten: _*)
-    case FloatType(max, min, precision) =>
+    case floatType @ FloatType(max, min, _) =>
       val minimum = min.map("minimum" -> _.asJson)
       val maximum = max.map("maximum" -> _.asJson)
-      OpenAPISimpleType("number", if (precision > 4) "double" else "float", Seq(minimum, maximum).flatten: _*)
+      OpenAPISimpleType("number", if (floatType.isDouble) "double" else "float", Seq(minimum, maximum).flatten: _*)
     case ForeignKey(references) =>
       OpenAPISimpleType("number", "int32", "description" -> s"Reference to $references ID".asJson)
   }
 
   private def generateItemType(attributes: Map[String, AbstractAttribute]): OpenAPIObject = OpenAPIObject(
     attributes.iterator
-      .filter { case _ -> attribute => !isServerAttribute(attribute) }
+      .filter { case _ -> attribute => attribute.inResponse }
       .map { case str -> attribute => str -> attributeToOpenAPIType(attribute) }
       .to(attributes.mapFactory),
   )
 
   private def generateItemInputType(attributes: Map[String, AbstractAttribute]): OpenAPIObject = OpenAPIObject(
     attributes.iterator
-      .filter { case _ -> attribute => isClientAttribute(attribute) }
+      .filter { case _ -> attribute => attribute.inRequest }
       .map { case str -> attribute => str -> attributeToOpenAPIType(attribute) }
       .to(attributes.mapFactory),
   )

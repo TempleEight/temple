@@ -6,6 +6,11 @@ sealed trait AbstractAttribute {
   def attributeType: AttributeType
   def accessAnnotation: Option[AccessAnnotation]
   def valueAnnotations: Set[ValueAnnotation]
+
+  def inRequest: Boolean =
+    !accessAnnotation.contains(Annotation.Server) && !accessAnnotation.contains(Annotation.ServerSet)
+
+  def inResponse: Boolean = !accessAnnotation.contains(Annotation.Server)
 }
 
 object AbstractAttribute {
@@ -24,7 +29,7 @@ object AbstractAttribute {
 
   case object CreatedByAttribute extends AbstractAttribute {
     override def attributeType: AttributeType               = AttributeType.UUIDType
-    override def accessAnnotation: Option[AccessAnnotation] = Some(Annotation.ServerSet)
+    override def accessAnnotation: Option[AccessAnnotation] = Some(Annotation.Server)
     override def valueAnnotations: Set[ValueAnnotation]     = Set()
   }
 }

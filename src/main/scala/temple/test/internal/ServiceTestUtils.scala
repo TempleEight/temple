@@ -1,6 +1,6 @@
 package temple.test.internal
 
-import java.sql.{Date, Time, Timestamp}
+import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.UUID
 
@@ -9,7 +9,7 @@ import io.circe.syntax._
 import io.circe.{Json, JsonObject}
 import scalaj.http.Http
 import temple.ast.AbstractServiceBlock.ServiceBlock
-import temple.ast.{AbstractAttribute, Annotation, AttributeType, Metadata}
+import temple.ast.{AbstractAttribute, AttributeType, Metadata}
 import temple.utils.MonadUtils.FromEither
 import temple.utils.StringUtils
 
@@ -116,12 +116,7 @@ object ServiceTestUtils {
   ): Json =
     // Drop any attributes that are @server or @serverSet
     attributes
-      .filterNot {
-        case (_, attribute) =>
-          attribute.accessAnnotation.contains(Annotation.Server) || attribute.accessAnnotation.contains(
-            Annotation.ServerSet,
-          )
-      }
+      .filter { case (_, attribute) => attribute.inRequest }
       .map {
         case (name, attribute) =>
           val value: Json = attribute.attributeType match {
@@ -145,20 +140,12 @@ object ServiceTestUtils {
             case AttributeType.StringType(max, min) =>
               val maxValue: Long = max.getOrElse(20)
               val minValue: Int  = min.getOrElse(0)
-              val random         = Random.between(minValue, maxValue)
+              val random         = Random.between(minValue, maxValue + 1)
               StringUtils.randomString(random.toInt).asJson
-            case AttributeType.IntType(max, min, precision) =>
-              val maxValue: Long = max.getOrElse(Long.MaxValue)
-              val minValue: Long = min.getOrElse(Long.MinValue)
-              (Random.between(minValue, maxValue) % math.pow(2, precision)).toLong.asJson
-            case AttributeType.FloatType(max, min, precision) if precision <= 4 =>
-              val maxValue = max.getOrElse(Float.MaxValue.toDouble)
-              val minValue = min.getOrElse(Float.MinValue.toDouble)
-              Random.between(minValue, maxValue).asJson
-            case AttributeType.FloatType(max, min, _) =>
-              val maxValue = max.getOrElse(Double.MaxValue)
-              val minValue = min.getOrElse(Double.MinValue)
-              Random.between(minValue, maxValue).asJson
+            case intType: AttributeType.IntType =>
+              Random.between(intType.minValue, intType.maxValue + 1).asJson
+            case floatType: AttributeType.FloatType =>
+              Random.between(floatType.minValue, floatType.maxValue).asJson
           }
           (name, value)
       }
@@ -187,9 +174,9 @@ object ServiceTestUtils {
         requestBody,
         newAccessToken,
       )
-    val idJSON = createJSON("ID").getOrElse(test.fail(s"response to create $serviceName did not contain an ID key"))
+    val idJSON = createJSON("id").getOrElse(test.fail(s"response to create $serviceName did not contain an id key"))
     val id =
-      idJSON.asString.getOrElse(test.fail(s"response to create $serviceName contained field ID, but was not a string"))
+      idJSON.asString.getOrElse(test.fail(s"response to create $serviceName contained field id, but was not a string"))
     CreateResponse(id, newAccessToken)
   }
 

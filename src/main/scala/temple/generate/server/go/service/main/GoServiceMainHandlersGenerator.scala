@@ -39,7 +39,7 @@ object GoServiceMainHandlersGenerator {
     // Includes ID attribute and all attributes without the @server annotation
     ListMap(root.idAttribute.name.toUpperCase -> s"${root.decapitalizedName}.${root.idAttribute.name.toUpperCase}") ++
     root.attributes.collect {
-      case name -> attribute if !attribute.accessAnnotation.contains(Annotation.Server) =>
+      case name -> attribute if attribute.inResponse =>
         name.capitalize -> generateResponseMapFormat(root, name, attribute.attributeType)
     }
 

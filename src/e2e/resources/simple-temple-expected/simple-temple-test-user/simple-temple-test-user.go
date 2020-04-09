@@ -22,42 +22,42 @@ type env struct {
 
 // createSimpleTempleTestUserRequest contains the client-provided information required to create a single simpleTempleTestUser
 type createSimpleTempleTestUserRequest struct {
-	SimpleTempleTestUser *string  `valid:"type(*string),required"`
-	Email                *string  `valid:"type(*string),required,stringlength(5|40)"`
-	FirstName            *string  `valid:"type(*string),required"`
-	LastName             *string  `valid:"type(*string),required"`
-	CreatedAt            *string  `valid:"type(*string),rfc3339,required"`
-	NumberOfDogs         *int32   `valid:"type(*int32),required"`
-	CurrentBankBalance   *float32 `valid:"type(*float32),required"`
-	BirthDate            *string  `valid:"type(*string),required"`
-	BreakfastTime        *string  `valid:"type(*string),required"`
+	SimpleTempleTestUser *string  `json:"simpleTempleTestUser" valid:"type(*string),required"`
+	Email                *string  `json:"email" valid:"type(*string),required,stringlength(5|40)"`
+	FirstName            *string  `json:"firstName" valid:"type(*string),required"`
+	LastName             *string  `json:"lastName" valid:"type(*string),required"`
+	CreatedAt            *string  `json:"createdAt" valid:"type(*string),rfc3339,required"`
+	NumberOfDogs         *int32   `json:"numberOfDogs" valid:"type(*int32),required"`
+	CurrentBankBalance   *float32 `json:"currentBankBalance" valid:"type(*float32),required"`
+	BirthDate            *string  `json:"birthDate" valid:"type(*string),required"`
+	BreakfastTime        *string  `json:"breakfastTime" valid:"type(*string),required"`
 }
 
 // updateSimpleTempleTestUserRequest contains the client-provided information required to update a single simpleTempleTestUser
 type updateSimpleTempleTestUserRequest struct {
-	SimpleTempleTestUser *string  `valid:"type(*string),required"`
-	Email                *string  `valid:"type(*string),required,stringlength(5|40)"`
-	FirstName            *string  `valid:"type(*string),required"`
-	LastName             *string  `valid:"type(*string),required"`
-	CreatedAt            *string  `valid:"type(*string),rfc3339,required"`
-	NumberOfDogs         *int32   `valid:"type(*int32),required"`
-	CurrentBankBalance   *float32 `valid:"type(*float32),required"`
-	BirthDate            *string  `valid:"type(*string),required"`
-	BreakfastTime        *string  `valid:"type(*string),required"`
+	SimpleTempleTestUser *string  `json:"simpleTempleTestUser" valid:"type(*string),required"`
+	Email                *string  `json:"email" valid:"type(*string),required,stringlength(5|40)"`
+	FirstName            *string  `json:"firstName" valid:"type(*string),required"`
+	LastName             *string  `json:"lastName" valid:"type(*string),required"`
+	CreatedAt            *string  `json:"createdAt" valid:"type(*string),rfc3339,required"`
+	NumberOfDogs         *int32   `json:"numberOfDogs" valid:"type(*int32),required"`
+	CurrentBankBalance   *float32 `json:"currentBankBalance" valid:"type(*float32),required"`
+	BirthDate            *string  `json:"birthDate" valid:"type(*string),required"`
+	BreakfastTime        *string  `json:"breakfastTime" valid:"type(*string),required"`
 }
 
 // listSimpleTempleTestUserElement contains a single simpleTempleTestUser list element
 type listSimpleTempleTestUserElement struct {
-	ID                   uuid.UUID
-	SimpleTempleTestUser string
-	Email                string
-	FirstName            string
-	LastName             string
-	CreatedAt            string
-	NumberOfDogs         int32
-	CurrentBankBalance   float32
-	BirthDate            string
-	BreakfastTime        string
+	ID                   uuid.UUID `json:"id"`
+	SimpleTempleTestUser string    `json:"simpleTempleTestUser"`
+	Email                string    `json:"email"`
+	FirstName            string    `json:"firstName"`
+	LastName             string    `json:"lastName"`
+	CreatedAt            string    `json:"createdAt"`
+	NumberOfDogs         int32     `json:"numberOfDogs"`
+	CurrentBankBalance   float32   `json:"currentBankBalance"`
+	BirthDate            string    `json:"birthDate"`
+	BreakfastTime        string    `json:"breakfastTime"`
 }
 
 // listSimpleTempleTestUserResponse contains a single simpleTempleTestUser list to be returned to the client
@@ -67,44 +67,44 @@ type listSimpleTempleTestUserResponse struct {
 
 // createSimpleTempleTestUserResponse contains a newly created simpleTempleTestUser to be returned to the client
 type createSimpleTempleTestUserResponse struct {
-	ID                   uuid.UUID
-	SimpleTempleTestUser string
-	Email                string
-	FirstName            string
-	LastName             string
-	CreatedAt            string
-	NumberOfDogs         int32
-	CurrentBankBalance   float32
-	BirthDate            string
-	BreakfastTime        string
+	ID                   uuid.UUID `json:"id"`
+	SimpleTempleTestUser string    `json:"simpleTempleTestUser"`
+	Email                string    `json:"email"`
+	FirstName            string    `json:"firstName"`
+	LastName             string    `json:"lastName"`
+	CreatedAt            string    `json:"createdAt"`
+	NumberOfDogs         int32     `json:"numberOfDogs"`
+	CurrentBankBalance   float32   `json:"currentBankBalance"`
+	BirthDate            string    `json:"birthDate"`
+	BreakfastTime        string    `json:"breakfastTime"`
 }
 
 // readSimpleTempleTestUserResponse contains a single simpleTempleTestUser to be returned to the client
 type readSimpleTempleTestUserResponse struct {
-	ID                   uuid.UUID
-	SimpleTempleTestUser string
-	Email                string
-	FirstName            string
-	LastName             string
-	CreatedAt            string
-	NumberOfDogs         int32
-	CurrentBankBalance   float32
-	BirthDate            string
-	BreakfastTime        string
+	ID                   uuid.UUID `json:"id"`
+	SimpleTempleTestUser string    `json:"simpleTempleTestUser"`
+	Email                string    `json:"email"`
+	FirstName            string    `json:"firstName"`
+	LastName             string    `json:"lastName"`
+	CreatedAt            string    `json:"createdAt"`
+	NumberOfDogs         int32     `json:"numberOfDogs"`
+	CurrentBankBalance   float32   `json:"currentBankBalance"`
+	BirthDate            string    `json:"birthDate"`
+	BreakfastTime        string    `json:"breakfastTime"`
 }
 
 // updateSimpleTempleTestUserResponse contains a newly updated simpleTempleTestUser to be returned to the client
 type updateSimpleTempleTestUserResponse struct {
-	ID                   uuid.UUID
-	SimpleTempleTestUser string
-	Email                string
-	FirstName            string
-	LastName             string
-	CreatedAt            string
-	NumberOfDogs         int32
-	CurrentBankBalance   float32
-	BirthDate            string
-	BreakfastTime        string
+	ID                   uuid.UUID `json:"id"`
+	SimpleTempleTestUser string    `json:"simpleTempleTestUser"`
+	Email                string    `json:"email"`
+	FirstName            string    `json:"firstName"`
+	LastName             string    `json:"lastName"`
+	CreatedAt            string    `json:"createdAt"`
+	NumberOfDogs         int32     `json:"numberOfDogs"`
+	CurrentBankBalance   float32   `json:"currentBankBalance"`
+	BirthDate            string    `json:"birthDate"`
+	BreakfastTime        string    `json:"breakfastTime"`
 }
 
 // router generates a router for this service

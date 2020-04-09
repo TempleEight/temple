@@ -151,6 +151,16 @@ class ValidatorTest extends FlatSpec with Matchers {
     ) shouldBe Set("IntType max not above min in a, in User")
 
     validationErrors(
+      templefileWithUserAttributes(
+        "a" -> Attribute(IntType(min = Some(1024), precision = 1)),
+        "b" -> Attribute(IntType(max = Some(-50_000), precision = 2)),
+      ),
+    ) shouldBe Set(
+      "IntType min is out of range for the precision 1 in a, in User",
+      "IntType max is out of range for the precision 2 in b, in User",
+    )
+
+    validationErrors(
       templefileWithUserAttributes("a" -> Attribute(IntType(precision = 16))),
     ) shouldBe Set("IntType precision not between 1 and 8 in a, in User")
 

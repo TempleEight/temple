@@ -21,12 +21,12 @@ type env struct {
 
 // createSimpleTempleTestGroupResponse contains a newly created simpleTempleTestGroup to be returned to the client
 type createSimpleTempleTestGroupResponse struct {
-	ID uuid.UUID
+	ID uuid.UUID `json:"id"`
 }
 
 // readSimpleTempleTestGroupResponse contains a single simpleTempleTestGroup to be returned to the client
 type readSimpleTempleTestGroupResponse struct {
-	ID uuid.UUID
+	ID uuid.UUID `json:"id"`
 }
 
 // router generates a router for this service

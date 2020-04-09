@@ -23,85 +23,85 @@ type env struct {
 
 // createComplexUserRequest contains the client-provided information required to create a single complexUser
 type createComplexUserRequest struct {
-	SmallIntField      *uint16  `valid:"type(*uint16),required,range(10|100)"`
-	IntField           *uint32  `valid:"type(*uint32),required,range(10|100)"`
-	BigIntField        *uint64  `valid:"type(*uint64),required,range(10|100)"`
-	FloatField         *float32 `valid:"type(*float32),required,range(0.0|300.0)"`
-	DoubleField        *float64 `valid:"type(*float64),required,range(0.0|123.0)"`
-	StringField        *string  `valid:"type(*string),required"`
-	BoundedStringField *string  `valid:"type(*string),required,stringlength(0|5)"`
-	BoolField          *bool    `valid:"type(*bool),required"`
-	DateField          *string  `valid:"type(*string),required"`
-	TimeField          *string  `valid:"type(*string),required"`
-	DateTimeField      *string  `valid:"type(*string),rfc3339,required"`
-	BlobField          *string  `valid:"type(*string),base64,required"`
+	SmallIntField      *uint16  `json:"smallIntField" valid:"type(*uint16),required,range(10|100)"`
+	IntField           *uint32  `json:"intField" valid:"type(*uint32),required,range(10|100)"`
+	BigIntField        *uint64  `json:"bigIntField" valid:"type(*uint64),required,range(10|100)"`
+	FloatField         *float32 `json:"floatField" valid:"type(*float32),required,range(0.0|300.0)"`
+	DoubleField        *float64 `json:"doubleField" valid:"type(*float64),required,range(0.0|123.0)"`
+	StringField        *string  `json:"stringField" valid:"type(*string),required"`
+	BoundedStringField *string  `json:"boundedStringField" valid:"type(*string),required,stringlength(0|5)"`
+	BoolField          *bool    `json:"boolField" valid:"type(*bool),required"`
+	DateField          *string  `json:"dateField" valid:"type(*string),required"`
+	TimeField          *string  `json:"timeField" valid:"type(*string),required"`
+	DateTimeField      *string  `json:"dateTimeField" valid:"type(*string),rfc3339,required"`
+	BlobField          *string  `json:"blobField" valid:"type(*string),base64,required"`
 }
 
 // updateComplexUserRequest contains the client-provided information required to update a single complexUser
 type updateComplexUserRequest struct {
-	SmallIntField      *uint16  `valid:"type(*uint16),required,range(10|100)"`
-	IntField           *uint32  `valid:"type(*uint32),required,range(10|100)"`
-	BigIntField        *uint64  `valid:"type(*uint64),required,range(10|100)"`
-	FloatField         *float32 `valid:"type(*float32),required,range(0.0|300.0)"`
-	DoubleField        *float64 `valid:"type(*float64),required,range(0.0|123.0)"`
-	StringField        *string  `valid:"type(*string),required"`
-	BoundedStringField *string  `valid:"type(*string),required,stringlength(0|5)"`
-	BoolField          *bool    `valid:"type(*bool),required"`
-	DateField          *string  `valid:"type(*string),required"`
-	TimeField          *string  `valid:"type(*string),required"`
-	DateTimeField      *string  `valid:"type(*string),rfc3339,required"`
-	BlobField          *string  `valid:"type(*string),base64,required"`
+	SmallIntField      *uint16  `json:"smallIntField" valid:"type(*uint16),required,range(10|100)"`
+	IntField           *uint32  `json:"intField" valid:"type(*uint32),required,range(10|100)"`
+	BigIntField        *uint64  `json:"bigIntField" valid:"type(*uint64),required,range(10|100)"`
+	FloatField         *float32 `json:"floatField" valid:"type(*float32),required,range(0.0|300.0)"`
+	DoubleField        *float64 `json:"doubleField" valid:"type(*float64),required,range(0.0|123.0)"`
+	StringField        *string  `json:"stringField" valid:"type(*string),required"`
+	BoundedStringField *string  `json:"boundedStringField" valid:"type(*string),required,stringlength(0|5)"`
+	BoolField          *bool    `json:"boolField" valid:"type(*bool),required"`
+	DateField          *string  `json:"dateField" valid:"type(*string),required"`
+	TimeField          *string  `json:"timeField" valid:"type(*string),required"`
+	DateTimeField      *string  `json:"dateTimeField" valid:"type(*string),rfc3339,required"`
+	BlobField          *string  `json:"blobField" valid:"type(*string),base64,required"`
 }
 
 // createComplexUserResponse contains a newly created complexUser to be returned to the client
 type createComplexUserResponse struct {
-	ID                 uuid.UUID
-	SmallIntField      uint16
-	IntField           uint32
-	BigIntField        uint64
-	FloatField         float32
-	DoubleField        float64
-	StringField        string
-	BoundedStringField string
-	BoolField          bool
-	DateField          string
-	TimeField          string
-	DateTimeField      string
-	BlobField          string
+	ID                 uuid.UUID `json:"id"`
+	SmallIntField      uint16    `json:"smallIntField"`
+	IntField           uint32    `json:"intField"`
+	BigIntField        uint64    `json:"bigIntField"`
+	FloatField         float32   `json:"floatField"`
+	DoubleField        float64   `json:"doubleField"`
+	StringField        string    `json:"stringField"`
+	BoundedStringField string    `json:"boundedStringField"`
+	BoolField          bool      `json:"boolField"`
+	DateField          string    `json:"dateField"`
+	TimeField          string    `json:"timeField"`
+	DateTimeField      string    `json:"dateTimeField"`
+	BlobField          string    `json:"blobField"`
 }
 
 // readComplexUserResponse contains a single complexUser to be returned to the client
 type readComplexUserResponse struct {
-	ID                 uuid.UUID
-	SmallIntField      uint16
-	IntField           uint32
-	BigIntField        uint64
-	FloatField         float32
-	DoubleField        float64
-	StringField        string
-	BoundedStringField string
-	BoolField          bool
-	DateField          string
-	TimeField          string
-	DateTimeField      string
-	BlobField          string
+	ID                 uuid.UUID `json:"id"`
+	SmallIntField      uint16    `json:"smallIntField"`
+	IntField           uint32    `json:"intField"`
+	BigIntField        uint64    `json:"bigIntField"`
+	FloatField         float32   `json:"floatField"`
+	DoubleField        float64   `json:"doubleField"`
+	StringField        string    `json:"stringField"`
+	BoundedStringField string    `json:"boundedStringField"`
+	BoolField          bool      `json:"boolField"`
+	DateField          string    `json:"dateField"`
+	TimeField          string    `json:"timeField"`
+	DateTimeField      string    `json:"dateTimeField"`
+	BlobField          string    `json:"blobField"`
 }
 
 // updateComplexUserResponse contains a newly updated complexUser to be returned to the client
 type updateComplexUserResponse struct {
-	ID                 uuid.UUID
-	SmallIntField      uint16
-	IntField           uint32
-	BigIntField        uint64
-	FloatField         float32
-	DoubleField        float64
-	StringField        string
-	BoundedStringField string
-	BoolField          bool
-	DateField          string
-	TimeField          string
-	DateTimeField      string
-	BlobField          string
+	ID                 uuid.UUID `json:"id"`
+	SmallIntField      uint16    `json:"smallIntField"`
+	IntField           uint32    `json:"intField"`
+	BigIntField        uint64    `json:"bigIntField"`
+	FloatField         float32   `json:"floatField"`
+	DoubleField        float64   `json:"doubleField"`
+	StringField        string    `json:"stringField"`
+	BoundedStringField string    `json:"boundedStringField"`
+	BoolField          bool      `json:"boolField"`
+	DateField          string    `json:"dateField"`
+	TimeField          string    `json:"timeField"`
+	DateTimeField      string    `json:"dateTimeField"`
+	BlobField          string    `json:"blobField"`
 }
 
 // router generates a router for this service
