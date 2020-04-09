@@ -1,7 +1,7 @@
 package temple.generate.server.go.service.main
 
 import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
-import temple.ast.{AbstractAttribute, Annotation, AttributeType}
+import temple.ast.{AbstractAttribute, AttributeType}
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, Create, Read, Update}
 import temple.generate.server.ServiceRoot
@@ -134,7 +134,7 @@ object GoServiceMainStructGenerator {
         ),
       ) ++
       root.attributes.collect {
-        case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.Server) =>
+        case (name, attribute) if attribute.inResponse =>
           (
             name.capitalize,
             generateRequestResponseType(attribute.attributeType),

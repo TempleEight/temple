@@ -34,8 +34,10 @@ object AuthServiceTest extends ServiceTest("Auth") {
   }
 
   // Test each type of auth that is present in the project
-  def test(auths: Set[ServiceAuth], baseURL: String): Unit =
+  def test(auths: Set[ServiceAuth], baseURL: String): Boolean = {
     auths.foreach {
       case ServiceAuth.Email => testEmailAuth(baseURL)
     }
+    anyTestFailed
+  }
 }

@@ -9,8 +9,9 @@ import temple.utils.StringUtils
 
 import scala.util.Try
 
+class TestFailedException(msg: String) extends RuntimeException(msg)
+
 private[internal] class EndpointTest(service: String, endpointName: String) {
-  class TestFailedException(msg: String) extends RuntimeException(msg)
 
   // Validate that the response JSON for the provided key matches the Attribute
   private def validateResponseType(key: String, responseForKey: Json, attribute: AbstractAttribute): Unit =
@@ -68,9 +69,7 @@ private[internal] class EndpointTest(service: String, endpointName: String) {
     attributes: Map[String, AbstractAttribute],
   ): Unit = {
     // The response should contain exactly the keys in attributes, PLUS an ID attribute, MINUS anything that is @server
-    val expectedAttributes = attributes.filter {
-      case (_, attribute) => !attribute.accessAnnotation.contains(Annotation.Server)
-    }
+    val expectedAttributes     = attributes.filter { case (_, attribute) => attribute.inResponse }
     val expectedAttributeNames = (Set("ID") ++ expectedAttributes.keys).map(_.capitalize)
     val foundAttributeNames    = response.keys.toSet
     assertEqual(expectedAttributeNames, foundAttributeNames)
