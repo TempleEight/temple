@@ -182,9 +182,9 @@ object ServiceTestUtils {
         requestBody,
         newAccessToken,
       )
-    val idJSON = createJSON("ID").getOrElse(test.fail(s"response to create $serviceName did not contain an ID key"))
+    val idJSON = createJSON("id").getOrElse(test.fail(s"response to create $serviceName did not contain an id key"))
     val id =
-      idJSON.asString.getOrElse(test.fail(s"response to create $serviceName contained field ID, but was not a string"))
+      idJSON.asString.getOrElse(test.fail(s"response to create $serviceName contained field id, but was not a string"))
     CreateResponse(id, newAccessToken)
   }
 

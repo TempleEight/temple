@@ -29,7 +29,7 @@ object AbstractAttribute {
 
   case object CreatedByAttribute extends AbstractAttribute {
     override def attributeType: AttributeType               = AttributeType.UUIDType
-    override def accessAnnotation: Option[AccessAnnotation] = Some(Annotation.ServerSet)
+    override def accessAnnotation: Option[AccessAnnotation] = Some(Annotation.Server)
     override def valueAnnotations: Set[ValueAnnotation]     = Set()
   }
 }
