@@ -23,27 +23,27 @@ object GoServiceMainStructGenerator {
   private def generateValidatorAnnotation(attrType: AttributeType): String =
     s"`valid:${doubleQuote(
       attrType match {
-        case AttributeType.ForeignKey(_) | AttributeType.UUIDType => "type(string),uuid,required"
-        case AttributeType.BoolType                               => "type(bool),required"
-        case AttributeType.DateType                               => "type(string),required"
-        case AttributeType.DateTimeType                           => "type(string),rfc3339,required"
-        case AttributeType.TimeType                               => "type(string),required"
-        case AttributeType.BlobType(_)                            => "type(string),base64,required"
+        case AttributeType.ForeignKey(_) | AttributeType.UUIDType => "type(*string),uuid,required"
+        case AttributeType.BoolType                               => "type(*bool),required"
+        case AttributeType.DateType                               => "type(*string),required"
+        case AttributeType.DateTimeType                           => "type(*string),rfc3339,required"
+        case AttributeType.TimeType                               => "type(*string),required"
+        case AttributeType.BlobType(_)                            => "type(*string),base64,required"
         case AttributeType.StringType(Some(max), Some(min)) =>
-          s"type(string),required,stringlength($min|$max)"
+          s"type(*string),required,stringlength($min|$max)"
         case AttributeType.StringType(_, _) =>
           // TODO: Requires a custom validator
-          "type(string),required"
+          "type(*string),required"
         case AttributeType.IntType(Some(max), Some(min), _) =>
-          s"type(${generateGoType(attrType)}),required,range($min|$max)"
+          s"type(*${generateGoType(attrType)}),required,range($min|$max)"
         case AttributeType.IntType(_, _, _) =>
           // TODO: Requires a custom validator
-          s"type(${generateGoType(attrType)}),required"
+          s"type(*${generateGoType(attrType)}),required"
         case AttributeType.FloatType(Some(max), Some(min), _) =>
-          s"type(${generateGoType(attrType)}),required,range($min|$max)"
+          s"type(*${generateGoType(attrType)}),required,range($min|$max)"
         case AttributeType.FloatType(_, _, _) =>
           // TODO: Requires a custom validator
-          s"type(${generateGoType(attrType)}),required"
+          s"type(*${generateGoType(attrType)}),required"
       },
     )}`"
 
