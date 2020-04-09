@@ -69,7 +69,7 @@ private[internal] class EndpointTest(service: String, endpointName: String) {
   ): Unit = {
     // The response should contain exactly the keys in attributes, PLUS an ID attribute, MINUS anything that is @server
     val expectedAttributes     = attributes.filter { case (_, attribute) => attribute.inResponse }
-    val expectedAttributeNames = (Set("ID") ++ expectedAttributes.keys).map(_.capitalize)
+    val expectedAttributeNames = expectedAttributes.keys
     val foundAttributeNames    = response.keys.toSet
     assertEqual(expectedAttributeNames, foundAttributeNames)
 
