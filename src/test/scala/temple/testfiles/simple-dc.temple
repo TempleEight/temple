@@ -1,0 +1,36 @@
+SimpleTempleTest: project {
+  #metrics(prometheus);
+  #provider(dockerCompose);
+}
+
+User: service {
+  user: string;
+  email: string(40,5);
+  firstName: string;
+  lastName: string;
+  createdAt: datetime;
+  numberOfDogs: int;
+  yeets: bool @unique @server; // Don't send this to the client
+  currentBankBalance: float(min: 0.0, precision: 2);
+  birthDate: date;
+  breakfastTime: time;
+
+  Fred: struct {
+    field: string @nullable;
+    friend: User;
+    image: data(10M);
+    #enumerable;
+    #readable(by: this);
+  };
+
+  #enumerable;
+  #omit [delete];
+  #readable(by: all);
+  #writable(by: this);
+
+  #auth(email);
+  #uses [Booking, Group, /* Reservations */];
+}
+
+Booking: service {}
+Group: service {}
