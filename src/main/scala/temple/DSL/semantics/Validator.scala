@@ -123,10 +123,7 @@ private class Validator private (templefile: Templefile) {
   ): Seq[M] = {
     validateMetadata(metadata, context)
 
-    val removeUpdateEndpoint = attributes.valuesIterator.forall(attributes =>
-      attributes.accessAnnotation.contains(Annotation.Server)
-      || attributes.accessAnnotation.contains(Annotation.ServerSet),
-    )
+    val removeUpdateEndpoint = attributes.valuesIterator.forall(!_.inRequest)
     if (removeUpdateEndpoint) {
       val (endpoints, otherMetadata) = metadata partitionMap {
           case Metadata.Omit(endpoints) => Left(endpoints)
