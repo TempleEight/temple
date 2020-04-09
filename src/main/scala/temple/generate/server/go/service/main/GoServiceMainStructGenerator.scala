@@ -130,12 +130,16 @@ object GoServiceMainStructGenerator {
         (
           root.idAttribute.name.toUpperCase,
           generateRequestResponseType(AttributeType.UUIDType),
-          s"`${generateJSONAnnotation(root.idAttribute.name)}`",
+          backTick(generateJSONAnnotation(root.idAttribute.name)),
         ),
       ) ++
       root.attributes.collect {
         case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.Server) =>
-          (name.capitalize, generateRequestResponseType(attribute.attributeType), s"`${generateJSONAnnotation(name)}`")
+          (
+            name.capitalize,
+            generateRequestResponseType(attribute.attributeType),
+            backTick(generateJSONAnnotation(name)),
+          )
       }
     mkCode.doubleLines(
       when(operations.contains(CRUD.List)) { generateListResponseStructs(root, fields) },
