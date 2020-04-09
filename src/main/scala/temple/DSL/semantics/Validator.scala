@@ -199,6 +199,10 @@ private class Validator private (templefile: Templefile) {
       case IntType(Some(max), Some(min), _) if max < min => errors += context.errorMessage(s"IntType max not above min")
       case IntType(_, _, precision) if precision <= 0 || precision > 8 =>
         errors += context.errorMessage(s"IntType precision not between 1 and 8")
+      case intType: IntType if intType.minValue > intType.precisionMax =>
+        errors += context.errorMessage(s"IntType min is out of range for the precision ${intType.precision}")
+      case intType: IntType if intType.maxValue < intType.precisionMin =>
+        errors += context.errorMessage(s"IntType max is out of range for the precision ${intType.precision}")
       case IntType(_, _, _) => // all good
 
       case FloatType(Some(max), Some(min), _) if max < min =>
