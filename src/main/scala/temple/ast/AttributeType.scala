@@ -30,7 +30,7 @@ object AttributeType {
       else -math.pow(2, 8 * precision - 1).toLong
 
     def maxValue: Long = max getOrElse precisionMax
-    def minValue: Long = max getOrElse precisionMin
+    def minValue: Long = min getOrElse precisionMin
   }
 
   case class FloatType(max: Option[Double] = None, min: Option[Double] = None, precision: Byte = 8)
