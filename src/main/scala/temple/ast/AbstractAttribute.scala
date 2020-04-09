@@ -6,6 +6,11 @@ sealed trait AbstractAttribute {
   def attributeType: AttributeType
   def accessAnnotation: Option[AccessAnnotation]
   def valueAnnotations: Set[ValueAnnotation]
+
+  def inRequest: Boolean =
+    !accessAnnotation.contains(Annotation.Server) && !accessAnnotation.contains(Annotation.ServerSet)
+
+  def inResponse: Boolean = !accessAnnotation.contains(Annotation.Server)
 }
 
 object AbstractAttribute {
