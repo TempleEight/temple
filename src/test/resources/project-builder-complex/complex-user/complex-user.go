@@ -23,34 +23,34 @@ type env struct {
 
 // createComplexUserRequest contains the client-provided information required to create a single complexUser
 type createComplexUserRequest struct {
-	SmallIntField      *uint16  `valid:"type(uint16),required,range(10|100)"`
-	IntField           *uint32  `valid:"type(uint32),required,range(10|100)"`
-	BigIntField        *uint64  `valid:"type(uint64),required,range(10|100)"`
-	FloatField         *float32 `valid:"type(float32),required,range(0.0|300.0)"`
-	DoubleField        *float64 `valid:"type(float64),required,range(0.0|123.0)"`
-	StringField        *string  `valid:"type(string),required"`
-	BoundedStringField *string  `valid:"type(string),required,stringlength(0|5)"`
-	BoolField          *bool    `valid:"type(bool),required"`
-	DateField          *string  `valid:"type(string),required"`
-	TimeField          *string  `valid:"type(string),required"`
-	DateTimeField      *string  `valid:"type(string),rfc3339,required"`
-	BlobField          *string  `valid:"type(string),base64,required"`
+	SmallIntField      *uint16  `valid:"type(*uint16),required,range(10|100)"`
+	IntField           *uint32  `valid:"type(*uint32),required,range(10|100)"`
+	BigIntField        *uint64  `valid:"type(*uint64),required,range(10|100)"`
+	FloatField         *float32 `valid:"type(*float32),required,range(0.0|300.0)"`
+	DoubleField        *float64 `valid:"type(*float64),required,range(0.0|123.0)"`
+	StringField        *string  `valid:"type(*string),required"`
+	BoundedStringField *string  `valid:"type(*string),required,stringlength(0|5)"`
+	BoolField          *bool    `valid:"type(*bool),required"`
+	DateField          *string  `valid:"type(*string),required"`
+	TimeField          *string  `valid:"type(*string),required"`
+	DateTimeField      *string  `valid:"type(*string),rfc3339,required"`
+	BlobField          *string  `valid:"type(*string),base64,required"`
 }
 
 // updateComplexUserRequest contains the client-provided information required to update a single complexUser
 type updateComplexUserRequest struct {
-	SmallIntField      *uint16  `valid:"type(uint16),required,range(10|100)"`
-	IntField           *uint32  `valid:"type(uint32),required,range(10|100)"`
-	BigIntField        *uint64  `valid:"type(uint64),required,range(10|100)"`
-	FloatField         *float32 `valid:"type(float32),required,range(0.0|300.0)"`
-	DoubleField        *float64 `valid:"type(float64),required,range(0.0|123.0)"`
-	StringField        *string  `valid:"type(string),required"`
-	BoundedStringField *string  `valid:"type(string),required,stringlength(0|5)"`
-	BoolField          *bool    `valid:"type(bool),required"`
-	DateField          *string  `valid:"type(string),required"`
-	TimeField          *string  `valid:"type(string),required"`
-	DateTimeField      *string  `valid:"type(string),rfc3339,required"`
-	BlobField          *string  `valid:"type(string),base64,required"`
+	SmallIntField      *uint16  `valid:"type(*uint16),required,range(10|100)"`
+	IntField           *uint32  `valid:"type(*uint32),required,range(10|100)"`
+	BigIntField        *uint64  `valid:"type(*uint64),required,range(10|100)"`
+	FloatField         *float32 `valid:"type(*float32),required,range(0.0|300.0)"`
+	DoubleField        *float64 `valid:"type(*float64),required,range(0.0|123.0)"`
+	StringField        *string  `valid:"type(*string),required"`
+	BoundedStringField *string  `valid:"type(*string),required,stringlength(0|5)"`
+	BoolField          *bool    `valid:"type(*bool),required"`
+	DateField          *string  `valid:"type(*string),required"`
+	TimeField          *string  `valid:"type(*string),required"`
+	DateTimeField      *string  `valid:"type(*string),rfc3339,required"`
+	BlobField          *string  `valid:"type(*string),base64,required"`
 }
 
 // createComplexUserResponse contains a newly created complexUser to be returned to the client
