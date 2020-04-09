@@ -3,8 +3,8 @@ package temple.generate.server.go.service
 import temple.generate.CRUD.CRUD
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonMetricGenerator
-import temple.utils.StringUtils.doubleQuote
 import temple.generate.utils.CodeUtils
+import temple.utils.StringUtils.doubleQuote
 
 object GoServiceMetricGenerator {
 

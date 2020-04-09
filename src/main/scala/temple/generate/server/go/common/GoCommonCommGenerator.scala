@@ -2,7 +2,6 @@ package temple.generate.server.go.common
 
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
-import temple.utils.FileUtils
 
 object GoCommonCommGenerator {
 

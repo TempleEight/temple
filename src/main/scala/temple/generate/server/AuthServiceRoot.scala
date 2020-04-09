@@ -1,7 +1,5 @@
 package temple.generate.server
 
-import temple.ast.Metadata.ServiceAuth
-
 /**
   * ServiceRoot encapsulates all the information needed to generate an auth service
   *

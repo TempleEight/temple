@@ -5,7 +5,7 @@ import temple.generate.server.AuthServiceRoot
 import temple.generate.server.go.common.GoCommonDAOGenerator
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
-import temple.utils.StringUtils.{doubleQuote, tabIndent}
+import temple.utils.StringUtils.doubleQuote
 
 import scala.collection.immutable.ListMap
 
