@@ -68,10 +68,10 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
       val minimum = min.map("minimum" -> _.asJson)
       val maximum = max.map("maximum" -> _.asJson)
       OpenAPISimpleType("number", if (precision > 4) "int64" else "int32", Seq(minimum, maximum).flatten: _*)
-    case FloatType(max, min, precision) =>
+    case floatType @ FloatType(max, min, _) =>
       val minimum = min.map("minimum" -> _.asJson)
       val maximum = max.map("maximum" -> _.asJson)
-      OpenAPISimpleType("number", if (precision > 4) "double" else "float", Seq(minimum, maximum).flatten: _*)
+      OpenAPISimpleType("number", if (floatType.isDouble) "double" else "float", Seq(minimum, maximum).flatten: _*)
     case ForeignKey(references) =>
       OpenAPISimpleType("number", "int32", "description" -> s"Reference to $references ID".asJson)
   }
