@@ -23,26 +23,26 @@ type env struct {
 
 // createTempleUserRequest contains the client-provided information required to create a single templeUser
 type createTempleUserRequest struct {
-	IntField      *int32     `valid:"type(int32),required"`
-	DoubleField   *float64   `valid:"type(float64),required"`
-	StringField   *string    `valid:"type(string),required"`
-	BoolField     *bool      `valid:"type(bool),required"`
-	DateField     *time.Time `valid:"type(string),required"`
-	TimeField     *time.Time `valid:"type(string),required"`
-	DateTimeField *time.Time `valid:"type(string),rfc3339,required"`
-	BlobField     *[]byte    `valid:"type(string),base64,required"`
+	IntField      *int32   `valid:"type(int32),required"`
+	DoubleField   *float64 `valid:"type(float64),required"`
+	StringField   *string  `valid:"type(string),required"`
+	BoolField     *bool    `valid:"type(bool),required"`
+	DateField     *string  `valid:"type(string),required"`
+	TimeField     *string  `valid:"type(string),required"`
+	DateTimeField *string  `valid:"type(string),rfc3339,required"`
+	BlobField     *string  `valid:"type(string),base64,required"`
 }
 
 // updateTempleUserRequest contains the client-provided information required to update a single templeUser
 type updateTempleUserRequest struct {
-	IntField      *int32     `valid:"type(int32),required"`
-	DoubleField   *float64   `valid:"type(float64),required"`
-	StringField   *string    `valid:"type(string),required"`
-	BoolField     *bool      `valid:"type(bool),required"`
-	DateField     *time.Time `valid:"type(string),required"`
-	TimeField     *time.Time `valid:"type(string),required"`
-	DateTimeField *time.Time `valid:"type(string),rfc3339,required"`
-	BlobField     *[]byte    `valid:"type(string),base64,required"`
+	IntField      *int32   `valid:"type(int32),required"`
+	DoubleField   *float64 `valid:"type(float64),required"`
+	StringField   *string  `valid:"type(string),required"`
+	BoolField     *bool    `valid:"type(bool),required"`
+	DateField     *string  `valid:"type(string),required"`
+	TimeField     *string  `valid:"type(string),required"`
+	DateTimeField *string  `valid:"type(string),rfc3339,required"`
+	BlobField     *string  `valid:"type(string),base64,required"`
 }
 
 // createTempleUserResponse contains a newly created templeUser to be returned to the client
@@ -148,6 +148,27 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	dateField, err := time.Parse("2006-01-02", *req.DateField)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid date string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	timeField, err := time.Parse("15:04:05.999999999", *req.TimeField)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid time string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	dateTimeField, err := time.Parse(time.RFC3339Nano, *req.DateTimeField)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid datetime string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
 	uuid, err := uuid.NewUUID()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not create UUID: %s", err.Error()))
@@ -161,9 +182,9 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		DoubleField:   *req.DoubleField,
 		StringField:   *req.StringField,
 		BoolField:     *req.BoolField,
-		DateField:     *req.DateField,
-		TimeField:     *req.TimeField,
-		DateTimeField: *req.DateTimeField,
+		DateField:     dateField,
+		TimeField:     timeField,
+		DateTimeField: dateTimeField,
 		BlobField:     *req.BlobField,
 	})
 	if err != nil {
@@ -247,15 +268,36 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	dateField, err := time.Parse("2006-01-02", *req.DateField)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid date string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	timeField, err := time.Parse("15:04:05.999999999", *req.TimeField)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid time string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
+	dateTimeField, err := time.Parse(time.RFC3339Nano, *req.DateTimeField)
+	if err != nil {
+		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid datetime string: %s", err.Error()))
+		http.Error(w, errMsg, http.StatusBadRequest)
+		return
+	}
+
 	templeUser, err := env.dao.UpdateTempleUser(dao.UpdateTempleUserInput{
 		ID:            templeUserID,
 		IntField:      *req.IntField,
 		DoubleField:   *req.DoubleField,
 		StringField:   *req.StringField,
 		BoolField:     *req.BoolField,
-		DateField:     *req.DateField,
-		TimeField:     *req.TimeField,
-		DateTimeField: *req.DateTimeField,
+		DateField:     dateField,
+		TimeField:     timeField,
+		DateTimeField: dateTimeField,
 		BlobField:     *req.BlobField,
 	})
 	if err != nil {

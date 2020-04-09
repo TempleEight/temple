@@ -65,7 +65,11 @@ object GoServiceMainStructGenerator {
   ): String = {
     val fields = clientAttributes.map {
       case (name, attr) =>
-        (name.capitalize, s"*${generateGoType(attr.attributeType)}", generateValidatorAnnotation(attr.attributeType))
+        (
+          name.capitalize,
+          s"*${generateRequestResponseType(attr.attributeType)}",
+          generateValidatorAnnotation(attr.attributeType),
+        )
     }
     mkCode.doubleLines(
       when(operations.contains(CRUD.Create)) {
@@ -77,7 +81,7 @@ object GoServiceMainStructGenerator {
     )
   }
 
-  private def generateGoResponseType(attributeType: AttributeType): String =
+  private def generateRequestResponseType(attributeType: AttributeType): String =
     attributeType match {
       case DateType | TimeType | DateTimeType | _: BlobType => "string"
       case _                                                => generateGoType(attributeType)
@@ -111,10 +115,10 @@ object GoServiceMainStructGenerator {
 
   private[service] def generateResponseStructs(root: ServiceRoot, operations: Set[CRUD]): String = {
     // Response struct fields include ID and user-defined attributes without the @server annotation
-    val fields = ListMap(root.idAttribute.name.toUpperCase -> generateGoResponseType(AttributeType.UUIDType)) ++
+    val fields = ListMap(root.idAttribute.name.toUpperCase -> generateRequestResponseType(AttributeType.UUIDType)) ++
       root.attributes.collect {
         case (name, attribute) if !attribute.accessAnnotation.contains(Annotation.Server) =>
-          (name.capitalize, generateGoResponseType(attribute.attributeType))
+          (name.capitalize, generateRequestResponseType(attribute.attributeType))
       }
     mkCode.doubleLines(
       when(operations.contains(CRUD.List)) { generateListResponseStructs(root, fields) },
