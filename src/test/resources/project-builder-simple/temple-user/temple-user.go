@@ -23,26 +23,26 @@ type env struct {
 
 // createTempleUserRequest contains the client-provided information required to create a single templeUser
 type createTempleUserRequest struct {
-	IntField      *int32   `valid:"type(int32),required"`
-	DoubleField   *float64 `valid:"type(float64),required"`
-	StringField   *string  `valid:"type(string),required"`
-	BoolField     *bool    `valid:"type(bool),required"`
-	DateField     *string  `valid:"type(string),required"`
-	TimeField     *string  `valid:"type(string),required"`
-	DateTimeField *string  `valid:"type(string),rfc3339,required"`
-	BlobField     *string  `valid:"type(string),base64,required"`
+	IntField      *int32   `valid:"type(*int32),required"`
+	DoubleField   *float64 `valid:"type(*float64),required"`
+	StringField   *string  `valid:"type(*string),required"`
+	BoolField     *bool    `valid:"type(*bool),required"`
+	DateField     *string  `valid:"type(*string),required"`
+	TimeField     *string  `valid:"type(*string),required"`
+	DateTimeField *string  `valid:"type(*string),rfc3339,required"`
+	BlobField     *string  `valid:"type(*string),base64,required"`
 }
 
 // updateTempleUserRequest contains the client-provided information required to update a single templeUser
 type updateTempleUserRequest struct {
-	IntField      *int32   `valid:"type(int32),required"`
-	DoubleField   *float64 `valid:"type(float64),required"`
-	StringField   *string  `valid:"type(string),required"`
-	BoolField     *bool    `valid:"type(bool),required"`
-	DateField     *string  `valid:"type(string),required"`
-	TimeField     *string  `valid:"type(string),required"`
-	DateTimeField *string  `valid:"type(string),rfc3339,required"`
-	BlobField     *string  `valid:"type(string),base64,required"`
+	IntField      *int32   `valid:"type(*int32),required"`
+	DoubleField   *float64 `valid:"type(*float64),required"`
+	StringField   *string  `valid:"type(*string),required"`
+	BoolField     *bool    `valid:"type(*bool),required"`
+	DateField     *string  `valid:"type(*string),required"`
+	TimeField     *string  `valid:"type(*string),required"`
+	DateTimeField *string  `valid:"type(*string),rfc3339,required"`
+	BlobField     *string  `valid:"type(*string),base64,required"`
 }
 
 // createTempleUserResponse contains a newly created templeUser to be returned to the client
