@@ -7,7 +7,7 @@ import temple.generate.CRUD.{CRUD, Create, Read, Update}
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator.{genStruct, genStructWithAnnotations, generateGoType}
 import temple.generate.utils.CodeTerm.mkCode
-import temple.utils.StringUtils.doubleQuote
+import temple.utils.StringUtils.{backTick, doubleQuote}
 
 import scala.Option.when
 import scala.collection.immutable.ListMap
@@ -21,7 +21,7 @@ object GoServiceMainStructGenerator {
     )
 
   private def generateValidatorAnnotation(attrType: AttributeType): String =
-    s"`valid:${doubleQuote(
+    s"valid:${doubleQuote(
       attrType match {
         // TODO: Work out what type the validator wants for uuid
         case AttributeType.ForeignKey(_) | AttributeType.UUIDType => "required"
@@ -46,7 +46,13 @@ object GoServiceMainStructGenerator {
           // TODO: Requires a custom validator
           s"type(*${generateGoType(attrType)}),required"
       },
-    )}`"
+    )}"
+
+  private def generateJSONAnnotation(name: String): String =
+    s"json:${doubleQuote(name)}"
+
+  private def generateRequestAnnotation(name: String, attrType: AttributeType): String =
+    backTick(mkCode(generateJSONAnnotation(name), generateValidatorAnnotation(attrType)))
 
   private def generateRequestStruct(
     root: ServiceRoot,
@@ -69,7 +75,7 @@ object GoServiceMainStructGenerator {
         (
           name.capitalize,
           s"*${generateRequestResponseType(attr.attributeType)}",
-          generateValidatorAnnotation(attr.attributeType),
+          generateRequestAnnotation(name, attr.attributeType),
         )
     }
     mkCode.doubleLines(
@@ -88,10 +94,10 @@ object GoServiceMainStructGenerator {
       case _                                                => generateGoType(attributeType)
     }
 
-  private def generateListResponseStructs(root: ServiceRoot, fields: ListMap[String, String]): String =
+  private def generateListResponseStructs(root: ServiceRoot, fields: Iterable[(String, String, String)]): String =
     mkCode.lines(
       s"// list${root.name}Element contains a single ${root.decapitalizedName} list element",
-      genStruct(s"list${root.name}Element", fields),
+      genStructWithAnnotations(s"list${root.name}Element", fields),
       "",
       s"// list${root.name}Response contains a single ${root.decapitalizedName} list to be returned to the client",
       genStruct(
@@ -100,7 +106,11 @@ object GoServiceMainStructGenerator {
       ),
     )
 
-  private def generateResponseStruct(root: ServiceRoot, operation: CRUD, fields: ListMap[String, String]): String =
+  private def generateResponseStruct(
+    root: ServiceRoot,
+    operation: CRUD,
+    fields: Iterable[(String, String, String)],
+  ): String =
     mkCode.lines(
       mkCode(
         s"// ${operation.toString.toLowerCase}${root.name}Response contains a",
@@ -111,15 +121,25 @@ object GoServiceMainStructGenerator {
         },
         "to be returned to the client",
       ),
-      genStruct(s"${operation.toString.toLowerCase}${root.name}Response", fields),
+      genStructWithAnnotations(s"${operation.toString.toLowerCase}${root.name}Response", fields),
     )
 
   private[service] def generateResponseStructs(root: ServiceRoot, operations: Set[CRUD]): String = {
     // Response struct fields include ID and user-defined attributes without the @server annotation
-    val fields = ListMap(root.idAttribute.name.toUpperCase -> generateRequestResponseType(AttributeType.UUIDType)) ++
+    val fields = Iterable(
+        (
+          root.idAttribute.name.toUpperCase,
+          generateRequestResponseType(AttributeType.UUIDType),
+          backTick(generateJSONAnnotation(root.idAttribute.name)),
+        ),
+      ) ++
       root.attributes.collect {
         case (name, attribute) if attribute.inResponse =>
-          name.capitalize -> generateRequestResponseType(attribute.attributeType)
+          (
+            name.capitalize,
+            generateRequestResponseType(attribute.attributeType),
+            backTick(generateJSONAnnotation(name)),
+          )
       }
     mkCode.doubleLines(
       when(operations.contains(CRUD.List)) { generateListResponseStructs(root, fields) },
