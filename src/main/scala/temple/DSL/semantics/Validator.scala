@@ -205,6 +205,15 @@ private class Validator private (templefile: Templefile) {
   private def validateBlockOfMetadata[T <: Metadata](target: TempleBlock[T], context: SemanticContext): Unit =
     validateMetadata(target.metadata, context)
 
+  private val referenceCycles: Set[Seq[String]] = {
+    val graph = templefile.providedBlockNames.map { blockName =>
+      blockName -> templefile.getBlock(blockName).attributes.values.collect {
+        case Attribute(ForeignKey(references), _, annotations) if !annotations.contains(Nullable) => references
+      }
+    }.toMap
+    Tarjan(graph).filter(_.sizeIs > 1)
+  }
+
   def validate(): Seq[String] = {
     val context = SemanticContext.empty
 
@@ -227,7 +236,8 @@ private class Validator private (templefile: Templefile) {
       .collect { case (name, repeats) if repeats.sizeIs > 1 => (name, repeats.map(_._2)) }
 
     if (duplicates.nonEmpty) {
-      val duplicateString = duplicates.map { case (name, used) => s"$name (${used.mkString(", ")})" }.mkString(", ")
+      val duplicateString =
+        duplicates.map { case (name, used) => s"$name (${used.sorted.mkString(", ")})" }.toSeq.sorted.mkString(", ")
 
       val suffix =
         if (duplicates.sizeIs == 1) s"duplicate found: $duplicateString"
@@ -237,6 +247,13 @@ private class Validator private (templefile: Templefile) {
     rootNames.collect {
       case (name, location) if !name.head.isUpper =>
         errors += context.errorMessage(s"Invalid name: $name ($location), it should start with a capital letter")
+    }
+
+    if (referenceCycles.nonEmpty) {
+      val referenceCycleStrings = referenceCycles.map { elems =>
+        (elems.reverseIterator ++ Iterator(elems.last)).mkString("(", " -> ", ")")
+      }
+      errors += ("Cycle(s) were detected in foreign keys: " + referenceCycleStrings.mkString(", "))
     }
 
     errors.toSeq
