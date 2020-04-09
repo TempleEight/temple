@@ -1,6 +1,5 @@
 package temple.generate.server.go.service.dao
 
-import temple.ast.Annotation
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
