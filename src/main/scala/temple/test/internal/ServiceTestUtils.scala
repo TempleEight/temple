@@ -1,6 +1,6 @@
 package temple.test.internal
 
-import java.sql.{Date, Time, Timestamp}
+import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.UUID
 
@@ -9,7 +9,7 @@ import io.circe.syntax._
 import io.circe.{Json, JsonObject}
 import scalaj.http.Http
 import temple.ast.AbstractServiceBlock.ServiceBlock
-import temple.ast.{AbstractAttribute, Annotation, AttributeType, Metadata}
+import temple.ast.{AbstractAttribute, AttributeType, Metadata}
 import temple.utils.MonadUtils.FromEither
 import temple.utils.StringUtils
 
@@ -116,12 +116,7 @@ object ServiceTestUtils {
   ): Json =
     // Drop any attributes that are @server or @serverSet
     attributes
-      .filterNot {
-        case (_, attribute) =>
-          attribute.accessAnnotation.contains(Annotation.Server) || attribute.accessAnnotation.contains(
-            Annotation.ServerSet,
-          )
-      }
+      .filter { case (_, attribute) => attribute.inRequest }
       .map {
         case (name, attribute) =>
           val value: Json = attribute.attributeType match {

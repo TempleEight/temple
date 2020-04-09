@@ -45,9 +45,6 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     paths.getOrElseUpdate(url, Path.Mutable(parameters = Seq(parameter))).handlers
   }
 
-  private def isServerAttribute(attribute: AbstractAttribute): Boolean =
-    attribute.accessAnnotation contains Annotation.Server
-
   private def isClientAttribute(attribute: AbstractAttribute): Boolean =
     attribute.accessAnnotation.isEmpty || (attribute.accessAnnotation contains Annotation.Client)
 
@@ -78,14 +75,14 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
 
   private def generateItemType(attributes: Map[String, AbstractAttribute]): OpenAPIObject = OpenAPIObject(
     attributes.iterator
-      .filter { case _ -> attribute => !isServerAttribute(attribute) }
+      .filter { case _ -> attribute => attribute.inResponse }
       .map { case str -> attribute => str -> attributeToOpenAPIType(attribute) }
       .to(attributes.mapFactory),
   )
 
   private def generateItemInputType(attributes: Map[String, AbstractAttribute]): OpenAPIObject = OpenAPIObject(
     attributes.iterator
-      .filter { case _ -> attribute => isClientAttribute(attribute) }
+      .filter { case _ -> attribute => attribute.inResponse }
       .map { case str -> attribute => str -> attributeToOpenAPIType(attribute) }
       .to(attributes.mapFactory),
   )
