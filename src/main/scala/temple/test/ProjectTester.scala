@@ -27,23 +27,21 @@ object ProjectTester {
         s"KONG_ADMIN=${config.kongAdminURL} KONG_ENTRY=${config.baseIP} sh $generatedPath/kong/configure-kong.sh",
       )
 
-      if (usesAuth) {
-        try {
-          configuredKong =
-            if (usesAuth)
-              Http("http://localhost:8000/api/auth/login")
-                .method("POST")
-                .asString
-                .code == HttpURLConnection.HTTP_BAD_REQUEST
-            // TODO: this might not be true, needs investigating
-            else true
-          if (!configuredKong) {
-            println("Kong wasn't configured correctly - trying again")
-            exec("sleep 5")
-          }
-        } catch {
-          case _: IOException => // Keep trying
+      try {
+        configuredKong =
+          if (usesAuth)
+            Http("http://localhost:8000/api/auth/login")
+              .method("POST")
+              .asString
+              .code == HttpURLConnection.HTTP_BAD_REQUEST
+          // TODO: this might not be true, needs investigating
+          else true
+        if (!configuredKong) {
+          println("Kong wasn't configured correctly - trying again")
+          exec("sleep 5")
         }
+      } catch {
+        case _: IOException => // Keep trying
       }
     }
   }
@@ -120,7 +118,8 @@ object ProjectTester {
     }
     templefile.providedServices.foreach {
       case (name, block) =>
-        anyFailed = CRUDServiceTest.test(name, block, templefile.providedServices, url) || anyFailed
+        anyFailed = CRUDServiceTest
+            .test(name, block, templefile.providedServices, url, templefile.usesAuth) || anyFailed
     }
 
     // Propagate exception up so that the exit code is relevant
