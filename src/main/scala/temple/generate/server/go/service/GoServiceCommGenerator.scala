@@ -6,8 +6,8 @@ import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
 
-import scala.collection.immutable.ListMap
 import scala.Option.when
+import scala.collection.immutable.ListMap
 
 object GoServiceCommGenerator {
 

@@ -14,8 +14,7 @@ import scala.collection.immutable.ListMap
 object GoServiceMainUpdateHandlerGenerator {
 
   private def generateDAOCallBlock(root: ServiceRoot, clientAttributes: ListMap[String, AbstractAttribute]): String = {
-    val createInput = ListMap("ID" -> s"${root.decapitalizedName}ID") ++
-      clientAttributes.map { case str -> _ => str.capitalize -> s"*req.${str.capitalize}" }
+    val createInput = ListMap("ID" -> s"${root.decapitalizedName}ID") ++ generateDAOInputClientMap(clientAttributes)
     mkCode.lines(
       genDeclareAndAssign(
         genMethodCall("env.dao", s"Update${root.name}", genPopulateStruct(s"dao.Update${root.name}Input", createInput)),
@@ -32,6 +31,7 @@ object GoServiceMainUpdateHandlerGenerator {
     clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     responseMap: ListMap[String, String],
+    clientUsesTime: Boolean,
   ): String =
     mkCode(
       generateHandlerDecl(root, Update),
@@ -47,6 +47,7 @@ object GoServiceMainUpdateHandlerGenerator {
               generateRequestNilCheck(root, clientAttributes),
               generateValidateStructBlock(),
               when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
+              when(clientUsesTime) { generateParseTimeBlocks(clientAttributes) },
             )
           },
           generateDAOCallBlock(root, clientAttributes),

@@ -31,8 +31,7 @@ object GoServiceMainCreateHandlerGenerator {
     val createInput = ListMap(idCapitalized -> (if (root.hasAuthBlock) s"auth.$idCapitalized" else "uuid")) ++
       // If the project uses auth, but this service does not have an auth block, AuthID is passed for created_by field
       when(!root.hasAuthBlock && root.projectUsesAuth) { s"Auth$idCapitalized" -> s"auth.$idCapitalized" } ++
-      // ServerSet values must not be passed, as this will cause a nil pointer dereference error
-      clientAttributes.map { case str -> _ => str.capitalize -> s"*req.${str.capitalize}" }
+      generateDAOInputClientMap(clientAttributes)
 
     mkCode.lines(
       genDeclareAndAssign(
@@ -60,6 +59,7 @@ object GoServiceMainCreateHandlerGenerator {
     clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     responseMap: ListMap[String, String],
+    clientUsesTime: Boolean,
   ): String =
     mkCode(
       generateHandlerDecl(root, Create),
@@ -73,6 +73,7 @@ object GoServiceMainCreateHandlerGenerator {
               generateRequestNilCheck(root, clientAttributes),
               generateValidateStructBlock(),
               when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
+              when(clientUsesTime) { generateParseTimeBlocks(clientAttributes) },
             )
           },
           when(!root.hasAuthBlock) { generateNewUUIDBlock() },
