@@ -1,7 +1,7 @@
 package temple.generate.server.go.service
 
 import temple.ast.AttributeType
-import temple.generate.server.ServiceRoot
+import temple.generate.server.{ServiceName, ServiceRoot}
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
@@ -24,11 +24,11 @@ object GoServiceCommGenerator {
       ),
     )
 
-  private[service] def generateCommFunctionDecl(root: ServiceRoot, serviceName: String): String =
+  private[service] def generateCommFunctionDecl(root: ServiceRoot, serviceName: ServiceName): String =
     mkCode(
       genFunctionCall(
-        s"Check${serviceName.capitalize}",
-        s"${serviceName}${root.idAttribute.name.toUpperCase} ${generateGoType(AttributeType.UUIDType)}",
+        s"Check${serviceName.name}",
+        s"${serviceName.decapitalizedName}${root.idAttribute.name.toUpperCase} ${generateGoType(AttributeType.UUIDType)}",
         when(root.projectUsesAuth) { "token string" },
       ),
       "(bool, error)",
@@ -51,23 +51,23 @@ object GoServiceCommGenerator {
       genStruct("Handler", ListMap("Services" -> "map[string]string")),
     )
 
-  private def generateCommFunction(root: ServiceRoot, serviceName: String): String =
+  private def generateCommFunction(root: ServiceRoot, serviceName: ServiceName): String =
     mkCode.lines(
-      s"// Check${serviceName.capitalize} makes a request to the target service to check if a $serviceName${root.idAttribute.name.toUpperCase} exists",
+      s"// Check${serviceName.name} makes a request to the target service to check if a ${serviceName.decapitalizedName}${root.idAttribute.name.toUpperCase} exists",
       mkCode(
         s"func (comm *Handler) ${generateCommFunctionDecl(root, serviceName)}",
         CodeWrap.curly.tabbed(
-          genDeclareAndAssign(s"comm.Services[${doubleQuote(serviceName)}]", "hostname", "ok"),
+          genDeclareAndAssign(s"comm.Services[${doubleQuote(serviceName.decapitalizedName)}]", "hostname", "ok"),
           genIf(
             "!ok",
             genReturn(
               "false",
-              s"errors.New(${doubleQuote(s"service $serviceName's hostname is not in the config file")})",
+              s"errors.New(${doubleQuote(s"service ${serviceName.decapitalizedName}'s hostname is not in the config file")})",
             ),
           ),
           "",
           genDeclareAndAssign(
-            s"http.NewRequest(http.MethodGet, fmt.Sprintf(${doubleQuote("%s/%s")}, hostname, $serviceName${root.idAttribute.name.toUpperCase}.String()), nil)",
+            s"http.NewRequest(http.MethodGet, fmt.Sprintf(${doubleQuote("%s/%s")}, hostname, ${serviceName.decapitalizedName}${root.idAttribute.name.toUpperCase}.String()), nil)",
             "req",
             "err",
           ),

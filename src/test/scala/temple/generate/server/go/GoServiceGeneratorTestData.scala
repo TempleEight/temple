@@ -6,7 +6,7 @@ import temple.ast.Metadata.{Readable, Writable}
 import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
-import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceRoot}
+import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceName, ServiceRoot}
 import temple.utils.FileUtils._
 
 import scala.collection.immutable.ListMap
@@ -58,7 +58,7 @@ object GoServiceGeneratorTestData {
     ServiceRoot(
       name = "Match",
       module = "github.com/TempleEight/spec-golang/match",
-      comms = Seq("user"),
+      comms = Seq("User").map(ServiceName(_)),
       opQueries = ListMap(
         CRUD.List   -> "SELECT id, created_by, userOne, userTwo, matchedOn FROM match WHERE created_by = $1",
         CRUD.Create -> "INSERT INTO match (id, created_by, userOne, userTwo, matchedOn) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_by, userOne, userTwo, matchedOn",

@@ -34,7 +34,7 @@ object GoGeneratorIntegrationTestData {
   val simpleServiceRootWithComms: ServiceRoot = ServiceRoot(
     name = "Match",
     module = "github.com/TempleEight/spec-golang/match",
-    comms = Seq("user"),
+    comms = Seq("user").map(ServiceName(_)),
     opQueries = ListMap(
       CRUD.List   -> "SELECT id, created_by, userOne, userTwo, matchedOn FROM match WHERE created_by = $1",
       CRUD.Create -> "INSERT INTO match (id, created_by, userOne, userTwo, matchedOn) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_by, userOne, userTwo, matchedOn",
