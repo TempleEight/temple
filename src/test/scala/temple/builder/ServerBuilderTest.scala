@@ -169,6 +169,4 @@ class ServerBuilderTest extends FlatSpec with Matchers {
     )
   }
 
-  it should "generate correct service root when duplicate foreign keys are used" in {}
-
 }
