@@ -92,6 +92,15 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
     validationErrors shouldBe ""
   }
 
+  it should "generate a compilable service when only a datetime attribute is used" in {
+    val validationErrors = validateAll(
+      GoServiceGenerator.generate(GoGeneratorIntegrationTestData.datetimeService),
+      File("date-time-svc", "date-time-svc.go"),
+    )
+
+    validationErrors shouldBe ""
+  }
+
   it should "generate the entire simple.temple project" in {
     val simpleTemple = FileUtils.readFile("src/test/scala/temple/testfiles/simple.temple")
     val parsed = DSLProcessor.parse(simpleTemple) fromEither { error =>
