@@ -31,14 +31,14 @@ class ServerBuilderTest extends FlatSpec with Matchers {
     serviceRoot shouldBe ServiceRoot(
       "TestService",
       "github.com/squat/and/dab/test-service",
-      comms = Seq(),
+      comms = Set("other-service"),
       port = 1026,
       opQueries = ListMap(
-        Create -> "INSERT INTO test_service (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image) VALUES ($1, $2, $3, $4, $5, $6, $7, $8) RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image;",
-        Read   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test_service WHERE id = $1;",
-        Update -> "UPDATE test_service SET id = $1, bankBalance = $2, name = $3, isStudent = $4, dateOfBirth = $5, timeOfDay = $6, expiry = $7, image = $8 WHERE id = $9 RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image;",
+        Create -> "INSERT INTO test_service (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image, fk) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image, fk;",
+        Read   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image, fk FROM test_service WHERE id = $1;",
+        Update -> "UPDATE test_service SET id = $1, bankBalance = $2, name = $3, isStudent = $4, dateOfBirth = $5, timeOfDay = $6, expiry = $7, image = $8, fk = $9 WHERE id = $10 RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image, fk;",
         Delete -> "DELETE FROM test_service WHERE id = $1;",
-        List   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test_service;",
+        List   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image, fk FROM test_service;",
       ),
       idAttribute = IDAttribute("id"),
       createdByAttribute = None,
@@ -51,6 +51,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "timeOfDay"   -> Attribute(TimeType),
         "expiry"      -> Attribute(DateTimeType),
         "image"       -> Attribute(BlobType()),
+        "fk"          -> Attribute(ForeignKey("other-service")),
       ),
       datastore = Database.Postgres,
       readable = Readable.All,
@@ -76,7 +77,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
     serviceRoot shouldBe ServiceRoot(
       "TestService",
       "github.com/squat/and/dab/test-service",
-      comms = Seq(),
+      comms = Set("other-service"),
       port = 1026,
       opQueries = ListMap(),
       idAttribute = IDAttribute("id"),
@@ -90,6 +91,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "timeOfDay"   -> Attribute(TimeType),
         "expiry"      -> Attribute(DateTimeType),
         "image"       -> Attribute(BlobType()),
+        "fk"          -> Attribute(ForeignKey("other-service")),
       ),
       datastore = Database.Postgres,
       readable = Readable.All,
@@ -115,14 +117,14 @@ class ServerBuilderTest extends FlatSpec with Matchers {
     serviceRoot shouldBe ServiceRoot(
       "TestComplexService",
       "github.com/squat/and/dab/test-complex-service",
-      comms = Seq(),
+      comms = Set("other-svc"),
       port = 1026,
       opQueries = ListMap(
-        Create -> "INSERT INTO test_complex_service (id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12) RETURNING id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image;",
-        Read   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test_complex_service WHERE id = $1;",
-        Update -> "UPDATE test_complex_service SET id = $1, anotherId = $2, yetAnotherId = $3, bankBalance = $4, bigBankBalance = $5, name = $6, initials = $7, isStudent = $8, dateOfBirth = $9, timeOfDay = $10, expiry = $11, image = $12 WHERE id = $13 RETURNING id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image;",
+        Create -> "INSERT INTO test_complex_service (id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image, sampleFK1, sampleFK2) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image, sampleFK1, sampleFK2;",
+        Read   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image, sampleFK1, sampleFK2 FROM test_complex_service WHERE id = $1;",
+        Update -> "UPDATE test_complex_service SET id = $1, anotherId = $2, yetAnotherId = $3, bankBalance = $4, bigBankBalance = $5, name = $6, initials = $7, isStudent = $8, dateOfBirth = $9, timeOfDay = $10, expiry = $11, image = $12, sampleFK1 = $13, sampleFK2 = $14 WHERE id = $15 RETURNING id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image, sampleFK1, sampleFK2;",
         Delete -> "DELETE FROM test_complex_service WHERE id = $1;",
-        List   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image FROM test_complex_service;",
+        List   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image, sampleFK1, sampleFK2 FROM test_complex_service;",
       ),
       idAttribute = IDAttribute("id"),
       createdByAttribute = None,
@@ -139,6 +141,8 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "timeOfDay"      -> Attribute(TimeType),
         "expiry"         -> Attribute(DateTimeType),
         "image"          -> Attribute(BlobType()),
+        "sampleFK1"      -> Attribute(ForeignKey("other-svc")),
+        "sampleFK2"      -> Attribute(ForeignKey("other-svc")),
       ),
       datastore = Database.Postgres,
       readable = Readable.All,
@@ -164,5 +168,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       "SELECT id, email, password FROM auth WHERE email = $1;",
     )
   }
+
+  it should "generate correct service root when duplicate foreign keys are used" in {}
 
 }

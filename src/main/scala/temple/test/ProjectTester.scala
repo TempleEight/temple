@@ -68,7 +68,7 @@ object ProjectTester {
       case Provider.DockerCompose =>
         println("🐳 Spinning up Docker Compose infrastructure...")
         exec(
-          s"cd $generatedPath && docker ps -a -q | xargs docker rm -f && docker volume prune -f && docker-compose up --build -d 2>&1",
+          s"cd $generatedPath && docker ps -a -q | xargs docker rm -f && docker volume prune -f && docker-compose up --build -d",
         )
 
         var successfullyStarted = false
