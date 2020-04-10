@@ -142,7 +142,7 @@ object ProjectBuilder {
 
         val serviceComms = serviceRoot.comms.map { service =>
           val (_, _, ports) = templefile.providedServicesWithPorts.find { _._1 == service }.get
-          service -> s"http://${kebabCase(service)}:${ports.service}/${kebabCase(service)}"
+          service -> s"http://${kebabCase(service)}:${ports.service}"
         }.toMap
 
         val configFileContents =
