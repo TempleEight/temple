@@ -5,8 +5,13 @@ import temple.builder.project.ProjectBuilder
 import temple.generate.CRUD
 import temple.utils.StringUtils
 
-class CRUDServiceTest(name: String, service: ServiceBlock, allServices: Map[String, ServiceBlock], baseURL: String)
-    extends ServiceTest(name) {
+class CRUDServiceTest(
+  name: String,
+  service: ServiceBlock,
+  allServices: Map[String, ServiceBlock],
+  baseURL: String,
+  usesAuth: Boolean,
+) extends ServiceTest(name) {
 
   private def testCreateEndpoint(accessToken: String): Unit =
     testEndpoint("create") { test =>
@@ -60,7 +65,9 @@ class CRUDServiceTest(name: String, service: ServiceBlock, allServices: Map[Stri
 
   // Test each type of endpoint that is present in the service
   def test(): Boolean = {
-    val accessToken = ServiceTestUtils.getAuthTokenWithEmail(name, baseURL)
+    val accessToken = if (usesAuth) {
+      ServiceTestUtils.getAuthTokenWithEmail(name, baseURL)
+    } else ""
     ProjectBuilder.endpoints(service).foreach {
       case CRUD.List   => // TODO
       case CRUD.Create => testCreateEndpoint(accessToken)
@@ -74,6 +81,12 @@ class CRUDServiceTest(name: String, service: ServiceBlock, allServices: Map[Stri
 
 object CRUDServiceTest {
 
-  def test(name: String, service: ServiceBlock, allServices: Map[String, ServiceBlock], baseURL: String): Boolean =
-    new CRUDServiceTest(name, service, allServices, baseURL).test()
+  def test(
+    name: String,
+    service: ServiceBlock,
+    allServices: Map[String, ServiceBlock],
+    baseURL: String,
+    usesAuth: Boolean,
+  ): Boolean =
+    new CRUDServiceTest(name, service, allServices, baseURL, usesAuth).test()
 }
