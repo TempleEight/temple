@@ -56,4 +56,26 @@ object GoGeneratorIntegrationTestData {
     projectUsesAuth = true,
     hasAuthBlock = false,
   )
+
+  val datetimeService: ServiceRoot = ServiceRoot(
+    name = "DateTimeSvc",
+    module = "github.com/TempleEight/integration/test",
+    comms = Seq.empty,
+    opQueries = ListMap(
+      CRUD.Create -> "",
+      CRUD.Read   -> "",
+      CRUD.Update -> "",
+      CRUD.Delete -> "",
+    ),
+    port = 80,
+    idAttribute = IDAttribute("id"),
+    createdByAttribute = None,
+    attributes = ListMap("dt" -> Attribute(AttributeType.DateTimeType)),
+    datastore = Postgres,
+    readable = Readable.All,
+    writable = Writable.This,
+    projectUsesAuth = true,
+    hasAuthBlock = true,
+  )
+
 }
