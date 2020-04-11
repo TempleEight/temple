@@ -206,7 +206,7 @@ private class Validator private (templefile: Templefile) {
   private def validateBlockOfMetadata[T <: Metadata](target: TempleBlock[T], context: SemanticContext): Unit =
     validateMetadata(target.metadata, context)
 
-  private val referenceCycles: Set[Seq[String]] = {
+  private val referenceCycles: Set[Set[String]] = {
     val graph = templefile.providedBlockNames.map { blockName =>
       blockName -> templefile.getBlock(blockName).attributes.values.collect {
         case Attribute(ForeignKey(references), _, annotations) if !annotations.contains(Nullable) => references
@@ -251,10 +251,8 @@ private class Validator private (templefile: Templefile) {
     }
 
     if (referenceCycles.nonEmpty) {
-      val referenceCycleStrings = referenceCycles.map { elems =>
-        (elems.reverseIterator ++ Iterator(elems.last)).mkString("(", " -> ", ")")
-      }
-      errors += ("Cycle(s) were detected in foreign keys: " + referenceCycleStrings.mkString(", "))
+      val referenceCycleStrings = referenceCycles.map(_.mkString("{ ", ", ", " }"))
+      errors += ("Cycle(s) were detected in foreign keys, between elements: " + referenceCycleStrings.mkString(", "))
     }
 
     errors.toSeq

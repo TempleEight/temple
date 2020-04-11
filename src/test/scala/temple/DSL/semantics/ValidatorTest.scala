@@ -280,7 +280,7 @@ class ValidatorTest extends FlatSpec with Matchers {
           "Square" -> ServiceBlock(Map("user"   -> Attribute(ForeignKey("User")))),
         ),
       ),
-    ) shouldBe Set("Cycle(s) were detected in foreign keys: (User -> Box -> Cube -> Square -> User)")
+    ) shouldBe Set("Cycle(s) were detected in foreign keys, between elements: { Square, Cube, Box, User }")
   }
 
   it should "throw errors when validating" in {

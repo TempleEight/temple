@@ -10,9 +10,9 @@ class Tarjan[T] private (graph: Map[T, Iterable[T]]) {
 
   /** The smallest index of any node known to be reachable from v, including v itself */
   private val lowLink: mutable.Map[T, Int]      = mutable.Map.empty
-  private val sccBuffer: mutable.Buffer[Seq[T]] = mutable.Buffer.empty
+  private val sccBuffer: mutable.Buffer[Set[T]] = mutable.Buffer.empty
 
-  lazy val sccs: Set[Seq[T]] = {
+  lazy val sccs: Set[Set[T]] = {
     for (v <- graph.keys) if (!index.contains(v)) visit(v)
     sccBuffer.toSet
   }
@@ -33,7 +33,7 @@ class Tarjan[T] private (graph: Map[T, Iterable[T]]) {
     // If this node is a root node, pop the stack and generate an SCC
     if (lowLink(node) == index(node)) {
       // Pop all elements from the stack until and including this element itself
-      val scc = (stack.popWhile(_ != node) :+ stack.pop()).toSeq
+      val scc = (stack.popWhile(_ != node) :+ stack.pop()).toSet
       sccBuffer += scc
     }
   }
@@ -41,5 +41,5 @@ class Tarjan[T] private (graph: Map[T, Iterable[T]]) {
 }
 
 object Tarjan {
-  def apply[T](graph: Map[T, Iterable[T]]): Set[Seq[T]] = new Tarjan(graph).sccs
+  def apply[T](graph: Map[T, Iterable[T]]): Set[Set[T]] = new Tarjan(graph).sccs
 }
