@@ -1,4 +1,4 @@
 CREATE TABLE booking (
   id UUID NOT NULL PRIMARY KEY,
-  createdBy UUID NOT NULL
+  created_by UUID NOT NULL
 );
