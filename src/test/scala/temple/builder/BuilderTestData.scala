@@ -10,8 +10,6 @@ import scala.collection.immutable.ListMap
 
 object BuilderTestData {
 
-  // TODO: This test doesn't include a `ForeignKey` attribute, since it is not yet supported
-  //  by the parser/semantic analysis. Once it is, please update these tests!
   val sampleService: ServiceBlock = ServiceBlock(
     ListMap(
       "id"          -> Attribute(IntType()),
@@ -22,6 +20,7 @@ object BuilderTestData {
       "timeOfDay"   -> Attribute(TimeType),
       "expiry"      -> Attribute(DateTimeType),
       "image"       -> Attribute(BlobType()),
+      "fk"          -> Attribute(ForeignKey("other-service")),
     ),
   )
 
@@ -46,6 +45,8 @@ object BuilderTestData {
       "timeOfDay"      -> Attribute(TimeType),
       "expiry"         -> Attribute(DateTimeType),
       "image"          -> Attribute(BlobType()),
+      "sampleFK1"      -> Attribute(ForeignKey("other-svc")),
+      "sampleFK2"      -> Attribute(ForeignKey("other-svc")),
     ),
     structs = ListMap(
       "Test" -> StructBlock(
