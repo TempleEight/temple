@@ -15,14 +15,14 @@ jobs:
   include:
     - stage: test
       name: Unit tests
-      script: sbt clean coverage test coverageReport
+      script: sbt clean test
+    - name: End-to-end tests
+      script: sbt clean coverage test e2e:test coverageReport
       after_success:
         # Requires CODECOV_TOKEN env var
         - bash <(curl -s https://codecov.io/bash)
     - name: Integration tests
       script: sbt clean it:test
-    - name: End-to-end tests
-      script: sbt clean e2e:test
     - name: Linting
       script: sbt clean scalafmtCheck test:scalafmtCheck it:scalafmtCheck
     - stage: deploy
