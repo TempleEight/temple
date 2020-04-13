@@ -313,7 +313,7 @@ object GoServiceMainHandlersGenerator {
     val responseMap = generateResponseMap(root)
 
     // Whether or not the client attributes contain attributes of type date, time or datetime
-    val clientUsesTime = Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateType)
+    val clientUsesTime = Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateTimeType)
       .intersect(clientAttributes.values.map(_.attributeType).toSet)
       .nonEmpty
 

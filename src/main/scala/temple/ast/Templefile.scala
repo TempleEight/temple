@@ -55,6 +55,17 @@ case class Templefile(
     * @return an option of the metadata item
     */
   override def lookupLocalMetadata[T <: Metadata: ClassTag]: Option[T] = projectBlock.lookupLocalMetadata[T]
+
+  /** A mapping from struct name to the service it is contained in */
+  lazy val structLocations: Map[String, String] = services.flatMap {
+    case (serviceName, block) => block.structs.keys.map(structName => structName -> serviceName)
+  }
+  def structNames: Iterable[String]        = structLocations.keys
+  lazy val providedBlockNames: Set[String] = (services.keys ++ structNames).toSet
+
+  /** Get a block by name, either as a service or a block */
+  def getBlock(name: String): AttributeBlock[_] =
+    services.getOrElse(name, services(structLocations(name)).structs(name))
 }
 
 object Templefile {

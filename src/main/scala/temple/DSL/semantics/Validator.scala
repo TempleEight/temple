@@ -1,8 +1,9 @@
 package temple.DSL.semantics
 
 import temple.DSL.semantics.NameClashes._
-import temple.ast.AbstractAttribute.{CreatedByAttribute, IDAttribute}
+import temple.ast.AbstractAttribute.{Attribute, CreatedByAttribute, IDAttribute}
 import temple.ast.AbstractServiceBlock._
+import temple.ast.Annotation.Nullable
 import temple.ast.AttributeType._
 import temple.ast.{Metadata, _}
 import temple.builder.project.ProjectConfig
@@ -16,19 +17,12 @@ import scala.reflect.{ClassTag, classTag}
 private class Validator private (templefile: Templefile) {
   private var errors: mutable.Set[String] = mutable.Set()
 
-  private val allStructs: Iterable[String] = templefile.services.flatMap {
-    case _ -> service => service.structs.keys
-  }
-
-  private val allServices: Set[String]           = templefile.services.keys.toSet
-  private val allStructsAndServices: Set[String] = allServices ++ allStructs
-
   // The services, updated with renamed attributes
   private var newServices: Map[String, ServiceBlock] = templefile.services
 
   // A mapping from every service/struct name in the input Templefile to its new name
   private val globalRenaming      = mutable.Map[String, String]()
-  def allGlobalNames: Set[String] = globalRenaming.valuesIterator.toSet ++ allStructsAndServices
+  def allGlobalNames: Set[String] = globalRenaming.valuesIterator.toSet ++ templefile.providedBlockNames
 
   private def validateAttributes(
     block: AttributeBlock[_],
@@ -157,7 +151,7 @@ private class Validator private (templefile: Templefile) {
       case _: Metadata.Metrics        => assertUnique[Metadata.Metrics]()
       case Metadata.Uses(services) =>
         assertUnique[Metadata.Uses]()
-        for (service <- services if !allServices.contains(service))
+        for (service <- services if !templefile.services.contains(service))
           errors += context.errorMessage(s"No such service $service referenced in #uses")
     }
   }
@@ -178,7 +172,7 @@ private class Validator private (templefile: Templefile) {
 
   private def validateAttributeType(attributeType: AttributeType, context: SemanticContext): Unit =
     attributeType match {
-      case ForeignKey(references) if !allStructsAndServices.contains(references) =>
+      case ForeignKey(references) if !templefile.providedBlockNames.contains(references) =>
         errors += context.errorMessage(s"Invalid foreign key $references")
       case ForeignKey(_) => // all good
 
@@ -196,6 +190,10 @@ private class Validator private (templefile: Templefile) {
       case IntType(Some(max), Some(min), _) if max < min => errors += context.errorMessage(s"IntType max not above min")
       case IntType(_, _, precision) if precision <= 0 || precision > 8 =>
         errors += context.errorMessage(s"IntType precision not between 1 and 8")
+      case intType: IntType if intType.minValue > intType.precisionMax =>
+        errors += context.errorMessage(s"IntType min is out of range for the precision ${intType.precision}")
+      case intType: IntType if intType.maxValue < intType.precisionMin =>
+        errors += context.errorMessage(s"IntType max is out of range for the precision ${intType.precision}")
       case IntType(_, _, _) => // all good
 
       case FloatType(Some(max), Some(min), _) if max < min =>
@@ -207,6 +205,15 @@ private class Validator private (templefile: Templefile) {
 
   private def validateBlockOfMetadata[T <: Metadata](target: TempleBlock[T], context: SemanticContext): Unit =
     validateMetadata(target.metadata, context)
+
+  private val referenceCycles: Set[Set[String]] = {
+    val graph = templefile.providedBlockNames.map { blockName =>
+      blockName -> templefile.getBlock(blockName).attributes.values.collect {
+        case Attribute(ForeignKey(references), _, annotations) if !annotations.contains(Nullable) => references
+      }
+    }.toMap
+    Tarjan(graph).filter(_.sizeIs > 1)
+  }
 
   def validate(): Seq[String] = {
     val context = SemanticContext.empty
@@ -220,17 +227,18 @@ private class Validator private (templefile: Templefile) {
 
     validateBlockOfMetadata(templefile.projectBlock, context :+ s"${templefile.projectName} project")
 
-    val rootNames =
-      allServices.toSeq.map(_       -> "service") ++
-      allStructs.map(_              -> "struct") ++
-      templefile.targets.keys.map(_ -> "target") :+
-      (templefile.projectName -> "project")
+    val rootNames: Seq[(String, String)] =
+      Seq(templefile.projectName     -> "project") ++
+      templefile.services.keys.map(_ -> "service") ++
+      templefile.structNames.map(_   -> "struct") ++
+      templefile.targets.keys.map(_  -> "target")
     val duplicates = rootNames
       .groupBy(_._1)
       .collect { case (name, repeats) if repeats.sizeIs > 1 => (name, repeats.map(_._2)) }
 
     if (duplicates.nonEmpty) {
-      val duplicateString = duplicates.map { case (name, used) => s"$name (${used.mkString(", ")})" }.mkString(", ")
+      val duplicateString =
+        duplicates.map { case (name, used) => s"$name (${used.sorted.mkString(", ")})" }.toSeq.sorted.mkString(", ")
 
       val suffix =
         if (duplicates.sizeIs == 1) s"duplicate found: $duplicateString"
@@ -240,6 +248,11 @@ private class Validator private (templefile: Templefile) {
     rootNames.collect {
       case (name, location) if !name.head.isUpper =>
         errors += context.errorMessage(s"Invalid name: $name ($location), it should start with a capital letter")
+    }
+
+    if (referenceCycles.nonEmpty) {
+      val referenceCycleStrings = referenceCycles.map(_.mkString("{ ", ", ", " }"))
+      errors += ("Cycle(s) were detected in foreign keys, between elements: " + referenceCycleStrings.mkString(", "))
     }
 
     errors.toSeq
@@ -266,7 +279,8 @@ object Validator {
     else Right(validator.transformed)
   }
 
-  /** Take a Templefile and convert it to a version valid for use in all the languages it will be deployed to
+  /**
+    * Take a Templefile and convert it to a version valid for use in all the languages it will be deployed to
     *
     * @throws SemanticParsingException a non-empty set of strings representing parse errors
     */
