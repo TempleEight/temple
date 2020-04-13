@@ -13,7 +13,7 @@ import scala.collection.immutable.ListMap
   *
   * @param name the service name to be generated
   * @param module the module name of the service to be generated // TODO: This is pretty Go specific, make it generic
-  * @param comms a sequence of service names this service communicates with
+  * @param comms a set of service names this service communicates with
   * @param opQueries a map of CRUD operations to their corresponding datastore query
   * @param port the port number this service will be served on
   * @param idAttribute the name of the ID field
@@ -28,7 +28,7 @@ import scala.collection.immutable.ListMap
 case class ServiceRoot(
   override val name: String,
   module: String,
-  comms: Seq[String],
+  comms: Set[String],
   opQueries: ListMap[CRUD, String],
   port: Int,
   idAttribute: IDAttribute,
