@@ -9,6 +9,6 @@ class EndpointIntegrationTest extends EndpointTesterSpec with Matchers {
 
   it should "correctly generate simple.temple" in {
     val simpleTemple = FileUtils.readFile("src/test/scala/temple/testfiles/simple-dc.temple")
-    noException should be thrownBy testEndpoints(simpleTemple)
+    noException should be thrownBy buildAndTestEndpoints(simpleTemple)
   }
 }

@@ -13,7 +13,7 @@ import temple.utils.MonadUtils.FromEither
 
 abstract class EndpointTesterSpec extends FlatSpec {
 
-  def testEndpoints(templefile: String): Unit = {
+  def buildAndTestEndpoints(templefile: String): Unit = {
     // Parse and validate templefile
     val data = DSLProcessor.parse(templefile) fromEither { error =>
       throw new RuntimeException(error)
