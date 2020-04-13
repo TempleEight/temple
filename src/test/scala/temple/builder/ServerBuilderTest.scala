@@ -31,7 +31,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
     serviceRoot shouldBe ServiceRoot(
       "TestService",
       "github.com/squat/and/dab/test-service",
-      comms = Set("other-service"),
+      comms = Set("OtherService").map(ServiceName(_)),
       port = 1026,
       opQueries = ListMap(
         Create -> "INSERT INTO test_service (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image, fk) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image, fk;",
@@ -51,7 +51,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "timeOfDay"   -> Attribute(TimeType),
         "expiry"      -> Attribute(DateTimeType),
         "image"       -> Attribute(BlobType()),
-        "fk"          -> Attribute(ForeignKey("other-service")),
+        "fk"          -> Attribute(ForeignKey("OtherService")),
       ),
       datastore = Database.Postgres,
       readable = Readable.All,
@@ -77,7 +77,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
     serviceRoot shouldBe ServiceRoot(
       "TestService",
       "github.com/squat/and/dab/test-service",
-      comms = Set("other-service"),
+      comms = Set("OtherService").map(ServiceName(_)),
       port = 1026,
       opQueries = ListMap(),
       idAttribute = IDAttribute("id"),
@@ -91,7 +91,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "timeOfDay"   -> Attribute(TimeType),
         "expiry"      -> Attribute(DateTimeType),
         "image"       -> Attribute(BlobType()),
-        "fk"          -> Attribute(ForeignKey("other-service")),
+        "fk"          -> Attribute(ForeignKey("OtherService")),
       ),
       datastore = Database.Postgres,
       readable = Readable.All,
@@ -117,7 +117,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
     serviceRoot shouldBe ServiceRoot(
       "TestComplexService",
       "github.com/squat/and/dab/test-complex-service",
-      comms = Set("other-svc"),
+      comms = Set("OtherSvc").map(ServiceName(_)),
       port = 1026,
       opQueries = ListMap(
         Create -> "INSERT INTO test_complex_service (id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image, sampleFK1, sampleFK2) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image, sampleFK1, sampleFK2;",
@@ -141,8 +141,8 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "timeOfDay"      -> Attribute(TimeType),
         "expiry"         -> Attribute(DateTimeType),
         "image"          -> Attribute(BlobType()),
-        "sampleFK1"      -> Attribute(ForeignKey("other-svc")),
-        "sampleFK2"      -> Attribute(ForeignKey("other-svc")),
+        "sampleFK1"      -> Attribute(ForeignKey("OtherSvc")),
+        "sampleFK2"      -> Attribute(ForeignKey("OtherSvc")),
       ),
       datastore = Database.Postgres,
       readable = Readable.All,

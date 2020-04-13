@@ -2,7 +2,7 @@ package temple.generate.server.go.auth
 
 import temple.generate.FileSystem._
 import temple.generate.server.go.common._
-import temple.generate.server.{AuthServiceGenerator, AuthServiceRoot, ServiceRoot}
+import temple.generate.server.{AuthServiceGenerator, AuthServiceRoot, ServiceName, ServiceRoot}
 import temple.generate.utils.CodeTerm.mkCode
 
 object GoAuthServiceGenerator extends AuthServiceGenerator {
@@ -18,7 +18,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceMainGenerator.generateImports(root),
         GoAuthServiceMainGenerator.generateStructs(),
         GoAuthServiceMainGenerator.generateRouter(),
-        GoCommonMainGenerator.generateMain(new ServiceRoot.Name("Auth"), root.port, usesComms = true, isAuth = true),
+        GoCommonMainGenerator.generateMain(ServiceName("Auth"), root.port, usesComms = true, isAuth = true),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoAuthServiceMainGenerator.generateHandlers(),
         GoAuthServiceMainGenerator.generateCreateToken(),

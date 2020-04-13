@@ -20,7 +20,7 @@ object BuilderTestData {
       "timeOfDay"   -> Attribute(TimeType),
       "expiry"      -> Attribute(DateTimeType),
       "image"       -> Attribute(BlobType()),
-      "fk"          -> Attribute(ForeignKey("other-service")),
+      "fk"          -> Attribute(ForeignKey("OtherService")),
     ),
   )
 
@@ -45,8 +45,8 @@ object BuilderTestData {
       "timeOfDay"      -> Attribute(TimeType),
       "expiry"         -> Attribute(DateTimeType),
       "image"          -> Attribute(BlobType()),
-      "sampleFK1"      -> Attribute(ForeignKey("other-svc")),
-      "sampleFK2"      -> Attribute(ForeignKey("other-svc")),
+      "sampleFK1"      -> Attribute(ForeignKey("OtherSvc")),
+      "sampleFK2"      -> Attribute(ForeignKey("OtherSvc")),
     ),
     structs = ListMap(
       "Test" -> StructBlock(
