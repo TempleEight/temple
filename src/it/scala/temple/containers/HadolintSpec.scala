@@ -19,6 +19,10 @@ abstract class HadolintSpec extends DockerShell2HttpService(8080) with DockerTes
   // Validate a given Dockerfile, returning the output of Hadolint
   def validate(dockerfile: String): String = {
     val json = Map("contents" -> dockerfile).asJson.toString()
-    Http(hadolintVerifyUrl).params(Map("dockerfile" -> json)).asString.body
+    Http(hadolintVerifyUrl)
+      .params(Map("dockerfile" -> json))
+      .timeout(connTimeoutMs = 1000, readTimeoutMs = 30000)
+      .asString
+      .body
   }
 }
