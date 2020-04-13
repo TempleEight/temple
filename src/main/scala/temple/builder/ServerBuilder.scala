@@ -79,7 +79,7 @@ object ServerBuilder {
     ServiceRoot(
       serviceName,
       module = moduleName,
-      comms = comms.toSet,
+      comms = comms.toSet.map(ServiceName(_)),
       opQueries = queries,
       port = port,
       idAttribute = idAttribute,

@@ -104,8 +104,8 @@ object ProjectBuilderTestData {
        |  "host" : "a-db",
        |  "sslMode" : "disable",
        |  "services" : {
-       |    "B" : "http://b:1028",
-       |    "C" : "http://c:1030"
+       |    "b" : "http://b:1028/b",
+       |    "c" : "http://c:1030/c"
        |  },
        |  "ports" : {
        |    "service" : 1026,

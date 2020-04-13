@@ -34,9 +34,9 @@ object GoServiceDAOInterfaceGenerator {
     enumeratingByCreator: Boolean,
   ): String =
     mkCode.lines(
-      "// Datastore provides the interface adopted by the DAO, allowing for mocking",
+      "// BaseDatastore provides the basic datastore methods",
       mkCode(
-        "type Datastore interface",
+        "type BaseDatastore interface",
         CodeWrap.curly.tabbed(
           for (operation <- operations.toSeq.sorted)
             yield generateInterfaceFunction(root, operation, enumeratingByCreator),
