@@ -76,6 +76,6 @@ object GoCommonDAOGenerator {
   private[go] def generateExtendableDatastoreInterface(): String =
     mkCode.lines(
       "// Datastore provides the interface adopted by the DAO, allowing for mocking",
-      genInterface("Datastore", Seq("BaseDatastore")),
+      genInterface("Datastore", Set("BaseDatastore")),
     )
 }
