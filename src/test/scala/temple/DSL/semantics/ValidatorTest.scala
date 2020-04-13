@@ -15,7 +15,7 @@ class ValidatorTest extends FlatSpec with Matchers {
 
   behavior of "Validator"
 
-  it should "validationErrors" in {
+  it should "throw no errors with a correct templefile" in {
     validationErrors(
       Templefile(
         "MyProject",
@@ -44,7 +44,9 @@ class ValidatorTest extends FlatSpec with Matchers {
         ),
       ),
     ) shouldBe empty
+  }
 
+  it should "identify duplicate usage of structs" in {
     validationErrors(
       Templefile(
         "MyProject",
@@ -68,7 +70,7 @@ class ValidatorTest extends FlatSpec with Matchers {
       Templefile(
         "Box",
         projectBlock = ProjectBlock(Seq(Database.Postgres)),
-        targets = Map("User" -> TargetBlock(Seq(TargetLanguage.JavaScript)), "Box" -> TargetBlock()),
+        targets = Map("User" -> TargetBlock(Seq(TargetLanguage.JavaScript))),
         services = Map(
           "User" -> ServiceBlock(
             attributes = Map(
@@ -79,15 +81,17 @@ class ValidatorTest extends FlatSpec with Matchers {
               "Box"  -> StructBlock(Map()),
             ),
           ),
+          "Other" -> ServiceBlock(
+            attributes = Map("a" -> Attribute(IntType())),
+            structs = Map(
+              "User" -> StructBlock(Map()),
+            ),
+          ),
         ),
       ),
     ) shouldBe Set(
-      "Project, targets and structs must be globally unique, duplicates found: Box (struct, target, project), User (service, struct, target)",
+      "Project, targets and structs must be globally unique, duplicates found: Box (project, struct), User (service, struct, target)",
     )
-
-    validationErrors(
-      Templefile("myProject"),
-    ) shouldBe Set("Invalid name: myProject (project), it should start with a capital letter")
 
     validationErrors(
       Templefile(
@@ -102,9 +106,17 @@ class ValidatorTest extends FlatSpec with Matchers {
         ),
       ),
     ) shouldBe Set(
-      "Project, targets and structs must be globally unique, duplicate found: User (service, project)",
+      "Project, targets and structs must be globally unique, duplicate found: User (project, service)",
     )
+  }
 
+  it should "enforce capitalization of project names" in {
+    validationErrors(
+      Templefile("myProject"),
+    ) shouldBe Set("Invalid name: myProject (project), it should start with a capital letter")
+  }
+
+  it should "identify repeated use of metadata" in {
     validationErrors(
       Templefile(
         "User",
@@ -115,9 +127,25 @@ class ValidatorTest extends FlatSpec with Matchers {
     )
 
     validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
+          "User" -> ServiceBlock(
+            attributes = Map("a" -> Attribute(IntType())),
+            metadata = Seq(ServiceAuth.Email, Readable.All, Readable.This),
+          ),
+        ),
+      ),
+    ) shouldBe Set("Multiple occurrences of Readable metadata in User")
+  }
+
+  it should "enforce capitalization of attributes" in {
+    validationErrors(
       templefileWithUserAttributes("A" -> Attribute(BoolType)),
     ) shouldBe Set("Invalid attribute name A, it must start with a lowercase letter, in User")
+  }
 
+  it should "validate constraints on attributes" in {
     validationErrors(
       templefileWithUserAttributes("a" -> Attribute(IntType(max = Some(0), min = Some(1)))),
     ) shouldBe Set("IntType max not above min in a, in User")
@@ -163,7 +191,9 @@ class ValidatorTest extends FlatSpec with Matchers {
       "StringType max is negative in c, in User",
       "StringType max not above min in d, in User",
     )
+  }
 
+  it should "identify unknown foreign keys" in {
     validationErrors(
       templefileWithUserAttributes("c" -> Attribute(ForeignKey("Unknown"))),
     ) shouldBe Set("Invalid foreign key Unknown in c, in User")
@@ -182,20 +212,9 @@ class ValidatorTest extends FlatSpec with Matchers {
         ),
       ),
     ) shouldBe Set("No such service Box referenced in #uses in User")
+  }
 
-    validationErrors(
-      Templefile(
-        "MyProject",
-        services = Map(
-          "User" -> ServiceBlock(
-            attributes = Map("a" -> Attribute(IntType())),
-            metadata = Seq(ServiceAuth.Email, Readable.All, Readable.This),
-          ),
-        ),
-      ),
-    ) shouldBe Set("Multiple occurrences of Readable metadata in User")
-
-    // check that the auth block is found, regardless of which block it’s in
+  it should "enforce the existance of an auth block when other dependent metadata are used" in {
     validationErrors(
       Templefile(
         "MyProject",
@@ -206,11 +225,11 @@ class ValidatorTest extends FlatSpec with Matchers {
           ),
           "Box" -> ServiceBlock(
             attributes = Map(),
-            metadata = Seq(Readable.All, Readable.This),
+            metadata = Seq(Readable.This),
           ),
         ),
       ),
-    ) shouldBe Set("Multiple occurrences of Readable metadata in Box")
+    ) shouldBe Set()
 
     validationErrors(
       Templefile(
@@ -223,7 +242,9 @@ class ValidatorTest extends FlatSpec with Matchers {
         ),
       ),
     ) shouldBe Set("#readable(this) requires at least one service to have #auth in User")
+  }
 
+  it should "identify incompatible metadata" in {
     validationErrors(
       Templefile(
         "MyProject",
@@ -237,7 +258,32 @@ class ValidatorTest extends FlatSpec with Matchers {
     ) shouldBe Set("#writable(all) is not compatible with #readable(this) in User")
   }
 
-  it should "validate" in {
+  it should "find cycles in dependencies, but only if they are not nullable" in {
+    validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
+          "User" -> ServiceBlock(Map("box"  -> Attribute(ForeignKey("Box")))),
+          "Box"  -> ServiceBlock(Map("fred" -> Attribute(ForeignKey("Fred"), None, Set(Nullable)))),
+          "Fred" -> ServiceBlock(Map("user" -> Attribute(ForeignKey("User")))),
+        ),
+      ),
+    ) shouldBe Set()
+
+    validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
+          "User"   -> ServiceBlock(Map("box"    -> Attribute(ForeignKey("Box")))),
+          "Box"    -> ServiceBlock(Map("cube"   -> Attribute(ForeignKey("Cube")))),
+          "Cube"   -> ServiceBlock(Map("square" -> Attribute(ForeignKey("Square")))),
+          "Square" -> ServiceBlock(Map("user"   -> Attribute(ForeignKey("User")))),
+        ),
+      ),
+    ) shouldBe Set("Cycle(s) were detected in foreign keys, between elements: { Square, Cube, Box, User }")
+  }
+
+  it should "throw errors when validating" in {
     noException shouldBe thrownBy {
       validate(
         Templefile(
