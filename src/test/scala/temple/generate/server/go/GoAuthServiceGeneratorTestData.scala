@@ -27,6 +27,9 @@ object GoAuthServiceGeneratorTestData {
     File("auth/dao", "dao.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/auth/dao/dao.go.snippet",
     ),
+    File("auth/dao", "datastore.go") -> readFile(
+      "src/test/scala/temple/generate/server/go/testfiles/auth/dao/datastore.go.snippet",
+    ),
     File("auth/comm", "handler.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/auth/comm/handler.go.snippet",
     ),

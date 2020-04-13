@@ -46,6 +46,9 @@ object GoServiceGeneratorTestData {
     File("user/dao", "dao.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/user/dao/dao.go.snippet",
     ),
+    File("user/dao", "datastore.go") -> readFile(
+      "src/test/scala/temple/generate/server/go/testfiles/user/dao/datastore.go.snippet",
+    ),
     File("user/util", "util.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/user/util/util.go.snippet",
     ),
@@ -92,6 +95,9 @@ object GoServiceGeneratorTestData {
     ),
     File("match/dao", "dao.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/match/dao/dao.go.snippet",
+    ),
+    File("match/dao", "datastore.go") -> readFile(
+      "src/test/scala/temple/generate/server/go/testfiles/match/dao/datastore.go.snippet",
     ),
     File("match/util", "util.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/match/util/util.go.snippet",
