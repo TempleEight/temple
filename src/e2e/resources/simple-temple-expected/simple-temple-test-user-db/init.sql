@@ -14,7 +14,7 @@ CREATE TABLE simple_temple_test_user (
 
 CREATE TABLE fred (
   id UUID NOT NULL PRIMARY KEY,
-  createdBy UUID NOT NULL,
+  created_by UUID NOT NULL,
   field TEXT,
   friend UUID NOT NULL,
   image BYTEA CHECK (octet_length(image) <= 10000000) NOT NULL

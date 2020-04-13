@@ -68,7 +68,7 @@ object ProjectTester {
       case Provider.DockerCompose =>
         println("🐳 Spinning up Docker Compose infrastructure...")
         exec(
-          s"cd $generatedPath && docker ps -a -q | xargs docker rm -f && docker volume prune -f && docker-compose up --build -d 2>&1",
+          s"cd $generatedPath && docker-compose up --build -d 2>&1",
         )
 
         var successfullyStarted = false
@@ -105,7 +105,7 @@ object ProjectTester {
         exec("kubectl drain minikube && minikube delete")
       case Provider.DockerCompose =>
         println(s"💀 Shutting down Docker Compose infrastructure...")
-        exec(s"cd $generatedPath && docker-compose down 2>&1")
+        exec(s"cd $generatedPath && docker-compose down -v 2>&1")
     }
   }
 

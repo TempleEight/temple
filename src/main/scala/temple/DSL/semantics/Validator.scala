@@ -36,7 +36,7 @@ private class Validator private (templefile: Templefile) {
     val usesCreatedBy: Boolean = templefile.usesAuth && block.lookupLocalMetadata[Metadata.ServiceAuth].isEmpty
 
     val implicitAttributes: ListMap[String, AbstractAttribute] = ListMap("id" -> IDAttribute) ++ when(usesCreatedBy) {
-        "createdBy" -> CreatedByAttribute
+        "created_by" -> CreatedByAttribute
       }
 
     // Add implicit attributes

@@ -42,7 +42,7 @@ object AttributeType {
       else Float.MaxValue
     }
 
-    def minValue: Double = max.getOrElse {
+    def minValue: Double = min.getOrElse {
       if (isDouble) Double.MinValue
       else Float.MinValue
     }

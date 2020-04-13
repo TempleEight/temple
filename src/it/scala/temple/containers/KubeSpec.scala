@@ -16,6 +16,7 @@ abstract class KubeSpec extends DockerShell2HttpService(8084) with DockerTestKit
     val json = files.map { case (file, contents) => (file.folder + "/" + file.filename, contents) }.asJson.toString()
     Http(kubeVerifyUrl)
       .params(Map("src" -> json, "root" -> entryFile.folder))
+      .timeout(connTimeoutMs = 1000, readTimeoutMs = 30000)
       .asString
       .body
   }
