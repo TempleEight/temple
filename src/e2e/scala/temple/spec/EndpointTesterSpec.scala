@@ -1,4 +1,4 @@
-package temple.containers
+package temple.spec
 
 import java.nio.file.Files
 
@@ -11,7 +11,7 @@ import temple.test.ProjectTester
 import temple.utils.FileUtils
 import temple.utils.MonadUtils.FromEither
 
-abstract class ProjectTesterSpec extends FlatSpec {
+abstract class EndpointTesterSpec extends FlatSpec {
 
   def testEndpoints(templefile: String): Unit = {
     // Parse and validate templefile
@@ -20,7 +20,7 @@ abstract class ProjectTesterSpec extends FlatSpec {
     }
     val analyzedTemplefile = Analyzer.parseAndValidate(data)
 
-    // Build projectexi
+    // Build project
     val detail =
       LanguageSpecificDetailBuilder.build(analyzedTemplefile, (_: String) => "github.com/Temple/integration-test")
     val project = ProjectBuilder.build(analyzedTemplefile, detail)

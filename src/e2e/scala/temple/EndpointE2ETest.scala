@@ -1,10 +1,10 @@
 package temple
 
 import org.scalatest.Matchers
-import temple.containers.ProjectTesterSpec
+import temple.spec.EndpointTesterSpec
 import temple.utils.FileUtils
 
-class ProjectIntegrationTest extends ProjectTesterSpec with Matchers {
+class EndpointE2ETest extends EndpointTesterSpec with Matchers {
   behavior of "temple generate"
 
   it should "correctly generate simple.temple" in {
