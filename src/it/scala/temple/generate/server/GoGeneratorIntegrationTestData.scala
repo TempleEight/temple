@@ -13,7 +13,7 @@ object GoGeneratorIntegrationTestData {
   val simpleServiceRoot: ServiceRoot = ServiceRoot(
     name = "User",
     module = "github.com/TempleEight/spec-golang/user",
-    comms = Seq.empty,
+    comms = Set.empty,
     opQueries = ListMap(
       CRUD.Create -> "INSERT INTO user_temple (id, name) VALUES ($1, $2) RETURNING id, name",
       CRUD.Read   -> "SELECT id, name FROM user_temple WHERE id = $1",
@@ -34,7 +34,7 @@ object GoGeneratorIntegrationTestData {
   val simpleServiceRootWithComms: ServiceRoot = ServiceRoot(
     name = "Match",
     module = "github.com/TempleEight/spec-golang/match",
-    comms = Seq("user"),
+    comms = Set("user"),
     opQueries = ListMap(
       CRUD.List   -> "SELECT id, created_by, userOne, userTwo, matchedOn FROM match WHERE created_by = $1",
       CRUD.Create -> "INSERT INTO match (id, created_by, userOne, userTwo, matchedOn) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_by, userOne, userTwo, matchedOn",
@@ -60,7 +60,7 @@ object GoGeneratorIntegrationTestData {
   val datetimeService: ServiceRoot = ServiceRoot(
     name = "DateTimeSvc",
     module = "github.com/TempleEight/integration/test",
-    comms = Seq.empty,
+    comms = Set.empty,
     opQueries = ListMap(
       CRUD.Create -> "",
       CRUD.Read   -> "",
