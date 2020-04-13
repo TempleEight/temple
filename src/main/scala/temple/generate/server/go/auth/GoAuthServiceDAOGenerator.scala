@@ -34,9 +34,9 @@ object GoAuthServiceDAOGenerator {
 
   private[auth] def generateInterface(): String =
     mkCode.lines(
-      "// Datastore provides the interface adopted by the DAO, allowing for mocking",
+      "// BaseDatastore provides the basic datastore methods",
       mkCode(
-        "type Datastore interface",
+        "type BaseDatastore interface",
         CodeWrap.curly.tabbed(
           "CreateAuth(input CreateAuthInput) (*Auth, error)",
           "ReadAuth(input ReadAuthInput) (*Auth, error)",

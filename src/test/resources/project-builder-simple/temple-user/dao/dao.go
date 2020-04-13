@@ -12,8 +12,8 @@ import (
 	_ "github.com/lib/pq"
 )
 
-// Datastore provides the interface adopted by the DAO, allowing for mocking
-type Datastore interface {
+// BaseDatastore provides the basic datastore methods
+type BaseDatastore interface {
 	CreateTempleUser(input CreateTempleUserInput) (*TempleUser, error)
 	ReadTempleUser(input ReadTempleUserInput) (*TempleUser, error)
 	UpdateTempleUser(input UpdateTempleUserInput) (*TempleUser, error)

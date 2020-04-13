@@ -43,6 +43,10 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceDAOGenerator.generateQueryFunctions(),
         GoAuthServiceDAOGenerator.generateDAOFunctions(root),
       ),
+      File("auth/dao", "datastore.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("dao"),
+        GoCommonDAOGenerator.generateExtendableDatastoreInterface(),
+      ),
       File("auth/comm", "handler.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("comm"),
         GoAuthServiceCommGenerator.generateImports(root),

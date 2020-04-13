@@ -2,6 +2,7 @@ package temple.generate.server.go.common
 
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
+import temple.generate.server.go.common.GoCommonGenerator.genInterface
 
 object GoCommonDAOGenerator {
 
@@ -68,5 +69,13 @@ object GoCommonDAOGenerator {
           "return db.Query(query, args...)",
         ),
       ),
+    )
+
+  // The datastore interface extends the "base" datastore we generate, so the user can provide their own
+  // datastore methods
+  private[go] def generateExtendableDatastoreInterface(): String =
+    mkCode.lines(
+      "// Datastore provides the interface adopted by the DAO, allowing for mocking",
+      genInterface("Datastore", Set("BaseDatastore")),
     )
 }
