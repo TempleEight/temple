@@ -63,7 +63,7 @@ object GoCommonGenerator {
     )
 
   /** Generate an interface */
-  private[go] def genInterface(identifier: String, methods: Seq[String]): String =
+  private[go] def genInterface(identifier: String, methods: Set[String]): String =
     mkCode(
       "type",
       identifier,

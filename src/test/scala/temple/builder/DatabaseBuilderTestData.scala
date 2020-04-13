@@ -22,6 +22,7 @@ object DatabaseBuilderTestData {
           ColumnDef("timeOfDay", TimeCol, Seq(NonNull)),
           ColumnDef("expiry", DateTimeTzCol, Seq(NonNull)),
           ColumnDef("image", BlobCol, Seq(NonNull)),
+          ColumnDef("fk", UUIDCol, Seq(NonNull)),
         ),
       ),
     )
@@ -59,6 +60,8 @@ object DatabaseBuilderTestData {
           ColumnDef("timeOfDay", TimeCol, Seq(NonNull)),
           ColumnDef("expiry", DateTimeTzCol, Seq(NonNull)),
           ColumnDef("image", BlobCol, Seq(NonNull)),
+          ColumnDef("sampleFK1", UUIDCol, Seq(NonNull)),
+          ColumnDef("sampleFK2", UUIDCol, Seq(NonNull)),
         ),
       ),
       Create(
@@ -86,6 +89,7 @@ object DatabaseBuilderTestData {
       Assignment(Column("timeOfDay")),
       Assignment(Column("expiry")),
       Assignment(Column("image")),
+      Assignment(Column("fk")),
     ),
     returnColumns = Seq(
       Column("id"),
@@ -96,6 +100,7 @@ object DatabaseBuilderTestData {
       Column("timeOfDay"),
       Column("expiry"),
       Column("image"),
+      Column("fk"),
     ),
   )
 
@@ -110,6 +115,7 @@ object DatabaseBuilderTestData {
       Column("timeOfDay"),
       Column("expiry"),
       Column("image"),
+      Column("fk"),
     ),
     Some(PreparedComparison("id", ComparisonOperator.Equal)),
   )
@@ -125,6 +131,7 @@ object DatabaseBuilderTestData {
       Assignment(Column("timeOfDay")),
       Assignment(Column("expiry")),
       Assignment(Column("image")),
+      Assignment(Column("fk")),
     ),
     Some(PreparedComparison("id", ComparisonOperator.Equal)),
     returnColumns = Seq(
@@ -136,6 +143,7 @@ object DatabaseBuilderTestData {
       Column("timeOfDay"),
       Column("expiry"),
       Column("image"),
+      Column("fk"),
     ),
   )
 
@@ -155,6 +163,7 @@ object DatabaseBuilderTestData {
       Column("timeOfDay"),
       Column("expiry"),
       Column("image"),
+      Column("fk"),
     ),
     Some(PreparedComparison("created_by", ComparisonOperator.Equal)),
   )
@@ -170,6 +179,7 @@ object DatabaseBuilderTestData {
       Column("timeOfDay"),
       Column("expiry"),
       Column("image"),
+      Column("fk"),
     ),
   )
 }
