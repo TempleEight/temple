@@ -22,7 +22,7 @@ abstract class GolangSpec extends DockerShell2HttpService(8081) with DockerTestK
     val json = files.map { case (file, contents) => (file.folder + "/" + file.filename, contents) }.asJson.toString()
     Http(golangVerifyUrl)
       .params(Map("src" -> json, "root" -> entryFile.folder, "entrypoint" -> entryFile.filename))
-      .timeout(connTimeoutMs = 1000, readTimeoutMs = 10000)
+      .timeout(connTimeoutMs = 1000, readTimeoutMs = 30000)
       .asString
       .body
   }
