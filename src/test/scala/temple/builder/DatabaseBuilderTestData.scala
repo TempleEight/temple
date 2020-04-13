@@ -5,7 +5,7 @@ import temple.generate.database.ast.ColumnConstraint.{Check, NonNull, Unique}
 import temple.generate.database.ast.ComparisonOperator.{GreaterEqual, LessEqual}
 import temple.generate.database.ast.Condition.PreparedComparison
 import temple.generate.database.ast.Statement._
-import temple.generate.database.ast.{ColumnDef, _}
+import temple.generate.database.ast._
 
 object DatabaseBuilderTestData {
 
