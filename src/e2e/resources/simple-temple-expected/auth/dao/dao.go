@@ -14,8 +14,8 @@ import (
 // https://www.postgresql.org/docs/9.3/errcodes-appendix.html
 const psqlUniqueViolation = "unique_violation"
 
-// Datastore provides the interface adopted by the DAO, allowing for mocking
-type Datastore interface {
+// BaseDatastore provides the basic datastore methods
+type BaseDatastore interface {
 	CreateAuth(input CreateAuthInput) (*Auth, error)
 	ReadAuth(input ReadAuthInput) (*Auth, error)
 }

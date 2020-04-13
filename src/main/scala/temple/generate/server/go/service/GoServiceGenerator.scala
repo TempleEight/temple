@@ -80,6 +80,10 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceDAOGenerator.generateQueryFunctions(operations),
         GoServiceDAOFunctionsGenerator.generateDAOFunctions(root, enumeratingByCreator),
       ),
+      File(s"${root.kebabName}/dao", "datastore.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("dao"),
+        GoCommonDAOGenerator.generateExtendableDatastoreInterface(),
+      ),
       File(s"${root.kebabName}/util", "util.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("util"),
         GoServiceUtilGenerator.generateImports(),
