@@ -99,7 +99,9 @@ object ServerBuilder {
       case GoLanguageDetail(modulePath) => s"$modulePath/auth"
     }
 
-    val serviceAuth = templefile.projectBlock.lookupMetadata[ServiceAuth].getOrElse(ProjectConfig.defaultAuth)
+    // TODO: look this up from the project block
+    // TODO: support usernames
+    val serviceAuth = ProjectConfig.defaultAuth
 
     val attributes: Map[String, Attribute] = serviceAuth match {
       case ServiceAuth.Email =>

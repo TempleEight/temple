@@ -162,7 +162,8 @@ object ServiceTestUtils {
     val service = allServices.getOrElse(serviceName, test.fail(s"service $serviceName does not exist"))
     // If this service is an auth service, the same access token cannot be used twice, so make a new one to be safe...
     // This is so that services that reference 2+ auth'd services can be successfully tested
-    val newAccessToken = service.lookupMetadata[Metadata.ServiceAuth].fold(accessToken) { _ =>
+    // TODO: refactor for central auth method
+    val newAccessToken = service.lookupLocalMetadata[Metadata.ServiceAuth].fold(accessToken) { _ =>
       ServiceTestUtils.getAuthTokenWithEmail(serviceName, baseURL)
     }
 
