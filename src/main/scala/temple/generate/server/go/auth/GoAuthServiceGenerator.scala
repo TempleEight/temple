@@ -23,6 +23,11 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceMainGenerator.generateHandlers(),
         GoAuthServiceMainGenerator.generateCreateToken(),
       ),
+      File("auth", "setup.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("main"),
+        GoCommonSetupGenerator.generateImports,
+        GoCommonSetupGenerator.generateSetupMethod,
+      ),
       File("auth", "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
         GoCommonHookGenerator.generateImports(root.module),

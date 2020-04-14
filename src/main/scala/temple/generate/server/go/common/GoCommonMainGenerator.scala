@@ -72,10 +72,14 @@ object GoCommonMainGenerator {
           "env",
         ),
         "",
+        "// Call into non-generated entry-point",
+        genDeclareAndAssign(genFunctionCall("defaultRouter", "&env"), "router"),
+        genMethodCall("env", "setup", "router"),
+        "",
         genMethodCall(
           "log",
           "Fatal",
-          genMethodCall("http", "ListenAndServe", doubleQuote(s":$port"), genMethodCall("env", "router")),
+          genMethodCall("http", "ListenAndServe", doubleQuote(s":$port"), "router"),
         ),
       ),
     )
