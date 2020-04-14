@@ -5,6 +5,7 @@ import temple.ast.Metadata.ServiceAuth
 import temple.ast.Templefile.Ports
 import temple.builder.project.ProjectConfig
 
+import scala.collection.immutable.ListMap
 import scala.reflect.ClassTag
 
 /** The semantic representation of a Templefile */
@@ -23,7 +24,7 @@ case class Templefile(
 
   // Whether or not to generate an auth service - based on whether any service has #auth
   val usesAuth: Boolean = services.exists {
-    case (_, service) => service.lookupMetadata[ServiceAuth].nonEmpty
+    case (_, service) => service.lookupLocalMetadata[ServiceAuth].nonEmpty
   }
 
   val providedServicesWithPorts: Iterable[(String, ServiceBlock, Ports)] =
@@ -41,12 +42,9 @@ case class Templefile(
     } else providedServicesWithPorts
   }
 
-  val allServices: Map[String, AbstractServiceBlock] = allServicesWithPorts.map {
-    case (name, service, _) => (name, service)
-  }.toMap
-
-  /** Fall back to the default metadata for the project */
-  override protected def lookupDefaultMetadata[T <: Metadata: ClassTag]: Option[T] = None
+  val allServices: Map[String, AbstractServiceBlock] = allServicesWithPorts
+    .map { case (name, service, _) => (name, service) }
+    .to(ListMap)
 
   /**
     * Find a metadata item by type
@@ -54,7 +52,7 @@ case class Templefile(
     * @tparam T The type of metadata to be provided. This must be explicitly given, in square brackets
     * @return an option of the metadata item
     */
-  override def lookupLocalMetadata[T <: Metadata: ClassTag]: Option[T] = projectBlock.lookupLocalMetadata[T]
+  override def lookupMetadata[T <: Metadata: ClassTag]: Option[T] = projectBlock.lookupLocalMetadata[T]
 
   /** A mapping from struct name to the service it is contained in */
   lazy val structLocations: Map[String, String] = services.flatMap {
