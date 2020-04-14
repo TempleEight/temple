@@ -44,7 +44,7 @@ object ProjectBuilder {
           }
       }
     // Add read all endpoint if defined
-    service.lookupMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + List)
+    service.lookupLocalMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + List)
   }
 
   private def buildDatabaseCreationScripts(templefile: Templefile): Files =
@@ -129,7 +129,7 @@ object ProjectBuilder {
   private def buildServerFiles(templefile: Templefile, detail: LanguageDetail): Files = {
     // Whether or not to generate an auth service - based on whether any service has #auth
     val usesAuth = templefile.services.exists {
-      case (_, service) => service.lookupMetadata[ServiceAuth].nonEmpty
+      case (_, service) => service.lookupLocalMetadata[ServiceAuth].nonEmpty
     }
 
     var serverFiles = templefile.providedServicesWithPorts.flatMap {

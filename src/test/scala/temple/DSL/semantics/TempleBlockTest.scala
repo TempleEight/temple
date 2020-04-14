@@ -31,7 +31,7 @@ class TempleBlockTest extends FlatSpec with Matchers {
 
     serviceBlock.lookupMetadata[Metadata.ServiceLanguage] shouldBe Some(Metadata.ServiceLanguage.Go)
     serviceBlock.lookupMetadata[Metadata.Database] shouldBe Some(Metadata.Database.Postgres)
-    serviceBlock.lookupMetadata[Metadata.Uses] shouldBe None
+    serviceBlock.lookupMetadata[Metadata.Provider] shouldBe None
   }
 
   it should "lookupMetadata in a struct block in a project file" in {
@@ -43,6 +43,6 @@ class TempleBlockTest extends FlatSpec with Matchers {
 
     structBlock.lookupMetadata[Metadata.ServiceLanguage] shouldBe Some(Metadata.ServiceLanguage.Go)
     structBlock.lookupMetadata[Metadata.Database] shouldBe Some(Metadata.Database.Postgres)
-    structBlock.lookupMetadata[Metadata.Uses] shouldBe None
+    structBlock.lookupMetadata[Metadata.Provider] shouldBe None
   }
 }

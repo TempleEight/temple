@@ -111,7 +111,8 @@ object ProjectTester {
 
   /** Execute the tests on each generated service */
   private def performTests(templefile: Templefile, generatedPath: String, url: String): Unit = {
-    val serviceAuths = templefile.services.values.flatMap(_.lookupMetadata[ServiceAuth]).toSet
+    // TODO: refactor for central auth method
+    val serviceAuths = templefile.services.values.flatMap(_.lookupLocalMetadata[ServiceAuth]).toSet
     var anyFailed    = false
     if (serviceAuths.nonEmpty) {
       anyFailed = AuthServiceTest.test(serviceAuths, url) || anyFailed
