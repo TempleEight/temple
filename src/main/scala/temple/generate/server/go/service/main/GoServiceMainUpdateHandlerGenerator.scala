@@ -57,6 +57,7 @@ object GoServiceMainUpdateHandlerGenerator {
             )
           },
           generateDAOInput(root, clientAttributes),
+          generateInvokeBeforeHookBlock(root, clientAttributes, Update),
           generateDAOCallBlock(root),
           generateJSONResponse(s"update${root.name}", responseMap),
         ),
