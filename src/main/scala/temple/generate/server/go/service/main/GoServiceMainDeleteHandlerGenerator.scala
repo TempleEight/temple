@@ -1,5 +1,6 @@
 package temple.generate.server.go.service.main
 
+import temple.ast.AbstractAttribute
 import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Delete
 import temple.generate.server.ServiceRoot
@@ -12,13 +13,19 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainDeleteHandlerGenerator {
 
+  private def generateDAOInput(root: ServiceRoot): String =
+    genDeclareAndAssign(
+      genPopulateStruct(s"dao.Delete${root.name}Input", ListMap("ID" -> s"${root.decapitalizedName}ID")),
+      "input",
+    )
+
   private def generateDAOCallBlock(root: ServiceRoot): String =
     mkCode.lines(
       genAssign(
         genMethodCall(
           "env.dao",
           s"Delete${root.name}",
-          genPopulateStruct(s"dao.Delete${root.name}Input", ListMap("ID" -> s"${root.decapitalizedName}ID")),
+          "input",
         ),
         "err",
       ),
@@ -34,6 +41,7 @@ object GoServiceMainDeleteHandlerGenerator {
           when(root.projectUsesAuth) { generateExtractAuthBlock(root.writable == Writable.This) },
           generateExtractIDBlock(root.decapitalizedName),
           when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root) },
+          generateDAOInput(root),
           generateDAOCallBlock(root),
           genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", "struct{}{}"),
         ),

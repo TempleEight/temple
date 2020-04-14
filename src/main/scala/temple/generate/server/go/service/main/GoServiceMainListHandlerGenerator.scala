@@ -18,6 +18,16 @@ object GoServiceMainListHandlerGenerator {
     responseMap: ListMap[String, String],
     enumeratingByCreator: Boolean,
   ): String = {
+    val queryDAOInputBlock = when(enumeratingByCreator) {
+      genDeclareAndAssign(
+        genPopulateStruct(
+          s"dao.List${root.name}Input",
+          ListMap(s"AuthID" -> "auth.ID"),
+        ),
+        "input",
+      )
+    }
+
     // Fetch list from DAO
     val queryDAOBlock =
       genDeclareAndAssign(
@@ -25,10 +35,7 @@ object GoServiceMainListHandlerGenerator {
           "env.dao",
           s"List${root.name}",
           when(enumeratingByCreator) {
-            genPopulateStruct(
-              s"dao.List${root.name}Input",
-              ListMap(s"AuthID" -> "auth.ID"),
-            )
+            "input"
           },
         ),
         s"${root.decapitalizedName}List",
@@ -76,9 +83,12 @@ object GoServiceMainListHandlerGenerator {
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
           when(enumeratingByCreator) { generateExtractAuthBlock(usesVar = true) },
-          mkCode.lines(
-            queryDAOBlock,
-            queryDAOErrorBlock,
+          mkCode.doubleLines(
+            queryDAOInputBlock,
+            mkCode.lines(
+              queryDAOBlock,
+              queryDAOErrorBlock,
+            ),
           ),
           instantiateResponseBlock,
           mapResponseBlock,

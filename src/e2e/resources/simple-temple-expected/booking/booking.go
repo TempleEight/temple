@@ -75,9 +75,10 @@ func jsonMiddleware(next http.Handler) http.Handler {
 }
 
 func checkAuthorization(env *env, bookingID uuid.UUID, auth *util.Auth) (bool, error) {
-	booking, err := env.dao.ReadBooking(dao.ReadBookingInput{
+	input := dao.ReadBookingInput{
 		ID: bookingID,
-	})
+	}
+	booking, err := env.dao.ReadBooking(input)
 	if err != nil {
 		return false, err
 	}
@@ -99,10 +100,12 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	booking, err := env.dao.CreateBooking(dao.CreateBookingInput{
+	input := dao.CreateBookingInput{
 		ID:     uuid,
 		AuthID: auth.ID,
-	})
+	}
+
+	booking, err := env.dao.CreateBooking(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
@@ -146,9 +149,11 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	booking, err := env.dao.ReadBooking(dao.ReadBookingInput{
+	input := dao.ReadBookingInput{
 		ID: bookingID,
-	})
+	}
+
+	booking, err := env.dao.ReadBooking(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrBookingNotFound:
@@ -197,9 +202,11 @@ func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = env.dao.DeleteBooking(dao.DeleteBookingInput{
+	input := dao.DeleteBookingInput{
 		ID: bookingID,
-	})
+	}
+
+	err = env.dao.DeleteBooking(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrBookingNotFound:

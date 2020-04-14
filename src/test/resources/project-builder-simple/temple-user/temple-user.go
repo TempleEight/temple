@@ -180,7 +180,7 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	templeUser, err := env.dao.CreateTempleUser(dao.CreateTempleUserInput{
+	input := dao.CreateTempleUserInput{
 		ID:            uuid,
 		IntField:      *req.IntField,
 		DoubleField:   *req.DoubleField,
@@ -190,7 +190,9 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		TimeField:     timeField,
 		DateTimeField: dateTimeField,
 		BlobField:     *req.BlobField,
-	})
+	}
+
+	templeUser, err := env.dao.CreateTempleUser(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
@@ -217,9 +219,11 @@ func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	templeUser, err := env.dao.ReadTempleUser(dao.ReadTempleUserInput{
+	input := dao.ReadTempleUserInput{
 		ID: templeUserID,
-	})
+	}
+
+	templeUser, err := env.dao.ReadTempleUser(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrTempleUserNotFound:
@@ -293,7 +297,7 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	templeUser, err := env.dao.UpdateTempleUser(dao.UpdateTempleUserInput{
+	input := dao.UpdateTempleUserInput{
 		ID:            templeUserID,
 		IntField:      *req.IntField,
 		DoubleField:   *req.DoubleField,
@@ -303,7 +307,9 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		TimeField:     timeField,
 		DateTimeField: dateTimeField,
 		BlobField:     *req.BlobField,
-	})
+	}
+
+	templeUser, err := env.dao.UpdateTempleUser(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrTempleUserNotFound:
@@ -335,9 +341,11 @@ func (env *env) deleteTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	err = env.dao.DeleteTempleUser(dao.DeleteTempleUserInput{
+	input := dao.DeleteTempleUserInput{
 		ID: templeUserID,
-	})
+	}
+
+	err = env.dao.DeleteTempleUser(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrTempleUserNotFound:

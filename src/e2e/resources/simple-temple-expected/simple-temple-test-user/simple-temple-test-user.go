@@ -233,7 +233,7 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	simpleTempleTestUser, err := env.dao.CreateSimpleTempleTestUser(dao.CreateSimpleTempleTestUserInput{
+	input := dao.CreateSimpleTempleTestUserInput{
 		ID:                   auth.ID,
 		SimpleTempleTestUser: *req.SimpleTempleTestUser,
 		Email:                *req.Email,
@@ -244,7 +244,9 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		CurrentBankBalance:   *req.CurrentBankBalance,
 		BirthDate:            birthDate,
 		BreakfastTime:        breakfastTime,
-	})
+	}
+
+	simpleTempleTestUser, err := env.dao.CreateSimpleTempleTestUser(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
@@ -279,9 +281,11 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	simpleTempleTestUser, err := env.dao.ReadSimpleTempleTestUser(dao.ReadSimpleTempleTestUserInput{
+	input := dao.ReadSimpleTempleTestUserInput{
 		ID: simpleTempleTestUserID,
-	})
+	}
+
+	simpleTempleTestUser, err := env.dao.ReadSimpleTempleTestUser(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestUserNotFound:
@@ -369,7 +373,7 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	simpleTempleTestUser, err := env.dao.UpdateSimpleTempleTestUser(dao.UpdateSimpleTempleTestUserInput{
+	input := dao.UpdateSimpleTempleTestUserInput{
 		ID:                   simpleTempleTestUserID,
 		SimpleTempleTestUser: *req.SimpleTempleTestUser,
 		Email:                *req.Email,
@@ -380,7 +384,9 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		CurrentBankBalance:   *req.CurrentBankBalance,
 		BirthDate:            birthDate,
 		BreakfastTime:        breakfastTime,
-	})
+	}
+
+	simpleTempleTestUser, err := env.dao.UpdateSimpleTempleTestUser(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestUserNotFound:
