@@ -1,8 +1,7 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.AbstractAttribute
 import temple.ast.Metadata.Writable
-import temple.generate.CRUD.{Create, Delete}
+import temple.generate.CRUD.Delete
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
