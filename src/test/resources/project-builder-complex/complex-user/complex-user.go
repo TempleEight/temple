@@ -18,7 +18,8 @@ import (
 
 // env defines the environment that requests should be executed within
 type env struct {
-	dao dao.Datastore
+	dao  dao.Datastore
+	hook Hook
 }
 
 // createComplexUserRequest contains the client-provided information required to create a single complexUser
@@ -133,7 +134,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	env := env{d}
+	env := env{d, Hook{}}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)

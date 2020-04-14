@@ -16,7 +16,8 @@ import (
 
 // env defines the environment that requests should be executed within
 type env struct {
-	dao dao.Datastore
+	dao  dao.Datastore
+	hook Hook
 }
 
 // createBookingResponse contains a newly created booking to be returned to the client
@@ -57,7 +58,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	env := env{d}
+	env := env{d, Hook{}}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)
