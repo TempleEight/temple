@@ -71,12 +71,18 @@ object GoServiceMainGenerator {
     )
   }
 
+  private[main] def generateDAOReadInput(root: ServiceRoot): String =
+    genDeclareAndAssign(
+      genPopulateStruct(s"dao.Read${root.name}Input", ListMap("ID" -> s"${root.decapitalizedName}ID")),
+      "input",
+    )
+
   private[main] def generateDAOReadCall(root: ServiceRoot): String =
     genDeclareAndAssign(
       genMethodCall(
         "env.dao",
         s"Read${root.name}",
-        genPopulateStruct(s"dao.Read${root.name}Input", ListMap("ID" -> s"${root.decapitalizedName}ID")),
+        "input",
       ),
       root.decapitalizedName,
       "err",
@@ -88,6 +94,7 @@ object GoServiceMainGenerator {
       Seq("env *env", s"${root.decapitalizedName}ID uuid.UUID", "auth *util.Auth"),
       Some(CodeWrap.parens(mkCode.list("bool", "error"))),
       mkCode.lines(
+        generateDAOReadInput(root),
         generateDAOReadCall(root),
         genCheckAndReturnError("false"),
         genReturn(s"${root.decapitalizedName}.CreatedBy == auth.ID", "nil"),

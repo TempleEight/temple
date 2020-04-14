@@ -201,7 +201,7 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	complexUser, err := env.dao.CreateComplexUser(dao.CreateComplexUserInput{
+	input := dao.CreateComplexUserInput{
 		ID:                 auth.ID,
 		SmallIntField:      *req.SmallIntField,
 		IntField:           *req.IntField,
@@ -215,7 +215,9 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		TimeField:          timeField,
 		DateTimeField:      dateTimeField,
 		BlobField:          *req.BlobField,
-	})
+	}
+
+	complexUser, err := env.dao.CreateComplexUser(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
@@ -259,9 +261,11 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	complexUser, err := env.dao.ReadComplexUser(dao.ReadComplexUserInput{
+	input := dao.ReadComplexUserInput{
 		ID: complexUserID,
-	})
+	}
+
+	complexUser, err := env.dao.ReadComplexUser(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrComplexUserNotFound:
@@ -352,7 +356,7 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	complexUser, err := env.dao.UpdateComplexUser(dao.UpdateComplexUserInput{
+	input := dao.UpdateComplexUserInput{
 		ID:                 complexUserID,
 		SmallIntField:      *req.SmallIntField,
 		IntField:           *req.IntField,
@@ -366,7 +370,9 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		TimeField:          timeField,
 		DateTimeField:      dateTimeField,
 		BlobField:          *req.BlobField,
-	})
+	}
+
+	complexUser, err := env.dao.UpdateComplexUser(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrComplexUserNotFound:
@@ -415,9 +421,11 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	err = env.dao.DeleteComplexUser(dao.DeleteComplexUserInput{
+	input := dao.DeleteComplexUserInput{
 		ID: complexUserID,
-	})
+	}
+
+	err = env.dao.DeleteComplexUser(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrComplexUserNotFound:

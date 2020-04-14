@@ -13,17 +13,23 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainUpdateHandlerGenerator {
 
-  private def generateDAOCallBlock(root: ServiceRoot, clientAttributes: ListMap[String, AbstractAttribute]): String = {
-    val createInput = ListMap("ID" -> s"${root.decapitalizedName}ID") ++ generateDAOInputClientMap(clientAttributes)
+  private def generateDAOInput(root: ServiceRoot, clientAttributes: ListMap[String, AbstractAttribute]): String = {
+    val updateInput = ListMap("ID" -> s"${root.decapitalizedName}ID") ++ generateDAOInputClientMap(clientAttributes)
+    genDeclareAndAssign(
+      genPopulateStruct(s"dao.Update${root.name}Input", updateInput),
+      "input",
+    )
+  }
+
+  private def generateDAOCallBlock(root: ServiceRoot): String =
     mkCode.lines(
       genDeclareAndAssign(
-        genMethodCall("env.dao", s"Update${root.name}", genPopulateStruct(s"dao.Update${root.name}Input", createInput)),
+        genMethodCall("env.dao", s"Update${root.name}", "input"),
         root.decapitalizedName,
         "err",
       ),
       generateDAOCallErrorBlock(root),
     )
-  }
 
   /** Generate the update handler function */
   private[main] def generateUpdateHandler(
@@ -50,7 +56,8 @@ object GoServiceMainUpdateHandlerGenerator {
               when(clientUsesTime) { generateParseTimeBlocks(clientAttributes) },
             )
           },
-          generateDAOCallBlock(root, clientAttributes),
+          generateDAOInput(root, clientAttributes),
+          generateDAOCallBlock(root),
           generateJSONResponse(s"update${root.name}", responseMap),
         ),
       ),

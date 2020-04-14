@@ -122,9 +122,10 @@ func jsonMiddleware(next http.Handler) http.Handler {
 }
 
 func checkAuthorization(env *env, matchID uuid.UUID, auth *util.Auth) (bool, error) {
-	match, err := env.dao.ReadMatch(dao.ReadMatchInput{
+	input := dao.ReadMatchInput{
 		ID: matchID,
-	})
+	}
+	match, err := env.dao.ReadMatch(input)
 	if err != nil {
 		return false, err
 	}
@@ -139,9 +140,11 @@ func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	matchList, err := env.dao.ListMatch(dao.ListMatchInput{
+	input := dao.ListMatchInput{
 		AuthID: auth.ID,
-	})
+	}
+
+	matchList, err := env.dao.ListMatch(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
@@ -224,12 +227,14 @@ func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	match, err := env.dao.CreateMatch(dao.CreateMatchInput{
+	input := dao.CreateMatchInput{
 		ID:      uuid,
 		AuthID:  auth.ID,
 		UserOne: *req.UserOne,
 		UserTwo: *req.UserTwo,
-	})
+	}
+
+	match, err := env.dao.CreateMatch(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
@@ -276,9 +281,11 @@ func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	match, err := env.dao.ReadMatch(dao.ReadMatchInput{
+	input := dao.ReadMatchInput{
 		ID: matchID,
-	})
+	}
+
+	match, err := env.dao.ReadMatch(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrMatchNotFound:
@@ -375,11 +382,13 @@ func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	match, err := env.dao.UpdateMatch(dao.UpdateMatchInput{
+	input := dao.UpdateMatchInput{
 		ID:      matchID,
 		UserOne: *req.UserOne,
 		UserTwo: *req.UserTwo,
-	})
+	}
+
+	match, err := env.dao.UpdateMatch(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrMatchNotFound:
@@ -431,9 +440,11 @@ func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = env.dao.DeleteMatch(dao.DeleteMatchInput{
+	input := dao.DeleteMatchInput{
 		ID: matchID,
-	})
+	}
+
+	err = env.dao.DeleteMatch(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrMatchNotFound:
