@@ -133,6 +133,7 @@ object ServerBuilder {
       server.IDAttribute("id"),
       createQuery,
       readQuery,
+      metrics = templefile.projectBlock.lookupMetadata[Metadata.Metrics],
     )
   }
 }

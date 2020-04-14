@@ -2,16 +2,19 @@ package temple.generate.server.go.auth
 
 import temple.generate.FileSystem._
 import temple.generate.server.go.common._
-import temple.generate.server.{AuthServiceGenerator, AuthServiceRoot, ServiceName, ServiceRoot}
+import temple.generate.server.{AuthServiceGenerator, AuthServiceRoot, ServiceName}
 import temple.generate.utils.CodeTerm.mkCode
+
+import scala.Option.when
 
 object GoAuthServiceGenerator extends AuthServiceGenerator {
 
-  override def generate(root: AuthServiceRoot): Files =
-    /* TODO
-     * config.json
-     */
-    Map(
+  override def generate(root: AuthServiceRoot): Files = {
+
+    // Whether or not this auth service uses metrics
+    val usesMetrics = root.metrics.isDefined
+
+    (Map(
       File("auth", "go.mod") -> GoCommonGenerator.generateMod(root.module),
       File("auth", "auth.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
@@ -66,10 +69,12 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoCommonUtilGenerator.generateGetConfig(),
         GoCommonUtilGenerator.generateCreateErrorJSON(),
       ),
+    ) ++ when(usesMetrics) {
       File("auth/metric", "metric.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("metric"),
         GoCommonMetricGenerator.generateImports(),
         GoAuthServiceMetricGenerator.generateVars(),
-      ),
-    ).map { case (path, contents) => path -> (contents + "\n") }
+      )
+    }).map { case (path, contents) => path -> (contents + "\n") }
+  }
 }

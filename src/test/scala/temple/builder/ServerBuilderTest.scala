@@ -169,6 +169,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       IDAttribute("id"),
       "INSERT INTO auth (id, email, password) VALUES ($1, $2, $3) RETURNING id, email, password;",
       "SELECT id, email, password FROM auth WHERE email = $1;",
+      metrics = None,
     )
   }
 
