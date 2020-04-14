@@ -251,7 +251,7 @@ private class Validator private (templefile: Templefile) {
     }
 
     if (referenceCycles.nonEmpty) {
-      val referenceCycleStrings = referenceCycles.map(_.mkString("{ ", ", ", " }"))
+      val referenceCycleStrings = referenceCycles.map(_.toSeq.sorted.mkString("{ ", ", ", " }"))
       errors += ("Cycle(s) were detected in foreign keys, between elements: " + referenceCycleStrings.mkString(", "))
     }
 
