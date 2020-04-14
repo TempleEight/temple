@@ -57,9 +57,9 @@ object GoServiceMainGenerator {
         }
 
     mkCode.lines(
-      "// router generates a router for this service",
+      "// defaultRouter generates a router for this service",
       mkCode(
-        "func (env *env) router() *mux.Router",
+        "func defaultRouter(env *env) *mux.Router",
         CodeWrap.curly.tabbed(
           genDeclareAndAssign("mux.NewRouter()", "r"),
           "// Mux directs to first matching route, i.e. the order matters",

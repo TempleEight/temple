@@ -60,6 +60,11 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainHandlersGenerator
           .generateHandlers(root, operations, clientAttributes, usesComms, enumeratingByCreator),
       ),
+      File(root.kebabName, "setup.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("main"),
+        GoCommonSetupGenerator.generateImports,
+        GoCommonSetupGenerator.generateSetupMethod,
+      ),
       File(root.kebabName, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
         GoCommonHookGenerator.generateImports(root.module),
