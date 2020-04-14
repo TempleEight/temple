@@ -19,6 +19,7 @@ import (
 // env defines the environment that requests should be executed within
 type env struct {
 	dao  dao.Datastore
+	hook Hook
 	comm comm.Comm
 }
 
@@ -103,7 +104,7 @@ func main() {
 
 	c := comm.Init(config)
 
-	env := env{d, c}
+	env := env{d, Hook{}, c}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)
