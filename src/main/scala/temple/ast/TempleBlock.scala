@@ -49,5 +49,5 @@ abstract class TempleBlock[+M <: Metadata] extends TempleNode {
     * For binary metadata (e.g. enumerable), this is just whether it’s set, else whether an exact value of the metadata
     * is provided locally.
     */
-  final override def hasMetadata(m: Metadata): Boolean = metadata contains m
+  final def hasMetadata(m: Metadata): Boolean = metadata contains m
 }

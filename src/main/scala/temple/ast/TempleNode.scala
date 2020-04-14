@@ -12,6 +12,4 @@ trait TempleNode {
     * @return an option of the metadata item
     */
   def lookupMetadata[T <: ProjectMetadata: ClassTag]: Option[T]
-
-  def hasMetadata(m: Metadata): Boolean
 }
