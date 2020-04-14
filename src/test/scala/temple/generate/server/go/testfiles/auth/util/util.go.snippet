@@ -12,6 +12,7 @@ type Config struct {
 	Host     string            `json:"host"`
 	SSLMode  string            `json:"sslMode"`
 	Services map[string]string `json:"services"`
+	Ports    map[string]int    `json:"ports"`
 }
 
 // GetConfig returns a configuration object from decoding the given configuration file

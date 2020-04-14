@@ -144,7 +144,7 @@ object GoCommonGenerator {
       CodeWrap.curly.tabbed(methodBody),
     )
 
-  /** Generation a function */
+  /** Generate a function */
   private[go] def genFunc(
     funcName: String,
     funcArgs: Seq[String],
@@ -156,6 +156,18 @@ object GoCommonGenerator {
       CodeWrap.parens.prefix(funcName).list(funcArgs),
       funcReturn,
       CodeWrap.curly.tabbed(funcBody),
+    )
+
+  /** Generate an anonymous goroutine */
+  private[go] def genAnonGoroutine(
+    args: Seq[String],
+    body: String,
+    invocationArgs: Seq[String],
+  ): String =
+    mkCode(
+      "go",
+      CodeWrap.parens.prefix("func").list(args),
+      CodeWrap.parens.prefix(CodeWrap.curly.tabbed(body))(invocationArgs),
     )
 
   /** Generate an if statement */

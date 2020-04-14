@@ -9,7 +9,7 @@ import scala.concurrent.{ExecutionContext, Future}
 
 /** DockerShell2HttpService configures a docker container for our custom Shell2Http container */
 abstract class DockerShell2HttpService(externalPort: Int) extends FlatSpec with DockerKit {
-  val image             = "jaylees/templeeight-shell2http:1.4.2"
+  val image             = "jaylees/templeeight-shell2http:1.4.3"
   val internalPort      = 8080
   val hadolintVerifyUrl = s"http://localhost:$externalPort/hadolint"
   val golangVerifyUrl   = s"http://localhost:$externalPort/go"
