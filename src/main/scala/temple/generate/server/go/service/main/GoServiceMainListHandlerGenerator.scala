@@ -4,6 +4,7 @@ import temple.generate.CRUD.List
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
 import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
@@ -89,7 +90,7 @@ object GoServiceMainListHandlerGenerator {
             queryDAOInputBlock,
             generateInvokeBeforeHookBlock(root, ListMap(), List),
             mkCode.lines(
-              when(usesMetrics) { generateMetricTimerDecl(List) },
+              when(usesMetrics) { generateMetricTimerDecl(List.toString) },
               queryDAOBlock,
               when(usesMetrics) { generateMetricTimerObservation() },
               queryDAOErrorBlock,
@@ -98,7 +99,7 @@ object GoServiceMainListHandlerGenerator {
           instantiateResponseBlock,
           mapResponseBlock,
           genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", s"${root.decapitalizedName}ListResp"),
-          when(usesMetrics) { generateMetricSuccess(List) },
+          when(usesMetrics) { generateMetricSuccess(List.toString) },
         ),
       ),
     )

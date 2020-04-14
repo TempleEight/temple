@@ -2,7 +2,7 @@ package temple.generate.server.go.service.main
 
 import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
 import temple.ast.Metadata.Readable
-import temple.ast.{AbstractAttribute, Annotation, AttributeType}
+import temple.ast.{AbstractAttribute, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus._
@@ -285,21 +285,6 @@ object GoServiceMainHandlersGenerator {
         )
     }
 
-  /** Generate the metric timer declaration, ready to measure the duration of a DAO call */
-  private[main] def generateMetricTimerDecl(op: CRUD): String =
-    genDeclareAndAssign(
-      genMethodCall(
-        "prometheus",
-        "NewTimer",
-        genMethodCall("metric.DatabaseRequestDuration", "WithLabelValues", s"metric.Request$op"),
-      ),
-      "timer",
-    )
-
-  /** Generate the metric timer observation, to log the duration of a DAO call */
-  private[main] def generateMetricTimerObservation(): String =
-    genMethodCall("timer", "ObserveDuration")
-
   /** Generate DAO call block error handling for Read, Update and Delete */
   private[main] def generateDAOCallErrorBlock(root: ServiceRoot): String =
     genIfErr(
@@ -347,10 +332,6 @@ object GoServiceMainHandlersGenerator {
       "Encode",
       genPopulateStruct(s"${typePrefix}Response", responseMap),
     )
-
-  /** Generate the metric call to log a successful request */
-  private[main] def generateMetricSuccess(op: CRUD): String =
-    genMethodCall(genMethodCall("metric.RequestSuccess", "WithLabelValues", s"metric.Request$op"), "Inc")
 
   /** Generate the env handler functions */
   private[service] def generateHandlers(

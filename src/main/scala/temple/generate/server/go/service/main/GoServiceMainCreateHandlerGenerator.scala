@@ -5,7 +5,8 @@ import temple.generate.CRUD.Create
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
 import temple.generate.server.go.common.GoCommonGenerator._
-import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.{generateHandlerDecl, _}
+import temple.generate.server.go.common.GoCommonMainGenerator._
+import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
 import scala.Option.when
@@ -38,7 +39,7 @@ object GoServiceMainCreateHandlerGenerator {
 
   private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
     mkCode.lines(
-      when(usesMetrics) { generateMetricTimerDecl(Create) },
+      when(usesMetrics) { generateMetricTimerDecl(Create.toString) },
       genDeclareAndAssign(
         genMethodCall(
           "env.dao",
@@ -87,7 +88,7 @@ object GoServiceMainCreateHandlerGenerator {
           generateInvokeBeforeHookBlock(root, clientAttributes, Create),
           generateDAOCallBlock(root, usesMetrics),
           generateJSONResponse(s"create${root.name}", responseMap),
-          when(usesMetrics) { generateMetricSuccess(Create) },
+          when(usesMetrics) { generateMetricSuccess(Create.toString) },
         ),
       ),
     )

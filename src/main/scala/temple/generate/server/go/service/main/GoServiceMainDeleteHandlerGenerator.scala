@@ -4,6 +4,7 @@ import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Delete
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
@@ -20,7 +21,7 @@ object GoServiceMainDeleteHandlerGenerator {
 
   private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
     mkCode.lines(
-      when(usesMetrics) { generateMetricTimerDecl(Delete) },
+      when(usesMetrics) { generateMetricTimerDecl(Delete.toString) },
       genAssign(
         genMethodCall(
           "env.dao",
@@ -46,7 +47,7 @@ object GoServiceMainDeleteHandlerGenerator {
           generateInvokeBeforeHookBlock(root, ListMap(), Delete),
           generateDAOCallBlock(root, usesMetrics),
           genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", "struct{}{}"),
-          when(usesMetrics) { generateMetricSuccess(Delete) },
+          when(usesMetrics) { generateMetricSuccess(Delete.toString) },
         ),
       ),
     )

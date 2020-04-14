@@ -5,6 +5,7 @@ import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Update
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
@@ -23,7 +24,7 @@ object GoServiceMainUpdateHandlerGenerator {
 
   private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
     mkCode.lines(
-      when(usesMetrics) { generateMetricTimerDecl(Update) },
+      when(usesMetrics) { generateMetricTimerDecl(Update.toString) },
       genDeclareAndAssign(
         genMethodCall("env.dao", s"Update${root.name}", "input"),
         root.decapitalizedName,
@@ -63,7 +64,7 @@ object GoServiceMainUpdateHandlerGenerator {
           generateInvokeBeforeHookBlock(root, clientAttributes, Update),
           generateDAOCallBlock(root, usesMetrics),
           generateJSONResponse(s"update${root.name}", responseMap),
-          when(usesMetrics) { generateMetricSuccess(Update) },
+          when(usesMetrics) { generateMetricSuccess(Update.toString) },
         ),
       ),
     )
