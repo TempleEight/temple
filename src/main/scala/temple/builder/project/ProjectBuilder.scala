@@ -31,7 +31,7 @@ object ProjectBuilder {
 
   def endpoints(service: AttributeBlock[_]): Set[CRUD] = {
     val endpoints: Set[CRUD] = service
-      .lookupMetadata[Metadata.Omit]
+      .lookupLocalMetadata[Metadata.Omit]
       .map(_.endpoints)
       .getOrElse(Set.empty)
       .foldLeft(Set[CRUD](Create, Read, Update, Delete)) {
