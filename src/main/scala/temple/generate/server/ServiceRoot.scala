@@ -17,12 +17,12 @@ import scala.collection.immutable.ListMap
   * @param idAttribute the name of the ID field
   * @param createdByAttribute whether or not this service has a createdBy attribute. Also indicates whether this service has an auth block.
   * @param attributes the user-defined fields of the resource handled by this service
-  * @param datastore the datastore being used
+  * @param datastore the datastore being used TODO: Does not switch on datastore, assumes Postgres
   * @param readable whether this service is readable by this or by all
   * @param writable whether this service is writable by this or by all
   * @param projectUsesAuth whether or not the project uses auth
   * @param hasAuthBlock whether or not this service has an auth block
-  * @param metrics whether or not this service has metrics, and if so, which framework is used
+  * @param metrics whether or not this service has metrics, and if so, which framework is used. TODO: Does not switch on framework, assumes Prometheus
   */
 case class ServiceRoot(
   override val name: String,

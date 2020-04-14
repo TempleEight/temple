@@ -18,10 +18,11 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
       File("auth", "go.mod") -> GoCommonGenerator.generateMod(root.module),
       File("auth", "auth.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoAuthServiceMainGenerator.generateImports(root),
+        GoAuthServiceMainGenerator.generateImports(root, usesMetrics),
         GoAuthServiceMainGenerator.generateStructs(),
         GoAuthServiceMainGenerator.generateRouter(),
-        GoCommonMainGenerator.generateMain(ServiceName("Auth"), root.port, usesComms = true, isAuth = true),
+        GoCommonMainGenerator
+          .generateMain(ServiceName("Auth"), root.port, usesComms = true, isAuth = true, usesMetrics),
         GoCommonMainGenerator.generateJsonMiddleware(),
         GoAuthServiceMainGenerator.generateHandlers(),
         GoAuthServiceMainGenerator.generateCreateToken(),

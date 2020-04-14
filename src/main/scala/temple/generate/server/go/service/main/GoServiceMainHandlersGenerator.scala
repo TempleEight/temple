@@ -1,6 +1,7 @@
 package temple.generate.server.go.service.main
 
 import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
+import temple.ast.Metadata.Readable
 import temple.ast.{AbstractAttribute, Annotation, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.ServiceRoot
@@ -293,6 +294,36 @@ object GoServiceMainHandlersGenerator {
         generateHTTPError(StatusInternalServerError, "Something went wrong: %s", genMethodCall("err", "Error")),
       ),
     )
+
+  private[main] def generateInvokeBeforeHookBlock(
+    root: ServiceRoot,
+    clientAttributes: ListMap[String, AbstractAttribute],
+    operation: CRUD,
+  ): String = {
+    val hookArguments: Seq[String] = operation match {
+      case List =>
+        root.readable match {
+          case Readable.This => Seq("env", "&input")
+          case Readable.All  => Seq("env")
+        }
+      case Create | Update =>
+        if (clientAttributes.isEmpty) Seq("env", "&input") else Seq("env", "req", "&input")
+      case Read | Delete =>
+        Seq("env", "&input")
+    }
+
+    genForLoop(
+      genDeclareAndAssign(s"range env.hook.before${operation.toString}Hooks", "_", "hook"),
+      mkCode.lines(
+        genDeclareAndAssign(
+          genFunctionCall("(*hook)", hookArguments),
+          "err",
+        ),
+        // TODO: replace with `respondWithError` call
+        genIfErr(mkCode.lines("// TODO", genReturn())),
+      ),
+    )
+  }
 
   /** Generate JSON response from DAO response */
   private[main] def generateJSONResponse(typePrefix: String, responseMap: ListMap[String, String]): String =

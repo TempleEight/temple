@@ -12,6 +12,7 @@ import (
 	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // env defines the environment that requests should be executed within
@@ -52,6 +53,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Prometheus metrics
+	promPort, ok := config.Ports["prometheus"]
+	if !ok {
+		log.Fatal("A port for the key prometheus was not found")
+	}
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(fmt.Sprintf(":%d", promPort), nil)
+	}()
 
 	d, err := dao.Init(config)
 	if err != nil {
@@ -106,6 +117,14 @@ func (env *env) createSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		AuthID: auth.ID,
 	}
 
+	for _, hook := range env.hook.beforeCreateHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	simpleTempleTestGroup, err := env.dao.CreateSimpleTempleTestGroup(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
@@ -152,6 +171,14 @@ func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.
 
 	input := dao.ReadSimpleTempleTestGroupInput{
 		ID: simpleTempleTestGroupID,
+	}
+
+	for _, hook := range env.hook.beforeReadHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	simpleTempleTestGroup, err := env.dao.ReadSimpleTempleTestGroup(input)
@@ -205,6 +232,14 @@ func (env *env) deleteSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 
 	input := dao.DeleteSimpleTempleTestGroupInput{
 		ID: simpleTempleTestGroupID,
+	}
+
+	for _, hook := range env.hook.beforeDeleteHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	err = env.dao.DeleteSimpleTempleTestGroup(input)

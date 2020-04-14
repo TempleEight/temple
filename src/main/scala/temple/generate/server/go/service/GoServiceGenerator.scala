@@ -48,14 +48,15 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${root.kebabName}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
       File(root.kebabName, s"${root.kebabName}.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoServiceMainGenerator.generateImports(root, usesBase64, usesTime, usesComms, clientAttributes, operations),
+        GoServiceMainGenerator
+          .generateImports(root, usesBase64, usesTime, usesComms, usesMetrics, clientAttributes, operations),
         GoServiceMainStructGenerator.generateEnvStruct(usesComms),
         when(clientAttributes.nonEmpty && (operations.contains(CRUD.Create) || operations.contains(CRUD.Update))) {
           GoServiceMainStructGenerator.generateRequestStructs(root, operations, clientAttributes)
         },
         GoServiceMainStructGenerator.generateResponseStructs(root, operations),
         GoServiceMainGenerator.generateRouter(root, operations),
-        GoCommonMainGenerator.generateMain(root, root.port, usesComms, isAuth = false),
+        GoCommonMainGenerator.generateMain(root, root.port, usesComms, isAuth = false, usesMetrics),
         GoCommonMainGenerator.generateJsonMiddleware(),
         when((root.readable == Readable.This || root.writable == Writable.This) && !root.hasAuthBlock) {
           GoServiceMainGenerator.generateCheckAuthorization(root)
