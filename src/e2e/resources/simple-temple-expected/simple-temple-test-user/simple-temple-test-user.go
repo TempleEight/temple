@@ -166,6 +166,14 @@ func jsonMiddleware(next http.Handler) http.Handler {
 }
 
 func (env *env) listSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
+	for _, hook := range env.hook.beforeListHooks {
+		err := (*hook)(env)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	simpleTempleTestUserList, err := env.dao.ListSimpleTempleTestUser()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
@@ -258,6 +266,14 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		BreakfastTime:        breakfastTime,
 	}
 
+	for _, hook := range env.hook.beforeCreateHooks {
+		err := (*hook)(env, req, &input)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	simpleTempleTestUser, err := env.dao.CreateSimpleTempleTestUser(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
@@ -295,6 +311,14 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 
 	input := dao.ReadSimpleTempleTestUserInput{
 		ID: simpleTempleTestUserID,
+	}
+
+	for _, hook := range env.hook.beforeReadHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	simpleTempleTestUser, err := env.dao.ReadSimpleTempleTestUser(input)
@@ -396,6 +420,14 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		CurrentBankBalance:   *req.CurrentBankBalance,
 		BirthDate:            birthDate,
 		BreakfastTime:        breakfastTime,
+	}
+
+	for _, hook := range env.hook.beforeUpdateHooks {
+		err := (*hook)(env, req, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	simpleTempleTestUser, err := env.dao.UpdateSimpleTempleTestUser(input)

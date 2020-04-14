@@ -228,6 +228,14 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		BlobField:          *req.BlobField,
 	}
 
+	for _, hook := range env.hook.beforeCreateHooks {
+		err := (*hook)(env, req, &input)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	complexUser, err := env.dao.CreateComplexUser(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
@@ -274,6 +282,14 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	input := dao.ReadComplexUserInput{
 		ID: complexUserID,
+	}
+
+	for _, hook := range env.hook.beforeReadHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	complexUser, err := env.dao.ReadComplexUser(input)
@@ -383,6 +399,14 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		BlobField:          *req.BlobField,
 	}
 
+	for _, hook := range env.hook.beforeUpdateHooks {
+		err := (*hook)(env, req, &input)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	complexUser, err := env.dao.UpdateComplexUser(input)
 	if err != nil {
 		switch err.(type) {
@@ -434,6 +458,14 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 
 	input := dao.DeleteComplexUserInput{
 		ID: complexUserID,
+	}
+
+	for _, hook := range env.hook.beforeDeleteHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	err = env.dao.DeleteComplexUser(input)

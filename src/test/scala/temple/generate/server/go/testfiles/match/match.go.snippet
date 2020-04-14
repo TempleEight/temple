@@ -155,6 +155,14 @@ func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {
 		AuthID: auth.ID,
 	}
 
+	for _, hook := range env.hook.beforeListHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	matchList, err := env.dao.ListMatch(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
@@ -245,6 +253,14 @@ func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
 		UserTwo: *req.UserTwo,
 	}
 
+	for _, hook := range env.hook.beforeCreateHooks {
+		err := (*hook)(env, req, &input)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	match, err := env.dao.CreateMatch(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
@@ -294,6 +310,14 @@ func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
 
 	input := dao.ReadMatchInput{
 		ID: matchID,
+	}
+
+	for _, hook := range env.hook.beforeReadHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	match, err := env.dao.ReadMatch(input)
@@ -399,6 +423,14 @@ func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
 		UserTwo: *req.UserTwo,
 	}
 
+	for _, hook := range env.hook.beforeUpdateHooks {
+		err := (*hook)(env, req, &input)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	match, err := env.dao.UpdateMatch(input)
 	if err != nil {
 		switch err.(type) {
@@ -453,6 +485,14 @@ func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {
 
 	input := dao.DeleteMatchInput{
 		ID: matchID,
+	}
+
+	for _, hook := range env.hook.beforeDeleteHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	err = env.dao.DeleteMatch(input)

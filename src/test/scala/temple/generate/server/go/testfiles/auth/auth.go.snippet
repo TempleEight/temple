@@ -147,6 +147,14 @@ func (env *env) registerAuthHandler(w http.ResponseWriter, r *http.Request) {
 		Password: string(hashedPassword),
 	}
 
+	for _, hook := range env.hook.beforeRegisterHooks {
+		err := (*hook)(env, req, &input)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	auth, err := env.dao.CreateAuth(input)
 	if err != nil {
 		switch err {
@@ -189,6 +197,14 @@ func (env *env) loginAuthHandler(w http.ResponseWriter, r *http.Request) {
 
 	input := dao.ReadAuthInput{
 		Email: req.Email,
+	}
+
+	for _, hook := range env.hook.beforeLoginHooks {
+		err := (*hook)(env, req, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	auth, err := env.dao.ReadAuth(input)

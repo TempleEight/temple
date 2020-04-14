@@ -193,6 +193,14 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		BlobField:     *req.BlobField,
 	}
 
+	for _, hook := range env.hook.beforeCreateHooks {
+		err := (*hook)(env, req, &input)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	templeUser, err := env.dao.CreateTempleUser(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
@@ -222,6 +230,14 @@ func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 
 	input := dao.ReadTempleUserInput{
 		ID: templeUserID,
+	}
+
+	for _, hook := range env.hook.beforeReadHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	templeUser, err := env.dao.ReadTempleUser(input)
@@ -310,6 +326,14 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		BlobField:     *req.BlobField,
 	}
 
+	for _, hook := range env.hook.beforeUpdateHooks {
+		err := (*hook)(env, req, &input)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	templeUser, err := env.dao.UpdateTempleUser(input)
 	if err != nil {
 		switch err.(type) {
@@ -344,6 +368,14 @@ func (env *env) deleteTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 
 	input := dao.DeleteTempleUserInput{
 		ID: templeUserID,
+	}
+
+	for _, hook := range env.hook.beforeDeleteHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	err = env.dao.DeleteTempleUser(input)

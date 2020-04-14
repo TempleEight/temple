@@ -117,6 +117,14 @@ func (env *env) createSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		AuthID: auth.ID,
 	}
 
+	for _, hook := range env.hook.beforeCreateHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	simpleTempleTestGroup, err := env.dao.CreateSimpleTempleTestGroup(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
@@ -163,6 +171,14 @@ func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.
 
 	input := dao.ReadSimpleTempleTestGroupInput{
 		ID: simpleTempleTestGroupID,
+	}
+
+	for _, hook := range env.hook.beforeReadHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	simpleTempleTestGroup, err := env.dao.ReadSimpleTempleTestGroup(input)
@@ -216,6 +232,14 @@ func (env *env) deleteSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 
 	input := dao.DeleteSimpleTempleTestGroupInput{
 		ID: simpleTempleTestGroupID,
+	}
+
+	for _, hook := range env.hook.beforeDeleteHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	err = env.dao.DeleteSimpleTempleTestGroup(input)

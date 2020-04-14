@@ -81,6 +81,7 @@ object GoServiceMainCreateHandlerGenerator {
           },
           when(!root.hasAuthBlock) { generateNewUUIDBlock() },
           generateDAOInput(root, clientAttributes),
+          generateInvokeBeforeHookBlock(root, clientAttributes, Create),
           generateDAOCallBlock(root),
           generateJSONResponse(s"create${root.name}", responseMap),
         ),
