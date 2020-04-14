@@ -60,13 +60,12 @@ object DatabaseBuilder {
     selectionAttribute: String = "id",
   ): ListMap[CRUD, Statement] = {
     val tableName = snakeCase(serviceName)
-    val columns   = attributes.keys.map(snakeCase(_)).map(Column).toSeq
+    val columns   = attributes.keys.map(att => Column(snakeCase(att))).toSeq
     val providedColumns =
       attributes
         .filter { case (_, attr) => attr != IDAttribute && attr != CreatedByAttribute }
         .keys
-        .map(snakeCase(_))
-        .map(Column)
+        .map(att => Column(snakeCase(att)))
         .toSeq
     ListMap.from(
       endpoints.map {
