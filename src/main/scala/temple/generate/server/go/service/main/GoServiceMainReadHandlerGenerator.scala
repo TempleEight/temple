@@ -3,7 +3,7 @@ package temple.generate.server.go.service.main
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD.Read
 import temple.generate.server.ServiceRoot
-import temple.generate.server.go.service.main.GoServiceMainGenerator.generateDAOReadCall
+import temple.generate.server.go.service.main.GoServiceMainGenerator.{generateDAOReadCall, generateDAOReadInput}
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
@@ -13,9 +13,12 @@ import scala.collection.immutable.ListMap
 object GoServiceMainReadHandlerGenerator {
 
   private def generateDAOCallBlock(root: ServiceRoot): String =
-    mkCode.lines(
-      generateDAOReadCall(root),
-      generateDAOCallErrorBlock(root),
+    mkCode.doubleLines(
+      generateDAOReadInput(root),
+      mkCode.lines(
+        generateDAOReadCall(root),
+        generateDAOCallErrorBlock(root),
+      ),
     )
 
   /** Generate the read handler function */

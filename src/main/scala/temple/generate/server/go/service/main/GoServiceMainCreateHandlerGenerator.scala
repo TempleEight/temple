@@ -22,10 +22,7 @@ object GoServiceMainCreateHandlerGenerator {
       ),
     )
 
-  private def generateDAOCallBlock(
-    root: ServiceRoot,
-    clientAttributes: ListMap[String, AbstractAttribute],
-  ): String = {
+  private def generateDAOInput(root: ServiceRoot, clientAttributes: ListMap[String, AbstractAttribute]): String = {
     val idCapitalized = root.idAttribute.name.toUpperCase
     // If service has auth block then an AuthID is passed in as ID, otherwise a created uuid is passed in
     val createInput = ListMap(idCapitalized -> (if (root.hasAuthBlock) s"auth.$idCapitalized" else "uuid")) ++
@@ -33,12 +30,19 @@ object GoServiceMainCreateHandlerGenerator {
       when(!root.hasAuthBlock && root.projectUsesAuth) { s"Auth$idCapitalized" -> s"auth.$idCapitalized" } ++
       generateDAOInputClientMap(clientAttributes)
 
+    genDeclareAndAssign(
+      genPopulateStruct(s"dao.Create${root.name}Input", createInput),
+      "input",
+    )
+  }
+
+  private def generateDAOCallBlock(root: ServiceRoot): String =
     mkCode.lines(
       genDeclareAndAssign(
         genMethodCall(
           "env.dao",
           s"Create${root.name}",
-          genPopulateStruct(s"dao.Create${root.name}Input", createInput),
+          "input",
         ),
         root.decapitalizedName,
         "err",
@@ -51,7 +55,6 @@ object GoServiceMainCreateHandlerGenerator {
         ),
       ),
     )
-  }
 
   /** Generate the create handler function */
   private[main] def generateCreateHandler(
@@ -77,7 +80,8 @@ object GoServiceMainCreateHandlerGenerator {
             )
           },
           when(!root.hasAuthBlock) { generateNewUUIDBlock() },
-          generateDAOCallBlock(root, clientAttributes),
+          generateDAOInput(root, clientAttributes),
+          generateDAOCallBlock(root),
           generateJSONResponse(s"create${root.name}", responseMap),
         ),
       ),
