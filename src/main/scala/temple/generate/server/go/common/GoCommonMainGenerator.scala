@@ -29,57 +29,102 @@ object GoCommonMainGenerator {
       ),
     )
 
-  private[go] def generateMain(serviceName: ServiceName, port: Int, usesComms: Boolean, isAuth: Boolean): String =
+  private def generateFlagParseBlock(serviceName: ServiceName): String =
+    mkCode.lines(
+      genDeclareAndAssign(
+        genMethodCall(
+          "flag",
+          "String",
+          doubleQuote("config"),
+          doubleQuote(s"/etc/${serviceName.kebabName}-service/config.json"),
+          doubleQuote("configuration filepath"),
+        ),
+        "configPtr",
+      ),
+      genMethodCall("flag", "Parse"),
+    )
+
+  private def generateRequireFieldsBlock(): String =
+    mkCode.lines(
+      "// Require all struct fields by default",
+      genMethodCall("valid", "SetFieldsRequiredByDefault", "true"),
+    )
+
+  private def generateGetConfigBlock(): String =
+    mkCode.lines(
+      genDeclareAndAssign(genMethodCall("util", "GetConfig", "*configPtr"), "config", "err"),
+      genIfErr(genMethodCall("log", "Fatal", "err")),
+    )
+
+  private def generateMetricsBlock(): String = {
+    val goroutineBody = mkCode.lines(
+      genMethodCall("http", "Handle", doubleQuote("/metrics"), genMethodCall("promhttp", "Handler")),
+      genMethodCall("http", "ListenAndServe", genMethodCall("fmt", "Sprintf", doubleQuote(":%d"), "promPort"), "nil"),
+    )
+    mkCode.lines(
+      "// Prometheus metrics",
+      genDeclareAndAssign(s"config.Ports[${doubleQuote("prometheus")}]", "promPort", "ok"),
+      genIf("!ok", genMethodCall("log", "Fatal", doubleQuote("A port for the key prometheus was not found"))),
+      genAnonGoroutine(Seq.empty, goroutineBody, Seq.empty),
+    )
+  }
+
+  private def generateDAOInitBlock(): String =
+    mkCode.lines(
+      genDeclareAndAssign(genMethodCall("dao", "Init", "config"), "d", "err"),
+      genIfErr(genMethodCall("log", "Fatal", "err")),
+    )
+
+  private def generateCommsInitBlock(): String =
+    genDeclareAndAssign(genMethodCall("comm", "Init", "config"), "c")
+
+  private def generateJWTCredentialsBlock(): String =
+    mkCode.lines(
+      genDeclareAndAssign(genMethodCall("c", "CreateJWTCredential"), "jwtCredential", "err"),
+      genIfErr(genMethodCall("log", "Fatal", "err")),
+    )
+
+  private def generateEnvDeclarationBlock(usesComms: Boolean, isAuth: Boolean): String =
+    genDeclareAndAssign(
+      s"env{${mkCode.list("d", "Hook{}", when(usesComms) { "c" }, when(isAuth) { "jwtCredential" })}}",
+      "env",
+    )
+
+  private def generateSetupBlock(): String =
+    mkCode.lines(
+      "// Call into non-generated entry-point",
+      genDeclareAndAssign(genFunctionCall("defaultRouter", "&env"), "router"),
+      genMethodCall("env", "setup", "router"),
+    )
+
+  private def generateListenAndServeBlock(port: Int): String =
+    genMethodCall(
+      "log",
+      "Fatal",
+      genMethodCall("http", "ListenAndServe", doubleQuote(s":$port"), "router"),
+    )
+
+  private[go] def generateMain(
+    serviceName: ServiceName,
+    port: Int,
+    usesComms: Boolean,
+    isAuth: Boolean,
+    usesMetrics: Boolean,
+  ): String =
     mkCode(
       "func main()",
       CodeWrap.curly.tabbed(
-        genDeclareAndAssign(
-          genMethodCall(
-            "flag",
-            "String",
-            doubleQuote("config"),
-            doubleQuote(s"/etc/${serviceName.kebabName}-service/config.json"),
-            doubleQuote("configuration filepath"),
-          ),
-          "configPtr",
-        ),
-        genMethodCall("flag", "Parse"),
-        "",
-        "// Require all struct fields by default",
-        genMethodCall("valid", "SetFieldsRequiredByDefault", "true"),
-        "",
-        genDeclareAndAssign(genMethodCall("util", "GetConfig", "*configPtr"), "config", "err"),
-        genIfErr(genMethodCall("log", "Fatal", "err")),
-        "",
-        genDeclareAndAssign(genMethodCall("dao", "Init", "config"), "d", "err"),
-        genIfErr(genMethodCall("log", "Fatal", "err")),
-        "",
-        when(usesComms) {
-          mkCode.lines(
-            genDeclareAndAssign(genMethodCall("comm", "Init", "config"), "c"),
-            "",
-          )
-        },
-        when(isAuth) {
-          mkCode.lines(
-            genDeclareAndAssign(genMethodCall("c", "CreateJWTCredential"), "jwtCredential", "err"),
-            genIfErr(genMethodCall("log", "Fatal", "err")),
-            "",
-          )
-        },
-        genDeclareAndAssign(
-          s"env{${mkCode.list("d", "Hook{}", when(usesComms) { "c" }, when(isAuth) { "jwtCredential" })}}",
-          "env",
-        ),
-        "",
-        "// Call into non-generated entry-point",
-        genDeclareAndAssign(genFunctionCall("defaultRouter", "&env"), "router"),
-        genMethodCall("env", "setup", "router"),
-        "",
-        genMethodCall(
-          "log",
-          "Fatal",
-          genMethodCall("http", "ListenAndServe", doubleQuote(s":$port"), "router"),
+        mkCode.doubleLines(
+          generateFlagParseBlock(serviceName),
+          generateRequireFieldsBlock(),
+          generateGetConfigBlock(),
+          when(usesMetrics) { generateMetricsBlock() },
+          generateDAOInitBlock(),
+          when(usesComms) { generateCommsInitBlock() },
+          when(isAuth) { generateJWTCredentialsBlock() },
+          generateEnvDeclarationBlock(usesComms, isAuth),
+          generateSetupBlock(),
+          generateListenAndServeBlock(port),
         ),
       ),
     )

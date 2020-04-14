@@ -18,6 +18,7 @@ type Config struct {
 	Host     string            `json:"host"`
 	SSLMode  string            `json:"sslMode"`
 	Services map[string]string `json:"services"`
+	Ports    map[string]int    `json:"ports"`
 }
 
 // Auth contains the unique identifier for a given auth
