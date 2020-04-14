@@ -90,6 +90,7 @@ object ServerBuilder {
       writable = writable,
       projectUsesAuth = projectUsesAuth,
       hasAuthBlock = hasAuthBlock,
+      metrics = serviceBlock.lookupMetadata[Metadata.Metrics],
     )
   }
 
@@ -134,6 +135,7 @@ object ServerBuilder {
       server.IDAttribute("id"),
       createQuery,
       readQuery,
+      metrics = templefile.projectBlock.lookupMetadata[Metadata.Metrics],
     )
   }
 }

@@ -16,7 +16,8 @@ import (
 
 // env defines the environment that requests should be executed within
 type env struct {
-	dao dao.Datastore
+	dao  dao.Datastore
+	hook Hook
 }
 
 // createSimpleTempleTestGroupResponse contains a newly created simpleTempleTestGroup to be returned to the client
@@ -57,7 +58,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	env := env{d}
+	env := env{d, Hook{}}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)
@@ -75,9 +76,10 @@ func jsonMiddleware(next http.Handler) http.Handler {
 }
 
 func checkAuthorization(env *env, simpleTempleTestGroupID uuid.UUID, auth *util.Auth) (bool, error) {
-	simpleTempleTestGroup, err := env.dao.ReadSimpleTempleTestGroup(dao.ReadSimpleTempleTestGroupInput{
+	input := dao.ReadSimpleTempleTestGroupInput{
 		ID: simpleTempleTestGroupID,
-	})
+	}
+	simpleTempleTestGroup, err := env.dao.ReadSimpleTempleTestGroup(input)
 	if err != nil {
 		return false, err
 	}
@@ -99,10 +101,12 @@ func (env *env) createSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
-	simpleTempleTestGroup, err := env.dao.CreateSimpleTempleTestGroup(dao.CreateSimpleTempleTestGroupInput{
+	input := dao.CreateSimpleTempleTestGroupInput{
 		ID:     uuid,
 		AuthID: auth.ID,
-	})
+	}
+
+	simpleTempleTestGroup, err := env.dao.CreateSimpleTempleTestGroup(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
@@ -146,9 +150,11 @@ func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	simpleTempleTestGroup, err := env.dao.ReadSimpleTempleTestGroup(dao.ReadSimpleTempleTestGroupInput{
+	input := dao.ReadSimpleTempleTestGroupInput{
 		ID: simpleTempleTestGroupID,
-	})
+	}
+
+	simpleTempleTestGroup, err := env.dao.ReadSimpleTempleTestGroup(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestGroupNotFound:
@@ -197,9 +203,11 @@ func (env *env) deleteSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
-	err = env.dao.DeleteSimpleTempleTestGroup(dao.DeleteSimpleTempleTestGroupInput{
+	input := dao.DeleteSimpleTempleTestGroupInput{
 		ID: simpleTempleTestGroupID,
-	})
+	}
+
+	err = env.dao.DeleteSimpleTempleTestGroup(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestGroupNotFound:

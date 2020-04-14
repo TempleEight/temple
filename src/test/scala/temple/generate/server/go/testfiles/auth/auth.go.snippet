@@ -22,6 +22,7 @@ import (
 // env defines the environment that requests should be executed within
 type env struct {
 	dao           dao.Datastore
+	hook          Hook
 	comm          comm.Comm
 	jwtCredential *comm.JWTCredential
 }
@@ -81,7 +82,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	env := env{d, c, jwtCredential}
+	env := env{d, Hook{}, c, jwtCredential}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)
@@ -129,11 +130,13 @@ func (env *env) registerAuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	auth, err := env.dao.CreateAuth(dao.CreateAuthInput{
+	input := dao.CreateAuthInput{
 		ID:       uuid,
 		Email:    req.Email,
 		Password: string(hashedPassword),
-	})
+	}
+
+	auth, err := env.dao.CreateAuth(input)
 	if err != nil {
 		switch err {
 		case dao.ErrDuplicateAuth:
@@ -173,9 +176,11 @@ func (env *env) loginAuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	auth, err := env.dao.ReadAuth(dao.ReadAuthInput{
+	input := dao.ReadAuthInput{
 		Email: req.Email,
-	})
+	}
+
+	auth, err := env.dao.ReadAuth(input)
 	if err != nil {
 		switch err {
 		case dao.ErrAuthNotFound:

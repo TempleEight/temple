@@ -17,7 +17,10 @@ object GoServiceMainStructGenerator {
   private[service] def generateEnvStruct(usesComms: Boolean): String =
     mkCode.lines(
       "// env defines the environment that requests should be executed within",
-      genStruct("env", ListMap("dao" -> "dao.Datastore") ++ when(usesComms) { "comm" -> "comm.Comm" }),
+      genStruct(
+        "env",
+        ListMap("dao" -> "dao.Datastore", "hook" -> "Hook") ++ when(usesComms) { "comm" -> "comm.Comm" },
+      ),
     )
 
   private def generateValidatorAnnotation(attrType: AttributeType): String =

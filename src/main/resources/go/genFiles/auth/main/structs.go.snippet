@@ -1,6 +1,7 @@
 // env defines the environment that requests should be executed within
 type env struct {
 	dao           dao.Datastore
+	hook          Hook
 	comm          comm.Comm
 	jwtCredential *comm.JWTCredential
 }

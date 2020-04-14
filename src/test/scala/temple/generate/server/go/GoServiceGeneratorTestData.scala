@@ -2,6 +2,7 @@ package temple.generate.server.go
 
 import temple.ast.AbstractAttribute.Attribute
 import temple.ast.Metadata.Database.Postgres
+import temple.ast.Metadata.Metrics.Prometheus
 import temple.ast.Metadata.{Readable, Writable}
 import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
@@ -32,6 +33,7 @@ object GoServiceGeneratorTestData {
     writable = Writable.This,
     projectUsesAuth = true,
     hasAuthBlock = true,
+    metrics = Some(Prometheus),
   )
 
   val simpleServiceFiles: Files = Map(
@@ -83,6 +85,7 @@ object GoServiceGeneratorTestData {
       writable = Writable.This,
       projectUsesAuth = true,
       hasAuthBlock = false,
+      metrics = Some(Prometheus),
     )
 
   val simpleServiceFilesWithComms: Files = Map(
