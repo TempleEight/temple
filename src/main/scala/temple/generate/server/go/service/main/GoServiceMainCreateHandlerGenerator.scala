@@ -36,8 +36,9 @@ object GoServiceMainCreateHandlerGenerator {
     )
   }
 
-  private def generateDAOCallBlock(root: ServiceRoot): String =
+  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
     mkCode.lines(
+      when(usesMetrics) { generateMetricTimerDecl(Create) },
       genDeclareAndAssign(
         genMethodCall(
           "env.dao",
@@ -47,6 +48,7 @@ object GoServiceMainCreateHandlerGenerator {
         root.decapitalizedName,
         "err",
       ),
+      when(usesMetrics) { generateMetricTimerObservation() },
       genIfErr(
         generateHTTPErrorReturn(
           StatusInternalServerError,
@@ -63,6 +65,7 @@ object GoServiceMainCreateHandlerGenerator {
     usesComms: Boolean,
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
+    usesMetrics: Boolean,
   ): String =
     mkCode(
       generateHandlerDecl(root, Create),
@@ -82,8 +85,9 @@ object GoServiceMainCreateHandlerGenerator {
           when(!root.hasAuthBlock) { generateNewUUIDBlock() },
           generateDAOInput(root, clientAttributes),
           generateInvokeBeforeHookBlock(root, clientAttributes, Create),
-          generateDAOCallBlock(root),
+          generateDAOCallBlock(root, usesMetrics),
           generateJSONResponse(s"create${root.name}", responseMap),
+          when(usesMetrics) { generateMetricSuccess(Create) },
         ),
       ),
     )

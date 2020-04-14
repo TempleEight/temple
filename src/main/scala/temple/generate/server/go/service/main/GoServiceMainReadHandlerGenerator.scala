@@ -12,18 +12,24 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainReadHandlerGenerator {
 
-  private def generateDAOCallBlock(root: ServiceRoot): String =
+  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
     mkCode.doubleLines(
       generateDAOReadInput(root),
       generateInvokeBeforeHookBlock(root, ListMap(), Read),
       mkCode.lines(
+        when(usesMetrics) { generateMetricTimerDecl(Read) },
         generateDAOReadCall(root),
+        when(usesMetrics) { generateMetricTimerObservation() },
         generateDAOCallErrorBlock(root),
       ),
     )
 
   /** Generate the read handler function */
-  private[main] def generateReadHandler(root: ServiceRoot, responseMap: ListMap[String, String]): String =
+  private[main] def generateReadHandler(
+    root: ServiceRoot,
+    responseMap: ListMap[String, String],
+    usesMetrics: Boolean,
+  ): String =
     mkCode(
       generateHandlerDecl(root, Read),
       CodeWrap.curly.tabbed(
@@ -31,8 +37,9 @@ object GoServiceMainReadHandlerGenerator {
           when(root.projectUsesAuth) { generateExtractAuthBlock(root.readable == Readable.This) },
           generateExtractIDBlock(root.decapitalizedName),
           when(root.readable == Readable.This) { generateCheckAuthorizationBlock(root) },
-          generateDAOCallBlock(root),
+          generateDAOCallBlock(root, usesMetrics),
           generateJSONResponse(s"read${root.name}", responseMap),
+          when(usesMetrics) { generateMetricSuccess(Read) },
         ),
       ),
     )

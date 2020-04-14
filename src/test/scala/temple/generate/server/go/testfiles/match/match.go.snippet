@@ -10,10 +10,12 @@ import (
 
 	"github.com/TempleEight/spec-golang/match/comm"
 	"github.com/TempleEight/spec-golang/match/dao"
+	"github.com/TempleEight/spec-golang/match/metric"
 	"github.com/TempleEight/spec-golang/match/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -163,7 +165,9 @@ func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestList))
 	matchList, err := env.dao.ListMatch(input)
+	timer.ObserveDuration()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
@@ -184,6 +188,8 @@ func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(matchListResp)
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestList).Inc()
 }
 
 func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
@@ -261,7 +267,9 @@ func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreate))
 	match, err := env.dao.CreateMatch(input)
+	timer.ObserveDuration()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
@@ -274,6 +282,8 @@ func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
 		UserTwo:   match.UserTwo,
 		MatchedOn: match.MatchedOn.Format(time.RFC3339),
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreate).Inc()
 }
 
 func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
@@ -320,7 +330,9 @@ func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRead))
 	match, err := env.dao.ReadMatch(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrMatchNotFound:
@@ -338,6 +350,8 @@ func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
 		UserTwo:   match.UserTwo,
 		MatchedOn: match.MatchedOn.Format(time.RFC3339),
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestRead).Inc()
 }
 
 func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
@@ -431,7 +445,9 @@ func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestUpdate))
 	match, err := env.dao.UpdateMatch(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrMatchNotFound:
@@ -449,6 +465,8 @@ func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
 		UserTwo:   match.UserTwo,
 		MatchedOn: match.MatchedOn.Format(time.RFC3339),
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestUpdate).Inc()
 }
 
 func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {
@@ -495,7 +513,9 @@ func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDelete))
 	err = env.dao.DeleteMatch(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrMatchNotFound:
@@ -508,4 +528,6 @@ func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(struct{}{})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestDelete).Inc()
 }

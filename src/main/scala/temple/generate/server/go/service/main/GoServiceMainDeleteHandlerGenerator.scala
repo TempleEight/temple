@@ -18,8 +18,9 @@ object GoServiceMainDeleteHandlerGenerator {
       "input",
     )
 
-  private def generateDAOCallBlock(root: ServiceRoot): String =
+  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
     mkCode.lines(
+      when(usesMetrics) { generateMetricTimerDecl(Delete) },
       genAssign(
         genMethodCall(
           "env.dao",
@@ -28,11 +29,12 @@ object GoServiceMainDeleteHandlerGenerator {
         ),
         "err",
       ),
+      when(usesMetrics) { generateMetricTimerObservation() },
       generateDAOCallErrorBlock(root),
     )
 
   /** Generate the delete handler function */
-  private[main] def generateDeleteHandler(root: ServiceRoot): String =
+  private[main] def generateDeleteHandler(root: ServiceRoot, usesMetrics: Boolean): String =
     mkCode(
       generateHandlerDecl(root, Delete),
       CodeWrap.curly.tabbed(
@@ -42,8 +44,9 @@ object GoServiceMainDeleteHandlerGenerator {
           when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root) },
           generateDAOInput(root),
           generateInvokeBeforeHookBlock(root, ListMap(), Delete),
-          generateDAOCallBlock(root),
+          generateDAOCallBlock(root, usesMetrics),
           genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", "struct{}{}"),
+          when(usesMetrics) { generateMetricSuccess(Delete) },
         ),
       ),
     )

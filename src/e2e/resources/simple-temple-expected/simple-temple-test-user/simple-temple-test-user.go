@@ -9,10 +9,12 @@ import (
 	"time"
 
 	"github.com/squat/and/dab/simple-temple-test-user/dao"
+	"github.com/squat/and/dab/simple-temple-test-user/metric"
 	"github.com/squat/and/dab/simple-temple-test-user/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -174,7 +176,9 @@ func (env *env) listSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestList))
 	simpleTempleTestUserList, err := env.dao.ListSimpleTempleTestUser()
+	timer.ObserveDuration()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
@@ -201,6 +205,8 @@ func (env *env) listSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 	}
 
 	json.NewEncoder(w).Encode(simpleTempleTestUserListResp)
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestList).Inc()
 }
 
 func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -274,7 +280,9 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreate))
 	simpleTempleTestUser, err := env.dao.CreateSimpleTempleTestUser(input)
+	timer.ObserveDuration()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
@@ -293,6 +301,8 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		BirthDate:            simpleTempleTestUser.BirthDate.Format("2006-01-02"),
 		BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreate).Inc()
 }
 
 func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -321,7 +331,9 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRead))
 	simpleTempleTestUser, err := env.dao.ReadSimpleTempleTestUser(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestUserNotFound:
@@ -345,6 +357,8 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 		BirthDate:            simpleTempleTestUser.BirthDate.Format("2006-01-02"),
 		BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestRead).Inc()
 }
 
 func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -430,7 +444,9 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestUpdate))
 	simpleTempleTestUser, err := env.dao.UpdateSimpleTempleTestUser(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestUserNotFound:
@@ -454,4 +470,6 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		BirthDate:            simpleTempleTestUser.BirthDate.Format("2006-01-02"),
 		BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestUpdate).Inc()
 }

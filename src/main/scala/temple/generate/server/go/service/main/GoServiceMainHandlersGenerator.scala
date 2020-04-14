@@ -285,7 +285,22 @@ object GoServiceMainHandlersGenerator {
         )
     }
 
-  /** Generate DAO call block error handling for Read, Update and Delete*/
+  /** Generate the metric timer declaration, ready to measure the duration of a DAO call */
+  private[main] def generateMetricTimerDecl(op: CRUD): String =
+    genDeclareAndAssign(
+      genMethodCall(
+        "prometheus",
+        "NewTimer",
+        genMethodCall("metric.DatabaseRequestDuration", "WithLabelValues", s"metric.Request$op"),
+      ),
+      "timer",
+    )
+
+  /** Generate the metric timer observation, to log the duration of a DAO call */
+  private[main] def generateMetricTimerObservation(): String =
+    genMethodCall("timer", "ObserveDuration")
+
+  /** Generate DAO call block error handling for Read, Update and Delete */
   private[main] def generateDAOCallErrorBlock(root: ServiceRoot): String =
     genIfErr(
       genSwitchReturn(
@@ -333,6 +348,10 @@ object GoServiceMainHandlersGenerator {
       genPopulateStruct(s"${typePrefix}Response", responseMap),
     )
 
+  /** Generate the metric call to log a successful request */
+  private[main] def generateMetricSuccess(op: CRUD): String =
+    genMethodCall(genMethodCall("metric.RequestSuccess", "WithLabelValues", s"metric.Request$op"), "Inc")
+
   /** Generate the env handler functions */
   private[service] def generateHandlers(
     root: ServiceRoot,
@@ -340,6 +359,7 @@ object GoServiceMainHandlersGenerator {
     clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     enumeratingByCreator: Boolean,
+    usesMetrics: Boolean,
   ): String = {
     val responseMap = generateResponseMap(root)
 
@@ -350,11 +370,16 @@ object GoServiceMainHandlersGenerator {
 
     mkCode.doubleLines(
       operations.toSeq.sorted.map {
-        case List   => generateListHandler(root, responseMap, enumeratingByCreator)
-        case Create => generateCreateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime)
-        case Read   => generateReadHandler(root, responseMap)
-        case Update => generateUpdateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime)
-        case Delete => generateDeleteHandler(root)
+        case List =>
+          generateListHandler(root, responseMap, enumeratingByCreator, usesMetrics)
+        case Create =>
+          generateCreateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime, usesMetrics)
+        case Read =>
+          generateReadHandler(root, responseMap, usesMetrics)
+        case Update =>
+          generateUpdateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime, usesMetrics)
+        case Delete =>
+          generateDeleteHandler(root, usesMetrics)
       },
     )
   }

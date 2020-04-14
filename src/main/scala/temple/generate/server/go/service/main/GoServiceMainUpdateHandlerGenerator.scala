@@ -21,13 +21,15 @@ object GoServiceMainUpdateHandlerGenerator {
     )
   }
 
-  private def generateDAOCallBlock(root: ServiceRoot): String =
+  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
     mkCode.lines(
+      when(usesMetrics) { generateMetricTimerDecl(Update) },
       genDeclareAndAssign(
         genMethodCall("env.dao", s"Update${root.name}", "input"),
         root.decapitalizedName,
         "err",
       ),
+      when(usesMetrics) { generateMetricTimerObservation() },
       generateDAOCallErrorBlock(root),
     )
 
@@ -38,6 +40,7 @@ object GoServiceMainUpdateHandlerGenerator {
     usesComms: Boolean,
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
+    usesMetrics: Boolean,
   ): String =
     mkCode(
       generateHandlerDecl(root, Update),
@@ -58,8 +61,9 @@ object GoServiceMainUpdateHandlerGenerator {
           },
           generateDAOInput(root, clientAttributes),
           generateInvokeBeforeHookBlock(root, clientAttributes, Update),
-          generateDAOCallBlock(root),
+          generateDAOCallBlock(root, usesMetrics),
           generateJSONResponse(s"update${root.name}", responseMap),
+          when(usesMetrics) { generateMetricSuccess(Update) },
         ),
       ),
     )
