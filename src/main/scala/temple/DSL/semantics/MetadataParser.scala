@@ -52,12 +52,6 @@ class MetadataParser[T <: Metadata]() {
       })
 
   final protected def registerKeyword[A](
-    key: String,
-    argType: ArgType[A],
-  )(constructor: A => T): Unit =
-    registerKeywordWithContext(key, key, argType)(enumParser(constructor))
-
-  final protected def registerKeyword[A](
     metaKey: String,
     argKey: String,
     argType: ArgType[A],
