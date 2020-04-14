@@ -129,11 +129,13 @@ func (env *env) registerAuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	auth, err := env.dao.CreateAuth(dao.CreateAuthInput{
+	input := dao.CreateAuthInput{
 		ID:       uuid,
 		Email:    req.Email,
 		Password: string(hashedPassword),
-	})
+	}
+
+	auth, err := env.dao.CreateAuth(input)
 	if err != nil {
 		switch err {
 		case dao.ErrDuplicateAuth:
@@ -173,9 +175,11 @@ func (env *env) loginAuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	auth, err := env.dao.ReadAuth(dao.ReadAuthInput{
+	input := dao.ReadAuthInput{
 		Email: req.Email,
-	})
+	}
+
+	auth, err := env.dao.ReadAuth(input)
 	if err != nil {
 		switch err {
 		case dao.ErrAuthNotFound:
