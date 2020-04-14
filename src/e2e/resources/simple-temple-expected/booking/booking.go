@@ -132,6 +132,14 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, hook := range env.hook.afterCreateHooks {
+		err := (*hook)(env, booking)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(createBookingResponse{
 		ID: booking.ID,
 	})
@@ -193,6 +201,14 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, hook := range env.hook.afterReadHooks {
+		err := (*hook)(env, booking)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(readBookingResponse{
 		ID: booking.ID,
 	})
@@ -252,6 +268,14 @@ func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, errMsg, http.StatusInternalServerError)
 		}
 		return
+	}
+
+	for _, hook := range env.hook.afterDeleteHooks {
+		err := (*hook)(env)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(struct{}{})

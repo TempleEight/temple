@@ -181,6 +181,14 @@ func (env *env) listSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
+	for _, hook := range env.hook.afterListHooks {
+		err := (*hook)(env, simpleTempleTestUserList)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	simpleTempleTestUserListResp := listSimpleTempleTestUserResponse{
 		SimpleTempleTestUserList: make([]listSimpleTempleTestUserElement, 0),
 	}
@@ -281,6 +289,14 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		return
 	}
 
+	for _, hook := range env.hook.afterCreateHooks {
+		err := (*hook)(env, simpleTempleTestUser)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(createSimpleTempleTestUserResponse{
 		ID:                   simpleTempleTestUser.ID,
 		SimpleTempleTestUser: simpleTempleTestUser.SimpleTempleTestUser,
@@ -331,6 +347,14 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 			http.Error(w, errMsg, http.StatusInternalServerError)
 		}
 		return
+	}
+
+	for _, hook := range env.hook.afterReadHooks {
+		err := (*hook)(env, simpleTempleTestUser)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(readSimpleTempleTestUserResponse{
@@ -440,6 +464,14 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 			http.Error(w, errMsg, http.StatusInternalServerError)
 		}
 		return
+	}
+
+	for _, hook := range env.hook.afterUpdateHooks {
+		err := (*hook)(env, simpleTempleTestUser)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(updateSimpleTempleTestUserResponse{

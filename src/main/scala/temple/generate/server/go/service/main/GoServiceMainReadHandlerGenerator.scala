@@ -20,6 +20,7 @@ object GoServiceMainReadHandlerGenerator {
         generateDAOReadCall(root),
         generateDAOCallErrorBlock(root),
       ),
+      generateInvokeAfterHookBlock(root, Read),
     )
 
   /** Generate the read handler function */

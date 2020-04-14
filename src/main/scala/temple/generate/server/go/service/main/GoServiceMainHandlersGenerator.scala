@@ -325,6 +325,32 @@ object GoServiceMainHandlersGenerator {
     )
   }
 
+  private[main] def generateInvokeAfterHookBlock(
+    root: ServiceRoot,
+    operation: CRUD,
+  ): String = {
+    val hookArguments = operation match {
+      case List =>
+        Seq("env", s"${root.decapitalizedName}List")
+      case Create | Read | Update =>
+        Seq("env", root.decapitalizedName)
+      case Delete =>
+        Seq("env")
+    }
+
+    genForLoop(
+      genDeclareAndAssign(s"range env.hook.after${operation.toString}Hooks", "_", "hook"),
+      mkCode.lines(
+        genDeclareAndAssign(
+          genFunctionCall("(*hook)", hookArguments),
+          "err",
+        ),
+        // TODO: replace with `respondWithError` call
+        genIfErr(mkCode.lines("// TODO", genReturn())),
+      ),
+    )
+  }
+
   /** Generate JSON response from DAO response */
   private[main] def generateJSONResponse(typePrefix: String, responseMap: ListMap[String, String]): String =
     genMethodCall(

@@ -4,7 +4,7 @@ import temple.generate.CRUD.List
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
 import temple.generate.server.go.common.GoCommonGenerator._
-import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.{generateExtractAuthBlock, generateHTTPError, generateHandlerDecl, generateInvokeBeforeHookBlock}
+import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
 import scala.Option.when
@@ -90,6 +90,7 @@ object GoServiceMainListHandlerGenerator {
               queryDAOBlock,
               queryDAOErrorBlock,
             ),
+            generateInvokeAfterHookBlock(root, List),
           ),
           instantiateResponseBlock,
           mapResponseBlock,
