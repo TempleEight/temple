@@ -16,7 +16,8 @@ import (
 
 // env defines the environment that requests should be executed within
 type env struct {
-	dao dao.Datastore
+	dao  dao.Datastore
+	hook Hook
 }
 
 // createUserRequest contains the client-provided information required to create a single user
@@ -76,7 +77,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	env := env{d}
+	env := env{d, Hook{}}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)
@@ -122,10 +123,12 @@ func (env *env) createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := env.dao.CreateUser(dao.CreateUserInput{
+	input := dao.CreateUserInput{
 		ID:   auth.ID,
 		Name: *req.Name,
-	})
+	}
+
+	user, err := env.dao.CreateUser(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
@@ -152,9 +155,11 @@ func (env *env) readUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := env.dao.ReadUser(dao.ReadUserInput{
+	input := dao.ReadUserInput{
 		ID: userID,
-	})
+	}
+
+	user, err := env.dao.ReadUser(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrUserNotFound:
@@ -213,10 +218,12 @@ func (env *env) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	user, err := env.dao.UpdateUser(dao.UpdateUserInput{
+	input := dao.UpdateUserInput{
 		ID:   userID,
 		Name: *req.Name,
-	})
+	}
+
+	user, err := env.dao.UpdateUser(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrUserNotFound:
@@ -254,9 +261,11 @@ func (env *env) deleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	err = env.dao.DeleteUser(dao.DeleteUserInput{
+	input := dao.DeleteUserInput{
 		ID: userID,
-	})
+	}
+
+	err = env.dao.DeleteUser(input)
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrUserNotFound:
