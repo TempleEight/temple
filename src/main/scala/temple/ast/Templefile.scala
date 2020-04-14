@@ -61,8 +61,6 @@ case class Templefile(
   /** Get a block by name, either as a service or a block */
   def getBlock(name: String): AttributeBlock[_] =
     services.getOrElse(name, services(structLocations(name)).structs(name))
-
-  override def hasMetadata(m: Metadata): Boolean = projectBlock hasMetadata m
 }
 
 object Templefile {
