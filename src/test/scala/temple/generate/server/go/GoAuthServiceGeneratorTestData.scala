@@ -1,6 +1,7 @@
 package temple.generate.server.go
 
 import temple.ast.AttributeType
+import temple.ast.Metadata.Metrics.Prometheus
 import temple.ast.Metadata.ServiceAuth
 import temple.generate.FileSystem._
 import temple.generate.server.{AuthAttribute, AuthServiceRoot, IDAttribute}
@@ -15,6 +16,7 @@ object GoAuthServiceGeneratorTestData {
     IDAttribute("id"),
     "INSERT INTO auth (id, email, password) VALUES ($1, $2, $3) RETURNING id, name, password",
     "SELECT id, email, password FROM auth WHERE email = $1",
+    metrics = Some(Prometheus),
   )
 
   val authServiceFiles: Files = Map(

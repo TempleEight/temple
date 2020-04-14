@@ -1,7 +1,7 @@
 package temple.generate.server
 
 import temple.ast.AbstractAttribute
-import temple.ast.Metadata.{Database, Readable, Writable}
+import temple.ast.Metadata.{Database, Metrics, Readable, Writable}
 import temple.generate.CRUD.CRUD
 
 import scala.collection.immutable.ListMap
@@ -22,6 +22,7 @@ import scala.collection.immutable.ListMap
   * @param writable whether this service is writable by this or by all
   * @param projectUsesAuth whether or not the project uses auth
   * @param hasAuthBlock whether or not this service has an auth block
+  * @param metrics whether or not this service has metrics, and if so, which framework is used
   */
 case class ServiceRoot(
   override val name: String,
@@ -37,4 +38,5 @@ case class ServiceRoot(
   writable: Writable,
   projectUsesAuth: Boolean,
   hasAuthBlock: Boolean,
+  metrics: Option[Metrics],
 ) extends ServiceName(name)
