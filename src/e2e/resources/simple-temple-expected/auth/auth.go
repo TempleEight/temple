@@ -22,6 +22,7 @@ import (
 // env defines the environment that requests should be executed within
 type env struct {
 	dao           dao.Datastore
+	hook          Hook
 	comm          comm.Comm
 	jwtCredential *comm.JWTCredential
 }
@@ -81,7 +82,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	env := env{d, c, jwtCredential}
+	env := env{d, Hook{}, c, jwtCredential}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)

@@ -68,7 +68,7 @@ object GoCommonMainGenerator {
           )
         },
         genDeclareAndAssign(
-          s"env{${mkCode.list("d", when(usesComms) { "c" }, when(isAuth) { "jwtCredential" })}}",
+          s"env{${mkCode.list("d", "Hook{}", when(usesComms) { "c" }, when(isAuth) { "jwtCredential" })}}",
           "env",
         ),
         "",
