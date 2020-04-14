@@ -1,7 +1,6 @@
 package temple.ast
 
 import temple.ast.AbstractServiceBlock._
-import temple.ast.Metadata.ServiceAuth
 import temple.ast.Templefile.Ports
 import temple.builder.project.ProjectConfig
 
@@ -23,9 +22,7 @@ case class Templefile(
   val providedServices: Map[String, ServiceBlock] = services
 
   // Whether or not to generate an auth service - based on whether any service has #auth
-  val usesAuth: Boolean = services.exists {
-    case (_, service) => service.lookupLocalMetadata[ServiceAuth].nonEmpty
-  }
+  val usesAuth: Boolean = lookupMetadata[Metadata.AuthMethod].isDefined
 
   val providedServicesWithPorts: Iterable[(String, ServiceBlock, Ports)] =
     providedServices
@@ -64,6 +61,8 @@ case class Templefile(
   /** Get a block by name, either as a service or a block */
   def getBlock(name: String): AttributeBlock[_] =
     services.getOrElse(name, services(structLocations(name)).structs(name))
+
+  override def hasMetadata(m: Metadata): Boolean = projectBlock hasMetadata m
 }
 
 object Templefile {

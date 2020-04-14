@@ -42,4 +42,12 @@ abstract class TempleBlock[+M <: Metadata] extends TempleNode {
     */
   final def lookupMetadata[T <: ProjectMetadata: ClassTag]: Option[T] =
     lookupLocalMetadata[T] orElse lookupDefaultMetadata[T]
+
+  /**
+    * Whether a specific metadata value is given.
+    *
+    * For binary metadata (e.g. enumerable), this is just whether it’s set, else whether an exact value of the metadata
+    * is provided locally.
+    */
+  final override def hasMetadata(m: Metadata): Boolean = metadata contains m
 }

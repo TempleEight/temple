@@ -92,12 +92,15 @@ object Metadata {
       Omit(names.map(Endpoint.parse(_)).toSet)
   }
 
-  sealed abstract class ServiceAuth private (name: String) extends EnumEntry(name) with ServiceMetadata
+  sealed abstract class AuthMethod private (name: String) extends EnumEntry(name) with ProjectMetadata
 
-  object ServiceAuth extends Enum[ServiceAuth] {
-    override def values: IndexedSeq[ServiceAuth] = findValues
-    case object Email extends ServiceAuth("email")
+  object AuthMethod extends Enum[AuthMethod] {
+    override def values: IndexedSeq[AuthMethod] = findValues
+    case object Email extends AuthMethod("email")
   }
+
+  type ServiceAuth = ServiceAuth.type
+  case object ServiceAuth extends ServiceMetadata
 
   sealed abstract class Metrics private (name: String) extends EnumEntry(name) with ProjectMetadata
 

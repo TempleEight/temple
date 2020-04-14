@@ -3,7 +3,7 @@ package temple.builder
 import temple.ast.AbstractAttribute.Attribute
 import temple.ast.AttributeType.ForeignKey
 import temple.ast.Metadata.{Database, ServiceAuth, ServiceLanguage}
-import temple.ast.{Metadata, _}
+import temple.ast._
 import temple.builder.project.LanguageConfig.GoLanguageConfig
 import temple.builder.project.ProjectConfig
 import temple.detail.LanguageDetail
@@ -99,12 +99,11 @@ object ServerBuilder {
       case GoLanguageDetail(modulePath) => s"$modulePath/auth"
     }
 
-    // TODO: look this up from the project block
     // TODO: support usernames
-    val serviceAuth = ProjectConfig.defaultAuth
+    val authMethod = templefile.lookupMetadata[Metadata.AuthMethod] getOrElse ProjectConfig.defaultAuth
 
-    val attributes: Map[String, Attribute] = serviceAuth match {
-      case ServiceAuth.Email =>
+    val attributes: Map[String, Attribute] = authMethod match {
+      case Metadata.AuthMethod.Email =>
         Map(
           "id"       -> Attribute(AttributeType.UUIDType),
           "email"    -> Attribute(AttributeType.StringType()),
@@ -131,7 +130,7 @@ object ServerBuilder {
     AuthServiceRoot(
       moduleName,
       port,
-      AuthAttribute(serviceAuth, AttributeType.StringType()),
+      AuthAttribute(authMethod, AttributeType.StringType()),
       server.IDAttribute("id"),
       createQuery,
       readQuery,

@@ -4,7 +4,7 @@ import java.io.IOException
 import java.net.HttpURLConnection
 
 import scalaj.http.Http
-import temple.ast.Metadata.{Provider, ServiceAuth}
+import temple.ast.Metadata.{AuthMethod, Provider}
 import temple.ast.{Metadata, Templefile}
 import temple.test.internal.{AuthServiceTest, CRUDServiceTest, ProjectConfig}
 
@@ -111,11 +111,10 @@ object ProjectTester {
 
   /** Execute the tests on each generated service */
   private def performTests(templefile: Templefile, generatedPath: String, url: String): Unit = {
-    // TODO: refactor for central auth method
-    val serviceAuths = templefile.services.values.flatMap(_.lookupLocalMetadata[ServiceAuth]).toSet
-    var anyFailed    = false
-    if (serviceAuths.nonEmpty) {
-      anyFailed = AuthServiceTest.test(serviceAuths, url) || anyFailed
+    val authMethod = templefile.lookupMetadata[AuthMethod]
+    var anyFailed  = false
+    authMethod.foreach { auth =>
+      anyFailed = AuthServiceTest.test(auth, url) || anyFailed
     }
     templefile.providedServices.foreach {
       case (name, block) =>

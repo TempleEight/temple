@@ -1,8 +1,8 @@
 package temple.test.internal
 
-import temple.ast.Metadata.ServiceAuth
-import temple.utils.StringUtils
 import io.circe.syntax._
+import temple.ast.Metadata.AuthMethod
+import temple.utils.StringUtils
 
 object AuthServiceTest extends ServiceTest("Auth") {
 
@@ -34,10 +34,9 @@ object AuthServiceTest extends ServiceTest("Auth") {
   }
 
   // Test each type of auth that is present in the project
-  // TODO: refactor for central auth method
-  def test(auths: Set[ServiceAuth], baseURL: String): Boolean = {
-    auths.foreach {
-      case ServiceAuth.Email => testEmailAuth(baseURL)
+  def test(authMethod: AuthMethod, baseURL: String): Boolean = {
+    authMethod match {
+      case AuthMethod.Email => testEmailAuth(baseURL)
     }
     anyTestFailed
   }
