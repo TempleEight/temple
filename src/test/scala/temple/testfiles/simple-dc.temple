@@ -1,6 +1,7 @@
 SimpleTempleTest: project {
   #metrics(prometheus);
   #provider(dockerCompose);
+  #authMethod(email);
 }
 
 User: service {
@@ -28,7 +29,7 @@ User: service {
   #readable(by: all);
   #writable(by: this);
 
-  #auth(email);
+  #auth;
   #uses [Booking, Group, /* Reservations */];
 }
 
