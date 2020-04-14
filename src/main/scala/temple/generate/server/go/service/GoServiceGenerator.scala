@@ -32,6 +32,9 @@ object GoServiceGenerator extends ServiceGenerator {
     // Whether or not this service uses base64, by checking for attributes of type blob
     val usesBase64 = root.attributes.values.map(_.attributeType).toSet.contains(AttributeType.BlobType())
 
+    // Whether or not the service uses metrics
+    val usesMetrics = root.metrics.isDefined
+
     // Attributes filtered by which are client-provided
     val clientAttributes = root.attributes.filter { case (_, attr) => attr.inRequest }
 
@@ -98,11 +101,6 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonUtilGenerator.generateCreateErrorJSON(),
         GoServiceUtilGenerator.generateIDsFromRequest(),
       ),
-      File(s"${root.kebabName}/metric", "metric.go") -> mkCode.doubleLines(
-        GoCommonGenerator.generatePackage("metric"),
-        GoCommonMetricGenerator.generateImports(),
-        GoServiceMetricGenerator.generateVars(root, operations),
-      ),
     ) ++ when(usesComms)(
       File(s"${root.kebabName}/comm", "handler.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("comm"),
@@ -111,6 +109,12 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceCommGenerator.generateHandlerStruct(),
         GoCommonCommGenerator.generateInit(),
         GoServiceCommGenerator.generateCommFunctions(root),
+      ),
+    ) ++ when(usesMetrics)(
+      File(s"${root.kebabName}/metric", "metric.go") -> mkCode.doubleLines(
+        GoCommonGenerator.generatePackage("metric"),
+        GoCommonMetricGenerator.generateImports(),
+        GoServiceMetricGenerator.generateVars(root, operations),
       ),
     )).map { case (path, contents) => path -> (contents + "\n") }
   }

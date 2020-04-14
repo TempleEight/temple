@@ -1,5 +1,7 @@
 package temple.generate.server
 
+import temple.ast.Metadata.Metrics
+
 /**
   * ServiceRoot encapsulates all the information needed to generate an auth service
   *
@@ -9,6 +11,7 @@ package temple.generate.server
   * @param idAttribute the name and type of the ID field in this service
   * @param createQuery the database query to create an auth
   * @param readQuery the database query to read an auth
+  * @param metrics whether or not this auth service has metrics, and if so, which framework is used
   */
 case class AuthServiceRoot(
   module: String,
@@ -17,4 +20,5 @@ case class AuthServiceRoot(
   idAttribute: IDAttribute,
   createQuery: String,
   readQuery: String,
+  metrics: Option[Metrics],
 )
