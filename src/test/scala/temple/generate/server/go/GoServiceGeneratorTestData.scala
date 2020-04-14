@@ -39,7 +39,8 @@ object GoServiceGeneratorTestData {
     File("user", "user.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/user/user.go.snippet",
     ),
-    File("user", "hook.go") -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/hook.go.snippet"),
+    File("user", "setup.go") -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/setup.go.snippet"),
+    File("user", "hook.go")  -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/hook.go.snippet"),
     File("user/dao", "errors.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/user/dao/errors.go.snippet",
     ),
@@ -89,7 +90,8 @@ object GoServiceGeneratorTestData {
     File("match", "match.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/match/match.go.snippet",
     ),
-    File("match", "hook.go") -> readFile("src/test/scala/temple/generate/server/go/testfiles/match/hook.go.snippet"),
+    File("match", "setup.go") -> readFile("src/test/scala/temple/generate/server/go/testfiles/match/setup.go.snippet"),
+    File("match", "hook.go")  -> readFile("src/test/scala/temple/generate/server/go/testfiles/match/hook.go.snippet"),
     File("match/dao", "errors.go") -> readFile(
       "src/test/scala/temple/generate/server/go/testfiles/match/dao/errors.go.snippet",
     ),

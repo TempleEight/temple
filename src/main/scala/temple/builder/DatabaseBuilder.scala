@@ -8,7 +8,7 @@ import temple.generate.database.ast.ColumnConstraint.Check
 import temple.generate.database.ast.Condition.PreparedComparison
 import temple.generate.database.ast.Expression.PreparedValue
 import temple.generate.database.ast._
-import temple.utils.StringUtils
+import temple.utils.StringUtils.snakeCase
 
 import scala.Option.when
 import scala.collection.immutable.ListMap
@@ -59,10 +59,14 @@ object DatabaseBuilder {
     readable: Metadata.Readable = Metadata.Readable.This,
     selectionAttribute: String = "id",
   ): ListMap[CRUD, Statement] = {
-    val tableName = StringUtils.snakeCase(serviceName)
-    val columns   = attributes.keys.map(Column).toSeq
+    val tableName = snakeCase(serviceName)
+    val columns   = attributes.keys.map(att => Column(snakeCase(att))).toSeq
     val providedColumns =
-      attributes.filter { case (_, attr) => attr != IDAttribute && attr != CreatedByAttribute }.keys.map(Column).toSeq
+      attributes
+        .filter { case (_, attr) => attr != IDAttribute && attr != CreatedByAttribute }
+        .keys
+        .map(att => Column(snakeCase(att)))
+        .toSeq
     ListMap.from(
       endpoints.map {
         case Create =>
@@ -111,8 +115,8 @@ object DatabaseBuilder {
   def createServiceTables(serviceName: String, service: AbstractServiceBlock): Seq[Statement.Create] = {
     service.structIterator(serviceName).map {
       case (tableName, structBlock) =>
-        val columns = structBlock.attributes.map { case (name, attributes) => toColDef(name, attributes) }
-        Statement.Create(StringUtils.snakeCase(tableName), columns.toSeq)
+        val columns = structBlock.attributes.map { case (name, attributes) => toColDef(snakeCase(name), attributes) }
+        Statement.Create(snakeCase(tableName), columns.toSeq)
     }
   }.toSeq
 }

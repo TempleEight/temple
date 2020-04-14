@@ -100,7 +100,7 @@ func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) 
 
 // CreateTempleUser creates a new templeUser in the datastore, returning the newly created templeUser
 func (dao *DAO) CreateTempleUser(input CreateTempleUserInput) (*TempleUser, error) {
-	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO temple_user (id, intField, doubleField, stringField, boolField, dateField, timeField, dateTimeField, blobField) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, intField, doubleField, stringField, boolField, dateField, timeField, dateTimeField, blobField;", input.ID, input.IntField, input.DoubleField, input.StringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField)
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO temple_user (id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field;", input.ID, input.IntField, input.DoubleField, input.StringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField)
 
 	var templeUser TempleUser
 	err := row.Scan(&templeUser.ID, &templeUser.IntField, &templeUser.DoubleField, &templeUser.StringField, &templeUser.BoolField, &templeUser.DateField, &templeUser.TimeField, &templeUser.DateTimeField, &templeUser.BlobField)
@@ -113,7 +113,7 @@ func (dao *DAO) CreateTempleUser(input CreateTempleUserInput) (*TempleUser, erro
 
 // ReadTempleUser returns the templeUser in the datastore for a given ID
 func (dao *DAO) ReadTempleUser(input ReadTempleUserInput) (*TempleUser, error) {
-	row := executeQueryWithRowResponse(dao.DB, "SELECT id, intField, doubleField, stringField, boolField, dateField, timeField, dateTimeField, blobField FROM temple_user WHERE id = $1;", input.ID)
+	row := executeQueryWithRowResponse(dao.DB, "SELECT id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field FROM temple_user WHERE id = $1;", input.ID)
 
 	var templeUser TempleUser
 	err := row.Scan(&templeUser.ID, &templeUser.IntField, &templeUser.DoubleField, &templeUser.StringField, &templeUser.BoolField, &templeUser.DateField, &templeUser.TimeField, &templeUser.DateTimeField, &templeUser.BlobField)
@@ -131,7 +131,7 @@ func (dao *DAO) ReadTempleUser(input ReadTempleUserInput) (*TempleUser, error) {
 
 // UpdateTempleUser updates the templeUser in the datastore for a given ID, returning the newly updated templeUser
 func (dao *DAO) UpdateTempleUser(input UpdateTempleUserInput) (*TempleUser, error) {
-	row := executeQueryWithRowResponse(dao.DB, "UPDATE temple_user SET intField = $1, doubleField = $2, stringField = $3, boolField = $4, dateField = $5, timeField = $6, dateTimeField = $7, blobField = $8 WHERE id = $9 RETURNING id, intField, doubleField, stringField, boolField, dateField, timeField, dateTimeField, blobField;", input.IntField, input.DoubleField, input.StringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField, input.ID)
+	row := executeQueryWithRowResponse(dao.DB, "UPDATE temple_user SET int_field = $1, double_field = $2, string_field = $3, bool_field = $4, date_field = $5, time_field = $6, date_time_field = $7, blob_field = $8 WHERE id = $9 RETURNING id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field;", input.IntField, input.DoubleField, input.StringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField, input.ID)
 
 	var templeUser TempleUser
 	err := row.Scan(&templeUser.ID, &templeUser.IntField, &templeUser.DoubleField, &templeUser.StringField, &templeUser.BoolField, &templeUser.DateField, &templeUser.TimeField, &templeUser.DateTimeField, &templeUser.BlobField)

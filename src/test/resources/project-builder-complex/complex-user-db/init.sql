@@ -1,27 +1,27 @@
 CREATE TABLE complex_user (
   id UUID NOT NULL PRIMARY KEY,
-  smallIntField SMALLINT CHECK (smallIntField <= 100) CHECK (smallIntField >= 10) NOT NULL,
-  intField INT CHECK (intField <= 100) CHECK (intField >= 10) NOT NULL,
-  bigIntField BIGINT CHECK (bigIntField <= 100) CHECK (bigIntField >= 10) NOT NULL,
-  floatField REAL CHECK (floatField <= 300.0) CHECK (floatField >= 0.0) NOT NULL,
-  doubleField DOUBLE PRECISION CHECK (doubleField <= 123.0) CHECK (doubleField >= 0.0) NOT NULL,
-  stringField TEXT CHECK (length(stringField) >= 1) NOT NULL,
-  boundedStringField VARCHAR(5) CHECK (length(boundedStringField) >= 0) NOT NULL,
-  boolField BOOLEAN NOT NULL,
-  dateField DATE NOT NULL,
-  timeField TIME NOT NULL,
-  dateTimeField TIMESTAMPTZ NOT NULL,
-  blobField BYTEA NOT NULL
+  small_int_field SMALLINT CHECK (small_int_field <= 100) CHECK (small_int_field >= 10) NOT NULL,
+  int_field INT CHECK (int_field <= 100) CHECK (int_field >= 10) NOT NULL,
+  big_int_field BIGINT CHECK (big_int_field <= 100) CHECK (big_int_field >= 10) NOT NULL,
+  float_field REAL CHECK (float_field <= 300.0) CHECK (float_field >= 0.0) NOT NULL,
+  double_field DOUBLE PRECISION CHECK (double_field <= 123.0) CHECK (double_field >= 0.0) NOT NULL,
+  string_field TEXT CHECK (length(string_field) >= 1) NOT NULL,
+  bounded_string_field VARCHAR(5) CHECK (length(bounded_string_field) >= 0) NOT NULL,
+  bool_field BOOLEAN NOT NULL,
+  date_field DATE NOT NULL,
+  time_field TIME NOT NULL,
+  date_time_field TIMESTAMPTZ NOT NULL,
+  blob_field BYTEA NOT NULL
 );
 
 CREATE TABLE temple_user (
   id UUID NOT NULL PRIMARY KEY,
-  intField INT NOT NULL,
-  doubleField DOUBLE PRECISION NOT NULL,
-  stringField TEXT NOT NULL,
-  boolField BOOLEAN NOT NULL,
-  dateField DATE NOT NULL,
-  timeField TIME NOT NULL,
-  dateTimeField TIMESTAMPTZ NOT NULL,
-  blobField BYTEA NOT NULL
+  int_field INT NOT NULL,
+  double_field DOUBLE PRECISION NOT NULL,
+  string_field TEXT NOT NULL,
+  bool_field BOOLEAN NOT NULL,
+  date_field DATE NOT NULL,
+  time_field TIME NOT NULL,
+  date_time_field TIMESTAMPTZ NOT NULL,
+  blob_field BYTEA NOT NULL
 );
