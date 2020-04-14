@@ -1,6 +1,7 @@
 package temple.test.internal
 
 import temple.ast.AbstractServiceBlock.ServiceBlock
+import temple.ast.Metadata
 import temple.builder.project.ProjectBuilder
 import temple.generate.CRUD
 import temple.utils.StringUtils
@@ -63,13 +64,43 @@ class CRUDServiceTest(
       test.assert(deleteJSON.isEmpty, "delete response was not empty")
     }
 
+  private def testListEndpoint(accessToken: String): Unit =
+    testEndpoint("list") { test =>
+      // To be sure how many items are created using the access token (and therefore validate `Readable.this` is correct,
+      // construct a new accessToken
+      val newAccessToken = if (usesAuth) {
+        ServiceTestUtils.getAuthTokenWithEmail(name, baseURL)
+      } else ""
+
+      val createResponse = ServiceTestUtils.create(test, name, allServices, baseURL, newAccessToken)
+      val listJSON =
+        ServiceTestUtils
+          .getRequest(test, s"http://$baseURL/api/${StringUtils.kebabCase(name)}/all", createResponse.accessToken)
+          .apply(s"${name}List")
+          .flatMap(_.asArray)
+          .getOrElse(test.fail(s"response did not contain key ${name}List"))
+
+      // Ensure the correct number of items were returned
+      // For `this`, only 1 item has been created for this access token...
+      if (service.lookupMetadata[Metadata.Readable].contains(Metadata.Readable.This)) {
+        test.assertEqual(1, listJSON.size, "expected list response to contain 1 item only")
+      } else {
+        test.assert(listJSON.nonEmpty, "expected list response to contain at least 1 item")
+      }
+
+      listJSON.foreach { listItem =>
+        val listObject = listItem.asObject.getOrElse(test.fail("list item was not a JSON object"))
+        test.validateResponseBody(None, listObject, service.attributes)
+      }
+    }
+
   // Test each type of endpoint that is present in the service
   def test(): Boolean = {
     val accessToken = if (usesAuth) {
       ServiceTestUtils.getAuthTokenWithEmail(name, baseURL)
     } else ""
     ProjectBuilder.endpoints(service).foreach {
-      case CRUD.List   => // TODO
+      case CRUD.List   => testListEndpoint(accessToken)
       case CRUD.Create => testCreateEndpoint(accessToken)
       case CRUD.Read   => testReadEndpoint(accessToken)
       case CRUD.Update => testUpdateEndpoint(accessToken)
