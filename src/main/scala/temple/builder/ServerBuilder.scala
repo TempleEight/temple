@@ -90,6 +90,7 @@ object ServerBuilder {
       writable = writable,
       projectUsesAuth = projectUsesAuth,
       hasAuthBlock = hasAuthBlock,
+      metrics = serviceBlock.lookupMetadata[Metadata.Metrics],
     )
   }
 

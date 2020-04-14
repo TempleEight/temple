@@ -1,7 +1,7 @@
 package temple.generate.server
 
 import temple.ast.AbstractAttribute
-import temple.ast.Metadata.{Database, Readable, Writable}
+import temple.ast.Metadata.{Database, Metrics, Readable, Writable}
 import temple.generate.CRUD.CRUD
 
 import scala.collection.immutable.ListMap
@@ -37,4 +37,5 @@ case class ServiceRoot(
   writable: Writable,
   projectUsesAuth: Boolean,
   hasAuthBlock: Boolean,
+  metrics: Option[Metrics],
 ) extends ServiceName(name)

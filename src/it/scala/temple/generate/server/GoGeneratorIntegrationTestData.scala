@@ -2,6 +2,7 @@ package temple.generate.server
 
 import temple.ast.AbstractAttribute.Attribute
 import temple.ast.Metadata.Database.Postgres
+import temple.ast.Metadata.Metrics.Prometheus
 import temple.ast.Metadata.{Readable, Writable}
 import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
@@ -29,6 +30,7 @@ object GoGeneratorIntegrationTestData {
     writable = Writable.This,
     projectUsesAuth = true,
     hasAuthBlock = true,
+    metrics = Some(Prometheus),
   )
 
   val simpleServiceRootWithComms: ServiceRoot = ServiceRoot(
@@ -55,6 +57,7 @@ object GoGeneratorIntegrationTestData {
     writable = Writable.This,
     projectUsesAuth = true,
     hasAuthBlock = false,
+    metrics = Some(Prometheus),
   )
 
   val datetimeService: ServiceRoot = ServiceRoot(
@@ -76,6 +79,7 @@ object GoGeneratorIntegrationTestData {
     writable = Writable.This,
     projectUsesAuth = true,
     hasAuthBlock = true,
+    metrics = None,
   )
 
 }

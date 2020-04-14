@@ -58,6 +58,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       writable = Writable.All,
       projectUsesAuth = false,
       hasAuthBlock = false,
+      metrics = None,
     )
   }
 
@@ -98,6 +99,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       writable = Writable.All,
       projectUsesAuth = false,
       hasAuthBlock = false,
+      metrics = None,
     )
   }
 
@@ -149,6 +151,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       writable = Writable.All,
       projectUsesAuth = false,
       hasAuthBlock = false,
+      metrics = None,
     )
   }
 
