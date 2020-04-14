@@ -12,13 +12,11 @@ import (
 
 	"github.com/squat/and/dab/auth/comm"
 	"github.com/squat/and/dab/auth/dao"
-	"github.com/squat/and/dab/auth/metric"
 	"github.com/squat/and/dab/auth/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

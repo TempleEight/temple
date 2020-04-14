@@ -8,12 +8,10 @@ import (
 	"net/http"
 
 	"github.com/squat/and/dab/simple-temple-test-group/dao"
-	"github.com/squat/and/dab/simple-temple-test-group/metric"
 	"github.com/squat/and/dab/simple-temple-test-group/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
-	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 

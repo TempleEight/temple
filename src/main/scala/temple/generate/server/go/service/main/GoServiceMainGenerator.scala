@@ -34,14 +34,16 @@ object GoServiceMainGenerator {
         "",
         when(usesComms) { doubleQuote(s"${root.module}/comm") },
         doubleQuote(s"${root.module}/dao"),
-        when(usesMetrics) { doubleQuote(s"${root.module}/metric") },
+        // TODO: Uncomment when metrics are added to handlers
+        //when(usesMetrics) { doubleQuote(s"${root.module}/metric") },
         doubleQuote(s"${root.module}/util"),
         s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
         doubleQuote("github.com/google/uuid"),
         doubleQuote("github.com/gorilla/mux"),
         when(usesMetrics) {
           mkCode.lines(
-            doubleQuote("github.com/prometheus/client_golang/prometheus"),
+            // TODO: Uncomment when metrics are added to handlers
+            //doubleQuote("github.com/prometheus/client_golang/prometheus"),
             doubleQuote("github.com/prometheus/client_golang/prometheus/promhttp"),
           )
         },
