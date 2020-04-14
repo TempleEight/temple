@@ -104,8 +104,8 @@ type updateComplexUserResponse struct {
 	BlobField          string    `json:"blobField"`
 }
 
-// router generates a router for this service
-func (env *env) router() *mux.Router {
+// defaultRouter generates a router for this service
+func defaultRouter(env *env) *mux.Router {
 	r := mux.NewRouter()
 	// Mux directs to first matching route, i.e. the order matters
 	r.HandleFunc("/complex-user", env.createComplexUserHandler).Methods(http.MethodPost)
@@ -135,7 +135,11 @@ func main() {
 
 	env := env{d}
 
-	log.Fatal(http.ListenAndServe(":1026", env.router()))
+	// Call into non-generated entry-point
+	router := defaultRouter(&env)
+	env.setup(router)
+
+	log.Fatal(http.ListenAndServe(":1026", router))
 }
 
 func jsonMiddleware(next http.Handler) http.Handler {
