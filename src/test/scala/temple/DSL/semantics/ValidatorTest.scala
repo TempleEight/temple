@@ -9,7 +9,7 @@ import temple.ast.Annotation.{Nullable, Unique}
 import temple.ast.AttributeType._
 import temple.ast.Metadata.Endpoint.Delete
 import temple.ast.Metadata._
-import temple.ast.{Annotation, _}
+import temple.ast._
 
 class ValidatorTest extends FlatSpec with Matchers {
 
@@ -214,7 +214,7 @@ class ValidatorTest extends FlatSpec with Matchers {
     ) shouldBe Set("No such service Box referenced in #uses in User")
   }
 
-  it should "enforce the existance of an auth block when other dependent metadata are used" in {
+  it should "enforce the existence of an auth block when other dependent metadata are used" in {
     validationErrors(
       Templefile(
         "MyProject",
@@ -237,11 +237,14 @@ class ValidatorTest extends FlatSpec with Matchers {
         services = Map(
           "User" -> ServiceBlock(
             attributes = Map("a" -> Attribute(IntType())),
-            metadata = Seq(Readable.This),
+            metadata = Seq(Readable.This, Writable.This),
           ),
         ),
       ),
-    ) shouldBe Set("#readable(this) requires at least one service to have #auth in User")
+    ) shouldBe Set(
+      "#readable(this) requires at least one service to have #auth in User",
+      "#writable(this) requires at least one service to have #auth in User",
+    )
   }
 
   it should "identify incompatible metadata" in {
@@ -280,7 +283,7 @@ class ValidatorTest extends FlatSpec with Matchers {
           "Square" -> ServiceBlock(Map("user"   -> Attribute(ForeignKey("User")))),
         ),
       ),
-    ) shouldBe Set("Cycle(s) were detected in foreign keys, between elements: { Square, Cube, Box, User }")
+    ) shouldBe Set("Cycle(s) were detected in foreign keys, between elements: { Box, Cube, Square, User }")
   }
 
   it should "throw errors when validating" in {
