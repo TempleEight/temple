@@ -22,7 +22,7 @@ import scala.collection.immutable.ListMap
   * @param writable whether this service is writable by this or by all
   * @param projectUsesAuth whether or not the project uses auth
   * @param hasAuthBlock whether or not this service has an auth block
-  * @param metrics whether or not thi server has metrics, and if so, which framework is used
+  * @param metrics whether or not this service has metrics, and if so, which framework is used
   */
 case class ServiceRoot(
   override val name: String,
