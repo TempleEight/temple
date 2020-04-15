@@ -57,7 +57,6 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
     )
     openAPIFiles should have size 1
     val openAPI: String = openAPIFiles.values.head
-    println(openAPI)
     openAPI shouldBe {
       """openapi: 3.0.0
         |info:
