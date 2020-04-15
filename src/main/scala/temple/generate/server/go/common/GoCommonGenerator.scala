@@ -220,6 +220,6 @@ object GoCommonGenerator {
       .tabbedTrailingList(CodeUtils.pad(body.map { case (k, v) => (k + ":", v) }))
 
   /** Generate a status code enumeration */
-  private[go] def genHttpEnum(statusCodeEnum: GoHTTPStatus): String =
+  private[go] def genHTTPEnum(statusCodeEnum: GoHTTPStatus): String =
     s"http.$statusCodeEnum"
 }

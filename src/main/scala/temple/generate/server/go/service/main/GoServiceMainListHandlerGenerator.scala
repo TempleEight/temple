@@ -49,7 +49,7 @@ object GoServiceMainListHandlerGenerator {
     // Check error from fetching list from DAO
     val queryDAOErrorBlock = genIfErr(
       mkCode.lines(
-        generateRespondWithError(genHttpEnum(StatusInternalServerError), metricSuffix)(
+        generateRespondWithError(genHTTPEnum(StatusInternalServerError), metricSuffix)(
           "Something went wrong: %s",
           genMethodCall("err", "Error"),
         ),

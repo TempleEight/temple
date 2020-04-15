@@ -19,7 +19,7 @@ object GoServiceMainCreateHandlerGenerator {
     mkCode.lines(
       genDeclareAndAssign(genMethodCall("uuid", "NewUUID"), "uuid", "err"),
       genIfErr(
-        generateRespondWithErrorReturn(genHttpEnum(StatusInternalServerError), metricSuffix)(
+        generateRespondWithErrorReturn(genHTTPEnum(StatusInternalServerError), metricSuffix)(
           "Could not create UUID: %s",
           genMethodCall("err", "Error"),
         ),
@@ -54,7 +54,7 @@ object GoServiceMainCreateHandlerGenerator {
       ),
       when(usesMetrics) { generateMetricTimerObservation() },
       genIfErr(
-        generateRespondWithErrorReturn(genHttpEnum(StatusInternalServerError), metricSuffix)(
+        generateRespondWithErrorReturn(genHTTPEnum(StatusInternalServerError), metricSuffix)(
           "Something went wrong: %s",
           genMethodCall("err", "Error"),
         ),
