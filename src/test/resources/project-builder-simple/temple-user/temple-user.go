@@ -141,49 +141,42 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 	var req createTempleUserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 
 	if req.IntField == nil || req.DoubleField == nil || req.StringField == nil || req.BoolField == nil || req.DateField == nil || req.TimeField == nil || req.DateTimeField == nil || req.BlobField == nil {
-		errMsg := util.CreateErrorJSON("Missing request parameter(s)")
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest)
 		return
 	}
 
 	_, err = valid.ValidateStruct(req)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 
 	dateField, err := time.Parse("2006-01-02", *req.DateField)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid date string: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid date string: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 
 	timeField, err := time.Parse("15:04:05.999999999", *req.TimeField)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid time string: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid time string: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 
 	dateTimeField, err := time.Parse(time.RFC3339Nano, *req.DateTimeField)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid datetime string: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid datetime string: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 
 	uuid, err := uuid.NewUUID()
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not create UUID: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusInternalServerError)
+		respondWithError(w, fmt.Sprintf("Could not create UUID: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 
@@ -202,22 +195,21 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 	for _, hook := range env.hook.beforeCreateHooks {
 		err := (*hook)(env, req, &input)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode)
 			return
 		}
 	}
 
 	templeUser, err := env.dao.CreateTempleUser(input)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusInternalServerError)
+		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError)
 		return
 	}
 
 	for _, hook := range env.hook.afterCreateHooks {
 		err := (*hook)(env, templeUser)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode)
 			return
 		}
 	}
@@ -238,7 +230,7 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 	templeUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		respondWithError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -249,7 +241,7 @@ func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 	for _, hook := range env.hook.beforeReadHooks {
 		err := (*hook)(env, &input)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode)
 			return
 		}
 	}
@@ -258,10 +250,9 @@ func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrTempleUserNotFound:
-			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+			respondWithError(w, err.Error(), http.StatusNotFound)
 		default:
-			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
-			http.Error(w, errMsg, http.StatusInternalServerError)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -269,7 +260,7 @@ func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 	for _, hook := range env.hook.afterReadHooks {
 		err := (*hook)(env, templeUser)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode)
 			return
 		}
 	}
@@ -290,49 +281,43 @@ func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 	templeUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		respondWithError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
 	var req updateTempleUserRequest
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 
 	if req.IntField == nil || req.DoubleField == nil || req.StringField == nil || req.BoolField == nil || req.DateField == nil || req.TimeField == nil || req.DateTimeField == nil || req.BlobField == nil {
-		errMsg := util.CreateErrorJSON("Missing request parameter(s)")
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest)
 		return
 	}
 
 	_, err = valid.ValidateStruct(req)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 
 	dateField, err := time.Parse("2006-01-02", *req.DateField)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid date string: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid date string: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 
 	timeField, err := time.Parse("15:04:05.999999999", *req.TimeField)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid time string: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid time string: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 
 	dateTimeField, err := time.Parse(time.RFC3339Nano, *req.DateTimeField)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid datetime string: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid datetime string: %s", err.Error()), http.StatusBadRequest)
 		return
 	}
 
@@ -351,7 +336,7 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 	for _, hook := range env.hook.beforeUpdateHooks {
 		err := (*hook)(env, req, &input)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode)
 			return
 		}
 	}
@@ -360,10 +345,9 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrTempleUserNotFound:
-			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+			respondWithError(w, err.Error(), http.StatusNotFound)
 		default:
-			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
-			http.Error(w, errMsg, http.StatusInternalServerError)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -371,7 +355,7 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 	for _, hook := range env.hook.afterUpdateHooks {
 		err := (*hook)(env, templeUser)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode)
 			return
 		}
 	}
@@ -392,7 +376,7 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 func (env *env) deleteTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 	templeUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		respondWithError(w, err.Error(), http.StatusBadRequest)
 		return
 	}
 
@@ -403,7 +387,7 @@ func (env *env) deleteTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 	for _, hook := range env.hook.beforeDeleteHooks {
 		err := (*hook)(env, &input)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode)
 			return
 		}
 	}
@@ -412,10 +396,9 @@ func (env *env) deleteTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrTempleUserNotFound:
-			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+			respondWithError(w, err.Error(), http.StatusNotFound)
 		default:
-			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
-			http.Error(w, errMsg, http.StatusInternalServerError)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError)
 		}
 		return
 	}
@@ -423,7 +406,7 @@ func (env *env) deleteTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 	for _, hook := range env.hook.afterDeleteHooks {
 		err := (*hook)(env)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode)
 			return
 		}
 	}
