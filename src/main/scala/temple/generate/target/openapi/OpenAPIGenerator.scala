@@ -164,7 +164,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
               500 -> Response.Ref(useError(500)),
             ),
           )
-      case Identity =>
+      case Identify =>
         path(s"/$lowerName") += HTTPVerb.Get -> Handler(
             s"Look up the single $lowerName associated with the access token",
             tags = tags,

@@ -1,6 +1,6 @@
 package temple.generate.server.go.service.dao
 
-import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
+import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update, Identify}
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
@@ -19,19 +19,21 @@ object GoServiceDAOFunctionsGenerator {
       "//",
       generateDAOFunctionName(root, operation),
       operation match {
-        case List   => s"returns a list containing every ${root.decapitalizedName}"
-        case Create => s"creates a new ${root.decapitalizedName}"
-        case Read   => s"returns the ${root.decapitalizedName}"
-        case Update => s"updates the ${root.decapitalizedName}"
-        case Delete => s"deletes the ${root.decapitalizedName}"
+        case List     => s"returns a list containing every ${root.decapitalizedName}"
+        case Create   => s"creates a new ${root.decapitalizedName}"
+        case Read     => s"returns the ${root.decapitalizedName}"
+        case Update   => s"updates the ${root.decapitalizedName}"
+        case Delete   => s"deletes the ${root.decapitalizedName}"
+        case Identify => s"returns the ${root.decapitalizedName}"
       },
       "in the datastore",
       operation match {
-        case List   => when(enumeratingByCreator) { "for a given ID" }
-        case Create => s", returning the newly created ${root.decapitalizedName}"
-        case Read   => "for a given ID"
-        case Update => s"for a given ID, returning the newly updated ${root.decapitalizedName}"
-        case Delete => "for a given ID"
+        case List     => when(enumeratingByCreator) { "for a given ID" }
+        case Create   => s", returning the newly created ${root.decapitalizedName}"
+        case Read     => "for a given ID"
+        case Update   => s"for a given ID, returning the newly updated ${root.decapitalizedName}"
+        case Delete   => "for a given ID"
+        case Identify => "for a given ID"
       },
     )
 
@@ -46,10 +48,10 @@ object GoServiceDAOFunctionsGenerator {
     lazy val attributes = root.attributes.map { case name -> _ => s"$prefix.${name.capitalize}" }.toSeq
 
     operation match {
-      case List          => createdBy
-      case Create        => id ++ createdBy ++ attributes
-      case Read | Delete => id
-      case Update        => attributes ++ id
+      case List                     => createdBy
+      case Create                   => id ++ createdBy ++ attributes
+      case Read | Delete | Identify => id
+      case Update                   => attributes ++ id
     }
   }
 
@@ -73,16 +75,16 @@ object GoServiceDAOFunctionsGenerator {
 
   private def generateQueryBlock(root: ServiceRoot, operation: CRUD, query: String): String = {
     val identifiers = operation match {
-      case List                   => Seq("rows", "err")
-      case Create | Read | Update => Seq("row")
-      case Delete                 => Seq("rowsAffected", "err")
+      case List                              => Seq("rows", "err")
+      case Create | Read | Update | Identify => Seq("row")
+      case Delete                            => Seq("rowsAffected", "err")
     }
 
     val value = genFunctionCall(
       operation match {
-        case List                   => "executeQueryWithRowResponses"
-        case Create | Read | Update => "executeQueryWithRowResponse"
-        case Delete                 => "executeQuery"
+        case List                              => "executeQueryWithRowResponses"
+        case Create | Read | Update | Identify => "executeQueryWithRowResponse"
+        case Delete                            => "executeQuery"
       },
       "dao.DB",
       doubleQuote(query),
@@ -156,19 +158,18 @@ object GoServiceDAOFunctionsGenerator {
   private def generateScanBlock(root: ServiceRoot, operation: CRUD): Option[String] = {
     val scanFunctionCall = generateScan(root)
     operation match {
-      case List =>
-        Some(generateListScanBlock(root, scanFunctionCall))
-      case Create        => Some(generateCreateScanBlock(root, scanFunctionCall))
-      case Read | Update => Some(generateReadUpdateScanBlock(root, scanFunctionCall))
-      case Delete        => None
+      case List                     => Some(generateListScanBlock(root, scanFunctionCall))
+      case Create                   => Some(generateCreateScanBlock(root, scanFunctionCall))
+      case Read | Update | Identify => Some(generateReadUpdateScanBlock(root, scanFunctionCall))
+      case Delete                   => None
     }
   }
 
   private def generateReturnExprs(root: ServiceRoot, operation: CRUD): Seq[String] =
     operation match {
-      case List                   => Seq(s"&${root.decapitalizedName}List", "nil")
-      case Create | Read | Update => Seq(s"&${root.decapitalizedName}", "nil")
-      case Delete                 => Seq("nil")
+      case List                              => Seq(s"&${root.decapitalizedName}List", "nil")
+      case Create | Read | Update | Identify => Seq(s"&${root.decapitalizedName}", "nil")
+      case Delete                            => Seq("nil")
     }
 
   private def generateDAOFunction(

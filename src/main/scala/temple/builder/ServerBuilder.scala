@@ -15,7 +15,7 @@ import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server._
 import temple.utils.StringUtils
 
-import scala.collection.immutable.{ListMap, SortedMap}
+import scala.collection.immutable.{ListMap, SortedMap, SortedSet}
 
 object ServerBuilder {
 
@@ -23,7 +23,7 @@ object ServerBuilder {
     serviceName: String,
     serviceBlock: AbstractServiceBlock,
     port: Int,
-    endpoints: Set[CRUD],
+    endpoints: SortedSet[CRUD],
     detail: LanguageDetail,
     projectUsesAuth: Boolean,
   ): ServiceRoot = {

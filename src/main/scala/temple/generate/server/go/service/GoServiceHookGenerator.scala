@@ -18,7 +18,7 @@ object GoServiceHookGenerator {
         case Readable.All =>
           s"func(env *env) *HookError"
       }
-    case op @ (CRUD.Read | CRUD.Delete) =>
+    case op @ (CRUD.Read | CRUD.Delete | CRUD.Identify) =>
       s"func(env *env, input *dao.${op.toString}${root.name}Input) *HookError"
     case op @ (CRUD.Create | CRUD.Update) =>
       if (root.requestAttributes.isEmpty)
@@ -31,7 +31,7 @@ object GoServiceHookGenerator {
   private def generateAfterHookType(root: ServiceRoot, operation: CRUD): String = operation match {
     case CRUD.List =>
       s"func(env *env, ${root.decapitalizedName}List *[]dao.${root.name}) *HookError"
-    case CRUD.Create | CRUD.Read | CRUD.Update =>
+    case CRUD.Create | CRUD.Read | CRUD.Update | CRUD.Identify =>
       s"func(env *env, ${root.decapitalizedName} *dao.${root.name}) *HookError"
     case CRUD.Delete =>
       "func(env *env) *HookError"
