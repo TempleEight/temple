@@ -3,7 +3,7 @@ package temple.builder
 import temple.ast.AbstractAttribute.{CreatedByAttribute, IDAttribute}
 import temple.ast.Annotation.Nullable
 import temple.ast._
-import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
+import temple.generate.CRUD._
 import temple.generate.database.ast.ColumnConstraint.Check
 import temple.generate.database.ast.Condition.PreparedComparison
 import temple.generate.database.ast.Expression.PreparedValue
@@ -100,6 +100,12 @@ object DatabaseBuilder {
             condition = when(readable == Metadata.Readable.This) {
               PreparedComparison("created_by", ComparisonOperator.Equal)
             },
+          )
+        case Identify =>
+          Identify -> Statement.Read(
+            tableName,
+            columns = columns,
+            condition = Some(PreparedComparison(selectionAttribute, ComparisonOperator.Equal)),
           )
       }
       .to(SortedMap)

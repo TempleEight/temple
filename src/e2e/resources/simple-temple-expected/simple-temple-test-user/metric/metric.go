@@ -6,10 +6,11 @@ import (
 )
 
 var (
-	RequestList   = "list"
-	RequestCreate = "create"
-	RequestRead   = "read"
-	RequestUpdate = "update"
+	RequestList     = "list"
+	RequestCreate   = "create"
+	RequestRead     = "read"
+	RequestUpdate   = "update"
+	RequestIdentify = "identify"
 
 	RequestSuccess = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "simpletempletestuser_request_success_total",
