@@ -18,6 +18,7 @@ type BaseDatastore interface {
 	CreateSimpleTempleTestUser(input CreateSimpleTempleTestUserInput) (*SimpleTempleTestUser, error)
 	ReadSimpleTempleTestUser(input ReadSimpleTempleTestUserInput) (*SimpleTempleTestUser, error)
 	UpdateSimpleTempleTestUser(input UpdateSimpleTempleTestUserInput) (*SimpleTempleTestUser, error)
+	IdentifySimpleTempleTestUser(input IdentifySimpleTempleTestUserInput) (*SimpleTempleTestUser, error)
 }
 
 // DAO encapsulates access to the datastore
@@ -73,6 +74,11 @@ type UpdateSimpleTempleTestUserInput struct {
 	CurrentBankBalance   float32
 	BirthDate            time.Time
 	BreakfastTime        time.Time
+}
+
+// IdentifySimpleTempleTestUserInput encapsulates the information required to identify the current simpleTempleTestUser in the datastore
+type IdentifySimpleTempleTestUserInput struct {
+	ID uuid.UUID
 }
 
 // Init opens the datastore connection, returning a DAO
@@ -153,6 +159,24 @@ func (dao *DAO) ReadSimpleTempleTestUser(input ReadSimpleTempleTestUserInput) (*
 // UpdateSimpleTempleTestUser updates the simpleTempleTestUser in the datastore for a given ID, returning the newly updated simpleTempleTestUser
 func (dao *DAO) UpdateSimpleTempleTestUser(input UpdateSimpleTempleTestUserInput) (*SimpleTempleTestUser, error) {
 	row := executeQueryWithRowResponse(dao.DB, "UPDATE simple_temple_test_user SET simple_temple_test_user = $1, email = $2, first_name = $3, last_name = $4, created_at = $5, number_of_dogs = $6, yeets = $7, current_bank_balance = $8, birth_date = $9, breakfast_time = $10 WHERE id = $11 RETURNING id, simple_temple_test_user, email, first_name, last_name, created_at, number_of_dogs, yeets, current_bank_balance, birth_date, breakfast_time;", input.SimpleTempleTestUser, input.Email, input.FirstName, input.LastName, input.CreatedAt, input.NumberOfDogs, input.Yeets, input.CurrentBankBalance, input.BirthDate, input.BreakfastTime, input.ID)
+
+	var simpleTempleTestUser SimpleTempleTestUser
+	err := row.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrSimpleTempleTestUserNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
+	return &simpleTempleTestUser, nil
+}
+
+// IdentifySimpleTempleTestUser returns the simpleTempleTestUser in the datastore for a given ID
+func (dao *DAO) IdentifySimpleTempleTestUser(input IdentifySimpleTempleTestUserInput) (*SimpleTempleTestUser, error) {
+	row := executeQueryWithRowResponse(dao.DB, "SELECT id, simple_temple_test_user, email, first_name, last_name, created_at, number_of_dogs, yeets, current_bank_balance, birth_date, breakfast_time FROM simple_temple_test_user WHERE id = $1;", input.ID)
 
 	var simpleTempleTestUser SimpleTempleTestUser
 	err := row.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)

@@ -117,6 +117,7 @@ func defaultRouter(env *env) *mux.Router {
 	r.HandleFunc("/complex-user/{id}", env.readComplexUserHandler).Methods(http.MethodGet)
 	r.HandleFunc("/complex-user/{id}", env.updateComplexUserHandler).Methods(http.MethodPut)
 	r.HandleFunc("/complex-user/{id}", env.deleteComplexUserHandler).Methods(http.MethodDelete)
+	r.HandleFunc("/complex-user", env.identifyComplexUserHandler).Methods(http.MethodGet)
 	r.Use(jsonMiddleware)
 	return r
 }
@@ -516,4 +517,8 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 	json.NewEncoder(w).Encode(struct{}{})
 
 	metric.RequestSuccess.WithLabelValues(metric.RequestDelete).Inc()
+}
+
+func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Request) {
+
 }

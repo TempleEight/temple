@@ -18,6 +18,7 @@ type BaseDatastore interface {
 	ReadComplexUser(input ReadComplexUserInput) (*ComplexUser, error)
 	UpdateComplexUser(input UpdateComplexUserInput) (*ComplexUser, error)
 	DeleteComplexUser(input DeleteComplexUserInput) error
+	IdentifyComplexUser(input IdentifyComplexUserInput) (*ComplexUser, error)
 }
 
 // DAO encapsulates access to the datastore
@@ -83,6 +84,11 @@ type UpdateComplexUserInput struct {
 
 // DeleteComplexUserInput encapsulates the information required to delete a single complexUser in the datastore
 type DeleteComplexUserInput struct {
+	ID uuid.UUID
+}
+
+// IdentifyComplexUserInput encapsulates the information required to identify the current complexUser in the datastore
+type IdentifyComplexUserInput struct {
 	ID uuid.UUID
 }
 
@@ -169,4 +175,22 @@ func (dao *DAO) DeleteComplexUser(input DeleteComplexUserInput) error {
 	}
 
 	return nil
+}
+
+// IdentifyComplexUser returns the complexUser in the datastore for a given ID
+func (dao *DAO) IdentifyComplexUser(input IdentifyComplexUserInput) (*ComplexUser, error) {
+	row := executeQueryWithRowResponse(dao.DB, "SELECT id, small_int_field, int_field, big_int_field, float_field, double_field, string_field, bounded_string_field, bool_field, date_field, time_field, date_time_field, blob_field FROM complex_user WHERE id = $1;", input.ID)
+
+	var complexUser ComplexUser
+	err := row.Scan(&complexUser.ID, &complexUser.SmallIntField, &complexUser.IntField, &complexUser.BigIntField, &complexUser.FloatField, &complexUser.DoubleField, &complexUser.StringField, &complexUser.BoundedStringField, &complexUser.BoolField, &complexUser.DateField, &complexUser.TimeField, &complexUser.DateTimeField, &complexUser.BlobField)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrComplexUserNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
+	return &complexUser, nil
 }

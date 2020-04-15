@@ -5,14 +5,16 @@ import "github.com/squat/and/dab/simple-temple-test-user/dao"
 // Hook allows additional code to be executed before and after every datastore interaction
 // Hooks are executed in the order they are defined, such that if any hook errors, future hooks are not executed and the request is terminated
 type Hook struct {
-	beforeListHooks   []*func(env *env) *HookError
-	beforeCreateHooks []*func(env *env, req createSimpleTempleTestUserRequest, input *dao.CreateSimpleTempleTestUserInput) *HookError
-	beforeReadHooks   []*func(env *env, input *dao.ReadSimpleTempleTestUserInput) *HookError
-	beforeUpdateHooks []*func(env *env, req updateSimpleTempleTestUserRequest, input *dao.UpdateSimpleTempleTestUserInput) *HookError
-	afterListHooks    []*func(env *env, simpleTempleTestUserList *[]dao.SimpleTempleTestUser) *HookError
-	afterCreateHooks  []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
-	afterReadHooks    []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
-	afterUpdateHooks  []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
+	beforeListHooks     []*func(env *env) *HookError
+	beforeCreateHooks   []*func(env *env, req createSimpleTempleTestUserRequest, input *dao.CreateSimpleTempleTestUserInput) *HookError
+	beforeReadHooks     []*func(env *env, input *dao.ReadSimpleTempleTestUserInput) *HookError
+	beforeUpdateHooks   []*func(env *env, req updateSimpleTempleTestUserRequest, input *dao.UpdateSimpleTempleTestUserInput) *HookError
+	beforeIdentifyHooks []*func(env *env, input *dao.IdentifySimpleTempleTestUserInput) *HookError
+	afterListHooks      []*func(env *env, simpleTempleTestUserList *[]dao.SimpleTempleTestUser) *HookError
+	afterCreateHooks    []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
+	afterReadHooks      []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
+	afterUpdateHooks    []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
+	afterIdentifyHooks  []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
 }
 
 // HookError wraps an existing error with HTTP status code
@@ -45,6 +47,11 @@ func (h *Hook) BeforeUpdate(hook func(env *env, req updateSimpleTempleTestUserRe
 	h.beforeUpdateHooks = append(h.beforeUpdateHooks, &hook)
 }
 
+// BeforeIdentify adds a new hook to be executed before identifying an object in the datastore
+func (h *Hook) BeforeIdentify(hook func(env *env, input *dao.IdentifySimpleTempleTestUserInput) *HookError) {
+	h.beforeIdentifyHooks = append(h.beforeIdentifyHooks, &hook)
+}
+
 // AfterList adds a new hook to be executed after listing the objects in the datastore
 func (h *Hook) AfterList(hook func(env *env, simpleTempleTestUserList *[]dao.SimpleTempleTestUser) *HookError) {
 	h.afterListHooks = append(h.afterListHooks, &hook)
@@ -63,4 +70,9 @@ func (h *Hook) AfterRead(hook func(env *env, simpleTempleTestUser *dao.SimpleTem
 // AfterUpdate adds a new hook to be executed after updating an object in the datastore
 func (h *Hook) AfterUpdate(hook func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError) {
 	h.afterUpdateHooks = append(h.afterUpdateHooks, &hook)
+}
+
+// AfterIdentify adds a new hook to be executed after identifying an object in the datastore
+func (h *Hook) AfterIdentify(hook func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError) {
+	h.afterIdentifyHooks = append(h.afterIdentifyHooks, &hook)
 }
