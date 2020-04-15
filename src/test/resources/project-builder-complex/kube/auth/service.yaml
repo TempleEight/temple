@@ -10,6 +10,9 @@ spec:
   - name: api
     port: 1024
     targetPort: 1024
+  - name: prom
+    port: 1025
+    targetPort: 1025
   selector:
     app: auth
     kind: service

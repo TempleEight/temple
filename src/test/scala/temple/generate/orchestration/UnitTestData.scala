@@ -1,5 +1,6 @@
 package temple.generate.orchestration
 
+import temple.ast.Templefile.Ports
 import temple.generate.orchestration.ast.OrchestrationType.{DbStorage, OrchestrationRoot, Service}
 import temple.generate.orchestration.kube.ast.LifecycleCommand
 import temple.utils.FileUtils
@@ -10,7 +11,7 @@ object UnitTestData {
     name = "user",
     image = "localhost:5000/temple-user-service",
     dbImage = "postgres:12.1",
-    ports = Seq("api" -> 80),
+    ports = Ports(80, 81),
     replicas = 1,
     secretName = "regcred",
     appEnvVars = Seq(),
@@ -105,4 +106,13 @@ object UnitTestData {
   val userDeployScriptWithMetrics: String = FileUtils.readResources("shell/deploy.sh")
 
   val userDeployScriptWithoutMetrics: String = FileUtils.readResources("shell/deploy-without-metrics.sh")
+
+  val userGrafanaDeployment: String = FileUtils.readResources("kube/user-grafana-deployment.yaml")
+
+  val userGrafanaService: String = FileUtils.readResources("project-builder-complex/kube/grafana/grafana-service.yaml")
+
+  val userPromDeployment: String =
+    FileUtils.readResources("project-builder-complex/kube/prom/prometheus-deployment.yaml")
+
+  val userPromService: String = FileUtils.readResources("project-builder-complex/kube/prom/prometheus-service.yaml")
 }

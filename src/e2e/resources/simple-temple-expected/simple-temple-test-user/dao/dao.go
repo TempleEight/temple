@@ -95,6 +95,30 @@ func executeQueryWithRowResponse(db *sql.DB, query string, args ...interface{}) 
 	return db.QueryRow(query, args...)
 }
 
+// ListSimpleTempleTestUser returns a list containing every simpleTempleTestUser in the datastore
+func (dao *DAO) ListSimpleTempleTestUser() (*[]SimpleTempleTestUser, error) {
+	rows, err := executeQueryWithRowResponses(dao.DB, "SELECT id, simple_temple_test_user, email, first_name, last_name, created_at, number_of_dogs, yeets, current_bank_balance, birth_date, breakfast_time FROM simple_temple_test_user;")
+	if err != nil {
+		return nil, err
+	}
+
+	simpleTempleTestUserList := make([]SimpleTempleTestUser, 0)
+	for rows.Next() {
+		var simpleTempleTestUser SimpleTempleTestUser
+		err = rows.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
+		if err != nil {
+			return nil, err
+		}
+		simpleTempleTestUserList = append(simpleTempleTestUserList, simpleTempleTestUser)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	return &simpleTempleTestUserList, nil
+}
+
 // CreateSimpleTempleTestUser creates a new simpleTempleTestUser in the datastore, returning the newly created simpleTempleTestUser
 func (dao *DAO) CreateSimpleTempleTestUser(input CreateSimpleTempleTestUserInput) (*SimpleTempleTestUser, error) {
 	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO simple_temple_test_user (id, simple_temple_test_user, email, first_name, last_name, created_at, number_of_dogs, yeets, current_bank_balance, birth_date, breakfast_time) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11) RETURNING id, simple_temple_test_user, email, first_name, last_name, created_at, number_of_dogs, yeets, current_bank_balance, birth_date, breakfast_time;", input.ID, input.SimpleTempleTestUser, input.Email, input.FirstName, input.LastName, input.CreatedAt, input.NumberOfDogs, input.Yeets, input.CurrentBankBalance, input.BirthDate, input.BreakfastTime)
@@ -142,28 +166,4 @@ func (dao *DAO) UpdateSimpleTempleTestUser(input UpdateSimpleTempleTestUserInput
 	}
 
 	return &simpleTempleTestUser, nil
-}
-
-// ListSimpleTempleTestUser returns a list containing every simpleTempleTestUser in the datastore
-func (dao *DAO) ListSimpleTempleTestUser() (*[]SimpleTempleTestUser, error) {
-	rows, err := executeQueryWithRowResponses(dao.DB, "SELECT id, simple_temple_test_user, email, first_name, last_name, created_at, number_of_dogs, yeets, current_bank_balance, birth_date, breakfast_time FROM simple_temple_test_user;")
-	if err != nil {
-		return nil, err
-	}
-
-	simpleTempleTestUserList := make([]SimpleTempleTestUser, 0)
-	for rows.Next() {
-		var simpleTempleTestUser SimpleTempleTestUser
-		err = rows.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
-		if err != nil {
-			return nil, err
-		}
-		simpleTempleTestUserList = append(simpleTempleTestUserList, simpleTempleTestUser)
-	}
-	err = rows.Err()
-	if err != nil {
-		return nil, err
-	}
-
-	return &simpleTempleTestUserList, nil
 }

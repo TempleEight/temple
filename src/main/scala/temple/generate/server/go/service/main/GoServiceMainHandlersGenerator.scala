@@ -4,7 +4,7 @@ import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
 import temple.ast.Metadata.Readable
 import temple.ast.{AbstractAttribute, AttributeType}
 import temple.generate.CRUD._
-import temple.generate.server.ServiceRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus._
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.main.GoServiceMainCreateHandlerGenerator.generateCreateHandler
@@ -184,7 +184,6 @@ object GoServiceMainHandlersGenerator {
 
   /** Generate the checking that incoming request parameters are not nil */
   private[main] def generateRequestNilCheck(
-    root: ServiceRoot,
     clientAttributes: ListMap[String, AbstractAttribute],
     metricSuffix: Option[String],
   ): String =
@@ -248,13 +247,9 @@ object GoServiceMainHandlersGenerator {
     )
 
   /** Generate the blocks for checking foreign keys against other services */
-  private[main] def generateForeignKeyCheckBlocks(
-    root: ServiceRoot,
-    clientAttributes: ListMap[String, AbstractAttribute],
-    metricSuffix: Option[String],
-  ): String =
+  private[main] def generateForeignKeyCheckBlocks(root: ServiceRoot, metricSuffix: Option[String]): String =
     mkCode.doubleLines(
-      clientAttributes.map {
+      root.requestAttributes.map {
         case name -> attribute =>
           attribute.attributeType match {
             case AttributeType.ForeignKey(reference) =>
@@ -349,7 +344,6 @@ object GoServiceMainHandlersGenerator {
 
   private[main] def generateInvokeBeforeHookBlock(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, AbstractAttribute],
     operation: CRUD,
     metricSuffix: Option[String],
   ): String = {
@@ -360,7 +354,7 @@ object GoServiceMainHandlersGenerator {
           case Readable.All  => Seq("env")
         }
       case Create | Update =>
-        if (clientAttributes.isEmpty) Seq("env", "&input") else Seq("env", "req", "&input")
+        if (root.requestAttributes.isEmpty) Seq("env", "&input") else Seq("env", "req", "&input")
       case Read | Delete =>
         Seq("env", "&input")
     }
@@ -414,8 +408,6 @@ object GoServiceMainHandlersGenerator {
   /** Generate the env handler functions */
   private[service] def generateHandlers(
     root: ServiceRoot,
-    operations: Set[CRUD],
-    clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     enumeratingByCreator: Boolean,
     usesMetrics: Boolean,
@@ -424,19 +416,19 @@ object GoServiceMainHandlersGenerator {
 
     // Whether or not the client attributes contain attributes of type date, time or datetime
     val clientUsesTime = Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateTimeType)
-      .intersect(clientAttributes.values.map(_.attributeType).toSet)
+      .intersect(root.requestAttributes.values.map(_.attributeType).toSet)
       .nonEmpty
 
     mkCode.doubleLines(
-      operations.toSeq.sorted.map {
+      root.operations.toSeq.map {
         case List =>
           generateListHandler(root, responseMap, enumeratingByCreator, usesMetrics)
         case Create =>
-          generateCreateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime, usesMetrics)
+          generateCreateHandler(root, usesComms, responseMap, clientUsesTime, usesMetrics)
         case Read =>
           generateReadHandler(root, responseMap, usesMetrics)
         case Update =>
-          generateUpdateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime, usesMetrics)
+          generateUpdateHandler(root, usesComms, responseMap, clientUsesTime, usesMetrics)
         case Delete =>
           generateDeleteHandler(root, usesMetrics)
       },

@@ -2,7 +2,7 @@ package temple.generate.server.go.service.main
 
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD.Read
-import temple.generate.server.ServiceRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainGenerator.{generateDAOReadCall, generateDAOReadInput}
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
@@ -16,7 +16,7 @@ object GoServiceMainReadHandlerGenerator {
   private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean, metricSuffix: Option[String]): String =
     mkCode.doubleLines(
       generateDAOReadInput(root),
-      generateInvokeBeforeHookBlock(root, ListMap(), Read, metricSuffix),
+      generateInvokeBeforeHookBlock(root, Read, metricSuffix),
       mkCode.lines(
         when(usesMetrics) { generateMetricTimerDecl(Read.toString) },
         generateDAOReadCall(root),

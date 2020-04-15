@@ -1,10 +1,11 @@
 package temple.generate.server.go.service.dao
 
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.server.go.service.dao.GoServiceDAOInterfaceGenerator.generateInterfaceFunction
-import temple.generate.server.{CreatedByAttribute, ServiceRoot}
+import temple.generate.server.CreatedByAttribute
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
 
