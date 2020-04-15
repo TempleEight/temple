@@ -132,6 +132,14 @@ func (env *env) createSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
+	for _, hook := range env.hook.afterCreateHooks {
+		err := (*hook)(env, simpleTempleTestGroup)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(createSimpleTempleTestGroupResponse{
 		ID: simpleTempleTestGroup.ID,
 	})
@@ -193,6 +201,14 @@ func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
+	for _, hook := range env.hook.afterReadHooks {
+		err := (*hook)(env, simpleTempleTestGroup)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(readSimpleTempleTestGroupResponse{
 		ID: simpleTempleTestGroup.ID,
 	})
@@ -252,6 +268,14 @@ func (env *env) deleteSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 			http.Error(w, errMsg, http.StatusInternalServerError)
 		}
 		return
+	}
+
+	for _, hook := range env.hook.afterDeleteHooks {
+		err := (*hook)(env)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(struct{}{})

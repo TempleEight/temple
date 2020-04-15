@@ -132,6 +132,8 @@ object ProjectBuilder {
       case (_, service) => service.lookupLocalMetadata[ServiceAuth].nonEmpty
     }
 
+    val metrics = templefile.lookupMetadata[Metrics]
+
     var serverFiles = templefile.providedServicesWithPorts.flatMap {
       case (name, service, port) =>
         val serviceRoot =
@@ -146,7 +148,7 @@ object ProjectBuilder {
         }.toMap
 
         val configFileContents =
-          ServerConfigGenerator.generate(serviceRoot.kebabName, serviceRoot.datastore, serviceComms, port)
+          ServerConfigGenerator.generate(serviceRoot.kebabName, serviceRoot.datastore, serviceComms, port, metrics)
 
         serverFiles + (File(serviceRoot.kebabName, "config.json") -> configFileContents)
     }
@@ -162,6 +164,7 @@ object ProjectBuilder {
               Database.Postgres,
               Map("kong-admin" -> "http://kong:8001"),
               Ports(ProjectConfig.authPort, ProjectConfig.authMetricPort),
+              metrics,
             )
           serverFiles = serverFiles ++ (GoAuthServiceGenerator.generate(authRoot) + (File("auth", "config.json") -> configFileContents))
       }
