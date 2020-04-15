@@ -57,6 +57,7 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
     )
     openAPIFiles should have size 1
     val openAPI: String = openAPIFiles.values.head
+    println(openAPI)
     openAPI shouldBe {
       """openapi: 3.0.0
         |info:
@@ -178,6 +179,20 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |          $ref: '#/components/responses/Error401'
         |        '500':
         |          $ref: '#/components/responses/Error500'
+        |    get:
+        |      summary: Look up the single match associated with the access token
+        |      tags:
+        |      - Match
+        |      responses:
+        |        '302':
+        |          description: The single match is accessible from the provided Location
+        |          headers:
+        |            Location:
+        |              description: The location where the single match can be found
+        |              schema:
+        |                type: string
+        |        '404':
+        |          $ref: '#/components/responses/Error404'
         |  /match/{id}:
         |    parameters:
         |    - in: path
