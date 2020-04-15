@@ -1,6 +1,7 @@
 package temple
 
 import java.nio.file.{Files, Paths}
+import java.util.function.Predicate
 
 import org.scalatest.Matchers
 import temple.containers.EndpointTesterSpec
@@ -15,9 +16,13 @@ class EndpointIntegrationTest extends EndpointTesterSpec with Matchers {
   }
 
   it should "correctly generate the example Templefiles" in {
-    Files.list(Paths.get("examples")).map(path => path.toString).forEach { (path: String) =>
-      val templefile = FileUtils.readFile(path)
-      noException should be thrownBy buildAndTestEndpoints(templefile)
-    }
+    Files
+      .list(Paths.get("examples"))
+      .map(path => path.toString)
+      .filter((path: String) => path.endsWith(".temple"))
+      .forEach { (path: String) =>
+        val templefile = FileUtils.readFile(path)
+        noException should be thrownBy buildAndTestEndpoints(templefile)
+      }
   }
 }
