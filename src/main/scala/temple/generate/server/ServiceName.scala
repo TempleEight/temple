@@ -15,15 +15,8 @@ object ServiceName {
   def apply(name: String): ServiceName = BareName(name)
 
   private case class BareName(name: String) extends ServiceName {
-    if (!name.head.isUpper) {
-      throw new SemanticParsingException(s"ServiceRoot name ($name) must be capitalized")
-    }
+    if (!name.head.isUpper) throw new SemanticParsingException(s"ServiceRoot name ($name) must be capitalized")
 
     override def toString: String = s"ServiceName($name)"
-
-    override def equals(obj: Any): Boolean = obj match {
-      case that: ServiceName => this.name == that.name
-      case _                 => false
-    }
   }
 }
