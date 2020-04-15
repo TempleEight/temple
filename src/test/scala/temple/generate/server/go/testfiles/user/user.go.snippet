@@ -118,29 +118,25 @@ func respondWithError(w http.ResponseWriter, err string, statusCode int, request
 func (env *env) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusUnauthorized)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestCreate)
 		return
 	}
 
 	var req createUserRequest
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
 	if req.Name == nil {
-		errMsg := util.CreateErrorJSON("Missing request parameter(s)")
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
 	_, err = valid.ValidateStruct(req)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
@@ -152,7 +148,7 @@ func (env *env) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	for _, hook := range env.hook.beforeCreateHooks {
 		err := (*hook)(env, req, &input)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
 		}
 	}
@@ -161,15 +157,14 @@ func (env *env) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	user, err := env.dao.CreateUser(input)
 	timer.ObserveDuration()
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusInternalServerError)
+		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreate)
 		return
 	}
 
 	for _, hook := range env.hook.afterCreateHooks {
 		err := (*hook)(env, user)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
 		}
 	}
@@ -185,14 +180,13 @@ func (env *env) createUserHandler(w http.ResponseWriter, r *http.Request) {
 func (env *env) readUserHandler(w http.ResponseWriter, r *http.Request) {
 	_, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusUnauthorized)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestRead)
 		return
 	}
 
 	userID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestRead)
 		return
 	}
 
@@ -203,7 +197,7 @@ func (env *env) readUserHandler(w http.ResponseWriter, r *http.Request) {
 	for _, hook := range env.hook.beforeReadHooks {
 		err := (*hook)(env, &input)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
 		}
 	}
@@ -214,10 +208,9 @@ func (env *env) readUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrUserNotFound:
-			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestRead)
 		default:
-			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
-			http.Error(w, errMsg, http.StatusInternalServerError)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestRead)
 		}
 		return
 	}
@@ -225,7 +218,7 @@ func (env *env) readUserHandler(w http.ResponseWriter, r *http.Request) {
 	for _, hook := range env.hook.afterReadHooks {
 		err := (*hook)(env, user)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
 		}
 	}
@@ -241,41 +234,36 @@ func (env *env) readUserHandler(w http.ResponseWriter, r *http.Request) {
 func (env *env) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusUnauthorized)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestUpdate)
 		return
 	}
 
 	userID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	if auth.ID != userID {
-		errMsg := util.CreateErrorJSON("Unauthorized")
-		http.Error(w, errMsg, http.StatusUnauthorized)
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestUpdate)
 		return
 	}
 
 	var req updateUserRequest
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	if req.Name == nil {
-		errMsg := util.CreateErrorJSON("Missing request parameter(s)")
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	_, err = valid.ValidateStruct(req)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Invalid request parameters: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusBadRequest)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
@@ -287,7 +275,7 @@ func (env *env) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	for _, hook := range env.hook.beforeUpdateHooks {
 		err := (*hook)(env, req, &input)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
 			return
 		}
 	}
@@ -298,10 +286,9 @@ func (env *env) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrUserNotFound:
-			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestUpdate)
 		default:
-			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
-			http.Error(w, errMsg, http.StatusInternalServerError)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdate)
 		}
 		return
 	}
@@ -309,7 +296,7 @@ func (env *env) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	for _, hook := range env.hook.afterUpdateHooks {
 		err := (*hook)(env, user)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
 			return
 		}
 	}
@@ -325,20 +312,18 @@ func (env *env) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 func (env *env) deleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not authorize request: %s", err.Error()))
-		http.Error(w, errMsg, http.StatusUnauthorized)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestDelete)
 		return
 	}
 
 	userID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusBadRequest)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestDelete)
 		return
 	}
 
 	if auth.ID != userID {
-		errMsg := util.CreateErrorJSON("Unauthorized")
-		http.Error(w, errMsg, http.StatusUnauthorized)
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDelete)
 		return
 	}
 
@@ -349,7 +334,7 @@ func (env *env) deleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	for _, hook := range env.hook.beforeDeleteHooks {
 		err := (*hook)(env, &input)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
 			return
 		}
 	}
@@ -360,10 +345,9 @@ func (env *env) deleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrUserNotFound:
-			http.Error(w, util.CreateErrorJSON(err.Error()), http.StatusNotFound)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestDelete)
 		default:
-			errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
-			http.Error(w, errMsg, http.StatusInternalServerError)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDelete)
 		}
 		return
 	}
@@ -371,7 +355,7 @@ func (env *env) deleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	for _, hook := range env.hook.afterDeleteHooks {
 		err := (*hook)(env)
 		if err != nil {
-			// TODO
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
 			return
 		}
 	}

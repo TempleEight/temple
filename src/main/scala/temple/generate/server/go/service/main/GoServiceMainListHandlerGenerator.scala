@@ -21,6 +21,7 @@ object GoServiceMainListHandlerGenerator {
     enumeratingByCreator: Boolean,
     usesMetrics: Boolean,
   ): String = {
+    val metricSuffix = when(usesMetrics) { List.toString }
     val queryDAOInputBlock = when(enumeratingByCreator) {
       genDeclareAndAssign(
         genPopulateStruct(
@@ -48,8 +49,7 @@ object GoServiceMainListHandlerGenerator {
     // Check error from fetching list from DAO
     val queryDAOErrorBlock = genIfErr(
       mkCode.lines(
-        generateHTTPError(
-          StatusInternalServerError,
+        generateRespondWithError(genHttpEnum(StatusInternalServerError), metricSuffix)(
           "Something went wrong: %s",
           genMethodCall("err", "Error"),
         ),
@@ -85,17 +85,17 @@ object GoServiceMainListHandlerGenerator {
       generateHandlerDecl(root, List),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(enumeratingByCreator) { generateExtractAuthBlock(usesVar = true) },
+          when(enumeratingByCreator) { generateExtractAuthBlock(usesVar = true, metricSuffix) },
           mkCode.doubleLines(
             queryDAOInputBlock,
-            generateInvokeBeforeHookBlock(root, ListMap(), List),
+            generateInvokeBeforeHookBlock(root, ListMap(), List, metricSuffix),
             mkCode.lines(
               when(usesMetrics) { generateMetricTimerDecl(List.toString) },
               queryDAOBlock,
               when(usesMetrics) { generateMetricTimerObservation() },
               queryDAOErrorBlock,
             ),
-            generateInvokeAfterHookBlock(root, List),
+            generateInvokeAfterHookBlock(root, List, metricSuffix),
           ),
           instantiateResponseBlock,
           mapResponseBlock,

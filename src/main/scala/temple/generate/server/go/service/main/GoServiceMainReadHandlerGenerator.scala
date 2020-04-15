@@ -13,17 +13,17 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainReadHandlerGenerator {
 
-  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
+  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean, metricSuffix: Option[String]): String =
     mkCode.doubleLines(
       generateDAOReadInput(root),
-      generateInvokeBeforeHookBlock(root, ListMap(), Read),
+      generateInvokeBeforeHookBlock(root, ListMap(), Read, metricSuffix),
       mkCode.lines(
         when(usesMetrics) { generateMetricTimerDecl(Read.toString) },
         generateDAOReadCall(root),
         when(usesMetrics) { generateMetricTimerObservation() },
-        generateDAOCallErrorBlock(root),
+        generateDAOCallErrorBlock(root, metricSuffix),
       ),
-      generateInvokeAfterHookBlock(root, Read),
+      generateInvokeAfterHookBlock(root, Read, metricSuffix),
     )
 
   /** Generate the read handler function */
@@ -31,18 +31,20 @@ object GoServiceMainReadHandlerGenerator {
     root: ServiceRoot,
     responseMap: ListMap[String, String],
     usesMetrics: Boolean,
-  ): String =
+  ): String = {
+    val metricSuffix = when(usesMetrics) { Read.toString }
     mkCode(
       generateHandlerDecl(root, Read),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(root.projectUsesAuth) { generateExtractAuthBlock(root.readable == Readable.This) },
-          generateExtractIDBlock(root.decapitalizedName),
-          when(root.readable == Readable.This) { generateCheckAuthorizationBlock(root) },
-          generateDAOCallBlock(root, usesMetrics),
+          when(root.projectUsesAuth) { generateExtractAuthBlock(root.readable == Readable.This, metricSuffix) },
+          generateExtractIDBlock(root.decapitalizedName, metricSuffix),
+          when(root.readable == Readable.This) { generateCheckAuthorizationBlock(root, metricSuffix) },
+          generateDAOCallBlock(root, usesMetrics, metricSuffix),
           generateJSONResponse(s"read${root.name}", responseMap),
           when(usesMetrics) { generateMetricSuccess(Read.toString) },
         ),
       ),
     )
+  }
 }

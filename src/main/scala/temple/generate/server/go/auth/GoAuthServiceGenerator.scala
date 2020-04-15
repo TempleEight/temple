@@ -24,7 +24,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoCommonMainGenerator
           .generateMain(ServiceName("Auth"), root.port, usesComms = true, isAuth = true, usesMetrics),
         GoCommonMainGenerator.generateJsonMiddleware(),
-        GoCommonMainGenerator.generateRespondWithError(usesMetrics),
+        GoCommonMainGenerator.generateRespondWithErrorFunc(usesMetrics),
         GoAuthServiceMainGenerator.generateHandlers(usesMetrics),
         GoAuthServiceMainGenerator.generateCreateToken(),
       ),

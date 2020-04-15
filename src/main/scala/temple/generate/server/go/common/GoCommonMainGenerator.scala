@@ -148,7 +148,7 @@ object GoCommonMainGenerator {
   private[go] def generateMetricSuccess(metricSuffix: String): String =
     genMethodCall(genMethodCall("metric.RequestSuccess", "WithLabelValues", s"metric.Request$metricSuffix"), "Inc")
 
-  private[go] def generateRespondWithError(usesMetrics: Boolean): String = {
+  private[go] def generateRespondWithErrorFunc(usesMetrics: Boolean): String = {
     val args = Seq("w http.ResponseWriter", "err string", "statusCode int") ++ when(usesMetrics) {
         "requestType string"
       }

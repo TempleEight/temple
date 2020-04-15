@@ -48,46 +48,30 @@ object GoServiceMainHandlersGenerator {
   private[main] def generateHandlerDecl(root: ServiceRoot, operation: CRUD): String =
     s"func (env *env) ${operation.toString.toLowerCase}${root.name}Handler(w http.ResponseWriter, r *http.Request)"
 
-  /** Generate a errMsg declaration and http.Error call */
-  private[main] def generateHTTPError(statusCodeEnum: GoHTTPStatus, errMsg: String, errMsgArgs: String*): String = {
-    val createErrorJSONargs =
+  /** Generate a respond with error call */
+  private[main] def generateRespondWithError(
+    statusCode: String,
+    metricSuffix: Option[String],
+  )(errMsg: String, errMsgArgs: String*): String = {
+    val errMsgString =
       if (errMsgArgs.nonEmpty) genMethodCall("fmt", "Sprintf", doubleQuote(errMsg), errMsgArgs)
-      else doubleQuote(errMsg)
-
-    mkCode.lines(
-      genDeclareAndAssign(
-        genMethodCall(
-          "util",
-          "CreateErrorJSON",
-          createErrorJSONargs,
-        ),
-        "errMsg",
-      ),
-      genMethodCall("http", "Error", "w", "errMsg", s"http.$statusCodeEnum"),
+      else errMsg
+    genFunctionCall(
+      "respondWithError",
+      "w",
+      errMsgString,
+      statusCode,
+      metricSuffix.map(suffix => s"metric.Request$suffix"),
     )
   }
 
-  /** Generate HTTP error and return */
-  private[main] def generateHTTPErrorReturn(statusCodeEnum: GoHTTPStatus, errMsg: String, errMsgArgs: String*): String =
+  /** Generate respond with error call and return */
+  private[main] def generateRespondWithErrorReturn(statusCode: String, metricSuffix: Option[String])(
+    errMsg: String,
+    errMsgArgs: String*,
+  ): String =
     mkCode.lines(
-      generateHTTPError(statusCodeEnum, errMsg, errMsgArgs: _*),
-      genReturn(),
-    )
-
-  /** Generate one line http.Error call */
-  private[main] def generateOneLineHTTPError(statusCodeEnum: GoHTTPStatus): String =
-    genMethodCall(
-      "http",
-      "Error",
-      "w",
-      genMethodCall("util", "CreateErrorJSON", genMethodCall("err", "Error")),
-      s"http.$statusCodeEnum",
-    )
-
-  /** Generate one line http.Error call and return */
-  private[main] def generateOneLineHTTPErrorReturn(statusCodeEnum: GoHTTPStatus): String =
-    mkCode.lines(
-      generateOneLineHTTPError(statusCodeEnum),
+      generateRespondWithError(statusCode, metricSuffix)(errMsg, errMsgArgs: _*),
       genReturn(),
     )
 
@@ -97,7 +81,7 @@ object GoServiceMainHandlersGenerator {
     * @param usesVar indicates whether to assign the auth to a variable, i.e. "auth" | "_"
     * @return extract auth block string
     */
-  private[main] def generateExtractAuthBlock(usesVar: Boolean): String =
+  private[main] def generateExtractAuthBlock(usesVar: Boolean, metricSuffix: Option[String]): String =
     mkCode.lines(
       genDeclareAndAssign(
         genMethodCall("util", "ExtractAuthIDFromRequest", "r.Header"),
@@ -105,8 +89,7 @@ object GoServiceMainHandlersGenerator {
         "err",
       ),
       genIfErr(
-        generateHTTPErrorReturn(
-          StatusUnauthorized,
+        generateRespondWithErrorReturn(genHttpEnum(StatusUnauthorized), metricSuffix)(
           "Could not authorize request: %s",
           genMethodCall("err", "Error"),
         ),
@@ -114,22 +97,27 @@ object GoServiceMainHandlersGenerator {
     )
 
   /** Generate the block for extracting and ID from the request URL */
-  private[main] def generateExtractIDBlock(varPrefix: String): String =
+  private[main] def generateExtractIDBlock(varPrefix: String, metricSuffix: Option[String]): String =
     mkCode.lines(
       genDeclareAndAssign(
         genMethodCall("util", "ExtractIDFromRequest", genMethodCall("mux", "Vars", "r")),
         s"${varPrefix}ID",
         "err",
       ),
-      genIfErr(generateOneLineHTTPErrorReturn(StatusBadRequest)),
+      genIfErr(
+        generateRespondWithErrorReturn(genHttpEnum(StatusBadRequest), metricSuffix)(genMethodCall("err", "Error")),
+      ),
     )
 
   /** Generate the block for checking if a request is authorized to perform operation  */
-  private[main] def generateCheckAuthorizationBlock(root: ServiceRoot): String =
+  private[main] def generateCheckAuthorizationBlock(root: ServiceRoot, metricSuffix: Option[String]): String =
     // If the service has an auth block, we can simply check the AuthID is the same as the resource ID being requested
     if (root.hasAuthBlock) {
       mkCode.lines(
-        genIf(s"auth.ID != ${root.decapitalizedName}ID", generateHTTPErrorReturn(StatusUnauthorized, "Unauthorized")),
+        genIf(
+          s"auth.ID != ${root.decapitalizedName}ID",
+          generateRespondWithErrorReturn(genHttpEnum(StatusUnauthorized), metricSuffix)(doubleQuote("Unauthorized")),
+        ),
       )
     } else {
       mkCode.lines(
@@ -141,16 +129,31 @@ object GoServiceMainHandlersGenerator {
         genIfErr(
           genSwitchReturn(
             "err.(type)",
-            ListMap(s"dao.Err${root.name}NotFound" -> generateHTTPError(StatusUnauthorized, "Unauthorized")),
-            generateHTTPError(StatusInternalServerError, "Something went wrong: %s", genMethodCall("err", "Error")),
+            ListMap(
+              s"dao.Err${root.name}NotFound" -> generateRespondWithError(genHttpEnum(StatusUnauthorized), metricSuffix)(
+                doubleQuote("Unauthorized"),
+              ),
+            ),
+            generateRespondWithError(genHttpEnum(StatusInternalServerError), metricSuffix)(
+              "Something went wrong: %s",
+              genMethodCall("err", "Error"),
+            ),
           ),
         ),
-        genIf("!authorized", generateHTTPErrorReturn(StatusUnauthorized, "Unauthorized")),
+        genIf(
+          "!authorized",
+          generateRespondWithErrorReturn(genHttpEnum(StatusUnauthorized), metricSuffix)(doubleQuote("Unauthorized")),
+        ),
       )
     }
 
   /** Generate the block for decoding an incoming request JSON into a request object */
-  private[main] def generateDecodeRequestBlock(root: ServiceRoot, op: CRUD, typePrefix: String): String = {
+  private[main] def generateDecodeRequestBlock(
+    root: ServiceRoot,
+    op: CRUD,
+    typePrefix: String,
+    metricSuffix: Option[String],
+  ): String = {
     val jsonDecodeCall = genMethodCall(genMethodCall("json", "NewDecoder", "r.Body"), "Decode", "&req")
     mkCode.lines(
       genVar("req", s"${typePrefix}Request"),
@@ -159,7 +162,10 @@ object GoServiceMainHandlersGenerator {
         genAssign(jsonDecodeCall, "err")
       },
       genIfErr(
-        generateHTTPErrorReturn(StatusBadRequest, "Invalid request parameters: %s", genMethodCall("err", "Error")),
+        generateRespondWithErrorReturn(genHttpEnum(StatusBadRequest), metricSuffix)(
+          "Invalid request parameters: %s",
+          genMethodCall("err", "Error"),
+        ),
       ),
     )
   }
@@ -168,22 +174,33 @@ object GoServiceMainHandlersGenerator {
   private[main] def generateRequestNilCheck(
     root: ServiceRoot,
     clientAttributes: ListMap[String, AbstractAttribute],
+    metricSuffix: Option[String],
   ): String =
     genIf(
       clientAttributes.map { case name -> _ => s"req.${name.capitalize} == nil" }.mkString(" || "),
-      generateHTTPErrorReturn(StatusBadRequest, "Missing request parameter(s)"),
-    )
-
-  /** Generate the block for validating the request object */
-  private[main] def generateValidateStructBlock(): String =
-    mkCode.lines(
-      genAssign(genMethodCall("valid", "ValidateStruct", "req"), "_", "err"),
-      genIfErr(
-        generateHTTPErrorReturn(StatusBadRequest, "Invalid request parameters: %s", genMethodCall("err", "Error")),
+      generateRespondWithErrorReturn(genHttpEnum(StatusBadRequest), metricSuffix)(
+        doubleQuote("Missing request parameter(s)"),
       ),
     )
 
-  private def generateForeignKeyCheckBlock(root: ServiceRoot, name: String, reference: String): String =
+  /** Generate the block for validating the request object */
+  private[main] def generateValidateStructBlock(metricSuffix: Option[String]): String =
+    mkCode.lines(
+      genAssign(genMethodCall("valid", "ValidateStruct", "req"), "_", "err"),
+      genIfErr(
+        generateRespondWithErrorReturn(genHttpEnum(StatusBadRequest), metricSuffix)(
+          "Invalid request parameters: %s",
+          genMethodCall("err", "Error"),
+        ),
+      ),
+    )
+
+  private def generateForeignKeyCheckBlock(
+    root: ServiceRoot,
+    name: String,
+    reference: String,
+    metricSuffix: Option[String],
+  ): String =
     mkCode.lines(
       genDeclareAndAssign(
         genMethodCall(
@@ -196,16 +213,14 @@ object GoServiceMainHandlersGenerator {
         "err",
       ),
       genIfErr(
-        generateHTTPErrorReturn(
-          StatusInternalServerError,
+        generateRespondWithErrorReturn(genHttpEnum(StatusInternalServerError), metricSuffix)(
           s"Unable to reach ${decapitalize(reference)} service: %s",
           genMethodCall("err", "Error"),
         ),
       ),
       genIf(
         s"!${name}Valid",
-        generateHTTPErrorReturn(
-          StatusBadRequest,
+        generateRespondWithErrorReturn(genHttpEnum(StatusBadRequest), metricSuffix)(
           s"Unknown $reference: %s",
           genMethodCall(s"req.${name.capitalize}", "String"),
         ),
@@ -216,18 +231,20 @@ object GoServiceMainHandlersGenerator {
   private[main] def generateForeignKeyCheckBlocks(
     root: ServiceRoot,
     clientAttributes: ListMap[String, AbstractAttribute],
+    metricSuffix: Option[String],
   ): String =
     mkCode.doubleLines(
       clientAttributes.map {
         case name -> attribute =>
           attribute.attributeType match {
-            case AttributeType.ForeignKey(reference) => generateForeignKeyCheckBlock(root, name, reference)
-            case _                                   => ""
+            case AttributeType.ForeignKey(reference) =>
+              generateForeignKeyCheckBlock(root, name, reference, metricSuffix)
+            case _ => ""
           }
       },
     )
 
-  private def generateParseTimeBlock(name: String, attributeType: AttributeType): String =
+  private def generateParseTimeBlock(name: String, attributeType: AttributeType, metricSuffix: Option[String]): String =
     mkCode.lines(
       genDeclareAndAssign(
         genMethodCall(
@@ -245,8 +262,7 @@ object GoServiceMainHandlersGenerator {
         "err",
       ),
       genIfErr(
-        generateHTTPErrorReturn(
-          StatusBadRequest,
+        generateRespondWithErrorReturn(genHttpEnum(StatusBadRequest), metricSuffix)(
           s"Invalid ${attributeType match {
             case DateType     => "date"
             case TimeType     => "time"
@@ -259,12 +275,15 @@ object GoServiceMainHandlersGenerator {
     )
 
   /** Generate the blocks for parsing attributes of type date, time or datetime */
-  private[main] def generateParseTimeBlocks(clientAttributes: ListMap[String, AbstractAttribute]): String =
+  private[main] def generateParseTimeBlocks(
+    clientAttributes: ListMap[String, AbstractAttribute],
+    metricSuffix: Option[String],
+  ): String =
     mkCode.doubleLines(
       clientAttributes.collect {
         case name -> attr
             if attr.attributeType == DateType || attr.attributeType == TimeType || attr.attributeType == DateTimeType =>
-          generateParseTimeBlock(name, attr.attributeType)
+          generateParseTimeBlock(name, attr.attributeType, metricSuffix)
       },
     )
 
@@ -286,12 +305,19 @@ object GoServiceMainHandlersGenerator {
     }
 
   /** Generate DAO call block error handling for Read, Update and Delete */
-  private[main] def generateDAOCallErrorBlock(root: ServiceRoot): String =
+  private[main] def generateDAOCallErrorBlock(root: ServiceRoot, metricSuffix: Option[String]): String =
     genIfErr(
       genSwitchReturn(
         "err.(type)",
-        ListMap(s"dao.Err${root.name}NotFound" -> generateOneLineHTTPError(StatusNotFound)),
-        generateHTTPError(StatusInternalServerError, "Something went wrong: %s", genMethodCall("err", "Error")),
+        ListMap(
+          s"dao.Err${root.name}NotFound" -> generateRespondWithError(genHttpEnum(StatusNotFound), metricSuffix)(
+            genMethodCall("err", "Error"),
+          ),
+        ),
+        generateRespondWithError(genHttpEnum(StatusInternalServerError), metricSuffix)(
+          "Something went wrong: %s",
+          genMethodCall("err", "Error"),
+        ),
       ),
     )
 
@@ -299,6 +325,7 @@ object GoServiceMainHandlersGenerator {
     root: ServiceRoot,
     clientAttributes: ListMap[String, AbstractAttribute],
     operation: CRUD,
+    metricSuffix: Option[String],
   ): String = {
     val hookArguments: Seq[String] = operation match {
       case List =>
@@ -319,8 +346,7 @@ object GoServiceMainHandlersGenerator {
           genFunctionCall("(*hook)", hookArguments),
           "err",
         ),
-        // TODO: replace with `respondWithError` call
-        genIfErr(mkCode.lines("// TODO", genReturn())),
+        genIfErr(generateRespondWithErrorReturn("err.statusCode", metricSuffix)(genMethodCall("err", "Error"))),
       ),
     )
   }
@@ -328,6 +354,7 @@ object GoServiceMainHandlersGenerator {
   private[main] def generateInvokeAfterHookBlock(
     root: ServiceRoot,
     operation: CRUD,
+    metricSuffix: Option[String],
   ): String = {
     val hookArguments = operation match {
       case List =>
@@ -345,8 +372,7 @@ object GoServiceMainHandlersGenerator {
           genFunctionCall("(*hook)", hookArguments),
           "err",
         ),
-        // TODO: replace with `respondWithError` call
-        genIfErr(mkCode.lines("// TODO", genReturn())),
+        genIfErr(generateRespondWithErrorReturn("err.statusCode", metricSuffix)(genMethodCall("err", "Error"))),
       ),
     )
   }
