@@ -1,6 +1,7 @@
 package temple.generate.server
 
 import temple.ast.Metadata.Metrics
+import temple.generate.server.AbstractAttributesRoot.AbstractServiceRoot
 
 /**
   * ServiceRoot encapsulates all the information needed to generate an auth service
@@ -14,11 +15,13 @@ import temple.ast.Metadata.Metrics
   * @param metrics whether or not this auth service has metrics, and if so, which framework is used
   */
 case class AuthServiceRoot(
-  module: String,
-  port: Int,
+  override val module: String,
+  override val port: Int,
   authAttribute: AuthAttribute,
-  idAttribute: IDAttribute,
+  override val idAttribute: IDAttribute,
   createQuery: String,
   readQuery: String,
-  metrics: Option[Metrics],
-)
+  override val metrics: Option[Metrics],
+) extends AbstractServiceRoot {
+  override def name: String = "Auth"
+}

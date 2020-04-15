@@ -1,7 +1,7 @@
 package temple.generate.server.go.service.main
 
 import temple.generate.CRUD.List
-import temple.generate.server.ServiceRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._
@@ -88,7 +88,7 @@ object GoServiceMainListHandlerGenerator {
           when(enumeratingByCreator) { generateExtractAuthBlock(usesVar = true) },
           mkCode.doubleLines(
             queryDAOInputBlock,
-            generateInvokeBeforeHookBlock(root, ListMap(), List),
+            generateInvokeBeforeHookBlock(root, List),
             mkCode.lines(
               when(usesMetrics) { generateMetricTimerDecl(List.toString) },
               queryDAOBlock,

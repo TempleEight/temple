@@ -2,7 +2,7 @@ package temple.generate.server.go.service.main
 
 import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Delete
-import temple.generate.server.ServiceRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
@@ -44,7 +44,7 @@ object GoServiceMainDeleteHandlerGenerator {
           generateExtractIDBlock(root.decapitalizedName),
           when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root) },
           generateDAOInput(root),
-          generateInvokeBeforeHookBlock(root, ListMap(), Delete),
+          generateInvokeBeforeHookBlock(root, Delete),
           generateDAOCallBlock(root, usesMetrics),
           generateInvokeAfterHookBlock(root, Delete),
           genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", "struct{}{}"),
