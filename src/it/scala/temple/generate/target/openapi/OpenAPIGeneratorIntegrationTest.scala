@@ -3,7 +3,7 @@ package temple.generate.target.openapi
 import org.scalatest.Matchers
 import temple.ast.AbstractAttribute.Attribute
 import temple.ast.Annotation
-import temple.ast.AttributeType.{BlobType, BoolType, DateTimeType, DateType, FloatType, ForeignKey, IntType, StringType, TimeType}
+import temple.ast.AttributeType._
 import temple.containers.SwaggerSpec
 import temple.generate.CRUD
 import temple.generate.target.openapi.ast.{OpenAPIRoot, Service}
