@@ -5,7 +5,8 @@ import temple.generate.CRUD.Create
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
 import temple.generate.server.go.common.GoCommonGenerator._
-import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.{generateHandlerDecl, _}
+import temple.generate.server.go.common.GoCommonMainGenerator._
+import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
 import scala.Option.when
@@ -36,8 +37,9 @@ object GoServiceMainCreateHandlerGenerator {
     )
   }
 
-  private def generateDAOCallBlock(root: ServiceRoot): String =
+  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
     mkCode.lines(
+      when(usesMetrics) { generateMetricTimerDecl(Create.toString) },
       genDeclareAndAssign(
         genMethodCall(
           "env.dao",
@@ -47,6 +49,7 @@ object GoServiceMainCreateHandlerGenerator {
         root.decapitalizedName,
         "err",
       ),
+      when(usesMetrics) { generateMetricTimerObservation() },
       genIfErr(
         generateHTTPErrorReturn(
           StatusInternalServerError,
@@ -63,6 +66,7 @@ object GoServiceMainCreateHandlerGenerator {
     usesComms: Boolean,
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
+    usesMetrics: Boolean,
   ): String =
     mkCode(
       generateHandlerDecl(root, Create),
@@ -82,9 +86,10 @@ object GoServiceMainCreateHandlerGenerator {
           when(!root.hasAuthBlock) { generateNewUUIDBlock() },
           generateDAOInput(root, clientAttributes),
           generateInvokeBeforeHookBlock(root, clientAttributes, Create),
-          generateDAOCallBlock(root),
+          generateDAOCallBlock(root, usesMetrics),
           generateInvokeAfterHookBlock(root, Create),
           generateJSONResponse(s"create${root.name}", responseMap),
+          when(usesMetrics) { generateMetricSuccess(Create.toString) },
         ),
       ),
     )
