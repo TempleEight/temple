@@ -147,4 +147,33 @@ object GoCommonMainGenerator {
   /** Generate the metric call to log a successful request */
   private[go] def generateMetricSuccess(metricSuffix: String): String =
     genMethodCall(genMethodCall("metric.RequestSuccess", "WithLabelValues", s"metric.Request$metricSuffix"), "Inc")
+
+  private[go] def generateRespondWithError(usesMetrics: Boolean): String = {
+    val args = Seq("w http.ResponseWriter", "err string", "statusCode int") ++ when(usesMetrics) {
+        "requestType string"
+      }
+    mkCode.lines(
+      "// respondWithError responds to a HTTP request with a JSON error response",
+      genFunc(
+        "respondWithError",
+        args,
+        funcReturn = None,
+        mkCode.lines(
+          genMethodCall("w", "WriteHeader", "statusCode"),
+          genMethodCall("fmt", "Fprintln", "w", genMethodCall("util", "CreateErrorJSON", "err")),
+          when(usesMetrics) {
+            genMethodCall(
+              genMethodCall(
+                "metric.RequestFailure",
+                "WithLabelValues",
+                "requestType",
+                genMethodCall("strconv", "Itoa", "statusCode"),
+              ),
+              "Inc",
+            )
+          },
+        ),
+      ),
+    )
+  }
 }

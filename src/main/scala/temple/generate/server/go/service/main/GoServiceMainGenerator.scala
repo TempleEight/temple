@@ -30,6 +30,7 @@ object GoServiceMainGenerator {
         doubleQuote("fmt"),
         doubleQuote("log"),
         doubleQuote("net/http"),
+        when(usesMetrics) { doubleQuote("strconv") },
         when(usesTime) { doubleQuote("time") },
         "",
         when(usesComms) { doubleQuote(s"${root.module}/comm") },
