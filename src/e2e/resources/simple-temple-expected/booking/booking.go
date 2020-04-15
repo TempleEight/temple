@@ -8,10 +8,12 @@ import (
 	"net/http"
 
 	"github.com/squat/and/dab/booking/dao"
+	"github.com/squat/and/dab/booking/metric"
 	"github.com/squat/and/dab/booking/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -125,7 +127,9 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreate))
 	booking, err := env.dao.CreateBooking(input)
+	timer.ObserveDuration()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
@@ -143,6 +147,8 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(createBookingResponse{
 		ID: booking.ID,
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreate).Inc()
 }
 
 func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
@@ -189,7 +195,9 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRead))
 	booking, err := env.dao.ReadBooking(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrBookingNotFound:
@@ -212,6 +220,8 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 	json.NewEncoder(w).Encode(readBookingResponse{
 		ID: booking.ID,
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestRead).Inc()
 }
 
 func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
@@ -258,7 +268,9 @@ func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDelete))
 	err = env.dao.DeleteBooking(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrBookingNotFound:
@@ -279,4 +291,6 @@ func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(struct{}{})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestDelete).Inc()
 }

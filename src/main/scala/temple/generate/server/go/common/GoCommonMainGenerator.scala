@@ -1,6 +1,6 @@
 package temple.generate.server.go.common
 
-import temple.generate.server.{ServiceName, ServiceRoot}
+import temple.generate.server.ServiceName
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
@@ -128,4 +128,23 @@ object GoCommonMainGenerator {
         ),
       ),
     )
+
+  /** Generate the metric timer declaration, ready to measure the duration of a DAO call */
+  private[go] def generateMetricTimerDecl(metricSuffix: String): String =
+    genDeclareAndAssign(
+      genMethodCall(
+        "prometheus",
+        "NewTimer",
+        genMethodCall("metric.DatabaseRequestDuration", "WithLabelValues", s"metric.Request$metricSuffix"),
+      ),
+      "timer",
+    )
+
+  /** Generate the metric timer observation, to log the duration of a DAO call */
+  private[go] def generateMetricTimerObservation(): String =
+    genMethodCall("timer", "ObserveDuration")
+
+  /** Generate the metric call to log a successful request */
+  private[go] def generateMetricSuccess(metricSuffix: String): String =
+    genMethodCall(genMethodCall("metric.RequestSuccess", "WithLabelValues", s"metric.Request$metricSuffix"), "Inc")
 }

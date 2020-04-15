@@ -62,7 +62,7 @@ object GoServiceGenerator extends ServiceGenerator {
           GoServiceMainGenerator.generateCheckAuthorization(root)
         },
         GoServiceMainHandlersGenerator
-          .generateHandlers(root, operations, clientAttributes, usesComms, enumeratingByCreator),
+          .generateHandlers(root, operations, clientAttributes, usesComms, enumeratingByCreator, usesMetrics),
       ),
       File(root.kebabName, "setup.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),

@@ -17,8 +17,7 @@ object GoAuthServiceMainGenerator {
     val customImports = mkCode.lines(
       doubleQuote(s"${root.module}/comm"),
       doubleQuote(s"${root.module}/dao"),
-      // TODO: Uncomment when metrics are added to handlers
-      //when(usesMetrics) { doubleQuote(s"${root.module}/metric") },
+      when(usesMetrics) { doubleQuote(s"${root.module}/metric") },
       doubleQuote(s"${root.module}/util"),
       s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
       doubleQuote("github.com/dgrijalva/jwt-go"),
@@ -26,8 +25,7 @@ object GoAuthServiceMainGenerator {
       doubleQuote("github.com/gorilla/mux"),
       when(usesMetrics) {
         mkCode.lines(
-          // TODO: Uncomment when metrics are added to handlers
-          //doubleQuote("github.com/prometheus/client_golang/prometheus"),
+          doubleQuote("github.com/prometheus/client_golang/prometheus"),
           doubleQuote("github.com/prometheus/client_golang/prometheus/promhttp"),
         )
       },

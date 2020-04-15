@@ -2,7 +2,7 @@ package temple.generate.server.go.service.main
 
 import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
 import temple.ast.Metadata.Readable
-import temple.ast.{AbstractAttribute, Annotation, AttributeType}
+import temple.ast.{AbstractAttribute, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus._
@@ -285,7 +285,7 @@ object GoServiceMainHandlersGenerator {
         )
     }
 
-  /** Generate DAO call block error handling for Read, Update and Delete*/
+  /** Generate DAO call block error handling for Read, Update and Delete */
   private[main] def generateDAOCallErrorBlock(root: ServiceRoot): String =
     genIfErr(
       genSwitchReturn(
@@ -366,6 +366,7 @@ object GoServiceMainHandlersGenerator {
     clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     enumeratingByCreator: Boolean,
+    usesMetrics: Boolean,
   ): String = {
     val responseMap = generateResponseMap(root)
 
@@ -376,11 +377,16 @@ object GoServiceMainHandlersGenerator {
 
     mkCode.doubleLines(
       operations.toSeq.sorted.map {
-        case List   => generateListHandler(root, responseMap, enumeratingByCreator)
-        case Create => generateCreateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime)
-        case Read   => generateReadHandler(root, responseMap)
-        case Update => generateUpdateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime)
-        case Delete => generateDeleteHandler(root)
+        case List =>
+          generateListHandler(root, responseMap, enumeratingByCreator, usesMetrics)
+        case Create =>
+          generateCreateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime, usesMetrics)
+        case Read =>
+          generateReadHandler(root, responseMap, usesMetrics)
+        case Update =>
+          generateUpdateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime, usesMetrics)
+        case Delete =>
+          generateDeleteHandler(root, usesMetrics)
       },
     )
   }
