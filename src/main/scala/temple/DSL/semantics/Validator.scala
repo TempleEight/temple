@@ -5,6 +5,7 @@ import temple.ast.AbstractAttribute.{Attribute, CreatedByAttribute, IDAttribute}
 import temple.ast.AbstractServiceBlock._
 import temple.ast.Annotation.Nullable
 import temple.ast.AttributeType._
+import temple.ast.Metadata.ServiceAuth
 import temple.ast.{Metadata, _}
 import temple.builder.project.ProjectConfig
 import temple.utils.MonadUtils.FromEither
@@ -33,7 +34,7 @@ private class Validator private (templefile: Templefile) {
     // Keep a set of names that have been used already
     val takenNames: mutable.Set[String] = block.attributes.keys.to(mutable.Set)
 
-    val usesCreatedBy: Boolean = templefile.usesAuth && block.lookupLocalMetadata[Metadata.ServiceAuth].isEmpty
+    val usesCreatedBy: Boolean = templefile.usesAuth && !block.hasMetadata(Metadata.ServiceAuth)
 
     val implicitAttributes: ListMap[String, AbstractAttribute] = ListMap("id" -> IDAttribute) ++ when(usesCreatedBy) {
         "created_by" -> CreatedByAttribute
@@ -136,14 +137,21 @@ private class Validator private (templefile: Templefile) {
       case _: Metadata.TargetLanguage  => assertUnique[Metadata.TargetLanguage]()
       case _: Metadata.ServiceLanguage => assertUnique[Metadata.ServiceLanguage]()
       case _: Metadata.Database        => assertUnique[Metadata.Database]()
-      case _: Metadata.ServiceAuth     => assertUnique[Metadata.ServiceAuth]()
+      case _: Metadata.AuthMethod =>
+        if (templefile.services.valuesIterator.forall { _.lookupLocalMetadata[ServiceAuth].isEmpty }) {
+          errors += context.errorMessage(s"#authMethod requires at least one block to have #auth declared")
+        }
+        assertUnique[Metadata.AuthMethod]()
+      case _: Metadata.ServiceAuth if !templefile.usesAuth =>
+        errors += context.errorMessage(s"#auth requires an #authMethod to be declared for the project")
+      case _: Metadata.ServiceAuth => assertUnique[Metadata.ServiceAuth]()
       case Metadata.Readable.This if !templefile.usesAuth =>
-        errors += context.errorMessage(s"#readable(this) requires at least one service to have #auth")
+        errors += context.errorMessage(s"#readable(this) requires an #authMethod to be declared for the project")
       case _: Metadata.Readable => assertUnique[Metadata.Readable]()
       case Metadata.Writable.All if metadata contains Metadata.Readable.This =>
         errors += context.errorMessage(s"#writable(all) is not compatible with #readable(this)")
       case Metadata.Writable.This if !templefile.usesAuth =>
-        errors += context.errorMessage(s"#writable(this) requires at least one service to have #auth")
+        errors += context.errorMessage(s"#writable(this) requires an #authMethod to be declared for the project")
       case _: Metadata.Writable       => assertUnique[Metadata.Writable]()
       case Metadata.Omit(_)           => assertUnique[Metadata.Omit]()
       case Metadata.ServiceEnumerable => assertUnique[Metadata.ServiceEnumerable]()

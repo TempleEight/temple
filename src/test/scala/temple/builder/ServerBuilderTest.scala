@@ -4,7 +4,7 @@ import org.scalatest.{FlatSpec, Matchers}
 import temple.ast.AbstractAttribute.Attribute
 import temple.ast.AttributeType
 import temple.ast.AttributeType._
-import temple.ast.Metadata.{Database, Readable, ServiceAuth, Writable}
+import temple.ast.Metadata.{AuthMethod, Database, Readable, ServiceAuth, Writable}
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
 import temple.generate.server.AttributesRoot.ServiceRoot
@@ -166,7 +166,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
     authServiceRoot shouldBe AuthServiceRoot(
       "github.com/squat/and/dab/auth",
       1000,
-      AuthAttribute(ServiceAuth.Email, AttributeType.StringType()),
+      AuthAttribute(AuthMethod.Email, AttributeType.StringType()),
       IDAttribute("id"),
       "INSERT INTO auth (id, email, password) VALUES ($1, $2, $3) RETURNING id, email, password;",
       "SELECT id, email, password FROM auth WHERE email = $1;",

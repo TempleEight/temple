@@ -59,8 +59,14 @@ object GoServiceGenerator extends ServiceGenerator {
         when((root.readable == Readable.This || root.writable == Writable.This) && !root.hasAuthBlock) {
           GoServiceMainGenerator.generateCheckAuthorization(root)
         },
-        GoServiceMainHandlersGenerator
-          .generateHandlers(root, root.operations, root.requestAttributes, usesComms, enumeratingByCreator),
+        GoServiceMainHandlersGenerator.generateHandlers(
+          root,
+          root.operations,
+          root.requestAttributes,
+          usesComms,
+          enumeratingByCreator,
+          usesMetrics,
+        ),
       ),
       File(root.kebabName, "setup.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),

@@ -45,9 +45,11 @@ object GoAuthServiceDAOGenerator {
     )
 
   private[auth] def generateStructs(root: AuthServiceRoot): String = {
-    val id       = ListMap(root.idAttribute.name.toUpperCase           -> generateGoType(AttributeType.UUIDType))
-    val auth     = ListMap(root.authAttribute.authType.name.capitalize -> generateGoType(root.authAttribute.attributeType))
-    val password = ListMap("Password"                                  -> "string")
+    val id = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(AttributeType.UUIDType))
+    val auth = ListMap(
+      root.authAttribute.authMethod.name.capitalize -> generateGoType(root.authAttribute.attributeType),
+    )
+    val password = ListMap("Password" -> "string")
     mkCode.lines(
       "// Auth encapsulates the object stored in the datastore",
       genStruct("Auth", id ++ auth ++ password),
@@ -73,7 +75,7 @@ object GoAuthServiceDAOGenerator {
         "dao.DB",
         doubleQuote(root.createQuery),
         s"input.${root.idAttribute.name.toUpperCase}",
-        s"input.${root.authAttribute.authType.name.capitalize}",
+        s"input.${root.authAttribute.authMethod.name.capitalize}",
         s"input.Password",
       ),
       "row",
@@ -118,7 +120,7 @@ object GoAuthServiceDAOGenerator {
         "executeQueryWithRowResponse",
         "dao.DB",
         doubleQuote(root.readQuery),
-        s"input.${root.authAttribute.authType.name.capitalize}",
+        s"input.${root.authAttribute.authMethod.name.capitalize}",
       ),
       "row",
     )
@@ -133,7 +135,7 @@ object GoAuthServiceDAOGenerator {
     )
 
     mkCode.lines(
-      s"// ReadAuth returns the auth in the datastore for a given ${root.authAttribute.authType.name}",
+      s"// ReadAuth returns the auth in the datastore for a given ${root.authAttribute.authMethod.name}",
       mkCode(
         "func (dao *DAO) ReadAuth(input ReadAuthInput) (*Auth, error)",
         CodeWrap.curly.tabbed(
@@ -151,7 +153,7 @@ object GoAuthServiceDAOGenerator {
     val scanFunctionCall = genFunctionCall(
       "Scan",
       s"&auth.${root.idAttribute.name.toUpperCase}",
-      s"&auth.${root.authAttribute.authType.name.capitalize}",
+      s"&auth.${root.authAttribute.authMethod.name.capitalize}",
       s"&auth.Password",
     )
     mkCode.doubleLines(
@@ -166,7 +168,7 @@ object GoAuthServiceDAOGenerator {
       "",
       s"import ${doubleQuote("errors")}",
       "",
-      s"// ErrAuthNotFound is returned when the provided ${root.authAttribute.authType.name} was not found",
+      s"// ErrAuthNotFound is returned when the provided ${root.authAttribute.authMethod.name} was not found",
       s"var ErrAuthNotFound = errors.New(${doubleQuote("auth not found")})",
       "",
       "// ErrDuplicateAuth is returned when an auth already exists",

@@ -304,7 +304,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
               Entry.Attribute("id", syntax.AttributeType.Primitive("int")),
               Entry.Metadata("enumerable"),
               Entry.Metadata("uses", Args(kwargs = Seq("services" -> ListArg(Seq(TokenArg("Box")))))),
-              Entry.Metadata("auth", Args(Seq(TokenArg("email")))),
+              Entry.Metadata("auth"),
             ),
           ),
           DSLRootItem("Box", "service", Seq()),

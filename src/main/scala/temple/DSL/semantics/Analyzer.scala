@@ -160,7 +160,7 @@ object Analyzer {
     registerEmptyKeyword("enumerable")(ServiceEnumerable)
     registerKeywordWithContext("readable", "by", TokenArgType)(Readable)
     registerKeywordWithContext("writable", "by", TokenArgType)(Writable)
-    registerKeywordWithContext("auth", "type", TokenArgType)(ServiceAuth)
+    registerEmptyKeyword("auth")(ServiceAuth)
     registerKeyword("uses", "services", ListArgType(TokenArgType))(Uses)
     registerKeywordWithContext("omit", "endpoints", ListArgType(TokenArgType))(Omit)
   }
@@ -179,6 +179,7 @@ object Analyzer {
     registerKeywordWithContext("database", TokenArgType)(Database)
     registerKeywordWithContext("provider", TokenArgType)(Provider)
     registerKeywordWithContext("metrics", TokenArgType)(Metrics)
+    registerKeywordWithContext("authMethod", "method", TokenArgType)(AuthMethod)
     registerKeywordWithContext("readable", "by", TokenArgType)(Readable)
     registerKeywordWithContext("writable", "by", TokenArgType)(Writable)
   }

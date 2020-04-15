@@ -128,4 +128,23 @@ object GoCommonMainGenerator {
         ),
       ),
     )
+
+  /** Generate the metric timer declaration, ready to measure the duration of a DAO call */
+  private[go] def generateMetricTimerDecl(metricSuffix: String): String =
+    genDeclareAndAssign(
+      genMethodCall(
+        "prometheus",
+        "NewTimer",
+        genMethodCall("metric.DatabaseRequestDuration", "WithLabelValues", s"metric.Request$metricSuffix"),
+      ),
+      "timer",
+    )
+
+  /** Generate the metric timer observation, to log the duration of a DAO call */
+  private[go] def generateMetricTimerObservation(): String =
+    genMethodCall("timer", "ObserveDuration")
+
+  /** Generate the metric call to log a successful request */
+  private[go] def generateMetricSuccess(metricSuffix: String): String =
+    genMethodCall(genMethodCall("metric.RequestSuccess", "WithLabelValues", s"metric.Request$metricSuffix"), "Inc")
 }

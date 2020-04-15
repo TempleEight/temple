@@ -4,7 +4,8 @@ import temple.generate.CRUD.List
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
 import temple.generate.server.go.common.GoCommonGenerator._
-import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator.{generateExtractAuthBlock, generateHTTPError, generateHandlerDecl, generateInvokeBeforeHookBlock}
+import temple.generate.server.go.common.GoCommonMainGenerator._
+import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
 import scala.Option.when
@@ -12,11 +13,13 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainListHandlerGenerator {
 
+  // TODO: This needs a refactor
   /** Generate the list handler function */
   private[main] def generateListHandler(
     root: ServiceRoot,
     responseMap: ListMap[String, String],
     enumeratingByCreator: Boolean,
+    usesMetrics: Boolean,
   ): String = {
     val queryDAOInputBlock = when(enumeratingByCreator) {
       genDeclareAndAssign(
@@ -87,13 +90,17 @@ object GoServiceMainListHandlerGenerator {
             queryDAOInputBlock,
             generateInvokeBeforeHookBlock(root, ListMap(), List),
             mkCode.lines(
+              when(usesMetrics) { generateMetricTimerDecl(List.toString) },
               queryDAOBlock,
+              when(usesMetrics) { generateMetricTimerObservation() },
               queryDAOErrorBlock,
             ),
+            generateInvokeAfterHookBlock(root, List),
           ),
           instantiateResponseBlock,
           mapResponseBlock,
           genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", s"${root.decapitalizedName}ListResp"),
+          when(usesMetrics) { generateMetricSuccess(List.toString) },
         ),
       ),
     )
