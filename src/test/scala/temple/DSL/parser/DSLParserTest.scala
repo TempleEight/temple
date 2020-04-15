@@ -58,6 +58,7 @@ class DSLParserTest extends FlatSpec with DSLParserMatchers {
         Seq(
           Metadata("metrics", Args(Seq(Arg.TokenArg("prometheus")))),
           Metadata("provider", Args(Seq(Arg.TokenArg("kubernetes")))),
+          Metadata("authMethod", Args(Seq(Arg.TokenArg("email")))),
         ),
       ),
       DSLRootItem(
@@ -93,7 +94,7 @@ class DSLParserTest extends FlatSpec with DSLParserMatchers {
           Metadata("omit", Args(Seq(Arg.ListArg(Seq(Arg.TokenArg("delete")))))),
           Metadata("readable", Args(kwargs = Seq("by" -> Arg.TokenArg("all")))),
           Metadata("writable", Args(kwargs = Seq("by" -> Arg.TokenArg("this")))),
-          Metadata("auth", Args(Seq(Arg.TokenArg("email")))),
+          Metadata("auth"),
           Metadata("uses", Args(Seq(Arg.ListArg(Seq(Arg.TokenArg("Booking"), Arg.TokenArg("Group")))))),
         ),
       ),

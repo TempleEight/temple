@@ -12,11 +12,13 @@ import (
 
 	"github.com/squat/and/dab/auth/comm"
 	"github.com/squat/and/dab/auth/dao"
+	"github.com/squat/and/dab/auth/metric"
 	"github.com/squat/and/dab/auth/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
 	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
@@ -155,7 +157,9 @@ func (env *env) registerAuthHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRegister))
 	auth, err := env.dao.CreateAuth(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err {
 		case dao.ErrDuplicateAuth:
@@ -174,9 +178,19 @@ func (env *env) registerAuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, hook := range env.hook.afterRegisterHooks {
+		err := (*hook)(env, auth, accessToken)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(registerAuthResponse{
 		AccessToken: accessToken,
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestRegister).Inc()
 }
 
 func (env *env) loginAuthHandler(w http.ResponseWriter, r *http.Request) {
@@ -207,7 +221,9 @@ func (env *env) loginAuthHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestLogin))
 	auth, err := env.dao.ReadAuth(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err {
 		case dao.ErrAuthNotFound:
@@ -234,9 +250,19 @@ func (env *env) loginAuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, hook := range env.hook.afterLoginHooks {
+		err := (*hook)(env, auth, accessToken)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(loginAuthResponse{
 		AccessToken: accessToken,
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestLogin).Inc()
 }
 
 // Create an access token with a 24 hour lifetime

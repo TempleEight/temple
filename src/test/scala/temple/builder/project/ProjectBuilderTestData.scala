@@ -3,7 +3,7 @@ package temple.builder.project
 import temple.ast.AbstractAttribute.{Attribute, IDAttribute}
 import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
-import temple.ast.Metadata.{Database, ServiceAuth}
+import temple.ast.Metadata.{AuthMethod, Database, ServiceAuth}
 import temple.ast._
 
 import scala.collection.immutable.ListMap
@@ -86,12 +86,13 @@ object ProjectBuilderTestData {
       metadata = Seq(
         Metadata.Metrics.Prometheus,
         Metadata.Provider.Kubernetes,
+        AuthMethod.Email,
       ),
     ),
     services = Map(
       "ComplexUser" -> ServiceBlock(
         complexServiceAttributes,
-        metadata = Seq(ServiceAuth.Email),
+        metadata = Seq(ServiceAuth),
         structs = Map("TempleUser" -> StructBlock(simpleServiceAttributes)),
       ),
     ),
@@ -108,8 +109,7 @@ object ProjectBuilderTestData {
        |    "c" : "http://c:1030/c"
        |  },
        |  "ports" : {
-       |    "service" : 1026,
-       |    "prometheus" : 1027
+       |    "service" : 1026
        |  }
        |}
        |""".stripMargin

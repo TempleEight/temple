@@ -208,6 +208,14 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	for _, hook := range env.hook.afterCreateHooks {
+		err := (*hook)(env, templeUser)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(createTempleUserResponse{
 		ID:            templeUser.ID,
 		IntField:      templeUser.IntField,
@@ -250,6 +258,14 @@ func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, errMsg, http.StatusInternalServerError)
 		}
 		return
+	}
+
+	for _, hook := range env.hook.afterReadHooks {
+		err := (*hook)(env, templeUser)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(readTempleUserResponse{
@@ -346,6 +362,14 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	for _, hook := range env.hook.afterUpdateHooks {
+		err := (*hook)(env, templeUser)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(updateTempleUserResponse{
 		ID:            templeUser.ID,
 		IntField:      templeUser.IntField,
@@ -388,6 +412,14 @@ func (env *env) deleteTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 			http.Error(w, errMsg, http.StatusInternalServerError)
 		}
 		return
+	}
+
+	for _, hook := range env.hook.afterDeleteHooks {
+		err := (*hook)(env)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(struct{}{})
