@@ -7,6 +7,7 @@ import temple.builder.project.ProjectBuilder
 import temple.containers.GolangSpec
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.FileSystem._
+import temple.generate.server.go.auth.GoAuthServiceGenerator
 import temple.generate.server.go.service.GoServiceGenerator
 import temple.utils.{FileUtils, StringUtils}
 import temple.utils.MonadUtils.FromEither
@@ -96,6 +97,15 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
     val validationErrors = validateAll(
       GoServiceGenerator.generate(GoGeneratorIntegrationTestData.datetimeService),
       File("date-time-svc", "date-time-svc.go"),
+    )
+
+    validationErrors shouldBe ""
+  }
+
+  it should "generate a compilable auth service when metrics are not used" in {
+    val validationErrors = validateAll(
+      GoAuthServiceGenerator.generate(GoGeneratorIntegrationTestData.authNoMetricsService),
+      File("auth", "auth.go"),
     )
 
     validationErrors shouldBe ""
