@@ -61,6 +61,7 @@ object GoServiceGenerator extends ServiceGenerator {
         when((root.readable == Readable.This || root.writable == Writable.This) && !root.hasAuthBlock) {
           GoServiceMainGenerator.generateCheckAuthorization(root)
         },
+        GoCommonMainGenerator.generateRespondWithError(usesMetrics),
         GoServiceMainHandlersGenerator
           .generateHandlers(root, operations, clientAttributes, usesComms, enumeratingByCreator, usesMetrics),
       ),
