@@ -1,5 +1,6 @@
 package temple.generate.orchestration.kube
 
+import temple.ast.Templefile.Ports
 import temple.generate.orchestration.ast.OrchestrationType.{DbStorage, OrchestrationRoot, Service}
 import temple.generate.orchestration.kube.ast.LifecycleCommand
 
@@ -11,7 +12,7 @@ object KubernetesGeneratorIntegrationTestData {
         name = "user",
         image = "temple-user-service",
         dbImage = "postgres:12.1",
-        ports = Seq("api" -> 80),
+        ports = Ports(80, 81),
         replicas = 1,
         secretName = "regcred",
         appEnvVars = Seq(),

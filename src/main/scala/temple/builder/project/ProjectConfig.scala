@@ -17,6 +17,7 @@ object ProjectConfig {
   val authPort: Int                    = 1024
   val authMetricPort: Int              = 1025
   val serviceStartPort: Int            = 1026
+  val grafanaDockerImage: DockerImage  = DockerImage("grafana/grafana", "6.6.2")
 
   def dockerImage(language: ServiceLanguage): DockerImage = language match {
     case ServiceLanguage.Go => DockerImage("golang", "1.13.7-alpine")

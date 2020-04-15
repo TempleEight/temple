@@ -104,4 +104,17 @@ class KubernetesGeneratorTest extends FlatSpec with Matchers {
     output.keys should contain(File("", "deploy.sh"))
     output(File("", "deploy.sh")) should be(UnitTestData.userDeployScriptWithoutMetrics)
   }
+
+  it should "generate correct prom and grafana scripts" in {
+    val output = KubernetesGenerator.generate("example", UnitTestData.basicOrchestrationRootWithMetrics)
+    output.keys should contain(File("kube/prom", "prometheus-deployment.yaml"))
+    output.keys should contain(File("kube/prom", "prometheus-service.yaml"))
+    output.keys should contain(File("kube/grafana", "grafana-deployment.yaml"))
+    output.keys should contain(File("kube/grafana", "grafana-service.yaml"))
+
+    output(File("kube/prom", "prometheus-deployment.yaml")) shouldBe UnitTestData.userPromDeployment
+    output(File("kube/prom", "prometheus-service.yaml")) shouldBe UnitTestData.userPromService
+    output(File("kube/grafana", "grafana-deployment.yaml")) shouldBe UnitTestData.userGrafanaDeployment
+    output(File("kube/grafana", "grafana-service.yaml")) shouldBe UnitTestData.userGrafanaService
+  }
 }

@@ -86,7 +86,8 @@ object ProjectBuilder {
   private def buildOrchestration(templefile: Templefile): Files = {
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(templefile)
     templefile.lookupMetadata[Provider].getOrElse(return Map()) match {
-      case Provider.Kubernetes    => KubernetesGenerator.generate(templefile.projectName, orchestrationRoot)
+      case Provider.Kubernetes =>
+        KubernetesGenerator.generate(templefile.projectName, orchestrationRoot)
       case Provider.DockerCompose => DockerComposeGenerator.generate(templefile.projectName, orchestrationRoot)
     }
   }
