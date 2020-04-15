@@ -12,6 +12,7 @@ import (
 	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // env defines the environment that requests should be executed within
@@ -52,6 +53,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Prometheus metrics
+	promPort, ok := config.Ports["prometheus"]
+	if !ok {
+		log.Fatal("A port for the key prometheus was not found")
+	}
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(fmt.Sprintf(":%d", promPort), nil)
+	}()
 
 	d, err := dao.Init(config)
 	if err != nil {
@@ -106,6 +117,14 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 		AuthID: auth.ID,
 	}
 
+	for _, hook := range env.hook.beforeCreateHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	booking, err := env.dao.CreateBooking(input)
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
@@ -152,6 +171,14 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 
 	input := dao.ReadBookingInput{
 		ID: bookingID,
+	}
+
+	for _, hook := range env.hook.beforeReadHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	booking, err := env.dao.ReadBooking(input)
@@ -205,6 +232,14 @@ func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 
 	input := dao.DeleteBookingInput{
 		ID: bookingID,
+	}
+
+	for _, hook := range env.hook.beforeDeleteHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	err = env.dao.DeleteBooking(input)
