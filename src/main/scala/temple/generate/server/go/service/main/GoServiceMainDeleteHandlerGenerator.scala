@@ -4,6 +4,7 @@ import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Delete
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
@@ -18,8 +19,9 @@ object GoServiceMainDeleteHandlerGenerator {
       "input",
     )
 
-  private def generateDAOCallBlock(root: ServiceRoot): String =
+  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
     mkCode.lines(
+      when(usesMetrics) { generateMetricTimerDecl(Delete.toString) },
       genAssign(
         genMethodCall(
           "env.dao",
@@ -28,11 +30,12 @@ object GoServiceMainDeleteHandlerGenerator {
         ),
         "err",
       ),
+      when(usesMetrics) { generateMetricTimerObservation() },
       generateDAOCallErrorBlock(root),
     )
 
   /** Generate the delete handler function */
-  private[main] def generateDeleteHandler(root: ServiceRoot): String =
+  private[main] def generateDeleteHandler(root: ServiceRoot, usesMetrics: Boolean): String =
     mkCode(
       generateHandlerDecl(root, Delete),
       CodeWrap.curly.tabbed(
@@ -42,8 +45,10 @@ object GoServiceMainDeleteHandlerGenerator {
           when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root) },
           generateDAOInput(root),
           generateInvokeBeforeHookBlock(root, ListMap(), Delete),
-          generateDAOCallBlock(root),
+          generateDAOCallBlock(root, usesMetrics),
+          generateInvokeAfterHookBlock(root, Delete),
           genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", "struct{}{}"),
+          when(usesMetrics) { generateMetricSuccess(Delete.toString) },
         ),
       ),
     )

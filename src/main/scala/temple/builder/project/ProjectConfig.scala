@@ -13,7 +13,7 @@ object ProjectConfig {
   val registryURL                      = "localhost:5000"
   val defaultLanguage: ServiceLanguage = ServiceLanguage.Go
   val defaultDatabase: Database        = Database.Postgres
-  val defaultAuth: ServiceAuth         = ServiceAuth.Email
+  val defaultAuth: AuthMethod          = AuthMethod.Email
   val authPort: Int                    = 1024
   val authMetricPort: Int              = 1025
   val serviceStartPort: Int            = 1026

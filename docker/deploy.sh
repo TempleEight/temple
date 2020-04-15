@@ -2,7 +2,7 @@
 
 BASE_REPO_URL=jaylees/templeeight
 SERVICE="shell2http"
-SERVICE_VERSION="1.4.2"
+SERVICE_VERSION="1.4.3"
 REPO_URL=${BASE_REPO_URL}-${SERVICE}
 
 docker build -t $SERVICE -f $SERVICE.Dockerfile .

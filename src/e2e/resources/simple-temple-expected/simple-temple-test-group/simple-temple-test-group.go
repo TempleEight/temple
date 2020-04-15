@@ -8,10 +8,13 @@ import (
 	"net/http"
 
 	"github.com/squat/and/dab/simple-temple-test-group/dao"
+	"github.com/squat/and/dab/simple-temple-test-group/metric"
 	"github.com/squat/and/dab/simple-temple-test-group/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // env defines the environment that requests should be executed within
@@ -52,6 +55,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Prometheus metrics
+	promPort, ok := config.Ports["prometheus"]
+	if !ok {
+		log.Fatal("A port for the key prometheus was not found")
+	}
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(fmt.Sprintf(":%d", promPort), nil)
+	}()
 
 	d, err := dao.Init(config)
 	if err != nil {
@@ -114,16 +127,28 @@ func (env *env) createSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreate))
 	simpleTempleTestGroup, err := env.dao.CreateSimpleTempleTestGroup(input)
+	timer.ObserveDuration()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
 		return
 	}
 
+	for _, hook := range env.hook.afterCreateHooks {
+		err := (*hook)(env, simpleTempleTestGroup)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(createSimpleTempleTestGroupResponse{
 		ID: simpleTempleTestGroup.ID,
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreate).Inc()
 }
 
 func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.Request) {
@@ -170,7 +195,9 @@ func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRead))
 	simpleTempleTestGroup, err := env.dao.ReadSimpleTempleTestGroup(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestGroupNotFound:
@@ -182,9 +209,19 @@ func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
+	for _, hook := range env.hook.afterReadHooks {
+		err := (*hook)(env, simpleTempleTestGroup)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(readSimpleTempleTestGroupResponse{
 		ID: simpleTempleTestGroup.ID,
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestRead).Inc()
 }
 
 func (env *env) deleteSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.Request) {
@@ -231,7 +268,9 @@ func (env *env) deleteSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDelete))
 	err = env.dao.DeleteSimpleTempleTestGroup(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestGroupNotFound:
@@ -243,5 +282,15 @@ func (env *env) deleteSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
+	for _, hook := range env.hook.afterDeleteHooks {
+		err := (*hook)(env)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(struct{}{})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestDelete).Inc()
 }

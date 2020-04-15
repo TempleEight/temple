@@ -2,7 +2,7 @@ package temple.generate.server.go.service.main
 
 import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
 import temple.ast.Metadata.Readable
-import temple.ast.{AbstractAttribute, Annotation, AttributeType}
+import temple.ast.{AbstractAttribute, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus._
@@ -285,7 +285,7 @@ object GoServiceMainHandlersGenerator {
         )
     }
 
-  /** Generate DAO call block error handling for Read, Update and Delete*/
+  /** Generate DAO call block error handling for Read, Update and Delete */
   private[main] def generateDAOCallErrorBlock(root: ServiceRoot): String =
     genIfErr(
       genSwitchReturn(
@@ -325,6 +325,32 @@ object GoServiceMainHandlersGenerator {
     )
   }
 
+  private[main] def generateInvokeAfterHookBlock(
+    root: ServiceRoot,
+    operation: CRUD,
+  ): String = {
+    val hookArguments = operation match {
+      case List =>
+        Seq("env", s"${root.decapitalizedName}List")
+      case Create | Read | Update =>
+        Seq("env", root.decapitalizedName)
+      case Delete =>
+        Seq("env")
+    }
+
+    genForLoop(
+      genDeclareAndAssign(s"range env.hook.after${operation.toString}Hooks", "_", "hook"),
+      mkCode.lines(
+        genDeclareAndAssign(
+          genFunctionCall("(*hook)", hookArguments),
+          "err",
+        ),
+        // TODO: replace with `respondWithError` call
+        genIfErr(mkCode.lines("// TODO", genReturn())),
+      ),
+    )
+  }
+
   /** Generate JSON response from DAO response */
   private[main] def generateJSONResponse(typePrefix: String, responseMap: ListMap[String, String]): String =
     genMethodCall(
@@ -340,6 +366,7 @@ object GoServiceMainHandlersGenerator {
     clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     enumeratingByCreator: Boolean,
+    usesMetrics: Boolean,
   ): String = {
     val responseMap = generateResponseMap(root)
 
@@ -350,11 +377,16 @@ object GoServiceMainHandlersGenerator {
 
     mkCode.doubleLines(
       operations.toSeq.sorted.map {
-        case List   => generateListHandler(root, responseMap, enumeratingByCreator)
-        case Create => generateCreateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime)
-        case Read   => generateReadHandler(root, responseMap)
-        case Update => generateUpdateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime)
-        case Delete => generateDeleteHandler(root)
+        case List =>
+          generateListHandler(root, responseMap, enumeratingByCreator, usesMetrics)
+        case Create =>
+          generateCreateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime, usesMetrics)
+        case Read =>
+          generateReadHandler(root, responseMap, usesMetrics)
+        case Update =>
+          generateUpdateHandler(root, clientAttributes, usesComms, responseMap, clientUsesTime, usesMetrics)
+        case Delete =>
+          generateDeleteHandler(root, usesMetrics)
       },
     )
   }

@@ -3,7 +3,7 @@ package temple.builder
 import org.scalatest.{FlatSpec, Matchers}
 import temple.ast.AbstractAttribute.Attribute
 import temple.ast.AbstractServiceBlock.{AuthServiceBlock, ServiceBlock}
-import temple.ast.Metadata.{Provider, ServiceLanguage}
+import temple.ast.Metadata.{AuthMethod, Provider, ServiceLanguage}
 import temple.ast.{AttributeType, Metadata, ProjectBlock, Templefile}
 
 class DockerfileBuilderTest extends FlatSpec with Matchers {
@@ -59,10 +59,11 @@ class DockerfileBuilderTest extends FlatSpec with Matchers {
   it should "generate the correct Dockerfile for a Go auth service when using DockerCompose" in {
     val templefile = Templefile(
       "ExampleProject",
+      projectBlock = ProjectBlock(Seq(AuthMethod.Email)),
       services = Map(
         "AuthyService" -> ServiceBlock(
           attributes = Map("test" -> Attribute(AttributeType.StringType())),
-          metadata = Seq(Metadata.ServiceAuth.Email),
+          metadata = Seq(Metadata.ServiceAuth),
           structs = Map(),
         ),
       ),
@@ -82,19 +83,18 @@ class DockerfileBuilderTest extends FlatSpec with Matchers {
   it should "generate the correct Dockerfile for a Go auth service when using Kubernetes" in {
     val templefile = Templefile(
       "ExampleProject",
+      projectBlock = ProjectBlock(Seq(AuthMethod.Email)),
       services = Map(
         "AuthyService" -> ServiceBlock(
           attributes = Map("test" -> Attribute(AttributeType.StringType())),
-          metadata = Seq(Metadata.ServiceAuth.Email),
+          metadata = Seq(Metadata.ServiceAuth),
           structs = Map(),
         ),
       ),
     )
 
     val authBlock = templefile.allServices
-      .collectFirst {
-        case (_, AuthServiceBlock) => AuthServiceBlock
-      }
+      .collectFirst { case (_, AuthServiceBlock) => AuthServiceBlock }
       .getOrElse(throw new RuntimeException("Auth block doesn't exist"))
 
     val dockerfile = DockerfileBuilder.createServiceDockerfile("auth", authBlock, 80, Some(Provider.Kubernetes))

@@ -8,10 +8,13 @@ import (
 	"net/http"
 
 	"github.com/squat/and/dab/booking/dao"
+	"github.com/squat/and/dab/booking/metric"
 	"github.com/squat/and/dab/booking/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // env defines the environment that requests should be executed within
@@ -52,6 +55,16 @@ func main() {
 	if err != nil {
 		log.Fatal(err)
 	}
+
+	// Prometheus metrics
+	promPort, ok := config.Ports["prometheus"]
+	if !ok {
+		log.Fatal("A port for the key prometheus was not found")
+	}
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(fmt.Sprintf(":%d", promPort), nil)
+	}()
 
 	d, err := dao.Init(config)
 	if err != nil {
@@ -114,16 +127,28 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreate))
 	booking, err := env.dao.CreateBooking(input)
+	timer.ObserveDuration()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
 		return
 	}
 
+	for _, hook := range env.hook.afterCreateHooks {
+		err := (*hook)(env, booking)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(createBookingResponse{
 		ID: booking.ID,
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreate).Inc()
 }
 
 func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
@@ -170,7 +195,9 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRead))
 	booking, err := env.dao.ReadBooking(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrBookingNotFound:
@@ -182,9 +209,19 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, hook := range env.hook.afterReadHooks {
+		err := (*hook)(env, booking)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(readBookingResponse{
 		ID: booking.ID,
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestRead).Inc()
 }
 
 func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
@@ -231,7 +268,9 @@ func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDelete))
 	err = env.dao.DeleteBooking(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrBookingNotFound:
@@ -243,5 +282,15 @@ func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, hook := range env.hook.afterDeleteHooks {
+		err := (*hook)(env)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(struct{}{})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestDelete).Inc()
 }

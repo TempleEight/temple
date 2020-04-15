@@ -31,7 +31,7 @@ object ProjectBuilder {
 
   def endpoints(service: AttributeBlock[_]): Set[CRUD] = {
     val endpoints: Set[CRUD] = service
-      .lookupMetadata[Metadata.Omit]
+      .lookupLocalMetadata[Metadata.Omit]
       .map(_.endpoints)
       .getOrElse(Set.empty)
       .foldLeft(Set[CRUD](Create, Read, Update, Delete)) {
@@ -44,7 +44,8 @@ object ProjectBuilder {
           }
       }
     // Add read all endpoint if defined
-    service.lookupMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + List)
+    if (service hasMetadata Metadata.ServiceEnumerable) endpoints + List
+    else endpoints
   }
 
   private def buildDatabaseCreationScripts(templefile: Templefile): Files =
@@ -130,8 +131,10 @@ object ProjectBuilder {
   private def buildServerFiles(templefile: Templefile, detail: LanguageDetail): Files = {
     // Whether or not to generate an auth service - based on whether any service has #auth
     val usesAuth = templefile.services.exists {
-      case (_, service) => service.lookupMetadata[ServiceAuth].nonEmpty
+      case (_, service) => service.lookupLocalMetadata[ServiceAuth].nonEmpty
     }
+
+    val metrics = templefile.lookupMetadata[Metrics]
 
     var serverFiles = templefile.providedServicesWithPorts.flatMap {
       case (name, service, port) =>
@@ -147,7 +150,7 @@ object ProjectBuilder {
         }.toMap
 
         val configFileContents =
-          ServerConfigGenerator.generate(serviceRoot.kebabName, serviceRoot.datastore, serviceComms, port)
+          ServerConfigGenerator.generate(serviceRoot.kebabName, serviceRoot.datastore, serviceComms, port, metrics)
 
         serverFiles + (File(serviceRoot.kebabName, "config.json") -> configFileContents)
     }
@@ -163,6 +166,7 @@ object ProjectBuilder {
               Database.Postgres,
               Map("kong-admin" -> "http://kong:8001"),
               Ports(ProjectConfig.authPort, ProjectConfig.authMetricPort),
+              metrics,
             )
           serverFiles = serverFiles ++ (GoAuthServiceGenerator.generate(authRoot) + (File("auth", "config.json") -> configFileContents))
       }

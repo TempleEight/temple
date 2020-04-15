@@ -10,10 +10,13 @@ import (
 
 	"github.com/TempleEight/spec-golang/match/comm"
 	"github.com/TempleEight/spec-golang/match/dao"
+	"github.com/TempleEight/spec-golang/match/metric"
 	"github.com/TempleEight/spec-golang/match/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // env defines the environment that requests should be executed within
@@ -97,6 +100,16 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Prometheus metrics
+	promPort, ok := config.Ports["prometheus"]
+	if !ok {
+		log.Fatal("A port for the key prometheus was not found")
+	}
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(fmt.Sprintf(":%d", promPort), nil)
+	}()
+
 	d, err := dao.Init(config)
 	if err != nil {
 		log.Fatal(err)
@@ -152,11 +165,21 @@ func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestList))
 	matchList, err := env.dao.ListMatch(input)
+	timer.ObserveDuration()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
 		return
+	}
+
+	for _, hook := range env.hook.afterListHooks {
+		err := (*hook)(env, matchList)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	matchListResp := listMatchResponse{
@@ -173,6 +196,8 @@ func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	json.NewEncoder(w).Encode(matchListResp)
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestList).Inc()
 }
 
 func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
@@ -250,11 +275,21 @@ func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreate))
 	match, err := env.dao.CreateMatch(input)
+	timer.ObserveDuration()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
 		return
+	}
+
+	for _, hook := range env.hook.afterCreateHooks {
+		err := (*hook)(env, match)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(createMatchResponse{
@@ -263,6 +298,8 @@ func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
 		UserTwo:   match.UserTwo,
 		MatchedOn: match.MatchedOn.Format(time.RFC3339),
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreate).Inc()
 }
 
 func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
@@ -309,7 +346,9 @@ func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRead))
 	match, err := env.dao.ReadMatch(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrMatchNotFound:
@@ -321,12 +360,22 @@ func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, hook := range env.hook.afterReadHooks {
+		err := (*hook)(env, match)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(readMatchResponse{
 		ID:        match.ID,
 		UserOne:   match.UserOne,
 		UserTwo:   match.UserTwo,
 		MatchedOn: match.MatchedOn.Format(time.RFC3339),
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestRead).Inc()
 }
 
 func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
@@ -420,7 +469,9 @@ func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestUpdate))
 	match, err := env.dao.UpdateMatch(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrMatchNotFound:
@@ -432,12 +483,22 @@ func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, hook := range env.hook.afterUpdateHooks {
+		err := (*hook)(env, match)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(updateMatchResponse{
 		ID:        match.ID,
 		UserOne:   match.UserOne,
 		UserTwo:   match.UserTwo,
 		MatchedOn: match.MatchedOn.Format(time.RFC3339),
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestUpdate).Inc()
 }
 
 func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {
@@ -484,7 +545,9 @@ func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDelete))
 	err = env.dao.DeleteMatch(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrMatchNotFound:
@@ -496,5 +559,15 @@ func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, hook := range env.hook.afterDeleteHooks {
+		err := (*hook)(env)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(struct{}{})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestDelete).Inc()
 }

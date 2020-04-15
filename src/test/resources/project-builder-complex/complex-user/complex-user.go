@@ -10,10 +10,13 @@ import (
 	"time"
 
 	"github.com/squat/and/dab/complex-user/dao"
+	"github.com/squat/and/dab/complex-user/metric"
 	"github.com/squat/and/dab/complex-user/util"
 	valid "github.com/asaskevich/govalidator"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
+	"github.com/prometheus/client_golang/prometheus"
+	"github.com/prometheus/client_golang/prometheus/promhttp"
 )
 
 // env defines the environment that requests should be executed within
@@ -129,6 +132,16 @@ func main() {
 		log.Fatal(err)
 	}
 
+	// Prometheus metrics
+	promPort, ok := config.Ports["prometheus"]
+	if !ok {
+		log.Fatal("A port for the key prometheus was not found")
+	}
+	go func() {
+		http.Handle("/metrics", promhttp.Handler())
+		http.ListenAndServe(fmt.Sprintf(":%d", promPort), nil)
+	}()
+
 	d, err := dao.Init(config)
 	if err != nil {
 		log.Fatal(err)
@@ -225,11 +238,21 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreate))
 	complexUser, err := env.dao.CreateComplexUser(input)
+	timer.ObserveDuration()
 	if err != nil {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Something went wrong: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
 		return
+	}
+
+	for _, hook := range env.hook.afterCreateHooks {
+		err := (*hook)(env, complexUser)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(createComplexUserResponse{
@@ -247,6 +270,8 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		DateTimeField:      complexUser.DateTimeField.Format(time.RFC3339),
 		BlobField:          base64.StdEncoding.EncodeToString(complexUser.BlobField),
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreate).Inc()
 }
 
 func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -281,7 +306,9 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRead))
 	complexUser, err := env.dao.ReadComplexUser(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrComplexUserNotFound:
@@ -291,6 +318,14 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, errMsg, http.StatusInternalServerError)
 		}
 		return
+	}
+
+	for _, hook := range env.hook.afterReadHooks {
+		err := (*hook)(env, complexUser)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(readComplexUserResponse{
@@ -308,6 +343,8 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 		DateTimeField:      complexUser.DateTimeField.Format(time.RFC3339),
 		BlobField:          base64.StdEncoding.EncodeToString(complexUser.BlobField),
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestRead).Inc()
 }
 
 func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -396,7 +433,9 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestUpdate))
 	complexUser, err := env.dao.UpdateComplexUser(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrComplexUserNotFound:
@@ -406,6 +445,14 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 			http.Error(w, errMsg, http.StatusInternalServerError)
 		}
 		return
+	}
+
+	for _, hook := range env.hook.afterUpdateHooks {
+		err := (*hook)(env, complexUser)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(updateComplexUserResponse{
@@ -423,6 +470,8 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		DateTimeField:      complexUser.DateTimeField.Format(time.RFC3339),
 		BlobField:          base64.StdEncoding.EncodeToString(complexUser.BlobField),
 	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestUpdate).Inc()
 }
 
 func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request) {
@@ -457,7 +506,9 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		}
 	}
 
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDelete))
 	err = env.dao.DeleteComplexUser(input)
+	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrComplexUserNotFound:
@@ -469,5 +520,15 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	for _, hook := range env.hook.afterDeleteHooks {
+		err := (*hook)(env)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(struct{}{})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestDelete).Inc()
 }
