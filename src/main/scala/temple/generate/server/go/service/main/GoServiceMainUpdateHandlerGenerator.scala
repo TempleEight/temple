@@ -24,7 +24,7 @@ object GoServiceMainUpdateHandlerGenerator {
     )
   }
 
-  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
+  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean, metricSuffix: Option[String]): String =
     mkCode.lines(
       when(usesMetrics) { generateMetricTimerDecl(Update.toString) },
       genDeclareAndAssign(
@@ -33,7 +33,7 @@ object GoServiceMainUpdateHandlerGenerator {
         "err",
       ),
       when(usesMetrics) { generateMetricTimerObservation() },
-      generateDAOCallErrorBlock(root),
+      generateDAOCallErrorBlock(root, metricSuffix),
     )
 
   /** Generate the update handler function */
@@ -43,31 +43,33 @@ object GoServiceMainUpdateHandlerGenerator {
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
     usesMetrics: Boolean,
-  ): String =
+  ): String = {
+    val metricSuffix = when(usesMetrics) { Update.toString }
     mkCode(
       generateHandlerDecl(root, Update),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(root.projectUsesAuth) { generateExtractAuthBlock(root.writable == Writable.This) },
-          generateExtractIDBlock(root.decapitalizedName),
-          when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root) },
+          when(root.projectUsesAuth) { generateExtractAuthBlock(root.writable == Writable.This, metricSuffix) },
+          generateExtractIDBlock(root.decapitalizedName, metricSuffix),
+          when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root, metricSuffix) },
           // Only need to handle request JSONs when there are client attributes
           when(root.requestAttributes.nonEmpty) {
             mkCode.doubleLines(
-              generateDecodeRequestBlock(root, Update, s"update${root.name}"),
-              generateRequestNilCheck(root.requestAttributes),
-              generateValidateStructBlock(),
-              when(usesComms) { generateForeignKeyCheckBlocks(root) },
-              when(clientUsesTime) { generateParseTimeBlocks(root.requestAttributes) },
+              generateDecodeRequestBlock(root, Update, s"update${root.name}", metricSuffix),
+              generateRequestNilCheck(root.requestAttributes, metricSuffix),
+              generateValidateStructBlock(metricSuffix),
+              when(usesComms) { generateForeignKeyCheckBlocks(root, metricSuffix) },
+              when(clientUsesTime) { generateParseTimeBlocks(root.requestAttributes, metricSuffix) },
             )
           },
           generateDAOInput(root),
-          generateInvokeBeforeHookBlock(root, Update),
-          generateDAOCallBlock(root, usesMetrics),
-          generateInvokeAfterHookBlock(root, Update),
+          generateInvokeBeforeHookBlock(root, Update, metricSuffix),
+          generateDAOCallBlock(root, usesMetrics, metricSuffix),
+          generateInvokeAfterHookBlock(root, Update, metricSuffix),
           generateJSONResponse(s"update${root.name}", responseMap),
           when(usesMetrics) { generateMetricSuccess(Update.toString) },
         ),
       ),
     )
+  }
 }

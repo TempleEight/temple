@@ -19,7 +19,7 @@ object GoServiceMainDeleteHandlerGenerator {
       "input",
     )
 
-  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
+  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean, metricSuffix: Option[String]): String =
     mkCode.lines(
       when(usesMetrics) { generateMetricTimerDecl(Delete.toString) },
       genAssign(
@@ -31,25 +31,27 @@ object GoServiceMainDeleteHandlerGenerator {
         "err",
       ),
       when(usesMetrics) { generateMetricTimerObservation() },
-      generateDAOCallErrorBlock(root),
+      generateDAOCallErrorBlock(root, metricSuffix),
     )
 
   /** Generate the delete handler function */
-  private[main] def generateDeleteHandler(root: ServiceRoot, usesMetrics: Boolean): String =
+  private[main] def generateDeleteHandler(root: ServiceRoot, usesMetrics: Boolean): String = {
+    val metricSuffix = when(usesMetrics) { Delete.toString }
     mkCode(
       generateHandlerDecl(root, Delete),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(root.projectUsesAuth) { generateExtractAuthBlock(root.writable == Writable.This) },
-          generateExtractIDBlock(root.decapitalizedName),
-          when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root) },
+          when(root.projectUsesAuth) { generateExtractAuthBlock(root.writable == Writable.This, metricSuffix) },
+          generateExtractIDBlock(root.decapitalizedName, metricSuffix),
+          when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root, metricSuffix) },
           generateDAOInput(root),
-          generateInvokeBeforeHookBlock(root, Delete),
-          generateDAOCallBlock(root, usesMetrics),
-          generateInvokeAfterHookBlock(root, Delete),
+          generateInvokeBeforeHookBlock(root, Delete, metricSuffix),
+          generateDAOCallBlock(root, usesMetrics, metricSuffix),
+          generateInvokeAfterHookBlock(root, Delete, metricSuffix),
           genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", "struct{}{}"),
           when(usesMetrics) { generateMetricSuccess(Delete.toString) },
         ),
       ),
     )
+  }
 }

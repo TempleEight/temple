@@ -15,11 +15,14 @@ import scala.collection.immutable.ListMap
 object GoServiceMainCreateHandlerGenerator {
 
   /** Generate new UUID block */
-  private def generateNewUUIDBlock(): String =
+  private def generateNewUUIDBlock(metricSuffix: Option[String]): String =
     mkCode.lines(
       genDeclareAndAssign(genMethodCall("uuid", "NewUUID"), "uuid", "err"),
       genIfErr(
-        generateHTTPErrorReturn(StatusInternalServerError, "Could not create UUID: %s", genMethodCall("err", "Error")),
+        generateRespondWithErrorReturn(genHTTPEnum(StatusInternalServerError), metricSuffix)(
+          "Could not create UUID: %s",
+          genMethodCall("err", "Error"),
+        ),
       ),
     )
 
@@ -37,7 +40,7 @@ object GoServiceMainCreateHandlerGenerator {
     )
   }
 
-  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
+  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean, metricSuffix: Option[String]): String =
     mkCode.lines(
       when(usesMetrics) { generateMetricTimerDecl(Create.toString) },
       genDeclareAndAssign(
@@ -51,8 +54,7 @@ object GoServiceMainCreateHandlerGenerator {
       ),
       when(usesMetrics) { generateMetricTimerObservation() },
       genIfErr(
-        generateHTTPErrorReturn(
-          StatusInternalServerError,
+        generateRespondWithErrorReturn(genHTTPEnum(StatusInternalServerError), metricSuffix)(
           "Something went wrong: %s",
           genMethodCall("err", "Error"),
         ),
@@ -66,30 +68,32 @@ object GoServiceMainCreateHandlerGenerator {
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
     usesMetrics: Boolean,
-  ): String =
+  ): String = {
+    val metricSuffix = when(usesMetrics) { Create.toString }
     mkCode(
       generateHandlerDecl(root, Create),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(root.projectUsesAuth) { generateExtractAuthBlock(usesVar = true) },
+          when(root.projectUsesAuth) { generateExtractAuthBlock(usesVar = true, metricSuffix) },
           // Only need to handle request JSONs when there are client attributes
           when(root.requestAttributes.nonEmpty) {
             mkCode.doubleLines(
-              generateDecodeRequestBlock(root, Create, s"create${root.name}"),
-              generateRequestNilCheck(root.requestAttributes),
-              generateValidateStructBlock(),
-              when(usesComms) { generateForeignKeyCheckBlocks(root) },
-              when(clientUsesTime) { generateParseTimeBlocks(root.requestAttributes) },
+              generateDecodeRequestBlock(root, Create, s"create${root.name}", metricSuffix),
+              generateRequestNilCheck(root.requestAttributes, metricSuffix),
+              generateValidateStructBlock(metricSuffix),
+              when(usesComms) { generateForeignKeyCheckBlocks(root, metricSuffix) },
+              when(clientUsesTime) { generateParseTimeBlocks(root.requestAttributes, metricSuffix) },
             )
           },
-          when(!root.hasAuthBlock) { generateNewUUIDBlock() },
+          when(!root.hasAuthBlock) { generateNewUUIDBlock(metricSuffix) },
           generateDAOInput(root),
-          generateInvokeBeforeHookBlock(root, Create),
-          generateDAOCallBlock(root, usesMetrics),
-          generateInvokeAfterHookBlock(root, Create),
+          generateInvokeBeforeHookBlock(root, Create, metricSuffix),
+          generateDAOCallBlock(root, usesMetrics, metricSuffix),
+          generateInvokeAfterHookBlock(root, Create, metricSuffix),
           generateJSONResponse(s"create${root.name}", responseMap),
           when(usesMetrics) { generateMetricSuccess(Create.toString) },
         ),
       ),
     )
+  }
 }
