@@ -57,12 +57,11 @@ object GoServiceDAOInputStructsGenerator {
 
   private[service] def generateStructs(
     root: ServiceRoot,
-    operations: Set[CRUD],
     enumeratingByCreator: Boolean,
   ): String =
     mkCode.doubleLines(
       // Generate input struct for each operation, except for List when not enumerating by creator
-      for (operation <- operations.toSeq.sorted if operation != CRUD.List || enumeratingByCreator)
+      for (operation <- root.operations.toSeq if operation != CRUD.List || enumeratingByCreator)
         yield generateStruct(root, operation),
     )
 }

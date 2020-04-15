@@ -16,7 +16,7 @@ object GoServiceMainReadHandlerGenerator {
   private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
     mkCode.doubleLines(
       generateDAOReadInput(root),
-      generateInvokeBeforeHookBlock(root, ListMap(), Read),
+      generateInvokeBeforeHookBlock(root, Read),
       mkCode.lines(
         when(usesMetrics) { generateMetricTimerDecl(Read.toString) },
         generateDAOReadCall(root),

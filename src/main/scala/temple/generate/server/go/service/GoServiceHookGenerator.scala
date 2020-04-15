@@ -1,6 +1,5 @@
 package temple.generate.server.go.service
 
-import temple.ast.AbstractAttribute
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, presentParticiple}
@@ -9,15 +8,9 @@ import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonHookGenerator
 import temple.generate.utils.CodeTerm.mkCode
 
-import scala.collection.immutable.ListMap
-
 object GoServiceHookGenerator {
 
-  private def generateBeforeHookType(
-    root: ServiceRoot,
-    clientAttributes: ListMap[String, AbstractAttribute],
-    operation: CRUD,
-  ): String = operation match {
+  private def generateBeforeHookType(root: ServiceRoot, operation: CRUD): String = operation match {
     case CRUD.List =>
       root.readable match {
         case Readable.This =>
@@ -28,7 +21,7 @@ object GoServiceHookGenerator {
     case op @ (CRUD.Read | CRUD.Delete) =>
       s"func(env *env, input *dao.${op.toString}${root.name}Input) *HookError"
     case op @ (CRUD.Create | CRUD.Update) =>
-      if (clientAttributes.isEmpty)
+      if (root.requestAttributes.isEmpty)
         s"func(env *env, input *dao.${op.toString}${root.name}Input) *HookError"
       else
         s"func(env *env, req ${op.toString.toLowerCase}${root.name}Request, input *dao.${op.toString}${root.name}Input) *HookError"
@@ -44,16 +37,12 @@ object GoServiceHookGenerator {
       "func(env *env) *HookError"
   }
 
-  private[service] def generateHookStruct(
-    root: ServiceRoot,
-    clientAttributes: ListMap[String, AbstractAttribute],
-    operations: Set[CRUD],
-  ): String = {
-    val beforeCreate = operations.toSeq.sorted.map { op =>
-      s"before${op.toString}Hooks" -> s"[]*${generateBeforeHookType(root, clientAttributes, op)}"
+  private[service] def generateHookStruct(root: ServiceRoot): String = {
+    val beforeCreate = root.operations.toSeq.map { op =>
+      s"before${op.toString}Hooks" -> s"[]*${generateBeforeHookType(root, op)}"
     }
 
-    val afterCreate = operations.toSeq.sorted.map { op =>
+    val afterCreate = root.operations.toSeq.map { op =>
       s"after${op.toString}Hooks" -> s"[]*${generateAfterHookType(root, op)}"
     }
 
@@ -86,16 +75,12 @@ object GoServiceHookGenerator {
       ),
     )
 
-  private[service] def generateAddHookMethods(
-    root: ServiceRoot,
-    clientAttributes: ListMap[String, AbstractAttribute],
-    operations: Set[CRUD],
-  ): String = {
-    val beforeHooks = operations.toSeq.sorted.map { op =>
-      generateAddHookMethod("before", generateBeforeHookType(root, clientAttributes, op), op)
+  private[service] def generateAddHookMethods(root: ServiceRoot): String = {
+    val beforeHooks = root.operations.toSeq.map { op =>
+      generateAddHookMethod("before", generateBeforeHookType(root, op), op)
     }
 
-    val afterHooks = operations.toSeq.sorted.map { op =>
+    val afterHooks = root.operations.toSeq.map { op =>
       generateAddHookMethod("after", generateAfterHookType(root, op), op)
     }
 

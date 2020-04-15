@@ -43,31 +43,23 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${root.kebabName}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
       File(root.kebabName, s"${root.kebabName}.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoServiceMainGenerator
-          .generateImports(root, usesBase64, usesTime, usesComms, usesMetrics, root.requestAttributes, root.operations),
+        GoServiceMainGenerator.generateImports(root, usesBase64, usesTime, usesComms, usesMetrics),
         GoServiceMainStructGenerator.generateEnvStruct(usesComms),
         when(
           root.requestAttributes.nonEmpty
           && (root.operations.contains(CRUD.Create) || root.operations.contains(CRUD.Update)),
         ) {
-          GoServiceMainStructGenerator.generateRequestStructs(root, root.operations, root.requestAttributes)
+          GoServiceMainStructGenerator.generateRequestStructs(root)
         },
-        GoServiceMainStructGenerator.generateResponseStructs(root, root.operations),
-        GoServiceMainGenerator.generateRouter(root, root.operations),
-        GoCommonMainGenerator.generateMain(root, root.port, usesComms, isAuth = false, usesMetrics),
+        GoServiceMainStructGenerator.generateResponseStructs(root),
+        GoServiceMainGenerator.generateRouter(root),
+        GoCommonMainGenerator.generateMain(root, usesComms, isAuth = false, usesMetrics),
         GoCommonMainGenerator.generateJsonMiddleware(),
         when((root.readable == Readable.This || root.writable == Writable.This) && !root.hasAuthBlock) {
           GoServiceMainGenerator.generateCheckAuthorization(root)
         },
         GoCommonMainGenerator.generateRespondWithError(usesMetrics),
-        GoServiceMainHandlersGenerator.generateHandlers(
-          root,
-          root.operations,
-          root.requestAttributes,
-          usesComms,
-          enumeratingByCreator,
-          usesMetrics,
-        ),
+        GoServiceMainHandlersGenerator.generateHandlers(root, usesComms, enumeratingByCreator, usesMetrics),
       ),
       File(root.kebabName, "setup.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
@@ -77,19 +69,19 @@ object GoServiceGenerator extends ServiceGenerator {
       File(root.kebabName, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
         GoCommonHookGenerator.generateImports(root.module),
-        GoServiceHookGenerator.generateHookStruct(root, root.requestAttributes, root.operations),
+        GoServiceHookGenerator.generateHookStruct(root),
         GoCommonHookGenerator.generateHookErrorStruct,
         GoCommonHookGenerator.generateHookErrorFunction,
-        GoServiceHookGenerator.generateAddHookMethods(root, root.requestAttributes, root.operations),
+        GoServiceHookGenerator.generateAddHookMethods(root),
       ),
       File(s"${root.kebabName}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),
       File(s"${root.kebabName}/dao", "dao.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("dao"),
         GoServiceDAOGenerator.generateImports(root, usesTime),
-        GoServiceDAOInterfaceGenerator.generateInterface(root, root.operations, enumeratingByCreator),
+        GoServiceDAOInterfaceGenerator.generateInterface(root, enumeratingByCreator),
         GoCommonDAOGenerator.generateDAOStruct(),
         GoServiceDAOGenerator.generateDatastoreObjectStruct(root),
-        GoServiceDAOInputStructsGenerator.generateStructs(root, root.operations, enumeratingByCreator),
+        GoServiceDAOInputStructsGenerator.generateStructs(root, enumeratingByCreator),
         GoCommonDAOGenerator.generateInit(),
         GoServiceDAOGenerator.generateQueryFunctions(root.operations),
         GoServiceDAOFunctionsGenerator.generateDAOFunctions(root, enumeratingByCreator),
@@ -120,7 +112,7 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${root.kebabName}/metric", "metric.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("metric"),
         GoCommonMetricGenerator.generateImports(),
-        GoServiceMetricGenerator.generateVars(root, root.operations),
+        GoServiceMetricGenerator.generateVars(root),
       ),
     )).map { case (path, contents) => path -> (contents + "\n") }
   }

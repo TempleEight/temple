@@ -30,7 +30,6 @@ object GoServiceDAOInterfaceGenerator {
 
   private[service] def generateInterface(
     root: ServiceRoot,
-    operations: Set[CRUD],
     enumeratingByCreator: Boolean,
   ): String =
     mkCode.lines(
@@ -38,7 +37,7 @@ object GoServiceDAOInterfaceGenerator {
       mkCode(
         "type BaseDatastore interface",
         CodeWrap.curly.tabbed(
-          for (operation <- operations.toSeq.sorted)
+          for (operation <- root.operations.toSeq)
             yield generateInterfaceFunction(root, operation, enumeratingByCreator),
         ),
       ),

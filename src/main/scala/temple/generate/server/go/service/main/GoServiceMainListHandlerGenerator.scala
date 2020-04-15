@@ -88,7 +88,7 @@ object GoServiceMainListHandlerGenerator {
           when(enumeratingByCreator) { generateExtractAuthBlock(usesVar = true) },
           mkCode.doubleLines(
             queryDAOInputBlock,
-            generateInvokeBeforeHookBlock(root, ListMap(), List),
+            generateInvokeBeforeHookBlock(root, List),
             mkCode.lines(
               when(usesMetrics) { generateMetricTimerDecl(List.toString) },
               queryDAOBlock,

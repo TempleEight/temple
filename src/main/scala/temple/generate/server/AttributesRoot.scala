@@ -3,10 +3,11 @@ package temple.generate.server
 import temple.ast.AbstractAttribute
 import temple.ast.Metadata.{Database, Metrics, Readable, Writable}
 import temple.generate.CRUD.CRUD
+import temple.generate.server.AbstractAttributesRoot.AbstractServiceRoot
 
-import scala.collection.immutable.{ListMap, SortedMap}
+import scala.collection.immutable.{ListMap, SortedMap, SortedSet}
 
-trait AttributesRoot extends ServiceName {
+trait AttributesRoot extends AbstractAttributesRoot {
   override def name: String
   def opQueries: SortedMap[CRUD, String]
   def idAttribute: IDAttribute
@@ -17,7 +18,7 @@ trait AttributesRoot extends ServiceName {
 
   def requestAttributes: ListMap[String, AbstractAttribute] = attributes.filter { case (_, attr) => attr.inRequest }
 
-  def operations: Set[CRUD] = opQueries.keySet
+  def operations: SortedSet[CRUD] = opQueries.keySet
 }
 
 object AttributesRoot {
@@ -55,6 +56,6 @@ object AttributesRoot {
     projectUsesAuth: Boolean,
     hasAuthBlock: Boolean,
     metrics: Option[Metrics],
-  ) extends ServiceName
-      with AttributesRoot {}
+  ) extends AttributesRoot
+      with AbstractServiceRoot
 }

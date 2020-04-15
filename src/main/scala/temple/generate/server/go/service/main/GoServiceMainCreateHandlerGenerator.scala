@@ -23,13 +23,13 @@ object GoServiceMainCreateHandlerGenerator {
       ),
     )
 
-  private def generateDAOInput(root: ServiceRoot, clientAttributes: ListMap[String, AbstractAttribute]): String = {
+  private def generateDAOInput(root: ServiceRoot): String = {
     val idCapitalized = root.idAttribute.name.toUpperCase
     // If service has auth block then an AuthID is passed in as ID, otherwise a created uuid is passed in
     val createInput = ListMap(idCapitalized -> (if (root.hasAuthBlock) s"auth.$idCapitalized" else "uuid")) ++
       // If the project uses auth, but this service does not have an auth block, AuthID is passed for created_by field
       when(!root.hasAuthBlock && root.projectUsesAuth) { s"Auth$idCapitalized" -> s"auth.$idCapitalized" } ++
-      generateDAOInputClientMap(clientAttributes)
+      generateDAOInputClientMap(root.requestAttributes)
 
     genDeclareAndAssign(
       genPopulateStruct(s"dao.Create${root.name}Input", createInput),
@@ -62,7 +62,6 @@ object GoServiceMainCreateHandlerGenerator {
   /** Generate the create handler function */
   private[main] def generateCreateHandler(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
@@ -74,18 +73,18 @@ object GoServiceMainCreateHandlerGenerator {
         mkCode.doubleLines(
           when(root.projectUsesAuth) { generateExtractAuthBlock(usesVar = true) },
           // Only need to handle request JSONs when there are client attributes
-          when(clientAttributes.nonEmpty) {
+          when(root.requestAttributes.nonEmpty) {
             mkCode.doubleLines(
               generateDecodeRequestBlock(root, Create, s"create${root.name}"),
-              generateRequestNilCheck(root, clientAttributes),
+              generateRequestNilCheck(root.requestAttributes),
               generateValidateStructBlock(),
-              when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes) },
-              when(clientUsesTime) { generateParseTimeBlocks(clientAttributes) },
+              when(usesComms) { generateForeignKeyCheckBlocks(root) },
+              when(clientUsesTime) { generateParseTimeBlocks(root.requestAttributes) },
             )
           },
           when(!root.hasAuthBlock) { generateNewUUIDBlock() },
-          generateDAOInput(root, clientAttributes),
-          generateInvokeBeforeHookBlock(root, clientAttributes, Create),
+          generateDAOInput(root),
+          generateInvokeBeforeHookBlock(root, Create),
           generateDAOCallBlock(root, usesMetrics),
           generateInvokeAfterHookBlock(root, Create),
           generateJSONResponse(s"create${root.name}", responseMap),
