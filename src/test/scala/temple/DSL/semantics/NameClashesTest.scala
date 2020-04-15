@@ -58,12 +58,12 @@ class NameClashesTest extends FlatSpec with Matchers {
       NameClashes.constructUniqueName("Func", "CreateMachine", takenNames = Set("unimportant"))(
         NameClashes.goServiceValidator,
       )
-    } should have message """Cannot generate good name for "func", names of projects and blocks cannot start with [create, delete, list, read, update] or end with [create, delete, list, read, update]"""
+    } should have message """Cannot generate good name for "func", names of projects and blocks cannot start with [create, delete, identity, list, read, update] or end with [create, delete, identity, list, read, update]"""
 
     the[SemanticParsingException] thrownBy {
       NameClashes.constructUniqueName("List", "Tinder", takenNames = Set("unimportant"))(
         NameClashes.goServiceValidator,
       )
-    } should have message """Cannot generate good name for "list", names of projects and blocks cannot start with [create, delete, list, read, update] or end with [create, delete, list, read, update]"""
+    } should have message """Cannot generate good name for "list", names of projects and blocks cannot start with [create, delete, identity, list, read, update] or end with [create, delete, identity, list, read, update]"""
   }
 }
