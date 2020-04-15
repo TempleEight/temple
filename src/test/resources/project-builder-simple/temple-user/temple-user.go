@@ -131,6 +131,12 @@ func jsonMiddleware(next http.Handler) http.Handler {
 	})
 }
 
+// respondWithError responds to a HTTP request with a JSON error response
+func respondWithError(w http.ResponseWriter, err string, statusCode int) {
+	w.WriteHeader(statusCode)
+	fmt.Fprintln(w, util.CreateErrorJSON(err))
+}
+
 func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 	var req createTempleUserRequest
 	err := json.NewDecoder(r.Body).Decode(&req)

@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/squat/and/dab/booking/dao"
 	"github.com/squat/and/dab/booking/metric"
@@ -97,6 +98,13 @@ func checkAuthorization(env *env, bookingID uuid.UUID, auth *util.Auth) (bool, e
 		return false, err
 	}
 	return booking.CreatedBy == auth.ID, nil
+}
+
+// respondWithError responds to a HTTP request with a JSON error response
+func respondWithError(w http.ResponseWriter, err string, statusCode int, requestType string) {
+	w.WriteHeader(statusCode)
+	fmt.Fprintln(w, util.CreateErrorJSON(err))
+	metric.RequestFailure.WithLabelValues(requestType, strconv.Itoa(statusCode)).Inc()
 }
 
 func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
