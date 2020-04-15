@@ -136,7 +136,10 @@ object KubernetesGenerator {
   private def generateService(service: Service): String = {
     val serviceBody = Body(
       ServiceSpec(
-        service.ports.map { case name -> port => ServicePort(name, port, port) },
+        Seq(
+          ServicePort("api", service.ports.service, service.ports.service),
+          ServicePort("prom", service.ports.metrics, service.ports.metrics),
+        ),
         Labels(service.name, GenType.Service, isDb = false),
       ),
     ).asJson
@@ -151,7 +154,10 @@ object KubernetesGenerator {
     val container = Container(
       service.image,
       service.name,
-      service.ports.map { case (_, port) => ContainerPort(port) },
+      Seq(
+        ContainerPort(service.ports.service),
+        ContainerPort(service.ports.metrics),
+      ),
       env = service.appEnvVars.map(EnvVar.tupled),
       volumeMounts = Seq(),
     )

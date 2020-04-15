@@ -13,7 +13,7 @@ object OrchestrationBuilder {
 
   def createServiceOrchestrationRoot(templefile: Templefile): OrchestrationRoot = {
     val services: Iterable[Service] = templefile.allServicesWithPorts map {
-        case (name: String, service: AbstractServiceBlock, port: Ports) =>
+        case (name: String, service: AbstractServiceBlock, ports: Ports) =>
           val kebabName   = StringUtils.kebabCase(name)
           val projectName = StringUtils.kebabCase(templefile.projectName)
           val dockerImage = s"${ProjectConfig.registryURL}/$projectName-$kebabName"
@@ -23,10 +23,7 @@ object OrchestrationBuilder {
             name = kebabName,
             image = dockerImage,
             dbImage = dbImage.toString,
-            ports = Seq(
-              ("api", port.service),
-              ("prom", port.metrics),
-            ),
+            ports = ports,
             //This value assumed to be one
             replicas = 1,
             secretName = "regcred",
