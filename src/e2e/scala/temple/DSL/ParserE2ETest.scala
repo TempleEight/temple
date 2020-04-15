@@ -26,6 +26,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
         metadata = Seq(
           Metrics.Prometheus,
           Provider.Kubernetes,
+          AuthMethod.Email,
         ),
       ),
       services = Map(
@@ -48,7 +49,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
             Omit(Set(Endpoint.Delete)),
             Readable.All,
             Writable.This,
-            ServiceAuth.Email,
+            ServiceAuth,
             Uses(Seq("Booking", "SimpleTempleTestGroup")),
           ),
           structs = Map(

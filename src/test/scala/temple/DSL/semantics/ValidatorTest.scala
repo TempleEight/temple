@@ -19,7 +19,7 @@ class ValidatorTest extends FlatSpec with Matchers {
     validationErrors(
       Templefile(
         "MyProject",
-        projectBlock = ProjectBlock(Seq(Database.Postgres, Provider.Kubernetes)),
+        projectBlock = ProjectBlock(Seq(Database.Postgres, Provider.Kubernetes, AuthMethod.Email)),
         services = Map(
           "User" -> ServiceBlock(
             attributes = Map(
@@ -31,7 +31,7 @@ class ValidatorTest extends FlatSpec with Matchers {
               "f" -> Attribute(ForeignKey("Box")),
             ),
             metadata = Seq(
-              ServiceAuth.Email,
+              ServiceAuth,
               Writable.This,
               Readable.All,
               Database.Postgres,
@@ -129,10 +129,11 @@ class ValidatorTest extends FlatSpec with Matchers {
     validationErrors(
       Templefile(
         "MyProject",
+        projectBlock = ProjectBlock(Seq(AuthMethod.Email)),
         services = Map(
           "User" -> ServiceBlock(
             attributes = Map("a" -> Attribute(IntType())),
-            metadata = Seq(ServiceAuth.Email, Readable.All, Readable.This),
+            metadata = Seq(ServiceAuth, Readable.All, Readable.This),
           ),
         ),
       ),
@@ -218,10 +219,11 @@ class ValidatorTest extends FlatSpec with Matchers {
     validationErrors(
       Templefile(
         "MyProject",
+        projectBlock = ProjectBlock(Seq(AuthMethod.Email)),
         services = Map(
           "User" -> ServiceBlock(
             attributes = Map("a" -> Attribute(IntType())),
-            metadata = Seq(ServiceAuth.Email),
+            metadata = Seq(ServiceAuth),
           ),
           "Box" -> ServiceBlock(
             attributes = Map(),
@@ -242,8 +244,8 @@ class ValidatorTest extends FlatSpec with Matchers {
         ),
       ),
     ) shouldBe Set(
-      "#readable(this) requires at least one service to have #auth in User",
-      "#writable(this) requires at least one service to have #auth in User",
+      "#readable(this) requires an #authMethod to be declared for the project in User",
+      "#writable(this) requires an #authMethod to be declared for the project in User",
     )
   }
 
@@ -251,14 +253,63 @@ class ValidatorTest extends FlatSpec with Matchers {
     validationErrors(
       Templefile(
         "MyProject",
+        projectBlock = ProjectBlock(Seq(AuthMethod.Email)),
         services = Map(
           "User" -> ServiceBlock(
             attributes = Map("a" -> Attribute(IntType())),
-            metadata = Seq(ServiceAuth.Email, Writable.All, Readable.This),
+            metadata = Seq(ServiceAuth, Writable.All, Readable.This),
           ),
         ),
       ),
     ) shouldBe Set("#writable(all) is not compatible with #readable(this) in User")
+  }
+
+  it should "identify #auth xor #authMethod being present" in {
+    validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
+          "User" -> ServiceBlock(
+            attributes = Map("a" -> Attribute(IntType())),
+            metadata = Seq(ServiceAuth),
+          ),
+        ),
+      ),
+    ) shouldBe Set("#auth requires an #authMethod to be declared for the project in User")
+
+    validationErrors(
+      Templefile(
+        "MyProject",
+        projectBlock = ProjectBlock(Seq(AuthMethod.Email)),
+        services = Map(
+          "User" -> ServiceBlock(
+            attributes = Map("a" -> Attribute(IntType())),
+          ),
+        ),
+      ),
+    ) shouldBe Set("#authMethod requires at least one block to have #auth declared in MyProject project")
+
+    validationErrors(
+      Templefile(
+        "MyProject",
+        projectBlock = ProjectBlock(Seq(AuthMethod.Email)),
+        services = Map(
+          "User" -> ServiceBlock(
+            attributes = Map("a" -> Attribute(IntType())),
+            metadata = Seq(ServiceAuth),
+          ),
+        ),
+      ),
+    ) shouldBe empty
+
+    validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
+          "User" -> ServiceBlock(attributes = Map("a" -> Attribute(IntType()))),
+        ),
+      ),
+    ) shouldBe empty
   }
 
   it should "find cycles in dependencies, but only if they are not nullable" in {
@@ -291,11 +342,11 @@ class ValidatorTest extends FlatSpec with Matchers {
       validate(
         Templefile(
           "MyProject",
-          projectBlock = ProjectBlock(Seq(Database.Postgres, Provider.Kubernetes)),
+          projectBlock = ProjectBlock(Seq(Database.Postgres, Provider.Kubernetes, AuthMethod.Email)),
           services = Map(
             "User" -> ServiceBlock(
               attributes = Map("a" -> Attribute(IntType())),
-              metadata = Seq(ServiceAuth.Email),
+              metadata = Seq(ServiceAuth),
             ),
           ),
         ),

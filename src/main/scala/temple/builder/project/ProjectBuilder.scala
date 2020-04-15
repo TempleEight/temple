@@ -44,7 +44,8 @@ object ProjectBuilder {
           }
       }
     // Add read all endpoint if defined
-    service.lookupLocalMetadata[Metadata.ServiceEnumerable].fold(endpoints)(_ => endpoints + List)
+    if (service hasMetadata Metadata.ServiceEnumerable) endpoints + List
+    else endpoints
   }
 
   private def buildDatabaseCreationScripts(templefile: Templefile): Files =

@@ -19,6 +19,7 @@ case class ServiceRenamer(renamingMap: Map[String, String]) {
     // currently `identity`, as no metadata contains a service name
     ProjectBlock(
       block.metadata.map {
+        case authMethod: Metadata.AuthMethod    => authMethod
         case language: Metadata.ServiceLanguage => language
         case provider: Metadata.Provider        => provider
         case database: Metadata.Database        => database
