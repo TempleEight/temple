@@ -2,6 +2,8 @@ Tinder: project {
   #language(go);
   #database(postgres);
   #provider(dockerCompose);
+  #metrics(prometheus);
+  #authMethod(email);
 }
 
 User: service {
@@ -9,7 +11,7 @@ User: service {
   firstName: string;
   lastName: string;
   dob: datetime;
-  #auth(email); // Creates Auth service, which stores an `id`, `email` and `password` field
+  #auth;
   #readable(by: all); // Anyone can GET any User
   // Implicit #writable(by: this), only creator can UPDATE and DELETE
 }
