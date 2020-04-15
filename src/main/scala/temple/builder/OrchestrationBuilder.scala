@@ -23,7 +23,10 @@ object OrchestrationBuilder {
             name = kebabName,
             image = dockerImage,
             dbImage = dbImage.toString,
-            ports = Seq(("api", port.service)),
+            ports = Seq(
+              ("api", port.service),
+              ("prom", port.metrics),
+            ),
             //This value assumed to be one
             replicas = 1,
             secretName = "regcred",

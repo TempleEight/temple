@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: grafana
+  labels:
+    app: grafana
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: grafana
+  template:
+    metadata:
+      name: grafana
+      labels:
+        app: grafana
+    spec:
+      hostname: grafana
+      containers:
+      - image: grafana/grafana:6.6.2
+        name: grafana
+        ports:
+        - containerPort: 3000
+        volumeMounts:
+        - mountPath: /etc/grafana/provisioning/datasources/datasource.yml
+          subPath: datasource.yml
+          name: grafana-datasource
+        - mountPath: /etc/grafana/provisioning/dashboards/dashboards.yml
+          subPath: dashboards.yml
+          name: grafana-dashboards
+        - mountPath: /etc/grafana/provisioning/dashboards/complex-user.json
+          subPath: complex-user.json
+          name: grafana-complex-user
+        - mountPath: /etc/grafana/provisioning/dashboards/auth.json
+          subPath: auth.json
+          name: grafana-auth
+      restartPolicy: Always
+      volumes:
+      - name: grafana-datasource
+        configMap:
+          name: grafana-datasource-config
+      - name: grafana-dashboards
+        configMap:
+          name: grafana-dashboards-config
+      - name: grafana-complex-user
+        configMap:
+          name: grafana-complex-user-config
+      - name: grafana-auth
+        configMap:
+          name: grafana-auth-config

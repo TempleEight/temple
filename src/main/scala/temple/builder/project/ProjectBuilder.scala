@@ -25,7 +25,7 @@ import temple.generate.target.openapi.OpenAPIGenerator
 import temple.utils.FileUtils
 import temple.utils.StringUtils._
 
-import Option.when
+import scala.Option.when
 
 object ProjectBuilder {
 
@@ -83,7 +83,8 @@ object ProjectBuilder {
   private def buildOrchestration(templefile: Templefile): Files = {
     val orchestrationRoot = OrchestrationBuilder.createServiceOrchestrationRoot(templefile)
     templefile.lookupMetadata[Provider].getOrElse(return Map()) match {
-      case Provider.Kubernetes    => KubernetesGenerator.generate(templefile.projectName, orchestrationRoot)
+      case Provider.Kubernetes =>
+        KubernetesGenerator.generate(templefile.projectName, orchestrationRoot)
       case Provider.DockerCompose => DockerComposeGenerator.generate(templefile.projectName, orchestrationRoot)
     }
   }

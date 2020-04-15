@@ -105,4 +105,13 @@ object UnitTestData {
   val userDeployScriptWithMetrics: String = FileUtils.readResources("shell/deploy.sh")
 
   val userDeployScriptWithoutMetrics: String = FileUtils.readResources("shell/deploy-without-metrics.sh")
+
+  val userGrafanaDeployment: String = FileUtils.readResources("kube/user-grafana-deployment.yaml")
+
+  val userGrafanaService: String = FileUtils.readResources("project-builder-complex/kube/grafana/grafana-service.yaml")
+
+  val userPromDeployment: String =
+    FileUtils.readResources("project-builder-complex/kube/prom/prometheus-deployment.yaml")
+
+  val userPromService: String = FileUtils.readResources("project-builder-complex/kube/prom/prometheus-service.yaml")
 }

@@ -13,7 +13,7 @@ object KongConfigGenerator {
 
   /** Generate a kong service declaration for a Temple service */
   private def generateServiceDef(service: Service): String = {
-    val urls = service.ports map {
+    val urls = service.ports.headOption map {
         case (_, port) => s"--data 'url=http://${service.name}:$port/${service.name}'"
       }
 

@@ -8,4 +8,5 @@ private[kube] object GenType {
   case object Deployment   extends GenType
   case object StorageClaim extends GenType
   case object StorageMount extends GenType
+  case object None         extends GenType
 }

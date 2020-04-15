@@ -31,6 +31,7 @@ object KubernetesGenerator {
       case GenType.Deployment   => "Deployment"
       case GenType.StorageClaim => "PersistentVolumeClaim"
       case GenType.StorageMount => "PersistentVolume"
+      case GenType.None         => ""
     }
     val suffix = genType match {
       case GenType.StorageClaim => "-db-claim"
@@ -215,7 +216,9 @@ object KubernetesGenerator {
     val kongConfig: Files   = Map(KongConfigGenerator.generate(orchestrationRoot))
     val deployScript: Files = Map(DeployScriptGenerator.generate(orchestrationRoot, Provider.Kubernetes))
     val pushScript: Files   = Map(PushImageScriptGenerator.generate(projectName, orchestrationRoot))
-    kubeFiles ++ kongConfig ++ kongFiles ++ deployFiles ++ deployScript ++ pushScript
+    val metricsFiles: Files =
+      if (orchestrationRoot.usesMetrics) KubernetesMetricGenerator.generate(orchestrationRoot) else Map()
+    kubeFiles ++ kongConfig ++ kongFiles ++ deployFiles ++ deployScript ++ pushScript ++ metricsFiles
   }
 
 }
