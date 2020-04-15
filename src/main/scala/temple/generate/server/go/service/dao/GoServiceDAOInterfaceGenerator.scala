@@ -1,7 +1,7 @@
 package temple.generate.server.go.service.dao
 
 import temple.generate.CRUD
-import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
+import temple.generate.CRUD._
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -10,9 +10,9 @@ object GoServiceDAOInterfaceGenerator {
 
   private def generateInterfaceFunctionReturnType(root: ServiceRoot, operation: CRUD): String =
     operation match {
-      case List                   => s"(*[]${root.name}, error)"
-      case Create | Read | Update => s"(*${root.name}, error)"
-      case Delete                 => "error"
+      case List                              => s"(*[]${root.name}, error)"
+      case Create | Read | Update | Identify => s"(*${root.name}, error)"
+      case Delete                            => "error"
     }
 
   private[dao] def generateInterfaceFunction(

@@ -5,14 +5,16 @@ import "github.com/squat/and/dab/complex-user/dao"
 // Hook allows additional code to be executed before and after every datastore interaction
 // Hooks are executed in the order they are defined, such that if any hook errors, future hooks are not executed and the request is terminated
 type Hook struct {
-	beforeCreateHooks []*func(env *env, req createComplexUserRequest, input *dao.CreateComplexUserInput) *HookError
-	beforeReadHooks   []*func(env *env, input *dao.ReadComplexUserInput) *HookError
-	beforeUpdateHooks []*func(env *env, req updateComplexUserRequest, input *dao.UpdateComplexUserInput) *HookError
-	beforeDeleteHooks []*func(env *env, input *dao.DeleteComplexUserInput) *HookError
-	afterCreateHooks  []*func(env *env, complexUser *dao.ComplexUser) *HookError
-	afterReadHooks    []*func(env *env, complexUser *dao.ComplexUser) *HookError
-	afterUpdateHooks  []*func(env *env, complexUser *dao.ComplexUser) *HookError
-	afterDeleteHooks  []*func(env *env) *HookError
+	beforeCreateHooks   []*func(env *env, req createComplexUserRequest, input *dao.CreateComplexUserInput) *HookError
+	beforeReadHooks     []*func(env *env, input *dao.ReadComplexUserInput) *HookError
+	beforeUpdateHooks   []*func(env *env, req updateComplexUserRequest, input *dao.UpdateComplexUserInput) *HookError
+	beforeDeleteHooks   []*func(env *env, input *dao.DeleteComplexUserInput) *HookError
+	beforeIdentifyHooks []*func(env *env, input *dao.IdentifyComplexUserInput) *HookError
+	afterCreateHooks    []*func(env *env, complexUser *dao.ComplexUser) *HookError
+	afterReadHooks      []*func(env *env, complexUser *dao.ComplexUser) *HookError
+	afterUpdateHooks    []*func(env *env, complexUser *dao.ComplexUser) *HookError
+	afterDeleteHooks    []*func(env *env) *HookError
+	afterIdentifyHooks  []*func(env *env, complexUser *dao.ComplexUser) *HookError
 }
 
 // HookError wraps an existing error with HTTP status code
@@ -45,6 +47,11 @@ func (h *Hook) BeforeDelete(hook func(env *env, input *dao.DeleteComplexUserInpu
 	h.beforeDeleteHooks = append(h.beforeDeleteHooks, &hook)
 }
 
+// BeforeIdentify adds a new hook to be executed before identifying an object in the datastore
+func (h *Hook) BeforeIdentify(hook func(env *env, input *dao.IdentifyComplexUserInput) *HookError) {
+	h.beforeIdentifyHooks = append(h.beforeIdentifyHooks, &hook)
+}
+
 // AfterCreate adds a new hook to be executed after creating an object in the datastore
 func (h *Hook) AfterCreate(hook func(env *env, complexUser *dao.ComplexUser) *HookError) {
 	h.afterCreateHooks = append(h.afterCreateHooks, &hook)
@@ -63,4 +70,9 @@ func (h *Hook) AfterUpdate(hook func(env *env, complexUser *dao.ComplexUser) *Ho
 // AfterDelete adds a new hook to be executed after deleting an object in the datastore
 func (h *Hook) AfterDelete(hook func(env *env) *HookError) {
 	h.afterDeleteHooks = append(h.afterDeleteHooks, &hook)
+}
+
+// AfterIdentify adds a new hook to be executed after identifying an object in the datastore
+func (h *Hook) AfterIdentify(hook func(env *env, complexUser *dao.ComplexUser) *HookError) {
+	h.afterIdentifyHooks = append(h.afterIdentifyHooks, &hook)
 }

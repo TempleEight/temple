@@ -10,7 +10,7 @@ import temple.generate.CRUD._
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server._
 
-import scala.collection.immutable.{ListMap, SortedMap}
+import scala.collection.immutable.{ListMap, SortedMap, SortedSet}
 
 class ServerBuilderTest extends FlatSpec with Matchers {
 
@@ -23,7 +23,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
           .buildServiceRoot(
             name,
             service,
-            endpoints = Set(Create, Read, Update, Delete, List),
+            endpoints = SortedSet(Create, Read, Update, Delete, List),
             port = port.service,
             detail = GoLanguageDetail("github.com/squat/and/dab"),
             projectUsesAuth = false,
@@ -70,7 +70,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
           .buildServiceRoot(
             name,
             service,
-            endpoints = Set(),
+            endpoints = SortedSet(),
             port = port.service,
             detail = GoLanguageDetail("github.com/squat/and/dab"),
             projectUsesAuth = false,
@@ -111,7 +111,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
           .buildServiceRoot(
             name,
             service,
-            endpoints = Set(Create, Read, Update, Delete, List),
+            endpoints = SortedSet(Create, Read, Update, Delete, List),
             port = port.service,
             detail = GoLanguageDetail("github.com/squat/and/dab"),
             projectUsesAuth = false,

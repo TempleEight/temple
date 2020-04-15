@@ -120,6 +120,7 @@ func defaultRouter(env *env) *mux.Router {
 	r.HandleFunc("/simple-temple-test-user", env.createSimpleTempleTestUserHandler).Methods(http.MethodPost)
 	r.HandleFunc("/simple-temple-test-user/{id}", env.readSimpleTempleTestUserHandler).Methods(http.MethodGet)
 	r.HandleFunc("/simple-temple-test-user/{id}", env.updateSimpleTempleTestUserHandler).Methods(http.MethodPut)
+	r.HandleFunc("/simple-temple-test-user", env.identifySimpleTempleTestUserHandler).Methods(http.MethodGet)
 	r.Use(jsonMiddleware)
 	return r
 }
@@ -512,4 +513,8 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	})
 
 	metric.RequestSuccess.WithLabelValues(metric.RequestUpdate).Inc()
+}
+
+func (env *env) identifySimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
+
 }
