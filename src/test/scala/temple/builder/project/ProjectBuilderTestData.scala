@@ -108,8 +108,7 @@ object ProjectBuilderTestData {
        |    "c" : "http://c:1030/c"
        |  },
        |  "ports" : {
-       |    "service" : 1026,
-       |    "prometheus" : 1027
+       |    "service" : 1026
        |  }
        |}
        |""".stripMargin
