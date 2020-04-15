@@ -5,6 +5,7 @@ import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Update
 import temple.generate.server.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 
@@ -21,13 +22,15 @@ object GoServiceMainUpdateHandlerGenerator {
     )
   }
 
-  private def generateDAOCallBlock(root: ServiceRoot): String =
+  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean): String =
     mkCode.lines(
+      when(usesMetrics) { generateMetricTimerDecl(Update.toString) },
       genDeclareAndAssign(
         genMethodCall("env.dao", s"Update${root.name}", "input"),
         root.decapitalizedName,
         "err",
       ),
+      when(usesMetrics) { generateMetricTimerObservation() },
       generateDAOCallErrorBlock(root),
     )
 
@@ -38,6 +41,7 @@ object GoServiceMainUpdateHandlerGenerator {
     usesComms: Boolean,
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
+    usesMetrics: Boolean,
   ): String =
     mkCode(
       generateHandlerDecl(root, Update),
@@ -58,9 +62,10 @@ object GoServiceMainUpdateHandlerGenerator {
           },
           generateDAOInput(root, clientAttributes),
           generateInvokeBeforeHookBlock(root, clientAttributes, Update),
-          generateDAOCallBlock(root),
+          generateDAOCallBlock(root, usesMetrics),
           generateInvokeAfterHookBlock(root, Update),
           generateJSONResponse(s"update${root.name}", responseMap),
+          when(usesMetrics) { generateMetricSuccess(Update.toString) },
         ),
       ),
     )
