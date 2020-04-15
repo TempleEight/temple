@@ -2,7 +2,7 @@ package temple.generate.server.go.service.main
 
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD.Read
-import temple.generate.server.ServiceRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.service.main.GoServiceMainGenerator.{generateDAOReadCall, generateDAOReadInput}
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}

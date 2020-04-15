@@ -4,7 +4,7 @@ import temple.ast.AbstractAttribute
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, presentParticiple}
-import temple.generate.server.ServiceRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonHookGenerator
 import temple.generate.utils.CodeTerm.mkCode

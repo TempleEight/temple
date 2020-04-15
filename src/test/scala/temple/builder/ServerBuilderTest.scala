@@ -7,9 +7,10 @@ import temple.ast.AttributeType._
 import temple.ast.Metadata.{Database, Readable, ServiceAuth, Writable}
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server._
 
-import scala.collection.immutable.ListMap
+import scala.collection.immutable.{ListMap, SortedMap}
 
 class ServerBuilderTest extends FlatSpec with Matchers {
 
@@ -33,12 +34,12 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       "github.com/squat/and/dab/test-service",
       comms = Set("OtherService").map(ServiceName(_)),
       port = 1026,
-      opQueries = ListMap(
-        Create -> "INSERT INTO test_service (id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image, fk) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image, fk;",
-        Read   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image, fk FROM test_service WHERE id = $1;",
-        Update -> "UPDATE test_service SET id = $1, bankBalance = $2, name = $3, isStudent = $4, dateOfBirth = $5, timeOfDay = $6, expiry = $7, image = $8, fk = $9 WHERE id = $10 RETURNING id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image, fk;",
+      opQueries = SortedMap(
+        List   -> "SELECT id, bank_balance, name, is_student, date_of_birth, time_of_day, expiry, image, fk FROM test_service;",
+        Create -> "INSERT INTO test_service (id, bank_balance, name, is_student, date_of_birth, time_of_day, expiry, image, fk) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, bank_balance, name, is_student, date_of_birth, time_of_day, expiry, image, fk;",
+        Read   -> "SELECT id, bank_balance, name, is_student, date_of_birth, time_of_day, expiry, image, fk FROM test_service WHERE id = $1;",
+        Update -> "UPDATE test_service SET id = $1, bank_balance = $2, name = $3, is_student = $4, date_of_birth = $5, time_of_day = $6, expiry = $7, image = $8, fk = $9 WHERE id = $10 RETURNING id, bank_balance, name, is_student, date_of_birth, time_of_day, expiry, image, fk;",
         Delete -> "DELETE FROM test_service WHERE id = $1;",
-        List   -> "SELECT id, bankBalance, name, isStudent, dateOfBirth, timeOfDay, expiry, image, fk FROM test_service;",
       ),
       idAttribute = IDAttribute("id"),
       createdByAttribute = None,
@@ -80,7 +81,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       "github.com/squat/and/dab/test-service",
       comms = Set("OtherService").map(ServiceName(_)),
       port = 1026,
-      opQueries = ListMap(),
+      opQueries = SortedMap(),
       idAttribute = IDAttribute("id"),
       createdByAttribute = None,
       attributes = ListMap(
@@ -121,12 +122,12 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       "github.com/squat/and/dab/test-complex-service",
       comms = Set("OtherSvc").map(ServiceName(_)),
       port = 1026,
-      opQueries = ListMap(
-        Create -> "INSERT INTO test_complex_service (id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image, sampleFK1, sampleFK2) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image, sampleFK1, sampleFK2;",
-        Read   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image, sampleFK1, sampleFK2 FROM test_complex_service WHERE id = $1;",
-        Update -> "UPDATE test_complex_service SET id = $1, anotherId = $2, yetAnotherId = $3, bankBalance = $4, bigBankBalance = $5, name = $6, initials = $7, isStudent = $8, dateOfBirth = $9, timeOfDay = $10, expiry = $11, image = $12, sampleFK1 = $13, sampleFK2 = $14 WHERE id = $15 RETURNING id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image, sampleFK1, sampleFK2;",
+      opQueries = SortedMap(
+        List   -> "SELECT id, another_id, yet_another_id, bank_balance, big_bank_balance, name, initials, is_student, date_of_birth, time_of_day, expiry, image, sample_fk1, sample_fk2 FROM test_complex_service;",
+        Create -> "INSERT INTO test_complex_service (id, another_id, yet_another_id, bank_balance, big_bank_balance, name, initials, is_student, date_of_birth, time_of_day, expiry, image, sample_fk1, sample_fk2) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10, $11, $12, $13, $14) RETURNING id, another_id, yet_another_id, bank_balance, big_bank_balance, name, initials, is_student, date_of_birth, time_of_day, expiry, image, sample_fk1, sample_fk2;",
+        Read   -> "SELECT id, another_id, yet_another_id, bank_balance, big_bank_balance, name, initials, is_student, date_of_birth, time_of_day, expiry, image, sample_fk1, sample_fk2 FROM test_complex_service WHERE id = $1;",
+        Update -> "UPDATE test_complex_service SET id = $1, another_id = $2, yet_another_id = $3, bank_balance = $4, big_bank_balance = $5, name = $6, initials = $7, is_student = $8, date_of_birth = $9, time_of_day = $10, expiry = $11, image = $12, sample_fk1 = $13, sample_fk2 = $14 WHERE id = $15 RETURNING id, another_id, yet_another_id, bank_balance, big_bank_balance, name, initials, is_student, date_of_birth, time_of_day, expiry, image, sample_fk1, sample_fk2;",
         Delete -> "DELETE FROM test_complex_service WHERE id = $1;",
-        List   -> "SELECT id, anotherId, yetAnotherId, bankBalance, bigBankBalance, name, initials, isStudent, dateOfBirth, timeOfDay, expiry, image, sampleFK1, sampleFK2 FROM test_complex_service;",
       ),
       idAttribute = IDAttribute("id"),
       createdByAttribute = None,

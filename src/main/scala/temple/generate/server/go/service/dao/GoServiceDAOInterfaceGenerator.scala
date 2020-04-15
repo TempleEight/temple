@@ -2,7 +2,7 @@ package temple.generate.server.go.service.dao
 
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
-import temple.generate.server.ServiceRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 

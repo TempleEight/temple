@@ -2,7 +2,7 @@ package temple.generate.server.go.service.main
 
 import temple.ast.AbstractAttribute
 import temple.generate.CRUD._
-import temple.generate.server.ServiceRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote

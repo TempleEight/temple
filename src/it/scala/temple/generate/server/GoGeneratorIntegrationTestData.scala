@@ -6,8 +6,9 @@ import temple.ast.Metadata.Metrics.Prometheus
 import temple.ast.Metadata.{Readable, Writable}
 import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
+import temple.generate.server.AttributesRoot.ServiceRoot
 
-import scala.collection.immutable.ListMap
+import scala.collection.immutable.{ListMap, SortedMap}
 
 object GoGeneratorIntegrationTestData {
 
@@ -15,7 +16,7 @@ object GoGeneratorIntegrationTestData {
     name = "User",
     module = "github.com/TempleEight/spec-golang/user",
     comms = Set.empty,
-    opQueries = ListMap(
+    opQueries = SortedMap(
       CRUD.Create -> "INSERT INTO user_temple (id, name) VALUES ($1, $2) RETURNING id, name",
       CRUD.Read   -> "SELECT id, name FROM user_temple WHERE id = $1",
       CRUD.Update -> "UPDATE user_temple SET name = $1 WHERE id = $2 RETURNING id, name",
@@ -37,7 +38,7 @@ object GoGeneratorIntegrationTestData {
     name = "Match",
     module = "github.com/TempleEight/spec-golang/match",
     comms = Set("User").map(ServiceName(_)),
-    opQueries = ListMap(
+    opQueries = SortedMap(
       CRUD.List   -> "SELECT id, created_by, userOne, userTwo, matchedOn FROM match WHERE created_by = $1",
       CRUD.Create -> "INSERT INTO match (id, created_by, userOne, userTwo, matchedOn) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_by, userOne, userTwo, matchedOn",
       CRUD.Read   -> "SELECT id, created_by, userOne, userTwo, matchedOn FROM match WHERE id = $1",
@@ -64,7 +65,7 @@ object GoGeneratorIntegrationTestData {
     name = "DateTimeSvc",
     module = "github.com/TempleEight/integration/test",
     comms = Set.empty,
-    opQueries = ListMap(
+    opQueries = SortedMap(
       CRUD.Create -> "",
       CRUD.Read   -> "",
       CRUD.Update -> "",

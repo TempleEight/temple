@@ -4,7 +4,7 @@ import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
 import temple.ast.{AbstractAttribute, AttributeType}
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, Create, Read, Update}
-import temple.generate.server.ServiceRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator.{genStruct, genStructWithAnnotations, generateGoType}
 import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.StringUtils.{backTick, doubleQuote}
