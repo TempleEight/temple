@@ -3,7 +3,7 @@ package temple.generate.server
 import temple.ast.AbstractAttribute.Attribute
 import temple.ast.Metadata.Database.Postgres
 import temple.ast.Metadata.Metrics.Prometheus
-import temple.ast.Metadata.{Readable, Writable}
+import temple.ast.Metadata.{AuthMethod, Metrics, Readable, Writable}
 import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
 
@@ -79,6 +79,16 @@ object GoGeneratorIntegrationTestData {
     writable = Writable.This,
     projectUsesAuth = true,
     hasAuthBlock = true,
+    metrics = None,
+  )
+
+  val authNoMetricsService: AuthServiceRoot = AuthServiceRoot(
+    module = "github.com/TempleEight/integration/test",
+    port = 1024,
+    authAttribute = AuthAttribute(AuthMethod.Email, AttributeType.StringType()),
+    idAttribute = IDAttribute("id"),
+    createQuery = "",
+    readQuery = "",
     metrics = None,
   )
 

@@ -46,8 +46,9 @@ object GoAuthServiceMainGenerator {
   private[auth] def generateRouter(): String =
     FileUtils.readResources("go/genFiles/auth/main/router.go.snippet").stripLineEnd
 
-  private[auth] def generateHandlers(): String =
-    FileUtils.readResources("go/genFiles/auth/main/handlers.go.snippet").stripLineEnd
+  private[auth] def generateHandlers(usesMetric: Boolean): String =
+    if (usesMetric) FileUtils.readResources("go/genFiles/auth/main/handlers-metric.go.snippet").stripLineEnd
+    else FileUtils.readResources("go/genFiles/auth/main/handlers-no-metric.go.snippet").stripLineEnd
 
   private[auth] def generateCreateToken(): String =
     FileUtils.readResources("go/genFiles/auth/main/create_token.go.snippet").stripLineEnd
