@@ -7,7 +7,7 @@ import temple.generate.CRUD.CRUD
 import scala.collection.immutable.{ListMap, SortedMap}
 
 trait AttributesRoot extends ServiceName {
-  def name: String
+  override def name: String
   def opQueries: SortedMap[CRUD, String]
   def idAttribute: IDAttribute
   def createdByAttribute: Option[CreatedByAttribute]
