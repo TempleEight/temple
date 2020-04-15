@@ -4,10 +4,11 @@ import temple.ast.AttributeType
 import temple.ast.Metadata.{Readable, Writable}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common._
 import temple.generate.server.go.service.dao._
 import temple.generate.server.go.service.main.{GoServiceMainGenerator, GoServiceMainHandlersGenerator, GoServiceMainStructGenerator}
-import temple.generate.server.{ServiceGenerator, ServiceRoot}
+import temple.generate.server.ServiceGenerator
 import temple.generate.utils.CodeTerm.mkCode
 
 import scala.Option.when
@@ -16,9 +17,6 @@ import scala.Option.when
 object GoServiceGenerator extends ServiceGenerator {
 
   override def generate(root: ServiceRoot): Files = {
-    // Set of CRUD operations the service uses
-    val operations = root.opQueries.keySet
-
     // Whether or not the service uses inter-service communication
     val usesComms = root.comms.nonEmpty
 
@@ -35,9 +33,6 @@ object GoServiceGenerator extends ServiceGenerator {
     // Whether or not the service uses metrics
     val usesMetrics = root.metrics.isDefined
 
-    // Attributes filtered by which are client-provided
-    val clientAttributes = root.attributes.filter { case (_, attr) => attr.inRequest }
-
     // Whether or not this service is enumerating by creator
     lazy val enumeratingByCreator = root.readable match {
       case Readable.All  => false
@@ -48,22 +43,23 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${root.kebabName}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
       File(root.kebabName, s"${root.kebabName}.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoServiceMainGenerator
-          .generateImports(root, usesBase64, usesTime, usesComms, usesMetrics, clientAttributes, operations),
+        GoServiceMainGenerator.generateImports(root, usesBase64, usesTime, usesComms, usesMetrics),
         GoServiceMainStructGenerator.generateEnvStruct(usesComms),
-        when(clientAttributes.nonEmpty && (operations.contains(CRUD.Create) || operations.contains(CRUD.Update))) {
-          GoServiceMainStructGenerator.generateRequestStructs(root, operations, clientAttributes)
+        when(
+          root.requestAttributes.nonEmpty
+          && (root.operations.contains(CRUD.Create) || root.operations.contains(CRUD.Update)),
+        ) {
+          GoServiceMainStructGenerator.generateRequestStructs(root)
         },
-        GoServiceMainStructGenerator.generateResponseStructs(root, operations),
-        GoServiceMainGenerator.generateRouter(root, operations),
-        GoCommonMainGenerator.generateMain(root, root.port, usesComms, isAuth = false, usesMetrics),
+        GoServiceMainStructGenerator.generateResponseStructs(root),
+        GoServiceMainGenerator.generateRouter(root),
+        GoCommonMainGenerator.generateMain(root, usesComms, isAuth = false, usesMetrics),
         GoCommonMainGenerator.generateJsonMiddleware(),
         when((root.readable == Readable.This || root.writable == Writable.This) && !root.hasAuthBlock) {
           GoServiceMainGenerator.generateCheckAuthorization(root)
         },
         GoCommonMainGenerator.generateRespondWithError(usesMetrics),
-        GoServiceMainHandlersGenerator
-          .generateHandlers(root, operations, clientAttributes, usesComms, enumeratingByCreator, usesMetrics),
+        GoServiceMainHandlersGenerator.generateHandlers(root, usesComms, enumeratingByCreator, usesMetrics),
       ),
       File(root.kebabName, "setup.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
@@ -73,21 +69,21 @@ object GoServiceGenerator extends ServiceGenerator {
       File(root.kebabName, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
         GoCommonHookGenerator.generateImports(root.module),
-        GoServiceHookGenerator.generateHookStruct(root, clientAttributes, operations),
+        GoServiceHookGenerator.generateHookStruct(root),
         GoCommonHookGenerator.generateHookErrorStruct,
         GoCommonHookGenerator.generateHookErrorFunction,
-        GoServiceHookGenerator.generateAddHookMethods(root, clientAttributes, operations),
+        GoServiceHookGenerator.generateAddHookMethods(root),
       ),
       File(s"${root.kebabName}/dao", "errors.go") -> GoServiceDAOGenerator.generateErrors(root),
       File(s"${root.kebabName}/dao", "dao.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("dao"),
         GoServiceDAOGenerator.generateImports(root, usesTime),
-        GoServiceDAOInterfaceGenerator.generateInterface(root, operations, enumeratingByCreator),
+        GoServiceDAOInterfaceGenerator.generateInterface(root, enumeratingByCreator),
         GoCommonDAOGenerator.generateDAOStruct(),
         GoServiceDAOGenerator.generateDatastoreObjectStruct(root),
-        GoServiceDAOInputStructsGenerator.generateStructs(root, operations, enumeratingByCreator),
+        GoServiceDAOInputStructsGenerator.generateStructs(root, enumeratingByCreator),
         GoCommonDAOGenerator.generateInit(),
-        GoServiceDAOGenerator.generateQueryFunctions(operations),
+        GoServiceDAOGenerator.generateQueryFunctions(root.operations),
         GoServiceDAOFunctionsGenerator.generateDAOFunctions(root, enumeratingByCreator),
       ),
       File(s"${root.kebabName}/dao", "datastore.go") -> mkCode.doubleLines(
@@ -116,7 +112,7 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${root.kebabName}/metric", "metric.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("metric"),
         GoCommonMetricGenerator.generateImports(),
-        GoServiceMetricGenerator.generateVars(root, operations),
+        GoServiceMetricGenerator.generateVars(root),
       ),
     )).map { case (path, contents) => path -> (contents + "\n") }
   }

@@ -2,7 +2,7 @@ package temple.generate.server.go.service.dao
 
 import temple.ast.AttributeType
 import temple.generate.CRUD._
-import temple.generate.server.ServiceRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonDAOGenerator
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}

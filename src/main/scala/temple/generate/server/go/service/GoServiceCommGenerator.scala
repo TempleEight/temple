@@ -1,7 +1,8 @@
 package temple.generate.server.go.service
 
 import temple.ast.AttributeType
-import temple.generate.server.{ServiceName, ServiceRoot}
+import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.server.ServiceName
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
