@@ -20,7 +20,7 @@ object DockerComposeGenerator {
   def generateService(service: OrchestrationType.Service): (String, Service) =
     service.name -> LocalService(
       path = s"./${service.name}",
-      ports = service.ports.map(_._2),
+      ports = Seq(service.ports.service, service.ports.metrics),
       networks = Seq(s"${service.name}-network", "kong-network"),
     )
 

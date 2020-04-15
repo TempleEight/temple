@@ -1,8 +1,7 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.AbstractAttribute
 import temple.generate.CRUD._
-import temple.generate.server.ServiceRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
@@ -18,8 +17,6 @@ object GoServiceMainGenerator {
     usesTime: Boolean,
     usesComms: Boolean,
     usesMetrics: Boolean,
-    clientAttributes: ListMap[String, AbstractAttribute],
-    operations: Set[CRUD],
   ): String =
     mkCode(
       "import",
@@ -49,9 +46,9 @@ object GoServiceMainGenerator {
       ),
     )
 
-  private[service] def generateRouter(root: ServiceRoot, operations: Set[CRUD]): String = {
+  private[service] def generateRouter(root: ServiceRoot): String = {
     val handleFuncs =
-      for (operation <- operations.toSeq.sorted)
+      for (operation <- root.operations.toSeq)
         yield operation match {
           case List =>
             s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/all")}, env.list${root.name}Handler).Methods(http.MethodGet)"

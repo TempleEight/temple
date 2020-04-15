@@ -10,6 +10,9 @@ spec:
   - name: api
     port: 1026
     targetPort: 1026
+  - name: prom
+    port: 1027
+    targetPort: 1027
   selector:
     app: complex-user
     kind: service

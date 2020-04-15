@@ -73,6 +73,7 @@ services:
     build: ./user
     ports:
     - 80:80
+    - 81:81
     networks:
     - user-network
     - kong-network

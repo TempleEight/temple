@@ -11,7 +11,7 @@ import temple.generate.database.ast._
 import temple.utils.StringUtils.snakeCase
 
 import scala.Option.when
-import scala.collection.immutable.ListMap
+import scala.collection.immutable.SortedMap
 
 /** Construct database queries from a Templefile structure */
 object DatabaseBuilder {
@@ -58,7 +58,7 @@ object DatabaseBuilder {
     endpoints: Set[CRUD],
     readable: Metadata.Readable = Metadata.Readable.This,
     selectionAttribute: String = "id",
-  ): ListMap[CRUD, Statement] = {
+  ): SortedMap[CRUD, Statement] = {
     val tableName = snakeCase(serviceName)
     val columns   = attributes.keys.map(att => Column(snakeCase(att))).toSeq
     val providedColumns =
@@ -67,8 +67,8 @@ object DatabaseBuilder {
         .keys
         .map(att => Column(snakeCase(att)))
         .toSeq
-    ListMap.from(
-      endpoints.map {
+    endpoints
+      .map {
         case Create =>
           Create -> Statement.Insert(
             tableName,
@@ -101,8 +101,8 @@ object DatabaseBuilder {
               PreparedComparison("created_by", ComparisonOperator.Equal)
             },
           )
-      },
-    )
+      }
+      .to(SortedMap)
   }
 
   /**

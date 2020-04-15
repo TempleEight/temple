@@ -1,10 +1,10 @@
 package temple.generate.server.go.service.main
 
+import temple.ast.AttributeType
 import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
-import temple.ast.{AbstractAttribute, AttributeType}
 import temple.generate.CRUD
 import temple.generate.CRUD.{CRUD, Create, Read, Update}
-import temple.generate.server.ServiceRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator.{genStruct, genStructWithAnnotations, generateGoType}
 import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.StringUtils.{backTick, doubleQuote}
@@ -68,12 +68,8 @@ object GoServiceMainStructGenerator {
       genStructWithAnnotations(s"${operation.toString.toLowerCase}${root.name}Request", fields),
     )
 
-  private[service] def generateRequestStructs(
-    root: ServiceRoot,
-    operations: Set[CRUD],
-    clientAttributes: ListMap[String, AbstractAttribute],
-  ): String = {
-    val fields = clientAttributes.map {
+  private[service] def generateRequestStructs(root: ServiceRoot): String = {
+    val fields = root.requestAttributes.map {
       case (name, attr) =>
         (
           name.capitalize,
@@ -82,10 +78,10 @@ object GoServiceMainStructGenerator {
         )
     }
     mkCode.doubleLines(
-      when(operations.contains(CRUD.Create)) {
+      when(root.operations contains CRUD.Create) {
         generateRequestStruct(root, CRUD.Create, fields)
       },
-      when(operations.contains(CRUD.Update)) {
+      when(root.operations contains CRUD.Update) {
         generateRequestStruct(root, CRUD.Update, fields)
       },
     )
@@ -127,7 +123,7 @@ object GoServiceMainStructGenerator {
       genStructWithAnnotations(s"${operation.toString.toLowerCase}${root.name}Response", fields),
     )
 
-  private[service] def generateResponseStructs(root: ServiceRoot, operations: Set[CRUD]): String = {
+  private[service] def generateResponseStructs(root: ServiceRoot): String = {
     // Response struct fields include ID and user-defined attributes without the @server annotation
     val fields = Iterable(
         (
@@ -145,8 +141,8 @@ object GoServiceMainStructGenerator {
           )
       }
     mkCode.doubleLines(
-      when(operations.contains(CRUD.List)) { generateListResponseStructs(root, fields) },
-      for (operation <- Set(CRUD.Create, CRUD.Read, CRUD.Update) if operations.contains(operation))
+      when(root.operations contains CRUD.List) { generateListResponseStructs(root, fields) },
+      for (operation <- root.operations intersect Set(CRUD.Create, CRUD.Read, CRUD.Update))
         yield generateResponseStruct(root, operation, fields),
     )
   }

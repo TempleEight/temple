@@ -24,6 +24,7 @@ spec:
         name: simple-temple-test-user
         ports:
         - containerPort: 1026
+        - containerPort: 1027
       imagePullSecrets:
       - name: regcred
       restartPolicy: Always

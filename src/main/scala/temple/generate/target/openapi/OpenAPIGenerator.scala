@@ -94,9 +94,9 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             s"Get a list of every $lowerName",
             tags = tags,
             responses = Seq(
-              200 -> BodyLiteral(
-                jsonContent(MediaTypeObject(OpenAPIArray(generateItemType(service.attributes)))),
+              200 -> ResponseObject(
                 s"$capitalizedName list successfully fetched",
+                Some(jsonContent(MediaTypeObject(OpenAPIArray(generateItemType(service.attributes))))),
               ),
               500 -> Response.Ref(useError(500)),
             ),
@@ -105,11 +105,12 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         path(s"/$lowerName") += HTTPVerb.Post -> Handler(
             s"Register a new $lowerName",
             tags = tags,
-            requestBody = Some(BodyLiteral(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
+            requestBody =
+              Some(RequestBodyObject(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
             responses = Seq(
-              200 -> BodyLiteral(
-                jsonContent(MediaTypeObject(generateItemType(service.attributes))),
+              200 -> ResponseObject(
                 s"$capitalizedName successfully created",
+                Some(jsonContent(MediaTypeObject(generateItemType(service.attributes)))),
               ),
               400 -> Response.Ref(useError(400)),
               401 -> Response.Ref(useError(401)),
@@ -121,9 +122,9 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             s"Look up a single $lowerName",
             tags = tags,
             responses = Seq(
-              200 -> BodyLiteral(
-                jsonContent(MediaTypeObject(generateItemType(service.attributes))),
+              200 -> ResponseObject(
                 s"$capitalizedName details",
+                Some(jsonContent(MediaTypeObject(generateItemType(service.attributes)))),
               ),
               400 -> Response.Ref(useError(400)),
               401 -> Response.Ref(useError(401)),
@@ -135,11 +136,12 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Put -> Handler(
             s"Update a single $lowerName",
             tags = tags,
-            requestBody = Some(BodyLiteral(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
+            requestBody =
+              Some(RequestBodyObject(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
             responses = Seq(
-              200 -> BodyLiteral(
-                jsonContent(MediaTypeObject(generateItemType(service.attributes))),
+              200 -> ResponseObject(
                 s"$capitalizedName successfully updated",
+                Some(jsonContent(MediaTypeObject(generateItemType(service.attributes)))),
               ),
               400 -> Response.Ref(useError(400)),
               401 -> Response.Ref(useError(401)),
@@ -152,14 +154,34 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             s"Delete a single $lowerName",
             tags = tags,
             responses = Seq(
-              200 -> BodyLiteral(
-                jsonContent(MediaTypeObject(OpenAPIObject(Map()))),
+              200 -> ResponseObject(
                 s"$capitalizedName successfully deleted",
+                Some(jsonContent(MediaTypeObject(OpenAPIObject(Map())))),
               ),
               400 -> Response.Ref(useError(400)),
               401 -> Response.Ref(useError(401)),
               404 -> Response.Ref(useError(404)),
               500 -> Response.Ref(useError(500)),
+            ),
+          )
+      case Identity =>
+        path(s"/$lowerName") += HTTPVerb.Get -> Handler(
+            s"Look up the single $lowerName associated with the access token",
+            tags = tags,
+            responses = Seq(
+              302 -> ResponseObject(
+                description = s"The single $lowerName is accessible from the provided Location",
+                content = None,
+                headers = Some(
+                  Map(
+                    "Location" -> HeaderObject(
+                      description = s"The location where the single $lowerName can be found",
+                      typ = "string",
+                    ),
+                  ),
+                ),
+              ),
+              404 -> Response.Ref(useError(404)),
             ),
           )
     }
@@ -199,11 +221,13 @@ object OpenAPIGenerator {
 
   /** Create a Response representation for an error */
   private[openapi] def generateError(description: String, example: String): Response =
-    BodyLiteral(
+    ResponseObject(
       description = description,
-      content = jsonContent(
-        MediaTypeObject(
-          OpenAPIObject(ListMap("error" -> OpenAPISimpleType("string", "example" -> example.asJson))),
+      content = Some(
+        jsonContent(
+          MediaTypeObject(
+            OpenAPIObject(ListMap("error" -> OpenAPISimpleType("string", "example" -> example.asJson))),
+          ),
         ),
       ),
     )

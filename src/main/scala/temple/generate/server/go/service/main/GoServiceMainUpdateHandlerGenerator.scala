@@ -1,9 +1,8 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.AbstractAttribute
 import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Update
-import temple.generate.server.ServiceRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
@@ -14,8 +13,11 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainUpdateHandlerGenerator {
 
-  private def generateDAOInput(root: ServiceRoot, clientAttributes: ListMap[String, AbstractAttribute]): String = {
-    val updateInput = ListMap("ID" -> s"${root.decapitalizedName}ID") ++ generateDAOInputClientMap(clientAttributes)
+  private def generateDAOInput(root: ServiceRoot): String = {
+    val updateInput =
+      ListMap("ID" -> s"${root.decapitalizedName}ID") ++
+      generateDAOInputClientMap(root.requestAttributes)
+
     genDeclareAndAssign(
       genPopulateStruct(s"dao.Update${root.name}Input", updateInput),
       "input",
@@ -37,7 +39,6 @@ object GoServiceMainUpdateHandlerGenerator {
   /** Generate the update handler function */
   private[main] def generateUpdateHandler(
     root: ServiceRoot,
-    clientAttributes: ListMap[String, AbstractAttribute],
     usesComms: Boolean,
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
@@ -52,17 +53,17 @@ object GoServiceMainUpdateHandlerGenerator {
           generateExtractIDBlock(root.decapitalizedName, metricSuffix),
           when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root, metricSuffix) },
           // Only need to handle request JSONs when there are client attributes
-          when(clientAttributes.nonEmpty) {
+          when(root.requestAttributes.nonEmpty) {
             mkCode.doubleLines(
               generateDecodeRequestBlock(root, Update, s"update${root.name}", metricSuffix),
-              generateRequestNilCheck(root, clientAttributes, metricSuffix),
+              generateRequestNilCheck(root.requestAttributes, metricSuffix),
               generateValidateStructBlock(metricSuffix),
-              when(usesComms) { generateForeignKeyCheckBlocks(root, clientAttributes, metricSuffix) },
-              when(clientUsesTime) { generateParseTimeBlocks(clientAttributes, metricSuffix) },
+              when(usesComms) { generateForeignKeyCheckBlocks(root, metricSuffix) },
+              when(clientUsesTime) { generateParseTimeBlocks(root.requestAttributes, metricSuffix) },
             )
           },
-          generateDAOInput(root, clientAttributes),
-          generateInvokeBeforeHookBlock(root, clientAttributes, Update, metricSuffix),
+          generateDAOInput(root),
+          generateInvokeBeforeHookBlock(root, Update, metricSuffix),
           generateDAOCallBlock(root, usesMetrics, metricSuffix),
           generateInvokeAfterHookBlock(root, Update, metricSuffix),
           generateJSONResponse(s"update${root.name}", responseMap),

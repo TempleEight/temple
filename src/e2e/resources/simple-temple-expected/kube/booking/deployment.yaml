@@ -24,6 +24,7 @@ spec:
         name: booking
         ports:
         - containerPort: 1028
+        - containerPort: 1029
       imagePullSecrets:
       - name: regcred
       restartPolicy: Always

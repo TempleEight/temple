@@ -11,10 +11,11 @@ import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
 import temple.generate.database.{PostgresContext, PostgresGenerator, PreparedType}
 import temple.generate.server
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server._
 import temple.utils.StringUtils
 
-import scala.collection.immutable.ListMap
+import scala.collection.immutable.{ListMap, SortedMap}
 
 object ServerBuilder {
 
@@ -48,7 +49,7 @@ object ServerBuilder {
     val writable =
       serviceBlock.lookupLocalMetadata[Metadata.Writable].getOrElse(ProjectConfig.getDefaultWritable(projectUsesAuth))
 
-    val queries: ListMap[CRUD, String] =
+    val queries: SortedMap[CRUD, String] =
       DatabaseBuilder
         .buildQuery(serviceName, serviceBlock.attributes, endpoints, readable, selectionAttribute = idAttribute.name)
         .map {

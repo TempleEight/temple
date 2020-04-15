@@ -1,6 +1,9 @@
 package temple.ast
 
 import temple.ast.AbstractServiceBlock._
+
+import temple.ast.Metadata.{Metrics, ServiceAuth}
+
 import temple.ast.Templefile.Ports
 import temple.builder.project.ProjectConfig
 
@@ -23,6 +26,9 @@ case class Templefile(
 
   // Whether or not to generate an auth service - based on whether any service has #auth
   val usesAuth: Boolean = lookupMetadata[Metadata.AuthMethod].isDefined
+
+  // Whether or not to generate metrics
+  val usesMetrics: Boolean = lookupMetadata[Metrics].nonEmpty
 
   val providedServicesWithPorts: Iterable[(String, ServiceBlock, Ports)] =
     providedServices

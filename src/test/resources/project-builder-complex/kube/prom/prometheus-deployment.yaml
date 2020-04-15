@@ -1,0 +1,32 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  labels:
+    app: prometheus
+  name: prometheus
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: prometheus
+  template:
+    metadata:
+      labels:
+        app: prometheus
+      name: prometheus
+    spec:
+      hostname: prometheus
+      containers:
+      - image: prom/prometheus:v2.16.0
+        name: prometheus
+        ports:
+        - containerPort: 9090
+        volumeMounts:
+        - mountPath: /etc/prometheus/prometheus.yml
+          subPath: prometheus.yml
+          name: prometheus-file
+      restartPolicy: Always
+      volumes:
+      - name: prometheus-file
+        configMap:
+          name: prometheus-file-config

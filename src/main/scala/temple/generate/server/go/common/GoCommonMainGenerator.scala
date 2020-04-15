@@ -1,5 +1,6 @@
 package temple.generate.server.go.common
 
+import temple.generate.server.AbstractAttributesRoot.AbstractServiceRoot
 import temple.generate.server.ServiceName
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -105,8 +106,7 @@ object GoCommonMainGenerator {
     )
 
   private[go] def generateMain(
-    serviceName: ServiceName,
-    port: Int,
+    service: AbstractServiceRoot,
     usesComms: Boolean,
     isAuth: Boolean,
     usesMetrics: Boolean,
@@ -115,7 +115,7 @@ object GoCommonMainGenerator {
       "func main()",
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          generateFlagParseBlock(serviceName),
+          generateFlagParseBlock(service),
           generateRequireFieldsBlock(),
           generateGetConfigBlock(),
           when(usesMetrics) { generateMetricsBlock() },
@@ -124,7 +124,7 @@ object GoCommonMainGenerator {
           when(isAuth) { generateJWTCredentialsBlock() },
           generateEnvDeclarationBlock(usesComms, isAuth),
           generateSetupBlock(),
-          generateListenAndServeBlock(port),
+          generateListenAndServeBlock(service.port),
         ),
       ),
     )
