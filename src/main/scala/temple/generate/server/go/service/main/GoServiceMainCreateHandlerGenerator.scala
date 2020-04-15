@@ -83,6 +83,7 @@ object GoServiceMainCreateHandlerGenerator {
           generateDAOInput(root, clientAttributes),
           generateInvokeBeforeHookBlock(root, clientAttributes, Create),
           generateDAOCallBlock(root),
+          generateInvokeAfterHookBlock(root, Create),
           generateJSONResponse(s"create${root.name}", responseMap),
         ),
       ),

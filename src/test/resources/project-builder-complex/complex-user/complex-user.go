@@ -243,6 +243,14 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	for _, hook := range env.hook.afterCreateHooks {
+		err := (*hook)(env, complexUser)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(createComplexUserResponse{
 		ID:                 complexUser.ID,
 		SmallIntField:      complexUser.SmallIntField,
@@ -302,6 +310,14 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, errMsg, http.StatusInternalServerError)
 		}
 		return
+	}
+
+	for _, hook := range env.hook.afterReadHooks {
+		err := (*hook)(env, complexUser)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(readComplexUserResponse{
@@ -419,6 +435,14 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	for _, hook := range env.hook.afterUpdateHooks {
+		err := (*hook)(env, complexUser)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(updateComplexUserResponse{
 		ID:                 complexUser.ID,
 		SmallIntField:      complexUser.SmallIntField,
@@ -478,6 +502,14 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 			http.Error(w, errMsg, http.StatusInternalServerError)
 		}
 		return
+	}
+
+	for _, hook := range env.hook.afterDeleteHooks {
+		err := (*hook)(env)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(struct{}{})
