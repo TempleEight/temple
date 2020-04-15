@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/squat/and/dab/simple-temple-test-group/dao"
 	"github.com/squat/and/dab/simple-temple-test-group/metric"
@@ -97,6 +98,13 @@ func checkAuthorization(env *env, simpleTempleTestGroupID uuid.UUID, auth *util.
 		return false, err
 	}
 	return simpleTempleTestGroup.CreatedBy == auth.ID, nil
+}
+
+// respondWithError responds to a HTTP request with a JSON error response
+func respondWithError(w http.ResponseWriter, err string, statusCode int, requestType string) {
+	w.WriteHeader(statusCode)
+	fmt.Fprintln(w, util.CreateErrorJSON(err))
+	metric.RequestFailure.WithLabelValues(requestType, strconv.Itoa(statusCode)).Inc()
 }
 
 func (env *env) createSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.Request) {
