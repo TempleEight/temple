@@ -95,6 +95,7 @@ object GoServiceMainListHandlerGenerator {
               when(usesMetrics) { generateMetricTimerObservation() },
               queryDAOErrorBlock,
             ),
+            generateInvokeAfterHookBlock(root, List),
           ),
           instantiateResponseBlock,
           mapResponseBlock,

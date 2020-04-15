@@ -7,7 +7,6 @@
     
   },
   "ports" : {
-    "service" : 1026,
-    "prometheus" : 1027
+    "service" : 1026
   }
 }

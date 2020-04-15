@@ -87,6 +87,7 @@ object GoServiceMainCreateHandlerGenerator {
           generateDAOInput(root, clientAttributes),
           generateInvokeBeforeHookBlock(root, clientAttributes, Create),
           generateDAOCallBlock(root, usesMetrics),
+          generateInvokeAfterHookBlock(root, Create),
           generateJSONResponse(s"create${root.name}", responseMap),
           when(usesMetrics) { generateMetricSuccess(Create.toString) },
         ),

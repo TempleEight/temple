@@ -63,6 +63,7 @@ object GoServiceMainUpdateHandlerGenerator {
           generateDAOInput(root, clientAttributes),
           generateInvokeBeforeHookBlock(root, clientAttributes, Update),
           generateDAOCallBlock(root, usesMetrics),
+          generateInvokeAfterHookBlock(root, Update),
           generateJSONResponse(s"update${root.name}", responseMap),
           when(usesMetrics) { generateMetricSuccess(Update.toString) },
         ),

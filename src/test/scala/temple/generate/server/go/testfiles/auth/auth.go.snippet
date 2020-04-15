@@ -178,6 +178,14 @@ func (env *env) registerAuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, hook := range env.hook.afterRegisterHooks {
+		err := (*hook)(env, auth, accessToken)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(registerAuthResponse{
 		AccessToken: accessToken,
 	})
@@ -240,6 +248,14 @@ func (env *env) loginAuthHandler(w http.ResponseWriter, r *http.Request) {
 		errMsg := util.CreateErrorJSON(fmt.Sprintf("Could not create access token: %s", err.Error()))
 		http.Error(w, errMsg, http.StatusInternalServerError)
 		return
+	}
+
+	for _, hook := range env.hook.afterLoginHooks {
+		err := (*hook)(env, auth, accessToken)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(loginAuthResponse{

@@ -46,6 +46,7 @@ object GoServiceMainDeleteHandlerGenerator {
           generateDAOInput(root),
           generateInvokeBeforeHookBlock(root, ListMap(), Delete),
           generateDAOCallBlock(root, usesMetrics),
+          generateInvokeAfterHookBlock(root, Delete),
           genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", "struct{}{}"),
           when(usesMetrics) { generateMetricSuccess(Delete.toString) },
         ),
