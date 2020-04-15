@@ -87,7 +87,7 @@ type DeleteComplexUserInput struct {
 	ID uuid.UUID
 }
 
-// IdentifyComplexUserInput encapsulates the information required to identify the single complexUser in the datastore
+// IdentifyComplexUserInput encapsulates the information required to identify the current complexUser in the datastore
 type IdentifyComplexUserInput struct {
 	ID uuid.UUID
 }

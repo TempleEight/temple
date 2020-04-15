@@ -76,7 +76,7 @@ type UpdateSimpleTempleTestUserInput struct {
 	BreakfastTime        time.Time
 }
 
-// IdentifySimpleTempleTestUserInput encapsulates the information required to identify the single simpleTempleTestUser in the datastore
+// IdentifySimpleTempleTestUserInput encapsulates the information required to identify the current simpleTempleTestUser in the datastore
 type IdentifySimpleTempleTestUserInput struct {
 	ID uuid.UUID
 }

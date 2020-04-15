@@ -17,7 +17,7 @@ object GoServiceDAOInputStructsGenerator {
     operation match {
       case List                            => s"read a ${root.decapitalizedName} list"
       case Create | Read | Update | Delete => s"${operation.toString.toLowerCase} a single ${root.decapitalizedName}"
-      case Identify                        => s"identify the single ${root.decapitalizedName}"
+      case Identify                        => s"identify the current ${root.decapitalizedName}"
     }
 
   private def generateStruct(root: ServiceRoot, operation: CRUD): String = {
@@ -44,12 +44,10 @@ object GoServiceDAOInputStructsGenerator {
           CodeUtils.pad(
             operation match {
               // Compose struct fields for each operation
-              case List     => createdByMap
-              case Create   => idMap ++ createdByMap ++ attributesMap
-              case Read     => idMap
-              case Update   => idMap ++ attributesMap
-              case Delete   => idMap
-              case Identify => idMap
+              case List                     => createdByMap
+              case Create                   => idMap ++ createdByMap ++ attributesMap
+              case Read | Delete | Identify => idMap
+              case Update                   => idMap ++ attributesMap
             },
           ),
         ),
