@@ -170,6 +170,14 @@ func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, hook := range env.hook.afterListHooks {
+		err := (*hook)(env, matchList)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	matchListResp := listMatchResponse{
 		MatchList: make([]listMatchElement, 0),
 	}
@@ -268,6 +276,14 @@ func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, hook := range env.hook.afterCreateHooks {
+		err := (*hook)(env, match)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(createMatchResponse{
 		ID:        match.ID,
 		UserOne:   match.UserOne,
@@ -330,6 +346,14 @@ func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, errMsg, http.StatusInternalServerError)
 		}
 		return
+	}
+
+	for _, hook := range env.hook.afterReadHooks {
+		err := (*hook)(env, match)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(readMatchResponse{
@@ -443,6 +467,14 @@ func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	for _, hook := range env.hook.afterUpdateHooks {
+		err := (*hook)(env, match)
+		if err != nil {
+			// TODO
+			return
+		}
+	}
+
 	json.NewEncoder(w).Encode(updateMatchResponse{
 		ID:        match.ID,
 		UserOne:   match.UserOne,
@@ -505,6 +537,14 @@ func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {
 			http.Error(w, errMsg, http.StatusInternalServerError)
 		}
 		return
+	}
+
+	for _, hook := range env.hook.afterDeleteHooks {
+		err := (*hook)(env)
+		if err != nil {
+			// TODO
+			return
+		}
 	}
 
 	json.NewEncoder(w).Encode(struct{}{})
