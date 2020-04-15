@@ -10,6 +10,9 @@ spec:
   - name: api
     port: 1028
     targetPort: 1028
+  - name: prom
+    port: 1029
+    targetPort: 1029
   selector:
     app: booking
     kind: service

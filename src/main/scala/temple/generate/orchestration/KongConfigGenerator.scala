@@ -13,9 +13,7 @@ object KongConfigGenerator {
 
   /** Generate a kong service declaration for a Temple service */
   private def generateServiceDef(service: Service): String = {
-    val urls = service.ports map {
-        case (_, port) => s"--data 'url=http://${service.name}:$port/${service.name}'"
-      }
+    val urls = s"--data 'url=http://${service.name}:${service.ports.service}/${service.name}'"
 
     mkCode.shellLines(
       "curl -s -X POST",

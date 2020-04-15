@@ -24,6 +24,7 @@ spec:
         name: auth
         ports:
         - containerPort: 1024
+        - containerPort: 1025
       imagePullSecrets:
       - name: regcred
       restartPolicy: Always

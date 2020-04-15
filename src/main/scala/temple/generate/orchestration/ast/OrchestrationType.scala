@@ -1,5 +1,7 @@
 package temple.generate.orchestration.ast
 
+import temple.ast.Templefile.Ports
+
 object OrchestrationType {
 
   /** Input information to generate kubernetes scripts */
@@ -24,7 +26,7 @@ object OrchestrationType {
     name: String,
     image: String,
     dbImage: String,
-    ports: Seq[(String, Int)],
+    ports: Ports,
     replicas: Int,
     secretName: String,
     appEnvVars: Seq[(String, String)],
