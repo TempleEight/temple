@@ -22,8 +22,9 @@ object Application {
     val analyzedTemplefile = Analyzer.parseAndValidate(data)
     val detail             = LanguageSpecificDetailBuilder.build(analyzedTemplefile, questionAsker)
     val project            = ProjectBuilder.build(analyzedTemplefile, detail)
+    val filteredProject    = RegenerationFilter.filter(outputDirectory, project, questionAsker)
 
-    FileUtils.outputProject(outputDirectory, project)
+    FileUtils.outputProject(outputDirectory, filteredProject)
 
     println(s"Generated project in $outputDirectory")
   }

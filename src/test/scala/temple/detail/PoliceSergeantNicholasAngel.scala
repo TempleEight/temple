@@ -16,5 +16,6 @@ package temple.detail
 object PoliceSergeantNicholasAngel extends QuestionAsker {
 
   /** Police Sergeant Nicholas Angel loves asking questions to the public in order to find out the answers he needs */
-  override def askQuestion(question: String): String = "github.com/squat/and/dab"
+  override def askQuestion(question: String): String =
+    if (question.contains("module")) "github.com/squat/and/dab" else "Y"
 }
