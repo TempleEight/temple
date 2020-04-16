@@ -3,7 +3,6 @@ package temple.DSL.semantics
 import temple.DSL.semantics.NameClashes._
 import temple.ast.AbstractAttribute.{Attribute, CreatedByAttribute, IDAttribute}
 import temple.ast.AbstractServiceBlock._
-import temple.ast.Annotation.Nullable
 import temple.ast.AttributeType._
 import temple.ast.Metadata.ServiceAuth
 import temple.ast.{Metadata, _}
@@ -173,8 +172,7 @@ private class Validator private (templefile: Templefile) {
       case None                       => // nothing to validate
     }
     attribute.valueAnnotations foreach {
-      case Annotation.Unique   => // nothing to validate
-      case Annotation.Nullable => // nothing to validate
+      case Annotation.Unique => // nothing to validate
     }
   }
 
@@ -217,7 +215,7 @@ private class Validator private (templefile: Templefile) {
   private val referenceCycles: Set[Set[String]] = {
     val graph = templefile.providedBlockNames.map { blockName =>
       blockName -> templefile.getBlock(blockName).attributes.values.collect {
-        case Attribute(ForeignKey(references), _, annotations) if !annotations.contains(Nullable) => references
+        case Attribute(ForeignKey(references), _, annotations) => references
       }
     }.toMap
     Tarjan(graph).filter(_.sizeIs > 1)

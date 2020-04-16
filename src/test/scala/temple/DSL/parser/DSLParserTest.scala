@@ -83,7 +83,7 @@ class DSLParserTest extends FlatSpec with DSLParserMatchers {
             "Fred",
             "struct",
             Seq(
-              Attribute("field", AttributeType.Primitive("string"), Seq(Annotation("nullable"))),
+              Attribute("field", AttributeType.Primitive("string")),
               Attribute("friend", AttributeType.Foreign("User")),
               Attribute("image", AttributeType.Primitive("data", Args(Seq(Arg.IntArg(10_000_000))))),
               Metadata("enumerable"),
