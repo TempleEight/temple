@@ -60,6 +60,8 @@ object GoServiceMainGenerator {
             s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.update${root.name}Handler).Methods(http.MethodPut)"
           case Delete =>
             s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.delete${root.name}Handler).Methods(http.MethodDelete)"
+          case Identify =>
+            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}")}, env.identify${root.name}Handler).Methods(http.MethodGet)"
         }
 
     mkCode.lines(

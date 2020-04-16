@@ -83,7 +83,7 @@ object NameClashes {
 
   // DAO clashes
   private def templeGoNameValidator: NameValidator = {
-    val crudStrings   = CRUD.values.map(_.toString.toLowerCase)
+    val crudStrings   = CRUD.values.toSeq.map(_.toString.toLowerCase)
     val suffixStrings = Seq("list", "input", "response")
 
     var lastBaseName: Option[String] = None
@@ -93,7 +93,8 @@ object NameClashes {
       if (!valid && lastBaseName.nonEmpty)
         throw new SemanticParsingException(
           s"""Cannot generate good name for "$baseName", names of projects and blocks cannot """
-          + s"start with [${crudStrings.mkString(", ")}] or end with [${crudStrings.mkString(", ")}]",
+          + s"start with [${crudStrings.mkString(", ")}], "
+          + s"and names of projects, blocks and fields cannot end with [${suffixStrings.mkString(", ")}]",
         )
       lastBaseName = Some(baseName)
       valid

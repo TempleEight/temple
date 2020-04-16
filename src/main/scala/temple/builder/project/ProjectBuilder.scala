@@ -25,16 +25,17 @@ import temple.generate.target.openapi.OpenAPIGenerator
 import temple.utils.FileUtils
 import temple.utils.StringUtils._
 
-import scala.Option.when
+import Option.when
+import scala.collection.immutable.SortedSet
 
 object ProjectBuilder {
 
-  def endpoints(service: AttributeBlock[_]): Set[CRUD] = {
-    val endpoints: Set[CRUD] = service
+  def endpoints(service: AttributeBlock[_]): SortedSet[CRUD] = {
+    val endpoints: SortedSet[CRUD] = service
       .lookupLocalMetadata[Metadata.Omit]
       .map(_.endpoints)
       .getOrElse(Set.empty)
-      .foldLeft(Set[CRUD](Create, Read, Update, Delete)) {
+      .foldLeft(SortedSet[CRUD](Create, Read, Update, Delete)) {
         case (set, endpoint) =>
           endpoint match {
             case Endpoint.Create => set - CRUD.Create
@@ -43,9 +44,10 @@ object ProjectBuilder {
             case Endpoint.Delete => set - CRUD.Delete
           }
       }
-    // Add read all endpoint if defined
-    if (service hasMetadata Metadata.ServiceEnumerable) endpoints + List
-    else endpoints
+
+    endpoints ++
+    when(service hasMetadata Metadata.ServiceEnumerable) { List } ++
+    when(service hasMetadata Metadata.ServiceAuth) { Identify }
   }
 
   private def buildDatabaseCreationScripts(templefile: Templefile): Files =

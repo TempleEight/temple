@@ -4,6 +4,8 @@ import temple.generate.CRUD.CRUD
 import temple.generate.metrics.grafana.ast.Row.{Metric, Query}
 import temple.generate.metrics.grafana.ast.{Datasource, Row}
 
+import scala.collection.immutable.SortedSet
+
 object MetricsBuilder {
 
   // Generate PromQL queries for determining queries per second to a service
@@ -43,7 +45,7 @@ object MetricsBuilder {
   def createDashboardRows(
     serviceName: String,
     datasource: Datasource,
-    endpoints: Set[CRUD],
+    endpoints: SortedSet[CRUD],
     structName: Option[String] = None,
   ): Seq[Row] =
     endpoints.zipWithIndex.map {

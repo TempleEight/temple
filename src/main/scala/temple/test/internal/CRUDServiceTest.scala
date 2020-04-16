@@ -100,11 +100,12 @@ class CRUDServiceTest(
       ServiceTestUtils.getAuthTokenWithEmail(name, baseURL)
     } else ""
     ProjectBuilder.endpoints(service).foreach {
-      case CRUD.List   => testListEndpoint(accessToken)
-      case CRUD.Create => testCreateEndpoint(accessToken)
-      case CRUD.Read   => testReadEndpoint(accessToken)
-      case CRUD.Update => testUpdateEndpoint(accessToken)
-      case CRUD.Delete => testDeleteEndpoint(accessToken)
+      case CRUD.List     => testListEndpoint(accessToken)
+      case CRUD.Create   => testCreateEndpoint(accessToken)
+      case CRUD.Read     => testReadEndpoint(accessToken)
+      case CRUD.Update   => testUpdateEndpoint(accessToken)
+      case CRUD.Delete   => testDeleteEndpoint(accessToken)
+      case CRUD.Identify => // TODO
     }
     anyTestFailed
   }

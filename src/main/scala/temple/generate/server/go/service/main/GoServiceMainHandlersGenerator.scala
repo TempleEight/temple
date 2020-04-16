@@ -12,6 +12,7 @@ import temple.generate.server.go.service.main.GoServiceMainDeleteHandlerGenerato
 import temple.generate.server.go.service.main.GoServiceMainListHandlerGenerator.generateListHandler
 import temple.generate.server.go.service.main.GoServiceMainReadHandlerGenerator.generateReadHandler
 import temple.generate.server.go.service.main.GoServiceMainUpdateHandlerGenerator.generateUpdateHandler
+import temple.generate.server.go.service.main.GoServiceMainIdentityHandlerGenerator.generateIdentityHandler
 import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.StringUtils.{decapitalize, doubleQuote}
 
@@ -405,6 +406,8 @@ object GoServiceMainHandlersGenerator {
           generateUpdateHandler(root, usesComms, responseMap, clientUsesTime, usesMetrics)
         case Delete =>
           generateDeleteHandler(root, usesMetrics)
+        case Identify =>
+          generateIdentityHandler(root, usesMetrics)
       },
     )
   }
