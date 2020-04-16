@@ -40,7 +40,6 @@ Product: service {
   price: float;
 
   Picture: struct {
-    product: Product;
     image: data(5M);
     #enumerable;
   }
