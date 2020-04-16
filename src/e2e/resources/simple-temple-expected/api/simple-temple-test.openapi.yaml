@@ -146,6 +146,8 @@ paths:
                 type: string
         '404':
           $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
   /simpletempletestuser/{id}:
     parameters:
     - in: path
