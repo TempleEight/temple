@@ -496,5 +496,48 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 }
 
 func (env *env) identifySimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestIdentify)
+		return
+	}
 
+	input := dao.IdentifySimpleTempleTestUserInput{
+		ID: auth.ID,
+	}
+
+	for _, hook := range env.hook.beforeIdentifyHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)
+			return
+		}
+	}
+
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestIdentify))
+	simpleTempleTestUser, err := env.dao.IdentifySimpleTempleTestUser(input)
+	timer.ObserveDuration()
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrSimpleTempleTestUserNotFound:
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestIdentify)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestIdentify)
+		}
+		return
+	}
+
+	for _, hook := range env.hook.afterIdentifyHooks {
+		err := (*hook)(env, simpleTempleTestUser)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)
+			return
+		}
+	}
+
+	url := fmt.Sprintf("%s:%s/api%s/%s", r.Header.Get("X-Forwarded-Host"), r.Header.Get("X-Forwarded-Port"), r.URL.Path, simpleTempleTestUser.ID)
+	w.Header().Set("Location", url)
+	w.WriteHeader(http.StatusFound)
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestIdentify).Inc()
 }
