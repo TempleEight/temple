@@ -48,7 +48,7 @@ object GoServiceMainIdentifyHandlerGenerator {
       genMethodCall(
         "fmt",
         "Sprintf",
-        doubleQuote("%s:%s/%s/%s"),
+        doubleQuote("%s:%s/api%s/%s"),
         genMethodCall("r.Header", "Get", doubleQuote("X-Forwarded-Host")),
         genMethodCall("r.Header", "Get", doubleQuote("X-Forwarded-Port")),
         "r.URL.Path",

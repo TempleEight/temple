@@ -559,7 +559,7 @@ func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Reques
 		}
 	}
 
-	url := fmt.Sprintf("%s:%s/%s/%s", r.Header.Get("X-Forwarded-Host"), r.Header.Get("X-Forwarded-Port"), r.URL.Path, complexUser.ID)
+	url := fmt.Sprintf("%s:%s/api%s/%s", r.Header.Get("X-Forwarded-Host"), r.Header.Get("X-Forwarded-Port"), r.URL.Path, complexUser.ID)
 	w.Header().Set("Location", url)
 	w.WriteHeader(http.StatusFound)
 
