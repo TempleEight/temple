@@ -25,4 +25,9 @@ class EndpointIntegrationTest extends EndpointTesterSpec with Matchers {
         noException should be thrownBy buildAndTestEndpoints(templefile)
       }
   }
+
+  it should "correctly generate enumReadAll.temple" in {
+    val enumReadAllTemple = FileUtils.readFile("src/test/scala/temple/testfiles/enumReadAll.temple")
+    noException should be thrownBy buildAndTestEndpoints(enumReadAllTemple)
+  }
 }
