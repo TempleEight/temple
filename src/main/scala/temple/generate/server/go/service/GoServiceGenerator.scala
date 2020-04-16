@@ -28,7 +28,7 @@ object GoServiceGenerator extends ServiceGenerator {
         .nonEmpty
 
     // Whether or not this service uses base64, by checking for attributes of type blob
-    val usesBase64 = root.attributes.values.map(_.attributeType).toSet.contains(AttributeType.BlobType())
+    val usesBase64 = root.attributes.values.exists(_.attributeType.isInstanceOf[AttributeType.BlobType])
 
     // Whether or not the service uses metrics
     val usesMetrics = root.metrics.isDefined
