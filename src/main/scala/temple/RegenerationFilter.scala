@@ -35,19 +35,24 @@ object RegenerationFilter {
         .iterator()
         .asScala
         .filterNot(path => path.toFile.isDirectory)
-        .map(path => File(path.getParent.toString, path.getFileName.toString))
+        .map(path => FileSystems.getDefault.getPath(directory).resolve(path))
+        .map(path =>
+          // hack - if the file is in $directory then getParent wont contain "directory/", but it will when the
+          // file is in some subdirectory of $directory, allow for both cases
+          File(path.getParent.toString.replace(directory + "/", "").replace(directory, ""), path.getFileName.toString),
+        )
         .toSeq
     } else Seq()
 
   // Check if any of the files we're generating already exist, i.e if we're regenerating something.
   private def isRegen(outputDir: String, existingFiles: Seq[File], project: Project): Boolean = {
-    val generatedFiles = project.files.keys.map(file => File(outputDir + file.folder, file.filename)).toSet
+    val generatedFiles = project.files.keys.map(file => File(file.folder, file.filename)).toSet
     existingFiles.toSet.intersect(generatedFiles).nonEmpty
   }
 
   // Confirm with the user that they want to overwrite existing files
   private def shouldRegen(omittedFiles: Seq[File], questionAsker: QuestionAsker): Boolean = {
-    val omittedFileString = mkCode.lines(s"➤ ${omittedFiles.toString}")
+    val omittedFileString = mkCode.lines(omittedFiles.map(file => s"➤ ${file.toString}"))
     var answer            = ""
     while (!Seq("y", "n").contains(answer.toLowerCase)) {
       answer = questionAsker.askQuestion(confirmationString(omittedFileString))
@@ -75,7 +80,7 @@ object RegenerationFilter {
       // Get the user to confirm whether we're regenerating
       if (shouldRegen(omittedFiles, questionAsker)) {
         Project(project.files.filterNot {
-          case file -> _ => omittedFiles.contains(File(outputDirectory + file.folder, file.filename))
+          case file -> _ => omittedFiles.contains(File(file.folder, file.filename))
         })
       } else {
         // If the user doesn't want to overwrite files, don't output anything
