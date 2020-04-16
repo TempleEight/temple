@@ -175,26 +175,25 @@ object ServiceTestUtils {
     val service = allServices.getOrElse(serviceName, test.fail(s"service $serviceName does not exist"))
 
     // If this service is an auth service, an access token can only create one entity
-    val createJSON = service.lookupLocalMetadata[Metadata.ServiceAuth] match {
-      case Some(_) =>
-        // First check if that single entity already exists
-        val response = Http(s"http://$baseURL/api/${StringUtils.kebabCase(serviceName)}")
-          .method("GET")
-          .header("Authorization", s"Bearer $accessToken")
-          .asString
-        response.code match {
-          case HttpURLConnection.HTTP_MOVED_TEMP =>
-            // Already exists, so perform a GET on it now the ID is known
-            val url = response.header("Location").getOrElse(test.fail("302 response without Location header"))
-            getRequest(test, s"http://$url", accessToken)
-          case HttpURLConnection.HTTP_NOT_FOUND =>
-            // Not found, so create a new one
-            createObject(test, service, serviceName, allServices, baseURL, accessToken)
-          case _ =>
-            test.fail(s"Unexpected response code ${response.code} when creating $serviceName")
-        }
-      case None =>
-        createObject(test, service, serviceName, allServices, baseURL, accessToken)
+    val createJSON = if (service hasMetadata Metadata.ServiceAuth) {
+      // First check if that single entity already exists
+      val response = Http(s"http://$baseURL/api/${StringUtils.kebabCase(serviceName)}")
+        .method("GET")
+        .header("Authorization", s"Bearer $accessToken")
+        .asString
+      response.code match {
+        case HttpURLConnection.HTTP_MOVED_TEMP =>
+          // Already exists, so perform a GET on it now the ID is known
+          val url = response.header("Location").getOrElse(test.fail("302 response without Location header"))
+          getRequest(test, s"http://$url", accessToken)
+        case HttpURLConnection.HTTP_NOT_FOUND =>
+          // Not found, so create a new one
+          createObject(test, service, serviceName, allServices, baseURL, accessToken)
+        case _ =>
+          test.fail(s"Unexpected response code ${response.code} when creating $serviceName")
+      }
+    } else {
+      createObject(test, service, serviceName, allServices, baseURL, accessToken)
     }
 
     val idJSON = createJSON("id").getOrElse(test.fail(s"response to create $serviceName did not contain an id key"))
