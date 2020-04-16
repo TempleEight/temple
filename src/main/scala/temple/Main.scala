@@ -1,6 +1,6 @@
 package temple
 
-import java.nio.file.FileAlreadyExistsException
+import java.nio.file.{FileAlreadyExistsException, NoSuchFileException}
 
 import temple.detail.StdInQuestionAsker
 
@@ -23,7 +23,8 @@ object Main extends App {
     }
   } catch {
     case error: FileAlreadyExistsException => exit(s"File already exists: ${error.getMessage}")
-    case error: Exception                  => exit(error.getMessage)
+    case error: NoSuchFileException        => exit(s"File not found: ${error.getMessage}")
+    case error: Exception                  => exit((error.toString +: error.getStackTrace.toSeq).mkString("\n"))
   }
 
 }

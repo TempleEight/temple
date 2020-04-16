@@ -6,10 +6,11 @@ import (
 )
 
 var (
-	RequestCreate = "create"
-	RequestRead   = "read"
-	RequestUpdate = "update"
-	RequestDelete = "delete"
+	RequestCreate   = "create"
+	RequestRead     = "read"
+	RequestUpdate   = "update"
+	RequestDelete   = "delete"
+	RequestIdentify = "identify"
 
 	RequestSuccess = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "complexuser_request_success_total",

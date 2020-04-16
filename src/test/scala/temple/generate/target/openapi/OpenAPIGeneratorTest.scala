@@ -192,6 +192,8 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                type: string
         |        '404':
         |          $ref: '#/components/responses/Error404'
+        |        '500':
+        |          $ref: '#/components/responses/Error500'
         |  /match/{id}:
         |    parameters:
         |    - in: path
