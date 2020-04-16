@@ -182,6 +182,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
                 ),
               ),
               404 -> Response.Ref(useError(404)),
+              500 -> Response.Ref(useError(500)),
             ),
           )
     }

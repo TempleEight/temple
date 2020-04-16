@@ -5,7 +5,7 @@ import temple.DSL.parser.DSLParserMatchers
 import temple.DSL.semantics.Analyzer.parseAndValidate
 import temple.ast.AbstractAttribute.{Attribute, CreatedByAttribute, IDAttribute}
 import temple.ast.AbstractServiceBlock.ServiceBlock
-import temple.ast.Annotation.{Nullable, Server, Unique}
+import temple.ast.Annotation.{Server, Unique}
 import temple.ast.AttributeType._
 import temple.ast.Metadata._
 import temple.ast._
@@ -57,7 +57,7 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
               Map(
                 "id"        -> IDAttribute,
                 "createdBy" -> CreatedByAttribute,
-                "field"     -> Attribute(StringType(), valueAnnotations = Set(Nullable)),
+                "field"     -> Attribute(StringType()),
                 "friend"    -> Attribute(ForeignKey("SimpleTempleTestUser")),
                 "image"     -> Attribute(BlobType(size = Some(10_000_000))),
               ),
