@@ -520,5 +520,48 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 }
 
 func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestIdentify)
+		return
+	}
 
+	input := dao.IdentifyComplexUserInput{
+		ID: auth.ID,
+	}
+
+	for _, hook := range env.hook.beforeIdentifyHooks {
+		err := (*hook)(env, &input)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)
+			return
+		}
+	}
+
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestIdentify))
+	complexUser, err := env.dao.IdentifyComplexUser(input)
+	timer.ObserveDuration()
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrComplexUserNotFound:
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestIdentify)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestIdentify)
+		}
+		return
+	}
+
+	for _, hook := range env.hook.afterIdentifyHooks {
+		err := (*hook)(env, complexUser)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)
+			return
+		}
+	}
+
+	url := fmt.Sprintf("%s:%s/%s/%s", r.Header.Get("X-Forwarded-Host"), r.Header.Get("X-Forwarded-Port"), r.URL.Path, complexUser.ID)
+	w.Header().Set("Location", url)
+	w.WriteHeader(http.StatusFound)
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestIdentify).Inc()
 }
