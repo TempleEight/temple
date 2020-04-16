@@ -1,0 +1,64 @@
+Amazon: project {
+  #language(go);
+  #database(postgres);
+  #authMethod(email);
+  #provider(dockerCompose);
+}
+
+Seller: service {
+  firstName: string;
+  lastName: string;
+
+  #auth;
+  #readable(by: all);
+  #enumerable;
+}
+
+Customer: service {
+  firstName: string;
+  lastName: string;
+  addressLine1: string;
+  addressLine2: string;
+  town: string;
+  county: string;
+  postcode: string;
+
+  #auth;
+}
+
+ProductCategory: service {
+  name: string;
+  #readable(by: all);
+  #enumerable;
+}
+
+Product: service {
+  category: ProductCategory;
+  seller: Seller;
+  name: string;
+  description: string;
+  price: float;
+
+  Picture: struct {
+    product: Product;
+    image: data(5M);
+    #enumerable;
+  }
+
+  #readable(by: all);
+  #enumerable;
+}
+
+Order: service {
+  customer: Customer;
+  orderDate: datetime;
+
+  // OrderItem is a join table between Orders and Products (many to many)
+  OrderItem: struct {
+    product: Product;
+    #enumerable;
+  }
+
+  #omit([delete]);
+  #enumerable;
+}
