@@ -1,0 +1,63 @@
+// TODO: Model property availability, since bookings are rightly #readable(by: this)
+
+Airbnb: project {
+  #language(go);
+  #database(postgres);
+  #provider(dockerCompose);
+  #metrics(prometheus);
+  #authMethod(email);
+}
+
+Landlord: service {
+  // implicit 'id' field that matches auth service 'id' field
+  firstName: string;
+  lastName: string;
+  #auth;
+  #readable(by: all);
+  // implicit #writable(by: this) since project has auth
+}
+
+Tenant: service {
+  // implicit 'id' field that matches auth service 'id' field
+  firstName: string;
+  lastName: string;
+  #auth;
+  // implicit #readable(by: this) since project has auth
+  // implicit #writable(by: this) since project has auth
+}
+
+Property: service {
+  // implicit 'id' field
+  // implicit 'createdBy' field since service does not have auth
+  landlord: Landlord;
+  address: string;
+  city: string;
+  postcode: string;
+  description: string;
+
+  Photo: struct {
+    // implicit 'id' field
+    // implicit 'parentID' field
+    // implicit 'createdBy' field
+    image: data(5M);
+    caption: string;
+    #enumerable;
+    // implicit #readable(by: all) since parent is readable by all
+    // implicit #writable(by:this) since parent is writable by this
+  }
+
+  #enumerable;
+  #readable(by: all);
+  // implicit #writable(by: this) since project has auth
+}
+
+Booking: service {
+  // implicit 'id' field
+  // implicit 'createdBy' field since service does not have auth
+  tenant: Tenant;
+  property: Property;
+  startTime: DateTime;
+  endTime: DateTime;
+  // implicit #readable(by: this) since project has auth
+  // implicit #writable(by: this) since project has auth
+}
