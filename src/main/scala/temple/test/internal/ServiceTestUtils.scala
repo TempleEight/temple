@@ -164,7 +164,7 @@ object ServiceTestUtils {
     postRequest(test, s"http://$baseURL/api/${StringUtils.kebabCase(serviceName)}", requestBody, accessToken)
   }
 
-  /** Create a new object in a given service, returning the ID field and access token used to make the request */
+  /** Create a new object in a given service, returning the ID field */
   def create(
     test: EndpointTest,
     serviceName: String,
