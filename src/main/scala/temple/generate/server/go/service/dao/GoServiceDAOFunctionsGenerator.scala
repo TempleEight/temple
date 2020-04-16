@@ -1,5 +1,6 @@
 package temple.generate.server.go.service.dao
 
+import temple.ast.Metadata.Readable
 import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update, Identify}
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
@@ -41,9 +42,11 @@ object GoServiceDAOFunctionsGenerator {
     val prefix  = "input"
     lazy val id = Seq(s"$prefix.${root.idAttribute.name.toUpperCase}")
     lazy val createdBy = root.createdByAttribute match {
-      // TODO: Fix this behaviour
-      case Some(CreatedByAttribute(inputName, _)) => Seq(s"$prefix.${inputName.capitalize}")
-      case _                                      => Seq.empty
+      // If for the list operation, only include createdBy argument if readable by this
+      case Some(CreatedByAttribute(inputName, _)) if operation != List || root.readable == Readable.This =>
+        Seq(s"$prefix.${inputName.capitalize}")
+      case _ =>
+        Seq.empty
     }
     lazy val attributes = root.attributes.map { case name -> _ => s"$prefix.${name.capitalize}" }.toSeq
 
