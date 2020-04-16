@@ -12,7 +12,7 @@ import temple.generate.server.go.service.main.GoServiceMainDeleteHandlerGenerato
 import temple.generate.server.go.service.main.GoServiceMainListHandlerGenerator.generateListHandler
 import temple.generate.server.go.service.main.GoServiceMainReadHandlerGenerator.generateReadHandler
 import temple.generate.server.go.service.main.GoServiceMainUpdateHandlerGenerator.generateUpdateHandler
-import temple.generate.server.go.service.main.GoServiceMainIdentityHandlerGenerator.generateIdentityHandler
+import temple.generate.server.go.service.main.GoServiceMainIdentifyHandlerGenerator.generateIdentifyHandler
 import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.StringUtils.{decapitalize, doubleQuote}
 
@@ -356,7 +356,7 @@ object GoServiceMainHandlersGenerator {
         }
       case Create | Update =>
         if (root.requestAttributes.isEmpty) Seq("env", "&input") else Seq("env", "req", "&input")
-      case Read | Delete =>
+      case Read | Delete | Identify =>
         Seq("env", "&input")
     }
 
@@ -380,7 +380,7 @@ object GoServiceMainHandlersGenerator {
     val hookArguments = operation match {
       case List =>
         Seq("env", s"${root.decapitalizedName}List")
-      case Create | Read | Update =>
+      case Create | Read | Update | Identify =>
         Seq("env", root.decapitalizedName)
       case Delete =>
         Seq("env")
@@ -433,7 +433,7 @@ object GoServiceMainHandlersGenerator {
         case Delete =>
           generateDeleteHandler(root, usesMetrics)
         case Identify =>
-          generateIdentityHandler(root, usesMetrics)
+          generateIdentifyHandler(root, usesMetrics)
       },
     )
   }
