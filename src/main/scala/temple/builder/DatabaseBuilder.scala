@@ -1,6 +1,7 @@
 package temple.builder
 
 import temple.ast.AbstractAttribute.{CreatedByAttribute, IDAttribute}
+import temple.ast.Annotation.Nullable
 import temple.ast._
 import temple.generate.CRUD._
 import temple.generate.database.ast.ColumnConstraint.Check
@@ -22,12 +23,13 @@ object DatabaseBuilder {
   }
 
   private def toColDef(name: String, attribute: AbstractAttribute): ColumnDef = {
-    val nonNullConstraint = Some(ColumnConstraint.NonNull)
+    val nonNullConstraint = when(!attribute.valueAnnotations.contains(Nullable)) { ColumnConstraint.NonNull }
 
     val primaryKeyConstraint = when(attribute == IDAttribute) { ColumnConstraint.PrimaryKey }
 
     val valueConstraints = attribute.valueAnnotations.flatMap {
-        case Annotation.Unique => Some(ColumnConstraint.Unique)
+        case Annotation.Unique   => Some(ColumnConstraint.Unique)
+        case Annotation.Nullable => None
       } ++ nonNullConstraint ++ primaryKeyConstraint
 
     val (colType, typeConstraints) = attribute.attributeType match {

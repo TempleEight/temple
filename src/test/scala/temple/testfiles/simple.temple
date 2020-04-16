@@ -17,7 +17,7 @@ User: service {
   breakfastTime: time;
 
   Fred: struct {
-    field: string;
+    field: string @nullable;
     friend: User;
     image: data(10M);
     #enumerable;
