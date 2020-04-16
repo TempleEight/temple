@@ -1,0 +1,17 @@
+EnumReadAll: project{
+  #language(go);
+  #database(postgres);
+  #provider(dockerCompose);
+  #authMethod(email);
+}
+
+Bulbasaur: service {
+  nickname: string;
+  #auth;
+}
+
+Squirtle: service {
+  nickname: string;
+  #enumerable;
+  #readable(by: all);
+}
