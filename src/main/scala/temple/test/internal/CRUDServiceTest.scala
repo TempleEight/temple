@@ -14,8 +14,11 @@ class CRUDServiceTest(
   usesAuth: Boolean,
 ) extends ServiceTest(name) {
 
-  private def testCreateEndpoint(accessToken: String): Unit =
+  private def newToken(): String = if (usesAuth) ServiceTestUtils.getAuthTokenWithEmail(name, baseURL) else ""
+
+  private def testCreateEndpoint(): Unit =
     testEndpoint("create") { test =>
+      val accessToken = newToken()
       val requestBody =
         ServiceTestUtils.constructRequestBody(test, service.attributes, allServices, baseURL, accessToken)
       val createJSON =
@@ -24,58 +27,56 @@ class CRUDServiceTest(
       test.validateResponseBody(requestBody.asObject, createJSON, service.attributes)
     }
 
-  private def testReadEndpoint(accessToken: String): Unit =
+  private def testReadEndpoint(): Unit =
     testEndpoint("read") { test =>
+      val accessToken    = newToken()
       val createResponse = ServiceTestUtils.create(test, name, allServices, baseURL, accessToken)
       val getJSON = ServiceTestUtils
         .getRequest(
           test,
-          s"http://$baseURL/api/${StringUtils.kebabCase(name)}/${createResponse.id}",
-          createResponse.accessToken,
+          s"http://$baseURL/api/${StringUtils.kebabCase(name)}/${createResponse}",
+          accessToken,
         )
       test.validateResponseBody(None, getJSON, service.attributes)
     }
 
-  private def testUpdateEndpoint(accessToken: String): Unit =
+  private def testUpdateEndpoint(): Unit =
     testEndpoint("update") { test =>
+      val accessToken    = newToken()
       val createResponse = ServiceTestUtils.create(test, name, allServices, baseURL, accessToken)
       val requestBody =
         ServiceTestUtils
-          .constructRequestBody(test, service.attributes, allServices, baseURL, createResponse.accessToken)
+          .constructRequestBody(test, service.attributes, allServices, baseURL, accessToken)
       val updateJSON =
         ServiceTestUtils.putRequest(
           test,
-          s"http://$baseURL/api/${StringUtils.kebabCase(name)}/${createResponse.id}",
+          s"http://$baseURL/api/${StringUtils.kebabCase(name)}/${createResponse}",
           requestBody,
-          createResponse.accessToken,
+          accessToken,
         )
       test.validateResponseBody(requestBody.asObject, updateJSON, service.attributes)
     }
 
-  private def testDeleteEndpoint(accessToken: String): Unit =
+  private def testDeleteEndpoint(): Unit =
     testEndpoint("delete") { test =>
+      val accessToken    = newToken()
       val createResponse = ServiceTestUtils.create(test, name, allServices, baseURL, accessToken)
       val deleteJSON =
         ServiceTestUtils.deleteRequest(
           test,
-          s"http://$baseURL/api/${StringUtils.kebabCase(name)}/${createResponse.id}",
-          createResponse.accessToken,
+          s"http://$baseURL/api/${StringUtils.kebabCase(name)}/${createResponse}",
+          accessToken,
         )
       test.assert(deleteJSON.isEmpty, "delete response was not empty")
     }
 
-  private def testListEndpoint(accessToken: String): Unit =
+  private def testListEndpoint(): Unit =
     testEndpoint("list") { test =>
-      // To be sure how many items are created using the access token (and therefore validate `Readable.this` is correct,
-      // construct a new accessToken
-      val newAccessToken = if (usesAuth) {
-        ServiceTestUtils.getAuthTokenWithEmail(name, baseURL)
-      } else ""
-
-      val createResponse = ServiceTestUtils.create(test, name, allServices, baseURL, newAccessToken)
+      val accessToken = newToken()
+      val _           = ServiceTestUtils.create(test, name, allServices, baseURL, accessToken)
       val listJSON =
         ServiceTestUtils
-          .getRequest(test, s"http://$baseURL/api/${StringUtils.kebabCase(name)}/all", createResponse.accessToken)
+          .getRequest(test, s"http://$baseURL/api/${StringUtils.kebabCase(name)}/all", accessToken)
           .apply(s"${name}List")
           .flatMap(_.asArray)
           .getOrElse(test.fail(s"response did not contain key ${name}List"))
@@ -96,15 +97,12 @@ class CRUDServiceTest(
 
   // Test each type of endpoint that is present in the service
   def test(): Boolean = {
-    val accessToken = if (usesAuth) {
-      ServiceTestUtils.getAuthTokenWithEmail(name, baseURL)
-    } else ""
     ProjectBuilder.endpoints(service).foreach {
-      case CRUD.List     => testListEndpoint(accessToken)
-      case CRUD.Create   => testCreateEndpoint(accessToken)
-      case CRUD.Read     => testReadEndpoint(accessToken)
-      case CRUD.Update   => testUpdateEndpoint(accessToken)
-      case CRUD.Delete   => testDeleteEndpoint(accessToken)
+      case CRUD.List     => testListEndpoint()
+      case CRUD.Create   => testCreateEndpoint()
+      case CRUD.Read     => testReadEndpoint()
+      case CRUD.Update   => testUpdateEndpoint()
+      case CRUD.Delete   => testDeleteEndpoint()
       case CRUD.Identify => // TODO
     }
     anyTestFailed
