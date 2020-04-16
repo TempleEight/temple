@@ -1,5 +1,6 @@
 package temple.test.internal
 
+import java.net.HttpURLConnection
 import java.sql.Date
 import java.text.SimpleDateFormat
 import java.util.UUID
@@ -16,7 +17,6 @@ import temple.utils.StringUtils
 import scala.util.Random
 
 object ServiceTestUtils {
-  case class CreateResponse(id: String, accessToken: String)
 
   // Decode a string body into a JSON object, failing the test if any stage fails
   private def decodeJSON(test: EndpointTest, body: String): JsonObject = {
@@ -121,7 +121,7 @@ object ServiceTestUtils {
         case (name, attribute) =>
           val value: Json = attribute.attributeType match {
             case AttributeType.ForeignKey(references) =>
-              create(test, references, allServices, baseURL, accessToken).id.asJson
+              create(test, references, allServices, baseURL, accessToken).asJson
             case AttributeType.UUIDType =>
               UUID.randomUUID().asJson
             case AttributeType.BoolType =>
@@ -151,6 +151,19 @@ object ServiceTestUtils {
       }
       .asJson
 
+  /** Create an object in a given service, returning the unique ID for that object */
+  private def createObject(
+    test: EndpointTest,
+    service: ServiceBlock,
+    serviceName: String,
+    allServices: Map[String, ServiceBlock],
+    baseURL: String,
+    accessToken: String,
+  ): JsonObject = {
+    val requestBody = constructRequestBody(test, service.attributes, allServices, baseURL, accessToken)
+    postRequest(test, s"http://$baseURL/api/${StringUtils.kebabCase(serviceName)}", requestBody, accessToken)
+  }
+
   /** Create a new object in a given service, returning the ID field and access token used to make the request */
   def create(
     test: EndpointTest,
@@ -158,27 +171,34 @@ object ServiceTestUtils {
     allServices: Map[String, ServiceBlock],
     baseURL: String,
     accessToken: String,
-  ): CreateResponse = {
+  ): String = {
     val service = allServices.getOrElse(serviceName, test.fail(s"service $serviceName does not exist"))
-    // If this service is an auth service, the same access token cannot be used twice, so make a new one to be safe...
-    // This is so that services that reference 2+ auth'd services can be successfully tested
-    // TODO: refactor for central auth method
-    val newAccessToken = service.lookupLocalMetadata[Metadata.ServiceAuth].fold(accessToken) { _ =>
-      ServiceTestUtils.getAuthTokenWithEmail(serviceName, baseURL)
+
+    // If this service is an auth service, an access token can only create one entity
+    val createJSON = service.lookupLocalMetadata[Metadata.ServiceAuth] match {
+      case Some(_) =>
+        // First check if that single entity already exists
+        val response = Http(s"http://$baseURL/api/${StringUtils.kebabCase(serviceName)}")
+          .method("GET")
+          .header("Authorization", s"Bearer $accessToken")
+          .asString
+        response.code match {
+          case HttpURLConnection.HTTP_MOVED_TEMP =>
+            // Already exists, so perform a GET on it now the ID is known
+            val url = response.header("Location").getOrElse(test.fail("302 response without Location header"))
+            getRequest(test, s"http://$url", accessToken)
+          case HttpURLConnection.HTTP_NOT_FOUND =>
+            // Not found, so create a new one
+            createObject(test, service, serviceName, allServices, baseURL, accessToken)
+          case _ =>
+            test.fail(s"Unexpected response code ${response.code} when creating $serviceName")
+        }
+      case None =>
+        createObject(test, service, serviceName, allServices, baseURL, accessToken)
     }
 
-    val requestBody = constructRequestBody(test, service.attributes, allServices, baseURL, newAccessToken)
-    val createJSON = ServiceTestUtils
-      .postRequest(
-        test,
-        s"http://$baseURL/api/${StringUtils.kebabCase(serviceName)}",
-        requestBody,
-        newAccessToken,
-      )
     val idJSON = createJSON("id").getOrElse(test.fail(s"response to create $serviceName did not contain an id key"))
-    val id =
-      idJSON.asString.getOrElse(test.fail(s"response to create $serviceName contained field id, but was not a string"))
-    CreateResponse(id, newAccessToken)
+    idJSON.asString.getOrElse(test.fail(s"response to create $serviceName contained field id, but was not a string"))
   }
 
   /**
