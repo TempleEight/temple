@@ -53,7 +53,9 @@ object GoServiceMainHandlersGenerator {
   private[main] def generateRespondWithError(
     statusCode: String,
     metricSuffix: Option[String],
-  )(errMsg: String, errMsgArgs: String*): String = {
+    errMsg: String,
+    errMsgArgs: String*,
+  ): String = {
     val errMsgString =
       if (errMsgArgs.nonEmpty) genMethodCall("fmt", "Sprintf", doubleQuote(errMsg), errMsgArgs)
       else errMsg
@@ -67,12 +69,14 @@ object GoServiceMainHandlersGenerator {
   }
 
   /** Generate respond with error call and return */
-  private[main] def generateRespondWithErrorReturn(statusCode: String, metricSuffix: Option[String])(
+  private[main] def generateRespondWithErrorReturn(
+    statusCode: String,
+    metricSuffix: Option[String],
     errMsg: String,
     errMsgArgs: String*,
   ): String =
     mkCode.lines(
-      generateRespondWithError(statusCode, metricSuffix)(errMsg, errMsgArgs: _*),
+      generateRespondWithError(statusCode, metricSuffix, errMsg, errMsgArgs: _*),
       genReturn(),
     )
 
@@ -90,7 +94,9 @@ object GoServiceMainHandlersGenerator {
         "err",
       ),
       genIfErr(
-        generateRespondWithErrorReturn(genHTTPEnum(StatusUnauthorized), metricSuffix)(
+        generateRespondWithErrorReturn(
+          genHTTPEnum(StatusUnauthorized),
+          metricSuffix,
           "Could not authorize request: %s",
           genMethodCall("err", "Error"),
         ),
@@ -106,7 +112,7 @@ object GoServiceMainHandlersGenerator {
         "err",
       ),
       genIfErr(
-        generateRespondWithErrorReturn(genHTTPEnum(StatusBadRequest), metricSuffix)(genMethodCall("err", "Error")),
+        generateRespondWithErrorReturn(genHTTPEnum(StatusBadRequest), metricSuffix, genMethodCall("err", "Error")),
       ),
     )
 
@@ -117,7 +123,7 @@ object GoServiceMainHandlersGenerator {
       mkCode.lines(
         genIf(
           s"auth.ID != ${root.decapitalizedName}ID",
-          generateRespondWithErrorReturn(genHTTPEnum(StatusUnauthorized), metricSuffix)(doubleQuote("Unauthorized")),
+          generateRespondWithErrorReturn(genHTTPEnum(StatusUnauthorized), metricSuffix, doubleQuote("Unauthorized")),
         ),
       )
     } else {
@@ -131,11 +137,15 @@ object GoServiceMainHandlersGenerator {
           genSwitchReturn(
             "err.(type)",
             ListMap(
-              s"dao.Err${root.name}NotFound" -> generateRespondWithError(genHTTPEnum(StatusUnauthorized), metricSuffix)(
+              s"dao.Err${root.name}NotFound" -> generateRespondWithError(
+                genHTTPEnum(StatusUnauthorized),
+                metricSuffix,
                 doubleQuote("Unauthorized"),
               ),
             ),
-            generateRespondWithError(genHTTPEnum(StatusInternalServerError), metricSuffix)(
+            generateRespondWithError(
+              genHTTPEnum(StatusInternalServerError),
+              metricSuffix,
               "Something went wrong: %s",
               genMethodCall("err", "Error"),
             ),
@@ -143,7 +153,7 @@ object GoServiceMainHandlersGenerator {
         ),
         genIf(
           "!authorized",
-          generateRespondWithErrorReturn(genHTTPEnum(StatusUnauthorized), metricSuffix)(doubleQuote("Unauthorized")),
+          generateRespondWithErrorReturn(genHTTPEnum(StatusUnauthorized), metricSuffix, doubleQuote("Unauthorized")),
         ),
       )
     }
@@ -163,7 +173,9 @@ object GoServiceMainHandlersGenerator {
         genAssign(jsonDecodeCall, "err")
       },
       genIfErr(
-        generateRespondWithErrorReturn(genHTTPEnum(StatusBadRequest), metricSuffix)(
+        generateRespondWithErrorReturn(
+          genHTTPEnum(StatusBadRequest),
+          metricSuffix,
           "Invalid request parameters: %s",
           genMethodCall("err", "Error"),
         ),
@@ -178,7 +190,9 @@ object GoServiceMainHandlersGenerator {
   ): String =
     genIf(
       clientAttributes.map { case name -> _ => s"req.${name.capitalize} == nil" }.mkString(" || "),
-      generateRespondWithErrorReturn(genHTTPEnum(StatusBadRequest), metricSuffix)(
+      generateRespondWithErrorReturn(
+        genHTTPEnum(StatusBadRequest),
+        metricSuffix,
         doubleQuote("Missing request parameter(s)"),
       ),
     )
@@ -188,7 +202,9 @@ object GoServiceMainHandlersGenerator {
     mkCode.lines(
       genAssign(genMethodCall("valid", "ValidateStruct", "req"), "_", "err"),
       genIfErr(
-        generateRespondWithErrorReturn(genHTTPEnum(StatusBadRequest), metricSuffix)(
+        generateRespondWithErrorReturn(
+          genHTTPEnum(StatusBadRequest),
+          metricSuffix,
           "Invalid request parameters: %s",
           genMethodCall("err", "Error"),
         ),
@@ -213,14 +229,18 @@ object GoServiceMainHandlersGenerator {
         "err",
       ),
       genIfErr(
-        generateRespondWithErrorReturn(genHTTPEnum(StatusInternalServerError), metricSuffix)(
+        generateRespondWithErrorReturn(
+          genHTTPEnum(StatusInternalServerError),
+          metricSuffix,
           s"Unable to reach ${decapitalize(reference)} service: %s",
           genMethodCall("err", "Error"),
         ),
       ),
       genIf(
         s"!${name}Valid",
-        generateRespondWithErrorReturn(genHTTPEnum(StatusBadRequest), metricSuffix)(
+        generateRespondWithErrorReturn(
+          genHTTPEnum(StatusBadRequest),
+          metricSuffix,
           s"Unknown $reference: %s",
           genMethodCall(s"req.${name.capitalize}", "String"),
         ),
@@ -258,7 +278,9 @@ object GoServiceMainHandlersGenerator {
         "err",
       ),
       genIfErr(
-        generateRespondWithErrorReturn(genHTTPEnum(StatusBadRequest), metricSuffix)(
+        generateRespondWithErrorReturn(
+          genHTTPEnum(StatusBadRequest),
+          metricSuffix,
           s"Invalid ${attributeType match {
             case DateType     => "date"
             case TimeType     => "time"
@@ -306,11 +328,15 @@ object GoServiceMainHandlersGenerator {
       genSwitchReturn(
         "err.(type)",
         ListMap(
-          s"dao.Err${root.name}NotFound" -> generateRespondWithError(genHTTPEnum(StatusNotFound), metricSuffix)(
+          s"dao.Err${root.name}NotFound" -> generateRespondWithError(
+            genHTTPEnum(StatusNotFound),
+            metricSuffix,
             genMethodCall("err", "Error"),
           ),
         ),
-        generateRespondWithError(genHTTPEnum(StatusInternalServerError), metricSuffix)(
+        generateRespondWithError(
+          genHTTPEnum(StatusInternalServerError),
+          metricSuffix,
           "Something went wrong: %s",
           genMethodCall("err", "Error"),
         ),
@@ -341,7 +367,7 @@ object GoServiceMainHandlersGenerator {
           genFunctionCall("(*hook)", hookArguments),
           "err",
         ),
-        genIfErr(generateRespondWithErrorReturn("err.statusCode", metricSuffix)(genMethodCall("err", "Error"))),
+        genIfErr(generateRespondWithErrorReturn("err.statusCode", metricSuffix, genMethodCall("err", "Error"))),
       ),
     )
   }
@@ -367,7 +393,7 @@ object GoServiceMainHandlersGenerator {
           genFunctionCall("(*hook)", hookArguments),
           "err",
         ),
-        genIfErr(generateRespondWithErrorReturn("err.statusCode", metricSuffix)(genMethodCall("err", "Error"))),
+        genIfErr(generateRespondWithErrorReturn("err.statusCode", metricSuffix, genMethodCall("err", "Error"))),
       ),
     )
   }
