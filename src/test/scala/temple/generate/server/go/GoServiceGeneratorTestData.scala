@@ -1,5 +1,8 @@
 package temple.generate.server.go
 
+import java.nio.file.Paths
+
+import temple.TestUtils
 import temple.ast.AbstractAttribute.Attribute
 import temple.ast.Metadata.Database.Postgres
 import temple.ast.Metadata.Metrics.Prometheus
@@ -9,7 +12,6 @@ import temple.generate.CRUD
 import temple.generate.FileSystem._
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceName}
-import temple.utils.FileUtils._
 
 import scala.collection.immutable.{ListMap, SortedMap}
 
@@ -37,29 +39,8 @@ object GoServiceGeneratorTestData {
     metrics = Some(Prometheus),
   )
 
-  val simpleServiceFiles: Files = Map(
-    File("user", "go.mod") -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/go.mod.snippet"),
-    File("user", "user.go") -> readFile(
-      "src/test/scala/temple/generate/server/go/testfiles/user/user.go.snippet",
-    ),
-    File("user", "setup.go") -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/setup.go.snippet"),
-    File("user", "hook.go")  -> readFile("src/test/scala/temple/generate/server/go/testfiles/user/hook.go.snippet"),
-    File("user/dao", "errors.go") -> readFile(
-      "src/test/scala/temple/generate/server/go/testfiles/user/dao/errors.go.snippet",
-    ),
-    File("user/dao", "dao.go") -> readFile(
-      "src/test/scala/temple/generate/server/go/testfiles/user/dao/dao.go.snippet",
-    ),
-    File("user/dao", "datastore.go") -> readFile(
-      "src/test/scala/temple/generate/server/go/testfiles/user/dao/datastore.go.snippet",
-    ),
-    File("user/util", "util.go") -> readFile(
-      "src/test/scala/temple/generate/server/go/testfiles/user/util/util.go.snippet",
-    ),
-    File("user/metric", "metric.go") -> readFile(
-      "src/test/scala/temple/generate/server/go/testfiles/user/metric/metric.go.snippet",
-    ),
-  )
+  val simpleServiceFiles: Files =
+    TestUtils.buildFileMap(Paths.get("src/test/resources/generate-server-test/"), "user")
 
   val simpleServiceRootWithComms: ServiceRoot =
     ServiceRoot(
@@ -89,30 +70,6 @@ object GoServiceGeneratorTestData {
       metrics = Some(Prometheus),
     )
 
-  val simpleServiceFilesWithComms: Files = Map(
-    File("match", "go.mod") -> readFile("src/test/scala/temple/generate/server/go/testfiles/match/go.mod.snippet"),
-    File("match", "match.go") -> readFile(
-      "src/test/scala/temple/generate/server/go/testfiles/match/match.go.snippet",
-    ),
-    File("match", "setup.go") -> readFile("src/test/scala/temple/generate/server/go/testfiles/match/setup.go.snippet"),
-    File("match", "hook.go")  -> readFile("src/test/scala/temple/generate/server/go/testfiles/match/hook.go.snippet"),
-    File("match/dao", "errors.go") -> readFile(
-      "src/test/scala/temple/generate/server/go/testfiles/match/dao/errors.go.snippet",
-    ),
-    File("match/dao", "dao.go") -> readFile(
-      "src/test/scala/temple/generate/server/go/testfiles/match/dao/dao.go.snippet",
-    ),
-    File("match/dao", "datastore.go") -> readFile(
-      "src/test/scala/temple/generate/server/go/testfiles/match/dao/datastore.go.snippet",
-    ),
-    File("match/util", "util.go") -> readFile(
-      "src/test/scala/temple/generate/server/go/testfiles/match/util/util.go.snippet",
-    ),
-    File("match/comm", "handler.go") -> readFile(
-      "src/test/scala/temple/generate/server/go/testfiles/match/comm/handler.go.snippet",
-    ),
-    File("match/metric", "metric.go") -> readFile(
-      "src/test/scala/temple/generate/server/go/testfiles/match/metric/metric.go.snippet",
-    ),
-  )
+  val simpleServiceFilesWithComms: Files =
+    TestUtils.buildFileMap(Paths.get("src/test/resources/generate-server-test/"), "match")
 }
