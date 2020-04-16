@@ -55,11 +55,11 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
           structs = Map(
             "Fred" -> StructBlock(
               Map(
-                "id"         -> IDAttribute,
-                "created_by" -> CreatedByAttribute,
-                "field"      -> Attribute(StringType(), valueAnnotations = Set(Nullable)),
-                "friend"     -> Attribute(ForeignKey("SimpleTempleTestUser")),
-                "image"      -> Attribute(BlobType(size = Some(10_000_000))),
+                "id"        -> IDAttribute,
+                "createdBy" -> CreatedByAttribute,
+                "field"     -> Attribute(StringType(), valueAnnotations = Set(Nullable)),
+                "friend"    -> Attribute(ForeignKey("SimpleTempleTestUser")),
+                "image"     -> Attribute(BlobType(size = Some(10_000_000))),
               ),
               Seq(ServiceEnumerable, Readable.This),
             ),
@@ -67,15 +67,15 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
         ),
         "Booking" -> ServiceBlock(
           attributes = ListMap(
-            "id"         -> IDAttribute,
-            "created_by" -> CreatedByAttribute,
+            "id"        -> IDAttribute,
+            "createdBy" -> CreatedByAttribute,
           ),
           metadata = List(Omit(Set(Endpoint.Update))),
         ),
         "SimpleTempleTestGroup" -> ServiceBlock(
           attributes = ListMap(
-            "id"         -> IDAttribute,
-            "created_by" -> CreatedByAttribute,
+            "id"        -> IDAttribute,
+            "createdBy" -> CreatedByAttribute,
           ),
           metadata = List(Omit(Set(Endpoint.Update))),
         ),
