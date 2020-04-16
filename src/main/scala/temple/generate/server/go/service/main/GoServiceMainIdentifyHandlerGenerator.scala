@@ -43,6 +43,7 @@ object GoServiceMainIdentifyHandlerGenerator {
       generateInvokeAfterHookBlock(root, Identify, metricSuffix),
     )
 
+  // The headers used here are defined by Kong: https://docs.konghq.com/2.0.x/proxy/#3-proxying--upstream-timeouts
   private def generateRedirectResponse(root: ServiceRoot): String = mkCode.lines(
     genDeclareAndAssign(
       genMethodCall(
