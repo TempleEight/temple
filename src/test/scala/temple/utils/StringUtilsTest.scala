@@ -33,6 +33,7 @@ class StringUtilsTest extends FlatSpec with Matchers {
     decapitalize("A_Box") shouldEqual "a_Box"
     decapitalize("AB_Box") shouldEqual "ab_Box"
     decapitalize("ABBox") shouldEqual "abBox"
+    decapitalize("ID") shouldEqual "id"
   }
 
   behavior of "snakeCase"
