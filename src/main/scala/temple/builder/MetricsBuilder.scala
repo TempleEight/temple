@@ -48,7 +48,7 @@ object MetricsBuilder {
     endpoints: SortedSet[CRUD],
     structName: Option[String] = None,
   ): Seq[Row] =
-    endpoints.zipWithIndex.map {
+    endpoints.toSeq.zipWithIndex.map {
       case (endpoint, index) =>
         Row(
           Metric(
@@ -72,5 +72,5 @@ object MetricsBuilder {
             ),
           ),
         )
-    }.toSeq
+    }
 }
