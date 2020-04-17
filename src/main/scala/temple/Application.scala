@@ -24,9 +24,13 @@ object Application {
     val project            = ProjectBuilder.build(analyzedTemplefile, detail)
     val filteredProject    = RegenerationFilter.filter(outputDirectory, project, questionAsker)
 
-    FileUtils.outputProject(outputDirectory, filteredProject)
+    filteredProject match {
+      case Some(project) =>
+        FileUtils.outputProject(outputDirectory, project)
+        println(s"Generated project in $outputDirectory")
+      case None => println("Nothing to generate")
+    }
 
-    println(s"Generated project in $outputDirectory")
   }
 
   def validate(config: TempleConfig): Unit = {
