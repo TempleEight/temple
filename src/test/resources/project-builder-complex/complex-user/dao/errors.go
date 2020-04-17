@@ -6,5 +6,5 @@ import "fmt"
 type ErrComplexUserNotFound string
 
 func (e ErrComplexUserNotFound) Error() string {
-	return fmt.Sprintf("complexUser not found with ID %d", string(e))
+	return fmt.Sprintf("complexUser not found with ID %s", string(e))
 }

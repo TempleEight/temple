@@ -102,6 +102,24 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
     validationErrors shouldBe ""
   }
 
+  it should "generate a compilable service with an unbounded blob attribute" in {
+    val validationErrors = validateAll(
+      GoServiceGenerator.generate(GoGeneratorIntegrationTestData.unboundedBlob),
+      File("unbounded-blob-svc", "unbounded-blob-svc.go"),
+    )
+
+    validationErrors shouldBe ""
+  }
+
+  it should "generate a compilable service with a bounded blob attribute" in {
+    val validationErrors = validateAll(
+      GoServiceGenerator.generate(GoGeneratorIntegrationTestData.boundedBlob),
+      File("bounded-blob-svc", "bounded-blob-svc.go"),
+    )
+
+    validationErrors shouldBe ""
+  }
+
   it should "generate a compilable auth service when metrics are not used" in {
     val validationErrors = validateAll(
       GoAuthServiceGenerator.generate(GoGeneratorIntegrationTestData.authNoMetricsService),
@@ -129,6 +147,5 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
 
       validationErrors shouldBe empty
     }
-
   }
 }
