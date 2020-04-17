@@ -7,8 +7,9 @@ import "github.com/squat/and/dab/auth/dao"
 type Hook struct {
 	beforeRegisterHooks []*func(env *env, req registerAuthRequest, input *dao.CreateAuthInput) *HookError
 	beforeLoginHooks    []*func(env *env, req loginAuthRequest, input *dao.ReadAuthInput) *HookError
-	afterRegisterHooks  []*func(env *env, auth *dao.Auth, accessToken string) *HookError
-	afterLoginHooks     []*func(env *env, auth *dao.Auth, accessToken string) *HookError
+
+	afterRegisterHooks []*func(env *env, auth *dao.Auth, accessToken string) *HookError
+	afterLoginHooks    []*func(env *env, auth *dao.Auth, accessToken string) *HookError
 }
 
 // HookError wraps an existing error with HTTP status code

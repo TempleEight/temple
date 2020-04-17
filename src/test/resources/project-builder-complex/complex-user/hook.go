@@ -10,11 +10,12 @@ type Hook struct {
 	beforeUpdateHooks   []*func(env *env, req updateComplexUserRequest, input *dao.UpdateComplexUserInput) *HookError
 	beforeDeleteHooks   []*func(env *env, input *dao.DeleteComplexUserInput) *HookError
 	beforeIdentifyHooks []*func(env *env, input *dao.IdentifyComplexUserInput) *HookError
-	afterCreateHooks    []*func(env *env, complexUser *dao.ComplexUser) *HookError
-	afterReadHooks      []*func(env *env, complexUser *dao.ComplexUser) *HookError
-	afterUpdateHooks    []*func(env *env, complexUser *dao.ComplexUser) *HookError
-	afterDeleteHooks    []*func(env *env) *HookError
-	afterIdentifyHooks  []*func(env *env, complexUser *dao.ComplexUser) *HookError
+
+	afterCreateHooks   []*func(env *env, complexUser *dao.ComplexUser) *HookError
+	afterReadHooks     []*func(env *env, complexUser *dao.ComplexUser) *HookError
+	afterUpdateHooks   []*func(env *env, complexUser *dao.ComplexUser) *HookError
+	afterDeleteHooks   []*func(env *env) *HookError
+	afterIdentifyHooks []*func(env *env, complexUser *dao.ComplexUser) *HookError
 }
 
 // HookError wraps an existing error with HTTP status code
