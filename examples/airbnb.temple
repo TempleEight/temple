@@ -53,8 +53,8 @@ Reservation: service {
   // implicit 'createdBy' field since service does not have auth
   tenant: Tenant;
   property: Property;
-  startTime: DateTime;
-  endTime: DateTime;
+  startTime: datetime;
+  endTime: datetime;
   // implicit #readable(by: this) since project has auth
   // implicit #writable(by: this) since project has auth
 }
@@ -70,7 +70,7 @@ Review: service {
 	property: Property;
 	tenant: Tenant;
 	reservation: Reservation;
-	stars: int(5, 0);
+	stars: int(0, 5);
 	review: string;
 	#readable(by: all);
 	// implicit #writable(by: this) since project has auth
