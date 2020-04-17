@@ -6,5 +6,5 @@ import "fmt"
 type ErrSimpleTempleTestGroupNotFound string
 
 func (e ErrSimpleTempleTestGroupNotFound) Error() string {
-	return fmt.Sprintf("simpleTempleTestGroup not found with ID %d", string(e))
+	return fmt.Sprintf("simpleTempleTestGroup not found with ID %s", string(e))
 }

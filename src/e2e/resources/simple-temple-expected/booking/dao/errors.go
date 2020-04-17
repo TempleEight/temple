@@ -6,5 +6,5 @@ import "fmt"
 type ErrBookingNotFound string
 
 func (e ErrBookingNotFound) Error() string {
-	return fmt.Sprintf("booking not found with ID %d", string(e))
+	return fmt.Sprintf("booking not found with ID %s", string(e))
 }
