@@ -21,7 +21,6 @@ User: service {
     friend: User;
     image: data(10M);
     #enumerable;
-    #readable(by: this);
   };
 
   #enumerable;

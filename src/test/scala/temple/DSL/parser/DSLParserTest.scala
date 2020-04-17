@@ -87,7 +87,6 @@ class DSLParserTest extends FlatSpec with DSLParserMatchers {
               Attribute("friend", AttributeType.Foreign("User")),
               Attribute("image", AttributeType.Primitive("data", Args(Seq(Arg.IntArg(10_000_000))))),
               Metadata("enumerable"),
-              Metadata("readable", Args(kwargs = Seq("by" -> Arg.TokenArg("this")))),
             ),
           ),
           Metadata("enumerable"),
