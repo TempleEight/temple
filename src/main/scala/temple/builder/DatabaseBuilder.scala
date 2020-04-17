@@ -1,9 +1,8 @@
 package temple.builder
 
 import temple.ast.AbstractAttribute.{CreatedByAttribute, IDAttribute}
-import temple.ast.Annotation.Nullable
 import temple.ast._
-import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update}
+import temple.generate.CRUD._
 import temple.generate.database.ast.ColumnConstraint.Check
 import temple.generate.database.ast.Condition.PreparedComparison
 import temple.generate.database.ast.Expression.PreparedValue
@@ -23,13 +22,12 @@ object DatabaseBuilder {
   }
 
   private def toColDef(name: String, attribute: AbstractAttribute): ColumnDef = {
-    val nonNullConstraint = when(!attribute.valueAnnotations.contains(Nullable)) { ColumnConstraint.NonNull }
+    val nonNullConstraint = Some(ColumnConstraint.NonNull)
 
     val primaryKeyConstraint = when(attribute == IDAttribute) { ColumnConstraint.PrimaryKey }
 
     val valueConstraints = attribute.valueAnnotations.flatMap {
-        case Annotation.Unique   => Some(ColumnConstraint.Unique)
-        case Annotation.Nullable => None
+        case Annotation.Unique => Some(ColumnConstraint.Unique)
       } ++ nonNullConstraint ++ primaryKeyConstraint
 
     val (colType, typeConstraints) = attribute.attributeType match {
@@ -100,6 +98,12 @@ object DatabaseBuilder {
             condition = when(readable == Metadata.Readable.This) {
               PreparedComparison("created_by", ComparisonOperator.Equal)
             },
+          )
+        case Identify =>
+          Identify -> Statement.Read(
+            tableName,
+            columns = columns,
+            condition = Some(PreparedComparison(selectionAttribute, ComparisonOperator.Equal)),
           )
       }
       .to(SortedMap)

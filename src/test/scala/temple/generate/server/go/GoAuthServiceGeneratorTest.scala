@@ -1,13 +1,17 @@
 package temple.generate.server.go
 
-import org.scalatest.{FlatSpec, Matchers}
+import org.scalatest.FlatSpec
+import temple.generate.FileMatchers
 import temple.generate.server.go.auth.GoAuthServiceGenerator
 
-class GoAuthServiceGeneratorTest extends FlatSpec with Matchers {
+class GoAuthServiceGeneratorTest extends FlatSpec with FileMatchers {
 
   behavior of "GoAuthServiceGenerator"
 
   it should "generate auth services correctly" in {
-    GoAuthServiceGenerator.generate(GoAuthServiceGeneratorTestData.authServiceRoot) shouldBe GoAuthServiceGeneratorTestData.authServiceFiles
+    filesShouldMatch(
+      GoAuthServiceGenerator.generate(GoAuthServiceGeneratorTestData.authServiceRoot),
+      GoAuthServiceGeneratorTestData.authServiceFiles,
+    )
   }
 }

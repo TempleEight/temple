@@ -5,7 +5,7 @@ import temple.DSL.parser.DSLParserMatchers
 import temple.DSL.semantics.Analyzer.parseAndValidate
 import temple.ast.AbstractAttribute.{Attribute, CreatedByAttribute, IDAttribute}
 import temple.ast.AbstractServiceBlock.ServiceBlock
-import temple.ast.Annotation.{Nullable, Server, Unique}
+import temple.ast.Annotation.{Server, Unique}
 import temple.ast.AttributeType._
 import temple.ast.Metadata._
 import temple.ast._
@@ -55,11 +55,11 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
           structs = Map(
             "Fred" -> StructBlock(
               Map(
-                "id"         -> IDAttribute,
-                "created_by" -> CreatedByAttribute,
-                "field"      -> Attribute(StringType(), valueAnnotations = Set(Nullable)),
-                "friend"     -> Attribute(ForeignKey("SimpleTempleTestUser")),
-                "image"      -> Attribute(BlobType(size = Some(10_000_000))),
+                "id"        -> IDAttribute,
+                "createdBy" -> CreatedByAttribute,
+                "field"     -> Attribute(StringType()),
+                "friend"    -> Attribute(ForeignKey("SimpleTempleTestUser")),
+                "image"     -> Attribute(BlobType(size = Some(10_000_000))),
               ),
               Seq(ServiceEnumerable, Readable.This),
             ),
@@ -67,15 +67,15 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
         ),
         "Booking" -> ServiceBlock(
           attributes = ListMap(
-            "id"         -> IDAttribute,
-            "created_by" -> CreatedByAttribute,
+            "id"        -> IDAttribute,
+            "createdBy" -> CreatedByAttribute,
           ),
           metadata = List(Omit(Set(Endpoint.Update))),
         ),
         "SimpleTempleTestGroup" -> ServiceBlock(
           attributes = ListMap(
-            "id"         -> IDAttribute,
-            "created_by" -> CreatedByAttribute,
+            "id"        -> IDAttribute,
+            "createdBy" -> CreatedByAttribute,
           ),
           metadata = List(Omit(Set(Endpoint.Update))),
         ),

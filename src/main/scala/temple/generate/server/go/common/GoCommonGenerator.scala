@@ -2,6 +2,7 @@ package temple.generate.server.go.common
 
 import temple.ast.AttributeType
 import temple.ast.AttributeType._
+import temple.generate.server.go.GoHTTPStatus.GoHTTPStatus
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode, _}
 import temple.generate.utils.{CodeTerm, CodeUtils}
 import temple.utils.StringUtils.tabIndent
@@ -217,4 +218,8 @@ object GoCommonGenerator {
     CodeWrap.curly
       .prefix(name)
       .tabbedTrailingList(CodeUtils.pad(body.map { case (k, v) => (k + ":", v) }))
+
+  /** Generate a status code enumeration */
+  private[go] def genHTTPEnum(statusCodeEnum: GoHTTPStatus): String =
+    s"http.$statusCodeEnum"
 }

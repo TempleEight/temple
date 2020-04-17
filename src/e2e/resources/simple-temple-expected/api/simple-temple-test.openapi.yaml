@@ -3,6 +3,52 @@ info:
   title: SimpleTempleTest
   version: 0.0.1
 paths:
+  /simpletempletestuser/all:
+    get:
+      summary: Get a list of every simpletempletestuser
+      tags:
+      - SimpleTempleTestUser
+      responses:
+        '200':
+          description: SimpleTempleTestUser list successfully fetched
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    simpleTempleTestUser:
+                      type: string
+                    email:
+                      type: string
+                      minLength: 5
+                      maxLength: 40
+                    firstName:
+                      type: string
+                    lastName:
+                      type: string
+                    createdAt:
+                      type: string
+                      format: date-time
+                    numberOfDogs:
+                      type: number
+                      format: int32
+                    currentBankBalance:
+                      type: number
+                      format: float
+                      minimum: 0.0
+                    birthDate:
+                      type: string
+                      format: date
+                    breakfastTime:
+                      type: string
+                      format: time
+        '500':
+          $ref: '#/components/responses/Error500'
   /simpletempletestuser:
     post:
       summary: Register a new simpletempletestuser
@@ -81,6 +127,25 @@ paths:
           $ref: '#/components/responses/Error400'
         '401':
           $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
+    get:
+      summary: Look up the single simpletempletestuser associated with the access
+        token
+      tags:
+      - SimpleTempleTestUser
+      responses:
+        '302':
+          description: The single simpletempletestuser is accessible from the provided
+            Location
+          headers:
+            Location:
+              description: The location where the single simpletempletestuser can
+                be found
+              schema:
+                type: string
+        '404':
+          $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
   /simpletempletestuser/{id}:
@@ -220,52 +285,6 @@ paths:
           $ref: '#/components/responses/Error401'
         '404':
           $ref: '#/components/responses/Error404'
-        '500':
-          $ref: '#/components/responses/Error500'
-  /simpletempletestuser/all:
-    get:
-      summary: Get a list of every simpletempletestuser
-      tags:
-      - SimpleTempleTestUser
-      responses:
-        '200':
-          description: SimpleTempleTestUser list successfully fetched
-          content:
-            application/json:
-              schema:
-                type: array
-                items:
-                  type: object
-                  properties:
-                    id:
-                      type: string
-                      format: uuid
-                    simpleTempleTestUser:
-                      type: string
-                    email:
-                      type: string
-                      minLength: 5
-                      maxLength: 40
-                    firstName:
-                      type: string
-                    lastName:
-                      type: string
-                    createdAt:
-                      type: string
-                      format: date-time
-                    numberOfDogs:
-                      type: number
-                      format: int32
-                    currentBankBalance:
-                      type: number
-                      format: float
-                      minimum: 0.0
-                    birthDate:
-                      type: string
-                      format: date
-                    breakfastTime:
-                      type: string
-                      format: time
         '500':
           $ref: '#/components/responses/Error500'
   /booking:
