@@ -46,26 +46,6 @@ class ValidatorTest extends FlatSpec with Matchers {
     ) shouldBe empty
   }
 
-  it should "prevent structs from having greater readability than their parents" in {
-    validationErrors(
-      Templefile(
-        "MyProject",
-        projectBlock = ProjectBlock(Seq(Database.Postgres, AuthMethod.Email)),
-        services = Map(
-          "User" -> ServiceBlock(
-            attributes = Map(),
-            metadata = Seq(Readable.This, ServiceAuth),
-            structs = Map(
-              "Struct" -> StructBlock(Map(), metadata = Seq(Readable.All)),
-            ),
-          ),
-        ),
-      ),
-    ) shouldBe Set(
-      "A struct cannot have wider readability than its parent service in Struct, in User",
-    )
-  }
-
   it should "identify duplicate usage of structs" in {
     validationErrors(
       Templefile(
