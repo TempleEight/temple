@@ -15,6 +15,11 @@ class EndpointIntegrationTest extends EndpointTesterSpec with Matchers {
     noException should be thrownBy buildAndTestEndpoints(simpleTemple)
   }
 
+  it should "correctly generate data.temple" in {
+    val dataTemple = FileUtils.readFile("src/test/scala/temple/testfiles/data.temple")
+    noException should be thrownBy buildAndTestEndpoints(dataTemple)
+  }
+
   it should "correctly generate the example Templefiles" in {
     Files
       .list(Paths.get("examples"))
