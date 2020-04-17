@@ -69,7 +69,7 @@ object GoServiceMainIdentifyHandlerGenerator {
       generateHandlerDecl(root, Identify),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          generateExtractAuthBlock(usesVar = true, metricSuffix),
+          generateExtractAuthBlock(metricSuffix),
           generateDAOCallBlock(root, usesMetrics, metricSuffix),
           generateRedirectResponse(root),
           when(usesMetrics) { generateMetricSuccess(Identify.toString) },

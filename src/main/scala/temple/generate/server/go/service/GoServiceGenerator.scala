@@ -68,7 +68,7 @@ object GoServiceGenerator extends ServiceGenerator {
       ),
       File(root.kebabName, "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoCommonHookGenerator.generateImports(root.module),
+        GoServiceHookGenerator.generateImports(root),
         GoServiceHookGenerator.generateHookStruct(root),
         GoCommonHookGenerator.generateHookErrorStruct,
         GoCommonHookGenerator.generateHookErrorFunction,
