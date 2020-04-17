@@ -58,6 +58,6 @@ Order: service {
     #enumerable;
   }
 
-  #omit([delete]);
+  #omit[delete];
   #enumerable;
 }
