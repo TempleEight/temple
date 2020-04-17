@@ -1,7 +1,7 @@
 package temple.test
 
 import java.io.IOException
-import java.net.HttpURLConnection
+import java.net.{ConnectException, HttpURLConnection}
 
 import scalaj.http.Http
 import temple.ast.AbstractServiceBlock.ServiceBlock
@@ -55,13 +55,29 @@ object ProjectTester {
     }
   }
 
+  private def getConfig(templefile: Templefile): ProjectConfig = {
+    val provider = templefile
+      .lookupMetadata[Metadata.Provider]
+      .getOrElse { throw new RuntimeException("Could not find deployment information") }
+
+    provider match {
+      case Provider.Kubernetes =>
+        // Grab Kong's URL for future requests
+        val Array(baseURL, kongAdmin, _*) = exec("minikube service kong --url").split("\n")
+        val baseIP                        = baseURL.replaceAll("http[s]*://", "")
+        ProjectConfig(baseIP, kongAdmin)
+      case Provider.DockerCompose =>
+        ProjectConfig("localhost:8000", "localhost:8001")
+    }
+  }
+
   /** Configure the infrastructure for testing */
   private def performSetup(templefile: Templefile, generatedPath: String): ProjectConfig = {
     val provider = templefile
       .lookupMetadata[Metadata.Provider]
       .getOrElse { throw new RuntimeException("Could not find deployment information") }
 
-    val config = provider match {
+    provider match {
       case Provider.Kubernetes =>
         println("🍪 Spinning up Kubernetes infrastructure...")
         // Require certain env vars to be set
@@ -70,10 +86,6 @@ object ProjectTester {
         }
         exec(s"sh $generatedPath/deploy.sh")
 
-        // Grab Kong's URL for future requests
-        val Array(baseURL, kongAdmin, _*) = exec("minikube service kong --url").split("\n")
-        val baseIP                        = baseURL.replaceAll("http[s]*://", "")
-        ProjectConfig(baseIP, kongAdmin)
       case Provider.DockerCompose =>
         println("🐳 Spinning up Docker Compose infrastructure...")
         exec(
@@ -96,8 +108,8 @@ object ProjectTester {
           }
           if (!successfullyStarted) exec("sleep 5")
         }
-        ProjectConfig("localhost:8000", "localhost:8001")
     }
+    val config = getConfig(templefile)
     configureKong(templefile.usesAuth, templefile.services, config, generatedPath)
     config
   }
@@ -134,6 +146,25 @@ object ProjectTester {
     // Propagate exception up so that the exit code is relevant
     if (anyFailed) throw new RuntimeException("😢 Looks like a test didn't go as planned")
     else println("🎉 Everything passed")
+  }
+
+  /**
+    * Perform a full endpoint test on a generated project, by querying each endpoint and validating responses
+    * This assumes that the infrastructure is already running
+    * @param templefile The parsed & validated templefile
+    * @param generatedPath The root of the project where the generated code resides
+    */
+  def testOnly(templefile: Templefile, generatedPath: String): Unit = {
+    val config = getConfig(templefile)
+    try {
+      // Check we can actually connect to the URL
+      Http(s"http://${config.baseIP}").asString
+      performTests(templefile, generatedPath, config.baseIP)
+    } catch {
+      case e: ConnectException =>
+        println(s"😢 Could not connect to ${config.baseIP}, is the project running?")
+        throw e
+    }
   }
 
   /**
