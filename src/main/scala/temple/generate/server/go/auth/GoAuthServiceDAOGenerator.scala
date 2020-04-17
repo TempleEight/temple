@@ -45,20 +45,19 @@ object GoAuthServiceDAOGenerator {
     )
 
   private[auth] def generateStructs(root: AuthServiceRoot): String = {
-    val id = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(AttributeType.UUIDType))
-    val auth = ListMap(
-      root.authAttribute.authMethod.name.capitalize -> generateGoType(root.authAttribute.attributeType),
-    )
-    val password = ListMap("Password" -> "string")
+    val id       = root.idAttribute.name.toUpperCase             -> generateGoType(AttributeType.UUIDType)
+    val auth     = root.authAttribute.authMethod.name.capitalize -> generateGoType(root.authAttribute.attributeType)
+    val password = "Password"                                    -> "string"
+
     mkCode.lines(
       "// Auth encapsulates the object stored in the datastore",
-      genStruct("Auth", id ++ auth ++ password),
+      genStruct("Auth", Seq(id, auth, password)),
       "",
       "// CreateAuthInput encapsulates the information required to create a single auth in the datastore",
-      genStruct("CreateAuthInput", id ++ auth ++ password),
+      genStruct("CreateAuthInput", Seq(id, auth, password)),
       "",
       "// ReadAuthInput encapsulates the information required to read a single auth in the datastore",
-      genStruct("ReadAuthInput", auth),
+      genStruct("ReadAuthInput", Seq(auth)),
     )
   }
 

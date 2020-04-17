@@ -185,7 +185,7 @@ object ServiceTestUtils {
         case HttpURLConnection.HTTP_MOVED_TEMP =>
           // Already exists, so perform a GET on it now the ID is known
           val url = response.header("Location").getOrElse(test.fail("302 response without Location header"))
-          getRequest(test, s"http://$url", accessToken)
+          getRequest(test, url, accessToken)
         case HttpURLConnection.HTTP_NOT_FOUND =>
           // Not found, so create a new one
           createObject(test, service, serviceName, allServices, baseURL, accessToken)
