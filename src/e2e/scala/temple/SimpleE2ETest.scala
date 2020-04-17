@@ -5,6 +5,7 @@ import java.nio.file.Paths
 import org.scalatest.FlatSpec
 import temple.detail.PoliceSergeantNicholasAngel
 import temple.generate.FileMatchers
+import temple.utils.FileUtils
 
 import scala.reflect.io.Directory
 
@@ -26,8 +27,8 @@ class SimpleE2ETest extends FlatSpec with FileMatchers {
       PoliceSergeantNicholasAngel,
     )
 
-    val expected = TestUtils.buildFileMap(Paths.get("src/e2e/resources/simple-temple-expected"))
-    val found    = TestUtils.buildFileMap(basePath)
+    val expected = FileUtils.buildFileMap(Paths.get("src/e2e/resources/simple-temple-expected"))
+    val found    = FileUtils.buildFileMap(basePath)
     filesShouldMatch(found, expected)
   }
 }

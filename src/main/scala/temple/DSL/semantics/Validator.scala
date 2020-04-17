@@ -5,7 +5,7 @@ import temple.ast.AbstractAttribute.{Attribute, CreatedByAttribute, IDAttribute}
 import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
 import temple.ast.Metadata.ServiceAuth
-import temple.ast.{Metadata, _}
+import temple.ast._
 import temple.builder.project.ProjectConfig
 import temple.utils.MonadUtils.FromEither
 

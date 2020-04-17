@@ -57,7 +57,6 @@ object Metadata {
   sealed abstract class Readable private (name: String)
       extends EnumEntry(name)
       with ServiceMetadata
-      with StructMetadata
       with ProjectMetadata
 
   object Readable extends Enum[Readable] {
@@ -66,7 +65,10 @@ object Metadata {
     case object This extends Readable("this")
   }
 
-  sealed abstract class Writable private (name: String) extends EnumEntry(name) with StructMetadata with ProjectMetadata
+  sealed abstract class Writable private (name: String)
+      extends EnumEntry(name)
+      with ServiceMetadata
+      with ProjectMetadata
 
   object Writable extends Enum[Writable] {
     override def values: IndexedSeq[Writable] = findValues
