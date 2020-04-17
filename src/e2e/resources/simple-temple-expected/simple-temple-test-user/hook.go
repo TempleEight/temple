@@ -10,11 +10,12 @@ type Hook struct {
 	beforeReadHooks     []*func(env *env, input *dao.ReadSimpleTempleTestUserInput) *HookError
 	beforeUpdateHooks   []*func(env *env, req updateSimpleTempleTestUserRequest, input *dao.UpdateSimpleTempleTestUserInput) *HookError
 	beforeIdentifyHooks []*func(env *env, input *dao.IdentifySimpleTempleTestUserInput) *HookError
-	afterListHooks      []*func(env *env, simpleTempleTestUserList *[]dao.SimpleTempleTestUser) *HookError
-	afterCreateHooks    []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
-	afterReadHooks      []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
-	afterUpdateHooks    []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
-	afterIdentifyHooks  []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
+
+	afterListHooks     []*func(env *env, simpleTempleTestUserList *[]dao.SimpleTempleTestUser) *HookError
+	afterCreateHooks   []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
+	afterReadHooks     []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
+	afterUpdateHooks   []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
+	afterIdentifyHooks []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser) *HookError
 }
 
 // HookError wraps an existing error with HTTP status code
