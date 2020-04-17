@@ -68,7 +68,7 @@ object DatabaseBuilderTestData {
         "test",
         Seq(
           ColumnDef("favourite_colour", StringCol, Seq(Unique, NonNull)),
-          ColumnDef("bed_time", TimeCol, Seq(NonNull)),
+          ColumnDef("bed_time", TimeCol),
           ColumnDef(
             "favourite_number",
             IntCol(4),

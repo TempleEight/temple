@@ -5,7 +5,7 @@ import temple.DSL.semantics.Validator._
 import temple.DSL.semantics.ValidatorTest._
 import temple.ast.AbstractAttribute.{Attribute, IDAttribute}
 import temple.ast.AbstractServiceBlock._
-import temple.ast.Annotation.Unique
+import temple.ast.Annotation.{Nullable, Unique}
 import temple.ast.AttributeType._
 import temple.ast.Metadata.Endpoint.Delete
 import temple.ast.Metadata._
@@ -25,7 +25,7 @@ class ValidatorTest extends FlatSpec with Matchers {
             attributes = Map(
               "a" -> Attribute(IntType(), accessAnnotation = Some(Annotation.Server)),
               "b" -> Attribute(BoolType, accessAnnotation = Some(Annotation.Client)),
-              "c" -> Attribute(BlobType(), valueAnnotations = Set(Unique)),
+              "c" -> Attribute(BlobType(), valueAnnotations = Set(Nullable, Unique)),
               "d" -> Attribute(FloatType(), accessAnnotation = Some(Annotation.ServerSet)),
               "e" -> Attribute(StringType()),
               "f" -> Attribute(ForeignKey("Box")),
@@ -312,7 +312,18 @@ class ValidatorTest extends FlatSpec with Matchers {
     ) shouldBe empty
   }
 
-  it should "find cycles in dependencies" in {
+  it should "find cycles in dependencies, but only if they are not nullable" in {
+    validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
+          "User" -> ServiceBlock(Map("box"  -> Attribute(ForeignKey("Box")))),
+          "Box"  -> ServiceBlock(Map("fred" -> Attribute(ForeignKey("Fred"), None, Set(Nullable)))),
+          "Fred" -> ServiceBlock(Map("user" -> Attribute(ForeignKey("User")))),
+        ),
+      ),
+    ) shouldBe Set()
+
     validationErrors(
       Templefile(
         "MyProject",

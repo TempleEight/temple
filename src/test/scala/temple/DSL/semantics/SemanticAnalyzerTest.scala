@@ -248,7 +248,7 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
       parseSemantics(
         mkTemplefileASTWithUserService(
           Entry.Attribute("a", syntax.AttributeType.Primitive("int"), Seq(syntax.Annotation("unique"))),
-          Entry.Attribute("b", syntax.AttributeType.Primitive("int")),
+          Entry.Attribute("b", syntax.AttributeType.Primitive("int"), Seq(syntax.Annotation("nullable"))),
           Entry.Attribute("c", syntax.AttributeType.Primitive("float"), Seq(syntax.Annotation("serverSet"))),
           Entry.Attribute("d", syntax.AttributeType.Primitive("float"), Seq(syntax.Annotation("client"))),
           Entry.Attribute("e", syntax.AttributeType.Primitive("float"), Seq(syntax.Annotation("server"))),

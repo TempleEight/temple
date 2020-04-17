@@ -28,7 +28,7 @@ object DockerGeneratorIntegrationTestData {
       "Test" -> StructBlock(
         ListMap(
           "favouriteColour" -> Attribute(StringType(), valueAnnotations = Set(Annotation.Unique)),
-          "bedTime"         -> Attribute(TimeType),
+          "bedTime"         -> Attribute(TimeType, valueAnnotations = Set(Annotation.Nullable)),
           "favouriteNumber" -> Attribute(IntType(max = Some(10), min = Some(0))),
         ),
       ),
