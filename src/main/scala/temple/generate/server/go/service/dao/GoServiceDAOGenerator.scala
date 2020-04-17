@@ -74,7 +74,7 @@ object GoServiceDAOGenerator {
       "",
       mkCode(
         s"func (e Err${root.name}NotFound) Error() string",
-        CodeWrap.curly.tabbed(s"""return fmt.Sprintf("${root.decapitalizedName} not found with ID %d", string(e))"""),
+        CodeWrap.curly.tabbed(s"""return fmt.Sprintf("${root.decapitalizedName} not found with ID %s", string(e))"""),
       ),
     )
 }
