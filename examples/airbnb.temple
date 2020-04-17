@@ -67,11 +67,11 @@ Reservation: service {
 Review: service {
   // implicit 'id' field
   // implicit 'createdBy' field since service does not have auth
-	property: Property;
-	tenant: Tenant;
-	reservation: Reservation;
-	stars: int(0, 5);
-	review: string;
-	#readable(by: all);
-	// implicit #writable(by: this) since project has auth
+  property: Property;
+  tenant: Tenant;
+  reservation: Reservation;
+  stars: int(0, 5);
+  review: string;
+  #readable(by: all);
+  // implicit #writable(by: this) since project has auth
 }
