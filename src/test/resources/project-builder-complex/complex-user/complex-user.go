@@ -216,6 +216,12 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	blobField, err := base64.StdEncoding.DecodeString(*req.BlobField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
+		return
+	}
+
 	input := dao.CreateComplexUserInput{
 		ID:                 auth.ID,
 		SmallIntField:      *req.SmallIntField,
@@ -229,7 +235,7 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		DateField:          dateField,
 		TimeField:          timeField,
 		DateTimeField:      dateTimeField,
-		BlobField:          *req.BlobField,
+		BlobField:          blobField,
 	}
 
 	for _, hook := range env.hook.beforeCreateHooks {
@@ -399,6 +405,12 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	blobField, err := base64.StdEncoding.DecodeString(*req.BlobField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
+		return
+	}
+
 	input := dao.UpdateComplexUserInput{
 		ID:                 complexUserID,
 		SmallIntField:      *req.SmallIntField,
@@ -412,7 +424,7 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		DateField:          dateField,
 		TimeField:          timeField,
 		DateTimeField:      dateTimeField,
-		BlobField:          *req.BlobField,
+		BlobField:          blobField,
 	}
 
 	for _, hook := range env.hook.beforeUpdateHooks {
