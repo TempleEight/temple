@@ -6,5 +6,5 @@ import "fmt"
 type ErrSimpleTempleTestUserNotFound string
 
 func (e ErrSimpleTempleTestUserNotFound) Error() string {
-	return fmt.Sprintf("simpleTempleTestUser not found with ID %d", string(e))
+	return fmt.Sprintf("simpleTempleTestUser not found with ID %s", string(e))
 }

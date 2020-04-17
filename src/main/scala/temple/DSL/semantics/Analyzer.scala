@@ -167,8 +167,6 @@ object Analyzer {
   /** A parser of Metadata items that can occur in struct blocks */
   private val parseStructMetadata = new MetadataParser[StructMetadata] {
     registerEmptyKeyword("enumerable")(ServiceEnumerable)
-    registerKeywordWithContext("readable", "by", TokenArgType)(Readable)
-    registerKeywordWithContext("writable", "by", TokenArgType)(Writable)
     registerKeywordWithContext("omit", "endpoints", ListArgType(TokenArgType))(Omit)
   }
 

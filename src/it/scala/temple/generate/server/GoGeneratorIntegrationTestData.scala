@@ -83,6 +83,52 @@ object GoGeneratorIntegrationTestData {
     metrics = None,
   )
 
+  val unboundedBlob: ServiceRoot = ServiceRoot(
+    name = "UnboundedBlobSvc",
+    module = "github.com/TempleEight/integration/test",
+    comms = Set.empty,
+    opQueries = SortedMap(
+      CRUD.Create -> "",
+      CRUD.Read   -> "",
+      CRUD.Update -> "",
+      CRUD.Delete -> "",
+      CRUD.List   -> "",
+    ),
+    port = 80,
+    idAttribute = IDAttribute("id"),
+    createdByAttribute = None,
+    attributes = ListMap("d" -> Attribute(AttributeType.BlobType(None))),
+    datastore = Postgres,
+    readable = Readable.All,
+    writable = Writable.This,
+    projectUsesAuth = true,
+    hasAuthBlock = true,
+    metrics = None,
+  )
+
+  val boundedBlob: ServiceRoot = ServiceRoot(
+    name = "BoundedBlobSvc",
+    module = "github.com/TempleEight/integration/test",
+    comms = Set.empty,
+    opQueries = SortedMap(
+      CRUD.Create -> "",
+      CRUD.Read   -> "",
+      CRUD.Update -> "",
+      CRUD.Delete -> "",
+      CRUD.List   -> "",
+    ),
+    port = 80,
+    idAttribute = IDAttribute("id"),
+    createdByAttribute = None,
+    attributes = ListMap("d" -> Attribute(AttributeType.BlobType(Some(500000)))),
+    datastore = Postgres,
+    readable = Readable.All,
+    writable = Writable.This,
+    projectUsesAuth = true,
+    hasAuthBlock = true,
+    metrics = None,
+  )
+
   val authNoMetricsService: AuthServiceRoot = AuthServiceRoot(
     module = "github.com/TempleEight/integration/test",
     port = 1024,
