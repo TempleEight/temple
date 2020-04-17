@@ -31,7 +31,6 @@ object GoCommonGenerator {
       case StringType(_, _)                               => "string"
       case BoolType                                       => "bool"
       case DateType | TimeType | DateTimeType             => "time.Time"
-      case BlobType(Some(size))                           => s"[$size]byte"
       case BlobType(_)                                    => "[]byte"
     }
 
