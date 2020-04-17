@@ -1,0 +1,79 @@
+/*
+ * This example is for a small sports company, that wants to provide their customers a system for booking themselves
+ * onto 5-a-side football games. Could be extended to also provide a league/tournament system. Omits metrics for
+ * variety
+ */
+FiveASide: project {
+  #language(go);
+  #database(postgres);
+  #provider(dockerCompose);
+  #authMethod(email);
+}
+
+// TODO: There should be a way to restrict who can create a Staff instance, i.e. auth service needs roles
+Staff: service {
+  // implicit 'id' field that matches auth service 'id' field
+  firstName: string;
+  lastName: string;
+  email: string;
+  #auth;
+  // implicit #readable(by: this) since project has auth
+  // implicit #writable(by: this) since project has auth
+}
+
+Player: service {
+  // implicit 'id' field that matches auth service 'id' field
+  firstName: string;
+  lastName: string;
+  email: string;
+  phoneNumber: int;
+  #auth;
+  // implicit #readable(by: this) since project has auth
+  // implicit #writable(by: this) since project has auth
+}
+
+/*
+ * Strongly enforce only creatable by a player in the beforeCreate hook (loosely enforced by player being readable by
+ * this), and only readable by the player or staff in the beforeRead hook
+ */
+EmergencyContact: service {
+  // implicit 'id' field
+  // implicit 'createdBy' field since service does not have auth
+  player: Player;
+  firstname: string;
+  lastName: string;
+  relation: string;
+  email: string;
+  phoneNumber: int;
+  #readable(by: all);
+  // implicit #writable(by: this) since project has auth
+}
+
+/*
+ * Enforce only creatable by staff in the beforeCreate hook
+ */
+Game: service {
+  // implicit 'id' field
+  // implicit 'createdBy' field since service does not have auth
+  pitchNumber: int;
+  price: float;
+  maxPlayers: int;
+  start: datetime;
+  end: datetime;
+  #enumerable;
+  #readable(by: all);
+  // implicit #writable(by: this) since project has auth
+}
+
+/*
+ * Enforce only creatable if game max players has not been reached in beforeCreate hook with interservice communication
+ */
+Booking: service {
+  // implicit 'id' field
+  // implicit 'createdBy' field since service does not have auth
+  player: Player;
+  game: Game;
+  #enumerable;
+  #readable(by: all);
+  // implicit #writable(by: this) since project has auth
+}
