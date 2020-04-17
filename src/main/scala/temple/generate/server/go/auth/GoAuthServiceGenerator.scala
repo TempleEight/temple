@@ -34,7 +34,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
       ),
       File("auth", "hook.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
-        GoCommonHookGenerator.generateImports(root.module),
+        GoAuthServiceHookGenerator.generateImports(root.module),
         GoAuthServiceHookGenerator.generateHookStruct,
         GoCommonHookGenerator.generateHookErrorStruct,
         GoCommonHookGenerator.generateHookErrorFunction,

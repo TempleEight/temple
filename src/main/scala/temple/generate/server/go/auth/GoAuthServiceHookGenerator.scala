@@ -5,9 +5,13 @@ import temple.generate.CRUD.{CRUD, presentParticiple}
 import temple.generate.server.go.common.GoCommonGenerator.{genAssign, genFunctionCall, genMethod, genStruct}
 import temple.generate.server.go.common.GoCommonHookGenerator
 import temple.generate.utils.CodeTerm.mkCode
+import temple.utils.StringUtils.doubleQuote
 
 object GoAuthServiceHookGenerator {
   private val endpoints = Seq("Register" -> CRUD.Create, "Login" -> CRUD.Read)
+
+  private[auth] def generateImports(rootModule: String): String =
+    s"import ${doubleQuote(rootModule + "/dao")}"
 
   private def generateBeforeHookType(action: String, operation: CRUD): String =
     s"func(env *env, req ${action.toLowerCase}AuthRequest, input *dao.${operation.toString}AuthInput) *HookError"

@@ -8,9 +8,6 @@ import scala.collection.immutable.ListMap
 
 object GoCommonHookGenerator {
 
-  private[go] def generateImports(rootModule: String): String =
-    s"import ${doubleQuote(rootModule + "/dao")}"
-
   private[go] def generateHookErrorStruct: String =
     mkCode.lines(
       "// HookError wraps an existing error with HTTP status code",

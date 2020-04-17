@@ -126,7 +126,7 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, hook := range env.hook.beforeCreateHooks {
-		err := (*hook)(env, &input)
+		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
@@ -142,7 +142,7 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, hook := range env.hook.afterCreateHooks {
-		err := (*hook)(env, booking)
+		err := (*hook)(env, booking, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
@@ -189,7 +189,7 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, hook := range env.hook.beforeReadHooks {
-		err := (*hook)(env, &input)
+		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
@@ -210,7 +210,7 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, hook := range env.hook.afterReadHooks {
-		err := (*hook)(env, booking)
+		err := (*hook)(env, booking, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
@@ -257,7 +257,7 @@ func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, hook := range env.hook.beforeDeleteHooks {
-		err := (*hook)(env, &input)
+		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
 			return
@@ -278,7 +278,7 @@ func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, hook := range env.hook.afterDeleteHooks {
-		err := (*hook)(env)
+		err := (*hook)(env, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
 			return

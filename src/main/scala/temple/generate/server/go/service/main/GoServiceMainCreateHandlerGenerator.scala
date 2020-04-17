@@ -78,7 +78,7 @@ object GoServiceMainCreateHandlerGenerator {
       generateHandlerDecl(root, Create),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(root.projectUsesAuth) { generateExtractAuthBlock(usesVar = true, metricSuffix) },
+          when(root.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
           // Only need to handle request JSONs when there are client attributes
           when(root.requestAttributes.nonEmpty) {
             mkCode.doubleLines(
