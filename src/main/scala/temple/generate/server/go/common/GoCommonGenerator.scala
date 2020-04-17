@@ -31,7 +31,6 @@ object GoCommonGenerator {
       case StringType(_, _)                               => "string"
       case BoolType                                       => "bool"
       case DateType | TimeType | DateTimeType             => "time.Time"
-      case BlobType(Some(size))                           => s"[$size]byte"
       case BlobType(_)                                    => "[]byte"
     }
 
@@ -75,13 +74,15 @@ object GoCommonGenerator {
     )
 
   /** Generate a struct */
-  private[go] def genStruct(identifier: String, fields: Iterable[(String, String)]): String =
+  private[go] def genStruct(identifier: String, fieldGroups: Iterable[(String, String)]*): String =
     mkCode(
       "type",
       identifier,
       "struct",
       CodeWrap.curly.tabbed(
-        CodeUtils.pad(fields),
+        mkCode.doubleLines(fieldGroups.map { fields =>
+          mkCode.lines(CodeUtils.pad(fields))
+        }),
       ),
     )
 

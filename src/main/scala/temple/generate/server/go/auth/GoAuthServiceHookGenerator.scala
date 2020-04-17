@@ -32,7 +32,7 @@ object GoAuthServiceHookGenerator {
 
     mkCode.lines(
       GoCommonHookGenerator.generateHookStructComment,
-      genStruct("Hook", beforeCreate ++ afterCreate),
+      genStruct("Hook", beforeCreate, afterCreate),
     )
   }
 

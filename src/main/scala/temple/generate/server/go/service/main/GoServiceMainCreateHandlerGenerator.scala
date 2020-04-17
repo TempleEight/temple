@@ -71,6 +71,7 @@ object GoServiceMainCreateHandlerGenerator {
     usesComms: Boolean,
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
+    clientUsesBase64: Boolean,
     usesMetrics: Boolean,
   ): String = {
     val metricSuffix = when(usesMetrics) { Create.toString }
@@ -87,6 +88,7 @@ object GoServiceMainCreateHandlerGenerator {
               generateValidateStructBlock(metricSuffix),
               when(usesComms) { generateForeignKeyCheckBlocks(root, metricSuffix) },
               when(clientUsesTime) { generateParseTimeBlocks(root.requestAttributes, metricSuffix) },
+              when(clientUsesBase64) { generateParseBase64Blocks(root.requestAttributes, metricSuffix) },
             )
           },
           when(!root.hasAuthBlock) { generateNewUUIDBlock(metricSuffix) },
