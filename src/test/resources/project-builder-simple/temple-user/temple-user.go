@@ -174,6 +174,12 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	blobField, err := base64.StdEncoding.DecodeString(*req.BlobField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+
 	uuid, err := uuid.NewUUID()
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Could not create UUID: %s", err.Error()), http.StatusInternalServerError)
@@ -189,7 +195,7 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		DateField:     dateField,
 		TimeField:     timeField,
 		DateTimeField: dateTimeField,
-		BlobField:     *req.BlobField,
+		BlobField:     blobField,
 	}
 
 	for _, hook := range env.hook.beforeCreateHooks {
@@ -321,6 +327,12 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
+	blobField, err := base64.StdEncoding.DecodeString(*req.BlobField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest)
+		return
+	}
+
 	input := dao.UpdateTempleUserInput{
 		ID:            templeUserID,
 		IntField:      *req.IntField,
@@ -330,7 +342,7 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		DateField:     dateField,
 		TimeField:     timeField,
 		DateTimeField: dateTimeField,
-		BlobField:     *req.BlobField,
+		BlobField:     blobField,
 	}
 
 	for _, hook := range env.hook.beforeUpdateHooks {
