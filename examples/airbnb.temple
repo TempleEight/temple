@@ -1,5 +1,3 @@
-// TODO: Model property availability, since bookings are rightly #readable(by: this)
-
 Airbnb: project {
   #language(go);
   #database(postgres);
@@ -34,6 +32,7 @@ Property: service {
   city: string;
   postcode: string;
   description: string;
+  pricePerNight: float;
 
   Photo: struct {
     // implicit 'id' field
@@ -42,8 +41,6 @@ Property: service {
     image: data(5M);
     caption: string;
     #enumerable;
-    // implicit #readable(by: all) since parent is readable by all
-    // implicit #writable(by:this) since parent is writable by this
   }
 
   #enumerable;
@@ -51,7 +48,7 @@ Property: service {
   // implicit #writable(by: this) since project has auth
 }
 
-Booking: service {
+Reservation: service {
   // implicit 'id' field
   // implicit 'createdBy' field since service does not have auth
   tenant: Tenant;
@@ -60,4 +57,21 @@ Booking: service {
   endTime: DateTime;
   // implicit #readable(by: this) since project has auth
   // implicit #writable(by: this) since project has auth
+}
+
+/*
+ * The presence of the tenant and reservation field loosely enforces that only tenants with reservations can leave
+ * reviews, as landlords are readable by all, but tenants are not. A strong enforcement could be implemented in the
+ * hooks, with interservice communication, even enforcing that reviews can only be left after the stay
+ */
+Review: service {
+  // implicit 'id' field
+  // implicit 'createdBy' field since service does not have auth
+	property: Property;
+	tenant: Tenant;
+	reservation: Reservation;
+	stars: int(5, 0);
+	review: string;
+	#readable(by: all);
+	// implicit #writable(by: this) since project has auth
 }
