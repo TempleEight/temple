@@ -8,9 +8,10 @@ type Hook struct {
 	beforeCreateHooks []*func(env *env, input *dao.CreateSimpleTempleTestGroupInput) *HookError
 	beforeReadHooks   []*func(env *env, input *dao.ReadSimpleTempleTestGroupInput) *HookError
 	beforeDeleteHooks []*func(env *env, input *dao.DeleteSimpleTempleTestGroupInput) *HookError
-	afterCreateHooks  []*func(env *env, simpleTempleTestGroup *dao.SimpleTempleTestGroup) *HookError
-	afterReadHooks    []*func(env *env, simpleTempleTestGroup *dao.SimpleTempleTestGroup) *HookError
-	afterDeleteHooks  []*func(env *env) *HookError
+
+	afterCreateHooks []*func(env *env, simpleTempleTestGroup *dao.SimpleTempleTestGroup) *HookError
+	afterReadHooks   []*func(env *env, simpleTempleTestGroup *dao.SimpleTempleTestGroup) *HookError
+	afterDeleteHooks []*func(env *env) *HookError
 }
 
 // HookError wraps an existing error with HTTP status code

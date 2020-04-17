@@ -1,5 +1,6 @@
 package temple.builder.project
 
+import temple.ast.AbstractServiceBlock.AuthServiceBlock
 import temple.ast.Metadata.Provider.DockerCompose
 import temple.ast.Metadata._
 import temple.ast.Templefile.Ports
@@ -99,20 +100,26 @@ object ProjectBuilder {
     }
 
     val datasource = metric match {
-      case Metrics.Prometheus => Datasource.Prometheus("Prometheus", "http://prom:9090")
+      case Metrics.Prometheus => Datasource.Prometheus("Prometheus", "http://prometheus:9090")
     }
 
-    val dashboardJSONs = templefile.allServices.map {
-      case (name, service) =>
-        // Create row for every endpoint in the service
-        val serviceRows = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
-        val structRows = service.structs.flatMap {
-          case (structName, struct) =>
-            MetricsBuilder.createDashboardRows(name, datasource, endpoints(struct), Some(structName))
-        }
-        val grafanaDashboard = GrafanaDashboardGenerator.generate(kebabCase(name), name, serviceRows ++ structRows)
-        File(s"grafana/provisioning/dashboards", s"${kebabCase(name)}.json") -> grafanaDashboard
-    }
+    val dashboardJSONs = templefile.allServices
+      .map {
+        case (name, AuthServiceBlock) => (name, MetricsBuilder.createAuthDashboardRows(name, datasource))
+        case (name, service)          =>
+          // Create row for every endpoint in the service
+          val serviceRows = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
+          val structRows = service.structs.flatMap {
+            case (structName, struct) =>
+              MetricsBuilder.createDashboardRows(name, datasource, endpoints(struct), Some(structName))
+          }
+          (name, serviceRows ++ structRows)
+      }
+      .map {
+        case (name, rows) =>
+          val grafanaDashboard = GrafanaDashboardGenerator.generate(kebabCase(name), name, rows)
+          File(s"grafana/provisioning/dashboards", s"${kebabCase(name)}.json") -> grafanaDashboard
+      }
     val dashboardYML  = GrafanaDashboardConfigGenerator.generate(datasource)
     val datasourceYML = GrafanaDatasourceConfigGenerator.generate(datasource)
 
