@@ -1,5 +1,6 @@
 package temple.generate.server.go.service.main
 
+import temple.ast.AbstractAttribute.Attribute
 import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
 import temple.ast.Metadata.Readable
 import temple.ast.{AbstractAttribute, AttributeType}
@@ -30,7 +31,7 @@ object GoServiceMainHandlersGenerator {
         s"$responseFieldName.${genFunctionCall("Format", doubleQuote("15:04:05.999999999"))}"
       case DateTimeType =>
         s"$responseFieldName.${genFunctionCall("Format", "time.RFC3339")}"
-      case _: BlobType =>
+      case BlobType(_) =>
         genMethodCall("base64.StdEncoding", "EncodeToString", responseFieldName)
       case _ => responseFieldName
     }
@@ -305,6 +306,36 @@ object GoServiceMainHandlersGenerator {
       },
     )
 
+  private def generateParseBase64Block(
+    name: String,
+    metricSuffix: Option[String],
+  ): String =
+    mkCode.lines(
+      genDeclareAndAssign(
+        genMethodCall("base64.StdEncoding", "DecodeString", s"*req.${name.capitalize}"),
+        name,
+        "err",
+      ),
+      genIfErr(
+        generateRespondWithErrorReturn(
+          genHTTPEnum(StatusBadRequest),
+          metricSuffix,
+          "Invalid request parameters: %s",
+          genMethodCall("err", "Error"),
+        ),
+      ),
+    )
+
+  private[main] def generateParseBase64Blocks(
+    clientAttributes: ListMap[String, AbstractAttribute],
+    metricSuffix: Option[String],
+  ): String =
+    mkCode.doubleLines(
+      clientAttributes.collect {
+        case name -> Attribute(BlobType(_), _, _) => generateParseBase64Block(name, metricSuffix)
+      },
+    )
+
   /** Generate a map of the client attributes to pass into the Create or Update DAO input struct */
   private[main] def generateDAOInputClientMap(
     clientAttributes: ListMap[String, AbstractAttribute],
@@ -313,11 +344,9 @@ object GoServiceMainHandlersGenerator {
       case (str, attr) =>
         (
           str.capitalize,
-          // Date, time or datetime attributes pass a pre-parsed variable of the same name
-          if (attr.attributeType == DateType || attr.attributeType == TimeType || attr.attributeType == DateTimeType) {
-            str
-          } else {
-            s"*req.${str.capitalize}"
+          attr.attributeType match {
+            case DateType | TimeType | DateTimeType | BlobType(_) => str
+            case _                                                => s"*req.${str.capitalize}"
           },
         )
     }
@@ -420,16 +449,19 @@ object GoServiceMainHandlersGenerator {
       .intersect(root.requestAttributes.values.map(_.attributeType).toSet)
       .nonEmpty
 
+    // Whether or not the client attributes contain attributes of type blob
+    val clientUsesBase64 = root.requestAttributes.values.exists(_.attributeType.isInstanceOf[AttributeType.BlobType])
+
     mkCode.doubleLines(
       root.operations.toSeq.map {
         case List =>
           generateListHandler(root, responseMap, enumeratingByCreator, usesMetrics)
         case Create =>
-          generateCreateHandler(root, usesComms, responseMap, clientUsesTime, usesMetrics)
+          generateCreateHandler(root, usesComms, responseMap, clientUsesTime, clientUsesBase64, usesMetrics)
         case Read =>
           generateReadHandler(root, responseMap, usesMetrics)
         case Update =>
-          generateUpdateHandler(root, usesComms, responseMap, clientUsesTime, usesMetrics)
+          generateUpdateHandler(root, usesComms, responseMap, clientUsesTime, clientUsesBase64, usesMetrics)
         case Delete =>
           generateDeleteHandler(root, usesMetrics)
         case Identify =>

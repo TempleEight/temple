@@ -1,0 +1,8 @@
+Example: project {
+  #provider(dockerCompose);
+}
+
+ExampleService: service {
+  bounded: data(5M);
+  unbounded: data;
+}
