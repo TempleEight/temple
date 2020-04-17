@@ -51,6 +51,10 @@ object Application {
       throw new RuntimeException(error)
     }
     val analyzedTemplefile = Analyzer.parseAndValidate(data)
-    ProjectTester.test(analyzedTemplefile, generatedDirectory)
+    if (config.Test.testOnly()) {
+      ProjectTester.testOnly(analyzedTemplefile, generatedDirectory)
+    } else {
+      ProjectTester.test(analyzedTemplefile, generatedDirectory)
+    }
   }
 }
