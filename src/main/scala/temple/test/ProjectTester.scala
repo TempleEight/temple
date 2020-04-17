@@ -4,9 +4,11 @@ import java.io.IOException
 import java.net.HttpURLConnection
 
 import scalaj.http.Http
+import temple.ast.AbstractServiceBlock.ServiceBlock
 import temple.ast.Metadata.{AuthMethod, Provider}
 import temple.ast.{Metadata, Templefile}
 import temple.test.internal.{AuthServiceTest, CRUDServiceTest, ProjectConfig}
+import temple.utils.StringUtils.kebabCase
 
 import scala.sys.process._
 
@@ -20,7 +22,19 @@ object ProjectTester {
     s"sh -c '$command'".!!
 
   /** Configure Kong using the generated script, waiting until this is successful */
-  private def configureKong(usesAuth: Boolean, config: ProjectConfig, generatedPath: String): Unit = {
+  private def configureKong(
+    usesAuth: Boolean,
+    services: Map[String, ServiceBlock],
+    config: ProjectConfig,
+    generatedPath: String,
+  ): Unit = {
+    // Get a random service to validate kong is configured correctly
+    val (serviceName, _) = Option(services.head).getOrElse {
+      // If there are no services, there's nothing to setup, so return early...
+      return
+    }
+    val serviceURL = s"http://${config.baseIP}/api/${kebabCase(serviceName)}"
+
     var configuredKong = false
     while (!configuredKong) {
       exec(
@@ -28,14 +42,9 @@ object ProjectTester {
       )
 
       try {
-        configuredKong =
-          if (usesAuth)
-            Http("http://localhost:8000/api/auth/login")
-              .method("POST")
-              .asString
-              .code == HttpURLConnection.HTTP_BAD_REQUEST
-          // TODO: this might not be true, needs investigating
-          else true
+        val responseCode     = Http(serviceURL).method("POST").asString.code
+        val expectedResponse = if (usesAuth) HttpURLConnection.HTTP_UNAUTHORIZED else HttpURLConnection.HTTP_BAD_REQUEST
+        configuredKong = responseCode == expectedResponse
         if (!configuredKong) {
           println("Kong wasn't configured correctly - trying again")
           exec("sleep 5")
@@ -89,7 +98,7 @@ object ProjectTester {
         }
         ProjectConfig("localhost:8000", "localhost:8001")
     }
-    configureKong(templefile.usesAuth, config, generatedPath)
+    configureKong(templefile.usesAuth, templefile.services, config, generatedPath)
     config
   }
 
