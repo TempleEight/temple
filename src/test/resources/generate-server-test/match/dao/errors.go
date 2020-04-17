@@ -6,5 +6,5 @@ import "fmt"
 type ErrMatchNotFound string
 
 func (e ErrMatchNotFound) Error() string {
-	return fmt.Sprintf("match not found with ID %d", string(e))
+	return fmt.Sprintf("match not found with ID %s", string(e))
 }
