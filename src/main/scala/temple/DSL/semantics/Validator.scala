@@ -4,8 +4,8 @@ import temple.DSL.semantics.NameClashes._
 import temple.ast.AbstractAttribute.{Attribute, CreatedByAttribute, IDAttribute}
 import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
-import temple.ast.Metadata.ServiceAuth
-import temple.ast.{Metadata, _}
+import temple.ast.Metadata.{Readable, ServiceAuth}
+import temple.ast._
 import temple.builder.project.ProjectConfig
 import temple.utils.MonadUtils.FromEither
 
@@ -88,8 +88,17 @@ private class Validator private (templefile: Templefile) {
   private def validateService(serviceName: String, service: ServiceBlock, context: SemanticContext): ServiceBlock = {
     renameBlock(serviceName, service)
 
+    val defaultReadable                       = ProjectConfig.getDefaultReadable(templefile.usesAuth)
+    def readability(block: AttributeBlock[_]) = block.lookupLocalMetadata[Metadata.Readable] getOrElse defaultReadable
+    lazy val serviceReadability               = readability(service)
     val newStructs = service.structs.transform {
-      case (name, struct) => validateStruct(name, struct, context :+ name)
+      case (name, struct) =>
+        val structContext = context :+ name
+
+        if (readability(struct) == Metadata.Readable.All && serviceReadability == Readable.This)
+          errors += structContext.errorMessage("A struct cannot have wider readability than its parent service")
+
+        validateStruct(name, struct, structContext)
     }
     val newAttributes = validateAttributes(service, context)
     val newMetadata   = validateStructMetadata(service.metadata, newAttributes, context)
