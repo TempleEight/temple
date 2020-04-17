@@ -6,5 +6,5 @@ import "fmt"
 type ErrUserNotFound string
 
 func (e ErrUserNotFound) Error() string {
-	return fmt.Sprintf("user not found with ID %d", string(e))
+	return fmt.Sprintf("user not found with ID %s", string(e))
 }

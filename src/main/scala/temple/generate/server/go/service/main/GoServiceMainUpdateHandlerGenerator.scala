@@ -42,6 +42,7 @@ object GoServiceMainUpdateHandlerGenerator {
     usesComms: Boolean,
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
+    clientUsesBase64: Boolean,
     usesMetrics: Boolean,
   ): String = {
     val metricSuffix = when(usesMetrics) { Update.toString }
@@ -60,6 +61,7 @@ object GoServiceMainUpdateHandlerGenerator {
               generateValidateStructBlock(metricSuffix),
               when(usesComms) { generateForeignKeyCheckBlocks(root, metricSuffix) },
               when(clientUsesTime) { generateParseTimeBlocks(root.requestAttributes, metricSuffix) },
+              when(clientUsesBase64) { generateParseBase64Blocks(root.requestAttributes, metricSuffix) },
             )
           },
           generateDAOInput(root),
