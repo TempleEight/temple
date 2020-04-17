@@ -1,5 +1,6 @@
 package temple.test.internal
 
+import scalaj.http.Http
 import temple.ast.AbstractServiceBlock.ServiceBlock
 import temple.ast.Metadata
 import temple.builder.project.ProjectBuilder
@@ -95,6 +96,32 @@ class CRUDServiceTest(
       }
     }
 
+  def testIdentifyEndpoint(): Unit =
+    testEndpoint("identify") { test =>
+      val accessToken = newToken()
+      val requestBody =
+        ServiceTestUtils.constructRequestBody(test, service.attributes, allServices, baseURL, accessToken)
+      // Create an entity for this access token
+      ServiceTestUtils
+        .postRequest(test, s"http://$baseURL/api/${StringUtils.kebabCase(name)}", requestBody, accessToken)
+
+      // Identify it from the access token
+      val identifyResponse = Http(s"http://$baseURL/api/${StringUtils.kebabCase(name)}")
+        .method("GET")
+        .header("Authorization", s"Bearer $accessToken")
+        .asString
+      test.assertEqual(302, identifyResponse.code)
+
+      val location =
+        identifyResponse.header("Location").getOrElse(test.fail("response did not contain a Location header"))
+
+      // Get the result of the identification
+      val response = ServiceTestUtils.getRequest(test, s"http://$location", accessToken)
+
+      // Validate this is exactly what was created at the start
+      test.validateResponseBody(requestBody.asObject, response, service.attributes)
+    }
+
   // Test each type of endpoint that is present in the service
   def test(): Boolean = {
     ProjectBuilder.endpoints(service).foreach {
@@ -103,7 +130,7 @@ class CRUDServiceTest(
       case CRUD.Read     => testReadEndpoint()
       case CRUD.Update   => testUpdateEndpoint()
       case CRUD.Delete   => testDeleteEndpoint()
-      case CRUD.Identify => // TODO
+      case CRUD.Identify => testIdentifyEndpoint()
     }
     anyTestFailed
   }
