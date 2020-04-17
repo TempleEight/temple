@@ -13,7 +13,7 @@ type Hook struct {
 	beforeUpdateHooks   []*func(env *env, req updateComplexUserRequest, input *dao.UpdateComplexUserInput, auth *util.Auth) *HookError
 	beforeDeleteHooks   []*func(env *env, input *dao.DeleteComplexUserInput, auth *util.Auth) *HookError
 	beforeIdentifyHooks []*func(env *env, input *dao.IdentifyComplexUserInput, auth *util.Auth) *HookError
-  
+
 	afterCreateHooks   []*func(env *env, complexUser *dao.ComplexUser, auth *util.Auth) *HookError
 	afterReadHooks     []*func(env *env, complexUser *dao.ComplexUser, auth *util.Auth) *HookError
 	afterUpdateHooks   []*func(env *env, complexUser *dao.ComplexUser, auth *util.Auth) *HookError

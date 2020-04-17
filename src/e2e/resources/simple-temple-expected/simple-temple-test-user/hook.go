@@ -13,7 +13,7 @@ type Hook struct {
 	beforeReadHooks     []*func(env *env, input *dao.ReadSimpleTempleTestUserInput, auth *util.Auth) *HookError
 	beforeUpdateHooks   []*func(env *env, req updateSimpleTempleTestUserRequest, input *dao.UpdateSimpleTempleTestUserInput, auth *util.Auth) *HookError
 	beforeIdentifyHooks []*func(env *env, input *dao.IdentifySimpleTempleTestUserInput, auth *util.Auth) *HookError
-  
+
 	afterListHooks     []*func(env *env, simpleTempleTestUserList *[]dao.SimpleTempleTestUser, auth *util.Auth) *HookError
 	afterCreateHooks   []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser, auth *util.Auth) *HookError
 	afterReadHooks     []*func(env *env, simpleTempleTestUser *dao.SimpleTempleTestUser, auth *util.Auth) *HookError
