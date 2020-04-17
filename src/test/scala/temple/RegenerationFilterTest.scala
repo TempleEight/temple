@@ -1,10 +1,8 @@
 package temple
 
-import java.io.{File, PrintWriter}
 import java.nio.file.{Files, Path}
 
-import org.scalatest.{BeforeAndAfter, FlatSpec, Matchers}
-import temple.builder.project.Project
+import org.scalatest.{BeforeAndAfter, FlatSpec}
 import temple.detail.PoliceSergeantNicholasAngel
 import temple.generate.{FileMatchers, FileSystem}
 import temple.utils.FileUtils
@@ -15,7 +13,7 @@ class RegenerationFilterTest extends FlatSpec with FileMatchers with BeforeAndAf
 
   behavior of "RegenerationFilterTest"
 
-  private var testDirectory: Path = Files.createTempDirectory("test")
+  private var testDirectory: Path = _
 
   before {
     testDirectory = Files.createTempDirectory("test")

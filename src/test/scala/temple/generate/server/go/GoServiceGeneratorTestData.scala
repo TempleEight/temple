@@ -2,7 +2,6 @@ package temple.generate.server.go
 
 import java.nio.file.Paths
 
-import temple.TestUtils
 import temple.ast.AbstractAttribute.Attribute
 import temple.ast.Metadata.Database.Postgres
 import temple.ast.Metadata.Metrics.Prometheus
@@ -12,6 +11,7 @@ import temple.generate.CRUD
 import temple.generate.FileSystem._
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.{CreatedByAttribute, IDAttribute, ServiceName}
+import temple.utils.FileUtils
 
 import scala.collection.immutable.{ListMap, SortedMap}
 
@@ -40,7 +40,7 @@ object GoServiceGeneratorTestData {
   )
 
   val simpleServiceFiles: Files =
-    TestUtils.buildFileMap(Paths.get("src/test/resources/generate-server-test/"), "user")
+    FileUtils.buildFileMap(Paths.get("src/test/resources/generate-server-test/"), "user")
 
   val simpleServiceRootWithComms: ServiceRoot =
     ServiceRoot(
@@ -71,5 +71,5 @@ object GoServiceGeneratorTestData {
     )
 
   val simpleServiceFilesWithComms: Files =
-    TestUtils.buildFileMap(Paths.get("src/test/resources/generate-server-test/"), "match")
+    FileUtils.buildFileMap(Paths.get("src/test/resources/generate-server-test/"), "match")
 }

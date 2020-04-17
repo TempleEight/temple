@@ -22,15 +22,12 @@ object Application {
     val analyzedTemplefile = Analyzer.parseAndValidate(data)
     val detail             = LanguageSpecificDetailBuilder.build(analyzedTemplefile, questionAsker)
     val project            = ProjectBuilder.build(analyzedTemplefile, detail)
-    val filteredProject    = RegenerationFilter.filter(outputDirectory, project, questionAsker)
-
-    filteredProject match {
-      case Some(project) =>
-        FileUtils.outputProject(outputDirectory, project)
-        println(s"Generated project in $outputDirectory")
-      case None => println("Nothing to generate")
+    val filteredProject = RegenerationFilter.filter(outputDirectory, project, questionAsker).getOrElse {
+      println("Nothing to generate")
+      return
     }
-
+    FileUtils.outputProject(outputDirectory, filteredProject)
+    println(s"Generated project in $outputDirectory")
   }
 
   def validate(config: TempleConfig): Unit = {

@@ -6,8 +6,7 @@ import temple.builder.project.Project
 import temple.detail.QuestionAsker
 import temple.generate.FileSystem.File
 import temple.generate.utils.CodeTerm.mkCode
-
-import scala.jdk.CollectionConverters._
+import temple.utils.FileUtils
 
 /**
   * Handles whether we're regenerating or not.
@@ -30,20 +29,13 @@ object RegenerationFilter {
   private def filesUnderDirectory(directory: String): Seq[File] = {
     val directoryPath = Paths.get(directory)
     if (Files.exists(directoryPath)) {
-      Files
-        .walk(directoryPath, 4)
-        .iterator()
-        .asScala
-        .filterNot(path => path.toFile.isDirectory)
-        .map(path => directoryPath.relativize(path))
-        .map(path => File(Option(path.getParent).fold("")(_.toString), path.getFileName.toString))
-        .toSeq
+      FileUtils.buildFileMap(directoryPath).keys.toSeq
     } else Seq()
   }
 
   // Check if any of the files we're generating already exist, i.e if we're regenerating something.
   private def isRegen(outputDir: String, existingFiles: Seq[File], project: Project): Boolean = {
-    val generatedFiles = project.files.keys.map(file => File(file.folder, file.filename)).toSet
+    val generatedFiles = project.files.keys.toSet
     existingFiles.toSet.intersect(generatedFiles).nonEmpty
   }
 
@@ -76,13 +68,10 @@ object RegenerationFilter {
     if (isRegen(outputDirectory, existingFiles, project)) {
       val omittedFiles = filesToOmit(existingFiles)
       // Get the user to confirm whether we're regenerating
-      if (shouldRegen(omittedFiles, questionAsker)) {
-        Some(Project(project.files.filterNot {
+      Option.when(shouldRegen(omittedFiles, questionAsker)) {
+        Project(project.files.filterNot {
           case file -> _ => omittedFiles.contains(file)
-        }))
-      } else {
-        // If the user doesn't want to overwrite files, don't output anything
-        None
+        })
       }
     } else {
       // If we're not regenerating anything, then carry on as normal
