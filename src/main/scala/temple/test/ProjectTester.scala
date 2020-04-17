@@ -29,7 +29,7 @@ object ProjectTester {
     generatedPath: String,
   ): Unit = {
     // Get a random service to validate kong is configured correctly
-    val (serviceName, _) = Option(services.head).getOrElse {
+    val (serviceName, _) = services.headOption.getOrElse {
       // If there are no services, there's nothing to setup, so return early...
       return
     }
