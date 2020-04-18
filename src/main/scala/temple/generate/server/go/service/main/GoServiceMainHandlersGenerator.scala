@@ -81,17 +81,12 @@ object GoServiceMainHandlersGenerator {
       genReturn(),
     )
 
-  /**
-    * Generate the block for extracting an AuthID from the request header
-    *
-    * @param usesVar indicates whether to assign the auth to a variable, i.e. "auth" | "_"
-    * @return extract auth block string
-    */
-  private[main] def generateExtractAuthBlock(usesVar: Boolean, metricSuffix: Option[String]): String =
+  /** Generate the block for extracting an AuthID from the request header */
+  private[main] def generateExtractAuthBlock(metricSuffix: Option[String]): String =
     mkCode.lines(
       genDeclareAndAssign(
         genMethodCall("util", "ExtractAuthIDFromRequest", "r.Header"),
-        if (usesVar) "auth" else "_",
+        "auth",
         "err",
       ),
       genIfErr(
@@ -377,17 +372,17 @@ object GoServiceMainHandlersGenerator {
     operation: CRUD,
     metricSuffix: Option[String],
   ): String = {
-    val hookArguments: Seq[String] = operation match {
-      case List =>
-        root.readable match {
-          case Readable.This => Seq("env", "&input")
-          case Readable.All  => Seq("env")
-        }
-      case Create | Update =>
-        if (root.requestAttributes.isEmpty) Seq("env", "&input") else Seq("env", "req", "&input")
-      case Read | Delete | Identify =>
-        Seq("env", "&input")
-    }
+    val hookArguments: Seq[String] = (operation match {
+        case List =>
+          root.readable match {
+            case Readable.This => Seq("env", "&input")
+            case Readable.All  => Seq("env")
+          }
+        case Create | Update =>
+          if (root.requestAttributes.isEmpty) Seq("env", "&input") else Seq("env", "req", "&input")
+        case Read | Delete | Identify =>
+          Seq("env", "&input")
+      }) ++ when(root.projectUsesAuth) { "auth" }
 
     genForLoop(
       genDeclareAndAssign(s"range env.hook.before${operation.toString}Hooks", "_", "hook"),
@@ -406,14 +401,14 @@ object GoServiceMainHandlersGenerator {
     operation: CRUD,
     metricSuffix: Option[String],
   ): String = {
-    val hookArguments = operation match {
-      case List =>
-        Seq("env", s"${root.decapitalizedName}List")
-      case Create | Read | Update | Identify =>
-        Seq("env", root.decapitalizedName)
-      case Delete =>
-        Seq("env")
-    }
+    val hookArguments = (operation match {
+        case List =>
+          Seq("env", s"${root.decapitalizedName}List")
+        case Create | Read | Update | Identify =>
+          Seq("env", root.decapitalizedName)
+        case Delete =>
+          Seq("env")
+      }) ++ when(root.projectUsesAuth) { "auth" }
 
     genForLoop(
       genDeclareAndAssign(s"range env.hook.after${operation.toString}Hooks", "_", "hook"),

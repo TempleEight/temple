@@ -177,8 +177,14 @@ func respondWithError(w http.ResponseWriter, err string, statusCode int, request
 }
 
 func (env *env) listSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestList)
+		return
+	}
+
 	for _, hook := range env.hook.beforeListHooks {
-		err := (*hook)(env)
+		err := (*hook)(env, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestList)
 			return
@@ -194,7 +200,7 @@ func (env *env) listSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 	}
 
 	for _, hook := range env.hook.afterListHooks {
-		err := (*hook)(env, simpleTempleTestUserList)
+		err := (*hook)(env, simpleTempleTestUserList, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestList)
 			return
@@ -282,7 +288,7 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	}
 
 	for _, hook := range env.hook.beforeCreateHooks {
-		err := (*hook)(env, req, &input)
+		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
@@ -298,7 +304,7 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	}
 
 	for _, hook := range env.hook.afterCreateHooks {
-		err := (*hook)(env, simpleTempleTestUser)
+		err := (*hook)(env, simpleTempleTestUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
@@ -322,7 +328,7 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 }
 
 func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
-	_, err := util.ExtractAuthIDFromRequest(r.Header)
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestRead)
 		return
@@ -339,7 +345,7 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 	}
 
 	for _, hook := range env.hook.beforeReadHooks {
-		err := (*hook)(env, &input)
+		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
@@ -360,7 +366,7 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 	}
 
 	for _, hook := range env.hook.afterReadHooks {
-		err := (*hook)(env, simpleTempleTestUser)
+		err := (*hook)(env, simpleTempleTestUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
@@ -451,7 +457,7 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	}
 
 	for _, hook := range env.hook.beforeUpdateHooks {
-		err := (*hook)(env, req, &input)
+		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
 			return
@@ -472,7 +478,7 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	}
 
 	for _, hook := range env.hook.afterUpdateHooks {
-		err := (*hook)(env, simpleTempleTestUser)
+		err := (*hook)(env, simpleTempleTestUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
 			return
@@ -507,7 +513,7 @@ func (env *env) identifySimpleTempleTestUserHandler(w http.ResponseWriter, r *ht
 	}
 
 	for _, hook := range env.hook.beforeIdentifyHooks {
-		err := (*hook)(env, &input)
+		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)
 			return
@@ -528,7 +534,7 @@ func (env *env) identifySimpleTempleTestUserHandler(w http.ResponseWriter, r *ht
 	}
 
 	for _, hook := range env.hook.afterIdentifyHooks {
-		err := (*hook)(env, simpleTempleTestUser)
+		err := (*hook)(env, simpleTempleTestUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)
 			return

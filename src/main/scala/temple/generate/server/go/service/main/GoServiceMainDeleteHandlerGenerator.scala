@@ -41,7 +41,7 @@ object GoServiceMainDeleteHandlerGenerator {
       generateHandlerDecl(root, Delete),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(root.projectUsesAuth) { generateExtractAuthBlock(root.writable == Writable.This, metricSuffix) },
+          when(root.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
           generateExtractIDBlock(root.decapitalizedName, metricSuffix),
           when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root, metricSuffix) },
           generateDAOInput(root),

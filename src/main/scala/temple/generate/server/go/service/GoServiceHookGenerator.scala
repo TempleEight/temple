@@ -6,36 +6,58 @@ import temple.generate.CRUD.{CRUD, presentParticiple}
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonHookGenerator
-import temple.generate.utils.CodeTerm.mkCode
+import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
+import temple.utils.StringUtils.doubleQuote
+
+import scala.Option.when
 
 object GoServiceHookGenerator {
 
-  private def generateBeforeHookType(root: ServiceRoot, operation: CRUD): String = operation match {
-    case CRUD.List =>
-      root.readable match {
-        case Readable.This =>
-          s"func(env *env, input *dao.List${root.name}Input) *HookError"
-        case Readable.All =>
-          s"func(env *env) *HookError"
-      }
-    case op @ (CRUD.Read | CRUD.Delete | CRUD.Identify) =>
-      s"func(env *env, input *dao.${op.toString}${root.name}Input) *HookError"
-    case op @ (CRUD.Create | CRUD.Update) =>
-      if (root.requestAttributes.isEmpty)
-        s"func(env *env, input *dao.${op.toString}${root.name}Input) *HookError"
-      else
-        s"func(env *env, req ${op.toString.toLowerCase}${root.name}Request, input *dao.${op.toString}${root.name}Input) *HookError"
-
+  private[service] def generateImports(root: ServiceRoot): String = {
+    val daoImport = s"${doubleQuote(root.module + "/dao")}"
+    if (root.projectUsesAuth)
+      mkCode("import", CodeWrap.parens.tabbed(daoImport, s"${doubleQuote(root.module + "/util")}"))
+    else mkCode("import", daoImport)
   }
 
-  private def generateAfterHookType(root: ServiceRoot, operation: CRUD): String = operation match {
-    case CRUD.List =>
-      s"func(env *env, ${root.decapitalizedName}List *[]dao.${root.name}) *HookError"
-    case CRUD.Create | CRUD.Read | CRUD.Update | CRUD.Identify =>
-      s"func(env *env, ${root.decapitalizedName} *dao.${root.name}) *HookError"
-    case CRUD.Delete =>
-      "func(env *env) *HookError"
-  }
+  private def generateHookType(root: ServiceRoot, args: String*): String =
+    mkCode(
+      CodeWrap.parens
+        .prefix("func")
+        .list("env *env", args, when(root.projectUsesAuth) { "auth *util.Auth" }),
+      "*HookError",
+    )
+
+  private def generateBeforeHookType(root: ServiceRoot, operation: CRUD): String =
+    operation match {
+      case CRUD.List =>
+        root.readable match {
+          case Readable.This => generateHookType(root, s"input *dao.List${root.name}Input")
+          case Readable.All  => generateHookType(root)
+        }
+      case op @ (CRUD.Read | CRUD.Delete | CRUD.Identify) =>
+        generateHookType(root, s"input *dao.${op.toString}${root.name}Input")
+      case op @ (CRUD.Create | CRUD.Update) =>
+        if (root.requestAttributes.isEmpty)
+          generateHookType(root, s"input *dao.${op.toString}${root.name}Input")
+        else
+          generateHookType(
+            root,
+            s"req ${op.toString.toLowerCase}${root.name}Request",
+            s"input *dao.${op.toString}${root.name}Input",
+          )
+
+    }
+
+  private def generateAfterHookType(root: ServiceRoot, operation: CRUD): String =
+    operation match {
+      case CRUD.List =>
+        generateHookType(root, s"${root.decapitalizedName}List *[]dao.${root.name}")
+      case CRUD.Create | CRUD.Read | CRUD.Update | CRUD.Identify =>
+        generateHookType(root, s"${root.decapitalizedName} *dao.${root.name}")
+      case CRUD.Delete =>
+        generateHookType(root)
+    }
 
   private[service] def generateHookStruct(root: ServiceRoot): String = {
     val beforeCreate = root.operations.toSeq.map { op =>
