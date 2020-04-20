@@ -27,7 +27,7 @@ object GoAuthServiceMainGenerator {
         doubleQuote(s"${root.module}/dao"),
         when(usesMetrics) { doubleQuote(s"${root.module}/metric") },
         doubleQuote(s"${root.module}/util"),
-        s"valid ${doubleQuote("github.com/asaskevich/govalidator")}",
+        s"valid ${doubleQuote("github.com/go-playground/validator/v10")}",
         doubleQuote("github.com/dgrijalva/jwt-go"),
         doubleQuote("github.com/google/uuid"),
         doubleQuote("github.com/gorilla/mux"),
