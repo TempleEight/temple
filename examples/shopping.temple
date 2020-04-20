@@ -1,0 +1,89 @@
+// Shopping is a product concept that would allow those who are self isolating to request others in the community
+// to deliver shopping to their doorstep.
+Shopping: project {
+   #language(go);
+   #database(postgres);
+   #provider(dockerCompose);
+   #metrics(prometheus);
+   #authMethod(email);
+}
+
+// Shoppers take Customer's orders and deliver them to their houses
+Shopper: service {
+  // implicit 'id' field that matches auth service 'id' field
+  firstName: string;
+  lastName: string;
+
+  #auth;
+  #readable(by: all);
+  // implicit #writable(by: this) since project has auth
+}
+
+// Customers place orders for Shoppers to deliver
+Customer: service {
+  // implicit 'id' field that matches auth service 'id' field
+  firstName: string;
+  lastName: string;
+
+  addressLine1: string;
+  addressLine2: string;
+  town: string;
+  county: string;
+  postcode: string;
+
+  #auth;
+  #readable(by: all);
+  // implicit #writable(by: this) since project has auth
+}
+
+Shop: service {
+  // implicit 'id' field that matches auth service 'id' field
+  name: string;
+
+  address: string;
+  addressLine2: string;
+  town: string;
+  county: string;
+  postcode: string;
+
+  #auth;
+  #readable(by: all);
+  #enumerable;
+  // implicit #writable(by: this) since project has auth
+}
+
+// Products are items that can be purchased from a Shop
+// TODO: Access control should only create products to be created if the Shop matches the access token
+Product: service {
+  name: string;
+  price: float;
+  shop: Shop;
+
+  Picture: struct {
+    image: data(5M);
+    #enumerable;
+  }
+
+  #readable(by: all);
+  #enumerable;
+  // implicit #writable(by: this) since project has auth
+}
+
+// An order contains a series of items associated with a given customer on a given date
+Order: service {
+  customer: Customer;
+  orderDate: date;
+  fulfilled: bool;
+  requestedDeliveryDate: date;
+
+  // OrderItem is a join table between Orders and Products (many to many)
+  OrderItem: struct {
+    product: Product;
+    #enumerable;
+  }
+
+  #omit[delete];
+  #enumerable;
+  #readable(by: all);
+  // implicit #writable(by: this) since project has auth
+}
