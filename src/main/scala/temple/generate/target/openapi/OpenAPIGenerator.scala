@@ -85,7 +85,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
       .to(attributes.mapFactory),
   )
 
-  def addPaths(service: Service): this.type = {
+  def addPaths(securityScheme: Option[String])(service: Service): this.type = {
     val lowerName       = service.name.toLowerCase
     val capitalizedName = service.name.capitalize
     val tags            = Seq(capitalizedName)
@@ -94,6 +94,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         path(s"/$lowerName/all") += HTTPVerb.Get -> Handler(
             s"Get a list of every $lowerName",
             tags = tags,
+            security = securityScheme,
             responses = Seq(
               200 -> ResponseObject(
                 s"$capitalizedName list successfully fetched",
@@ -106,6 +107,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         path(s"/$lowerName") += HTTPVerb.Post -> Handler(
             s"Register a new $lowerName",
             tags = tags,
+            security = securityScheme,
             requestBody =
               Some(RequestBodyObject(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
             responses = Seq(
@@ -122,6 +124,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Get -> Handler(
             s"Look up a single $lowerName",
             tags = tags,
+            security = securityScheme,
             responses = Seq(
               200 -> ResponseObject(
                 s"$capitalizedName details",
@@ -137,6 +140,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Put -> Handler(
             s"Update a single $lowerName",
             tags = tags,
+            security = securityScheme,
             requestBody =
               Some(RequestBodyObject(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
             responses = Seq(
@@ -154,6 +158,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Delete -> Handler(
             s"Delete a single $lowerName",
             tags = tags,
+            security = securityScheme,
             responses = Seq(
               200 -> ResponseObject(
                 s"$capitalizedName successfully deleted",
@@ -169,6 +174,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
         path(s"/$lowerName") += HTTPVerb.Get -> Handler(
             s"Look up the single $lowerName associated with the access token",
             tags = tags,
+            security = securityScheme,
             responses = Seq(
               302 -> ResponseObject(
                 description = s"The single $lowerName is accessible from the provided Location",
@@ -247,10 +253,10 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
   def errorBlock: Map[String, Response] =
     errorTracker.view.map { case i -> response => useError(i) -> response }.toSeq.sortBy(_._1).to(ListMap)
 
-  def toOpenAPI: OpenAPIFile = OpenAPIFile(
+  def toOpenAPI(securityScheme: Option[(String, SecurityScheme)]): OpenAPIFile = OpenAPIFile(
     info = Info(name, version, description),
     paths = paths.view.mapValues(_.toPath).to(ListMap),
-    components = Components(responses = errorBlock),
+    components = Components(securitySchemes = securityScheme.toMap, responses = errorBlock),
   )
 }
 
@@ -260,9 +266,12 @@ object OpenAPIGenerator {
 
   private def build(root: OpenAPIRoot): OpenAPIFile = {
     val builder = new OpenAPIGenerator(root.name, root.version, root.description)
-    root.services.foreach(builder.addPaths)
+    val securityScheme = root.auth.map {
+      case Auth.Email => "bearerAuth" -> SecurityScheme("http", "bearer", "JWT")
+    }
+    root.services.foreach(builder.addPaths(securityScheme.map { case (name, _) => name }))
     root.auth.foreach(builder.addAuthPaths)
-    builder.toOpenAPI
+    builder.toOpenAPI(securityScheme)
   }
 
   private def render(root: OpenAPIRoot): String =
