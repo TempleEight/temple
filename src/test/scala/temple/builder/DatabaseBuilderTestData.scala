@@ -1,7 +1,7 @@
 package temple.builder
 
 import temple.generate.database.ast.ColType._
-import temple.generate.database.ast.ColumnConstraint.{Check, NonNull, Unique}
+import temple.generate.database.ast.ColumnConstraint.{Check, NonNull, PrimaryKey, Unique}
 import temple.generate.database.ast.ComparisonOperator.{GreaterEqual, LessEqual}
 import temple.generate.database.ast.Condition.PreparedComparison
 import temple.generate.database.ast.Statement._
@@ -14,7 +14,7 @@ object DatabaseBuilderTestData {
       Create(
         "temple_user",
         Seq(
-          ColumnDef("id", IntCol(4), Seq(NonNull)),
+          ColumnDef("id", UUIDCol, Seq(NonNull, PrimaryKey)),
           ColumnDef("bank_balance", FloatCol(8), Seq(NonNull)),
           ColumnDef("name", StringCol, Seq(NonNull)),
           ColumnDef("is_student", BoolCol, Seq(NonNull)),
@@ -32,7 +32,7 @@ object DatabaseBuilderTestData {
       Create(
         "temple_user",
         Seq(
-          ColumnDef("id", IntCol(2), Seq(Check("id", LessEqual, "100"), Check("id", GreaterEqual, "10"), NonNull)),
+          ColumnDef("id", UUIDCol, Seq(NonNull, PrimaryKey)),
           ColumnDef(
             "another_id",
             IntCol(4),
@@ -123,7 +123,6 @@ object DatabaseBuilderTestData {
   val sampleUpdateStatement: Statement = Update(
     "test_service",
     Seq(
-      Assignment(Column("id")),
       Assignment(Column("bank_balance")),
       Assignment(Column("name")),
       Assignment(Column("is_student")),
