@@ -12,7 +12,7 @@ import (
 	"github.com/squat/and/dab/simple-temple-test-user/dao"
 	"github.com/squat/and/dab/simple-temple-test-user/metric"
 	"github.com/squat/and/dab/simple-temple-test-user/util"
-	valid "github.com/asaskevich/govalidator"
+	valid "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
@@ -21,34 +21,35 @@ import (
 
 // env defines the environment that requests should be executed within
 type env struct {
-	dao  dao.Datastore
-	hook Hook
+	dao   dao.Datastore
+	hook  Hook
+	valid *valid.Validate
 }
 
 // createSimpleTempleTestUserRequest contains the client-provided information required to create a single simpleTempleTestUser
 type createSimpleTempleTestUserRequest struct {
-	SimpleTempleTestUser *string  `json:"simpleTempleTestUser" valid:"type(*string),required"`
-	Email                *string  `json:"email" valid:"type(*string),required,stringlength(5|40)"`
-	FirstName            *string  `json:"firstName" valid:"type(*string),required"`
-	LastName             *string  `json:"lastName" valid:"type(*string),required"`
-	CreatedAt            *string  `json:"createdAt" valid:"type(*string),rfc3339,required"`
-	NumberOfDogs         *int32   `json:"numberOfDogs" valid:"type(*int32),required"`
-	CurrentBankBalance   *float32 `json:"currentBankBalance" valid:"type(*float32),required"`
-	BirthDate            *string  `json:"birthDate" valid:"type(*string),required"`
-	BreakfastTime        *string  `json:"breakfastTime" valid:"type(*string),required"`
+	SimpleTempleTestUser *string  `json:"simpleTempleTestUser" validate:"required"`
+	Email                *string  `json:"email" validate:"required,gte=5,lte=40"`
+	FirstName            *string  `json:"firstName" validate:"required"`
+	LastName             *string  `json:"lastName" validate:"required"`
+	CreatedAt            *string  `json:"createdAt" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
+	NumberOfDogs         *int32   `json:"numberOfDogs" validate:"required"`
+	CurrentBankBalance   *float32 `json:"currentBankBalance" validate:"required,gte=0.0"`
+	BirthDate            *string  `json:"birthDate" validate:"required"`
+	BreakfastTime        *string  `json:"breakfastTime" validate:"required"`
 }
 
 // updateSimpleTempleTestUserRequest contains the client-provided information required to update a single simpleTempleTestUser
 type updateSimpleTempleTestUserRequest struct {
-	SimpleTempleTestUser *string  `json:"simpleTempleTestUser" valid:"type(*string),required"`
-	Email                *string  `json:"email" valid:"type(*string),required,stringlength(5|40)"`
-	FirstName            *string  `json:"firstName" valid:"type(*string),required"`
-	LastName             *string  `json:"lastName" valid:"type(*string),required"`
-	CreatedAt            *string  `json:"createdAt" valid:"type(*string),rfc3339,required"`
-	NumberOfDogs         *int32   `json:"numberOfDogs" valid:"type(*int32),required"`
-	CurrentBankBalance   *float32 `json:"currentBankBalance" valid:"type(*float32),required"`
-	BirthDate            *string  `json:"birthDate" valid:"type(*string),required"`
-	BreakfastTime        *string  `json:"breakfastTime" valid:"type(*string),required"`
+	SimpleTempleTestUser *string  `json:"simpleTempleTestUser" validate:"required"`
+	Email                *string  `json:"email" validate:"required,gte=5,lte=40"`
+	FirstName            *string  `json:"firstName" validate:"required"`
+	LastName             *string  `json:"lastName" validate:"required"`
+	CreatedAt            *string  `json:"createdAt" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
+	NumberOfDogs         *int32   `json:"numberOfDogs" validate:"required"`
+	CurrentBankBalance   *float32 `json:"currentBankBalance" validate:"required,gte=0.0"`
+	BirthDate            *string  `json:"birthDate" validate:"required"`
+	BreakfastTime        *string  `json:"breakfastTime" validate:"required"`
 }
 
 // listSimpleTempleTestUserElement contains a single simpleTempleTestUser list element
@@ -129,9 +130,6 @@ func main() {
 	configPtr := flag.String("config", "/etc/simple-temple-test-user-service/config.json", "configuration filepath")
 	flag.Parse()
 
-	// Require all struct fields by default
-	valid.SetFieldsRequiredByDefault(true)
-
 	config, err := util.GetConfig(*configPtr)
 	if err != nil {
 		log.Fatal(err)
@@ -152,7 +150,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	env := env{d, Hook{}}
+	env := env{d, Hook{}, valid.New()}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)
@@ -250,7 +248,7 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
@@ -419,7 +417,7 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return

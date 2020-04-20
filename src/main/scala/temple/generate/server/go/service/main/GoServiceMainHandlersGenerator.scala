@@ -10,10 +10,10 @@ import temple.generate.server.go.GoHTTPStatus._
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.main.GoServiceMainCreateHandlerGenerator.generateCreateHandler
 import temple.generate.server.go.service.main.GoServiceMainDeleteHandlerGenerator.generateDeleteHandler
+import temple.generate.server.go.service.main.GoServiceMainIdentifyHandlerGenerator.generateIdentifyHandler
 import temple.generate.server.go.service.main.GoServiceMainListHandlerGenerator.generateListHandler
 import temple.generate.server.go.service.main.GoServiceMainReadHandlerGenerator.generateReadHandler
 import temple.generate.server.go.service.main.GoServiceMainUpdateHandlerGenerator.generateUpdateHandler
-import temple.generate.server.go.service.main.GoServiceMainIdentifyHandlerGenerator.generateIdentifyHandler
 import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.StringUtils.{decapitalize, doubleQuote}
 
@@ -196,7 +196,7 @@ object GoServiceMainHandlersGenerator {
   /** Generate the block for validating the request object */
   private[main] def generateValidateStructBlock(metricSuffix: Option[String]): String =
     mkCode.lines(
-      genAssign(genMethodCall("valid", "ValidateStruct", "req"), "_", "err"),
+      genAssign(genMethodCall("env.valid", "Struct", "req"), "err"),
       genIfErr(
         generateRespondWithErrorReturn(
           genHTTPEnum(StatusBadRequest),
