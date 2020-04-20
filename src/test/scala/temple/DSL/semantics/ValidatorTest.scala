@@ -215,6 +215,75 @@ class ValidatorTest extends FlatSpec with Matchers {
     ) shouldBe Set("No such service Box referenced in #uses in User")
   }
 
+  it should "allow valid foreign keys" in {
+    validationErrors(
+      Templefile(
+        "MyProject",
+        projectBlock = ProjectBlock(Seq(Database.Postgres)),
+        services = Map(
+          "Foo" -> ServiceBlock(
+            attributes = Map(),
+            structs = Map(
+              "Bar" -> StructBlock(
+                attributes = Map(
+                  "foo" -> Attribute(ForeignKey("Foo")),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ) shouldBe empty
+
+    validationErrors(
+      Templefile(
+        "MyProject",
+        projectBlock = ProjectBlock(Seq(Database.Postgres)),
+        services = Map(
+          "Foo" -> ServiceBlock(
+            attributes = Map(),
+            structs = Map(
+              "Bar" -> StructBlock(
+                attributes = Map(),
+              ),
+              "Baz" -> StructBlock(
+                attributes = Map(
+                  "bar" -> Attribute(ForeignKey("Bar")),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ) shouldBe empty
+  }
+
+  it should "identify invalid foreign keys" in {
+    validationErrors(
+      Templefile(
+        "MyProject",
+        projectBlock = ProjectBlock(Seq(Database.Postgres)),
+        services = Map(
+          "Foo" -> ServiceBlock(
+            attributes = Map(
+              "baz" -> Attribute(ForeignKey("Baz")),
+            ),
+          ),
+          "Bar" -> ServiceBlock(
+            attributes = Map(),
+            structs = Map(
+              "Baz" -> StructBlock(
+                attributes = Map(
+                  "name" -> Attribute(StringType()),
+                ),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ) shouldBe Set("Invalid foreign key Baz in baz, in Foo")
+  }
+
   it should "enforce the existence of an auth block when other dependent metadata are used" in {
     validationErrors(
       Templefile(
