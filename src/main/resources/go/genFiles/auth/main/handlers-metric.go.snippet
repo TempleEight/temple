@@ -6,7 +6,7 @@ func (env *env) registerAuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestRegister)
 		return
@@ -81,7 +81,7 @@ func (env *env) loginAuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestLogin)
 		return
