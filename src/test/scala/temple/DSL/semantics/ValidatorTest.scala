@@ -268,6 +268,11 @@ class ValidatorTest extends FlatSpec with Matchers {
             attributes = Map(
               "baz" -> Attribute(ForeignKey("Baz")),
             ),
+            structs = Map(
+              "Quux" -> StructBlock(
+                attributes = Map("baz" -> Attribute(ForeignKey("Baz"))),
+              ),
+            ),
           ),
           "Bar" -> ServiceBlock(
             attributes = Map(),
@@ -281,7 +286,7 @@ class ValidatorTest extends FlatSpec with Matchers {
           ),
         ),
       ),
-    ) shouldBe Set("Invalid foreign key Baz in baz, in Foo")
+    ) shouldBe Set("Invalid foreign key Baz in baz, in Foo", "Invalid foreign key Baz in baz, in Quux, in Foo")
   }
 
   it should "enforce the existence of an auth block when other dependent metadata are used" in {
