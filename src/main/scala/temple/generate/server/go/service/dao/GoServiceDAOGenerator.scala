@@ -38,7 +38,7 @@ object GoServiceDAOGenerator {
     val createdByMap = root.createdByAttribute.fold(ListMap[String, String]()) { enumerating =>
       ListMap(enumerating.name.capitalize -> generateGoType(AttributeType.UUIDType))
     }
-    val attributesMap = root.attributes.map {
+    val attributesMap = root.storedAttributes.map {
       case (name, attribute) => name.capitalize -> generateGoType(attribute.attributeType)
     }
 
