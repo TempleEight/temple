@@ -2,10 +2,10 @@ package temple.test.internal
 
 import scalaj.http.Http
 import temple.ast.AbstractServiceBlock.ServiceBlock
+import temple.test.internal.ServiceTestUtils._
 import temple.ast.Metadata
 import temple.builder.project.ProjectBuilder
 import temple.generate.CRUD
-import temple.utils.StringUtils
 
 class CRUDServiceTest(
   name: String,
@@ -13,74 +13,44 @@ class CRUDServiceTest(
   allServices: Map[String, ServiceBlock],
   baseURL: String,
   usesAuth: Boolean,
-) extends ServiceTest(name) {
-
-  private def newToken(): String = if (usesAuth) ServiceTestUtils.getAuthTokenWithEmail(name, baseURL) else ""
+) extends ServiceTest(name, baseURL, usesAuth) {
 
   private def testCreateEndpoint(): Unit =
-    testEndpoint("create") { test =>
-      val accessToken = newToken()
-      val requestBody =
-        ServiceTestUtils.constructRequestBody(test, service.attributes, allServices, baseURL, accessToken)
-      val createJSON =
-        ServiceTestUtils
-          .postRequest(test, s"http://$baseURL/api/${StringUtils.kebabCase(name)}", requestBody, accessToken)
+    testEndpoint("create") { (test, accessToken) =>
+      val requestBody = constructRequestBody(test, service.attributes, allServices, baseURL, accessToken)
+      val createJSON  = postRequest(test, serviceURL, requestBody, accessToken)
       test.validateResponseBody(requestBody.asObject, createJSON, service.attributes)
     }
 
   private def testReadEndpoint(): Unit =
-    testEndpoint("read") { test =>
-      val accessToken    = newToken()
-      val createResponse = ServiceTestUtils.create(test, name, allServices, baseURL, accessToken)
-      val getJSON = ServiceTestUtils
-        .getRequest(
-          test,
-          s"http://$baseURL/api/${StringUtils.kebabCase(name)}/${createResponse}",
-          accessToken,
-        )
+    testEndpoint("read") { (test, accessToken) =>
+      val id      = create(test, name, allServices, baseURL, accessToken)
+      val getJSON = getRequest(test, s"$serviceURL/$id", accessToken)
       test.validateResponseBody(None, getJSON, service.attributes)
     }
 
   private def testUpdateEndpoint(): Unit =
-    testEndpoint("update") { test =>
-      val accessToken    = newToken()
-      val createResponse = ServiceTestUtils.create(test, name, allServices, baseURL, accessToken)
-      val requestBody =
-        ServiceTestUtils
-          .constructRequestBody(test, service.attributes, allServices, baseURL, accessToken)
-      val updateJSON =
-        ServiceTestUtils.putRequest(
-          test,
-          s"http://$baseURL/api/${StringUtils.kebabCase(name)}/${createResponse}",
-          requestBody,
-          accessToken,
-        )
+    testEndpoint("update") { (test, accessToken) =>
+      val id          = create(test, name, allServices, baseURL, accessToken)
+      val requestBody = constructRequestBody(test, service.attributes, allServices, baseURL, accessToken)
+      val updateJSON  = putRequest(test, s"$serviceURL/$id", requestBody, accessToken)
       test.validateResponseBody(requestBody.asObject, updateJSON, service.attributes)
     }
 
   private def testDeleteEndpoint(): Unit =
-    testEndpoint("delete") { test =>
-      val accessToken    = newToken()
-      val createResponse = ServiceTestUtils.create(test, name, allServices, baseURL, accessToken)
-      val deleteJSON =
-        ServiceTestUtils.deleteRequest(
-          test,
-          s"http://$baseURL/api/${StringUtils.kebabCase(name)}/${createResponse}",
-          accessToken,
-        )
+    testEndpoint("delete") { (test, accessToken) =>
+      val id         = create(test, name, allServices, baseURL, accessToken)
+      val deleteJSON = deleteRequest(test, s"$serviceURL/$id", accessToken)
       test.assert(deleteJSON.isEmpty, "delete response was not empty")
     }
 
   private def testListEndpoint(): Unit =
-    testEndpoint("list") { test =>
-      val accessToken = newToken()
-      val _           = ServiceTestUtils.create(test, name, allServices, baseURL, accessToken)
-      val listJSON =
-        ServiceTestUtils
-          .getRequest(test, s"http://$baseURL/api/${StringUtils.kebabCase(name)}/all", accessToken)
-          .apply(s"${name}List")
-          .flatMap(_.asArray)
-          .getOrElse(test.fail(s"response did not contain key ${name}List"))
+    testEndpoint("list") { (test, accessToken) =>
+      val _ = create(test, name, allServices, baseURL, accessToken)
+      val listJSON = getRequest(test, s"$serviceURL/all", accessToken)
+        .apply(s"${name}List")
+        .flatMap(_.asArray)
+        .getOrElse(test.fail(s"response did not contain key ${name}List"))
 
       // Ensure the correct number of items were returned
       // For `this`, only 1 item has been created for this access token...
@@ -97,19 +67,17 @@ class CRUDServiceTest(
     }
 
   def testIdentifyEndpoint(): Unit =
-    testEndpoint("identify") { test =>
-      val accessToken = newToken()
-      val requestBody =
-        ServiceTestUtils.constructRequestBody(test, service.attributes, allServices, baseURL, accessToken)
-      // Create an entity for this access token
-      ServiceTestUtils
-        .postRequest(test, s"http://$baseURL/api/${StringUtils.kebabCase(name)}", requestBody, accessToken)
+    testEndpoint("identify") { (test, accessToken) =>
+      val requestBody = constructRequestBody(test, service.attributes, allServices, baseURL, accessToken)
+      // Check the entity does not alreayd exist
+      val preIdentifyResponse = Http(serviceURL).method("GET").header("Authorization", s"Bearer $accessToken").asString
+      test.assertEqual(404, preIdentifyResponse.code)
 
-      // Identify it from the access token
-      val identifyResponse = Http(s"http://$baseURL/api/${StringUtils.kebabCase(name)}")
-        .method("GET")
-        .header("Authorization", s"Bearer $accessToken")
-        .asString
+      // Construct an entity, but discard the ID
+      val _ = postRequest(test, serviceURL, requestBody, accessToken)
+
+      // Check the entity can be identified from the access token
+      val identifyResponse = Http(serviceURL).method("GET").header("Authorization", s"Bearer $accessToken").asString
       test.assertEqual(302, identifyResponse.code)
 
       val location =
