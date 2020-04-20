@@ -317,6 +317,15 @@ class ValidatorTest extends FlatSpec with Matchers {
       Templefile(
         "MyProject",
         services = Map(
+          "Box" -> ServiceBlock(Map("box" -> Attribute(ForeignKey("Box")))),
+        ),
+      ),
+    ) shouldBe Set("Cycle(s) were detected in foreign keys, between elements: { Box }")
+
+    validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
           "User"   -> ServiceBlock(Map("box"    -> Attribute(ForeignKey("Box")))),
           "Box"    -> ServiceBlock(Map("cube"   -> Attribute(ForeignKey("Cube")))),
           "Cube"   -> ServiceBlock(Map("square" -> Attribute(ForeignKey("Square")))),
