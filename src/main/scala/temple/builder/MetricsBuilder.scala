@@ -42,6 +42,28 @@ object MetricsBuilder {
       ),
     )
 
+  def createAuthDashboardRows(serviceName: String, datasource: Datasource): Seq[Row] =
+    Seq("Register", "Login").zipWithIndex.map {
+      case (endpoint, index) =>
+        Row(
+          Metric(
+            index * 2,
+            s"$endpoint Requests",
+            datasource,
+            "QPS",
+            qpsQueries(serviceName.toLowerCase, endpoint.toLowerCase),
+          ),
+          Metric(
+            index * 2 + 1,
+            s"DB $endpoint Queries",
+            datasource,
+            "Time (seconds)",
+            databaseDurationQueries(serviceName.toLowerCase, endpoint.toLowerCase()),
+          ),
+        )
+
+    }
+
   def createDashboardRows(
     serviceName: String,
     datasource: Datasource,

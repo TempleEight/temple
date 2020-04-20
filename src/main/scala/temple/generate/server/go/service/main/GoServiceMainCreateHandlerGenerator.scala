@@ -71,6 +71,7 @@ object GoServiceMainCreateHandlerGenerator {
     usesComms: Boolean,
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
+    clientUsesBase64: Boolean,
     usesMetrics: Boolean,
   ): String = {
     val metricSuffix = when(usesMetrics) { Create.toString }
@@ -78,7 +79,7 @@ object GoServiceMainCreateHandlerGenerator {
       generateHandlerDecl(root, Create),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(root.projectUsesAuth) { generateExtractAuthBlock(usesVar = true, metricSuffix) },
+          when(root.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
           // Only need to handle request JSONs when there are client attributes
           when(root.requestAttributes.nonEmpty) {
             mkCode.doubleLines(
@@ -87,6 +88,7 @@ object GoServiceMainCreateHandlerGenerator {
               generateValidateStructBlock(metricSuffix),
               when(usesComms) { generateForeignKeyCheckBlocks(root, metricSuffix) },
               when(clientUsesTime) { generateParseTimeBlocks(root.requestAttributes, metricSuffix) },
+              when(clientUsesBase64) { generateParseBase64Blocks(root.requestAttributes, metricSuffix) },
             )
           },
           when(!root.hasAuthBlock) { generateNewUUIDBlock(metricSuffix) },

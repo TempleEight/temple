@@ -49,7 +49,7 @@ object GoServiceMainIdentifyHandlerGenerator {
       genMethodCall(
         "fmt",
         "Sprintf",
-        doubleQuote("%s:%s/api%s/%s"),
+        doubleQuote("http://%s:%s/api%s/%s"),
         genMethodCall("r.Header", "Get", doubleQuote("X-Forwarded-Host")),
         genMethodCall("r.Header", "Get", doubleQuote("X-Forwarded-Port")),
         "r.URL.Path",
@@ -69,7 +69,7 @@ object GoServiceMainIdentifyHandlerGenerator {
       generateHandlerDecl(root, Identify),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          generateExtractAuthBlock(usesVar = true, metricSuffix),
+          generateExtractAuthBlock(metricSuffix),
           generateDAOCallBlock(root, usesMetrics, metricSuffix),
           generateRedirectResponse(root),
           when(usesMetrics) { generateMetricSuccess(Identify.toString) },

@@ -216,6 +216,12 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	blobField, err := base64.StdEncoding.DecodeString(*req.BlobField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
+		return
+	}
+
 	input := dao.CreateComplexUserInput{
 		ID:                 auth.ID,
 		SmallIntField:      *req.SmallIntField,
@@ -229,11 +235,11 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		DateField:          dateField,
 		TimeField:          timeField,
 		DateTimeField:      dateTimeField,
-		BlobField:          *req.BlobField,
+		BlobField:          blobField,
 	}
 
 	for _, hook := range env.hook.beforeCreateHooks {
-		err := (*hook)(env, req, &input)
+		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
@@ -249,7 +255,7 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	for _, hook := range env.hook.afterCreateHooks {
-		err := (*hook)(env, complexUser)
+		err := (*hook)(env, complexUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
@@ -298,7 +304,7 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, hook := range env.hook.beforeReadHooks {
-		err := (*hook)(env, &input)
+		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
@@ -319,7 +325,7 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	for _, hook := range env.hook.afterReadHooks {
-		err := (*hook)(env, complexUser)
+		err := (*hook)(env, complexUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
@@ -399,6 +405,12 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
+	blobField, err := base64.StdEncoding.DecodeString(*req.BlobField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
+		return
+	}
+
 	input := dao.UpdateComplexUserInput{
 		ID:                 complexUserID,
 		SmallIntField:      *req.SmallIntField,
@@ -412,11 +424,11 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		DateField:          dateField,
 		TimeField:          timeField,
 		DateTimeField:      dateTimeField,
-		BlobField:          *req.BlobField,
+		BlobField:          blobField,
 	}
 
 	for _, hook := range env.hook.beforeUpdateHooks {
-		err := (*hook)(env, req, &input)
+		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
 			return
@@ -437,7 +449,7 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	for _, hook := range env.hook.afterUpdateHooks {
-		err := (*hook)(env, complexUser)
+		err := (*hook)(env, complexUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
 			return
@@ -486,7 +498,7 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	for _, hook := range env.hook.beforeDeleteHooks {
-		err := (*hook)(env, &input)
+		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
 			return
@@ -507,7 +519,7 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 	}
 
 	for _, hook := range env.hook.afterDeleteHooks {
-		err := (*hook)(env)
+		err := (*hook)(env, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
 			return
@@ -531,7 +543,7 @@ func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	for _, hook := range env.hook.beforeIdentifyHooks {
-		err := (*hook)(env, &input)
+		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)
 			return
@@ -552,14 +564,14 @@ func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Reques
 	}
 
 	for _, hook := range env.hook.afterIdentifyHooks {
-		err := (*hook)(env, complexUser)
+		err := (*hook)(env, complexUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)
 			return
 		}
 	}
 
-	url := fmt.Sprintf("%s:%s/api%s/%s", r.Header.Get("X-Forwarded-Host"), r.Header.Get("X-Forwarded-Port"), r.URL.Path, complexUser.ID)
+	url := fmt.Sprintf("http://%s:%s/api%s/%s", r.Header.Get("X-Forwarded-Host"), r.Header.Get("X-Forwarded-Port"), r.URL.Path, complexUser.ID)
 	w.Header().Set("Location", url)
 	w.WriteHeader(http.StatusFound)
 

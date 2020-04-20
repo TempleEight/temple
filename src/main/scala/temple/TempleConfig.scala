@@ -35,6 +35,9 @@ class TempleConfig(arguments: CSeq[String]) extends ScallopConf(arguments) {
   object Test extends Subcommand("test") {
     val filename: ScallopOption[String] = trailArg[String]("filename", "Templefile to test against")
 
+    val testOnly: ScallopOption[Boolean] =
+      opt[Boolean]("testOnly", 't', "Do not spin up or shutdown any infrastructure as part of the testing")
+
     val generatedDirectory: ScallopOption[String] =
       opt[String]("dir", 'd', "Root directory where files have been generated")
   }

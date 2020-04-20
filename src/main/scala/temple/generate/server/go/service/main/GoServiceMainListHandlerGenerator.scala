@@ -87,7 +87,7 @@ object GoServiceMainListHandlerGenerator {
       generateHandlerDecl(root, List),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(enumeratingByCreator) { generateExtractAuthBlock(usesVar = true, metricSuffix) },
+          when(root.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
           mkCode.doubleLines(
             queryDAOInputBlock,
             generateInvokeBeforeHookBlock(root, List, metricSuffix),

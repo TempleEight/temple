@@ -2,12 +2,12 @@ package temple.generate.server.go
 
 import java.nio.file.Paths
 
-import temple.TestUtils
 import temple.ast.AttributeType
 import temple.ast.Metadata.AuthMethod
 import temple.ast.Metadata.Metrics.Prometheus
 import temple.generate.FileSystem.Files
 import temple.generate.server.{AuthAttribute, AuthServiceRoot, IDAttribute}
+import temple.utils.FileUtils
 
 object GoAuthServiceGeneratorTestData {
 
@@ -22,5 +22,5 @@ object GoAuthServiceGeneratorTestData {
   )
 
   val authServiceFiles: Files =
-    TestUtils.buildFileMap(Paths.get("src/test/resources/generate-server-test/"), "auth")
+    FileUtils.buildFileMap(Paths.get("src/test/resources/generate-server-test/"), "auth")
 }

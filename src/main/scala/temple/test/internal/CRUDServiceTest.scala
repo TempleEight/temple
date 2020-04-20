@@ -116,7 +116,7 @@ class CRUDServiceTest(
         identifyResponse.header("Location").getOrElse(test.fail("response did not contain a Location header"))
 
       // Get the result of the identification
-      val response = ServiceTestUtils.getRequest(test, s"http://$location", accessToken)
+      val response = ServiceTestUtils.getRequest(test, location, accessToken)
 
       // Validate this is exactly what was created at the start
       test.validateResponseBody(requestBody.asObject, response, service.attributes)

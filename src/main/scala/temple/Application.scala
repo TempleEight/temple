@@ -22,9 +22,11 @@ object Application {
     val analyzedTemplefile = Analyzer.parseAndValidate(data)
     val detail             = LanguageSpecificDetailBuilder.build(analyzedTemplefile, questionAsker)
     val project            = ProjectBuilder.build(analyzedTemplefile, detail)
-
-    FileUtils.outputProject(outputDirectory, project)
-
+    val filteredProject = RegenerationFilter.filter(outputDirectory, project, questionAsker).getOrElse {
+      println("Nothing to generate")
+      return
+    }
+    FileUtils.outputProject(outputDirectory, filteredProject)
     println(s"Generated project in $outputDirectory")
   }
 
@@ -49,6 +51,10 @@ object Application {
       throw new RuntimeException(error)
     }
     val analyzedTemplefile = Analyzer.parseAndValidate(data)
-    ProjectTester.test(analyzedTemplefile, generatedDirectory)
+    if (config.Test.testOnly()) {
+      ProjectTester.testOnly(analyzedTemplefile, generatedDirectory)
+    } else {
+      ProjectTester.test(analyzedTemplefile, generatedDirectory)
+    }
   }
 }
