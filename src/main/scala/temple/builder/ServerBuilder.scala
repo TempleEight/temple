@@ -49,10 +49,15 @@ object ServerBuilder {
     val writable =
       serviceBlock.lookupLocalMetadata[Metadata.Writable].getOrElse(ProjectConfig.getDefaultWritable(projectUsesAuth))
 
-    val storedAttributes = serviceBlock.attributes.filter { case (_, attr) => attr.isStored }
     val queries: SortedMap[CRUD, String] =
       DatabaseBuilder
-        .buildQuery(serviceName, storedAttributes, endpoints, readable, selectionAttribute = idAttribute.name)
+        .buildQuery(
+          serviceName,
+          serviceBlock.storedAttributes,
+          endpoints,
+          readable,
+          selectionAttribute = idAttribute.name,
+        )
         .map {
           case (crud, statement) =>
             crud -> (database match {
