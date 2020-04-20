@@ -1,8 +1,9 @@
 package temple.builder
 
-import temple.ast.Templefile
+import temple.ast.Metadata.AuthMethod
+import temple.ast.{Metadata, Templefile}
 import temple.builder.project.ProjectBuilder.endpoints
-import temple.generate.target.openapi.ast.{OpenAPIRoot, Service}
+import temple.generate.target.openapi.ast.{Auth, OpenAPIRoot, Service}
 
 object OpenAPIBuilder {
 
@@ -11,6 +12,7 @@ object OpenAPIBuilder {
       name = templefile.projectName,
       version = version,
       description = description,
+      auth = templefile.lookupMetadata[Metadata.AuthMethod].map { case AuthMethod.Email => Auth.Email },
       services = templefile.providedServices.map {
         case (serviceName, block) =>
           Service(
