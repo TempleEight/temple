@@ -37,7 +37,7 @@ object GoServiceMainReadHandlerGenerator {
       generateHandlerDecl(root, Read),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(root.projectUsesAuth) { generateExtractAuthBlock(root.readable == Readable.This, metricSuffix) },
+          when(root.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
           generateExtractIDBlock(root.decapitalizedName, metricSuffix),
           when(root.readable == Readable.This) { generateCheckAuthorizationBlock(root, metricSuffix) },
           generateDAOCallBlock(root, usesMetrics, metricSuffix),
