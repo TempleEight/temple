@@ -215,10 +215,10 @@ private class Validator private (templefile: Templefile) {
   private val referenceCycles: Set[Set[String]] = {
     val graph = templefile.providedBlockNames.map { blockName =>
       blockName -> templefile.getBlock(blockName).attributes.values.collect {
-        case Attribute(ForeignKey(references), _, annotations) => references
+        case Attribute(ForeignKey(references), _, _) => references
       }
     }.toMap
-    Tarjan(graph).filter(_.sizeIs > 1)
+    Tarjan(graph)
   }
 
   def validate(): Seq[String] = {
