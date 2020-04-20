@@ -45,12 +45,6 @@ object GoCommonMainGenerator {
       genMethodCall("flag", "Parse"),
     )
 
-  private def generateRequireFieldsBlock(): String =
-    mkCode.lines(
-      "// Require all struct fields by default",
-      genMethodCall("valid", "SetFieldsRequiredByDefault", "true"),
-    )
-
   private def generateGetConfigBlock(): String =
     mkCode.lines(
       genDeclareAndAssign(genMethodCall("util", "GetConfig", "*configPtr"), "config", "err"),
@@ -87,7 +81,7 @@ object GoCommonMainGenerator {
 
   private def generateEnvDeclarationBlock(usesComms: Boolean, isAuth: Boolean): String =
     genDeclareAndAssign(
-      s"env{${mkCode.list("d", "Hook{}", when(usesComms) { "c" }, when(isAuth) { "jwtCredential" })}}",
+      s"env{${mkCode.list("d", "Hook{}", "valid.New()", when(usesComms) { "c" }, when(isAuth) { "jwtCredential" })}}",
       "env",
     )
 
@@ -116,7 +110,6 @@ object GoCommonMainGenerator {
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
           generateFlagParseBlock(service),
-          generateRequireFieldsBlock(),
           generateGetConfigBlock(),
           when(usesMetrics) { generateMetricsBlock() },
           generateDAOInitBlock(),
