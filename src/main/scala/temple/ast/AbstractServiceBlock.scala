@@ -22,6 +22,11 @@ sealed trait AbstractServiceBlock extends AttributeBlock[ServiceMetadata] {
     case (name: String, x: Attribute) => name -> x
   }
 
+  /** Return the attributes of this service that are stored */
+  lazy val storedAttributes: Map[String, AbstractAttribute] = attributes.filter {
+    case (_, attribute) => attribute.isStored
+  }
+
   /** Set the parent that this Templefile is within */
   override private[temple] def setParent(parent: TempleNode): Unit = {
     super.setParent(parent)

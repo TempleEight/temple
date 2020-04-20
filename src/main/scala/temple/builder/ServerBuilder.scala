@@ -51,7 +51,13 @@ object ServerBuilder {
 
     val queries: SortedMap[CRUD, String] =
       DatabaseBuilder
-        .buildQuery(serviceName, serviceBlock.attributes, endpoints, readable, selectionAttribute = idAttribute.name)
+        .buildQuery(
+          serviceName,
+          serviceBlock.storedAttributes,
+          endpoints,
+          readable,
+          selectionAttribute = idAttribute.name,
+        )
         .map {
           case (crud, statement) =>
             crud -> (database match {
