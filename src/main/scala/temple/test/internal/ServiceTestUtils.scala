@@ -3,7 +3,7 @@ package temple.test.internal
 import java.net.HttpURLConnection
 import java.sql.Date
 import java.text.SimpleDateFormat
-import java.util.UUID
+import java.util.{Base64, UUID}
 
 import io.circe.parser.parse
 import io.circe.syntax._
@@ -88,13 +88,9 @@ object ServiceTestUtils {
     * @return The access token, as a string
     */
   def getAuthTokenWithEmail(service: String, baseURL: String): String = {
-    val test = new EndpointTest(service, "fetch auth token")
-    val registerJson = ServiceTestUtils
-      .postRequest(
-        test,
-        s"http://$baseURL/api/auth/register",
-        Map("email" -> randomEmail(), "password" -> StringUtils.randomString(10)).asJson,
-      )
+    val test         = new EndpointTest(service, "fetch auth token")
+    val body         = Map("email" -> randomEmail(), "password" -> StringUtils.randomString(10))
+    val registerJson = postRequest(test, s"http://$baseURL/api/auth/register", body.asJson)
     registerJson("AccessToken").flatMap(_.asString).getOrElse(test.fail("access token was not a valid string"))
   }
 
@@ -135,8 +131,7 @@ object ServiceTestUtils {
             case AttributeType.TimeType =>
               new SimpleDateFormat("HH:mm:ss").format(new Date(Random.between(0, 100000000000000L))).asJson
             case AttributeType.BlobType(_) =>
-              // TODO
-              "todo".asJson
+              Base64.getEncoder.encodeToString(Random.nextBytes(Random.between(10, 1000))).asJson
             case AttributeType.StringType(max, min) =>
               val maxValue: Long = max.getOrElse(20)
               val minValue: Int  = min.getOrElse(0)
