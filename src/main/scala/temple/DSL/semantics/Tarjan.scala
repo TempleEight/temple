@@ -17,12 +17,14 @@ class Tarjan[T] private (graph: Map[T, Iterable[T]]) {
     sccBuffer.toSet
   }
 
+  private def neighbours(node: T): Iterable[T] = graph.getOrElse(node, Nil)
+
   private def visit(node: T): Unit = {
     // Set the depth index for v to the smallest unused index
     index(node) = index.size
     lowLink(node) = index(node)
     stack.push(node)
-    for (neighbour <- graph.getOrElse(node, Nil)) {
+    for (neighbour <- neighbours(node)) {
       if (!index.contains(neighbour)) { // neighbour has not yet been visited; recurse on it
         visit(neighbour)
         lowLink(node) = math.min(lowLink(node), lowLink(neighbour))
@@ -34,7 +36,8 @@ class Tarjan[T] private (graph: Map[T, Iterable[T]]) {
     if (lowLink(node) == index(node)) {
       // Pop all elements from the stack until and including this element itself
       val scc = (stack.popWhile(_ != node) :+ stack.pop()).toSet
-      sccBuffer += scc
+      // Only add single elements if they have a self-loop
+      if (scc.sizeIs != 1 || neighbours(node).iterator.contains(node)) sccBuffer += scc
     }
   }
 
