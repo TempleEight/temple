@@ -7,8 +7,6 @@ import temple.detail.PoliceSergeantNicholasAngel
 import temple.generate.FileMatchers
 import temple.utils.FileUtils
 
-import scala.reflect.io.Directory
-
 class SimpleE2ETest extends FlatSpec with FileMatchers {
 
   behavior of "Temple"
