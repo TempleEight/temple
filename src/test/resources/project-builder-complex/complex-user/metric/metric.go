@@ -6,15 +6,15 @@ import (
 )
 
 var (
-	RequestCreateComplexUser   = "create_complex_user"
-	RequestReadComplexUser     = "read_complex_user"
-	RequestUpdateComplexUser   = "update_complex_user"
-	RequestDeleteComplexUser   = "delete_complex_user"
-	RequestIdentifyComplexUser = "identify_complex_user"
-	RequestCreateTempleUser    = "create_temple_user"
-	RequestReadTempleUser      = "read_temple_user"
-	RequestUpdateTempleUser    = "update_temple_user"
-	RequestDeleteTempleUser    = "delete_temple_user"
+	RequestCreate           = "createNone"
+	RequestRead             = "readNone"
+	RequestUpdate           = "updateNone"
+	RequestDelete           = "deleteNone"
+	RequestIdentify         = "identifyNone"
+	RequestCreateTempleUser = "createSome(_temple_user)"
+	RequestReadTempleUser   = "readSome(_temple_user)"
+	RequestUpdateTempleUser = "updateSome(_temple_user)"
+	RequestDeleteTempleUser = "deleteSome(_temple_user)"
 
 	RequestSuccess = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "complexuser_request_success_total",

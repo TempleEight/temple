@@ -51,7 +51,7 @@ object GoServiceMainUpdateHandlerGenerator {
     clientUsesBase64: Boolean,
     usesMetrics: Boolean,
   ): String = {
-    val metricSuffix = when(usesMetrics) { Update.toString + block.name }
+    val metricSuffix = when(usesMetrics) { Update.toString + block.structName }
     mkCode(
       generateHandlerDecl(block, Update),
       CodeWrap.curly.tabbed(

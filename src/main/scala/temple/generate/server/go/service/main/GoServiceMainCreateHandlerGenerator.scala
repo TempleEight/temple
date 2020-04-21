@@ -79,7 +79,7 @@ object GoServiceMainCreateHandlerGenerator {
     clientUsesBase64: Boolean,
     usesMetrics: Boolean,
   ): String = {
-    val metricSuffix = when(usesMetrics) { Create.toString + block.name }
+    val metricSuffix = when(usesMetrics) { Create.toString + block.structName }
     mkCode(
       generateHandlerDecl(block, Create),
       CodeWrap.curly.tabbed(
@@ -89,7 +89,7 @@ object GoServiceMainCreateHandlerGenerator {
             mkCode.doubleLines(
               generateExtractParentIDBlock(parent.decapitalizedName, metricSuffix),
               when(parent.writable == Writable.This) {
-                generateCheckAuthorizationBlock(parent, false, metricSuffix)
+                generateCheckAuthorizationBlock(parent, blockHasAuth = false, metricSuffix)
               },
             )
           },

@@ -108,13 +108,13 @@ func respondWithError(w http.ResponseWriter, err string, statusCode int, request
 func (env *env) createSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestCreateSimpleTempleTestGroup)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestCreate)
 		return
 	}
 
 	uuid, err := uuid.NewUUID()
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not create UUID: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreateSimpleTempleTestGroup)
+		respondWithError(w, fmt.Sprintf("Could not create UUID: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreate)
 		return
 	}
 
@@ -126,23 +126,23 @@ func (env *env) createSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 	for _, hook := range env.hook.beforeCreateHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateSimpleTempleTestGroup)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreateSimpleTempleTestGroup))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreate))
 	simpleTempleTestGroup, err := env.dao.CreateSimpleTempleTestGroup(input)
 	timer.ObserveDuration()
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreateSimpleTempleTestGroup)
+		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreate)
 		return
 	}
 
 	for _, hook := range env.hook.afterCreateHooks {
 		err := (*hook)(env, simpleTempleTestGroup, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateSimpleTempleTestGroup)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
 		}
 	}
@@ -151,19 +151,19 @@ func (env *env) createSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		ID: simpleTempleTestGroup.ID,
 	})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestCreateSimpleTempleTestGroup).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreate).Inc()
 }
 
 func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestReadSimpleTempleTestGroup)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestRead)
 		return
 	}
 
 	simpleTempleTestGroupID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestReadSimpleTempleTestGroup)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestRead)
 		return
 	}
 
@@ -171,14 +171,14 @@ func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestGroupNotFound:
-			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestReadSimpleTempleTestGroup)
+			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestRead)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestReadSimpleTempleTestGroup)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestRead)
 		}
 		return
 	}
 	if !authorized {
-		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestReadSimpleTempleTestGroup)
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestRead)
 		return
 	}
 
@@ -189,20 +189,20 @@ func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.
 	for _, hook := range env.hook.beforeReadHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadSimpleTempleTestGroup)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestReadSimpleTempleTestGroup))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRead))
 	simpleTempleTestGroup, err := env.dao.ReadSimpleTempleTestGroup(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestGroupNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestReadSimpleTempleTestGroup)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestRead)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestReadSimpleTempleTestGroup)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestRead)
 		}
 		return
 	}
@@ -210,7 +210,7 @@ func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.
 	for _, hook := range env.hook.afterReadHooks {
 		err := (*hook)(env, simpleTempleTestGroup, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadSimpleTempleTestGroup)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
 		}
 	}
@@ -219,19 +219,19 @@ func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.
 		ID: simpleTempleTestGroup.ID,
 	})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestReadSimpleTempleTestGroup).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestRead).Inc()
 }
 
 func (env *env) deleteSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestDeleteSimpleTempleTestGroup)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestDelete)
 		return
 	}
 
 	simpleTempleTestGroupID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestDeleteSimpleTempleTestGroup)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestDelete)
 		return
 	}
 
@@ -239,14 +239,14 @@ func (env *env) deleteSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestGroupNotFound:
-			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDeleteSimpleTempleTestGroup)
+			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDelete)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDeleteSimpleTempleTestGroup)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDelete)
 		}
 		return
 	}
 	if !authorized {
-		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDeleteSimpleTempleTestGroup)
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDelete)
 		return
 	}
 
@@ -257,20 +257,20 @@ func (env *env) deleteSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 	for _, hook := range env.hook.beforeDeleteHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteSimpleTempleTestGroup)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDeleteSimpleTempleTestGroup))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDelete))
 	err = env.dao.DeleteSimpleTempleTestGroup(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestGroupNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestDeleteSimpleTempleTestGroup)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestDelete)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDeleteSimpleTempleTestGroup)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDelete)
 		}
 		return
 	}
@@ -278,12 +278,12 @@ func (env *env) deleteSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 	for _, hook := range env.hook.afterDeleteHooks {
 		err := (*hook)(env, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteSimpleTempleTestGroup)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
 			return
 		}
 	}
 
 	json.NewEncoder(w).Encode(struct{}{})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestDeleteSimpleTempleTestGroup).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestDelete).Inc()
 }

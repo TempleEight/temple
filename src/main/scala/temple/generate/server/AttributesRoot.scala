@@ -21,6 +21,8 @@ sealed trait AttributesRoot extends AbstractAttributesRoot {
   def hasAuthBlock: Boolean
   def projectUsesAuth: Boolean
 
+  def structName: String
+
   def requestAttributes: ListMap[String, AbstractAttribute] = attributes.filter { case (_, attr) => attr.inRequest }
   def storedAttributes: ListMap[String, AbstractAttribute]  = attributes.filter { case (_, attr) => attr.isStored }
 
@@ -72,6 +74,8 @@ object AttributesRoot {
     def blockIterator: Iterator[AttributesRoot] = Iterator(this) ++ structs
 
     override def parentAttribute: None.type = None
+
+    override def structName: String = ""
   }
 
   case class StructRoot(
@@ -86,5 +90,7 @@ object AttributesRoot {
   ) extends AttributesRoot {
     override def createdByAttribute: None.type = None
     override def hasAuthBlock: Boolean         = false
+
+    override def structName: String = name
   }
 }

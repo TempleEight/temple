@@ -72,7 +72,7 @@ object GoServiceMainIdentifyHandlerGenerator {
     parent: Option[ServiceRoot],
     usesMetrics: Boolean,
   ): String = {
-    val metricSuffix = when(usesMetrics) { Identify.toString + block.name }
+    val metricSuffix = when(usesMetrics) { Identify.toString + block.structName }
 
     mkCode(
       generateHandlerDecl(block, Identify),

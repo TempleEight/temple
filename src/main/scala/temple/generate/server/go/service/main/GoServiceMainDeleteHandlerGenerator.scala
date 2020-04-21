@@ -45,7 +45,7 @@ object GoServiceMainDeleteHandlerGenerator {
     parent: Option[ServiceRoot],
     usesMetrics: Boolean,
   ): String = {
-    val metricSuffix = when(usesMetrics) { Delete.toString + block.name }
+    val metricSuffix = when(usesMetrics) { Delete.toString + block.structName }
     mkCode(
       generateHandlerDecl(block, Delete),
       CodeWrap.curly.tabbed(

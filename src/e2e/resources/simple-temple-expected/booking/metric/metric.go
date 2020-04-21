@@ -6,9 +6,9 @@ import (
 )
 
 var (
-	RequestCreateBooking = "create_booking"
-	RequestReadBooking   = "read_booking"
-	RequestDeleteBooking = "delete_booking"
+	RequestCreate = "createNone"
+	RequestRead   = "readNone"
+	RequestDelete = "deleteNone"
 
 	RequestSuccess = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "booking_request_success_total",

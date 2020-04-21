@@ -263,49 +263,49 @@ func respondWithError(w http.ResponseWriter, err string, statusCode int, request
 func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestCreateComplexUser)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestCreate)
 		return
 	}
 
 	var req createComplexUserRequest
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateComplexUser)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
 	if req.SmallIntField == nil || req.IntField == nil || req.BigIntField == nil || req.FloatField == nil || req.DoubleField == nil || req.StringField == nil || req.BoundedStringField == nil || req.BoolField == nil || req.DateField == nil || req.TimeField == nil || req.DateTimeField == nil || req.BlobField == nil {
-		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestCreateComplexUser)
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
 	err = env.valid.Struct(req)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateComplexUser)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
 	dateField, err := time.Parse("2006-01-02", *req.DateField)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid date string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateComplexUser)
+		respondWithError(w, fmt.Sprintf("Invalid date string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
 	timeField, err := time.Parse("15:04:05.999999999", *req.TimeField)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid time string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateComplexUser)
+		respondWithError(w, fmt.Sprintf("Invalid time string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
 	dateTimeField, err := time.Parse(time.RFC3339Nano, *req.DateTimeField)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid datetime string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateComplexUser)
+		respondWithError(w, fmt.Sprintf("Invalid datetime string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
 	blobField, err := base64.StdEncoding.DecodeString(*req.BlobField)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateComplexUser)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
@@ -328,23 +328,23 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 	for _, hook := range env.hook.beforeCreateHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateComplexUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreateComplexUser))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreate))
 	complexUser, err := env.dao.CreateComplexUser(input)
 	timer.ObserveDuration()
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreateComplexUser)
+		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreate)
 		return
 	}
 
 	for _, hook := range env.hook.afterCreateHooks {
 		err := (*hook)(env, complexUser, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateComplexUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
 		}
 	}
@@ -365,24 +365,24 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		BlobField:          base64.StdEncoding.EncodeToString(complexUser.BlobField),
 	})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestCreateComplexUser).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreate).Inc()
 }
 
 func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestReadComplexUser)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestRead)
 		return
 	}
 
 	complexUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestReadComplexUser)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestRead)
 		return
 	}
 
 	if auth.ID != complexUserID {
-		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestReadComplexUser)
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestRead)
 		return
 	}
 
@@ -393,20 +393,20 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 	for _, hook := range env.hook.beforeReadHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadComplexUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestReadComplexUser))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRead))
 	complexUser, err := env.dao.ReadComplexUser(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrComplexUserNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestReadComplexUser)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestRead)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestReadComplexUser)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestRead)
 		}
 		return
 	}
@@ -414,7 +414,7 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 	for _, hook := range env.hook.afterReadHooks {
 		err := (*hook)(env, complexUser, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadComplexUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
 		}
 	}
@@ -435,66 +435,66 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 		BlobField:          base64.StdEncoding.EncodeToString(complexUser.BlobField),
 	})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestReadComplexUser).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestRead).Inc()
 }
 
 func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestUpdateComplexUser)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestUpdate)
 		return
 	}
 
 	complexUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestUpdateComplexUser)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	if auth.ID != complexUserID {
-		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestUpdateComplexUser)
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestUpdate)
 		return
 	}
 
 	var req updateComplexUserRequest
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateComplexUser)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	if req.SmallIntField == nil || req.IntField == nil || req.BigIntField == nil || req.FloatField == nil || req.DoubleField == nil || req.StringField == nil || req.BoundedStringField == nil || req.BoolField == nil || req.DateField == nil || req.TimeField == nil || req.DateTimeField == nil || req.BlobField == nil {
-		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestUpdateComplexUser)
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	err = env.valid.Struct(req)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateComplexUser)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	dateField, err := time.Parse("2006-01-02", *req.DateField)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid date string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateComplexUser)
+		respondWithError(w, fmt.Sprintf("Invalid date string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	timeField, err := time.Parse("15:04:05.999999999", *req.TimeField)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid time string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateComplexUser)
+		respondWithError(w, fmt.Sprintf("Invalid time string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	dateTimeField, err := time.Parse(time.RFC3339Nano, *req.DateTimeField)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid datetime string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateComplexUser)
+		respondWithError(w, fmt.Sprintf("Invalid datetime string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	blobField, err := base64.StdEncoding.DecodeString(*req.BlobField)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateComplexUser)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
@@ -517,20 +517,20 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 	for _, hook := range env.hook.beforeUpdateHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateComplexUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestUpdateComplexUser))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestUpdate))
 	complexUser, err := env.dao.UpdateComplexUser(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrComplexUserNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestUpdateComplexUser)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestUpdate)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdateComplexUser)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdate)
 		}
 		return
 	}
@@ -538,7 +538,7 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 	for _, hook := range env.hook.afterUpdateHooks {
 		err := (*hook)(env, complexUser, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateComplexUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
 			return
 		}
 	}
@@ -559,24 +559,24 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		BlobField:          base64.StdEncoding.EncodeToString(complexUser.BlobField),
 	})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestUpdateComplexUser).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestUpdate).Inc()
 }
 
 func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestDeleteComplexUser)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestDelete)
 		return
 	}
 
 	complexUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestDeleteComplexUser)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestDelete)
 		return
 	}
 
 	if auth.ID != complexUserID {
-		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDeleteComplexUser)
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDelete)
 		return
 	}
 
@@ -587,20 +587,20 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 	for _, hook := range env.hook.beforeDeleteHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteComplexUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDeleteComplexUser))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDelete))
 	err = env.dao.DeleteComplexUser(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrComplexUserNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestDeleteComplexUser)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestDelete)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDeleteComplexUser)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDelete)
 		}
 		return
 	}
@@ -608,20 +608,20 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 	for _, hook := range env.hook.afterDeleteHooks {
 		err := (*hook)(env, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteComplexUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
 			return
 		}
 	}
 
 	json.NewEncoder(w).Encode(struct{}{})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestDeleteComplexUser).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestDelete).Inc()
 }
 
 func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestIdentifyComplexUser)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestIdentify)
 		return
 	}
 
@@ -632,20 +632,20 @@ func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Reques
 	for _, hook := range env.hook.beforeIdentifyHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentifyComplexUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestIdentifyComplexUser))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestIdentify))
 	complexUser, err := env.dao.IdentifyComplexUser(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrComplexUserNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestIdentifyComplexUser)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestIdentify)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestIdentifyComplexUser)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestIdentify)
 		}
 		return
 	}
@@ -653,7 +653,7 @@ func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Reques
 	for _, hook := range env.hook.afterIdentifyHooks {
 		err := (*hook)(env, complexUser, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentifyComplexUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)
 			return
 		}
 	}
@@ -662,7 +662,7 @@ func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Reques
 	w.Header().Set("Location", url)
 	w.WriteHeader(http.StatusFound)
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestIdentifyComplexUser).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestIdentify).Inc()
 }
 
 func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) {

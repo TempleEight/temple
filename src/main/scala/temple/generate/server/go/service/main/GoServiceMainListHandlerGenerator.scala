@@ -23,7 +23,7 @@ object GoServiceMainListHandlerGenerator {
     responseMap: ListMap[String, String],
     usesMetrics: Boolean,
   ): String = {
-    val metricSuffix = when(usesMetrics) { List.toString + block.name }
+    val metricSuffix = when(usesMetrics) { List.toString + block.structName }
     val daoInput = ListMap.from(
       Iterator()
       ++ when(block.readable == Readable.This && parent.isEmpty) { "AuthID" -> "auth.ID" }

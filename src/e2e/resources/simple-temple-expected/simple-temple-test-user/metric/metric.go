@@ -6,16 +6,16 @@ import (
 )
 
 var (
-	RequestListSimpleTempleTestUser     = "list_simple_temple_test_user"
-	RequestCreateSimpleTempleTestUser   = "create_simple_temple_test_user"
-	RequestReadSimpleTempleTestUser     = "read_simple_temple_test_user"
-	RequestUpdateSimpleTempleTestUser   = "update_simple_temple_test_user"
-	RequestIdentifySimpleTempleTestUser = "identify_simple_temple_test_user"
-	RequestListFred                     = "list_fred"
-	RequestCreateFred                   = "create_fred"
-	RequestReadFred                     = "read_fred"
-	RequestUpdateFred                   = "update_fred"
-	RequestDeleteFred                   = "delete_fred"
+	RequestList       = "listNone"
+	RequestCreate     = "createNone"
+	RequestRead       = "readNone"
+	RequestUpdate     = "updateNone"
+	RequestIdentify   = "identifyNone"
+	RequestListFred   = "listSome(_fred)"
+	RequestCreateFred = "createSome(_fred)"
+	RequestReadFred   = "readSome(_fred)"
+	RequestUpdateFred = "updateSome(_fred)"
+	RequestDeleteFred = "deleteSome(_fred)"
 
 	RequestSuccess = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "simpletempletestuser_request_success_total",

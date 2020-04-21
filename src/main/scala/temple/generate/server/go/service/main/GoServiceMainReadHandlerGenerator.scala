@@ -39,7 +39,7 @@ object GoServiceMainReadHandlerGenerator {
     responseMap: ListMap[String, String],
     usesMetrics: Boolean,
   ): String = {
-    val metricSuffix = when(usesMetrics) { Read.toString + block.name }
+    val metricSuffix = when(usesMetrics) { Read.toString + block.structName }
     mkCode(
       generateHandlerDecl(block, Read),
       CodeWrap.curly.tabbed(

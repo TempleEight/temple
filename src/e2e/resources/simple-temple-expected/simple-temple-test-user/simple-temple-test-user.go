@@ -256,30 +256,30 @@ func respondWithError(w http.ResponseWriter, err string, statusCode int, request
 func (env *env) listSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestListSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestList)
 		return
 	}
 
 	for _, hook := range env.hook.beforeListHooks {
 		err := (*hook)(env, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestListSimpleTempleTestUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestList)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestListSimpleTempleTestUser))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestList))
 	simpleTempleTestUserList, err := env.dao.ListSimpleTempleTestUser()
 	timer.ObserveDuration()
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestListSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestList)
 		return
 	}
 
 	for _, hook := range env.hook.afterListHooks {
 		err := (*hook)(env, simpleTempleTestUserList, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestListSimpleTempleTestUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestList)
 			return
 		}
 	}
@@ -305,49 +305,49 @@ func (env *env) listSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 
 	json.NewEncoder(w).Encode(simpleTempleTestUserListResp)
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestListSimpleTempleTestUser).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestList).Inc()
 }
 
 func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestCreateSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestCreate)
 		return
 	}
 
 	var req createSimpleTempleTestUserRequest
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
 	if req.SimpleTempleTestUser == nil || req.Email == nil || req.FirstName == nil || req.LastName == nil || req.CreatedAt == nil || req.NumberOfDogs == nil || req.CurrentBankBalance == nil || req.BirthDate == nil || req.BreakfastTime == nil {
-		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestCreateSimpleTempleTestUser)
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
 	err = env.valid.Struct(req)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
 	createdAt, err := time.Parse(time.RFC3339Nano, *req.CreatedAt)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid datetime string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Invalid datetime string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
 	birthDate, err := time.Parse("2006-01-02", *req.BirthDate)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid date string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Invalid date string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
 	breakfastTime, err := time.Parse("15:04:05.999999999", *req.BreakfastTime)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid time string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Invalid time string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
 
@@ -367,23 +367,23 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	for _, hook := range env.hook.beforeCreateHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateSimpleTempleTestUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreateSimpleTempleTestUser))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreate))
 	simpleTempleTestUser, err := env.dao.CreateSimpleTempleTestUser(input)
 	timer.ObserveDuration()
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreateSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreate)
 		return
 	}
 
 	for _, hook := range env.hook.afterCreateHooks {
 		err := (*hook)(env, simpleTempleTestUser, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateSimpleTempleTestUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
 			return
 		}
 	}
@@ -401,19 +401,19 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
 	})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestCreateSimpleTempleTestUser).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreate).Inc()
 }
 
 func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestReadSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestRead)
 		return
 	}
 
 	simpleTempleTestUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestReadSimpleTempleTestUser)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestRead)
 		return
 	}
 
@@ -424,20 +424,20 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 	for _, hook := range env.hook.beforeReadHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadSimpleTempleTestUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestReadSimpleTempleTestUser))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRead))
 	simpleTempleTestUser, err := env.dao.ReadSimpleTempleTestUser(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestUserNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestReadSimpleTempleTestUser)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestRead)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestReadSimpleTempleTestUser)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestRead)
 		}
 		return
 	}
@@ -445,7 +445,7 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 	for _, hook := range env.hook.afterReadHooks {
 		err := (*hook)(env, simpleTempleTestUser, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadSimpleTempleTestUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
 			return
 		}
 	}
@@ -463,60 +463,60 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 		BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
 	})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestReadSimpleTempleTestUser).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestRead).Inc()
 }
 
 func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestUpdateSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestUpdate)
 		return
 	}
 
 	simpleTempleTestUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestUpdateSimpleTempleTestUser)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	if auth.ID != simpleTempleTestUserID {
-		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestUpdateSimpleTempleTestUser)
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestUpdate)
 		return
 	}
 
 	var req updateSimpleTempleTestUserRequest
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	if req.SimpleTempleTestUser == nil || req.Email == nil || req.FirstName == nil || req.LastName == nil || req.CreatedAt == nil || req.NumberOfDogs == nil || req.CurrentBankBalance == nil || req.BirthDate == nil || req.BreakfastTime == nil {
-		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestUpdateSimpleTempleTestUser)
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	err = env.valid.Struct(req)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	createdAt, err := time.Parse(time.RFC3339Nano, *req.CreatedAt)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid datetime string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Invalid datetime string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	birthDate, err := time.Parse("2006-01-02", *req.BirthDate)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid date string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Invalid date string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
 	breakfastTime, err := time.Parse("15:04:05.999999999", *req.BreakfastTime)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid time string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateSimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Invalid time string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
 
@@ -536,20 +536,20 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	for _, hook := range env.hook.beforeUpdateHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateSimpleTempleTestUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestUpdateSimpleTempleTestUser))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestUpdate))
 	simpleTempleTestUser, err := env.dao.UpdateSimpleTempleTestUser(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestUserNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestUpdateSimpleTempleTestUser)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestUpdate)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdateSimpleTempleTestUser)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdate)
 		}
 		return
 	}
@@ -557,7 +557,7 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	for _, hook := range env.hook.afterUpdateHooks {
 		err := (*hook)(env, simpleTempleTestUser, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateSimpleTempleTestUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
 			return
 		}
 	}
@@ -575,13 +575,13 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
 	})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestUpdateSimpleTempleTestUser).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestUpdate).Inc()
 }
 
 func (env *env) identifySimpleTempleTestUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestIdentifySimpleTempleTestUser)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestIdentify)
 		return
 	}
 
@@ -592,20 +592,20 @@ func (env *env) identifySimpleTempleTestUserHandler(w http.ResponseWriter, r *ht
 	for _, hook := range env.hook.beforeIdentifyHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentifySimpleTempleTestUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestIdentifySimpleTempleTestUser))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestIdentify))
 	simpleTempleTestUser, err := env.dao.IdentifySimpleTempleTestUser(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestUserNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestIdentifySimpleTempleTestUser)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestIdentify)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestIdentifySimpleTempleTestUser)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestIdentify)
 		}
 		return
 	}
@@ -613,7 +613,7 @@ func (env *env) identifySimpleTempleTestUserHandler(w http.ResponseWriter, r *ht
 	for _, hook := range env.hook.afterIdentifyHooks {
 		err := (*hook)(env, simpleTempleTestUser, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentifySimpleTempleTestUser)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)
 			return
 		}
 	}
@@ -622,7 +622,7 @@ func (env *env) identifySimpleTempleTestUserHandler(w http.ResponseWriter, r *ht
 	w.Header().Set("Location", url)
 	w.WriteHeader(http.StatusFound)
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestIdentifySimpleTempleTestUser).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestIdentify).Inc()
 }
 
 func (env *env) listFredHandler(w http.ResponseWriter, r *http.Request) {
