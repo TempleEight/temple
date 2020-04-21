@@ -22,7 +22,17 @@ case class OpenAPIFile(
 }
 
 object OpenAPIFile {
-  case class Components(responses: Map[String, Response] = Map.empty)
+
+  case class Components(
+    securitySchemes: Map[String, SecurityScheme] = Map.empty,
+    responses: Map[String, Response] = Map.empty,
+  ) extends JsonEncodable.Partial {
+
+    override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
+      "securitySchemes" ~~> when(securitySchemes.nonEmpty) { securitySchemes },
+      "responses"       ~~> when(responses.nonEmpty) { responses },
+    )
+  }
 
   case class Info(title: String, version: String, description: String) extends JsonEncodable.Partial {
 

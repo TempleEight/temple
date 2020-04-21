@@ -6,6 +6,8 @@ paths:
   /complex-user:
     post:
       summary: Register a new complexuser
+      security:
+      - bearerAuth: []
       tags:
       - ComplexUser
       requestBody:
@@ -123,6 +125,8 @@ paths:
           $ref: '#/components/responses/Error500'
     get:
       summary: Look up the single complexuser associated with the access token
+      security:
+      - bearerAuth: []
       tags:
       - ComplexUser
       responses:
@@ -148,6 +152,8 @@ paths:
       description: ID of the complexuser to perform operations on
     get:
       summary: Look up a single complexuser
+      security:
+      - bearerAuth: []
       tags:
       - ComplexUser
       responses:
@@ -216,6 +222,8 @@ paths:
           $ref: '#/components/responses/Error500'
     put:
       summary: Update a single complexuser
+      security:
+      - bearerAuth: []
       tags:
       - ComplexUser
       requestBody:
@@ -335,6 +343,8 @@ paths:
           $ref: '#/components/responses/Error500'
     delete:
       summary: Delete a single complexuser
+      security:
+      - bearerAuth: []
       tags:
       - ComplexUser
       responses:
@@ -424,6 +434,11 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   responses:
     Error400:
       description: Invalid request
