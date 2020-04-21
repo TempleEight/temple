@@ -92,7 +92,6 @@ object ServerBuilder {
           name = structName,
           opQueries = queries,
           idAttribute = idAttribute,
-          createdByAttribute = None,
           parentAttribute = Some(ParentAttribute("parentID")),
           attributes = ListMap.from(structBlock.providedAttributes),
           readable = readable, // from parent

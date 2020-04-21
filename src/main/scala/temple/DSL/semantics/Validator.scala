@@ -34,7 +34,9 @@ private class Validator private (templefile: Templefile) {
     // Keep a set of names that have been used already
     val takenNames: mutable.Set[String] = block.attributes.keys.to(mutable.Set)
 
-    val usesCreatedBy: Boolean = templefile.usesAuth && !block.hasMetadata(Metadata.ServiceAuth)
+    val usesCreatedBy: Boolean = (templefile.usesAuth
+      && !block.hasMetadata(Metadata.ServiceAuth)
+      && block.isInstanceOf[ServiceBlock])
 
     val implicitAttributes: ListMap[String, AbstractAttribute] =
       (ListMap("id" -> IDAttribute)

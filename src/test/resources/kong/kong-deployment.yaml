@@ -39,7 +39,7 @@ spec:
           value: /dev/stdout
         - name: KONG_PROXY_ERROR_LOG
           value: /dev/stderr
-        image: kong:2.0.1
+        image: kong:2.0.2
         livenessProbe:
           exec:
             command:
