@@ -143,7 +143,7 @@ func (env *env) createUserHandler(w http.ResponseWriter, r *http.Request) {
 		Name: *req.Name,
 	}
 
-	for _, hook := range env.hook.beforeCreateUserHooks {
+	for _, hook := range env.hook.beforeCreateHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
@@ -159,7 +159,7 @@ func (env *env) createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterCreateUserHooks {
+	for _, hook := range env.hook.afterCreateHooks {
 		err := (*hook)(env, user, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
@@ -192,7 +192,7 @@ func (env *env) readUserHandler(w http.ResponseWriter, r *http.Request) {
 		ID: userID,
 	}
 
-	for _, hook := range env.hook.beforeReadUserHooks {
+	for _, hook := range env.hook.beforeReadHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
@@ -213,7 +213,7 @@ func (env *env) readUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterReadUserHooks {
+	for _, hook := range env.hook.afterReadHooks {
 		err := (*hook)(env, user, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
@@ -270,7 +270,7 @@ func (env *env) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		Name: *req.Name,
 	}
 
-	for _, hook := range env.hook.beforeUpdateUserHooks {
+	for _, hook := range env.hook.beforeUpdateHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
@@ -291,7 +291,7 @@ func (env *env) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterUpdateUserHooks {
+	for _, hook := range env.hook.afterUpdateHooks {
 		err := (*hook)(env, user, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
@@ -329,7 +329,7 @@ func (env *env) deleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		ID: userID,
 	}
 
-	for _, hook := range env.hook.beforeDeleteUserHooks {
+	for _, hook := range env.hook.beforeDeleteHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
@@ -350,7 +350,7 @@ func (env *env) deleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterDeleteUserHooks {
+	for _, hook := range env.hook.afterDeleteHooks {
 		err := (*hook)(env, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)

@@ -162,7 +162,7 @@ func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {
 		AuthID: auth.ID,
 	}
 
-	for _, hook := range env.hook.beforeListMatchHooks {
+	for _, hook := range env.hook.beforeListHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestList)
@@ -178,7 +178,7 @@ func (env *env) listMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterListMatchHooks {
+	for _, hook := range env.hook.afterListHooks {
 		err := (*hook)(env, matchList, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestList)
@@ -262,7 +262,7 @@ func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
 		UserTwo: *req.UserTwo,
 	}
 
-	for _, hook := range env.hook.beforeCreateMatchHooks {
+	for _, hook := range env.hook.beforeCreateHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
@@ -278,7 +278,7 @@ func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterCreateMatchHooks {
+	for _, hook := range env.hook.afterCreateHooks {
 		err := (*hook)(env, match, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
@@ -328,7 +328,7 @@ func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
 		ID: matchID,
 	}
 
-	for _, hook := range env.hook.beforeReadMatchHooks {
+	for _, hook := range env.hook.beforeReadHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
@@ -349,7 +349,7 @@ func (env *env) readMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterReadMatchHooks {
+	for _, hook := range env.hook.afterReadHooks {
 		err := (*hook)(env, match, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
@@ -439,7 +439,7 @@ func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
 		UserTwo: *req.UserTwo,
 	}
 
-	for _, hook := range env.hook.beforeUpdateMatchHooks {
+	for _, hook := range env.hook.beforeUpdateHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
@@ -460,7 +460,7 @@ func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterUpdateMatchHooks {
+	for _, hook := range env.hook.afterUpdateHooks {
 		err := (*hook)(env, match, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
@@ -510,7 +510,7 @@ func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {
 		ID: matchID,
 	}
 
-	for _, hook := range env.hook.beforeDeleteMatchHooks {
+	for _, hook := range env.hook.beforeDeleteHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
@@ -531,7 +531,7 @@ func (env *env) deleteMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterDeleteMatchHooks {
+	for _, hook := range env.hook.afterDeleteHooks {
 		err := (*hook)(env, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
