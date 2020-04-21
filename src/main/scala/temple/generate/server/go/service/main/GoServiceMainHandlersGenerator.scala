@@ -39,7 +39,7 @@ object GoServiceMainHandlersGenerator {
 
   /** Generate a map for converting the fields of the DAO response to the JSON response */
   private def generateResponseMap(root: ServiceRoot): ListMap[String, String] =
-    // Includes ID attribute and all attributes without the @server annotation
+    // Includes ID attribute and all attributes without the @server or @client annotation
     ListMap(root.idAttribute.name.toUpperCase -> s"${root.decapitalizedName}.${root.idAttribute.name.toUpperCase}") ++
     root.attributes.collect {
       case name -> attribute if attribute.inResponse =>

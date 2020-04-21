@@ -48,7 +48,7 @@ object GoServiceDAOFunctionsGenerator {
       case _ =>
         Seq.empty
     }
-    lazy val attributes = root.attributes.map { case name -> _ => s"$prefix.${name.capitalize}" }.toSeq
+    lazy val attributes = root.storedAttributes.map { case name -> _ => s"$prefix.${name.capitalize}" }.toSeq
 
     operation match {
       case List                     => createdBy
@@ -108,7 +108,7 @@ object GoServiceDAOFunctionsGenerator {
         root.createdByAttribute.map { enumerating =>
           Some(s"&${root.decapitalizedName}.${enumerating.name.capitalize}")
         },
-        root.attributes.map { case (name, _) => s"&${root.decapitalizedName}.${name.capitalize}" },
+        root.storedAttributes.map { case (name, _) => s"&${root.decapitalizedName}.${name.capitalize}" },
       )
 
   private def generateListScanBlock(root: ServiceRoot, scanFunctionCall: String): String =
