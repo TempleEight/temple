@@ -4,7 +4,7 @@ import temple.ast.AbstractAttribute.{CreatedByAttribute, IDAttribute}
 import temple.ast._
 import temple.generate.CRUD._
 import temple.generate.database.ast.ColumnConstraint.Check
-import temple.generate.database.ast.Condition.{Disjunction, PreparedComparison}
+import temple.generate.database.ast.Condition.PreparedComparison
 import temple.generate.database.ast.Expression.PreparedValue
 import temple.generate.database.ast._
 import temple.utils.StringUtils.snakeCase
@@ -48,10 +48,6 @@ object DatabaseBuilder {
         (colType, generateMaxMinConstraints(s"length($name)", None, min))
     }
     ColumnDef(name, colType, typeConstraints ++ valueConstraints)
-  }
-
-  def conditionsToDisjunction(terms: Iterable[Condition]): Option[Condition] = when(terms.nonEmpty) {
-    if (terms.sizeIs == 1) terms.head else Disjunction(terms.head, conditionsToDisjunction(terms.tail).get)
   }
 
   def buildQueries(
@@ -100,13 +96,12 @@ object DatabaseBuilder {
           List -> Statement.Read(
             tableName,
             columns = columns,
-            condition = conditionsToDisjunction(
-              when(readable == Metadata.Readable.This) {
-                PreparedComparison("created_by", ComparisonOperator.Equal)
-              } ++ when(isStruct) {
+            condition =
+              when(isStruct) {
                 PreparedComparison("parent_id", ComparisonOperator.Equal)
+              } orElse when(readable == Metadata.Readable.This) {
+                PreparedComparison("created_by", ComparisonOperator.Equal)
               },
-            ),
           )
         case Identify =>
           Identify -> Statement.Read(

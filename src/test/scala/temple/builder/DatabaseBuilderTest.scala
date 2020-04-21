@@ -102,5 +102,14 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
     queries(CRUD.List) shouldBe DatabaseBuilderTestData.sampleListStatementEnumerateByCreator
   }
 
-  // TODO: test the list endpoint with isStruct=true
+  it should "correctly build endpoint list queries for structs" in {
+    val queries = DatabaseBuilder.buildQueries(
+      "test_service",
+      BuilderTestData.sampleStruct.attributes,
+      Set(CRUD.List),
+      isStruct = true,
+    )
+    queries.keys should contain(CRUD.List)
+    queries(CRUD.List) shouldBe DatabaseBuilderTestData.sampleListStatementStruct
+  }
 }
