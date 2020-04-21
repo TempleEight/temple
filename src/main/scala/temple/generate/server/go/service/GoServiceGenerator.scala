@@ -45,13 +45,17 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonGenerator.generatePackage("main"),
         GoServiceMainGenerator.generateImports(root, usesBase64, usesTime, usesComms, usesMetrics),
         GoServiceMainStructGenerator.generateEnvStruct(usesComms),
-        when(
-          root.requestAttributes.nonEmpty
-          && (root.operations.contains(CRUD.Create) || root.operations.contains(CRUD.Update)),
-        ) {
-          GoServiceMainStructGenerator.generateRequestStructs(root)
+        root.blockIterator.map { block =>
+          when(
+            block.requestAttributes.nonEmpty
+            && (block.opQueries.contains(CRUD.Create) || block.opQueries.contains(CRUD.Update)),
+          ) {
+            GoServiceMainStructGenerator.generateRequestStructs(block)
+          }
         },
-        GoServiceMainStructGenerator.generateResponseStructs(root),
+        root.blockIterator.map { block =>
+          GoServiceMainStructGenerator.generateResponseStructs(block)
+        },
         GoServiceMainGenerator.generateRouter(root),
         GoCommonMainGenerator.generateMain(root, usesComms, isAuth = false, usesMetrics),
         GoCommonMainGenerator.generateJsonMiddleware(),
