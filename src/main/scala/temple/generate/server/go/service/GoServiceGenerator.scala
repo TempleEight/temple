@@ -24,7 +24,7 @@ object GoServiceGenerator extends ServiceGenerator {
     // Whether or not this service uses the time type, by checking for attributes of type date, time or datetime
     val usesTime =
       Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateTimeType)
-        .intersect(root.attributes.values.map(_.attributeType).toSet)
+        .intersect(root.blockIterator.flatMap(_.attributes.values).map(_.attributeType).toSet)
         .nonEmpty
 
     // Whether or not this service uses base64, by checking for attributes of type blob
