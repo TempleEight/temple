@@ -11,11 +11,11 @@ import temple.detail.LanguageDetail
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
 import temple.generate.database.{PostgresContext, PostgresGenerator, PreparedType}
-import temple.generate.server
 import temple.generate.server.AttributesRoot.{ServiceRoot, StructRoot}
 import temple.generate.server._
 import temple.utils.StringUtils
 
+import scala.Option.when
 import scala.collection.immutable.{ListMap, SortedMap}
 
 object ServerBuilder {
@@ -36,16 +36,14 @@ object ServerBuilder {
     // Whether or not this service has an auth block
     val hasAuthBlock = serviceBlock.lookupLocalMetadata[ServiceAuth].isDefined
 
-    // The created by attribute exists if the project has auth and this service does not have an auth block
-    val createdBy =
-      if (projectUsesAuth && !hasAuthBlock)
-        Some(CreatedByAttribute(languageConfig.createdByInputName, languageConfig.createdByName))
-      else None
+    val createdBy = when(serviceBlock.attributes.valuesIterator contains AbstractAttribute.CreatedByAttribute) {
+      CreatedByAttribute(languageConfig.createdByInputName, languageConfig.createdByName)
+    }
 
-    val idAttribute = server.IDAttribute("id")
+    val idAttribute = IDAttribute("id")
 
     val readable =
-      serviceBlock.lookupLocalMetadata[Metadata.Readable].getOrElse(ProjectConfig.getDefaultReadable(projectUsesAuth))
+      serviceBlock.lookupLocalMetadata[Metadata.Readable] getOrElse ProjectConfig.getDefaultReadable(projectUsesAuth)
     val writable =
       serviceBlock.lookupLocalMetadata[Metadata.Writable] getOrElse ProjectConfig.getDefaultWritable(projectUsesAuth)
 
@@ -53,6 +51,7 @@ object ServerBuilder {
       serviceName,
       serviceBlock.storedAttributes,
       endpoints(serviceBlock),
+      isStruct = false,
       idAttribute.name,
       database,
       readable,
@@ -77,9 +76,19 @@ object ServerBuilder {
       case (structName: String, structBlock: StructBlock) =>
         val idAttribute = IDAttribute("id")
 
+        val queries = buildQueries(
+          structName,
+          structBlock.attributes,
+          endpoints(structBlock),
+          isStruct = true,
+          idAttribute.name,
+          database,
+          readable,
+        )
+
         StructRoot(
           name = structName,
-          opQueries = SortedMap(),
+          opQueries = queries,
           idAttribute = idAttribute,
           createdByAttribute = None,
           parentAttribute = Some(ParentAttribute("parentID")),
@@ -113,12 +122,13 @@ object ServerBuilder {
     tableName: String,
     attributes: Map[String, AbstractAttribute],
     endpoints: Set[CRUD],
+    isStruct: Boolean,
     primaryKey: String,
     database: Database,
     readable: Metadata.Readable,
   ): SortedMap[CRUD, String] =
     DatabaseBuilder
-      .buildQueries(tableName, attributes, endpoints, readable, primaryKey)
+      .buildQueries(tableName, attributes, endpoints, isStruct, readable, primaryKey)
       .transform {
         case (_, statement) =>
           database match {
@@ -155,6 +165,7 @@ object ServerBuilder {
               "auth",
               attributes,
               Set(Create, Read),
+              isStruct = false,
               selectionAttribute = "email",
             )
           val createQuery = PostgresGenerator.generate(queries(Create))
@@ -166,7 +177,7 @@ object ServerBuilder {
       moduleName,
       port,
       AuthAttribute(authMethod, AttributeType.StringType()),
-      server.IDAttribute("id"),
+      IDAttribute("id"),
       createQuery,
       readQuery,
       metrics = templefile.projectBlock.lookupMetadata[Metadata.Metrics],

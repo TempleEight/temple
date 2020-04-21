@@ -4,7 +4,7 @@ import temple.ast.AbstractAttribute.{CreatedByAttribute, IDAttribute}
 import temple.ast._
 import temple.generate.CRUD._
 import temple.generate.database.ast.ColumnConstraint.Check
-import temple.generate.database.ast.Condition.PreparedComparison
+import temple.generate.database.ast.Condition.{Disjunction, PreparedComparison}
 import temple.generate.database.ast.Expression.PreparedValue
 import temple.generate.database.ast._
 import temple.utils.StringUtils.snakeCase
@@ -50,10 +50,16 @@ object DatabaseBuilder {
     ColumnDef(name, colType, typeConstraints ++ valueConstraints)
   }
 
+  def conditionsToDisjunction(terms: Iterable[Condition]): Option[Condition] = when(terms.nonEmpty) {
+    if (terms.sizeIs == 1) (terms.head)
+    else Disjunction(terms.head, conditionsToDisjunction(terms.tail).get)
+  }
+
   def buildQueries(
     serviceName: String,
     attributes: Map[String, AbstractAttribute],
     endpoints: Set[CRUD],
+    isStruct: Boolean,
     readable: Metadata.Readable = Metadata.Readable.This,
     selectionAttribute: String = "id",
   ): SortedMap[CRUD, Statement] = {
@@ -95,9 +101,13 @@ object DatabaseBuilder {
           List -> Statement.Read(
             tableName,
             columns = columns,
-            condition = when(readable == Metadata.Readable.This) {
-              PreparedComparison("created_by", ComparisonOperator.Equal)
-            },
+            condition = conditionsToDisjunction(
+              when(readable == Metadata.Readable.This) {
+                PreparedComparison("created_by", ComparisonOperator.Equal)
+              } ++ when(isStruct) {
+                PreparedComparison("parent_id", ComparisonOperator.Equal)
+              },
+            ),
           )
         case Identify =>
           Identify -> Statement.Read(
@@ -119,8 +129,7 @@ object DatabaseBuilder {
   def createServiceTables(serviceName: String, service: AbstractServiceBlock): Seq[Statement.Create] = {
     service.structIterator(serviceName).map {
       case (tableName, structBlock) =>
-        val columns = structBlock.attributes
-          .filter { case (_, attribute) => attribute.isStored }
+        val columns = structBlock.storedAttributes
           .map { case (name, attribute) => toColDef(snakeCase(name), attribute) }
         Statement.Create(snakeCase(tableName), columns.toSeq)
     }
