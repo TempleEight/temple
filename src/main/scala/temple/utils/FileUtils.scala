@@ -9,6 +9,7 @@ import temple.builder.project.Project
 import temple.generate.FileSystem
 import temple.generate.FileSystem.File
 
+import scala.collection.mutable
 import scala.io.{Source, StdIn}
 
 /** Helper functions useful for manipulating files */
@@ -69,7 +70,7 @@ object FileUtils {
     * @param path The root path to explore
     * @return A sequence of filenames, relative to the provided path
     */
-  def buildFilenameSeq(path: Path): Seq[File] = buildFilenameMap(path, path)
+  def buildFilenameSeq(path: Path): Seq[File] = buildFilenameSeq(path, path)
 
   /**
     * Build a map of files present in the provided filepath
@@ -119,8 +120,8 @@ object FileUtils {
     * @param cwd The location to give paths relative to
     * @return A sequence of filenames, relative to the provided path
     */
-  private def buildFilenameMap(path: Path, cwd: Path): Seq[File] = {
-    var foundFiles: Seq[File] = Seq.empty
+  private def buildFilenameSeq(path: Path, cwd: Path): Seq[File] = {
+    val foundFiles: mutable.Buffer[File] = mutable.Buffer.empty
     Files.walkFileTree(
       path,
       new FileVisitor[Path] {
@@ -128,10 +129,10 @@ object FileUtils {
           FileVisitResult.CONTINUE
 
         override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
-          foundFiles = foundFiles :+ File(
-              Option(cwd.relativize(file).getParent).map(_.toString).getOrElse(""),
-              file.getFileName.toString,
-            )
+          foundFiles += File(
+            Option(cwd.relativize(file).getParent).map(_.toString).getOrElse(""),
+            file.getFileName.toString,
+          )
           FileVisitResult.CONTINUE
         }
 
@@ -142,6 +143,6 @@ object FileUtils {
           FileVisitResult.CONTINUE
       },
     )
-    foundFiles
+    foundFiles.toSeq
   }
 }
