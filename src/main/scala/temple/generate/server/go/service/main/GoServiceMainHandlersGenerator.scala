@@ -10,10 +10,10 @@ import temple.generate.server.go.GoHTTPStatus._
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.main.GoServiceMainCreateHandlerGenerator.generateCreateHandler
 import temple.generate.server.go.service.main.GoServiceMainDeleteHandlerGenerator.generateDeleteHandler
+import temple.generate.server.go.service.main.GoServiceMainIdentifyHandlerGenerator.generateIdentifyHandler
 import temple.generate.server.go.service.main.GoServiceMainListHandlerGenerator.generateListHandler
 import temple.generate.server.go.service.main.GoServiceMainReadHandlerGenerator.generateReadHandler
 import temple.generate.server.go.service.main.GoServiceMainUpdateHandlerGenerator.generateUpdateHandler
-import temple.generate.server.go.service.main.GoServiceMainIdentifyHandlerGenerator.generateIdentifyHandler
 import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.StringUtils.{decapitalize, doubleQuote}
 
@@ -39,7 +39,7 @@ object GoServiceMainHandlersGenerator {
 
   /** Generate a map for converting the fields of the DAO response to the JSON response */
   private def generateResponseMap(root: ServiceRoot): ListMap[String, String] =
-    // Includes ID attribute and all attributes without the @server annotation
+    // Includes ID attribute and all attributes without the @server or @client annotation
     ListMap(root.idAttribute.name.toUpperCase -> s"${root.decapitalizedName}.${root.idAttribute.name.toUpperCase}") ++
     root.attributes.collect {
       case name -> attribute if attribute.inResponse =>
@@ -196,7 +196,7 @@ object GoServiceMainHandlersGenerator {
   /** Generate the block for validating the request object */
   private[main] def generateValidateStructBlock(metricSuffix: Option[String]): String =
     mkCode.lines(
-      genAssign(genMethodCall("valid", "ValidateStruct", "req"), "_", "err"),
+      genAssign(genMethodCall("env.valid", "Struct", "req"), "err"),
       genIfErr(
         generateRespondWithErrorReturn(
           genHTTPEnum(StatusBadRequest),

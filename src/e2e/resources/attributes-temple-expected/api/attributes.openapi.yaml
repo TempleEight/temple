@@ -1,43 +1,24 @@
 openapi: 3.0.0
 info:
-  title: SampleProject
+  title: Attributes
   version: 0.0.1
 paths:
-  /temple-user:
+  /example:
     post:
-      summary: Register a new templeuser
+      summary: Register a new example
       tags:
-      - TempleUser
+      - Example
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                intField:
-                  type: number
-                  format: int32
-                doubleField:
-                  type: number
-                  format: double
-                stringField:
-                  type: string
-                boolField:
-                  type: boolean
-                dateField:
-                  type: string
-                  format: date
-                timeField:
-                  type: string
-                  format: time
-                dateTimeField:
-                  type: string
-                  format: date-time
-                blobField:
+                clientAttribute:
                   type: string
       responses:
         '200':
-          description: TempleUser successfully created
+          description: Example successfully created
           content:
             application/json:
               schema:
@@ -46,34 +27,15 @@ paths:
                   id:
                     type: string
                     format: uuid
-                  intField:
-                    type: number
-                    format: int32
-                  doubleField:
-                    type: number
-                    format: double
-                  stringField:
-                    type: string
-                  boolField:
+                  serverSetAttribute:
                     type: boolean
-                  dateField:
-                    type: string
-                    format: date
-                  timeField:
-                    type: string
-                    format: time
-                  dateTimeField:
-                    type: string
-                    format: date-time
-                  blobField:
-                    type: string
         '400':
           $ref: '#/components/responses/Error400'
         '401':
           $ref: '#/components/responses/Error401'
         '500':
           $ref: '#/components/responses/Error500'
-  /temple-user/{id}:
+  /example/{id}:
     parameters:
     - in: path
       name: id
@@ -81,14 +43,14 @@ paths:
         type: number
         format: int32
       required: true
-      description: ID of the templeuser to perform operations on
+      description: ID of the example to perform operations on
     get:
-      summary: Look up a single templeuser
+      summary: Look up a single example
       tags:
-      - TempleUser
+      - Example
       responses:
         '200':
-          description: TempleUser details
+          description: Example details
           content:
             application/json:
               schema:
@@ -97,27 +59,8 @@ paths:
                   id:
                     type: string
                     format: uuid
-                  intField:
-                    type: number
-                    format: int32
-                  doubleField:
-                    type: number
-                    format: double
-                  stringField:
-                    type: string
-                  boolField:
+                  serverSetAttribute:
                     type: boolean
-                  dateField:
-                    type: string
-                    format: date
-                  timeField:
-                    type: string
-                    format: time
-                  dateTimeField:
-                    type: string
-                    format: date-time
-                  blobField:
-                    type: string
         '400':
           $ref: '#/components/responses/Error400'
         '401':
@@ -127,39 +70,20 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
     put:
-      summary: Update a single templeuser
+      summary: Update a single example
       tags:
-      - TempleUser
+      - Example
       requestBody:
         content:
           application/json:
             schema:
               type: object
               properties:
-                intField:
-                  type: number
-                  format: int32
-                doubleField:
-                  type: number
-                  format: double
-                stringField:
-                  type: string
-                boolField:
-                  type: boolean
-                dateField:
-                  type: string
-                  format: date
-                timeField:
-                  type: string
-                  format: time
-                dateTimeField:
-                  type: string
-                  format: date-time
-                blobField:
+                clientAttribute:
                   type: string
       responses:
         '200':
-          description: TempleUser successfully updated
+          description: Example successfully updated
           content:
             application/json:
               schema:
@@ -168,27 +92,8 @@ paths:
                   id:
                     type: string
                     format: uuid
-                  intField:
-                    type: number
-                    format: int32
-                  doubleField:
-                    type: number
-                    format: double
-                  stringField:
-                    type: string
-                  boolField:
+                  serverSetAttribute:
                     type: boolean
-                  dateField:
-                    type: string
-                    format: date
-                  timeField:
-                    type: string
-                    format: time
-                  dateTimeField:
-                    type: string
-                    format: date-time
-                  blobField:
-                    type: string
         '400':
           $ref: '#/components/responses/Error400'
         '401':
@@ -198,12 +103,12 @@ paths:
         '500':
           $ref: '#/components/responses/Error500'
     delete:
-      summary: Delete a single templeuser
+      summary: Delete a single example
       tags:
-      - TempleUser
+      - Example
       responses:
         '200':
-          description: TempleUser successfully deleted
+          description: Example successfully deleted
           content:
             application/json:
               schema:

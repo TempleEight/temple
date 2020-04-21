@@ -11,39 +11,40 @@ import (
 
 	"github.com/squat/and/dab/temple-user/dao"
 	"github.com/squat/and/dab/temple-user/util"
-	valid "github.com/asaskevich/govalidator"
+	valid "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 )
 
 // env defines the environment that requests should be executed within
 type env struct {
-	dao  dao.Datastore
-	hook Hook
+	dao   dao.Datastore
+	hook  Hook
+	valid *valid.Validate
 }
 
 // createTempleUserRequest contains the client-provided information required to create a single templeUser
 type createTempleUserRequest struct {
-	IntField      *int32   `json:"intField" valid:"type(*int32),required"`
-	DoubleField   *float64 `json:"doubleField" valid:"type(*float64),required"`
-	StringField   *string  `json:"stringField" valid:"type(*string),required"`
-	BoolField     *bool    `json:"boolField" valid:"type(*bool),required"`
-	DateField     *string  `json:"dateField" valid:"type(*string),required"`
-	TimeField     *string  `json:"timeField" valid:"type(*string),required"`
-	DateTimeField *string  `json:"dateTimeField" valid:"type(*string),rfc3339,required"`
-	BlobField     *string  `json:"blobField" valid:"type(*string),base64,required"`
+	IntField      *int32   `json:"intField" validate:"required"`
+	DoubleField   *float64 `json:"doubleField" validate:"required"`
+	StringField   *string  `json:"stringField" validate:"required"`
+	BoolField     *bool    `json:"boolField" validate:"required"`
+	DateField     *string  `json:"dateField" validate:"required"`
+	TimeField     *string  `json:"timeField" validate:"required"`
+	DateTimeField *string  `json:"dateTimeField" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
+	BlobField     *string  `json:"blobField" validate:"base64,required"`
 }
 
 // updateTempleUserRequest contains the client-provided information required to update a single templeUser
 type updateTempleUserRequest struct {
-	IntField      *int32   `json:"intField" valid:"type(*int32),required"`
-	DoubleField   *float64 `json:"doubleField" valid:"type(*float64),required"`
-	StringField   *string  `json:"stringField" valid:"type(*string),required"`
-	BoolField     *bool    `json:"boolField" valid:"type(*bool),required"`
-	DateField     *string  `json:"dateField" valid:"type(*string),required"`
-	TimeField     *string  `json:"timeField" valid:"type(*string),required"`
-	DateTimeField *string  `json:"dateTimeField" valid:"type(*string),rfc3339,required"`
-	BlobField     *string  `json:"blobField" valid:"type(*string),base64,required"`
+	IntField      *int32   `json:"intField" validate:"required"`
+	DoubleField   *float64 `json:"doubleField" validate:"required"`
+	StringField   *string  `json:"stringField" validate:"required"`
+	BoolField     *bool    `json:"boolField" validate:"required"`
+	DateField     *string  `json:"dateField" validate:"required"`
+	TimeField     *string  `json:"timeField" validate:"required"`
+	DateTimeField *string  `json:"dateTimeField" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
+	BlobField     *string  `json:"blobField" validate:"base64,required"`
 }
 
 // createTempleUserResponse contains a newly created templeUser to be returned to the client
@@ -101,9 +102,6 @@ func main() {
 	configPtr := flag.String("config", "/etc/temple-user-service/config.json", "configuration filepath")
 	flag.Parse()
 
-	// Require all struct fields by default
-	valid.SetFieldsRequiredByDefault(true)
-
 	config, err := util.GetConfig(*configPtr)
 	if err != nil {
 		log.Fatal(err)
@@ -114,7 +112,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	env := env{d, Hook{}}
+	env := env{d, Hook{}, valid.New()}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)
@@ -150,7 +148,7 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest)
 		return
@@ -303,7 +301,7 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest)
 		return
