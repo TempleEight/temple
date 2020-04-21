@@ -236,7 +236,7 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		BlobField:          blobField,
 	}
 
-	for _, hook := range env.hook.beforeCreateHooks {
+	for _, hook := range env.hook.beforeCreateComplexUserHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
@@ -252,7 +252,7 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	for _, hook := range env.hook.afterCreateHooks {
+	for _, hook := range env.hook.afterCreateComplexUserHooks {
 		err := (*hook)(env, complexUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
@@ -301,7 +301,7 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 		ID: complexUserID,
 	}
 
-	for _, hook := range env.hook.beforeReadHooks {
+	for _, hook := range env.hook.beforeReadComplexUserHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
@@ -322,7 +322,7 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterReadHooks {
+	for _, hook := range env.hook.afterReadComplexUserHooks {
 		err := (*hook)(env, complexUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
@@ -425,7 +425,7 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		BlobField:          blobField,
 	}
 
-	for _, hook := range env.hook.beforeUpdateHooks {
+	for _, hook := range env.hook.beforeUpdateComplexUserHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
@@ -446,7 +446,7 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	for _, hook := range env.hook.afterUpdateHooks {
+	for _, hook := range env.hook.afterUpdateComplexUserHooks {
 		err := (*hook)(env, complexUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
@@ -495,7 +495,7 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		ID: complexUserID,
 	}
 
-	for _, hook := range env.hook.beforeDeleteHooks {
+	for _, hook := range env.hook.beforeDeleteComplexUserHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
@@ -516,7 +516,7 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	for _, hook := range env.hook.afterDeleteHooks {
+	for _, hook := range env.hook.afterDeleteComplexUserHooks {
 		err := (*hook)(env, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
@@ -540,7 +540,7 @@ func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Reques
 		ID: auth.ID,
 	}
 
-	for _, hook := range env.hook.beforeIdentifyHooks {
+	for _, hook := range env.hook.beforeIdentifyComplexUserHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)
@@ -561,7 +561,7 @@ func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	for _, hook := range env.hook.afterIdentifyHooks {
+	for _, hook := range env.hook.afterIdentifyComplexUserHooks {
 		err := (*hook)(env, complexUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentify)

@@ -123,7 +123,7 @@ func (env *env) createSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		AuthID: auth.ID,
 	}
 
-	for _, hook := range env.hook.beforeCreateHooks {
+	for _, hook := range env.hook.beforeCreateSimpleTempleTestGroupHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
@@ -139,7 +139,7 @@ func (env *env) createSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
-	for _, hook := range env.hook.afterCreateHooks {
+	for _, hook := range env.hook.afterCreateSimpleTempleTestGroupHooks {
 		err := (*hook)(env, simpleTempleTestGroup, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
@@ -186,7 +186,7 @@ func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.
 		ID: simpleTempleTestGroupID,
 	}
 
-	for _, hook := range env.hook.beforeReadHooks {
+	for _, hook := range env.hook.beforeReadSimpleTempleTestGroupHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
@@ -207,7 +207,7 @@ func (env *env) readSimpleTempleTestGroupHandler(w http.ResponseWriter, r *http.
 		return
 	}
 
-	for _, hook := range env.hook.afterReadHooks {
+	for _, hook := range env.hook.afterReadSimpleTempleTestGroupHooks {
 		err := (*hook)(env, simpleTempleTestGroup, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
@@ -254,7 +254,7 @@ func (env *env) deleteSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		ID: simpleTempleTestGroupID,
 	}
 
-	for _, hook := range env.hook.beforeDeleteHooks {
+	for _, hook := range env.hook.beforeDeleteSimpleTempleTestGroupHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
@@ -275,7 +275,7 @@ func (env *env) deleteSimpleTempleTestGroupHandler(w http.ResponseWriter, r *htt
 		return
 	}
 
-	for _, hook := range env.hook.afterDeleteHooks {
+	for _, hook := range env.hook.afterDeleteSimpleTempleTestGroupHooks {
 		err := (*hook)(env, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)

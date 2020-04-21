@@ -123,7 +123,7 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 		AuthID: auth.ID,
 	}
 
-	for _, hook := range env.hook.beforeCreateHooks {
+	for _, hook := range env.hook.beforeCreateBookingHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
@@ -139,7 +139,7 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterCreateHooks {
+	for _, hook := range env.hook.afterCreateBookingHooks {
 		err := (*hook)(env, booking, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
@@ -186,7 +186,7 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 		ID: bookingID,
 	}
 
-	for _, hook := range env.hook.beforeReadHooks {
+	for _, hook := range env.hook.beforeReadBookingHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
@@ -207,7 +207,7 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterReadHooks {
+	for _, hook := range env.hook.afterReadBookingHooks {
 		err := (*hook)(env, booking, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
@@ -254,7 +254,7 @@ func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 		ID: bookingID,
 	}
 
-	for _, hook := range env.hook.beforeDeleteHooks {
+	for _, hook := range env.hook.beforeDeleteBookingHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
@@ -275,7 +275,7 @@ func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterDeleteHooks {
+	for _, hook := range env.hook.afterDeleteBookingHooks {
 		err := (*hook)(env, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
