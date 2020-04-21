@@ -8,16 +8,6 @@ func ExtractIDFromRequest(requestParams map[string]string) (uuid.UUID, error) {
 	return uuid.Parse(id)
 }
 
-// ExtractIDFromRequest extracts the parameter provided under parameter parent_id and converts it into a UUID
-func ExtractParentIDFromRequest(requestParams map[string]string) (uuid.UUID, error) {
-	id := requestParams["parent_id"]
-	if len(id) == 0 {
-		return uuid.Nil, errors.New("No Service ID provided")
-	}
-
-	return uuid.Parse(id)
-}
-
 // ExtractAuthIDFromRequest extracts a token from a header of the form `Authorization: Bearer <token>`
 func ExtractAuthIDFromRequest(headers http.Header) (*Auth, error) {
 	authHeader := headers.Get("Authorization")

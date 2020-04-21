@@ -31,6 +31,8 @@ sealed trait AttributesRoot extends AbstractAttributesRoot {
   }
 
   def operations: SortedSet[CRUD] = opQueries.keySet
+
+  @inline final def isStruct: Boolean = parentAttribute.nonEmpty
 }
 
 object AttributesRoot {

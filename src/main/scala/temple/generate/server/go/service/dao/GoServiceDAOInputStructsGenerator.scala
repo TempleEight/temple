@@ -63,7 +63,7 @@ object GoServiceDAOInputStructsGenerator {
     mkCode.doubleLines(
       // Generate input struct for each operation, except for List when not enumerating by creator
       for (operation <- block.operations.toSeq
-           if operation != List || block.readable == Readable.This || block.parentAttribute.nonEmpty)
+           if operation != List || block.readable == Readable.This || block.isStruct)
         yield generateStruct(block, operation),
     )
 }
