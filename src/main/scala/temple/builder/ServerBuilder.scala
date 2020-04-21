@@ -5,6 +5,7 @@ import temple.ast.AttributeType.ForeignKey
 import temple.ast.Metadata.{Database, ServiceAuth, ServiceLanguage}
 import temple.ast._
 import temple.builder.project.LanguageConfig.GoLanguageConfig
+import temple.builder.project.ProjectBuilder.endpoints
 import temple.builder.project.ProjectConfig
 import temple.detail.LanguageDetail
 import temple.detail.LanguageDetail.GoLanguageDetail
@@ -15,7 +16,7 @@ import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server._
 import temple.utils.StringUtils
 
-import scala.collection.immutable.{ListMap, SortedMap, SortedSet}
+import scala.collection.immutable.{ListMap, SortedMap}
 
 object ServerBuilder {
 
@@ -23,7 +24,6 @@ object ServerBuilder {
     serviceName: String,
     serviceBlock: AbstractServiceBlock,
     port: Int,
-    endpoints: SortedSet[CRUD],
     detail: LanguageDetail,
     projectUsesAuth: Boolean,
   ): ServiceRoot = {
@@ -47,26 +47,16 @@ object ServerBuilder {
     val readable =
       serviceBlock.lookupLocalMetadata[Metadata.Readable].getOrElse(ProjectConfig.getDefaultReadable(projectUsesAuth))
     val writable =
-      serviceBlock.lookupLocalMetadata[Metadata.Writable].getOrElse(ProjectConfig.getDefaultWritable(projectUsesAuth))
+      serviceBlock.lookupLocalMetadata[Metadata.Writable] getOrElse ProjectConfig.getDefaultWritable(projectUsesAuth)
 
-    val queries: SortedMap[CRUD, String] =
-      DatabaseBuilder
-        .buildQuery(
-          serviceName,
-          serviceBlock.storedAttributes,
-          endpoints,
-          readable,
-          selectionAttribute = idAttribute.name,
-        )
-        .map {
-          case (crud, statement) =>
-            crud -> (database match {
-              case Database.Postgres =>
-                //TODO: Does this need to change with server lang?
-                implicit val context: PostgresContext = PostgresContext(PreparedType.DollarNumbers)
-                PostgresGenerator.generate(statement)
-            })
-        }
+    val queries = buildQueries(
+      serviceName,
+      serviceBlock.storedAttributes,
+      endpoints(serviceBlock),
+      idAttribute.name,
+      database,
+      readable,
+    )
 
     val moduleName: String = detail match {
       case GoLanguageDetail(modulePath) => s"$modulePath/${StringUtils.kebabCase(serviceName)}"
@@ -101,6 +91,26 @@ object ServerBuilder {
     )
   }
 
+  private def buildQueries(
+    tableName: String,
+    attributes: Map[String, AbstractAttribute],
+    endpoints: Set[CRUD],
+    primaryKey: String,
+    database: Database,
+    readable: Metadata.Readable,
+  ): SortedMap[CRUD, String] =
+    DatabaseBuilder
+      .buildQueries(tableName, attributes, endpoints, readable, primaryKey)
+      .transform {
+        case (_, statement) =>
+          database match {
+            case Database.Postgres =>
+              //TODO: Does this need to change with server lang?
+              implicit val context: PostgresContext = PostgresContext(PreparedType.DollarNumbers)
+              PostgresGenerator.generate(statement)
+          }
+      }
+
   def buildAuthRoot(templefile: Templefile, detail: LanguageDetail, port: Int): AuthServiceRoot = {
     val moduleName: String = detail match {
       case GoLanguageDetail(modulePath) => s"$modulePath/auth"
@@ -123,7 +133,7 @@ object ServerBuilder {
         case Database.Postgres =>
           implicit val postgresContext: PostgresContext = PostgresContext(PreparedType.DollarNumbers)
           val queries =
-            DatabaseBuilder.buildQuery(
+            DatabaseBuilder.buildQueries(
               "auth",
               attributes,
               Set(Create, Read),
