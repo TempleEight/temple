@@ -26,9 +26,7 @@ object GoServiceDAOInterfaceGenerator {
       CodeWrap.parens
         .prefix(functionName)
         .list(
-          when(block.readable == Readable.This || operation != List || block.parentAttribute.isDefined) {
-            s"input ${functionName}Input"
-          },
+          when(block.readable == Readable.This || operation != List || block.isStruct) { s"input ${functionName}Input" },
         ),
       generateInterfaceFunctionReturnType(block, operation),
     )
