@@ -97,3 +97,13 @@ func ExtractAuthIDFromRequest(headers http.Header) (*Auth, error) {
 
 	return &Auth{uuid}, nil
 }
+
+// ExtractIDFromRequest extracts the parameter provided under parameter parent_id and converts it into a UUID
+func ExtractParentIDFromRequest(requestParams map[string]string) (uuid.UUID, error) {
+	id := requestParams["parent_id"]
+	if len(id) == 0 {
+		return uuid.Nil, errors.New("No Service ID provided")
+	}
+
+	return uuid.Parse(id)
+}
