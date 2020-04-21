@@ -385,7 +385,7 @@ object GoServiceMainHandlersGenerator {
       }) ++ when(root.projectUsesAuth) { "auth" }
 
     genForLoop(
-      genDeclareAndAssign(s"range env.hook.before${operation.toString}Hooks", "_", "hook"),
+      genDeclareAndAssign(s"range env.hook.before${operation.toString}${root.name}Hooks", "_", "hook"),
       mkCode.lines(
         genDeclareAndAssign(
           genFunctionCall("(*hook)", hookArguments),
@@ -411,7 +411,7 @@ object GoServiceMainHandlersGenerator {
       }) ++ when(root.projectUsesAuth) { "auth" }
 
     genForLoop(
-      genDeclareAndAssign(s"range env.hook.after${operation.toString}Hooks", "_", "hook"),
+      genDeclareAndAssign(s"range env.hook.after${operation.toString}${root.name}Hooks", "_", "hook"),
       mkCode.lines(
         genDeclareAndAssign(
           genFunctionCall("(*hook)", hookArguments),

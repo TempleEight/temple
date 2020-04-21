@@ -127,7 +127,7 @@ func (env *env) createExampleHandler(w http.ResponseWriter, r *http.Request) {
 		ID: uuid,
 	}
 
-	for _, hook := range env.hook.beforeCreateHooks {
+	for _, hook := range env.hook.beforeCreateExampleHooks {
 		err := (*hook)(env, req, &input)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -141,7 +141,7 @@ func (env *env) createExampleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterCreateHooks {
+	for _, hook := range env.hook.afterCreateExampleHooks {
 		err := (*hook)(env, example)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -166,7 +166,7 @@ func (env *env) readExampleHandler(w http.ResponseWriter, r *http.Request) {
 		ID: exampleID,
 	}
 
-	for _, hook := range env.hook.beforeReadHooks {
+	for _, hook := range env.hook.beforeReadExampleHooks {
 		err := (*hook)(env, &input)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -185,7 +185,7 @@ func (env *env) readExampleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterReadHooks {
+	for _, hook := range env.hook.afterReadExampleHooks {
 		err := (*hook)(env, example)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -228,7 +228,7 @@ func (env *env) updateExampleHandler(w http.ResponseWriter, r *http.Request) {
 		ID: exampleID,
 	}
 
-	for _, hook := range env.hook.beforeUpdateHooks {
+	for _, hook := range env.hook.beforeUpdateExampleHooks {
 		err := (*hook)(env, req, &input)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -247,7 +247,7 @@ func (env *env) updateExampleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterUpdateHooks {
+	for _, hook := range env.hook.afterUpdateExampleHooks {
 		err := (*hook)(env, example)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -272,7 +272,7 @@ func (env *env) deleteExampleHandler(w http.ResponseWriter, r *http.Request) {
 		ID: exampleID,
 	}
 
-	for _, hook := range env.hook.beforeDeleteHooks {
+	for _, hook := range env.hook.beforeDeleteExampleHooks {
 		err := (*hook)(env, &input)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -291,7 +291,7 @@ func (env *env) deleteExampleHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterDeleteHooks {
+	for _, hook := range env.hook.afterDeleteExampleHooks {
 		err := (*hook)(env)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
