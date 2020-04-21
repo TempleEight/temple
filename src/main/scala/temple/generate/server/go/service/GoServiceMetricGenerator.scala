@@ -5,8 +5,6 @@ import temple.generate.server.go.common.GoCommonMetricGenerator
 import temple.generate.utils.CodeUtils
 import temple.utils.StringUtils.doubleQuote
 
-import scala.Option.when
-
 object GoServiceMetricGenerator {
 
   // Generate global variables for metrics, including string identifiers and metric objects
@@ -15,7 +13,7 @@ object GoServiceMetricGenerator {
     val serviceGlobals = CodeUtils.pad(
       root.blockIterator.flatMap { block =>
         block.operations.toSeq.map { operation =>
-          val suffix = when(block.parentAttribute.nonEmpty) { "_" + block.snakeName }
+          val suffix = if (block.parentAttribute.nonEmpty) "_" + block.snakeName else ""
           (
             s"Request${operation.toString.capitalize}${block.structName}",
             doubleQuote(operation.toString.toLowerCase + suffix),
