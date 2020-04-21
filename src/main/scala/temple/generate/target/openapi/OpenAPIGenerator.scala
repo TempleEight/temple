@@ -87,11 +87,12 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
 
   def addPaths(service: Service): this.type = {
     val lowerName       = service.name.toLowerCase
+    val kebabName       = StringUtils.kebabCase(service.name)
     val capitalizedName = service.name.capitalize
     val tags            = Seq(capitalizedName)
     service.operations.foreach {
       case List =>
-        path(s"/$lowerName/all") += HTTPVerb.Get -> Handler(
+        path(s"/$kebabName/all") += HTTPVerb.Get -> Handler(
             s"Get a list of every $lowerName",
             tags = tags,
             responses = Seq(
@@ -103,7 +104,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             ),
           )
       case Create =>
-        path(s"/$lowerName") += HTTPVerb.Post -> Handler(
+        path(s"/$kebabName") += HTTPVerb.Post -> Handler(
             s"Register a new $lowerName",
             tags = tags,
             requestBody =
@@ -119,7 +120,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             ),
           )
       case Read =>
-        pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Get -> Handler(
+        pathWithID(s"/$kebabName/{id}", lowerName) += HTTPVerb.Get -> Handler(
             s"Look up a single $lowerName",
             tags = tags,
             responses = Seq(
@@ -134,7 +135,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             ),
           )
       case Update =>
-        pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Put -> Handler(
+        pathWithID(s"/$kebabName/{id}", lowerName) += HTTPVerb.Put -> Handler(
             s"Update a single $lowerName",
             tags = tags,
             requestBody =
@@ -151,7 +152,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             ),
           )
       case Delete =>
-        pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Delete -> Handler(
+        pathWithID(s"/$kebabName/{id}", lowerName) += HTTPVerb.Delete -> Handler(
             s"Delete a single $lowerName",
             tags = tags,
             responses = Seq(
@@ -166,7 +167,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             ),
           )
       case Identify =>
-        path(s"/$lowerName") += HTTPVerb.Get -> Handler(
+        path(s"/$kebabName") += HTTPVerb.Get -> Handler(
             s"Look up the single $lowerName associated with the access token",
             tags = tags,
             responses = Seq(
