@@ -22,6 +22,7 @@ object BuilderTestData {
       "image"       -> Attribute(BlobType()),
       "fk"          -> Attribute(ForeignKey("OtherService")),
     ),
+    Seq(Metadata.ServiceEnumerable),
   )
 
   val simpleTemplefile: Templefile = Templefile(
@@ -48,6 +49,7 @@ object BuilderTestData {
       "sampleFK1"      -> Attribute(ForeignKey("OtherSvc")),
       "sampleFK2"      -> Attribute(ForeignKey("OtherSvc")),
     ),
+    metadata = Seq(Metadata.ServiceEnumerable),
     structs = ListMap(
       "Test" -> StructBlock(
         ListMap(
