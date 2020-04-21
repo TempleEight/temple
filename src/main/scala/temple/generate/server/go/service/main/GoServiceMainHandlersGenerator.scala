@@ -9,6 +9,7 @@ import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus._
 import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.server.go.service.GoServiceHookGenerator.hookSuffix
 import temple.generate.server.go.service.main.GoServiceMainCreateHandlerGenerator.generateCreateHandler
 import temple.generate.server.go.service.main.GoServiceMainDeleteHandlerGenerator.generateDeleteHandler
 import temple.generate.server.go.service.main.GoServiceMainIdentifyHandlerGenerator.generateIdentifyHandler
@@ -44,7 +45,7 @@ object GoServiceMainHandlersGenerator {
     ListMap(block.idAttribute.name.toUpperCase -> s"${block.decapitalizedName}.${block.idAttribute.name.toUpperCase}") ++
     block.attributes.collect {
       case name -> attribute if attribute.inResponse =>
-        name.capitalize -> generateResponseMapFormat(root, name, attribute.attributeType)
+        name.capitalize -> generateResponseMapFormat(block, name, attribute.attributeType)
     }
 
   /** Generate a handler method declaration */
@@ -453,7 +454,7 @@ object GoServiceMainHandlersGenerator {
       }) ++ when(block.projectUsesAuth) { "auth" }
 
     genForLoop(
-      genDeclareAndAssign(s"range env.hook.before${operation.toString}${block.name}Hooks", "_", "hook"),
+      genDeclareAndAssign(s"range env.hook.before${operation.toString}${hookSuffix(block)}Hooks", "_", "hook"),
       mkCode.lines(
         genDeclareAndAssign(
           genFunctionCall("(*hook)", hookArguments),
@@ -480,7 +481,7 @@ object GoServiceMainHandlersGenerator {
       }) ++ when(block.projectUsesAuth) { "auth" }
 
     genForLoop(
-      genDeclareAndAssign(s"range env.hook.after${operation.toString}${block.name}Hooks", "_", "hook"),
+      genDeclareAndAssign(s"range env.hook.after${operation.toString}${hookSuffix(block)}Hooks", "_", "hook"),
       mkCode.lines(
         genDeclareAndAssign(
           genFunctionCall("(*hook)", hookArguments),

@@ -37,7 +37,6 @@ class ProjectBuilderTest extends FlatSpec with FileMatchers {
     val expected = FileUtils.buildFileMap(Paths.get("src/test/resources/project-builder-simple"))
     val actual = ProjectBuilder
       .build(ProjectBuilderTestData.simpleTemplefilePostgresService, GoLanguageDetail("github.com/squat/and/dab"))
-//    temple.utils.FileUtils.outputProject("src/test/resources/project-builder-simple", actual)
     projectFilesShouldMatch(actual, expected)
   }
 
@@ -53,5 +52,6 @@ class ProjectBuilderTest extends FlatSpec with FileMatchers {
     val expected = FileUtils.buildFileMap(Paths.get("src/test/resources/project-builder-complex"))
     val actual =
       ProjectBuilder.build(ProjectBuilderTestData.complexTemplefile, GoLanguageDetail("github.com/squat/and/dab"))
+    projectFilesShouldMatch(actual, expected)
   }
 }

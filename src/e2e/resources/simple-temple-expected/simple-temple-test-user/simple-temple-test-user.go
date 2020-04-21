@@ -55,16 +55,16 @@ type updateSimpleTempleTestUserRequest struct {
 
 // createFredRequest contains the client-provided information required to create a single fred
 type createFredRequest struct {
-	Field  *string    `json:"field" valid:"type(*string),required"`
-	Friend *uuid.UUID `json:"friend" valid:"required"`
-	Image  *string    `json:"image" valid:"type(*string),base64,required"`
+	Field  *string    `json:"field" validate:"required"`
+	Friend *uuid.UUID `json:"friend" validate:"required"`
+	Image  *string    `json:"image" validate:"base64,required"`
 }
 
 // updateFredRequest contains the client-provided information required to update a single fred
 type updateFredRequest struct {
-	Field  *string    `json:"field" valid:"type(*string),required"`
-	Friend *uuid.UUID `json:"friend" valid:"required"`
-	Image  *string    `json:"image" valid:"type(*string),base64,required"`
+	Field  *string    `json:"field" validate:"required"`
+	Friend *uuid.UUID `json:"friend" validate:"required"`
+	Image  *string    `json:"image" validate:"base64,required"`
 }
 
 // listSimpleTempleTestUserElement contains a single simpleTempleTestUser list element
@@ -260,7 +260,7 @@ func (env *env) listSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	for _, hook := range env.hook.beforeListSimpleTempleTestUserHooks {
+	for _, hook := range env.hook.beforeListHooks {
 		err := (*hook)(env, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestListSimpleTempleTestUser)
@@ -276,7 +276,7 @@ func (env *env) listSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	for _, hook := range env.hook.afterListSimpleTempleTestUserHooks {
+	for _, hook := range env.hook.afterListHooks {
 		err := (*hook)(env, simpleTempleTestUserList, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestListSimpleTempleTestUser)
@@ -364,7 +364,7 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		BreakfastTime:        breakfastTime,
 	}
 
-	for _, hook := range env.hook.beforeCreateSimpleTempleTestUserHooks {
+	for _, hook := range env.hook.beforeCreateHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateSimpleTempleTestUser)
@@ -380,7 +380,7 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	for _, hook := range env.hook.afterCreateSimpleTempleTestUserHooks {
+	for _, hook := range env.hook.afterCreateHooks {
 		err := (*hook)(env, simpleTempleTestUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateSimpleTempleTestUser)
@@ -421,7 +421,7 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 		ID: simpleTempleTestUserID,
 	}
 
-	for _, hook := range env.hook.beforeReadSimpleTempleTestUserHooks {
+	for _, hook := range env.hook.beforeReadHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadSimpleTempleTestUser)
@@ -442,7 +442,7 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	for _, hook := range env.hook.afterReadSimpleTempleTestUserHooks {
+	for _, hook := range env.hook.afterReadHooks {
 		err := (*hook)(env, simpleTempleTestUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadSimpleTempleTestUser)
@@ -533,7 +533,7 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		BreakfastTime:        breakfastTime,
 	}
 
-	for _, hook := range env.hook.beforeUpdateSimpleTempleTestUserHooks {
+	for _, hook := range env.hook.beforeUpdateHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateSimpleTempleTestUser)
@@ -554,7 +554,7 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	for _, hook := range env.hook.afterUpdateSimpleTempleTestUserHooks {
+	for _, hook := range env.hook.afterUpdateHooks {
 		err := (*hook)(env, simpleTempleTestUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateSimpleTempleTestUser)
@@ -589,7 +589,7 @@ func (env *env) identifySimpleTempleTestUserHandler(w http.ResponseWriter, r *ht
 		ID: auth.ID,
 	}
 
-	for _, hook := range env.hook.beforeIdentifySimpleTempleTestUserHooks {
+	for _, hook := range env.hook.beforeIdentifyHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentifySimpleTempleTestUser)
@@ -610,7 +610,7 @@ func (env *env) identifySimpleTempleTestUserHandler(w http.ResponseWriter, r *ht
 		return
 	}
 
-	for _, hook := range env.hook.afterIdentifySimpleTempleTestUserHooks {
+	for _, hook := range env.hook.afterIdentifyHooks {
 		err := (*hook)(env, simpleTempleTestUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentifySimpleTempleTestUser)
@@ -724,7 +724,7 @@ func (env *env) createFredHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateFred)
 		return
@@ -921,7 +921,7 @@ func (env *env) updateFredHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateFred)
 		return

@@ -27,12 +27,12 @@ object ServerBuilder {
     detail: LanguageDetail,
     projectUsesAuth: Boolean,
   ): ServiceRoot = {
-    val language = serviceBlock.lookupMetadata[ServiceLanguage] getOrElse ProjectConfig.defaultLanguage
-    val database = serviceBlock.lookupMetadata[Database] getOrElse ProjectConfig.defaultDatabase
+    val language = serviceBlock.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
+    val database = serviceBlock.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase)
     val readable =
-      serviceBlock.lookupLocalMetadata[Metadata.Readable] getOrElse ProjectConfig.getDefaultReadable(projectUsesAuth)
+      serviceBlock.lookupLocalMetadata[Metadata.Readable].getOrElse(ProjectConfig.getDefaultReadable(projectUsesAuth))
     val writable =
-      serviceBlock.lookupLocalMetadata[Metadata.Writable] getOrElse ProjectConfig.getDefaultWritable(projectUsesAuth)
+      serviceBlock.lookupLocalMetadata[Metadata.Writable].getOrElse(ProjectConfig.getDefaultWritable(projectUsesAuth))
 
     val languageConfig = language match {
       case ServiceLanguage.Go => GoLanguageConfig
@@ -92,7 +92,6 @@ object ServerBuilder {
           name = structName,
           opQueries = queries,
           idAttribute = idAttribute,
-          createdByAttribute = None,
           parentAttribute = Some(ParentAttribute("parentID")),
           attributes = ListMap.from(structBlock.providedAttributes),
           readable = readable, // from parent
@@ -147,7 +146,7 @@ object ServerBuilder {
     }
 
     // TODO: support usernames
-    val authMethod = templefile.lookupMetadata[Metadata.AuthMethod] getOrElse ProjectConfig.defaultAuth
+    val authMethod = templefile.lookupMetadata[Metadata.AuthMethod].getOrElse(ProjectConfig.defaultAuth)
 
     val attributes: Map[String, Attribute] = authMethod match {
       case Metadata.AuthMethod.Email =>

@@ -196,7 +196,7 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		BlobField:     blobField,
 	}
 
-	for _, hook := range env.hook.beforeCreateTempleUserHooks {
+	for _, hook := range env.hook.beforeCreateHooks {
 		err := (*hook)(env, req, &input)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -210,7 +210,7 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	for _, hook := range env.hook.afterCreateTempleUserHooks {
+	for _, hook := range env.hook.afterCreateHooks {
 		err := (*hook)(env, templeUser)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -242,7 +242,7 @@ func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 		ID: templeUserID,
 	}
 
-	for _, hook := range env.hook.beforeReadTempleUserHooks {
+	for _, hook := range env.hook.beforeReadHooks {
 		err := (*hook)(env, &input)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -261,7 +261,7 @@ func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterReadTempleUserHooks {
+	for _, hook := range env.hook.afterReadHooks {
 		err := (*hook)(env, templeUser)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -343,7 +343,7 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		BlobField:     blobField,
 	}
 
-	for _, hook := range env.hook.beforeUpdateTempleUserHooks {
+	for _, hook := range env.hook.beforeUpdateHooks {
 		err := (*hook)(env, req, &input)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -362,7 +362,7 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	for _, hook := range env.hook.afterUpdateTempleUserHooks {
+	for _, hook := range env.hook.afterUpdateHooks {
 		err := (*hook)(env, templeUser)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -394,7 +394,7 @@ func (env *env) deleteTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		ID: templeUserID,
 	}
 
-	for _, hook := range env.hook.beforeDeleteTempleUserHooks {
+	for _, hook := range env.hook.beforeDeleteHooks {
 		err := (*hook)(env, &input)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)
@@ -413,7 +413,7 @@ func (env *env) deleteTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	for _, hook := range env.hook.afterDeleteTempleUserHooks {
+	for _, hook := range env.hook.afterDeleteHooks {
 		err := (*hook)(env)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode)

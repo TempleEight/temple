@@ -16,6 +16,7 @@ CREATE TABLE complex_user (
 
 CREATE TABLE temple_user (
   id UUID NOT NULL PRIMARY KEY,
+  parent_id UUID NOT NULL,
   int_field INT NOT NULL,
   double_field DOUBLE PRECISION NOT NULL,
   string_field TEXT NOT NULL,

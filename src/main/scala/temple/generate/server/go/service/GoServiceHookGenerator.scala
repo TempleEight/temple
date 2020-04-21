@@ -13,6 +13,9 @@ import scala.Option.when
 
 object GoServiceHookGenerator {
 
+  private[service] def hookSuffix(block: AttributesRoot): String =
+    if (block.parentAttribute.nonEmpty) block.name else ""
+
   private[service] def generateImports(root: ServiceRoot): String = {
     val daoImport = s"${doubleQuote(root.module + "/dao")}"
     if (root.projectUsesAuth)
@@ -57,19 +60,17 @@ object GoServiceHookGenerator {
   }
 
   private[service] def generateHookStruct(root: ServiceRoot): String = {
-    val beforeCreate =
-      root.blockIterator.iterator.map { struct =>
-        struct.operations.toSeq.map { op =>
-          s"before${op.toString}${struct.name}Hooks" -> s"[]*${generateBeforeHookType(struct, op)}"
-        }
+    val beforeCreate = root.blockIterator.map { block =>
+      block.operations.toSeq.map { op =>
+        s"before${op.toString}${hookSuffix(block)}Hooks" -> s"[]*${generateBeforeHookType(block, op)}"
       }
+    }
 
-    val afterCreate =
-      root.blockIterator.map { struct =>
-        struct.operations.iterator.toSeq.map { op =>
-          s"after${op.toString}${struct.name}Hooks" -> s"[]*${generateAfterHookType(struct, op)}"
-        }
+    val afterCreate = root.blockIterator.map { block =>
+      block.operations.toSeq.map { op =>
+        s"after${op.toString}${hookSuffix(block)}Hooks" -> s"[]*${generateAfterHookType(block, op)}"
       }
+    }
 
     mkCode.lines(
       GoCommonHookGenerator.generateHookStructComment,
@@ -101,15 +102,15 @@ object GoServiceHookGenerator {
     )
 
   private[service] def generateAddHookMethods(root: ServiceRoot): String = {
-    val beforeHooks = root.blockIterator.flatMap { struct =>
-      struct.operations.toSeq.map { op =>
-        generateAddHookMethod("before", generateBeforeHookType(struct, op), op, struct.name)
+    val beforeHooks = root.blockIterator.flatMap { block =>
+      block.operations.toSeq.map { op =>
+        generateAddHookMethod("before", generateBeforeHookType(block, op), op, hookSuffix(block))
       }
     }
 
-    val afterHooks = root.blockIterator.flatMap { struct =>
-      struct.operations.toSeq.map { op =>
-        generateAddHookMethod("after", generateAfterHookType(struct, op), op, struct.name)
+    val afterHooks = root.blockIterator.flatMap { block =>
+      block.operations.toSeq.map { op =>
+        generateAddHookMethod("after", generateAfterHookType(block, op), op, hookSuffix(block))
       }
     }
 

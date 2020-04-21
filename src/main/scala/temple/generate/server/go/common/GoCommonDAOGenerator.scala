@@ -6,7 +6,7 @@ import temple.utils.StringUtils.doubleQuote
 
 object GoCommonDAOGenerator {
 
-  private[go] def generateDAOStruct: String =
+  private[go] def generateDAOStruct(): String =
     mkCode.lines(
       "// DAO encapsulates access to the datastore",
       mkCode("type DAO struct", CodeWrap.curly.tabbed("DB *sql.DB")),

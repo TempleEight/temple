@@ -61,26 +61,26 @@ type updateComplexUserRequest struct {
 
 // createTempleUserRequest contains the client-provided information required to create a single templeUser
 type createTempleUserRequest struct {
-	IntField      *int32   `json:"intField" valid:"type(*int32),required"`
-	DoubleField   *float64 `json:"doubleField" valid:"type(*float64),required"`
-	StringField   *string  `json:"stringField" valid:"type(*string),required"`
-	BoolField     *bool    `json:"boolField" valid:"type(*bool),required"`
-	DateField     *string  `json:"dateField" valid:"type(*string),required"`
-	TimeField     *string  `json:"timeField" valid:"type(*string),required"`
-	DateTimeField *string  `json:"dateTimeField" valid:"type(*string),rfc3339,required"`
-	BlobField     *string  `json:"blobField" valid:"type(*string),base64,required"`
+	IntField      *int32   `json:"intField" validate:"required"`
+	DoubleField   *float64 `json:"doubleField" validate:"required"`
+	StringField   *string  `json:"stringField" validate:"required"`
+	BoolField     *bool    `json:"boolField" validate:"required"`
+	DateField     *string  `json:"dateField" validate:"required"`
+	TimeField     *string  `json:"timeField" validate:"required"`
+	DateTimeField *string  `json:"dateTimeField" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
+	BlobField     *string  `json:"blobField" validate:"base64,required"`
 }
 
 // updateTempleUserRequest contains the client-provided information required to update a single templeUser
 type updateTempleUserRequest struct {
-	IntField      *int32   `json:"intField" valid:"type(*int32),required"`
-	DoubleField   *float64 `json:"doubleField" valid:"type(*float64),required"`
-	StringField   *string  `json:"stringField" valid:"type(*string),required"`
-	BoolField     *bool    `json:"boolField" valid:"type(*bool),required"`
-	DateField     *string  `json:"dateField" valid:"type(*string),required"`
-	TimeField     *string  `json:"timeField" valid:"type(*string),required"`
-	DateTimeField *string  `json:"dateTimeField" valid:"type(*string),rfc3339,required"`
-	BlobField     *string  `json:"blobField" valid:"type(*string),base64,required"`
+	IntField      *int32   `json:"intField" validate:"required"`
+	DoubleField   *float64 `json:"doubleField" validate:"required"`
+	StringField   *string  `json:"stringField" validate:"required"`
+	BoolField     *bool    `json:"boolField" validate:"required"`
+	DateField     *string  `json:"dateField" validate:"required"`
+	TimeField     *string  `json:"timeField" validate:"required"`
+	DateTimeField *string  `json:"dateTimeField" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
+	BlobField     *string  `json:"blobField" validate:"base64,required"`
 }
 
 // createComplexUserResponse contains a newly created complexUser to be returned to the client
@@ -325,7 +325,7 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		BlobField:          blobField,
 	}
 
-	for _, hook := range env.hook.beforeCreateComplexUserHooks {
+	for _, hook := range env.hook.beforeCreateHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateComplexUser)
@@ -341,7 +341,7 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	for _, hook := range env.hook.afterCreateComplexUserHooks {
+	for _, hook := range env.hook.afterCreateHooks {
 		err := (*hook)(env, complexUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateComplexUser)
@@ -390,7 +390,7 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 		ID: complexUserID,
 	}
 
-	for _, hook := range env.hook.beforeReadComplexUserHooks {
+	for _, hook := range env.hook.beforeReadHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadComplexUser)
@@ -411,7 +411,7 @@ func (env *env) readComplexUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	for _, hook := range env.hook.afterReadComplexUserHooks {
+	for _, hook := range env.hook.afterReadHooks {
 		err := (*hook)(env, complexUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadComplexUser)
@@ -514,7 +514,7 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		BlobField:          blobField,
 	}
 
-	for _, hook := range env.hook.beforeUpdateComplexUserHooks {
+	for _, hook := range env.hook.beforeUpdateHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateComplexUser)
@@ -535,7 +535,7 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	for _, hook := range env.hook.afterUpdateComplexUserHooks {
+	for _, hook := range env.hook.afterUpdateHooks {
 		err := (*hook)(env, complexUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateComplexUser)
@@ -584,7 +584,7 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		ID: complexUserID,
 	}
 
-	for _, hook := range env.hook.beforeDeleteComplexUserHooks {
+	for _, hook := range env.hook.beforeDeleteHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteComplexUser)
@@ -605,7 +605,7 @@ func (env *env) deleteComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	for _, hook := range env.hook.afterDeleteComplexUserHooks {
+	for _, hook := range env.hook.afterDeleteHooks {
 		err := (*hook)(env, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteComplexUser)
@@ -629,7 +629,7 @@ func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Reques
 		ID: auth.ID,
 	}
 
-	for _, hook := range env.hook.beforeIdentifyComplexUserHooks {
+	for _, hook := range env.hook.beforeIdentifyHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentifyComplexUser)
@@ -650,7 +650,7 @@ func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Reques
 		return
 	}
 
-	for _, hook := range env.hook.afterIdentifyComplexUserHooks {
+	for _, hook := range env.hook.afterIdentifyHooks {
 		err := (*hook)(env, complexUser, auth)
 		if err != nil {
 			respondWithError(w, err.Error(), err.statusCode, metric.RequestIdentifyComplexUser)
@@ -705,7 +705,7 @@ func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateTempleUser)
 		return
@@ -950,7 +950,7 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateTempleUser)
 		return

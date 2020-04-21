@@ -4,11 +4,10 @@ import java.io.IOException
 import java.net.{ConnectException, HttpURLConnection}
 
 import scalaj.http.Http
-import temple.ast.AbstractServiceBlock.ServiceBlock
 import temple.ast.Metadata.{AuthMethod, Provider}
 import temple.ast.{Metadata, Templefile}
 import temple.test.internal.{AuthServiceTest, CRUDServiceTest, ProjectConfig}
-import temple.utils.StringUtils.kebabCase
+import io.circe.parser.parse
 
 import scala.collection.mutable
 import scala.sys.process._
@@ -39,18 +38,10 @@ object ProjectTester {
 
   /** Configure Kong using the generated script, waiting until this is successful */
   private def configureKong(
-    usesAuth: Boolean,
-    services: Map[String, ServiceBlock],
     config: ProjectConfig,
     generatedPath: String,
   ): Unit = {
-    // Get a random service to validate kong is configured correctly
-    val (serviceName, _) = services.headOption.getOrElse {
-      // If there are no services, there's nothing to setup, so return early...
-      return
-    }
-    val serviceURL = s"http://${config.baseIP}/api/${kebabCase(serviceName)}"
-
+    println("🦍 Configuring Kong")
     var configuredKong = false
     while (!configuredKong) {
       exec(
@@ -58,13 +49,17 @@ object ProjectTester {
       )
 
       try {
-        val responseCode     = Http(serviceURL).method("POST").asString.code
-        val expectedResponse = if (usesAuth) HttpURLConnection.HTTP_UNAUTHORIZED else HttpURLConnection.HTTP_BAD_REQUEST
-        configuredKong = responseCode == expectedResponse
+        // TODO: this doesn't error very well
+        val routesResponse = Http(s"${config.kongAdminURL}/routes").method("GET").asString
+        val jsonObject     = parse(routesResponse.body).toOption.flatMap(json => json.asObject)
+        val kongArray      = jsonObject.flatMap(json => json.apply("data")).flatMap(data => data.asArray)
+        // Kong is configured if the response array is non empty
+        configuredKong = kongArray.fold(false)(_.nonEmpty)
         if (!configuredKong) {
           println("Kong wasn't configured correctly - trying again")
-          exec("sleep 5")
         }
+        // Sleep regardless so Kong has time to update with the routes
+        exec("sleep 5")
       } catch {
         case _: IOException => // Keep trying
       }
@@ -83,7 +78,7 @@ object ProjectTester {
         val baseIP                        = baseURL.replaceAll("http[s]*://", "")
         ProjectConfig(baseIP, kongAdmin)
       case Provider.DockerCompose =>
-        ProjectConfig("localhost:8000", "localhost:8001")
+        ProjectConfig("localhost:8000", "http://localhost:8001")
     }
   }
 
@@ -104,9 +99,8 @@ object ProjectTester {
 
       case Provider.DockerCompose =>
         println("🐳 Spinning up Docker Compose infrastructure...")
-        exec(
-          s"cd $generatedPath && docker-compose up --build -d",
-        )
+        exec("docker volume prune -f && docker network prune -f")
+        exec(s"cd $generatedPath && docker-compose up --build -d")
 
         var successfullyStarted = false
         while (!successfullyStarted) {
@@ -126,7 +120,7 @@ object ProjectTester {
         }
     }
     val config = getConfig(templefile)
-    configureKong(templefile.usesAuth, templefile.services, config, generatedPath)
+    configureKong(config, generatedPath)
     config
   }
 
