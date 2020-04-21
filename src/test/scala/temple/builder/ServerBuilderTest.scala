@@ -108,7 +108,10 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         StructRoot(
           name = "Test",
           opQueries = SortedMap(
-            // TODO: Coming soon
+            Create -> "INSERT INTO test (favourite_colour, bed_time, favourite_number) VALUES ($1, $2, $3) RETURNING favourite_colour, bed_time, favourite_number;",
+            Read   -> "SELECT favourite_colour, bed_time, favourite_number FROM test WHERE id = $1;",
+            Update -> "UPDATE test SET favourite_colour = $1, bed_time = $2, favourite_number = $3 WHERE id = $4 RETURNING favourite_colour, bed_time, favourite_number;",
+            Delete -> "DELETE FROM test WHERE id = $1;",
           ),
           idAttribute = IDAttribute("id"),
           createdByAttribute = None,
