@@ -1,20 +1,25 @@
 package temple.generate.server
 
 import temple.ast.AbstractAttribute
+import temple.ast.AbstractAttribute.Attribute
 import temple.ast.Metadata.{Database, Metrics, Readable, Writable}
 import temple.generate.CRUD.CRUD
 import temple.generate.server.AbstractAttributesRoot.AbstractServiceRoot
 
 import scala.collection.immutable.{ListMap, SortedMap, SortedSet}
 
-trait AttributesRoot extends AbstractAttributesRoot {
+sealed trait AttributesRoot extends AbstractAttributesRoot {
+
   override def name: String
   def opQueries: SortedMap[CRUD, String]
   def idAttribute: IDAttribute
   def createdByAttribute: Option[CreatedByAttribute]
-  def attributes: ListMap[String, AbstractAttribute]
+  def parentAttribute: Option[ParentAttribute]
+  def attributes: ListMap[String, Attribute]
   def readable: Readable
   def writable: Writable
+  def hasAuthBlock: Boolean
+  def projectUsesAuth: Boolean
 
   def requestAttributes: ListMap[String, AbstractAttribute] = attributes.filter { case (_, attr) => attr.inRequest }
   def storedAttributes: ListMap[String, AbstractAttribute]  = attributes.filter { case (_, attr) => attr.isStored }
@@ -54,7 +59,8 @@ object AttributesRoot {
     port: Int,
     idAttribute: IDAttribute,
     createdByAttribute: Option[CreatedByAttribute],
-    attributes: ListMap[String, AbstractAttribute],
+    attributes: ListMap[String, Attribute],
+    structs: Iterable[StructRoot],
     datastore: Database,
     readable: Readable,
     writable: Writable,
@@ -62,5 +68,23 @@ object AttributesRoot {
     hasAuthBlock: Boolean,
     metrics: Option[Metrics],
   ) extends AttributesRoot
-      with AbstractServiceRoot
+      with AbstractServiceRoot {
+    def blockIterator: Iterator[AttributesRoot] = Iterator(this) ++ structs
+
+    override def parentAttribute: None.type = None
+  }
+
+  case class StructRoot(
+    override val name: String,
+    override val opQueries: SortedMap[CRUD, String],
+    override val idAttribute: IDAttribute,
+    override val createdByAttribute: Option[CreatedByAttribute],
+    override val parentAttribute: Some[ParentAttribute],
+    override val attributes: ListMap[String, Attribute],
+    override val readable: Readable,
+    override val writable: Writable,
+    override val projectUsesAuth: Boolean,
+  ) extends AttributesRoot {
+    override def hasAuthBlock: Boolean = false
+  }
 }

@@ -25,6 +25,22 @@ object BuilderTestData {
     Seq(Metadata.ServiceEnumerable),
   )
 
+  val sampleStruct: StructBlock = StructBlock(
+    ListMap(
+      "id"          -> IDAttribute,
+      "parent_id"   -> Attribute(UUIDType),
+      "bankBalance" -> Attribute(FloatType()),
+      "name"        -> Attribute(StringType()),
+      "isStudent"   -> Attribute(BoolType),
+      "dateOfBirth" -> Attribute(DateType),
+      "timeOfDay"   -> Attribute(TimeType),
+      "expiry"      -> Attribute(DateTimeType),
+      "image"       -> Attribute(BlobType()),
+      "fk"          -> Attribute(ForeignKey("OtherService")),
+    ),
+    Seq(Metadata.ServiceEnumerable),
+  )
+
   val simpleTemplefile: Templefile = Templefile(
     "TestProject",
     ProjectBlock(Seq(ServiceLanguage.Go)),

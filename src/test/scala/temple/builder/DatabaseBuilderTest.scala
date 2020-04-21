@@ -3,7 +3,6 @@ package temple.builder
 import org.scalatest.{FlatSpec, Matchers}
 import temple.ast.Metadata
 import temple.generate.CRUD
-import temple.generate.server.CreatedByAttribute
 
 class DatabaseBuilderTest extends FlatSpec with Matchers {
 
@@ -24,6 +23,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Create),
+      isStruct = false,
       Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.Create)
@@ -35,6 +35,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Read),
+      isStruct = false,
       Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.Read)
@@ -46,6 +47,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Update),
+      isStruct = false,
       Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.Update)
@@ -57,6 +59,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Delete),
+      isStruct = false,
       Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.Delete)
@@ -68,6 +71,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
+      isStruct = false,
       Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.List)
@@ -79,6 +83,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
+      isStruct = false,
       Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.List)
@@ -90,9 +95,21 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
+      isStruct = false,
       Metadata.Readable.This,
     )
     queries.keys should contain(CRUD.List)
     queries(CRUD.List) shouldBe DatabaseBuilderTestData.sampleListStatementEnumerateByCreator
+  }
+
+  it should "correctly build endpoint list queries for structs" in {
+    val queries = DatabaseBuilder.buildQueries(
+      "test_service",
+      BuilderTestData.sampleStruct.attributes,
+      Set(CRUD.List),
+      isStruct = true,
+    )
+    queries.keys should contain(CRUD.List)
+    queries(CRUD.List) shouldBe DatabaseBuilderTestData.sampleListStatementStruct
   }
 }
