@@ -50,7 +50,7 @@ object DatabaseBuilder {
     ColumnDef(name, colType, typeConstraints ++ valueConstraints)
   }
 
-  def buildQuery(
+  def buildQueries(
     serviceName: String,
     attributes: Map[String, AbstractAttribute],
     endpoints: Set[CRUD],
