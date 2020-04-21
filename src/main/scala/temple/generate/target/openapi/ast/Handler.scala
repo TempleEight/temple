@@ -10,6 +10,7 @@ import scala.collection.immutable.ListMap
 case class Handler(
   summary: String,
   description: String,
+  security: Option[String],
   tags: Seq[String],
   requestBody: Option[RequestBody],
   responses: Map[Int, Response],
@@ -18,6 +19,10 @@ case class Handler(
   override def jsonOptionEntryIterator: IterableOnce[(String, Option[Json])] = Seq(
     "summary"     ~~> Some(summary),
     "description" ~~> when(description.nonEmpty) { description },
+    "security" ~~> security.map { name =>
+      // What a mess...
+      Seq(Map(name -> Seq[String]()))
+    },
     "tags"        ~~> when(tags.nonEmpty) { tags },
     "requestBody" ~~> when(requestBody.nonEmpty) { requestBody },
     "responses"   ~~> when(responses.nonEmpty) { responses },
@@ -29,8 +34,9 @@ object Handler {
   def apply(
     summary: String,
     description: String = "",
+    security: Option[String] = None,
     tags: Seq[String] = Nil,
     requestBody: Option[RequestBody] = None,
     responses: Seq[(Int, Response)] = Seq(),
-  ): Handler = Handler(summary, description, tags, requestBody, responses.to(ListMap))
+  ): Handler = Handler(summary, description, security, tags, requestBody, responses.to(ListMap))
 }

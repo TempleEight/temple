@@ -17,11 +17,17 @@ import temple.utils.StringUtils
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
 
-private class OpenAPIGenerator private (name: String, version: String, description: String = "") {
+private class OpenAPIGenerator private (
+  name: String,
+  version: String,
+  description: String = "",
+  securityScheme: Option[(String, SecurityScheme)] = None,
+) {
 
   private val errorTracker = FlagMapView(
     400 -> generateError("Invalid request", "Invalid request parameters: name"),
     401 -> generateError("Valid request but forbidden by server", "Not authorised to create this object"),
+    403 -> generateError("Valid request but server will not fulfill", "User with this ID already exists"),
     404 -> generateError("ID not found", "Object not found with ID 1"),
     500 -> generateError(
       "The server encountered an error while serving this request",
@@ -85,14 +91,17 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
   )
 
   def addPaths(service: Service): this.type = {
-    val lowerName       = service.name.toLowerCase
-    val capitalizedName = service.name.capitalize
-    val tags            = Seq(capitalizedName)
+    val securitySchemeName = securityScheme.map { case (name, _) => name }
+    val kebabName          = StringUtils.kebabCase(service.name)
+    val lowerName          = service.name.toLowerCase
+    val capitalizedName    = service.name.capitalize
+    val tags               = Seq(capitalizedName)
     service.operations.foreach {
       case List =>
-        path(s"/$lowerName/all") += HTTPVerb.Get -> Handler(
+        path(s"/$kebabName/all") += HTTPVerb.Get -> Handler(
             s"Get a list of every $lowerName",
             tags = tags,
+            security = securitySchemeName,
             responses = Seq(
               200 -> ResponseObject(
                 s"$capitalizedName list successfully fetched",
@@ -102,9 +111,10 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             ),
           )
       case Create =>
-        path(s"/$lowerName") += HTTPVerb.Post -> Handler(
+        path(s"/$kebabName") += HTTPVerb.Post -> Handler(
             s"Register a new $lowerName",
             tags = tags,
+            security = securitySchemeName,
             requestBody =
               Some(RequestBodyObject(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
             responses = Seq(
@@ -118,9 +128,10 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             ),
           )
       case Read =>
-        pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Get -> Handler(
+        pathWithID(s"/$kebabName/{id}", lowerName) += HTTPVerb.Get -> Handler(
             s"Look up a single $lowerName",
             tags = tags,
+            security = securitySchemeName,
             responses = Seq(
               200 -> ResponseObject(
                 s"$capitalizedName details",
@@ -133,9 +144,10 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             ),
           )
       case Update =>
-        pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Put -> Handler(
+        pathWithID(s"/$kebabName/{id}", lowerName) += HTTPVerb.Put -> Handler(
             s"Update a single $lowerName",
             tags = tags,
+            security = securitySchemeName,
             requestBody =
               Some(RequestBodyObject(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
             responses = Seq(
@@ -150,9 +162,10 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             ),
           )
       case Delete =>
-        pathWithID(s"/$lowerName/{id}", lowerName) += HTTPVerb.Delete -> Handler(
+        pathWithID(s"/$kebabName/{id}", lowerName) += HTTPVerb.Delete -> Handler(
             s"Delete a single $lowerName",
             tags = tags,
+            security = securitySchemeName,
             responses = Seq(
               200 -> ResponseObject(
                 s"$capitalizedName successfully deleted",
@@ -165,9 +178,10 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
             ),
           )
       case Identify =>
-        path(s"/$lowerName") += HTTPVerb.Get -> Handler(
+        path(s"/$kebabName") += HTTPVerb.Get -> Handler(
             s"Look up the single $lowerName associated with the access token",
             tags = tags,
+            security = securitySchemeName,
             responses = Seq(
               302 -> ResponseObject(
                 description = s"The single $lowerName is accessible from the provided Location",
@@ -189,17 +203,67 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     this
   }
 
+  def addAuthPaths(auth: Auth): this.type = {
+    val tags = Seq("Auth")
+
+    auth match {
+      case Auth.Email =>
+        val requestBody = Map(
+          "Email" -> OpenAPISimpleType("string", "email"),
+          "Password" -> OpenAPISimpleType(
+            "string",
+            "password",
+            "minLength" -> 8.asJson,
+            "maxLength" -> 64.asJson,
+          ),
+        )
+
+        val responseBody = OpenAPIObject(Map("AccessToken" -> OpenAPISimpleType("string")))
+
+        path(s"/auth/register") += HTTPVerb.Post -> Handler(
+          s"Register and get an access token",
+          tags = tags,
+          requestBody = Some(RequestBodyObject(jsonContent(MediaTypeObject(OpenAPIObject(requestBody))))),
+          responses = Seq(
+            200 -> ResponseObject(
+              s"Successful registration",
+              Some(jsonContent(MediaTypeObject(responseBody))),
+            ),
+            400 -> Response.Ref(useError(400)),
+            403 -> Response.Ref(useError(403)),
+            500 -> Response.Ref(useError(500)),
+          ),
+        )
+        path(s"/auth/login") += HTTPVerb.Post -> Handler(
+          s"Login and get an access token",
+          tags = tags,
+          requestBody = Some(RequestBodyObject(jsonContent(MediaTypeObject(OpenAPIObject(requestBody))))),
+          responses = Seq(
+            200 -> ResponseObject(
+              s"Successful login",
+              Some(jsonContent(MediaTypeObject(responseBody))),
+            ),
+            400 -> Response.Ref(useError(400)),
+            401 -> Response.Ref(useError(401)),
+            500 -> Response.Ref(useError(500)),
+          ),
+        )
+    }
+    this
+  }
+
   def useError(code: Int): String = {
     errorTracker.flag(code)
     s"Error$code"
   }
 
-  def errorBlock: Map[String, Response] = errorTracker.view.map { case i -> response => useError(i) -> response }.toMap
+  def errorBlock: Map[String, Response] =
+    errorTracker.view.map { case i -> response => useError(i) -> response }.toSeq.sortBy(_._1).to(ListMap)
 
   def toOpenAPI: OpenAPIFile = OpenAPIFile(
     info = Info(name, version, description),
     paths = paths.view.mapValues(_.toPath).to(ListMap),
-    components = Components(responses = errorBlock),
+    components = Components(securitySchemes = securityScheme.toMap, responses = errorBlock),
   )
 }
 
@@ -208,8 +272,12 @@ object OpenAPIGenerator {
   private def jsonContent(mediaTypeObject: MediaTypeObject) = Map("application/json" -> mediaTypeObject)
 
   private def build(root: OpenAPIRoot): OpenAPIFile = {
-    val builder = new OpenAPIGenerator(root.name, root.version, root.description)
+    val securityScheme = root.auth.map {
+      case Auth.Email => "bearerAuth" -> SecurityScheme("http", "bearer", "JWT")
+    }
+    val builder = new OpenAPIGenerator(root.name, root.version, root.description, securityScheme)
     root.services.foreach(builder.addPaths)
+    root.auth.foreach(builder.addAuthPaths)
     builder.toOpenAPI
   }
 
