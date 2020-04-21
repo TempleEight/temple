@@ -54,6 +54,7 @@ object DatabaseBuilder {
     serviceName: String,
     attributes: Map[String, AbstractAttribute],
     endpoints: Set[CRUD],
+    isStruct: Boolean,
     readable: Metadata.Readable = Metadata.Readable.This,
     selectionAttribute: String = "id",
   ): SortedMap[CRUD, Statement] = {
@@ -95,9 +96,12 @@ object DatabaseBuilder {
           List -> Statement.Read(
             tableName,
             columns = columns,
-            condition = when(readable == Metadata.Readable.This) {
-              PreparedComparison("created_by", ComparisonOperator.Equal)
-            },
+            condition =
+              when(isStruct) {
+                PreparedComparison("parent_id", ComparisonOperator.Equal)
+              } orElse when(readable == Metadata.Readable.This) {
+                PreparedComparison("created_by", ComparisonOperator.Equal)
+              },
           )
         case Identify =>
           Identify -> Statement.Read(
@@ -119,8 +123,7 @@ object DatabaseBuilder {
   def createServiceTables(serviceName: String, service: AbstractServiceBlock): Seq[Statement.Create] = {
     service.structIterator(serviceName).map {
       case (tableName, structBlock) =>
-        val columns = structBlock.attributes
-          .filter { case (_, attribute) => attribute.isStored }
+        val columns = structBlock.storedAttributes
           .map { case (name, attribute) => toColDef(snakeCase(name), attribute) }
         Statement.Create(snakeCase(tableName), columns.toSeq)
     }
