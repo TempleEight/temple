@@ -28,7 +28,7 @@ object RegenerationFilter {
   private def filesUnderDirectory(directory: String): Seq[File] = {
     val directoryPath = Paths.get(directory)
     if (Files.exists(directoryPath)) {
-      FileUtils.buildFilenameMap(directoryPath)
+      FileUtils.buildFilenameSeq(directoryPath)
     } else Seq()
   }
 

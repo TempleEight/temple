@@ -2,8 +2,8 @@ package temple.utils
 
 import java.io.IOException
 import java.nio.charset.Charset
-import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file._
+import java.nio.file.attribute.BasicFileAttributes
 
 import temple.builder.project.Project
 import temple.generate.FileSystem
@@ -69,7 +69,7 @@ object FileUtils {
     * @param path The root path to explore
     * @return A sequence of filenames, relative to the provided path
     */
-  def buildFilenameMap(path: Path): Seq[File] = buildFilenameMap(path, path)
+  def buildFilenameSeq(path: Path): Seq[File] = buildFilenameMap(path, path)
 
   /**
     * Build a map of files present in the provided filepath
