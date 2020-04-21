@@ -83,7 +83,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonGenerator.generatePackage("dao"),
         GoServiceDAOGenerator.generateImports(root, usesTime),
         GoServiceDAOInterfaceGenerator.generateInterface(root),
-        GoCommonDAOGenerator.generateDAOStruct,
+        GoCommonDAOGenerator.generateDAOStruct(),
         root.blockIterator.map { block =>
           GoServiceDAOGenerator.generateDatastoreObjectStruct(block)
         },

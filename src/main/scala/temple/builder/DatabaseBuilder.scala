@@ -51,8 +51,7 @@ object DatabaseBuilder {
   }
 
   def conditionsToDisjunction(terms: Iterable[Condition]): Option[Condition] = when(terms.nonEmpty) {
-    if (terms.sizeIs == 1) (terms.head)
-    else Disjunction(terms.head, conditionsToDisjunction(terms.tail).get)
+    if (terms.sizeIs == 1) terms.head else Disjunction(terms.head, conditionsToDisjunction(terms.tail).get)
   }
 
   def buildQueries(
