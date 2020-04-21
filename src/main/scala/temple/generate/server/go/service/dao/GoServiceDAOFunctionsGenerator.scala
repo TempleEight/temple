@@ -51,7 +51,7 @@ object GoServiceDAOFunctionsGenerator {
 
     operation match {
       case List                     => createdBy ++ parentBlock
-      case Create                   => id ++ createdBy ++ attributes
+      case Create                   => id ++ createdBy ++ parentBlock ++ attributes
       case Read | Delete | Identify => id
       case Update                   => attributes ++ id
     }

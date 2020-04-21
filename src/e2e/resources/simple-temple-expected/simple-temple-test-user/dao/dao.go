@@ -273,7 +273,7 @@ func (dao *DAO) ListFred(input ListFredInput) (*[]Fred, error) {
 
 // CreateFred creates a new fred in the datastore, returning the newly created fred
 func (dao *DAO) CreateFred(input CreateFredInput) (*Fred, error) {
-	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO fred (id, parent_id, field, friend, image) VALUES ($1, $2, $3, $4, $5) RETURNING id, parent_id, field, friend, image;", input.ID, input.Field, input.Friend, input.Image)
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO fred (id, parent_id, field, friend, image) VALUES ($1, $2, $3, $4, $5) RETURNING id, parent_id, field, friend, image;", input.ID, input.ParentID, input.Field, input.Friend, input.Image)
 
 	var fred Fred
 	err := row.Scan(&fred.ID, &fred.Field, &fred.Friend, &fred.Image)

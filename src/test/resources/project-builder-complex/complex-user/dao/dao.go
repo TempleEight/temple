@@ -252,7 +252,7 @@ func (dao *DAO) IdentifyComplexUser(input IdentifyComplexUserInput) (*ComplexUse
 
 // CreateTempleUser creates a new templeUser in the datastore, returning the newly created templeUser
 func (dao *DAO) CreateTempleUser(input CreateTempleUserInput) (*TempleUser, error) {
-	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO temple_user (id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field;", input.ID, input.IntField, input.DoubleField, input.StringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField)
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO temple_user (id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field;", input.ID, input.ParentID, input.IntField, input.DoubleField, input.StringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField)
 
 	var templeUser TempleUser
 	err := row.Scan(&templeUser.ID, &templeUser.IntField, &templeUser.DoubleField, &templeUser.StringField, &templeUser.BoolField, &templeUser.DateField, &templeUser.TimeField, &templeUser.DateTimeField, &templeUser.BlobField)
