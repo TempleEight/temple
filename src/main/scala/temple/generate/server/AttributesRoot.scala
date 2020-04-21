@@ -22,6 +22,11 @@ sealed trait AttributesRoot extends AbstractAttributesRoot {
   def projectUsesAuth: Boolean
 
   def requestAttributes: ListMap[String, AbstractAttribute] = attributes.filter { case (_, attr) => attr.inRequest }
+  def storedAttributes: ListMap[String, AbstractAttribute]  = attributes.filter { case (_, attr) => attr.isStored }
+
+  def storedRequestAttributes: ListMap[String, AbstractAttribute] = attributes.filter {
+    case (_, attr) => attr.inRequest && attr.isStored
+  }
 
   def operations: SortedSet[CRUD] = opQueries.keySet
 }

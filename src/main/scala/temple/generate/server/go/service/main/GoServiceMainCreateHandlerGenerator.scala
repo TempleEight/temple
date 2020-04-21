@@ -38,7 +38,7 @@ object GoServiceMainCreateHandlerGenerator {
       when(!block.hasAuthBlock && block.projectUsesAuth && block.parentAttribute.isEmpty) {
         s"Auth$idCapitalized" -> s"auth.$idCapitalized"
       } ++
-      generateDAOInputClientMap(block.requestAttributes)
+      generateDAOInputClientMap(block.storedRequestAttributes)
 
     genDeclareAndAssign(
       genPopulateStruct(s"dao.Create${block.name}Input", createInput),

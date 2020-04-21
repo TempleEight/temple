@@ -13,7 +13,7 @@ import (
 	"github.com/squat/and/dab/complex-user/dao"
 	"github.com/squat/and/dab/complex-user/metric"
 	"github.com/squat/and/dab/complex-user/util"
-	valid "github.com/asaskevich/govalidator"
+	valid "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
@@ -22,40 +22,41 @@ import (
 
 // env defines the environment that requests should be executed within
 type env struct {
-	dao  dao.Datastore
-	hook Hook
+	dao   dao.Datastore
+	hook  Hook
+	valid *valid.Validate
 }
 
 // createComplexUserRequest contains the client-provided information required to create a single complexUser
 type createComplexUserRequest struct {
-	SmallIntField      *uint16  `json:"smallIntField" valid:"type(*uint16),required,range(10|100)"`
-	IntField           *uint32  `json:"intField" valid:"type(*uint32),required,range(10|100)"`
-	BigIntField        *uint64  `json:"bigIntField" valid:"type(*uint64),required,range(10|100)"`
-	FloatField         *float32 `json:"floatField" valid:"type(*float32),required,range(0.0|300.0)"`
-	DoubleField        *float64 `json:"doubleField" valid:"type(*float64),required,range(0.0|123.0)"`
-	StringField        *string  `json:"stringField" valid:"type(*string),required"`
-	BoundedStringField *string  `json:"boundedStringField" valid:"type(*string),required,stringlength(0|5)"`
-	BoolField          *bool    `json:"boolField" valid:"type(*bool),required"`
-	DateField          *string  `json:"dateField" valid:"type(*string),required"`
-	TimeField          *string  `json:"timeField" valid:"type(*string),required"`
-	DateTimeField      *string  `json:"dateTimeField" valid:"type(*string),rfc3339,required"`
-	BlobField          *string  `json:"blobField" valid:"type(*string),base64,required"`
+	SmallIntField      *uint16  `json:"smallIntField" validate:"required,gte=10,lte=100"`
+	IntField           *uint32  `json:"intField" validate:"required,gte=10,lte=100"`
+	BigIntField        *uint64  `json:"bigIntField" validate:"required,gte=10,lte=100"`
+	FloatField         *float32 `json:"floatField" validate:"required,gte=0.0,lte=300.0"`
+	DoubleField        *float64 `json:"doubleField" validate:"required,gte=0.0,lte=123.0"`
+	StringField        *string  `json:"stringField" validate:"required,gte=1"`
+	BoundedStringField *string  `json:"boundedStringField" validate:"required,gte=0,lte=5"`
+	BoolField          *bool    `json:"boolField" validate:"required"`
+	DateField          *string  `json:"dateField" validate:"required"`
+	TimeField          *string  `json:"timeField" validate:"required"`
+	DateTimeField      *string  `json:"dateTimeField" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
+	BlobField          *string  `json:"blobField" validate:"base64,required"`
 }
 
 // updateComplexUserRequest contains the client-provided information required to update a single complexUser
 type updateComplexUserRequest struct {
-	SmallIntField      *uint16  `json:"smallIntField" valid:"type(*uint16),required,range(10|100)"`
-	IntField           *uint32  `json:"intField" valid:"type(*uint32),required,range(10|100)"`
-	BigIntField        *uint64  `json:"bigIntField" valid:"type(*uint64),required,range(10|100)"`
-	FloatField         *float32 `json:"floatField" valid:"type(*float32),required,range(0.0|300.0)"`
-	DoubleField        *float64 `json:"doubleField" valid:"type(*float64),required,range(0.0|123.0)"`
-	StringField        *string  `json:"stringField" valid:"type(*string),required"`
-	BoundedStringField *string  `json:"boundedStringField" valid:"type(*string),required,stringlength(0|5)"`
-	BoolField          *bool    `json:"boolField" valid:"type(*bool),required"`
-	DateField          *string  `json:"dateField" valid:"type(*string),required"`
-	TimeField          *string  `json:"timeField" valid:"type(*string),required"`
-	DateTimeField      *string  `json:"dateTimeField" valid:"type(*string),rfc3339,required"`
-	BlobField          *string  `json:"blobField" valid:"type(*string),base64,required"`
+	SmallIntField      *uint16  `json:"smallIntField" validate:"required,gte=10,lte=100"`
+	IntField           *uint32  `json:"intField" validate:"required,gte=10,lte=100"`
+	BigIntField        *uint64  `json:"bigIntField" validate:"required,gte=10,lte=100"`
+	FloatField         *float32 `json:"floatField" validate:"required,gte=0.0,lte=300.0"`
+	DoubleField        *float64 `json:"doubleField" validate:"required,gte=0.0,lte=123.0"`
+	StringField        *string  `json:"stringField" validate:"required,gte=1"`
+	BoundedStringField *string  `json:"boundedStringField" validate:"required,gte=0,lte=5"`
+	BoolField          *bool    `json:"boolField" validate:"required"`
+	DateField          *string  `json:"dateField" validate:"required"`
+	TimeField          *string  `json:"timeField" validate:"required"`
+	DateTimeField      *string  `json:"dateTimeField" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
+	BlobField          *string  `json:"blobField" validate:"base64,required"`
 }
 
 // createTempleUserRequest contains the client-provided information required to create a single templeUser
@@ -193,9 +194,6 @@ func main() {
 	configPtr := flag.String("config", "/etc/complex-user-service/config.json", "configuration filepath")
 	flag.Parse()
 
-	// Require all struct fields by default
-	valid.SetFieldsRequiredByDefault(true)
-
 	config, err := util.GetConfig(*configPtr)
 	if err != nil {
 		log.Fatal(err)
@@ -216,7 +214,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	env := env{d, Hook{}}
+	env := env{d, Hook{}, valid.New()}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)
@@ -281,7 +279,7 @@ func (env *env) createComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateComplexUser)
 		return
@@ -470,7 +468,7 @@ func (env *env) updateComplexUserHandler(w http.ResponseWriter, r *http.Request)
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateComplexUser)
 		return

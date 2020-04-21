@@ -11,7 +11,7 @@ import (
 	"github.com/squat/and/dab/simple-temple-test-group/dao"
 	"github.com/squat/and/dab/simple-temple-test-group/metric"
 	"github.com/squat/and/dab/simple-temple-test-group/util"
-	valid "github.com/asaskevich/govalidator"
+	valid "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
@@ -20,8 +20,9 @@ import (
 
 // env defines the environment that requests should be executed within
 type env struct {
-	dao  dao.Datastore
-	hook Hook
+	dao   dao.Datastore
+	hook  Hook
+	valid *valid.Validate
 }
 
 // createSimpleTempleTestGroupResponse contains a newly created simpleTempleTestGroup to be returned to the client
@@ -49,9 +50,6 @@ func main() {
 	configPtr := flag.String("config", "/etc/simple-temple-test-group-service/config.json", "configuration filepath")
 	flag.Parse()
 
-	// Require all struct fields by default
-	valid.SetFieldsRequiredByDefault(true)
-
 	config, err := util.GetConfig(*configPtr)
 	if err != nil {
 		log.Fatal(err)
@@ -72,7 +70,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	env := env{d, Hook{}}
+	env := env{d, Hook{}, valid.New()}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)

@@ -12,10 +12,13 @@ import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
 import temple.generate.database.{PostgresContext, PostgresGenerator, PreparedType}
 import temple.generate.server.AttributesRoot.{ServiceRoot, StructRoot}
+import temple.generate.server
+import temple.generate.server.AttributesRoot.{ServiceRoot, StructRoot}
 import temple.generate.server._
 import temple.utils.StringUtils
 
 import scala.Option.when
+import scala.collection.immutable.{ListMap, SortedMap}
 import scala.collection.immutable.{ListMap, SortedMap}
 
 object ServerBuilder {
@@ -49,7 +52,7 @@ object ServerBuilder {
 
     val queries = buildQueries(
       serviceName,
-      serviceBlock.attributes,
+      serviceBlock.storedAttributes,
       endpoints(serviceBlock),
       isStruct = false,
       idAttribute.name,
@@ -74,11 +77,6 @@ object ServerBuilder {
 
     val structs = serviceBlock.structs.map {
       case (structName: String, structBlock: StructBlock) =>
-        // The created by attribute exists if the project has auth and this service does not have an auth block
-        val createdBy = when(hasAuthBlock) {
-          CreatedByAttribute(languageConfig.createdByInputName, languageConfig.createdByName)
-        }
-
         val idAttribute = IDAttribute("id")
 
         val queries = buildQueries(

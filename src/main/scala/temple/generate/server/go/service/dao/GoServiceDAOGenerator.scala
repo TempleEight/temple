@@ -42,7 +42,7 @@ object GoServiceDAOGenerator {
     val parentMap = block.parentAttribute.map { parent =>
       (parent.name.capitalize -> generateGoType(AttributeType.UUIDType))
     }
-    val attributesMap = block.attributes.map {
+    val attributesMap = block.storedAttributes.map {
       case (name, attribute) => name.capitalize -> generateGoType(attribute.attributeType)
     }
 

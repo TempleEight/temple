@@ -39,10 +39,10 @@ object GoServiceMainHandlersGenerator {
   }
 
   /** Generate a map for converting the fields of the DAO response to the JSON response */
-  private def generateResponseMap(root: AttributesRoot): ListMap[String, String] =
-    // Includes ID attribute and all attributes without the @server annotation
-    ListMap(root.idAttribute.name.toUpperCase -> s"${root.decapitalizedName}.${root.idAttribute.name.toUpperCase}") ++
-    root.attributes.collect {
+  private def generateResponseMap(block: AttributesRoot): ListMap[String, String] =
+    // Includes ID attribute and all attributes without the @server or @client annotation
+    ListMap(block.idAttribute.name.toUpperCase -> s"${block.decapitalizedName}.${block.idAttribute.name.toUpperCase}") ++
+    block.attributes.collect {
       case name -> attribute if attribute.inResponse =>
         name.capitalize -> generateResponseMapFormat(root, name, attribute.attributeType)
     }
@@ -256,7 +256,7 @@ object GoServiceMainHandlersGenerator {
   /** Generate the block for validating the request object */
   private[main] def generateValidateStructBlock(metricSuffix: Option[String]): String =
     mkCode.lines(
-      genAssign(genMethodCall("valid", "ValidateStruct", "req"), "_", "err"),
+      genAssign(genMethodCall("env.valid", "Struct", "req"), "err"),
       genIfErr(
         generateRespondWithErrorReturn(
           genHTTPEnum(StatusBadRequest),

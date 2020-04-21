@@ -15,7 +15,7 @@ import (
 	"github.com/squat/and/dab/auth/dao"
 	"github.com/squat/and/dab/auth/metric"
 	"github.com/squat/and/dab/auth/util"
-	valid "github.com/asaskevich/govalidator"
+	valid "github.com/go-playground/validator/v10"
 	"github.com/dgrijalva/jwt-go"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
@@ -27,20 +27,21 @@ import (
 type env struct {
 	dao           dao.Datastore
 	hook          Hook
+	valid	      *valid.Validate
 	comm          comm.Comm
 	jwtCredential *comm.JWTCredential
 }
 
 // registerAuthRequest contains the client-provided information required to create a single auth
 type registerAuthRequest struct {
-	Email    string `valid:"email,required"`
-	Password string `valid:"type(string),required,stringlength(8|64)"`
+	Email    string `validate:"email,required"`
+	Password string `validate:"required,gte=8,lte=64"`
 }
 
 // loginAuthRequest contains the client-provided information required to login an existing auth
 type loginAuthRequest struct {
-	Email    string `valid:"email,required"`
-	Password string `valid:"type(string),required,stringlength(8|64)"`
+	Email    string `validate:"email,required"`
+	Password string `validate:"required,gte=8,lte=64"`
 }
 
 // registerAuthResponse contains an access token
@@ -65,9 +66,6 @@ func defaultRouter(env *env) *mux.Router {
 func main() {
 	configPtr := flag.String("config", "/etc/auth-service/config.json", "configuration filepath")
 	flag.Parse()
-
-	// Require all struct fields by default
-	valid.SetFieldsRequiredByDefault(true)
 
 	config, err := util.GetConfig(*configPtr)
 	if err != nil {
@@ -96,7 +94,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	env := env{d, Hook{}, c, jwtCredential}
+	env := env{d, Hook{}, valid.New(), c, jwtCredential}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)
@@ -128,7 +126,7 @@ func (env *env) registerAuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestRegister)
 		return
@@ -203,7 +201,7 @@ func (env *env) loginAuthHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestLogin)
 		return

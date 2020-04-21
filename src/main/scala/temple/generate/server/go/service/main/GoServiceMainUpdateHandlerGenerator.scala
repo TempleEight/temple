@@ -17,7 +17,7 @@ object GoServiceMainUpdateHandlerGenerator {
   private def generateDAOInput(block: AttributesRoot): String = {
     val updateInput =
       ListMap("ID" -> s"${block.decapitalizedName}ID") ++
-      generateDAOInputClientMap(block.requestAttributes)
+      generateDAOInputClientMap(block.storedRequestAttributes)
 
     genDeclareAndAssign(
       genPopulateStruct(s"dao.Update${block.name}Input", updateInput),

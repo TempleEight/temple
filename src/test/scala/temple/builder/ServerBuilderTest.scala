@@ -106,23 +106,23 @@ class ServerBuilderTest extends FlatSpec with Matchers {
       ),
       structs = Seq(
         StructRoot(
-          "Test",
-          SortedMap(
+          name = "Test",
+          opQueries = SortedMap(
             Create -> "INSERT INTO test (favourite_colour, bed_time, favourite_number) VALUES ($1, $2, $3) RETURNING favourite_colour, bed_time, favourite_number;",
             Read   -> "SELECT favourite_colour, bed_time, favourite_number FROM test WHERE id = $1;",
             Update -> "UPDATE test SET favourite_colour = $1, bed_time = $2, favourite_number = $3 WHERE id = $4 RETURNING favourite_colour, bed_time, favourite_number;",
             Delete -> "DELETE FROM test WHERE id = $1;",
           ),
-          IDAttribute("id"),
-          None,
-          Some(ParentAttribute("parentID")),
-          ListMap(
+          idAttribute = IDAttribute("id"),
+          createdByAttribute = None,
+          parentAttribute = Some(ParentAttribute("parentID")),
+          attributes = ListMap(
             "favouriteColour" -> Attribute(StringType(None, None), None, Set(Unique)),
             "bedTime"         -> Attribute(TimeType, None, Set()),
             "favouriteNumber" -> Attribute(IntType(Some(10), Some(0), 4), None, Set()),
           ),
-          Readable.All,
-          Writable.All,
+          readable = Readable.All,
+          writable = Writable.All,
           projectUsesAuth = false,
         ),
       ),

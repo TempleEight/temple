@@ -12,4 +12,9 @@ trait AttributeBlock[M >: StructMetadata <: Metadata] extends TempleBlock[M] {
   lazy val providedAttributes: Map[String, Attribute] = attributes.collect {
     case name -> (attribute: Attribute) => name -> attribute
   }
+
+  /** Return the attributes of this service that are stored */
+  lazy val storedAttributes: Map[String, AbstractAttribute] = attributes.filter {
+    case (_, attribute) => attribute.isStored
+  }
 }

@@ -10,7 +10,11 @@ sealed trait AbstractAttribute {
   def inRequest: Boolean =
     !accessAnnotation.contains(Annotation.Server) && !accessAnnotation.contains(Annotation.ServerSet)
 
-  def inResponse: Boolean = !accessAnnotation.contains(Annotation.Server)
+  def inResponse: Boolean =
+    !accessAnnotation.contains(Annotation.Server) && !accessAnnotation.contains(Annotation.Client)
+
+  def isStored: Boolean =
+    !accessAnnotation.contains(Annotation.Client)
 }
 
 object AbstractAttribute {

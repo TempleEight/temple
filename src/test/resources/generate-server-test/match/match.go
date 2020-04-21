@@ -13,7 +13,7 @@ import (
 	"github.com/TempleEight/spec-golang/match/dao"
 	"github.com/TempleEight/spec-golang/match/metric"
 	"github.com/TempleEight/spec-golang/match/util"
-	valid "github.com/asaskevich/govalidator"
+	valid "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
@@ -22,21 +22,22 @@ import (
 
 // env defines the environment that requests should be executed within
 type env struct {
-	dao  dao.Datastore
-	hook Hook
-	comm comm.Comm
+	dao   dao.Datastore
+	hook  Hook
+	valid *valid.Validate
+	comm  comm.Comm
 }
 
 // createMatchRequest contains the client-provided information required to create a single match
 type createMatchRequest struct {
-	UserOne *uuid.UUID `json:"userOne" valid:"required"`
-	UserTwo *uuid.UUID `json:"userTwo" valid:"required"`
+	UserOne *uuid.UUID `json:"userOne" validate:"required"`
+	UserTwo *uuid.UUID `json:"userTwo" validate:"required"`
 }
 
 // updateMatchRequest contains the client-provided information required to update a single match
 type updateMatchRequest struct {
-	UserOne *uuid.UUID `json:"userOne" valid:"required"`
-	UserTwo *uuid.UUID `json:"userTwo" valid:"required"`
+	UserOne *uuid.UUID `json:"userOne" validate:"required"`
+	UserTwo *uuid.UUID `json:"userTwo" validate:"required"`
 }
 
 // listMatchElement contains a single match list element
@@ -93,9 +94,6 @@ func main() {
 	configPtr := flag.String("config", "/etc/match-service/config.json", "configuration filepath")
 	flag.Parse()
 
-	// Require all struct fields by default
-	valid.SetFieldsRequiredByDefault(true)
-
 	config, err := util.GetConfig(*configPtr)
 	if err != nil {
 		log.Fatal(err)
@@ -118,7 +116,7 @@ func main() {
 
 	c := comm.Init(config)
 
-	env := env{d, Hook{}, c}
+	env := env{d, Hook{}, valid.New(), c}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)
@@ -225,7 +223,7 @@ func (env *env) createMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateMatch)
 		return
@@ -409,7 +407,7 @@ func (env *env) updateMatchHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateMatch)
 		return

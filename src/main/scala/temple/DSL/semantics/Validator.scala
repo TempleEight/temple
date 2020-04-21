@@ -26,9 +26,10 @@ private class Validator private (templefile: Templefile) {
 
   private def validateAttributes(
     block: AttributeBlock[_],
+    serviceName: String,
     context: SemanticContext,
   ): Map[String, AbstractAttribute] = {
-    block.attributes.foreach { case (name, t) => validateAttribute(t, context :+ name) }
+    block.attributes.foreach { case (name, t) => validateAttribute(t, serviceName, context :+ name) }
 
     // Keep a set of names that have been used already
     val takenNames: mutable.Set[String] = block.attributes.keys.to(mutable.Set)
@@ -90,9 +91,9 @@ private class Validator private (templefile: Templefile) {
     renameBlock(serviceName, service)
 
     val newStructs = service.structs.transform {
-      case (name, struct) => validateStruct(name, struct, context :+ name)
+      case (name, struct) => validateStruct(name, struct, serviceName, context :+ name)
     }
-    val newAttributes = validateAttributes(service, context)
+    val newAttributes = validateAttributes(service, serviceName, context)
     val newMetadata   = validateStructMetadata(service.metadata, newAttributes, context)
 
     ServiceBlock(newAttributes, newMetadata, newStructs)
@@ -101,11 +102,12 @@ private class Validator private (templefile: Templefile) {
   private def validateStruct(
     structName: String,
     struct: StructBlock,
+    serviceName: String,
     context: SemanticContext,
   ): StructBlock = {
     renameBlock(structName, struct)
 
-    val newAttributes = validateAttributes(struct, context)
+    val newAttributes = validateAttributes(struct, serviceName, context)
     val newMetadata   = validateStructMetadata(struct.metadata, newAttributes, context)
 
     StructBlock(newAttributes, newMetadata)
@@ -164,8 +166,8 @@ private class Validator private (templefile: Templefile) {
     }
   }
 
-  private def validateAttribute(attribute: AbstractAttribute, context: SemanticContext): Unit = {
-    validateAttributeType(attribute.attributeType, context)
+  private def validateAttribute(attribute: AbstractAttribute, serviceName: String, context: SemanticContext): Unit = {
+    validateAttributeType(attribute.attributeType, serviceName, context)
     attribute.accessAnnotation match {
       case Some(Annotation.Client)    => // nothing to validate
       case Some(Annotation.Server)    => // nothing to validate
@@ -177,9 +179,11 @@ private class Validator private (templefile: Templefile) {
     }
   }
 
-  private def validateAttributeType(attributeType: AttributeType, context: SemanticContext): Unit =
+  private def validateAttributeType(attributeType: AttributeType, serviceName: String, context: SemanticContext): Unit =
     attributeType match {
-      case ForeignKey(references) if !templefile.providedBlockNames.contains(references) =>
+      case ForeignKey(references)
+          if !templefile.services.contains(references) &&
+          !templefile.services(serviceName).structs.contains(references) =>
         errors += context.errorMessage(s"Invalid foreign key $references")
       case ForeignKey(_) => // all good
 
@@ -216,10 +220,10 @@ private class Validator private (templefile: Templefile) {
   private val referenceCycles: Set[Set[String]] = {
     val graph = templefile.providedBlockNames.map { blockName =>
       blockName -> templefile.getBlock(blockName).attributes.values.collect {
-        case Attribute(ForeignKey(references), _, annotations) => references
+        case Attribute(ForeignKey(references), _, _) => references
       }
     }.toMap
-    Tarjan(graph).filter(_.sizeIs > 1)
+    Tarjan(graph)
   }
 
   def validate(): Seq[String] = {

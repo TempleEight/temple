@@ -11,7 +11,7 @@ import (
 	"github.com/TempleEight/spec-golang/user/dao"
 	"github.com/TempleEight/spec-golang/user/metric"
 	"github.com/TempleEight/spec-golang/user/util"
-	valid "github.com/asaskevich/govalidator"
+	valid "github.com/go-playground/validator/v10"
 	"github.com/google/uuid"
 	"github.com/gorilla/mux"
 	"github.com/prometheus/client_golang/prometheus"
@@ -20,18 +20,19 @@ import (
 
 // env defines the environment that requests should be executed within
 type env struct {
-	dao  dao.Datastore
-	hook Hook
+	dao   dao.Datastore
+	hook  Hook
+	valid *valid.Validate
 }
 
 // createUserRequest contains the client-provided information required to create a single user
 type createUserRequest struct {
-	Name *string `json:"name" valid:"type(*string),required,stringlength(2|255)"`
+	Name *string `json:"name" validate:"required,gte=2,lte=255"`
 }
 
 // updateUserRequest contains the client-provided information required to update a single user
 type updateUserRequest struct {
-	Name *string `json:"name" valid:"type(*string),required,stringlength(2|255)"`
+	Name *string `json:"name" validate:"required,gte=2,lte=255"`
 }
 
 // createUserResponse contains a newly created user to be returned to the client
@@ -68,9 +69,6 @@ func main() {
 	configPtr := flag.String("config", "/etc/user-service/config.json", "configuration filepath")
 	flag.Parse()
 
-	// Require all struct fields by default
-	valid.SetFieldsRequiredByDefault(true)
-
 	config, err := util.GetConfig(*configPtr)
 	if err != nil {
 		log.Fatal(err)
@@ -91,7 +89,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	env := env{d, Hook{}}
+	env := env{d, Hook{}, valid.New()}
 
 	// Call into non-generated entry-point
 	router := defaultRouter(&env)
@@ -134,7 +132,7 @@ func (env *env) createUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateUser)
 		return
@@ -261,7 +259,7 @@ func (env *env) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	_, err = valid.ValidateStruct(req)
+	err = env.valid.Struct(req)
 	if err != nil {
 		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateUser)
 		return

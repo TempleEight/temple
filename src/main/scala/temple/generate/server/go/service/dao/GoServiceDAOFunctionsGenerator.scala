@@ -2,6 +2,7 @@ package temple.generate.server.go.service.dao
 
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD._
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.server.go.service.dao.GoServiceDAOInterfaceGenerator.generateInterfaceFunction
@@ -47,8 +48,7 @@ object GoServiceDAOFunctionsGenerator {
       case _ => Seq.empty
     }
     lazy val parentBlock = when(block.parentAttribute.isDefined) { "input.ParentID" }
-    // TODO: does this need filtering?
-    lazy val attributes = block.attributes.map { case name -> _ => s"$prefix.${name.capitalize}" }.toSeq
+    lazy val attributes  = block.storedAttributes.map { case name -> _ => s"$prefix.${name.capitalize}" }.toSeq
 
     operation match {
       case List                     => createdBy ++ parentBlock
@@ -108,7 +108,7 @@ object GoServiceDAOFunctionsGenerator {
         block.createdByAttribute.map { enumerating =>
           Some(s"&${block.decapitalizedName}.${enumerating.name.capitalize}")
         },
-        block.attributes.map { case (name, _) => s"&${block.decapitalizedName}.${name.capitalize}" },
+        block.storedAttributes.map { case (name, _) => s"&${block.decapitalizedName}.${name.capitalize}" },
       )
 
   private def generateListScanBlock(block: AttributesRoot, scanFunctionCall: String): String =
