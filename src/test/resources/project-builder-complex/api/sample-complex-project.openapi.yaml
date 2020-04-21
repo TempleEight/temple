@@ -3,7 +3,7 @@ info:
   title: SampleComplexProject
   version: 0.0.1
 paths:
-  /complexuser:
+  /complex-user:
     post:
       summary: Register a new complexuser
       security:
@@ -141,7 +141,7 @@ paths:
           $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
-  /complexuser/{id}:
+  /complex-user/{id}:
     parameters:
     - in: path
       name: id

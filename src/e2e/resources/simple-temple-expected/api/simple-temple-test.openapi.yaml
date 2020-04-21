@@ -3,7 +3,7 @@ info:
   title: SimpleTempleTest
   version: 0.0.1
 paths:
-  /simpletempletestuser/all:
+  /simple-temple-test-user/all:
     get:
       summary: Get a list of every simpletempletestuser
       security:
@@ -51,7 +51,7 @@ paths:
                       format: time
         '500':
           $ref: '#/components/responses/Error500'
-  /simpletempletestuser:
+  /simple-temple-test-user:
     post:
       summary: Register a new simpletempletestuser
       security:
@@ -154,7 +154,7 @@ paths:
           $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
-  /simpletempletestuser/{id}:
+  /simple-temple-test-user/{id}:
     parameters:
     - in: path
       name: id
@@ -383,7 +383,7 @@ paths:
           $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
-  /simpletempletestgroup:
+  /simple-temple-test-group:
     post:
       summary: Register a new simpletempletestgroup
       security:
@@ -413,7 +413,7 @@ paths:
           $ref: '#/components/responses/Error401'
         '500':
           $ref: '#/components/responses/Error500'
-  /simpletempletestgroup/{id}:
+  /simple-temple-test-group/{id}:
     parameters:
     - in: path
       name: id

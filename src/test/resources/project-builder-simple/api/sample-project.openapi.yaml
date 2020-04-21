@@ -3,7 +3,7 @@ info:
   title: SampleProject
   version: 0.0.1
 paths:
-  /templeuser:
+  /temple-user:
     post:
       summary: Register a new templeuser
       tags:
@@ -73,7 +73,7 @@ paths:
           $ref: '#/components/responses/Error401'
         '500':
           $ref: '#/components/responses/Error500'
-  /templeuser/{id}:
+  /temple-user/{id}:
     parameters:
     - in: path
       name: id
