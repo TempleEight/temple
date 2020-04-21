@@ -20,7 +20,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint create queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Create),
@@ -31,7 +31,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint read queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Read),
@@ -42,7 +42,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint update queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Update),
@@ -53,7 +53,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint delete queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Delete),
@@ -64,7 +64,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint list CreatedByNone queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
@@ -75,7 +75,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint list EnumerateByAll queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
@@ -86,7 +86,7 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint list EnumerateByCreator queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),

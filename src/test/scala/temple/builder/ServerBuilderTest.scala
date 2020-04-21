@@ -10,20 +10,19 @@ import temple.generate.CRUD._
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server._
 
-import scala.collection.immutable.{ListMap, SortedMap, SortedSet}
+import scala.collection.immutable.{ListMap, SortedMap}
 
 class ServerBuilderTest extends FlatSpec with Matchers {
 
   behavior of "ServerBuilderTest"
 
-  it should "build a correct simple ServiceRoot with all endpoints" in {
+  it should "build a correct simple ServiceRoot" in {
     val serviceRoot: ServiceRoot = BuilderTestData.simpleTemplefile.allServicesWithPorts.head match {
       case (name, service, port) =>
         ServerBuilder
           .buildServiceRoot(
             name,
             service,
-            endpoints = SortedSet(Create, Read, Update, Delete, List),
             port = port.service,
             detail = GoLanguageDetail("github.com/squat/and/dab"),
             projectUsesAuth = false,
@@ -62,54 +61,13 @@ class ServerBuilderTest extends FlatSpec with Matchers {
     )
   }
 
-  it should "build a correct simple ServiceRoot with no endpoints" in {
-    val serviceRoot: ServiceRoot = BuilderTestData.simpleTemplefile.allServicesWithPorts.head match {
-      case (name, service, port) =>
-        ServerBuilder
-          .buildServiceRoot(
-            name,
-            service,
-            endpoints = SortedSet(),
-            port = port.service,
-            detail = GoLanguageDetail("github.com/squat/and/dab"),
-            projectUsesAuth = false,
-          )
-    }
-    serviceRoot shouldBe ServiceRoot(
-      "TestService",
-      "github.com/squat/and/dab/test-service",
-      comms = Set("OtherService").map(ServiceName(_)),
-      port = 1026,
-      opQueries = SortedMap(),
-      idAttribute = IDAttribute("id"),
-      createdByAttribute = None,
-      attributes = ListMap(
-        "bankBalance" -> Attribute(FloatType()),
-        "name"        -> Attribute(StringType()),
-        "isStudent"   -> Attribute(BoolType),
-        "dateOfBirth" -> Attribute(DateType),
-        "timeOfDay"   -> Attribute(TimeType),
-        "expiry"      -> Attribute(DateTimeType),
-        "image"       -> Attribute(BlobType()),
-        "fk"          -> Attribute(ForeignKey("OtherService")),
-      ),
-      datastore = Database.Postgres,
-      readable = Readable.All,
-      writable = Writable.All,
-      projectUsesAuth = false,
-      hasAuthBlock = false,
-      metrics = None,
-    )
-  }
-
-  it should "build a correct complex ServiceRoot with all endpoints" in {
+  it should "build a correct complex ServiceRoot" in {
     val serviceRoot: ServiceRoot = BuilderTestData.complexTemplefile.allServicesWithPorts.head match {
       case (name, service, port) =>
         ServerBuilder
           .buildServiceRoot(
             name,
             service,
-            endpoints = SortedSet(Create, Read, Update, Delete, List),
             port = port.service,
             detail = GoLanguageDetail("github.com/squat/and/dab"),
             projectUsesAuth = false,
