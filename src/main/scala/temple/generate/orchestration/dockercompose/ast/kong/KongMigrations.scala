@@ -9,7 +9,7 @@ case object KongMigrations extends Service(Seq(), Seq("kong-network")) {
 
   override def jsonEntryIterator: IterableOnce[(String, Json)] =
     ListMap(
-      "image"      ~> "kong:2.0.1",
+      "image"      ~> "kong:2.0.2",
       "command"    ~> "kong migrations bootstrap && kong migrations up && kong migrations finish",
       "depends_on" ~> Seq("kong-db"),
       "environment" ~> Seq(
