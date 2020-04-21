@@ -97,8 +97,6 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                      format: date-time
         |                    h:
         |                      type: string
-        |                    i:
-        |                      type: string
         |                    j:
         |                      type: number
         |                      format: int32
@@ -166,8 +164,6 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                    format: date-time
         |                  h:
         |                    type: string
-        |                  i:
-        |                    type: string
         |                  j:
         |                    type: number
         |                    format: int32
@@ -233,8 +229,6 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                    type: string
         |                    format: date-time
         |                  h:
-        |                    type: string
-        |                  i:
         |                    type: string
         |                  j:
         |                    type: number
@@ -307,8 +301,6 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                    type: string
         |                    format: date-time
         |                  h:
-        |                    type: string
-        |                  i:
         |                    type: string
         |                  j:
         |                    type: number
