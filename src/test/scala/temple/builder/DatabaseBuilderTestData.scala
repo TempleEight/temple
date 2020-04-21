@@ -2,7 +2,7 @@ package temple.builder
 
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint.{Check, NonNull, PrimaryKey, Unique}
-import temple.generate.database.ast.ComparisonOperator.{GreaterEqual, LessEqual}
+import temple.generate.database.ast.ComparisonOperator.{Equal, GreaterEqual, LessEqual}
 import temple.generate.database.ast.Condition.PreparedComparison
 import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
@@ -180,5 +180,22 @@ object DatabaseBuilderTestData {
       Column("image"),
       Column("fk"),
     ),
+  )
+
+  val sampleListStatementStruct: Statement = Read(
+    "test_service",
+    Seq(
+      Column("id"),
+      Column("parent_id"),
+      Column("bank_balance"),
+      Column("name"),
+      Column("is_student"),
+      Column("date_of_birth"),
+      Column("time_of_day"),
+      Column("expiry"),
+      Column("image"),
+      Column("fk"),
+    ),
+    Some(PreparedComparison("parent_id", Equal)),
   )
 }
