@@ -13,7 +13,7 @@ abstract class KubeSpec extends DockerShell2HttpService(8084) with DockerTestKit
   implicit override val dockerFactory: DockerFactory = new SpotifyDockerFactory(DefaultDockerClient.fromEnv().build())
 
   def validateAll(files: Files, entryFile: File): String = {
-    val json = files.map { case (file, contents) => (file.folder + "/" + file.filename, contents) }.asJson.toString()
+    val json = files.asJson.toString()
     Http(kubeVerifyUrl)
       .params(Map("src" -> json, "root" -> entryFile.folder))
       .timeout(connTimeoutMs = 1000, readTimeoutMs = 30000)
