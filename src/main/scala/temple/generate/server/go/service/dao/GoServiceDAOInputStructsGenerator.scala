@@ -47,7 +47,7 @@ object GoServiceDAOInputStructsGenerator {
             operation match {
               // Compose struct fields for each operation
               case List                     => createdBy ++ parent
-              case Create                   => id ++ createdBy ++ attributesMap
+              case Create                   => id ++ createdBy ++ parent ++ attributesMap
               case Read | Delete | Identify => id
               case Update                   => id ++ attributesMap
             },

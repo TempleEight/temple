@@ -103,10 +103,11 @@ type ListFredInput struct {
 
 // CreateFredInput encapsulates the information required to create a single fred in the datastore
 type CreateFredInput struct {
-	ID     uuid.UUID
-	Field  string
-	Friend uuid.UUID
-	Image  []byte
+	ID       uuid.UUID
+	ParentID uuid.UUID
+	Field    string
+	Friend   uuid.UUID
+	Image    []byte
 }
 
 // ReadFredInput encapsulates the information required to read a single fred in the datastore

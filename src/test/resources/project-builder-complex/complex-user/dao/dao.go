@@ -114,6 +114,7 @@ type IdentifyComplexUserInput struct {
 // CreateTempleUserInput encapsulates the information required to create a single templeUser in the datastore
 type CreateTempleUserInput struct {
 	ID            uuid.UUID
+	ParentID      uuid.UUID
 	IntField      int32
 	DoubleField   float64
 	StringField   string
