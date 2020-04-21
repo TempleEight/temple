@@ -14,6 +14,8 @@ import temple.generate.FileSystem._
 import temple.utils.MonadUtils.FromEither
 import temple.utils.StringUtils
 
+import scala.collection.immutable.SortedMap
+
 abstract class GolangSpec extends DockerShell2HttpService(8081) with DockerTestKit {
   implicit override val dockerFactory: DockerFactory = new SpotifyDockerFactory(DefaultDockerClient.fromEnv().build())
 
@@ -25,11 +27,20 @@ abstract class GolangSpec extends DockerShell2HttpService(8081) with DockerTestK
 
   def validateAll(files: Files, entryFile: File): String = {
     val json = files.asJson.toString()
-    Http(golangVerifyUrl)
+    val errors = Http(golangVerifyUrl)
       .params(Map("src" -> json, "root" -> entryFile.folder, "entrypoint" -> entryFile.filename))
-      .timeout(connTimeoutMs = 1000, readTimeoutMs = 30000)
+      .timeout(connTimeoutMs = 1000, readTimeoutMs = 60000)
       .asString
       .body
+    if (errors.nonEmpty) {
+      for ((file, content) <- files.to(SortedMap)) {
+        System.err.println(s"$file:")
+        for ((line, i) <- content.linesIterator.zipWithIndex) {
+          System.err.println(s"${i + 1}:".padTo(6, ' ') + line)
+        }
+      }
+    }
+    errors
   }
 
   protected def buildAndValidate(templefile: String): Iterable[String] = {
