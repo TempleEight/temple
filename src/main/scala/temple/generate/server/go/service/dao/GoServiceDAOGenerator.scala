@@ -5,6 +5,7 @@ import temple.generate.CRUD._
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonDAOGenerator
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
+import temple.generate.server.{AttributesRoot, ServiceName}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
 import temple.utils.StringUtils.doubleQuote
@@ -30,25 +31,28 @@ object GoServiceDAOGenerator {
       ),
     )
 
-  private[dao] def generateDAOFunctionName(root: ServiceRoot, operation: CRUD): String =
-    s"$operation${root.name}"
+  private[dao] def generateDAOFunctionName(block: ServiceName, operation: CRUD): String =
+    s"$operation${block.name}"
 
-  private[service] def generateDatastoreObjectStruct(root: ServiceRoot): String = {
-    val idMap = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(AttributeType.UUIDType))
-    val createdByMap = root.createdByAttribute.fold(ListMap[String, String]()) { enumerating =>
-      ListMap(enumerating.name.capitalize -> generateGoType(AttributeType.UUIDType))
+  private[service] def generateDatastoreObjectStruct(block: AttributesRoot): String = {
+    val idMap = ListMap(block.idAttribute.name.toUpperCase -> generateGoType(AttributeType.UUIDType))
+    val createdByMap = block.createdByAttribute.map { createdBy =>
+      (createdBy.name.capitalize -> generateGoType(AttributeType.UUIDType))
     }
-    val attributesMap = root.storedAttributes.map {
+    val parentMap = block.parentAttribute.map { parent =>
+      (parent.name.capitalize -> generateGoType(AttributeType.UUIDType))
+    }
+    val attributesMap = block.storedAttributes.map {
       case (name, attribute) => name.capitalize -> generateGoType(attribute.attributeType)
     }
 
     mkCode.lines(
-      s"// ${root.name} encapsulates the object stored in the datastore",
+      s"// ${block.name} encapsulates the object stored in the datastore",
       mkCode(
-        s"type ${root.name} struct",
+        s"type ${block.name} struct",
         CodeWrap.curly.tabbed(
           // Compose struct fields
-          CodeUtils.pad(idMap ++ createdByMap ++ attributesMap),
+          CodeUtils.pad(idMap ++ createdByMap ++ parentMap ++ attributesMap),
         ),
       ),
     )
@@ -63,18 +67,21 @@ object GoServiceDAOGenerator {
       when(operations.contains(Delete)) { GoCommonDAOGenerator.generateExecuteQuery() },
     )
 
-  private[service] def generateErrors(root: ServiceRoot): String =
+  private def generateError(block: AttributesRoot): String =
     mkCode.lines(
-      "package dao",
-      "",
-      """import "fmt"""",
-      "",
-      s"// Err${root.name}NotFound is returned when a ${root.decapitalizedName} for the provided ID was not found",
-      s"type Err${root.name}NotFound string",
+      s"// Err${block.name}NotFound is returned when a ${block.decapitalizedName} for the provided ID was not found",
+      s"type Err${block.name}NotFound string",
       "",
       mkCode(
-        s"func (e Err${root.name}NotFound) Error() string",
-        CodeWrap.curly.tabbed(s"""return fmt.Sprintf("${root.decapitalizedName} not found with ID %s", string(e))"""),
+        s"func (e Err${block.name}NotFound) Error() string",
+        CodeWrap.curly.tabbed(s"""return fmt.Sprintf("${block.decapitalizedName} not found with ID %s", string(e))"""),
       ),
+    )
+
+  private[service] def generateErrors(root: ServiceRoot): String =
+    mkCode.doubleLines(
+      "package dao",
+      """import "fmt"""",
+      root.blockIterator.map(generateError),
     )
 }

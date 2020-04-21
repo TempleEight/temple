@@ -1,12 +1,11 @@
 package temple.generate.server.go.service.dao
 
 import temple.ast.Metadata.Readable
-import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update, Identify}
-import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.CRUD._
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.server.go.service.dao.GoServiceDAOInterfaceGenerator.generateInterfaceFunction
-import temple.generate.server.CreatedByAttribute
+import temple.generate.server.{AttributesRoot, CreatedByAttribute}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
 
@@ -15,50 +14,50 @@ import scala.collection.immutable.ListMap
 
 object GoServiceDAOFunctionsGenerator {
 
-  private def generateDAOFunctionComment(root: ServiceRoot, operation: CRUD, enumeratingByCreator: Boolean): String =
+  private def generateDAOFunctionComment(block: AttributesRoot, operation: CRUD): String =
     mkCode(
       "//",
-      generateDAOFunctionName(root, operation),
+      generateDAOFunctionName(block, operation),
       operation match {
-        case List     => s"returns a list containing every ${root.decapitalizedName}"
-        case Create   => s"creates a new ${root.decapitalizedName}"
-        case Read     => s"returns the ${root.decapitalizedName}"
-        case Update   => s"updates the ${root.decapitalizedName}"
-        case Delete   => s"deletes the ${root.decapitalizedName}"
-        case Identify => s"returns the ${root.decapitalizedName}"
+        case List     => s"returns a list containing every ${block.decapitalizedName}"
+        case Create   => s"creates a new ${block.decapitalizedName}"
+        case Read     => s"returns the ${block.decapitalizedName}"
+        case Update   => s"updates the ${block.decapitalizedName}"
+        case Delete   => s"deletes the ${block.decapitalizedName}"
+        case Identify => s"returns the ${block.decapitalizedName}"
       },
       "in the datastore",
       operation match {
-        case List     => when(enumeratingByCreator) { "for a given ID" }
-        case Create   => s", returning the newly created ${root.decapitalizedName}"
+        case List     => when(block.readable == Readable.This) { "for a given ID" }
+        case Create   => s", returning the newly created ${block.decapitalizedName}"
         case Read     => "for a given ID"
-        case Update   => s"for a given ID, returning the newly updated ${root.decapitalizedName}"
+        case Update   => s"for a given ID, returning the newly updated ${block.decapitalizedName}"
         case Delete   => "for a given ID"
         case Identify => "for a given ID"
       },
     )
 
-  private def generateQueryArgs(root: ServiceRoot, operation: CRUD): Seq[String] = {
+  private def generateQueryArgs(block: AttributesRoot, operation: CRUD): Seq[String] = {
     val prefix  = "input"
-    lazy val id = Seq(s"$prefix.${root.idAttribute.name.toUpperCase}")
-    lazy val createdBy = root.createdByAttribute match {
+    lazy val id = Seq(s"$prefix.${block.idAttribute.name.toUpperCase}")
+    lazy val createdBy = block.createdByAttribute match {
       // If for the list operation, only include createdBy argument if readable by this
-      case Some(CreatedByAttribute(inputName, _)) if operation != List || root.readable == Readable.This =>
+      case Some(CreatedByAttribute(inputName, _)) if operation != List || block.readable == Readable.This =>
         Seq(s"$prefix.${inputName.capitalize}")
-      case _ =>
-        Seq.empty
+      case _ => Seq.empty
     }
-    lazy val attributes = root.storedAttributes.map { case name -> _ => s"$prefix.${name.capitalize}" }.toSeq
+    lazy val parentBlock = when(block.parentAttribute.isDefined) { "input.ParentID" }
+    lazy val attributes  = block.storedAttributes.map { case name -> _ => s"$prefix.${name.capitalize}" }.toSeq
 
     operation match {
-      case List                     => createdBy
-      case Create                   => id ++ createdBy ++ attributes
+      case List                     => createdBy ++ parentBlock
+      case Create                   => id ++ createdBy ++ parentBlock ++ attributes
       case Read | Delete | Identify => id
       case Update                   => attributes ++ id
     }
   }
 
-  private def generateQueryBlockErrorHandling(root: ServiceRoot, operation: CRUD): Option[String] =
+  private def generateQueryBlockErrorHandling(block: AttributesRoot, operation: CRUD): Option[String] =
     operation match {
       case List =>
         Some(genCheckAndReturnError("nil"))
@@ -68,7 +67,7 @@ object GoServiceDAOFunctionsGenerator {
             genCheckAndReturnError(),
             "else if rowsAffected == 0",
             CodeWrap.curly.tabbed(
-              s"return Err${root.name}NotFound(input.${root.idAttribute.name.toUpperCase}.String())",
+              s"return Err${block.name}NotFound(input.${block.idAttribute.name.toUpperCase}.String())",
             ),
           ),
         )
@@ -76,7 +75,7 @@ object GoServiceDAOFunctionsGenerator {
         None
     }
 
-  private def generateQueryBlock(root: ServiceRoot, operation: CRUD, query: String): String = {
+  private def generateQueryBlock(block: AttributesRoot, operation: CRUD, query: String): String = {
     val identifiers = operation match {
       case List                              => Seq("rows", "err")
       case Create | Read | Update | Identify => Seq("row")
@@ -91,38 +90,38 @@ object GoServiceDAOFunctionsGenerator {
       },
       "dao.DB",
       doubleQuote(query),
-      generateQueryArgs(root, operation),
+      generateQueryArgs(block, operation),
     )
 
     mkCode.lines(
       genDeclareAndAssign(value, identifiers: _*),
-      generateQueryBlockErrorHandling(root, operation),
+      generateQueryBlockErrorHandling(block, operation),
     )
   }
 
-  private def generateScan(root: ServiceRoot): String =
+  private def generateScan(block: AttributesRoot): String =
     CodeWrap.parens
       .prefix("Scan")
       .list(
-        s"&${root.decapitalizedName}.${root.idAttribute.name.toUpperCase}",
-        root.createdByAttribute.map { enumerating =>
-          Some(s"&${root.decapitalizedName}.${enumerating.name.capitalize}")
+        s"&${block.decapitalizedName}.${block.idAttribute.name.toUpperCase}",
+        block.createdByAttribute.map { enumerating =>
+          Some(s"&${block.decapitalizedName}.${enumerating.name.capitalize}")
         },
-        root.storedAttributes.map { case (name, _) => s"&${root.decapitalizedName}.${name.capitalize}" },
+        block.storedAttributes.map { case (name, _) => s"&${block.decapitalizedName}.${name.capitalize}" },
       )
 
-  private def generateListScanBlock(root: ServiceRoot, scanFunctionCall: String): String =
+  private def generateListScanBlock(block: AttributesRoot, scanFunctionCall: String): String =
     mkCode.lines(
-      genDeclareAndAssign(s"make([]${root.name}, 0)", s"${root.decapitalizedName}List"),
+      genDeclareAndAssign(s"make([]${block.name}, 0)", s"${block.decapitalizedName}List"),
       genForLoop(
         "rows.Next()",
         mkCode.lines(
-          genVar(root.decapitalizedName, root.name),
+          genVar(block.decapitalizedName, block.name),
           genAssign(s"rows.$scanFunctionCall", "err"),
           genCheckAndReturnError("nil"),
           genAssign(
-            genFunctionCall("append", s"${root.decapitalizedName}List", root.decapitalizedName),
-            s"${root.decapitalizedName}List",
+            genFunctionCall("append", s"${block.decapitalizedName}List", block.decapitalizedName),
+            s"${block.decapitalizedName}List",
           ),
         ),
       ),
@@ -130,16 +129,16 @@ object GoServiceDAOFunctionsGenerator {
       genCheckAndReturnError("nil"),
     )
 
-  private def generateCreateScanBlock(root: ServiceRoot, scanFunctionCall: String): String =
+  private def generateCreateScanBlock(block: AttributesRoot, scanFunctionCall: String): String =
     mkCode.lines(
-      genVar(root.decapitalizedName, root.name),
+      genVar(block.decapitalizedName, block.name),
       genDeclareAndAssign(s"row.$scanFunctionCall", "err"),
       genCheckAndReturnError("nil"),
     )
 
-  private def generateReadUpdateScanBlock(root: ServiceRoot, scanFunctionCall: String): String =
+  private def generateReadUpdateScanBlock(block: AttributesRoot, scanFunctionCall: String): String =
     mkCode.lines(
-      genVar(root.decapitalizedName, root.name),
+      genVar(block.decapitalizedName, block.name),
       genDeclareAndAssign(s"row.$scanFunctionCall", "err"),
       mkCode(
         "if err != nil",
@@ -149,7 +148,7 @@ object GoServiceDAOFunctionsGenerator {
             ListMap(
               "sql.ErrNoRows" -> genReturn(
                 "nil",
-                s"Err${root.name}NotFound(input.${root.idAttribute.name.toUpperCase}.String())",
+                s"Err${block.name}NotFound(input.${block.idAttribute.name.toUpperCase}.String())",
               ),
             ),
             genReturn("nil", "err"),
@@ -158,47 +157,41 @@ object GoServiceDAOFunctionsGenerator {
       ),
     )
 
-  private def generateScanBlock(root: ServiceRoot, operation: CRUD): Option[String] = {
-    val scanFunctionCall = generateScan(root)
+  private def generateScanBlock(block: AttributesRoot, operation: CRUD): Option[String] = {
+    val scanFunctionCall = generateScan(block)
     operation match {
-      case List                     => Some(generateListScanBlock(root, scanFunctionCall))
-      case Create                   => Some(generateCreateScanBlock(root, scanFunctionCall))
-      case Read | Update | Identify => Some(generateReadUpdateScanBlock(root, scanFunctionCall))
+      case List                     => Some(generateListScanBlock(block, scanFunctionCall))
+      case Create                   => Some(generateCreateScanBlock(block, scanFunctionCall))
+      case Read | Update | Identify => Some(generateReadUpdateScanBlock(block, scanFunctionCall))
       case Delete                   => None
     }
   }
 
-  private def generateReturnExprs(root: ServiceRoot, operation: CRUD): Seq[String] =
+  private def generateReturnExprs(block: AttributesRoot, operation: CRUD): Seq[String] =
     operation match {
-      case List                              => Seq(s"&${root.decapitalizedName}List", "nil")
-      case Create | Read | Update | Identify => Seq(s"&${root.decapitalizedName}", "nil")
+      case List                              => Seq(s"&${block.decapitalizedName}List", "nil")
+      case Create | Read | Update | Identify => Seq(s"&${block.decapitalizedName}", "nil")
       case Delete                            => Seq("nil")
     }
 
-  private def generateDAOFunction(
-    root: ServiceRoot,
-    operation: CRUD,
-    query: String,
-    enumeratingByCreator: Boolean,
-  ): String =
-    mkCode.lines(
-      generateDAOFunctionComment(root, operation, enumeratingByCreator),
-      mkCode(
-        "func (dao *DAO)",
-        generateInterfaceFunction(root, operation, enumeratingByCreator),
-        CodeWrap.curly.tabbed(
-          mkCode.doubleLines(
-            generateQueryBlock(root, operation, query),
-            generateScanBlock(root, operation),
-            genReturn(generateReturnExprs(root, operation): _*),
-          ),
+  private def generateDAOFunction(block: AttributesRoot, operation: CRUD, query: String): String = mkCode.lines(
+    generateDAOFunctionComment(block, operation),
+    mkCode(
+      "func (dao *DAO)",
+      generateInterfaceFunction(block, operation),
+      CodeWrap.curly.tabbed(
+        mkCode.doubleLines(
+          generateQueryBlock(block, operation, query),
+          generateScanBlock(block, operation),
+          genReturn(generateReturnExprs(block, operation): _*),
         ),
       ),
-    )
+    ),
+  )
 
-  private[service] def generateDAOFunctions(root: ServiceRoot, enumeratingByCreator: Boolean): String =
+  private[service] def generateDAOFunctions(block: AttributesRoot): String =
     mkCode.doubleLines(
-      for ((operation, query) <- root.opQueries)
-        yield generateDAOFunction(root, operation, query, enumeratingByCreator),
+      for ((operation, query) <- block.opQueries)
+        yield generateDAOFunction(block, operation, query),
     )
 }

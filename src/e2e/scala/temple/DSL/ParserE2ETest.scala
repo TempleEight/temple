@@ -55,12 +55,11 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
           structs = Map(
             "Fred" -> StructBlock(
               ListMap(
-                "id"        -> IDAttribute,
-                "parentID"  -> ParentAttribute,
-                "createdBy" -> CreatedByAttribute,
-                "field"     -> Attribute(StringType()),
-                "friend"    -> Attribute(ForeignKey("SimpleTempleTestUser")),
-                "image"     -> Attribute(BlobType(size = Some(10_000_000))),
+                "id"       -> IDAttribute,
+                "parentID" -> ParentAttribute,
+                "field"    -> Attribute(StringType()),
+                "friend"   -> Attribute(ForeignKey("SimpleTempleTestUser")),
+                "image"    -> Attribute(BlobType(size = Some(10_000_000))),
               ),
               Seq(ServiceEnumerable),
             ),
