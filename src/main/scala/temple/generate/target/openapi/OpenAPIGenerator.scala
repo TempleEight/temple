@@ -22,6 +22,7 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
   private val errorTracker = FlagMapView(
     400 -> generateError("Invalid request", "Invalid request parameters: name"),
     401 -> generateError("Valid request but forbidden by server", "Not authorised to create this object"),
+    403 -> generateError("Valid request but server will not fulfill", "User with this ID already exists"),
     404 -> generateError("ID not found", "Object not found with ID 1"),
     500 -> generateError(
       "The server encountered an error while serving this request",
@@ -190,12 +191,62 @@ private class OpenAPIGenerator private (name: String, version: String, descripti
     this
   }
 
+  def addAuthPaths(auth: Auth): this.type = {
+    val tags = Seq("Auth")
+
+    auth match {
+      case Auth.Email =>
+        val requestBody = Map(
+          "Email" -> OpenAPISimpleType("string", "email"),
+          "Password" -> OpenAPISimpleType(
+            "string",
+            "password",
+            "minLength" -> 8.asJson,
+            "maxLength" -> 64.asJson,
+          ),
+        )
+
+        val responseBody = OpenAPIObject(Map("AccessToken" -> OpenAPISimpleType("string")))
+
+        path(s"/auth/register") += HTTPVerb.Post -> Handler(
+          s"Register and get an access token",
+          tags = tags,
+          requestBody = Some(RequestBodyObject(jsonContent(MediaTypeObject(OpenAPIObject(requestBody))))),
+          responses = Seq(
+            200 -> ResponseObject(
+              s"Successful registration",
+              Some(jsonContent(MediaTypeObject(responseBody))),
+            ),
+            400 -> Response.Ref(useError(400)),
+            403 -> Response.Ref(useError(403)),
+            500 -> Response.Ref(useError(500)),
+          ),
+        )
+        path(s"/auth/login") += HTTPVerb.Post -> Handler(
+          s"Login and get an access token",
+          tags = tags,
+          requestBody = Some(RequestBodyObject(jsonContent(MediaTypeObject(OpenAPIObject(requestBody))))),
+          responses = Seq(
+            200 -> ResponseObject(
+              s"Successful login",
+              Some(jsonContent(MediaTypeObject(responseBody))),
+            ),
+            400 -> Response.Ref(useError(400)),
+            401 -> Response.Ref(useError(401)),
+            500 -> Response.Ref(useError(500)),
+          ),
+        )
+    }
+    this
+  }
+
   def useError(code: Int): String = {
     errorTracker.flag(code)
     s"Error$code"
   }
 
-  def errorBlock: Map[String, Response] = errorTracker.view.map { case i -> response => useError(i) -> response }.toMap
+  def errorBlock: Map[String, Response] =
+    errorTracker.view.map { case i -> response => useError(i) -> response }.toSeq.sortBy(_._1).to(ListMap)
 
   def toOpenAPI: OpenAPIFile = OpenAPIFile(
     info = Info(name, version, description),
@@ -211,6 +262,7 @@ object OpenAPIGenerator {
   private def build(root: OpenAPIRoot): OpenAPIFile = {
     val builder = new OpenAPIGenerator(root.name, root.version, root.description)
     root.services.foreach(builder.addPaths)
+    root.auth.foreach(builder.addAuthPaths)
     builder.toOpenAPI
   }
 

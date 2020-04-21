@@ -353,6 +353,76 @@ paths:
           $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
+  /auth/register:
+    post:
+      summary: Register and get an access token
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Email:
+                  type: string
+                  format: email
+                Password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  maxLength: 64
+      responses:
+        '200':
+          description: Successful registration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  AccessToken:
+                    type: string
+        '400':
+          $ref: '#/components/responses/Error400'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /auth/login:
+    post:
+      summary: Login and get an access token
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Email:
+                  type: string
+                  format: email
+                Password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  maxLength: 64
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  AccessToken:
+                    type: string
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
 components:
   responses:
     Error400:
@@ -375,6 +445,16 @@ components:
               error:
                 type: string
                 example: Not authorised to create this object
+    Error403:
+      description: Valid request but server will not fulfill
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: User with this ID already exists
     Error404:
       description: ID not found
       content:
