@@ -1,9 +1,7 @@
 package temple.ast
 
 import temple.ast.AbstractServiceBlock._
-
-import temple.ast.Metadata.{Metrics, ServiceAuth}
-
+import temple.ast.Metadata.Metrics
 import temple.ast.Templefile.Ports
 import temple.builder.project.ProjectConfig
 

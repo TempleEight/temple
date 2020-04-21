@@ -12,13 +12,10 @@ import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
 import temple.generate.database.{PostgresContext, PostgresGenerator, PreparedType}
 import temple.generate.server.AttributesRoot.{ServiceRoot, StructRoot}
-import temple.generate.server
-import temple.generate.server.AttributesRoot.{ServiceRoot, StructRoot}
 import temple.generate.server._
 import temple.utils.StringUtils
 
 import scala.Option.when
-import scala.collection.immutable.{ListMap, SortedMap}
 import scala.collection.immutable.{ListMap, SortedMap}
 
 object ServerBuilder {

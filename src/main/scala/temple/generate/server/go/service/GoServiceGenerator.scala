@@ -5,10 +5,10 @@ import temple.ast.Metadata.{Readable, Writable}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
 import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.server.ServiceGenerator
 import temple.generate.server.go.common._
 import temple.generate.server.go.service.dao._
 import temple.generate.server.go.service.main.{GoServiceMainGenerator, GoServiceMainHandlersGenerator, GoServiceMainStructGenerator}
-import temple.generate.server.ServiceGenerator
 import temple.generate.utils.CodeTerm.mkCode
 
 import scala.Option.when

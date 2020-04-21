@@ -4,7 +4,7 @@ import java.text.SimpleDateFormat
 import java.util.UUID
 
 import io.circe.{Json, JsonObject}
-import temple.ast.{AbstractAttribute, Annotation, AttributeType}
+import temple.ast.{AbstractAttribute, AttributeType}
 import temple.utils.StringUtils
 
 class TestFailedException(msg: String) extends RuntimeException(msg)

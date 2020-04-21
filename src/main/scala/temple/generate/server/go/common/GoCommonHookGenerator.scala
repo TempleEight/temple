@@ -2,7 +2,6 @@ package temple.generate.server.go.common
 
 import temple.generate.server.go.common.GoCommonGenerator.{genMethod, genReturn, genStruct}
 import temple.generate.utils.CodeTerm.mkCode
-import temple.utils.StringUtils.doubleQuote
 
 import scala.collection.immutable.ListMap
 

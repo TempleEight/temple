@@ -2,10 +2,10 @@ package temple.test.internal
 
 import scalaj.http.Http
 import temple.ast.AbstractServiceBlock.ServiceBlock
-import temple.test.internal.ServiceTestUtils._
 import temple.ast.Metadata
 import temple.builder.project.ProjectBuilder
 import temple.generate.CRUD
+import temple.test.internal.ServiceTestUtils._
 
 class CRUDServiceTest(
   name: String,

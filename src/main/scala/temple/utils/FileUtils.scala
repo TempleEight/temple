@@ -2,8 +2,8 @@ package temple.utils
 
 import java.io.IOException
 import java.nio.charset.Charset
-import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file._
+import java.nio.file.attribute.BasicFileAttributes
 
 import temple.builder.project.Project
 import temple.generate.FileSystem

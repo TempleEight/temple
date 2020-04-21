@@ -1,16 +1,11 @@
 package temple.generate.server
 
 import org.scalatest.{BeforeAndAfter, Matchers}
-import temple.DSL.DSLProcessor
-import temple.DSL.semantics.Analyzer
-import temple.builder.project.ProjectBuilder
 import temple.containers.GolangSpec
-import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.FileSystem._
 import temple.generate.server.go.auth.GoAuthServiceGenerator
 import temple.generate.server.go.service.GoServiceGenerator
-import temple.utils.MonadUtils.FromEither
-import temple.utils.{FileUtils, StringUtils}
+import temple.utils.FileUtils
 
 class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAndAfter {
 

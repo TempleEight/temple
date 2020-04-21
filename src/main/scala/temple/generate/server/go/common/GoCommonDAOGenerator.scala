@@ -1,8 +1,8 @@
 package temple.generate.server.go.common
 
+import temple.generate.server.go.common.GoCommonGenerator.genInterface
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
-import temple.generate.server.go.common.GoCommonGenerator.genInterface
 
 object GoCommonDAOGenerator {
 

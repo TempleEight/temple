@@ -11,8 +11,8 @@ import temple.DSL.semantics.Analyzer
 import temple.builder.project.ProjectBuilder
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.FileSystem._
-import temple.utils.StringUtils
 import temple.utils.MonadUtils.FromEither
+import temple.utils.StringUtils
 
 import scala.collection.immutable.SortedMap
 

@@ -5,8 +5,6 @@ import temple.ast.Metadata.Metrics
 import temple.ast.Templefile.Ports
 import temple.generate.JsonEncodable
 
-import scala.collection.immutable.ListMap
-
 case class ServerConfig(
   databaseConfig: DatabaseConfig,
   services: Map[String, String],

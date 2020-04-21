@@ -1,7 +1,5 @@
 package temple.generate.utils
 
-import scala.collection.immutable.ListMap
-
 object CodeUtils {
 
   /** Takes an iterable collection of string tuples and pads the first element of each tuple to the length of the

@@ -2,7 +2,6 @@ package temple.generate.server.go.service.dao
 
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD._
-import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.server.go.service.dao.GoServiceDAOInterfaceGenerator.generateInterfaceFunction

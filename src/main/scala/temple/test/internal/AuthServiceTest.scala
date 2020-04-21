@@ -2,8 +2,8 @@ package temple.test.internal
 
 import io.circe.syntax._
 import temple.ast.Metadata.AuthMethod
-import temple.utils.StringUtils
 import temple.test.internal.ServiceTestUtils._
+import temple.utils.StringUtils
 
 class AuthServiceTest(baseURL: String) extends ServiceTest("Auth", baseURL, false) {
 
