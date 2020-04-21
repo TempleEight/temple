@@ -1,6 +1,6 @@
 package temple.builder.project
 
-import temple.ast.AbstractAttribute.{Attribute, IDAttribute}
+import temple.ast.AbstractAttribute.{Attribute, IDAttribute, ParentAttribute}
 import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
 import temple.ast.Metadata.{AuthMethod, Database, ServiceAuth}
@@ -12,6 +12,19 @@ object ProjectBuilderTestData {
 
   private val simpleServiceAttributes = ListMap(
     "id"            -> IDAttribute,
+    "intField"      -> Attribute(IntType()),
+    "doubleField"   -> Attribute(FloatType()),
+    "stringField"   -> Attribute(StringType()),
+    "boolField"     -> Attribute(BoolType),
+    "dateField"     -> Attribute(DateType),
+    "timeField"     -> Attribute(TimeType),
+    "dateTimeField" -> Attribute(DateTimeType),
+    "blobField"     -> Attribute(BlobType()),
+  )
+
+  private val simpleStructAttributes = ListMap(
+    "id"            -> IDAttribute,
+    "parentID"      -> ParentAttribute,
     "intField"      -> Attribute(IntType()),
     "doubleField"   -> Attribute(FloatType()),
     "stringField"   -> Attribute(StringType()),
@@ -93,7 +106,7 @@ object ProjectBuilderTestData {
       "ComplexUser" -> ServiceBlock(
         complexServiceAttributes,
         metadata = Seq(ServiceAuth),
-        structs = Map("TempleUser" -> StructBlock(simpleServiceAttributes)),
+        structs = Map("TempleUser" -> StructBlock(simpleStructAttributes)),
       ),
     ),
   )

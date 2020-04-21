@@ -1,7 +1,7 @@
 version: '3'
 services:
   kong:
-    image: kong:2.0.1
+    image: kong:2.0.2
     user: kong
     depends_on:
     - kong-db
@@ -55,7 +55,7 @@ services:
     networks:
     - kong-network
   kong-migrations:
-    image: kong:2.0.1
+    image: kong:2.0.2
     command: kong migrations bootstrap && kong migrations up && kong migrations finish
     depends_on:
     - kong-db

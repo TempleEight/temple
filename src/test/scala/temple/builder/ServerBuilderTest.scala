@@ -114,7 +114,6 @@ class ServerBuilderTest extends FlatSpec with Matchers {
             Delete -> "DELETE FROM test WHERE id = $1;",
           ),
           idAttribute = IDAttribute("id"),
-          createdByAttribute = None,
           parentAttribute = Some(ParentAttribute("parentID")),
           attributes = ListMap(
             "favouriteColour" -> Attribute(StringType(None, None), None, Set(Unique)),

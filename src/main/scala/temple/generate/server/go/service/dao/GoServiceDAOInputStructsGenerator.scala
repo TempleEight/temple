@@ -1,38 +1,40 @@
 package temple.generate.server.go.service.dao
 
 import temple.ast.AttributeType
-import temple.generate.CRUD
-import temple.generate.CRUD.{CRUD, Create, Delete, List, Read, Update, Identify}
-import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.ast.Metadata.Readable
+import temple.generate.CRUD._
+import temple.generate.server.AttributesRoot
 import temple.generate.server.go.common.GoCommonGenerator.generateGoType
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
 
-import scala.collection.immutable.ListMap
-
 object GoServiceDAOInputStructsGenerator {
 
-  private def generateStructCommentSubstring(root: ServiceRoot, operation: CRUD): String =
+  private def generateStructCommentSubstring(block: AttributesRoot, operation: CRUD): String =
     operation match {
-      case List                            => s"read a ${root.decapitalizedName} list"
-      case Create | Read | Update | Delete => s"${operation.toString.toLowerCase} a single ${root.decapitalizedName}"
-      case Identify                        => s"identify the current ${root.decapitalizedName}"
+      case List                            => s"read a ${block.decapitalizedName} list"
+      case Create | Read | Update | Delete => s"${operation.toString.toLowerCase} a single ${block.decapitalizedName}"
+      case Identify                        => s"identify the current ${block.decapitalizedName}"
     }
 
-  private def generateStruct(root: ServiceRoot, operation: CRUD): String = {
-    val structName       = s"${generateDAOFunctionName(root, operation)}Input"
-    val commentSubstring = generateStructCommentSubstring(root, operation)
+  private def generateStruct(block: AttributesRoot, operation: CRUD): String = {
+    val structName       = s"${generateDAOFunctionName(block, operation)}Input"
+    val commentSubstring = generateStructCommentSubstring(block, operation)
 
     // We assume identifier is an acronym, so we upper case it
-    lazy val idMap = ListMap(root.idAttribute.name.toUpperCase -> generateGoType(AttributeType.UUIDType))
+    lazy val id = Iterable(block.idAttribute.name.toUpperCase -> generateGoType(AttributeType.UUIDType))
 
     // Note we use the createdBy input name, rather than name
-    lazy val createdByMap = root.createdByAttribute.fold(ListMap[String, String]()) { enumerating =>
-      ListMap(enumerating.inputName.capitalize -> generateGoType(AttributeType.UUIDType))
+    lazy val createdBy = block.createdByAttribute.map { createdBy =>
+      createdBy.inputName.capitalize -> generateGoType(AttributeType.UUIDType)
     }
 
-    lazy val attributesMap = root.storedAttributes.map {
+    lazy val parent = block.parentAttribute.map { parentAttribute =>
+      parentAttribute.name.capitalize -> generateGoType(AttributeType.UUIDType)
+    }
+
+    lazy val attributesMap = block.storedAttributes.map {
       case (name, attribute) => (name.capitalize, generateGoType(attribute.attributeType))
     }
 
@@ -44,10 +46,10 @@ object GoServiceDAOInputStructsGenerator {
           CodeUtils.pad(
             operation match {
               // Compose struct fields for each operation
-              case List                     => createdByMap
-              case Create                   => idMap ++ createdByMap ++ attributesMap
-              case Read | Delete | Identify => idMap
-              case Update                   => idMap ++ attributesMap
+              case List                     => createdBy ++ parent
+              case Create                   => id ++ createdBy ++ parent ++ attributesMap
+              case Read | Delete | Identify => id
+              case Update                   => id ++ attributesMap
             },
           ),
         ),
@@ -56,12 +58,12 @@ object GoServiceDAOInputStructsGenerator {
   }
 
   private[service] def generateStructs(
-    root: ServiceRoot,
-    enumeratingByCreator: Boolean,
+    block: AttributesRoot,
   ): String =
     mkCode.doubleLines(
       // Generate input struct for each operation, except for List when not enumerating by creator
-      for (operation <- root.operations.toSeq if operation != CRUD.List || enumeratingByCreator)
-        yield generateStruct(root, operation),
+      for (operation <- block.operations.toSeq
+           if operation != List || block.readable == Readable.This || block.parentAttribute.nonEmpty)
+        yield generateStruct(block, operation),
     )
 }

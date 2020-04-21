@@ -5,10 +5,10 @@ import temple.ast.Metadata.{Readable, Writable}
 import temple.generate.CRUD
 import temple.generate.FileSystem._
 import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.server.ServiceGenerator
 import temple.generate.server.go.common._
 import temple.generate.server.go.service.dao._
 import temple.generate.server.go.service.main.{GoServiceMainGenerator, GoServiceMainHandlersGenerator, GoServiceMainStructGenerator}
-import temple.generate.server.ServiceGenerator
 import temple.generate.utils.CodeTerm.mkCode
 
 import scala.Option.when
@@ -78,13 +78,19 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${root.kebabName}/dao", "dao.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("dao"),
         GoServiceDAOGenerator.generateImports(root, usesTime),
-        GoServiceDAOInterfaceGenerator.generateInterface(root, enumeratingByCreator),
+        GoServiceDAOInterfaceGenerator.generateInterface(root),
         GoCommonDAOGenerator.generateDAOStruct(),
-        GoServiceDAOGenerator.generateDatastoreObjectStruct(root),
-        GoServiceDAOInputStructsGenerator.generateStructs(root, enumeratingByCreator),
+        root.blockIterator.map { block =>
+          GoServiceDAOGenerator.generateDatastoreObjectStruct(block)
+        },
+        root.blockIterator.map { block =>
+          GoServiceDAOInputStructsGenerator.generateStructs(block)
+        },
         GoCommonDAOGenerator.generateInit(),
-        GoServiceDAOGenerator.generateQueryFunctions(root.operations),
-        GoServiceDAOFunctionsGenerator.generateDAOFunctions(root, enumeratingByCreator),
+        GoServiceDAOGenerator.generateQueryFunctions(root.blockIterator.flatMap(_.operations).toSet),
+        root.blockIterator.map { block =>
+          GoServiceDAOFunctionsGenerator.generateDAOFunctions(block)
+        },
       ),
       File(s"${root.kebabName}/dao", "datastore.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("dao"),
