@@ -2,12 +2,13 @@ package temple.builder
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.ast.AbstractAttribute.Attribute
+import temple.ast.Annotation.Unique
 import temple.ast.AttributeType
 import temple.ast.AttributeType._
 import temple.ast.Metadata.{AuthMethod, Database, Readable, Writable}
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
-import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.server.AttributesRoot.{ServiceRoot, StructRoot}
 import temple.generate.server._
 
 import scala.collection.immutable.{ListMap, SortedMap}
@@ -52,6 +53,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "image"       -> Attribute(BlobType()),
         "fk"          -> Attribute(ForeignKey("OtherService")),
       ),
+      structs = Nil,
       datastore = Database.Postgres,
       readable = Readable.All,
       writable = Writable.All,
@@ -101,6 +103,25 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "image"          -> Attribute(BlobType()),
         "sampleFK1"      -> Attribute(ForeignKey("OtherSvc")),
         "sampleFK2"      -> Attribute(ForeignKey("OtherSvc")),
+      ),
+      structs = Seq(
+        StructRoot(
+          name = "Test",
+          opQueries = SortedMap(
+            // TODO: Coming soon
+          ),
+          idAttribute = IDAttribute("id"),
+          createdByAttribute = None,
+          parentAttribute = Some(ParentAttribute("parentID")),
+          attributes = ListMap(
+            "favouriteColour" -> Attribute(StringType(None, None), None, Set(Unique)),
+            "bedTime"         -> Attribute(TimeType, None, Set()),
+            "favouriteNumber" -> Attribute(IntType(Some(10), Some(0), 4), None, Set()),
+          ),
+          readable = Readable.All,
+          writable = Writable.All,
+          projectUsesAuth = false,
+        ),
       ),
       datastore = Database.Postgres,
       readable = Readable.All,
