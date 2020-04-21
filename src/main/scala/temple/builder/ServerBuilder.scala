@@ -12,7 +12,7 @@ import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
 import temple.generate.database.{PostgresContext, PostgresGenerator, PreparedType}
 import temple.generate.server
-import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.server.AttributesRoot.{ServiceRoot, StructRoot}
 import temple.generate.server._
 import temple.utils.StringUtils
 
@@ -73,6 +73,23 @@ object ServerBuilder {
           }
         }
 
+    val structs = serviceBlock.structs.map {
+      case (structName: String, structBlock: StructBlock) =>
+        val idAttribute = IDAttribute("id")
+
+        StructRoot(
+          name = structName,
+          opQueries = SortedMap(),
+          idAttribute = idAttribute,
+          createdByAttribute = None,
+          parentAttribute = Some(ParentAttribute("parentID")),
+          attributes = ListMap.from(structBlock.providedAttributes),
+          readable = readable, // from parent
+          writable = writable, // from parent
+          projectUsesAuth = projectUsesAuth,
+        )
+    }
+
     ServiceRoot(
       serviceName,
       module = moduleName,
@@ -82,6 +99,7 @@ object ServerBuilder {
       idAttribute = idAttribute,
       createdByAttribute = createdBy,
       attributes = ListMap.from(serviceBlock.providedAttributes),
+      structs = structs,
       datastore = serviceBlock.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase),
       readable = readable,
       writable = writable,
