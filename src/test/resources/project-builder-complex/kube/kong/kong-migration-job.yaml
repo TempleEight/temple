@@ -22,6 +22,6 @@ spec:
           value: kong
         - name: KONG_PG_USER
           value: kong
-        image: kong:2.0.1
+        image: kong:2.0.2
         name: kong-migrations
       restartPolicy: OnFailure
