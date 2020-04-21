@@ -118,25 +118,25 @@ func respondWithError(w http.ResponseWriter, err string, statusCode int, request
 func (env *env) createUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestCreate)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestCreateUser)
 		return
 	}
 
 	var req createUserRequest
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateUser)
 		return
 	}
 
 	if req.Name == nil {
-		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestCreate)
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestCreateUser)
 		return
 	}
 
 	_, err = valid.ValidateStruct(req)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreate)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateUser)
 		return
 	}
 
@@ -145,26 +145,26 @@ func (env *env) createUserHandler(w http.ResponseWriter, r *http.Request) {
 		Name: *req.Name,
 	}
 
-	for _, hook := range env.hook.beforeCreateHooks {
+	for _, hook := range env.hook.beforeCreateUserHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateUser)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreate))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreateUser))
 	user, err := env.dao.CreateUser(input)
 	timer.ObserveDuration()
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreate)
+		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreateUser)
 		return
 	}
 
-	for _, hook := range env.hook.afterCreateHooks {
+	for _, hook := range env.hook.afterCreateUserHooks {
 		err := (*hook)(env, user, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateUser)
 			return
 		}
 	}
@@ -174,19 +174,19 @@ func (env *env) createUserHandler(w http.ResponseWriter, r *http.Request) {
 		Name: user.Name,
 	})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestCreate).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreateUser).Inc()
 }
 
 func (env *env) readUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestRead)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestReadUser)
 		return
 	}
 
 	userID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestRead)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestReadUser)
 		return
 	}
 
@@ -194,31 +194,31 @@ func (env *env) readUserHandler(w http.ResponseWriter, r *http.Request) {
 		ID: userID,
 	}
 
-	for _, hook := range env.hook.beforeReadHooks {
+	for _, hook := range env.hook.beforeReadUserHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadUser)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRead))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestReadUser))
 	user, err := env.dao.ReadUser(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrUserNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestRead)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestReadUser)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestRead)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestReadUser)
 		}
 		return
 	}
 
-	for _, hook := range env.hook.afterReadHooks {
+	for _, hook := range env.hook.afterReadUserHooks {
 		err := (*hook)(env, user, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadUser)
 			return
 		}
 	}
@@ -228,42 +228,42 @@ func (env *env) readUserHandler(w http.ResponseWriter, r *http.Request) {
 		Name: user.Name,
 	})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestRead).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestReadUser).Inc()
 }
 
 func (env *env) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestUpdate)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestUpdateUser)
 		return
 	}
 
 	userID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestUpdate)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestUpdateUser)
 		return
 	}
 
 	if auth.ID != userID {
-		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestUpdate)
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestUpdateUser)
 		return
 	}
 
 	var req updateUserRequest
 	err = json.NewDecoder(r.Body).Decode(&req)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateUser)
 		return
 	}
 
 	if req.Name == nil {
-		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestUpdate)
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestUpdateUser)
 		return
 	}
 
 	_, err = valid.ValidateStruct(req)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdate)
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateUser)
 		return
 	}
 
@@ -272,31 +272,31 @@ func (env *env) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		Name: *req.Name,
 	}
 
-	for _, hook := range env.hook.beforeUpdateHooks {
+	for _, hook := range env.hook.beforeUpdateUserHooks {
 		err := (*hook)(env, req, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateUser)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestUpdate))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestUpdateUser))
 	user, err := env.dao.UpdateUser(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrUserNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestUpdate)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestUpdateUser)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdate)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdateUser)
 		}
 		return
 	}
 
-	for _, hook := range env.hook.afterUpdateHooks {
+	for _, hook := range env.hook.afterUpdateUserHooks {
 		err := (*hook)(env, user, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdate)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateUser)
 			return
 		}
 	}
@@ -306,24 +306,24 @@ func (env *env) updateUserHandler(w http.ResponseWriter, r *http.Request) {
 		Name: user.Name,
 	})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestUpdate).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestUpdateUser).Inc()
 }
 
 func (env *env) deleteUserHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestDelete)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestDeleteUser)
 		return
 	}
 
 	userID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestDelete)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestDeleteUser)
 		return
 	}
 
 	if auth.ID != userID {
-		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDelete)
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDeleteUser)
 		return
 	}
 
@@ -331,36 +331,36 @@ func (env *env) deleteUserHandler(w http.ResponseWriter, r *http.Request) {
 		ID: userID,
 	}
 
-	for _, hook := range env.hook.beforeDeleteHooks {
+	for _, hook := range env.hook.beforeDeleteUserHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteUser)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDelete))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDeleteUser))
 	err = env.dao.DeleteUser(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrUserNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestDelete)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestDeleteUser)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDelete)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDeleteUser)
 		}
 		return
 	}
 
-	for _, hook := range env.hook.afterDeleteHooks {
+	for _, hook := range env.hook.afterDeleteUserHooks {
 		err := (*hook)(env, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteUser)
 			return
 		}
 	}
 
 	json.NewEncoder(w).Encode(struct{}{})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestDelete).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestDeleteUser).Inc()
 }

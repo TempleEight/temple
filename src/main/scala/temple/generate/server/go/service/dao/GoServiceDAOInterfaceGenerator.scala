@@ -1,44 +1,54 @@
 package temple.generate.server.go.service.dao
 
-import temple.generate.CRUD
+import temple.ast.Metadata.Readable
 import temple.generate.CRUD._
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
+import temple.generate.server.{AttributesRoot, ServiceName}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
+
+import scala.Option.when
 
 object GoServiceDAOInterfaceGenerator {
 
-  private def generateInterfaceFunctionReturnType(root: ServiceRoot, operation: CRUD): String =
+  private def generateInterfaceFunctionReturnType(block: ServiceName, operation: CRUD): String =
     operation match {
-      case List                              => s"(*[]${root.name}, error)"
-      case Create | Read | Update | Identify => s"(*${root.name}, error)"
+      case List                              => s"(*[]${block.name}, error)"
+      case Create | Read | Update | Identify => s"(*${block.name}, error)"
       case Delete                            => "error"
     }
 
-  private[dao] def generateInterfaceFunction(
-    root: ServiceRoot,
-    operation: CRUD,
-    enumeratingByCreator: Boolean,
-  ): String = {
-    val functionName = generateDAOFunctionName(root, operation)
-    val functionArgs = if (enumeratingByCreator || operation != CRUD.List) s"input ${functionName}Input" else ""
+  private[dao] def generateInterfaceFunction(block: AttributesRoot, operation: CRUD): String = {
+    val functionName = generateDAOFunctionName(block, operation)
+    val functionArgs =
+      if (block.readable == Readable.This || operation != List) s"input ${functionName}Input" else ""
     mkCode(
-      s"$functionName($functionArgs)",
-      generateInterfaceFunctionReturnType(root, operation),
+      CodeWrap.parens
+        .prefix(functionName)
+        .list(
+          when(block.readable == Readable.This || operation != List || block.parentAttribute.isDefined) {
+            s"input ${functionName}Input"
+          },
+        ),
+      generateInterfaceFunctionReturnType(block, operation),
     )
   }
 
-  private[service] def generateInterface(
-    root: ServiceRoot,
-    enumeratingByCreator: Boolean,
-  ): String =
+  private[service] def generateInterface(root: ServiceRoot): String =
     mkCode.lines(
       "// BaseDatastore provides the basic datastore methods",
       mkCode(
         "type BaseDatastore interface",
         CodeWrap.curly.tabbed(
-          for (operation <- root.operations.toSeq)
-            yield generateInterfaceFunction(root, operation, enumeratingByCreator),
+          mkCode.doubleLines(
+            root.blockIterator.map { block =>
+              mkCode.lines(
+                block.operations.toSeq.map { operation =>
+                  generateInterfaceFunction(block, operation)
+                },
+              )
+            },
+          ),
         ),
       ),
     )

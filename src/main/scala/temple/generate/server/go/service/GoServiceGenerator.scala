@@ -24,20 +24,15 @@ object GoServiceGenerator extends ServiceGenerator {
     // Whether or not this service uses the time type, by checking for attributes of type date, time or datetime
     val usesTime =
       Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateTimeType)
-        .intersect(root.attributes.values.map(_.attributeType).toSet)
+        .intersect(root.blockIterator.flatMap(_.attributes.values).map(_.attributeType).toSet)
         .nonEmpty
 
     // Whether or not this service uses base64, by checking for attributes of type blob
-    val usesBase64 = root.attributes.values.exists(_.attributeType.isInstanceOf[AttributeType.BlobType])
+    val usesBase64 =
+      root.blockIterator.flatMap(_.attributes.values).exists(_.attributeType.isInstanceOf[AttributeType.BlobType])
 
     // Whether or not the service uses metrics
     val usesMetrics = root.metrics.isDefined
-
-    // Whether or not this service is enumerating by creator
-    lazy val enumeratingByCreator = root.readable match {
-      case Readable.All  => false
-      case Readable.This => true
-    }
 
     (Map(
       File(s"${root.kebabName}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
@@ -45,21 +40,30 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonGenerator.generatePackage("main"),
         GoServiceMainGenerator.generateImports(root, usesBase64, usesTime, usesComms, usesMetrics),
         GoServiceMainStructGenerator.generateEnvStruct(usesComms),
-        when(
-          root.requestAttributes.nonEmpty
-          && (root.operations.contains(CRUD.Create) || root.operations.contains(CRUD.Update)),
-        ) {
-          GoServiceMainStructGenerator.generateRequestStructs(root)
+        root.blockIterator.map { block =>
+          when(
+            block.requestAttributes.nonEmpty
+            && (block.opQueries.contains(CRUD.Create) || block.opQueries.contains(CRUD.Update)),
+          ) {
+            GoServiceMainStructGenerator.generateRequestStructs(block)
+          }
         },
-        GoServiceMainStructGenerator.generateResponseStructs(root),
+        root.blockIterator.map { block =>
+          GoServiceMainStructGenerator.generateResponseStructs(block)
+        },
         GoServiceMainGenerator.generateRouter(root),
         GoCommonMainGenerator.generateMain(root, usesComms, isAuth = false, usesMetrics),
         GoCommonMainGenerator.generateJsonMiddleware(),
-        when((root.readable == Readable.This || root.writable == Writable.This) && !root.hasAuthBlock) {
+        when(
+          (root.readable == Readable.This || root.writable == Writable.This) && (!root.hasAuthBlock || root.structs.nonEmpty),
+        ) {
           GoServiceMainGenerator.generateCheckAuthorization(root)
         },
+        root.structs.map(GoServiceMainGenerator.generateCheckParent),
         GoCommonMainGenerator.generateRespondWithErrorFunc(usesMetrics),
-        GoServiceMainHandlersGenerator.generateHandlers(root, usesComms, enumeratingByCreator, usesMetrics),
+        root.blockIterator.map { block =>
+          GoServiceMainHandlersGenerator.generateHandlers(block, when(root != block)(root), usesComms, usesMetrics)
+        },
       ),
       File(root.kebabName, "setup.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
@@ -78,13 +82,19 @@ object GoServiceGenerator extends ServiceGenerator {
       File(s"${root.kebabName}/dao", "dao.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("dao"),
         GoServiceDAOGenerator.generateImports(root, usesTime),
-        GoServiceDAOInterfaceGenerator.generateInterface(root, enumeratingByCreator),
-        GoCommonDAOGenerator.generateDAOStruct(),
-        GoServiceDAOGenerator.generateDatastoreObjectStruct(root),
-        GoServiceDAOInputStructsGenerator.generateStructs(root, enumeratingByCreator),
+        GoServiceDAOInterfaceGenerator.generateInterface(root),
+        GoCommonDAOGenerator.generateDAOStruct,
+        root.blockIterator.map { block =>
+          GoServiceDAOGenerator.generateDatastoreObjectStruct(block)
+        },
+        root.blockIterator.map { block =>
+          GoServiceDAOInputStructsGenerator.generateStructs(block)
+        },
         GoCommonDAOGenerator.generateInit(),
-        GoServiceDAOGenerator.generateQueryFunctions(root.operations),
-        GoServiceDAOFunctionsGenerator.generateDAOFunctions(root, enumeratingByCreator),
+        GoServiceDAOGenerator.generateQueryFunctions(root.blockIterator.flatMap(_.operations).toSet),
+        root.blockIterator.map { block =>
+          GoServiceDAOFunctionsGenerator.generateDAOFunctions(block)
+        },
       ),
       File(s"${root.kebabName}/dao", "datastore.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("dao"),

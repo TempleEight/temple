@@ -6,9 +6,9 @@ import (
 )
 
 var (
-	RequestCreate = "create"
-	RequestRead   = "read"
-	RequestDelete = "delete"
+	RequestCreateSimpleTempleTestGroup = "create_simple_temple_test_group"
+	RequestReadSimpleTempleTestGroup   = "read_simple_temple_test_group"
+	RequestDeleteSimpleTempleTestGroup = "delete_simple_temple_test_group"
 
 	RequestSuccess = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "simpletempletestgroup_request_success_total",

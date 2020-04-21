@@ -1,14 +1,13 @@
 package temple.generate.server.go.auth
 
-import temple.generate.CRUD
-import temple.generate.CRUD.{CRUD, presentParticiple}
+import temple.generate.CRUD._
 import temple.generate.server.go.common.GoCommonGenerator.{genAssign, genFunctionCall, genMethod, genStruct}
 import temple.generate.server.go.common.GoCommonHookGenerator
 import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.StringUtils.doubleQuote
 
 object GoAuthServiceHookGenerator {
-  private val endpoints = Seq("Register" -> CRUD.Create, "Login" -> CRUD.Read)
+  private val endpoints = Seq("Register" -> Create, "Login" -> Read)
 
   private[auth] def generateImports(rootModule: String): String =
     s"import ${doubleQuote(rootModule + "/dao")}"

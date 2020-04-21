@@ -2,28 +2,28 @@ package temple.builder
 
 import org.scalatest.{FlatSpec, Matchers}
 import temple.ast.AbstractAttribute.Attribute
+import temple.ast.Annotation.Unique
 import temple.ast.AttributeType
 import temple.ast.AttributeType._
 import temple.ast.Metadata.{AuthMethod, Database, Readable, Writable}
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.CRUD._
-import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.server.AttributesRoot.{ServiceRoot, StructRoot}
 import temple.generate.server._
 
-import scala.collection.immutable.{ListMap, SortedMap, SortedSet}
+import scala.collection.immutable.{ListMap, SortedMap}
 
 class ServerBuilderTest extends FlatSpec with Matchers {
 
   behavior of "ServerBuilderTest"
 
-  it should "build a correct simple ServiceRoot with all endpoints" in {
+  it should "build a correct simple ServiceRoot" in {
     val serviceRoot: ServiceRoot = BuilderTestData.simpleTemplefile.allServicesWithPorts.head match {
       case (name, service, port) =>
         ServerBuilder
           .buildServiceRoot(
             name,
             service,
-            endpoints = SortedSet(Create, Read, Update, Delete, List),
             port = port.service,
             detail = GoLanguageDetail("github.com/squat/and/dab"),
             projectUsesAuth = false,
@@ -53,6 +53,7 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "image"       -> Attribute(BlobType()),
         "fk"          -> Attribute(ForeignKey("OtherService")),
       ),
+      structs = Nil,
       datastore = Database.Postgres,
       readable = Readable.All,
       writable = Writable.All,
@@ -62,54 +63,13 @@ class ServerBuilderTest extends FlatSpec with Matchers {
     )
   }
 
-  it should "build a correct simple ServiceRoot with no endpoints" in {
-    val serviceRoot: ServiceRoot = BuilderTestData.simpleTemplefile.allServicesWithPorts.head match {
-      case (name, service, port) =>
-        ServerBuilder
-          .buildServiceRoot(
-            name,
-            service,
-            endpoints = SortedSet(),
-            port = port.service,
-            detail = GoLanguageDetail("github.com/squat/and/dab"),
-            projectUsesAuth = false,
-          )
-    }
-    serviceRoot shouldBe ServiceRoot(
-      "TestService",
-      "github.com/squat/and/dab/test-service",
-      comms = Set("OtherService").map(ServiceName(_)),
-      port = 1026,
-      opQueries = SortedMap(),
-      idAttribute = IDAttribute("id"),
-      createdByAttribute = None,
-      attributes = ListMap(
-        "bankBalance" -> Attribute(FloatType()),
-        "name"        -> Attribute(StringType()),
-        "isStudent"   -> Attribute(BoolType),
-        "dateOfBirth" -> Attribute(DateType),
-        "timeOfDay"   -> Attribute(TimeType),
-        "expiry"      -> Attribute(DateTimeType),
-        "image"       -> Attribute(BlobType()),
-        "fk"          -> Attribute(ForeignKey("OtherService")),
-      ),
-      datastore = Database.Postgres,
-      readable = Readable.All,
-      writable = Writable.All,
-      projectUsesAuth = false,
-      hasAuthBlock = false,
-      metrics = None,
-    )
-  }
-
-  it should "build a correct complex ServiceRoot with all endpoints" in {
+  it should "build a correct complex ServiceRoot" in {
     val serviceRoot: ServiceRoot = BuilderTestData.complexTemplefile.allServicesWithPorts.head match {
       case (name, service, port) =>
         ServerBuilder
           .buildServiceRoot(
             name,
             service,
-            endpoints = SortedSet(Create, Read, Update, Delete, List),
             port = port.service,
             detail = GoLanguageDetail("github.com/squat/and/dab"),
             projectUsesAuth = false,
@@ -143,6 +103,28 @@ class ServerBuilderTest extends FlatSpec with Matchers {
         "image"          -> Attribute(BlobType()),
         "sampleFK1"      -> Attribute(ForeignKey("OtherSvc")),
         "sampleFK2"      -> Attribute(ForeignKey("OtherSvc")),
+      ),
+      structs = Seq(
+        StructRoot(
+          "Test",
+          SortedMap(
+            Create -> "INSERT INTO test (favourite_colour, bed_time, favourite_number) VALUES ($1, $2, $3) RETURNING favourite_colour, bed_time, favourite_number;",
+            Read   -> "SELECT favourite_colour, bed_time, favourite_number FROM test WHERE id = $1;",
+            Update -> "UPDATE test SET favourite_colour = $1, bed_time = $2, favourite_number = $3 WHERE id = $4 RETURNING favourite_colour, bed_time, favourite_number;",
+            Delete -> "DELETE FROM test WHERE id = $1;",
+          ),
+          IDAttribute("id"),
+          None,
+          Some(ParentAttribute("parentID")),
+          ListMap(
+            "favouriteColour" -> Attribute(StringType(None, None), None, Set(Unique)),
+            "bedTime"         -> Attribute(TimeType, None, Set()),
+            "favouriteNumber" -> Attribute(IntType(Some(10), Some(0), 4), None, Set()),
+          ),
+          Readable.All,
+          Writable.All,
+          projectUsesAuth = false,
+        ),
       ),
       datastore = Database.Postgres,
       readable = Readable.All,

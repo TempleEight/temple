@@ -110,13 +110,13 @@ func respondWithError(w http.ResponseWriter, err string, statusCode int, request
 func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestCreate)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestCreateBooking)
 		return
 	}
 
 	uuid, err := uuid.NewUUID()
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not create UUID: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreate)
+		respondWithError(w, fmt.Sprintf("Could not create UUID: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreateBooking)
 		return
 	}
 
@@ -125,26 +125,26 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 		AuthID: auth.ID,
 	}
 
-	for _, hook := range env.hook.beforeCreateHooks {
+	for _, hook := range env.hook.beforeCreateBookingHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateBooking)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreate))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreateBooking))
 	booking, err := env.dao.CreateBooking(input)
 	timer.ObserveDuration()
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreate)
+		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreateBooking)
 		return
 	}
 
-	for _, hook := range env.hook.afterCreateHooks {
+	for _, hook := range env.hook.afterCreateBookingHooks {
 		err := (*hook)(env, booking, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreate)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateBooking)
 			return
 		}
 	}
@@ -153,19 +153,19 @@ func (env *env) createBookingHandler(w http.ResponseWriter, r *http.Request) {
 		ID: booking.ID,
 	})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestCreate).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreateBooking).Inc()
 }
 
 func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestRead)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestReadBooking)
 		return
 	}
 
 	bookingID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestRead)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestReadBooking)
 		return
 	}
 
@@ -173,14 +173,14 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrBookingNotFound:
-			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestRead)
+			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestReadBooking)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestRead)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestReadBooking)
 		}
 		return
 	}
 	if !authorized {
-		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestRead)
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestReadBooking)
 		return
 	}
 
@@ -188,31 +188,31 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 		ID: bookingID,
 	}
 
-	for _, hook := range env.hook.beforeReadHooks {
+	for _, hook := range env.hook.beforeReadBookingHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadBooking)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRead))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestReadBooking))
 	booking, err := env.dao.ReadBooking(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrBookingNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestRead)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestReadBooking)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestRead)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestReadBooking)
 		}
 		return
 	}
 
-	for _, hook := range env.hook.afterReadHooks {
+	for _, hook := range env.hook.afterReadBookingHooks {
 		err := (*hook)(env, booking, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestRead)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadBooking)
 			return
 		}
 	}
@@ -221,19 +221,19 @@ func (env *env) readBookingHandler(w http.ResponseWriter, r *http.Request) {
 		ID: booking.ID,
 	})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestRead).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestReadBooking).Inc()
 }
 
 func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 	auth, err := util.ExtractAuthIDFromRequest(r.Header)
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestDelete)
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestDeleteBooking)
 		return
 	}
 
 	bookingID, err := util.ExtractIDFromRequest(mux.Vars(r))
 	if err != nil {
-		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestDelete)
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestDeleteBooking)
 		return
 	}
 
@@ -241,14 +241,14 @@ func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrBookingNotFound:
-			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDelete)
+			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDeleteBooking)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDelete)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDeleteBooking)
 		}
 		return
 	}
 	if !authorized {
-		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDelete)
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDeleteBooking)
 		return
 	}
 
@@ -256,36 +256,36 @@ func (env *env) deleteBookingHandler(w http.ResponseWriter, r *http.Request) {
 		ID: bookingID,
 	}
 
-	for _, hook := range env.hook.beforeDeleteHooks {
+	for _, hook := range env.hook.beforeDeleteBookingHooks {
 		err := (*hook)(env, &input, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteBooking)
 			return
 		}
 	}
 
-	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDelete))
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDeleteBooking))
 	err = env.dao.DeleteBooking(input)
 	timer.ObserveDuration()
 	if err != nil {
 		switch err.(type) {
 		case dao.ErrBookingNotFound:
-			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestDelete)
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestDeleteBooking)
 		default:
-			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDelete)
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDeleteBooking)
 		}
 		return
 	}
 
-	for _, hook := range env.hook.afterDeleteHooks {
+	for _, hook := range env.hook.afterDeleteBookingHooks {
 		err := (*hook)(env, auth)
 		if err != nil {
-			respondWithError(w, err.Error(), err.statusCode, metric.RequestDelete)
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteBooking)
 			return
 		}
 	}
 
 	json.NewEncoder(w).Encode(struct{}{})
 
-	metric.RequestSuccess.WithLabelValues(metric.RequestDelete).Inc()
+	metric.RequestSuccess.WithLabelValues(metric.RequestDeleteBooking).Inc()
 }

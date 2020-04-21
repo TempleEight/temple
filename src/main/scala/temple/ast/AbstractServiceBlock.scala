@@ -17,11 +17,6 @@ sealed trait AbstractServiceBlock extends AttributeBlock[ServiceMetadata] {
   def structIterator(rootName: String): Iterator[(String, AttributeBlock[_])] =
     Iterator(rootName -> this) ++ structs
 
-  /** Return this service's attributes, minus the ID and CreatedBy */
-  lazy val providedAttributes: Map[String, Attribute] = attributes.collect {
-    case (name: String, x: Attribute) => name -> x
-  }
-
   /** Set the parent that this Templefile is within */
   override private[temple] def setParent(parent: TempleNode): Unit = {
     super.setParent(parent)

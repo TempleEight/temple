@@ -3,7 +3,7 @@ package temple.generate.server
 import temple.ast.AbstractAttribute.Attribute
 import temple.ast.Metadata.Database.Postgres
 import temple.ast.Metadata.Metrics.Prometheus
-import temple.ast.Metadata.{AuthMethod, Metrics, Readable, Writable}
+import temple.ast.Metadata.{AuthMethod, Readable, Writable}
 import temple.ast.{Annotation, AttributeType}
 import temple.generate.CRUD
 import temple.generate.server.AttributesRoot.ServiceRoot
@@ -26,6 +26,7 @@ object GoGeneratorIntegrationTestData {
     idAttribute = IDAttribute("id"),
     createdByAttribute = None,
     attributes = ListMap("name" -> Attribute(AttributeType.StringType(Option(255L), Option(2)))),
+    structs = Nil,
     datastore = Postgres,
     readable = Readable.All,
     writable = Writable.This,
@@ -53,6 +54,7 @@ object GoGeneratorIntegrationTestData {
       "userTwo"   -> Attribute(AttributeType.ForeignKey("User")),
       "matchedOn" -> Attribute(AttributeType.DateTimeType, Some(Annotation.ServerSet)),
     ),
+    structs = Nil,
     datastore = Postgres,
     readable = Readable.This,
     writable = Writable.This,
@@ -75,6 +77,7 @@ object GoGeneratorIntegrationTestData {
     idAttribute = IDAttribute("id"),
     createdByAttribute = None,
     attributes = ListMap("dt" -> Attribute(AttributeType.DateTimeType)),
+    structs = Nil,
     datastore = Postgres,
     readable = Readable.All,
     writable = Writable.This,
@@ -98,6 +101,7 @@ object GoGeneratorIntegrationTestData {
     idAttribute = IDAttribute("id"),
     createdByAttribute = None,
     attributes = ListMap("d" -> Attribute(AttributeType.BlobType(None))),
+    structs = Nil,
     datastore = Postgres,
     readable = Readable.All,
     writable = Writable.This,
@@ -121,6 +125,7 @@ object GoGeneratorIntegrationTestData {
     idAttribute = IDAttribute("id"),
     createdByAttribute = None,
     attributes = ListMap("d" -> Attribute(AttributeType.BlobType(Some(500000)))),
+    structs = Nil,
     datastore = Postgres,
     readable = Readable.All,
     writable = Writable.This,

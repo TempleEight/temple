@@ -19,6 +19,12 @@ type BaseDatastore interface {
 	ReadSimpleTempleTestUser(input ReadSimpleTempleTestUserInput) (*SimpleTempleTestUser, error)
 	UpdateSimpleTempleTestUser(input UpdateSimpleTempleTestUserInput) (*SimpleTempleTestUser, error)
 	IdentifySimpleTempleTestUser(input IdentifySimpleTempleTestUserInput) (*SimpleTempleTestUser, error)
+
+	ListFred(input ListFredInput) (*[]Fred, error)
+	CreateFred(input CreateFredInput) (*Fred, error)
+	ReadFred(input ReadFredInput) (*Fred, error)
+	UpdateFred(input UpdateFredInput) (*Fred, error)
+	DeleteFred(input DeleteFredInput) error
 }
 
 // DAO encapsulates access to the datastore
@@ -39,6 +45,15 @@ type SimpleTempleTestUser struct {
 	CurrentBankBalance   float32
 	BirthDate            time.Time
 	BreakfastTime        time.Time
+}
+
+// Fred encapsulates the object stored in the datastore
+type Fred struct {
+	ID       uuid.UUID
+	ParentID uuid.UUID
+	Field    string
+	Friend   uuid.UUID
+	Image    []byte
 }
 
 // CreateSimpleTempleTestUserInput encapsulates the information required to create a single simpleTempleTestUser in the datastore
@@ -81,6 +96,37 @@ type IdentifySimpleTempleTestUserInput struct {
 	ID uuid.UUID
 }
 
+// ListFredInput encapsulates the information required to read a fred list in the datastore
+type ListFredInput struct {
+	ParentID uuid.UUID
+}
+
+// CreateFredInput encapsulates the information required to create a single fred in the datastore
+type CreateFredInput struct {
+	ID     uuid.UUID
+	Field  string
+	Friend uuid.UUID
+	Image  []byte
+}
+
+// ReadFredInput encapsulates the information required to read a single fred in the datastore
+type ReadFredInput struct {
+	ID uuid.UUID
+}
+
+// UpdateFredInput encapsulates the information required to update a single fred in the datastore
+type UpdateFredInput struct {
+	ID     uuid.UUID
+	Field  string
+	Friend uuid.UUID
+	Image  []byte
+}
+
+// DeleteFredInput encapsulates the information required to delete a single fred in the datastore
+type DeleteFredInput struct {
+	ID uuid.UUID
+}
+
 // Init opens the datastore connection, returning a DAO
 func Init(config *util.Config) (*DAO, error) {
 	connStr := fmt.Sprintf("user=%s dbname=%s host=%s sslmode=%s", config.User, config.DBName, config.Host, config.SSLMode)
@@ -99,6 +145,15 @@ func executeQueryWithRowResponses(db *sql.DB, query string, args ...interface{})
 // Executes a query, returning the row
 func executeQueryWithRowResponse(db *sql.DB, query string, args ...interface{}) *sql.Row {
 	return db.QueryRow(query, args...)
+}
+
+// Executes a query, returning the number of rows affected
+func executeQuery(db *sql.DB, query string, args ...interface{}) (int64, error) {
+	result, err := db.Exec(query, args...)
+	if err != nil {
+		return 0, err
+	}
+	return result.RowsAffected()
 }
 
 // ListSimpleTempleTestUser returns a list containing every simpleTempleTestUser in the datastore
@@ -190,4 +245,89 @@ func (dao *DAO) IdentifySimpleTempleTestUser(input IdentifySimpleTempleTestUserI
 	}
 
 	return &simpleTempleTestUser, nil
+}
+
+// ListFred returns a list containing every fred in the datastore
+func (dao *DAO) ListFred(input ListFredInput) (*[]Fred, error) {
+	rows, err := executeQueryWithRowResponses(dao.DB, "SELECT id, parent_id, created_by, field, friend, image FROM fred WHERE parent_id = $1;", input.ParentID)
+	if err != nil {
+		return nil, err
+	}
+
+	fredList := make([]Fred, 0)
+	for rows.Next() {
+		var fred Fred
+		err = rows.Scan(&fred.ID, &fred.Field, &fred.Friend, &fred.Image)
+		if err != nil {
+			return nil, err
+		}
+		fredList = append(fredList, fred)
+	}
+	err = rows.Err()
+	if err != nil {
+		return nil, err
+	}
+
+	return &fredList, nil
+}
+
+// CreateFred creates a new fred in the datastore, returning the newly created fred
+func (dao *DAO) CreateFred(input CreateFredInput) (*Fred, error) {
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO fred (id, parent_id, created_by, field, friend, image) VALUES ($1, $2, $3, $4, $5, $6) RETURNING id, parent_id, created_by, field, friend, image;", input.ID, input.Field, input.Friend, input.Image)
+
+	var fred Fred
+	err := row.Scan(&fred.ID, &fred.Field, &fred.Friend, &fred.Image)
+	if err != nil {
+		return nil, err
+	}
+
+	return &fred, nil
+}
+
+// ReadFred returns the fred in the datastore for a given ID
+func (dao *DAO) ReadFred(input ReadFredInput) (*Fred, error) {
+	row := executeQueryWithRowResponse(dao.DB, "SELECT id, parent_id, created_by, field, friend, image FROM fred WHERE id = $1;", input.ID)
+
+	var fred Fred
+	err := row.Scan(&fred.ID, &fred.Field, &fred.Friend, &fred.Image)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrFredNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
+	return &fred, nil
+}
+
+// UpdateFred updates the fred in the datastore for a given ID, returning the newly updated fred
+func (dao *DAO) UpdateFred(input UpdateFredInput) (*Fred, error) {
+	row := executeQueryWithRowResponse(dao.DB, "UPDATE fred SET parent_id = $1, field = $2, friend = $3, image = $4 WHERE id = $5 RETURNING id, parent_id, created_by, field, friend, image;", input.Field, input.Friend, input.Image, input.ID)
+
+	var fred Fred
+	err := row.Scan(&fred.ID, &fred.Field, &fred.Friend, &fred.Image)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrFredNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
+	return &fred, nil
+}
+
+// DeleteFred deletes the fred in the datastore for a given ID
+func (dao *DAO) DeleteFred(input DeleteFredInput) error {
+	rowsAffected, err := executeQuery(dao.DB, "DELETE FROM fred WHERE id = $1;", input.ID)
+	if err != nil {
+		return err
+	} else if rowsAffected == 0 {
+		return ErrFredNotFound(input.ID.String())
+	}
+
+	return nil
 }

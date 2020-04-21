@@ -3,7 +3,6 @@ package temple.builder
 import org.scalatest.{FlatSpec, Matchers}
 import temple.ast.Metadata
 import temple.generate.CRUD
-import temple.generate.server.CreatedByAttribute
 
 class DatabaseBuilderTest extends FlatSpec with Matchers {
 
@@ -20,10 +19,11 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint create queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Create),
+      isStruct = false,
       Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.Create)
@@ -31,10 +31,11 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint read queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Read),
+      isStruct = false,
       Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.Read)
@@ -42,10 +43,11 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint update queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Update),
+      isStruct = false,
       Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.Update)
@@ -53,10 +55,11 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint delete queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.Delete),
+      isStruct = false,
       Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.Delete)
@@ -64,10 +67,11 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint list CreatedByNone queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
+      isStruct = false,
       Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.List)
@@ -75,10 +79,11 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint list EnumerateByAll queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
+      isStruct = false,
       Metadata.Readable.All,
     )
     queries.keys should contain(CRUD.List)
@@ -86,13 +91,16 @@ class DatabaseBuilderTest extends FlatSpec with Matchers {
   }
 
   it should "correctly build endpoint list EnumerateByCreator queries" in {
-    val queries = DatabaseBuilder.buildQuery(
+    val queries = DatabaseBuilder.buildQueries(
       "test_service",
       BuilderTestData.sampleService.attributes,
       Set(CRUD.List),
+      isStruct = false,
       Metadata.Readable.This,
     )
     queries.keys should contain(CRUD.List)
     queries(CRUD.List) shouldBe DatabaseBuilderTestData.sampleListStatementEnumerateByCreator
   }
+
+  // TODO: test the list endpoint with isStruct=true
 }

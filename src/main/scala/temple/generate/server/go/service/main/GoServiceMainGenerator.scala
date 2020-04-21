@@ -1,7 +1,8 @@
 package temple.generate.server.go.service.main
 
 import temple.generate.CRUD._
-import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.server.AttributesRoot
+import temple.generate.server.AttributesRoot.{ServiceRoot, StructRoot}
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
@@ -48,21 +49,38 @@ object GoServiceMainGenerator {
 
   private[service] def generateRouter(root: ServiceRoot): String = {
     val handleFuncs =
-      for (operation <- root.operations.toSeq)
-        yield operation match {
+      root.operations.toSeq.map {
+        case List =>
+          s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/all")}, env.list${root.name}Handler).Methods(http.MethodGet)"
+        case Create =>
+          s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}")}, env.create${root.name}Handler).Methods(http.MethodPost)"
+        case Read =>
+          s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.read${root.name}Handler).Methods(http.MethodGet)"
+        case Update =>
+          s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.update${root.name}Handler).Methods(http.MethodPut)"
+        case Delete =>
+          s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.delete${root.name}Handler).Methods(http.MethodDelete)"
+        case Identify =>
+          s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}")}, env.identify${root.name}Handler).Methods(http.MethodGet)"
+      } ++ root.structs.flatMap { struct =>
+        val urlPrefix = s"/${root.kebabName}/{parent_id}"
+        struct.operations.toSeq.map {
           case List =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/all")}, env.list${root.name}Handler).Methods(http.MethodGet)"
+            s"r.HandleFunc(${doubleQuote(s"$urlPrefix/${struct.kebabName}/all")}, env.list${struct.name}Handler).Methods(http.MethodGet)"
           case Create =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}")}, env.create${root.name}Handler).Methods(http.MethodPost)"
+            s"r.HandleFunc(${doubleQuote(s"$urlPrefix/${struct.kebabName}")}, env.create${struct.name}Handler).Methods(http.MethodPost)"
           case Read =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.read${root.name}Handler).Methods(http.MethodGet)"
+            s"r.HandleFunc(${doubleQuote(s"$urlPrefix/${struct.kebabName}/{id}")}, env.read${struct.name}Handler).Methods(http.MethodGet)"
           case Update =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.update${root.name}Handler).Methods(http.MethodPut)"
+            s"r.HandleFunc(${doubleQuote(s"$urlPrefix/${struct.kebabName}/{id}")}, env.update${struct.name}Handler).Methods(http.MethodPut)"
           case Delete =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.delete${root.name}Handler).Methods(http.MethodDelete)"
+            s"r.HandleFunc(${doubleQuote(s"$urlPrefix/${struct.kebabName}/{id}")}, env.delete${struct.name}Handler).Methods(http.MethodDelete)"
           case Identify =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}")}, env.identify${root.name}Handler).Methods(http.MethodGet)"
+            // TODO: can this be prevented at the type level?
+            throw new RuntimeException("Cannot identify a struct")
+            s"r.HandleFunc(${doubleQuote(s"$urlPrefix/${root.kebabName}")}, env.identify${root.name}Handler).Methods(http.MethodGet)"
         }
+      }
 
     mkCode.lines(
       "// defaultRouter generates a router for this service",
@@ -79,20 +97,20 @@ object GoServiceMainGenerator {
     )
   }
 
-  private[main] def generateDAOReadInput(root: ServiceRoot): String =
+  private[main] def generateDAOReadInput(block: AttributesRoot): String =
     genDeclareAndAssign(
-      genPopulateStruct(s"dao.Read${root.name}Input", ListMap("ID" -> s"${root.decapitalizedName}ID")),
+      genPopulateStruct(s"dao.Read${block.name}Input", ListMap("ID" -> s"${block.decapitalizedName}ID")),
       "input",
     )
 
-  private[main] def generateDAOReadCall(root: ServiceRoot): String =
+  private[main] def generateDAOReadCall(block: AttributesRoot): String =
     genDeclareAndAssign(
       genMethodCall(
         "env.dao",
-        s"Read${root.name}",
+        s"Read${block.name}",
         "input",
       ),
-      root.decapitalizedName,
+      block.decapitalizedName,
       "err",
     )
 
@@ -105,7 +123,23 @@ object GoServiceMainGenerator {
         generateDAOReadInput(root),
         generateDAOReadCall(root),
         genCheckAndReturnError("false"),
-        genReturn(s"${root.decapitalizedName}.CreatedBy == auth.ID", "nil"),
+        genReturn({
+          if (root.hasAuthBlock) s"${root.decapitalizedName}.ID == auth.ID"
+          else s"${root.decapitalizedName}.CreatedBy == auth.ID"
+        }, "nil"),
+      ),
+    )
+
+  private[service] def generateCheckParent(struct: StructRoot): String =
+    genFunc(
+      s"check${struct.name}Parent",
+      Seq("env *env", s"${struct.decapitalizedName}ID uuid.UUID", "parentID uuid.UUID"),
+      Some(CodeWrap.parens(mkCode.list("bool", "error"))),
+      mkCode.lines(
+        generateDAOReadInput(struct),
+        generateDAOReadCall(struct),
+        genCheckAndReturnError("false"),
+        genReturn(s"${struct.decapitalizedName}.ParentID == parentID", "nil"),
       ),
     )
 

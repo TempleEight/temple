@@ -19,6 +19,11 @@ type BaseDatastore interface {
 	UpdateComplexUser(input UpdateComplexUserInput) (*ComplexUser, error)
 	DeleteComplexUser(input DeleteComplexUserInput) error
 	IdentifyComplexUser(input IdentifyComplexUserInput) (*ComplexUser, error)
+
+	CreateTempleUser(input CreateTempleUserInput) (*TempleUser, error)
+	ReadTempleUser(input ReadTempleUserInput) (*TempleUser, error)
+	UpdateTempleUser(input UpdateTempleUserInput) (*TempleUser, error)
+	DeleteTempleUser(input DeleteTempleUserInput) error
 }
 
 // DAO encapsulates access to the datastore
@@ -41,6 +46,20 @@ type ComplexUser struct {
 	TimeField          time.Time
 	DateTimeField      time.Time
 	BlobField          []byte
+}
+
+// TempleUser encapsulates the object stored in the datastore
+type TempleUser struct {
+	ID            uuid.UUID
+	ParentID      uuid.UUID
+	IntField      int32
+	DoubleField   float64
+	StringField   string
+	BoolField     bool
+	DateField     time.Time
+	TimeField     time.Time
+	DateTimeField time.Time
+	BlobField     []byte
 }
 
 // CreateComplexUserInput encapsulates the information required to create a single complexUser in the datastore
@@ -89,6 +108,42 @@ type DeleteComplexUserInput struct {
 
 // IdentifyComplexUserInput encapsulates the information required to identify the current complexUser in the datastore
 type IdentifyComplexUserInput struct {
+	ID uuid.UUID
+}
+
+// CreateTempleUserInput encapsulates the information required to create a single templeUser in the datastore
+type CreateTempleUserInput struct {
+	ID            uuid.UUID
+	IntField      int32
+	DoubleField   float64
+	StringField   string
+	BoolField     bool
+	DateField     time.Time
+	TimeField     time.Time
+	DateTimeField time.Time
+	BlobField     []byte
+}
+
+// ReadTempleUserInput encapsulates the information required to read a single templeUser in the datastore
+type ReadTempleUserInput struct {
+	ID uuid.UUID
+}
+
+// UpdateTempleUserInput encapsulates the information required to update a single templeUser in the datastore
+type UpdateTempleUserInput struct {
+	ID            uuid.UUID
+	IntField      int32
+	DoubleField   float64
+	StringField   string
+	BoolField     bool
+	DateField     time.Time
+	TimeField     time.Time
+	DateTimeField time.Time
+	BlobField     []byte
+}
+
+// DeleteTempleUserInput encapsulates the information required to delete a single templeUser in the datastore
+type DeleteTempleUserInput struct {
 	ID uuid.UUID
 }
 
@@ -193,4 +248,65 @@ func (dao *DAO) IdentifyComplexUser(input IdentifyComplexUserInput) (*ComplexUse
 	}
 
 	return &complexUser, nil
+}
+
+// CreateTempleUser creates a new templeUser in the datastore, returning the newly created templeUser
+func (dao *DAO) CreateTempleUser(input CreateTempleUserInput) (*TempleUser, error) {
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO temple_user (id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9) RETURNING id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field;", input.ID, input.IntField, input.DoubleField, input.StringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField)
+
+	var templeUser TempleUser
+	err := row.Scan(&templeUser.ID, &templeUser.IntField, &templeUser.DoubleField, &templeUser.StringField, &templeUser.BoolField, &templeUser.DateField, &templeUser.TimeField, &templeUser.DateTimeField, &templeUser.BlobField)
+	if err != nil {
+		return nil, err
+	}
+
+	return &templeUser, nil
+}
+
+// ReadTempleUser returns the templeUser in the datastore for a given ID
+func (dao *DAO) ReadTempleUser(input ReadTempleUserInput) (*TempleUser, error) {
+	row := executeQueryWithRowResponse(dao.DB, "SELECT id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field FROM temple_user WHERE id = $1;", input.ID)
+
+	var templeUser TempleUser
+	err := row.Scan(&templeUser.ID, &templeUser.IntField, &templeUser.DoubleField, &templeUser.StringField, &templeUser.BoolField, &templeUser.DateField, &templeUser.TimeField, &templeUser.DateTimeField, &templeUser.BlobField)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrTempleUserNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
+	return &templeUser, nil
+}
+
+// UpdateTempleUser updates the templeUser in the datastore for a given ID, returning the newly updated templeUser
+func (dao *DAO) UpdateTempleUser(input UpdateTempleUserInput) (*TempleUser, error) {
+	row := executeQueryWithRowResponse(dao.DB, "UPDATE temple_user SET int_field = $1, double_field = $2, string_field = $3, bool_field = $4, date_field = $5, time_field = $6, date_time_field = $7, blob_field = $8 WHERE id = $9 RETURNING id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field;", input.IntField, input.DoubleField, input.StringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField, input.ID)
+
+	var templeUser TempleUser
+	err := row.Scan(&templeUser.ID, &templeUser.IntField, &templeUser.DoubleField, &templeUser.StringField, &templeUser.BoolField, &templeUser.DateField, &templeUser.TimeField, &templeUser.DateTimeField, &templeUser.BlobField)
+	if err != nil {
+		switch err {
+		case sql.ErrNoRows:
+			return nil, ErrTempleUserNotFound(input.ID.String())
+		default:
+			return nil, err
+		}
+	}
+
+	return &templeUser, nil
+}
+
+// DeleteTempleUser deletes the templeUser in the datastore for a given ID
+func (dao *DAO) DeleteTempleUser(input DeleteTempleUserInput) error {
+	rowsAffected, err := executeQuery(dao.DB, "DELETE FROM temple_user WHERE id = $1;", input.ID)
+	if err != nil {
+		return err
+	} else if rowsAffected == 0 {
+		return ErrTempleUserNotFound(input.ID.String())
+	}
+
+	return nil
 }

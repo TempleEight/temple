@@ -26,29 +26,21 @@ import temple.generate.target.openapi.OpenAPIGenerator
 import temple.utils.FileUtils
 import temple.utils.StringUtils._
 
-import Option.when
+import scala.Option.when
 import scala.collection.immutable.SortedSet
 
 object ProjectBuilder {
 
-  def endpoints(service: AttributeBlock[_]): SortedSet[CRUD] = {
-    val endpoints: SortedSet[CRUD] = service
-      .lookupLocalMetadata[Metadata.Omit]
-      .map(_.endpoints)
-      .getOrElse(Set.empty)
-      .foldLeft(SortedSet[CRUD](Create, Read, Update, Delete)) {
-        case (set, endpoint) =>
-          endpoint match {
-            case Endpoint.Create => set - CRUD.Create
-            case Endpoint.Read   => set - CRUD.Read
-            case Endpoint.Update => set - CRUD.Update
-            case Endpoint.Delete => set - CRUD.Delete
-          }
-      }
-
-    endpoints ++
-    when(service hasMetadata Metadata.ServiceEnumerable) { List } ++
-    when(service hasMetadata Metadata.ServiceAuth) { Identify }
+  def endpoints(block: AttributeBlock[_]): SortedSet[CRUD] = {
+    val omitted = block.lookupLocalMetadata[Metadata.Omit].iterator.flatMap(_.endpoints).map {
+      case Endpoint.Create => CRUD.Create
+      case Endpoint.Read   => CRUD.Read
+      case Endpoint.Update => CRUD.Update
+      case Endpoint.Delete => CRUD.Delete
+    }
+    (SortedSet(Create, Read, Update, Delete) -- omitted
+    ++ when(block hasMetadata Metadata.ServiceEnumerable) { List }
+    ++ when(block hasMetadata Metadata.ServiceAuth) { Identify })
   }
 
   private def buildDatabaseCreationScripts(templefile: Templefile): Files =
@@ -148,7 +140,7 @@ object ProjectBuilder {
     var serverFiles = templefile.providedServicesWithPorts.flatMap {
       case (name, service, port) =>
         val serviceRoot =
-          ServerBuilder.buildServiceRoot(name, service, port.service, endpoints(service), detail, usesAuth)
+          ServerBuilder.buildServiceRoot(name, service, port.service, detail, usesAuth)
         val serverFiles = service.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage) match {
           case ServiceLanguage.Go => GoServiceGenerator.generate(serviceRoot)
         }

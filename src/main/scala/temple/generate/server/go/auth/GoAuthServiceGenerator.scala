@@ -46,7 +46,7 @@ object GoAuthServiceGenerator extends AuthServiceGenerator {
         GoAuthServiceDAOGenerator.generateImports(root),
         GoAuthServiceDAOGenerator.generateGlobals(),
         GoAuthServiceDAOGenerator.generateInterface(),
-        GoCommonDAOGenerator.generateDAOStruct(),
+        GoCommonDAOGenerator.generateDAOStruct,
         GoAuthServiceDAOGenerator.generateStructs(root),
         GoCommonDAOGenerator.generateInit(),
         GoAuthServiceDAOGenerator.generateQueryFunctions(),

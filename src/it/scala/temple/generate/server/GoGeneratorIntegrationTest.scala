@@ -1,6 +1,6 @@
 package temple.generate.server
 
-import org.scalatest.{BeforeAndAfter, Matchers}
+import org.scalatest.Matchers
 import temple.DSL.DSLProcessor
 import temple.DSL.semantics.Analyzer
 import temple.builder.project.ProjectBuilder
@@ -9,10 +9,10 @@ import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.FileSystem._
 import temple.generate.server.go.auth.GoAuthServiceGenerator
 import temple.generate.server.go.service.GoServiceGenerator
-import temple.utils.{FileUtils, StringUtils}
 import temple.utils.MonadUtils.FromEither
+import temple.utils.{FileUtils, StringUtils}
 
-class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAndAfter {
+class GoGeneratorIntegrationTest extends GolangSpec with Matchers {
 
   behavior of "GolangValidator"
 

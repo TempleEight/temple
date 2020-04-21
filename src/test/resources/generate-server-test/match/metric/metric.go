@@ -6,11 +6,11 @@ import (
 )
 
 var (
-	RequestList   = "list"
-	RequestCreate = "create"
-	RequestRead   = "read"
-	RequestUpdate = "update"
-	RequestDelete = "delete"
+	RequestListMatch   = "list_match"
+	RequestCreateMatch = "create_match"
+	RequestReadMatch   = "read_match"
+	RequestUpdateMatch = "update_match"
+	RequestDeleteMatch = "delete_match"
 
 	RequestSuccess = promauto.NewCounterVec(prometheus.CounterOpts{
 		Name: "match_request_success_total",
