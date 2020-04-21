@@ -37,7 +37,6 @@ Property: service {
   Photo: struct {
     // implicit 'id' field
     // implicit 'parentID' field
-    // implicit 'createdBy' field
     image: data(5M);
     caption: string;
     #enumerable;

@@ -50,7 +50,7 @@ object DatabaseBuilder {
     ColumnDef(name, colType, typeConstraints ++ valueConstraints)
   }
 
-  def buildQuery(
+  def buildQueries(
     serviceName: String,
     attributes: Map[String, AbstractAttribute],
     endpoints: Set[CRUD],
@@ -119,7 +119,9 @@ object DatabaseBuilder {
   def createServiceTables(serviceName: String, service: AbstractServiceBlock): Seq[Statement.Create] = {
     service.structIterator(serviceName).map {
       case (tableName, structBlock) =>
-        val columns = structBlock.attributes.map { case (name, attributes) => toColDef(snakeCase(name), attributes) }
+        val columns = structBlock.attributes
+          .filter { case (_, attribute) => attribute.isStored }
+          .map { case (name, attribute) => toColDef(snakeCase(name), attribute) }
         Statement.Create(snakeCase(tableName), columns.toSeq)
     }
   }.toSeq

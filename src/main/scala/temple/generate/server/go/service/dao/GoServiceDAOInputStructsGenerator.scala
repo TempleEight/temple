@@ -32,7 +32,7 @@ object GoServiceDAOInputStructsGenerator {
       ListMap(enumerating.inputName.capitalize -> generateGoType(AttributeType.UUIDType))
     }
 
-    lazy val attributesMap = root.attributes.map {
+    lazy val attributesMap = root.storedAttributes.map {
       case (name, attribute) => (name.capitalize, generateGoType(attribute.attributeType))
     }
 

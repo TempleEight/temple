@@ -3,9 +3,11 @@ info:
   title: SimpleTempleTest
   version: 0.0.1
 paths:
-  /simpletempletestuser/all:
+  /simple-temple-test-user/all:
     get:
       summary: Get a list of every simpletempletestuser
+      security:
+      - bearerAuth: []
       tags:
       - SimpleTempleTestUser
       responses:
@@ -49,9 +51,11 @@ paths:
                       format: time
         '500':
           $ref: '#/components/responses/Error500'
-  /simpletempletestuser:
+  /simple-temple-test-user:
     post:
       summary: Register a new simpletempletestuser
+      security:
+      - bearerAuth: []
       tags:
       - SimpleTempleTestUser
       requestBody:
@@ -132,6 +136,8 @@ paths:
     get:
       summary: Look up the single simpletempletestuser associated with the access
         token
+      security:
+      - bearerAuth: []
       tags:
       - SimpleTempleTestUser
       responses:
@@ -148,7 +154,7 @@ paths:
           $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
-  /simpletempletestuser/{id}:
+  /simple-temple-test-user/{id}:
     parameters:
     - in: path
       name: id
@@ -159,6 +165,8 @@ paths:
       description: ID of the simpletempletestuser to perform operations on
     get:
       summary: Look up a single simpletempletestuser
+      security:
+      - bearerAuth: []
       tags:
       - SimpleTempleTestUser
       responses:
@@ -208,6 +216,8 @@ paths:
           $ref: '#/components/responses/Error500'
     put:
       summary: Update a single simpletempletestuser
+      security:
+      - bearerAuth: []
       tags:
       - SimpleTempleTestUser
       requestBody:
@@ -290,6 +300,8 @@ paths:
   /booking:
     post:
       summary: Register a new booking
+      security:
+      - bearerAuth: []
       tags:
       - Booking
       requestBody:
@@ -326,6 +338,8 @@ paths:
       description: ID of the booking to perform operations on
     get:
       summary: Look up a single booking
+      security:
+      - bearerAuth: []
       tags:
       - Booking
       responses:
@@ -349,6 +363,8 @@ paths:
           $ref: '#/components/responses/Error500'
     delete:
       summary: Delete a single booking
+      security:
+      - bearerAuth: []
       tags:
       - Booking
       responses:
@@ -367,9 +383,11 @@ paths:
           $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
-  /simpletempletestgroup:
+  /simple-temple-test-group:
     post:
       summary: Register a new simpletempletestgroup
+      security:
+      - bearerAuth: []
       tags:
       - SimpleTempleTestGroup
       requestBody:
@@ -395,7 +413,7 @@ paths:
           $ref: '#/components/responses/Error401'
         '500':
           $ref: '#/components/responses/Error500'
-  /simpletempletestgroup/{id}:
+  /simple-temple-test-group/{id}:
     parameters:
     - in: path
       name: id
@@ -406,6 +424,8 @@ paths:
       description: ID of the simpletempletestgroup to perform operations on
     get:
       summary: Look up a single simpletempletestgroup
+      security:
+      - bearerAuth: []
       tags:
       - SimpleTempleTestGroup
       responses:
@@ -429,6 +449,8 @@ paths:
           $ref: '#/components/responses/Error500'
     delete:
       summary: Delete a single simpletempletestgroup
+      security:
+      - bearerAuth: []
       tags:
       - SimpleTempleTestGroup
       responses:
@@ -447,7 +469,82 @@ paths:
           $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
+  /auth/register:
+    post:
+      summary: Register and get an access token
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Email:
+                  type: string
+                  format: email
+                Password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  maxLength: 64
+      responses:
+        '200':
+          description: Successful registration
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  AccessToken:
+                    type: string
+        '400':
+          $ref: '#/components/responses/Error400'
+        '403':
+          $ref: '#/components/responses/Error403'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /auth/login:
+    post:
+      summary: Login and get an access token
+      tags:
+      - Auth
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                Email:
+                  type: string
+                  format: email
+                Password:
+                  type: string
+                  format: password
+                  minLength: 8
+                  maxLength: 64
+      responses:
+        '200':
+          description: Successful login
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  AccessToken:
+                    type: string
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
 components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
   responses:
     Error400:
       description: Invalid request
@@ -469,6 +566,16 @@ components:
               error:
                 type: string
                 example: Not authorised to create this object
+    Error403:
+      description: Valid request but server will not fulfill
+      content:
+        application/json:
+          schema:
+            type: object
+            properties:
+              error:
+                type: string
+                example: User with this ID already exists
     Error404:
       description: ID not found
       content:

@@ -10,6 +10,7 @@ import temple.ast.{Metadata, Templefile}
 import temple.test.internal.{AuthServiceTest, CRUDServiceTest, ProjectConfig}
 import temple.utils.StringUtils.kebabCase
 
+import scala.collection.mutable
 import scala.sys.process._
 
 object ProjectTester {
@@ -18,8 +19,23 @@ object ProjectTester {
       extends RuntimeException(s"The environment variable $name was required, but not found")
 
   /** Execute a command, returning the stdout */
-  private def exec(command: String): String =
-    s"sh -c '$command'".!!
+  private def exec(command: String): String = {
+    // Collect output lines
+    val result = mutable.Buffer[Either[String, String]]()
+    // Run the command, with a custom handler for receiving output
+    val code = s"sh -c '$command'".!(new ProcessLogger {
+      override def out(s: => String): Unit = result += Right(s)
+      override def err(s: => String): Unit = result += Left(s)
+      override def buffer[T](f: => T): T   = f
+    })
+    // If there’s an error, print the log and throw an error; otherwise return the stdout log
+    if (code != 0) {
+      result.foreach(_.fold(stderr.println, println))
+      throw new RuntimeException(s"Nonzero exit code ($code) to `$command`")
+    } else {
+      result.iterator.flatMap(_.toSeq).mkString("\n")
+    }
+  }
 
   /** Configure Kong using the generated script, waiting until this is successful */
   private def configureKong(
@@ -89,7 +105,7 @@ object ProjectTester {
       case Provider.DockerCompose =>
         println("🐳 Spinning up Docker Compose infrastructure...")
         exec(
-          s"cd $generatedPath && docker-compose up --build -d 2>&1",
+          s"cd $generatedPath && docker-compose up --build -d",
         )
 
         var successfullyStarted = false

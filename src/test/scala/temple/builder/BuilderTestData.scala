@@ -1,6 +1,6 @@
 package temple.builder
 
-import temple.ast.AbstractAttribute.Attribute
+import temple.ast.AbstractAttribute.{Attribute, IDAttribute}
 import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
 import temple.ast.Metadata.ServiceLanguage
@@ -12,7 +12,7 @@ object BuilderTestData {
 
   val sampleService: ServiceBlock = ServiceBlock(
     ListMap(
-      "id"          -> Attribute(IntType()),
+      "id"          -> IDAttribute,
       "bankBalance" -> Attribute(FloatType()),
       "name"        -> Attribute(StringType()),
       "isStudent"   -> Attribute(BoolType),
@@ -22,6 +22,7 @@ object BuilderTestData {
       "image"       -> Attribute(BlobType()),
       "fk"          -> Attribute(ForeignKey("OtherService")),
     ),
+    Seq(Metadata.ServiceEnumerable),
   )
 
   val simpleTemplefile: Templefile = Templefile(
@@ -33,7 +34,7 @@ object BuilderTestData {
 
   val sampleComplexService: ServiceBlock = ServiceBlock(
     ListMap(
-      "id"             -> Attribute(IntType(max = Some(100), min = Some(10), precision = 2)),
+      "id"             -> IDAttribute,
       "anotherId"      -> Attribute(IntType(max = Some(100), min = Some(10))),
       "yetAnotherId"   -> Attribute(IntType(max = Some(100), min = Some(10), precision = 8)),
       "bankBalance"    -> Attribute(FloatType(max = Some(300), min = Some(0), precision = 4)),
@@ -48,6 +49,7 @@ object BuilderTestData {
       "sampleFK1"      -> Attribute(ForeignKey("OtherSvc")),
       "sampleFK2"      -> Attribute(ForeignKey("OtherSvc")),
     ),
+    metadata = Seq(Metadata.ServiceEnumerable),
     structs = ListMap(
       "Test" -> StructBlock(
         ListMap(
