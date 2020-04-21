@@ -249,7 +249,7 @@ func (dao *DAO) IdentifySimpleTempleTestUser(input IdentifySimpleTempleTestUserI
 
 // ListFred returns a list containing every fred in the datastore
 func (dao *DAO) ListFred(input ListFredInput) (*[]Fred, error) {
-	rows, err := executeQueryWithRowResponses(dao.DB, "SELECT id, created_by, field, friend, image FROM fred WHERE parent_id = $1;", input.ParentID)
+	rows, err := executeQueryWithRowResponses(dao.DB, "SELECT id, parent_id, field, friend, image FROM fred WHERE parent_id = $1;", input.ParentID)
 	if err != nil {
 		return nil, err
 	}
@@ -273,7 +273,7 @@ func (dao *DAO) ListFred(input ListFredInput) (*[]Fred, error) {
 
 // CreateFred creates a new fred in the datastore, returning the newly created fred
 func (dao *DAO) CreateFred(input CreateFredInput) (*Fred, error) {
-	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO fred (id, created_by, field, friend, image) VALUES ($1, $2, $3, $4, $5) RETURNING id, created_by, field, friend, image;", input.ID, input.Field, input.Friend, input.Image)
+	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO fred (id, parent_id, field, friend, image) VALUES ($1, $2, $3, $4, $5) RETURNING id, parent_id, field, friend, image;", input.ID, input.Field, input.Friend, input.Image)
 
 	var fred Fred
 	err := row.Scan(&fred.ID, &fred.Field, &fred.Friend, &fred.Image)
@@ -286,7 +286,7 @@ func (dao *DAO) CreateFred(input CreateFredInput) (*Fred, error) {
 
 // ReadFred returns the fred in the datastore for a given ID
 func (dao *DAO) ReadFred(input ReadFredInput) (*Fred, error) {
-	row := executeQueryWithRowResponse(dao.DB, "SELECT id, created_by, field, friend, image FROM fred WHERE id = $1;", input.ID)
+	row := executeQueryWithRowResponse(dao.DB, "SELECT id, parent_id, field, friend, image FROM fred WHERE id = $1;", input.ID)
 
 	var fred Fred
 	err := row.Scan(&fred.ID, &fred.Field, &fred.Friend, &fred.Image)
@@ -304,7 +304,7 @@ func (dao *DAO) ReadFred(input ReadFredInput) (*Fred, error) {
 
 // UpdateFred updates the fred in the datastore for a given ID, returning the newly updated fred
 func (dao *DAO) UpdateFred(input UpdateFredInput) (*Fred, error) {
-	row := executeQueryWithRowResponse(dao.DB, "UPDATE fred SET field = $1, friend = $2, image = $3 WHERE id = $4 RETURNING id, created_by, field, friend, image;", input.Field, input.Friend, input.Image, input.ID)
+	row := executeQueryWithRowResponse(dao.DB, "UPDATE fred SET parent_id = $1, field = $2, friend = $3, image = $4 WHERE id = $5 RETURNING id, parent_id, field, friend, image;", input.Field, input.Friend, input.Image, input.ID)
 
 	var fred Fred
 	err := row.Scan(&fred.ID, &fred.Field, &fred.Friend, &fred.Image)

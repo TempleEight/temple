@@ -3,7 +3,7 @@ package temple.DSL
 import org.scalatest.{FlatSpec, Matchers}
 import temple.DSL.parser.DSLParserMatchers
 import temple.DSL.semantics.Analyzer.parseAndValidate
-import temple.ast.AbstractAttribute.{Attribute, CreatedByAttribute, IDAttribute}
+import temple.ast.AbstractAttribute.{Attribute, CreatedByAttribute, IDAttribute, ParentAttribute}
 import temple.ast.AbstractServiceBlock.ServiceBlock
 import temple.ast.Annotation.{Server, Unique}
 import temple.ast.AttributeType._
@@ -54,12 +54,12 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
           ),
           structs = Map(
             "Fred" -> StructBlock(
-              Map(
-                "id"        -> IDAttribute,
-                "createdBy" -> CreatedByAttribute,
-                "field"     -> Attribute(StringType()),
-                "friend"    -> Attribute(ForeignKey("SimpleTempleTestUser")),
-                "image"     -> Attribute(BlobType(size = Some(10_000_000))),
+              ListMap(
+                "id"       -> IDAttribute,
+                "parentID" -> ParentAttribute,
+                "field"    -> Attribute(StringType()),
+                "friend"   -> Attribute(ForeignKey("SimpleTempleTestUser")),
+                "image"    -> Attribute(BlobType(size = Some(10_000_000))),
               ),
               Seq(ServiceEnumerable),
             ),

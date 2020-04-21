@@ -10,6 +10,7 @@ object NameClashes {
   val templeAttributeNameValidator: NameValidator = NameValidator.fromBlacklist(
     "id",
     "createdBy",
+    "parentID",
   )
 
   val templeServiceNameValidator: NameValidator = NameValidator.fromBlacklist(

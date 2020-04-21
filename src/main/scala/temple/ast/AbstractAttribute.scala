@@ -31,6 +31,12 @@ object AbstractAttribute {
     override def valueAnnotations: Set[ValueAnnotation]     = Set()
   }
 
+  case object ParentAttribute extends AbstractAttribute {
+    override def attributeType: AttributeType               = AttributeType.UUIDType
+    override def accessAnnotation: Option[AccessAnnotation] = Some(Annotation.ServerSet)
+    override def valueAnnotations: Set[ValueAnnotation]     = Set()
+  }
+
   case object CreatedByAttribute extends AbstractAttribute {
     override def attributeType: AttributeType               = AttributeType.UUIDType
     override def accessAnnotation: Option[AccessAnnotation] = Some(Annotation.Server)

@@ -1,7 +1,7 @@
 package temple.DSL.semantics
 
 import temple.DSL.semantics.NameClashes._
-import temple.ast.AbstractAttribute.{Attribute, CreatedByAttribute, IDAttribute}
+import temple.ast.AbstractAttribute.{Attribute, CreatedByAttribute, IDAttribute, ParentAttribute}
 import temple.ast.AbstractServiceBlock._
 import temple.ast.AttributeType._
 import temple.ast.Metadata.ServiceAuth
@@ -34,11 +34,14 @@ private class Validator private (templefile: Templefile) {
     // Keep a set of names that have been used already
     val takenNames: mutable.Set[String] = block.attributes.keys.to(mutable.Set)
 
-    val usesCreatedBy: Boolean = templefile.usesAuth && !block.hasMetadata(Metadata.ServiceAuth)
+    val usesCreatedBy: Boolean = (templefile.usesAuth
+      && !block.hasMetadata(Metadata.ServiceAuth)
+      && block.isInstanceOf[ServiceBlock])
 
     val implicitAttributes: ListMap[String, AbstractAttribute] =
       (ListMap("id" -> IDAttribute)
-      ++ when(usesCreatedBy) { "createdBy" -> CreatedByAttribute })
+      ++ when(block.isInstanceOf[StructBlock]) { "parentID" -> ParentAttribute }
+      ++ when(usesCreatedBy) { "createdBy"                  -> CreatedByAttribute })
 
     // Add implicit attributes
     implicitAttributes ++ block.attributes.map {
