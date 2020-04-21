@@ -29,6 +29,11 @@ object ServerBuilder {
   ): ServiceRoot = {
     val language = serviceBlock.lookupMetadata[ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
     val database = serviceBlock.lookupMetadata[Database].getOrElse(ProjectConfig.defaultDatabase)
+    val readable =
+      serviceBlock.lookupLocalMetadata[Metadata.Readable].getOrElse(ProjectConfig.getDefaultReadable(projectUsesAuth))
+    val writable =
+      serviceBlock.lookupLocalMetadata[Metadata.Writable].getOrElse(ProjectConfig.getDefaultWritable(projectUsesAuth))
+
     val languageConfig = language match {
       case ServiceLanguage.Go => GoLanguageConfig
     }
@@ -42,11 +47,6 @@ object ServerBuilder {
 
     val idAttribute = IDAttribute("id")
 
-    val readable =
-      serviceBlock.lookupLocalMetadata[Metadata.Readable] getOrElse ProjectConfig.getDefaultReadable(projectUsesAuth)
-    val writable =
-      serviceBlock.lookupLocalMetadata[Metadata.Writable] getOrElse ProjectConfig.getDefaultWritable(projectUsesAuth)
-
     val queries = buildQueries(
       serviceName,
       serviceBlock.storedAttributes,
@@ -54,6 +54,7 @@ object ServerBuilder {
       isStruct = false,
       idAttribute.name,
       database,
+      language,
       readable,
     )
 
@@ -83,6 +84,7 @@ object ServerBuilder {
           isStruct = true,
           idAttribute.name,
           database,
+          language,
           readable,
         )
 
@@ -125,6 +127,7 @@ object ServerBuilder {
     isStruct: Boolean,
     primaryKey: String,
     database: Database,
+    language: ServiceLanguage,
     readable: Metadata.Readable,
   ): SortedMap[CRUD, String] =
     DatabaseBuilder
@@ -133,8 +136,7 @@ object ServerBuilder {
         case (_, statement) =>
           database match {
             case Database.Postgres =>
-              //TODO: Does this need to change with server lang?
-              implicit val context: PostgresContext = PostgresContext(PreparedType.DollarNumbers)
+              implicit val context: PostgresContext = PostgresContext(ProjectConfig.preparedType(language))
               PostgresGenerator.generate(statement)
           }
       }
@@ -145,7 +147,7 @@ object ServerBuilder {
     }
 
     // TODO: support usernames
-    val authMethod = templefile.lookupMetadata[Metadata.AuthMethod] getOrElse ProjectConfig.defaultAuth
+    val authMethod = templefile.lookupMetadata[Metadata.AuthMethod].getOrElse(ProjectConfig.defaultAuth)
 
     val attributes: Map[String, Attribute] = authMethod match {
       case Metadata.AuthMethod.Email =>
