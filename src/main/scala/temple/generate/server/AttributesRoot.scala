@@ -78,13 +78,13 @@ object AttributesRoot {
     override val name: String,
     override val opQueries: SortedMap[CRUD, String],
     override val idAttribute: IDAttribute,
-    override val createdByAttribute: Option[CreatedByAttribute],
     override val parentAttribute: Some[ParentAttribute],
     override val attributes: ListMap[String, Attribute],
     override val readable: Readable,
     override val writable: Writable,
     override val projectUsesAuth: Boolean,
   ) extends AttributesRoot {
-    override def hasAuthBlock: Boolean = false
+    override def createdByAttribute: None.type = None
+    override def hasAuthBlock: Boolean         = false
   }
 }
