@@ -35,8 +35,9 @@ abstract class GolangSpec extends DockerShell2HttpService(8081) with DockerTestK
     if (errors.nonEmpty) {
       for ((file, content) <- files.to(SortedMap)) {
         System.err.println(s"$file:")
+        val marginWidth = 6 // width of margin for column numbers: ≤4 for line number, 1 for colon, ≥1 space
         for ((line, i) <- content.linesIterator.zipWithIndex) {
-          System.err.println(s"${i + 1}:".padTo(6, ' ') + line)
+          System.err.println(s"${i + 1}:".padTo(marginWidth, ' ') + line)
         }
       }
     }
