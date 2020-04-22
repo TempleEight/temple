@@ -1,0 +1,21 @@
+ImageServer: project {
+    #language(go);
+    #database(postgres);
+    #provider(dockerCompose);
+    #metrics(prometheus);
+    #authMethod(email);
+}
+
+Image: service {
+    image: data(4M);
+    description: string;
+    owner: User;
+    #enumerable;
+    #readable(by: all);
+    #writable(by: this);
+}
+
+User: service {
+    displayName: string(30);
+    #auth;
+}
