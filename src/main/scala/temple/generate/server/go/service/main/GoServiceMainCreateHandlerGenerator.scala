@@ -1,7 +1,8 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.AbstractAttribute
+import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Create
+import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
 import temple.generate.server.go.common.GoCommonGenerator._
@@ -28,33 +29,36 @@ object GoServiceMainCreateHandlerGenerator {
       ),
     )
 
-  private def generateDAOInput(root: ServiceRoot): String = {
-    val idCapitalized = root.idAttribute.name.toUpperCase
+  private def generateDAOInput(block: AttributesRoot): String = {
+    val idCapitalized = block.idAttribute.name.toUpperCase
     // If service has auth block then an AuthID is passed in as ID, otherwise a created uuid is passed in
-    val createInput = ListMap(idCapitalized -> (if (root.hasAuthBlock) s"auth.$idCapitalized" else "uuid")) ++
+    val createInput =
+      ListMap(idCapitalized -> (if (block.hasAuthBlock) s"auth.$idCapitalized" else "uuid")) ++
       // If the project uses auth, but this service does not have an auth block, AuthID is passed for created_by field
-      when(!root.hasAuthBlock && root.projectUsesAuth) { s"Auth$idCapitalized" -> s"auth.$idCapitalized" } ++
-      generateDAOInputClientMap(root.storedRequestAttributes)
+      when(!block.hasAuthBlock && block.projectUsesAuth && block.parentAttribute.isEmpty) {
+        s"Auth$idCapitalized" -> s"auth.$idCapitalized"
+      } ++
+      generateDAOInputClientMap(block.storedRequestAttributes)
 
     genDeclareAndAssign(
-      genPopulateStruct(s"dao.Create${root.name}Input", createInput),
+      genPopulateStruct(s"dao.Create${block.name}Input", createInput),
       "input",
     )
   }
 
-  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean, metricSuffix: Option[String]): String =
+  private def generateDAOCallBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
     mkCode.lines(
-      when(usesMetrics) { generateMetricTimerDecl(Create.toString) },
+      metricSuffix.map(metricSuffix => generateMetricTimerDecl(metricSuffix)),
       genDeclareAndAssign(
         genMethodCall(
           "env.dao",
-          s"Create${root.name}",
+          s"Create${block.name}",
           "input",
         ),
-        root.decapitalizedName,
+        block.decapitalizedName,
         "err",
       ),
-      when(usesMetrics) { generateMetricTimerObservation() },
+      metricSuffix.map(_ => generateMetricTimerObservation()),
       genIfErr(
         generateRespondWithErrorReturn(
           genHTTPEnum(StatusInternalServerError),
@@ -67,37 +71,46 @@ object GoServiceMainCreateHandlerGenerator {
 
   /** Generate the create handler function */
   private[main] def generateCreateHandler(
-    root: ServiceRoot,
+    block: AttributesRoot,
+    parent: Option[ServiceRoot],
     usesComms: Boolean,
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
     clientUsesBase64: Boolean,
     usesMetrics: Boolean,
   ): String = {
-    val metricSuffix = when(usesMetrics) { Create.toString }
+    val metricSuffix = when(usesMetrics) { Create.toString + block.structName }
     mkCode(
-      generateHandlerDecl(root, Create),
+      generateHandlerDecl(block, Create),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(root.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
-          // Only need to handle request JSONs when there are client attributes
-          when(root.requestAttributes.nonEmpty) {
+          when(block.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
+          parent.map { parent =>
             mkCode.doubleLines(
-              generateDecodeRequestBlock(root, Create, s"create${root.name}", metricSuffix),
-              generateRequestNilCheck(root.requestAttributes, metricSuffix),
-              generateValidateStructBlock(metricSuffix),
-              when(usesComms) { generateForeignKeyCheckBlocks(root, metricSuffix) },
-              when(clientUsesTime) { generateParseTimeBlocks(root.requestAttributes, metricSuffix) },
-              when(clientUsesBase64) { generateParseBase64Blocks(root.requestAttributes, metricSuffix) },
+              generateExtractParentIDBlock(parent.decapitalizedName, metricSuffix),
+              when(parent.writable == Writable.This) {
+                generateCheckAuthorizationBlock(parent, blockHasAuth = false, metricSuffix)
+              },
             )
           },
-          when(!root.hasAuthBlock) { generateNewUUIDBlock(metricSuffix) },
-          generateDAOInput(root),
-          generateInvokeBeforeHookBlock(root, Create, metricSuffix),
-          generateDAOCallBlock(root, usesMetrics, metricSuffix),
-          generateInvokeAfterHookBlock(root, Create, metricSuffix),
-          generateJSONResponse(s"create${root.name}", responseMap),
-          when(usesMetrics) { generateMetricSuccess(Create.toString) },
+          // Only need to handle request JSONs when there are client attributes
+          when(block.requestAttributes.nonEmpty) {
+            mkCode.doubleLines(
+              generateDecodeRequestBlock(block, Create, s"create${block.name}", metricSuffix),
+              generateRequestNilCheck(block.requestAttributes, metricSuffix),
+              generateValidateStructBlock(metricSuffix),
+              when(usesComms) { generateForeignKeyCheckBlocks(block, metricSuffix) },
+              when(clientUsesTime) { generateParseTimeBlocks(block.requestAttributes, metricSuffix) },
+              when(clientUsesBase64) { generateParseBase64Blocks(block.requestAttributes, metricSuffix) },
+            )
+          },
+          when(!block.hasAuthBlock) { generateNewUUIDBlock(metricSuffix) },
+          generateDAOInput(block),
+          generateInvokeBeforeHookBlock(block, Create, metricSuffix),
+          generateDAOCallBlock(block, metricSuffix),
+          generateInvokeAfterHookBlock(block, Create, metricSuffix),
+          generateJSONResponse(s"create${block.name}", responseMap),
+          metricSuffix.map(metricSuffix => generateMetricSuccess(metricSuffix)),
         ),
       ),
     )

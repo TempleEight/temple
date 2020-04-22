@@ -182,6 +182,10 @@ func defaultRouter(env *env) *mux.Router {
 	r.HandleFunc("/complex-user/{id}", env.updateComplexUserHandler).Methods(http.MethodPut)
 	r.HandleFunc("/complex-user/{id}", env.deleteComplexUserHandler).Methods(http.MethodDelete)
 	r.HandleFunc("/complex-user", env.identifyComplexUserHandler).Methods(http.MethodGet)
+	r.HandleFunc("/complex-user/{parent_id}/temple-user", env.createTempleUserHandler).Methods(http.MethodPost)
+	r.HandleFunc("/complex-user/{parent_id}/temple-user/{id}", env.readTempleUserHandler).Methods(http.MethodGet)
+	r.HandleFunc("/complex-user/{parent_id}/temple-user/{id}", env.updateTempleUserHandler).Methods(http.MethodPut)
+	r.HandleFunc("/complex-user/{parent_id}/temple-user/{id}", env.deleteTempleUserHandler).Methods(http.MethodDelete)
 	r.Use(jsonMiddleware)
 	return r
 }
@@ -225,6 +229,28 @@ func jsonMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("Content-Type", "application/json")
 		next.ServeHTTP(w, r)
 	})
+}
+
+func checkAuthorization(env *env, complexUserID uuid.UUID, auth *util.Auth) (bool, error) {
+	input := dao.ReadComplexUserInput{
+		ID: complexUserID,
+	}
+	complexUser, err := env.dao.ReadComplexUser(input)
+	if err != nil {
+		return false, err
+	}
+	return complexUser.ID == auth.ID, nil
+}
+
+func checkTempleUserParent(env *env, templeUserID uuid.UUID, parentID uuid.UUID) (bool, error) {
+	input := dao.ReadTempleUserInput{
+		ID: templeUserID,
+	}
+	templeUser, err := env.dao.ReadTempleUser(input)
+	if err != nil {
+		return false, err
+	}
+	return templeUser.ParentID == parentID, nil
 }
 
 // respondWithError responds to a HTTP request with a JSON error response
@@ -637,4 +663,462 @@ func (env *env) identifyComplexUserHandler(w http.ResponseWriter, r *http.Reques
 	w.WriteHeader(http.StatusFound)
 
 	metric.RequestSuccess.WithLabelValues(metric.RequestIdentify).Inc()
+}
+
+func (env *env) createTempleUserHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestCreateTempleUser)
+		return
+	}
+
+	complexUserID, err := util.ExtractParentIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestCreateTempleUser)
+		return
+	}
+
+	authorized, err := checkAuthorization(env, complexUserID, auth)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrComplexUserNotFound:
+			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestCreateTempleUser)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreateTempleUser)
+		}
+		return
+	}
+	if !authorized {
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestCreateTempleUser)
+		return
+	}
+
+	var req createTempleUserRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateTempleUser)
+		return
+	}
+
+	if req.IntField == nil || req.DoubleField == nil || req.StringField == nil || req.BoolField == nil || req.DateField == nil || req.TimeField == nil || req.DateTimeField == nil || req.BlobField == nil {
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestCreateTempleUser)
+		return
+	}
+
+	err = env.valid.Struct(req)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateTempleUser)
+		return
+	}
+
+	dateField, err := time.Parse("2006-01-02", *req.DateField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid date string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateTempleUser)
+		return
+	}
+
+	timeField, err := time.Parse("15:04:05.999999999", *req.TimeField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid time string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateTempleUser)
+		return
+	}
+
+	dateTimeField, err := time.Parse(time.RFC3339Nano, *req.DateTimeField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid datetime string: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateTempleUser)
+		return
+	}
+
+	blobField, err := base64.StdEncoding.DecodeString(*req.BlobField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateTempleUser)
+		return
+	}
+
+	uuid, err := uuid.NewUUID()
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not create UUID: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreateTempleUser)
+		return
+	}
+
+	input := dao.CreateTempleUserInput{
+		ID:            uuid,
+		IntField:      *req.IntField,
+		DoubleField:   *req.DoubleField,
+		StringField:   *req.StringField,
+		BoolField:     *req.BoolField,
+		DateField:     dateField,
+		TimeField:     timeField,
+		DateTimeField: dateTimeField,
+		BlobField:     blobField,
+	}
+
+	for _, hook := range env.hook.beforeCreateTempleUserHooks {
+		err := (*hook)(env, req, &input, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateTempleUser)
+			return
+		}
+	}
+
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreateTempleUser))
+	templeUser, err := env.dao.CreateTempleUser(input)
+	timer.ObserveDuration()
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreateTempleUser)
+		return
+	}
+
+	for _, hook := range env.hook.afterCreateTempleUserHooks {
+		err := (*hook)(env, templeUser, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateTempleUser)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(createTempleUserResponse{
+		ID:            templeUser.ID,
+		IntField:      templeUser.IntField,
+		DoubleField:   templeUser.DoubleField,
+		StringField:   templeUser.StringField,
+		BoolField:     templeUser.BoolField,
+		DateField:     templeUser.DateField.Format("2006-01-02"),
+		TimeField:     templeUser.TimeField.Format("15:04:05.999999999"),
+		DateTimeField: templeUser.DateTimeField.Format(time.RFC3339),
+		BlobField:     base64.StdEncoding.EncodeToString(templeUser.BlobField),
+	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreateTempleUser).Inc()
+}
+
+func (env *env) readTempleUserHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestReadTempleUser)
+		return
+	}
+
+	templeUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestReadTempleUser)
+		return
+	}
+
+	complexUserID, err := util.ExtractParentIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestReadTempleUser)
+		return
+	}
+
+	correctParent, err := checkTempleUserParent(env, templeUserID, complexUserID)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrTempleUserNotFound:
+			respondWithError(w, "Not Found", http.StatusNotFound, metric.RequestReadTempleUser)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestReadTempleUser)
+		}
+		return
+	}
+	if !correctParent {
+		respondWithError(w, "Not Found", http.StatusNotFound, metric.RequestReadTempleUser)
+		return
+	}
+
+	authorized, err := checkAuthorization(env, complexUserID, auth)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrComplexUserNotFound:
+			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestReadTempleUser)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestReadTempleUser)
+		}
+		return
+	}
+	if !authorized {
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestReadTempleUser)
+		return
+	}
+
+	input := dao.ReadTempleUserInput{
+		ID: templeUserID,
+	}
+
+	for _, hook := range env.hook.beforeReadTempleUserHooks {
+		err := (*hook)(env, &input, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadTempleUser)
+			return
+		}
+	}
+
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestReadTempleUser))
+	templeUser, err := env.dao.ReadTempleUser(input)
+	timer.ObserveDuration()
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrTempleUserNotFound:
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestReadTempleUser)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestReadTempleUser)
+		}
+		return
+	}
+
+	for _, hook := range env.hook.afterReadTempleUserHooks {
+		err := (*hook)(env, templeUser, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadTempleUser)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(readTempleUserResponse{
+		ID:            templeUser.ID,
+		IntField:      templeUser.IntField,
+		DoubleField:   templeUser.DoubleField,
+		StringField:   templeUser.StringField,
+		BoolField:     templeUser.BoolField,
+		DateField:     templeUser.DateField.Format("2006-01-02"),
+		TimeField:     templeUser.TimeField.Format("15:04:05.999999999"),
+		DateTimeField: templeUser.DateTimeField.Format(time.RFC3339),
+		BlobField:     base64.StdEncoding.EncodeToString(templeUser.BlobField),
+	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestReadTempleUser).Inc()
+}
+
+func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestUpdateTempleUser)
+		return
+	}
+
+	templeUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestUpdateTempleUser)
+		return
+	}
+
+	complexUserID, err := util.ExtractParentIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestUpdateTempleUser)
+		return
+	}
+
+	correctParent, err := checkTempleUserParent(env, templeUserID, complexUserID)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrTempleUserNotFound:
+			respondWithError(w, "Not Found", http.StatusNotFound, metric.RequestUpdateTempleUser)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdateTempleUser)
+		}
+		return
+	}
+	if !correctParent {
+		respondWithError(w, "Not Found", http.StatusNotFound, metric.RequestUpdateTempleUser)
+		return
+	}
+
+	authorized, err := checkAuthorization(env, complexUserID, auth)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrComplexUserNotFound:
+			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestUpdateTempleUser)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdateTempleUser)
+		}
+		return
+	}
+	if !authorized {
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestUpdateTempleUser)
+		return
+	}
+
+	var req updateTempleUserRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateTempleUser)
+		return
+	}
+
+	if req.IntField == nil || req.DoubleField == nil || req.StringField == nil || req.BoolField == nil || req.DateField == nil || req.TimeField == nil || req.DateTimeField == nil || req.BlobField == nil {
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestUpdateTempleUser)
+		return
+	}
+
+	err = env.valid.Struct(req)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateTempleUser)
+		return
+	}
+
+	dateField, err := time.Parse("2006-01-02", *req.DateField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid date string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateTempleUser)
+		return
+	}
+
+	timeField, err := time.Parse("15:04:05.999999999", *req.TimeField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid time string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateTempleUser)
+		return
+	}
+
+	dateTimeField, err := time.Parse(time.RFC3339Nano, *req.DateTimeField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid datetime string: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateTempleUser)
+		return
+	}
+
+	blobField, err := base64.StdEncoding.DecodeString(*req.BlobField)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateTempleUser)
+		return
+	}
+
+	input := dao.UpdateTempleUserInput{
+		ID:            templeUserID,
+		IntField:      *req.IntField,
+		DoubleField:   *req.DoubleField,
+		StringField:   *req.StringField,
+		BoolField:     *req.BoolField,
+		DateField:     dateField,
+		TimeField:     timeField,
+		DateTimeField: dateTimeField,
+		BlobField:     blobField,
+	}
+
+	for _, hook := range env.hook.beforeUpdateTempleUserHooks {
+		err := (*hook)(env, req, &input, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateTempleUser)
+			return
+		}
+	}
+
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestUpdateTempleUser))
+	templeUser, err := env.dao.UpdateTempleUser(input)
+	timer.ObserveDuration()
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrTempleUserNotFound:
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestUpdateTempleUser)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdateTempleUser)
+		}
+		return
+	}
+
+	for _, hook := range env.hook.afterUpdateTempleUserHooks {
+		err := (*hook)(env, templeUser, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateTempleUser)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(updateTempleUserResponse{
+		ID:            templeUser.ID,
+		IntField:      templeUser.IntField,
+		DoubleField:   templeUser.DoubleField,
+		StringField:   templeUser.StringField,
+		BoolField:     templeUser.BoolField,
+		DateField:     templeUser.DateField.Format("2006-01-02"),
+		TimeField:     templeUser.TimeField.Format("15:04:05.999999999"),
+		DateTimeField: templeUser.DateTimeField.Format(time.RFC3339),
+		BlobField:     base64.StdEncoding.EncodeToString(templeUser.BlobField),
+	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestUpdateTempleUser).Inc()
+}
+
+func (env *env) deleteTempleUserHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestDeleteTempleUser)
+		return
+	}
+
+	templeUserID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestDeleteTempleUser)
+		return
+	}
+
+	complexUserID, err := util.ExtractParentIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestDeleteTempleUser)
+		return
+	}
+
+	correctParent, err := checkTempleUserParent(env, templeUserID, complexUserID)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrTempleUserNotFound:
+			respondWithError(w, "Not Found", http.StatusNotFound, metric.RequestDeleteTempleUser)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDeleteTempleUser)
+		}
+		return
+	}
+	if !correctParent {
+		respondWithError(w, "Not Found", http.StatusNotFound, metric.RequestDeleteTempleUser)
+		return
+	}
+
+	authorized, err := checkAuthorization(env, complexUserID, auth)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrComplexUserNotFound:
+			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDeleteTempleUser)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDeleteTempleUser)
+		}
+		return
+	}
+	if !authorized {
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDeleteTempleUser)
+		return
+	}
+
+	input := dao.DeleteTempleUserInput{
+		ID: templeUserID,
+	}
+
+	for _, hook := range env.hook.beforeDeleteTempleUserHooks {
+		err := (*hook)(env, &input, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteTempleUser)
+			return
+		}
+	}
+
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDeleteTempleUser))
+	err = env.dao.DeleteTempleUser(input)
+	timer.ObserveDuration()
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrTempleUserNotFound:
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestDeleteTempleUser)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDeleteTempleUser)
+		}
+		return
+	}
+
+	for _, hook := range env.hook.afterDeleteTempleUserHooks {
+		err := (*hook)(env, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteTempleUser)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(struct{}{})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestDeleteTempleUser).Inc()
 }

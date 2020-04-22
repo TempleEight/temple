@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/base64"
 	"encoding/json"
 	"flag"
 	"fmt"
@@ -173,6 +174,11 @@ func defaultRouter(env *env) *mux.Router {
 	r.HandleFunc("/simple-temple-test-user/{id}", env.readSimpleTempleTestUserHandler).Methods(http.MethodGet)
 	r.HandleFunc("/simple-temple-test-user/{id}", env.updateSimpleTempleTestUserHandler).Methods(http.MethodPut)
 	r.HandleFunc("/simple-temple-test-user", env.identifySimpleTempleTestUserHandler).Methods(http.MethodGet)
+	r.HandleFunc("/simple-temple-test-user/{parent_id}/fred/all", env.listFredHandler).Methods(http.MethodGet)
+	r.HandleFunc("/simple-temple-test-user/{parent_id}/fred", env.createFredHandler).Methods(http.MethodPost)
+	r.HandleFunc("/simple-temple-test-user/{parent_id}/fred/{id}", env.readFredHandler).Methods(http.MethodGet)
+	r.HandleFunc("/simple-temple-test-user/{parent_id}/fred/{id}", env.updateFredHandler).Methods(http.MethodPut)
+	r.HandleFunc("/simple-temple-test-user/{parent_id}/fred/{id}", env.deleteFredHandler).Methods(http.MethodDelete)
 	r.Use(jsonMiddleware)
 	return r
 }
@@ -216,6 +222,28 @@ func jsonMiddleware(next http.Handler) http.Handler {
 		w.Header().Set("Content-Type", "application/json")
 		next.ServeHTTP(w, r)
 	})
+}
+
+func checkAuthorization(env *env, simpleTempleTestUserID uuid.UUID, auth *util.Auth) (bool, error) {
+	input := dao.ReadSimpleTempleTestUserInput{
+		ID: simpleTempleTestUserID,
+	}
+	simpleTempleTestUser, err := env.dao.ReadSimpleTempleTestUser(input)
+	if err != nil {
+		return false, err
+	}
+	return simpleTempleTestUser.ID == auth.ID, nil
+}
+
+func checkFredParent(env *env, fredID uuid.UUID, parentID uuid.UUID) (bool, error) {
+	input := dao.ReadFredInput{
+		ID: fredID,
+	}
+	fred, err := env.dao.ReadFred(input)
+	if err != nil {
+		return false, err
+	}
+	return fred.ParentID == parentID, nil
 }
 
 // respondWithError responds to a HTTP request with a JSON error response
@@ -595,4 +623,445 @@ func (env *env) identifySimpleTempleTestUserHandler(w http.ResponseWriter, r *ht
 	w.WriteHeader(http.StatusFound)
 
 	metric.RequestSuccess.WithLabelValues(metric.RequestIdentify).Inc()
+}
+
+func (env *env) listFredHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestListFred)
+		return
+	}
+
+	simpleTempleTestUserID, err := util.ExtractParentIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestListFred)
+		return
+	}
+
+	input := dao.ListFredInput{
+		ParentID: simpleTempleTestUserID,
+	}
+
+	for _, hook := range env.hook.beforeListFredHooks {
+		err := (*hook)(env, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestListFred)
+			return
+		}
+	}
+
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestListFred))
+	fredList, err := env.dao.ListFred(input)
+	timer.ObserveDuration()
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestListFred)
+		return
+	}
+
+	for _, hook := range env.hook.afterListFredHooks {
+		err := (*hook)(env, fredList, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestListFred)
+			return
+		}
+	}
+
+	fredListResp := listFredResponse{
+		FredList: make([]listFredElement, 0),
+	}
+
+	for _, fred := range *fredList {
+		fredListResp.FredList = append(fredListResp.FredList, listFredElement{
+			ID:     fred.ID,
+			Field:  fred.Field,
+			Friend: fred.Friend,
+			Image:  base64.StdEncoding.EncodeToString(fred.Image),
+		})
+	}
+
+	json.NewEncoder(w).Encode(fredListResp)
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestListFred).Inc()
+}
+
+func (env *env) createFredHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestCreateFred)
+		return
+	}
+
+	simpleTempleTestUserID, err := util.ExtractParentIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestCreateFred)
+		return
+	}
+
+	authorized, err := checkAuthorization(env, simpleTempleTestUserID, auth)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrSimpleTempleTestUserNotFound:
+			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestCreateFred)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreateFred)
+		}
+		return
+	}
+	if !authorized {
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestCreateFred)
+		return
+	}
+
+	var req createFredRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateFred)
+		return
+	}
+
+	if req.Field == nil || req.Friend == nil || req.Image == nil {
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestCreateFred)
+		return
+	}
+
+	err = env.valid.Struct(req)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateFred)
+		return
+	}
+
+	image, err := base64.StdEncoding.DecodeString(*req.Image)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestCreateFred)
+		return
+	}
+
+	uuid, err := uuid.NewUUID()
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not create UUID: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreateFred)
+		return
+	}
+
+	input := dao.CreateFredInput{
+		ID:     uuid,
+		Field:  *req.Field,
+		Friend: *req.Friend,
+		Image:  image,
+	}
+
+	for _, hook := range env.hook.beforeCreateFredHooks {
+		err := (*hook)(env, req, &input, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateFred)
+			return
+		}
+	}
+
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestCreateFred))
+	fred, err := env.dao.CreateFred(input)
+	timer.ObserveDuration()
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreateFred)
+		return
+	}
+
+	for _, hook := range env.hook.afterCreateFredHooks {
+		err := (*hook)(env, fred, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestCreateFred)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(createFredResponse{
+		ID:     fred.ID,
+		Field:  fred.Field,
+		Friend: fred.Friend,
+		Image:  base64.StdEncoding.EncodeToString(fred.Image),
+	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestCreateFred).Inc()
+}
+
+func (env *env) readFredHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestReadFred)
+		return
+	}
+
+	fredID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestReadFred)
+		return
+	}
+
+	simpleTempleTestUserID, err := util.ExtractParentIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestReadFred)
+		return
+	}
+
+	correctParent, err := checkFredParent(env, fredID, simpleTempleTestUserID)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrFredNotFound:
+			respondWithError(w, "Not Found", http.StatusNotFound, metric.RequestReadFred)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestReadFred)
+		}
+		return
+	}
+	if !correctParent {
+		respondWithError(w, "Not Found", http.StatusNotFound, metric.RequestReadFred)
+		return
+	}
+
+	input := dao.ReadFredInput{
+		ID: fredID,
+	}
+
+	for _, hook := range env.hook.beforeReadFredHooks {
+		err := (*hook)(env, &input, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadFred)
+			return
+		}
+	}
+
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestReadFred))
+	fred, err := env.dao.ReadFred(input)
+	timer.ObserveDuration()
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrFredNotFound:
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestReadFred)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestReadFred)
+		}
+		return
+	}
+
+	for _, hook := range env.hook.afterReadFredHooks {
+		err := (*hook)(env, fred, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestReadFred)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(readFredResponse{
+		ID:     fred.ID,
+		Field:  fred.Field,
+		Friend: fred.Friend,
+		Image:  base64.StdEncoding.EncodeToString(fred.Image),
+	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestReadFred).Inc()
+}
+
+func (env *env) updateFredHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestUpdateFred)
+		return
+	}
+
+	fredID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestUpdateFred)
+		return
+	}
+
+	simpleTempleTestUserID, err := util.ExtractParentIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestUpdateFred)
+		return
+	}
+
+	correctParent, err := checkFredParent(env, fredID, simpleTempleTestUserID)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrFredNotFound:
+			respondWithError(w, "Not Found", http.StatusNotFound, metric.RequestUpdateFred)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdateFred)
+		}
+		return
+	}
+	if !correctParent {
+		respondWithError(w, "Not Found", http.StatusNotFound, metric.RequestUpdateFred)
+		return
+	}
+
+	authorized, err := checkAuthorization(env, simpleTempleTestUserID, auth)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrSimpleTempleTestUserNotFound:
+			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestUpdateFred)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdateFred)
+		}
+		return
+	}
+	if !authorized {
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestUpdateFred)
+		return
+	}
+
+	var req updateFredRequest
+	err = json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateFred)
+		return
+	}
+
+	if req.Field == nil || req.Friend == nil || req.Image == nil {
+		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestUpdateFred)
+		return
+	}
+
+	err = env.valid.Struct(req)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateFred)
+		return
+	}
+
+	image, err := base64.StdEncoding.DecodeString(*req.Image)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestUpdateFred)
+		return
+	}
+
+	input := dao.UpdateFredInput{
+		ID:     fredID,
+		Field:  *req.Field,
+		Friend: *req.Friend,
+		Image:  image,
+	}
+
+	for _, hook := range env.hook.beforeUpdateFredHooks {
+		err := (*hook)(env, req, &input, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateFred)
+			return
+		}
+	}
+
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestUpdateFred))
+	fred, err := env.dao.UpdateFred(input)
+	timer.ObserveDuration()
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrFredNotFound:
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestUpdateFred)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdateFred)
+		}
+		return
+	}
+
+	for _, hook := range env.hook.afterUpdateFredHooks {
+		err := (*hook)(env, fred, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestUpdateFred)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(updateFredResponse{
+		ID:     fred.ID,
+		Field:  fred.Field,
+		Friend: fred.Friend,
+		Image:  base64.StdEncoding.EncodeToString(fred.Image),
+	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestUpdateFred).Inc()
+}
+
+func (env *env) deleteFredHandler(w http.ResponseWriter, r *http.Request) {
+	auth, err := util.ExtractAuthIDFromRequest(r.Header)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not authorize request: %s", err.Error()), http.StatusUnauthorized, metric.RequestDeleteFred)
+		return
+	}
+
+	fredID, err := util.ExtractIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestDeleteFred)
+		return
+	}
+
+	simpleTempleTestUserID, err := util.ExtractParentIDFromRequest(mux.Vars(r))
+	if err != nil {
+		respondWithError(w, err.Error(), http.StatusBadRequest, metric.RequestDeleteFred)
+		return
+	}
+
+	correctParent, err := checkFredParent(env, fredID, simpleTempleTestUserID)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrFredNotFound:
+			respondWithError(w, "Not Found", http.StatusNotFound, metric.RequestDeleteFred)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDeleteFred)
+		}
+		return
+	}
+	if !correctParent {
+		respondWithError(w, "Not Found", http.StatusNotFound, metric.RequestDeleteFred)
+		return
+	}
+
+	authorized, err := checkAuthorization(env, simpleTempleTestUserID, auth)
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrSimpleTempleTestUserNotFound:
+			respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDeleteFred)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDeleteFred)
+		}
+		return
+	}
+	if !authorized {
+		respondWithError(w, "Unauthorized", http.StatusUnauthorized, metric.RequestDeleteFred)
+		return
+	}
+
+	input := dao.DeleteFredInput{
+		ID: fredID,
+	}
+
+	for _, hook := range env.hook.beforeDeleteFredHooks {
+		err := (*hook)(env, &input, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteFred)
+			return
+		}
+	}
+
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestDeleteFred))
+	err = env.dao.DeleteFred(input)
+	timer.ObserveDuration()
+	if err != nil {
+		switch err.(type) {
+		case dao.ErrFredNotFound:
+			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestDeleteFred)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestDeleteFred)
+		}
+		return
+	}
+
+	for _, hook := range env.hook.afterDeleteFredHooks {
+		err := (*hook)(env, auth)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestDeleteFred)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(struct{}{})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestDeleteFred).Inc()
 }

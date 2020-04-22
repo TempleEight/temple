@@ -5,10 +5,10 @@ import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
 import temple.ast.Metadata.Readable
 import temple.ast.{AbstractAttribute, AttributeType}
 import temple.generate.CRUD._
+import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus._
 import temple.generate.server.go.common.GoCommonGenerator._
-import temple.generate.server.go.service.GoServiceHookGenerator.hookSuffix
 import temple.generate.server.go.service.main.GoServiceMainCreateHandlerGenerator.generateCreateHandler
 import temple.generate.server.go.service.main.GoServiceMainDeleteHandlerGenerator.generateDeleteHandler
 import temple.generate.server.go.service.main.GoServiceMainIdentifyHandlerGenerator.generateIdentifyHandler
@@ -23,7 +23,7 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainHandlersGenerator {
 
-  private def generateResponseMapFormat(root: ServiceRoot, name: String, attributeType: AttributeType): String = {
+  private def generateResponseMapFormat(root: AttributesRoot, name: String, attributeType: AttributeType): String = {
     val responseFieldName = s"${root.decapitalizedName}.${name.capitalize}"
     attributeType match {
       case DateType =>
@@ -39,17 +39,17 @@ object GoServiceMainHandlersGenerator {
   }
 
   /** Generate a map for converting the fields of the DAO response to the JSON response */
-  private def generateResponseMap(root: ServiceRoot): ListMap[String, String] =
+  private def generateResponseMap(block: AttributesRoot): ListMap[String, String] =
     // Includes ID attribute and all attributes without the @server or @client annotation
-    ListMap(root.idAttribute.name.toUpperCase -> s"${root.decapitalizedName}.${root.idAttribute.name.toUpperCase}") ++
-    root.attributes.collect {
+    ListMap(block.idAttribute.name.toUpperCase -> s"${block.decapitalizedName}.${block.idAttribute.name.toUpperCase}") ++
+    block.attributes.collect {
       case name -> attribute if attribute.inResponse =>
-        name.capitalize -> generateResponseMapFormat(root, name, attribute.attributeType)
+        name.capitalize -> generateResponseMapFormat(block, name, attribute.attributeType)
     }
 
   /** Generate a handler method declaration */
-  private[main] def generateHandlerDecl(root: ServiceRoot, operation: CRUD): String =
-    s"func (env *env) ${operation.toString.toLowerCase}${root.name}Handler(w http.ResponseWriter, r *http.Request)"
+  private[main] def generateHandlerDecl(block: AttributesRoot, operation: CRUD): String =
+    s"func (env *env) ${operation.toString.toLowerCase}${block.name}Handler(w http.ResponseWriter, r *http.Request)"
 
   /** Generate a respond with error call */
   private[main] def generateRespondWithError(
@@ -100,7 +100,7 @@ object GoServiceMainHandlersGenerator {
       ),
     )
 
-  /** Generate the block for extracting and ID from the request URL */
+  /** Generate the block for extracting ID from the request URL */
   private[main] def generateExtractIDBlock(varPrefix: String, metricSuffix: Option[String]): String =
     mkCode.lines(
       genDeclareAndAssign(
@@ -113,20 +113,78 @@ object GoServiceMainHandlersGenerator {
       ),
     )
 
+  /** Generate the block for extracting parent ID from the request URL */
+  private[main] def generateExtractParentIDBlock(varPrefix: String, metricSuffix: Option[String]): String =
+    mkCode.lines(
+      genDeclareAndAssign(
+        genMethodCall("util", "ExtractParentIDFromRequest", genMethodCall("mux", "Vars", "r")),
+        s"${varPrefix}ID",
+        "err",
+      ),
+      genIfErr(
+        generateRespondWithErrorReturn(genHTTPEnum(StatusBadRequest), metricSuffix, genMethodCall("err", "Error")),
+      ),
+    )
+
+  /** Generate the block for checking if a block’s parent is correct */
+  private[main] def generateCheckParentBlock(
+    block: AttributesRoot,
+    parent: ServiceRoot,
+    metricSuffix: Option[String],
+  ): String =
+    mkCode.lines(
+      genDeclareAndAssign(
+        genFunctionCall(
+          s"check${block.name}Parent",
+          "env",
+          s"${block.decapitalizedName}ID",
+          s"${parent.decapitalizedName}ID",
+        ),
+        "correctParent",
+        "err",
+      ),
+      genIfErr(
+        genSwitchReturn(
+          "err.(type)",
+          ListMap(
+            s"dao.Err${block.name}NotFound" -> generateRespondWithError(
+              genHTTPEnum(StatusNotFound),
+              metricSuffix,
+              doubleQuote("Not Found"),
+            ),
+          ),
+          generateRespondWithError(
+            genHTTPEnum(StatusInternalServerError),
+            metricSuffix,
+            "Something went wrong: %s",
+            genMethodCall("err", "Error"),
+          ),
+        ),
+      ),
+      genIf(
+        "!correctParent",
+        generateRespondWithErrorReturn(genHTTPEnum(StatusNotFound), metricSuffix, doubleQuote("Not Found")),
+      ),
+    )
+
   /** Generate the block for checking if a request is authorized to perform operation  */
-  private[main] def generateCheckAuthorizationBlock(root: ServiceRoot, metricSuffix: Option[String]): String =
+  private[main] def generateCheckAuthorizationBlock(
+    block: AttributesRoot,
+    blockHasAuth: Boolean,
+    metricSuffix: Option[String],
+  ): String =
     // If the service has an auth block, we can simply check the AuthID is the same as the resource ID being requested
-    if (root.hasAuthBlock) {
+    if (blockHasAuth) {
       mkCode.lines(
         genIf(
-          s"auth.ID != ${root.decapitalizedName}ID",
+          s"auth.ID != ${block.decapitalizedName}ID",
           generateRespondWithErrorReturn(genHTTPEnum(StatusUnauthorized), metricSuffix, doubleQuote("Unauthorized")),
         ),
       )
     } else {
       mkCode.lines(
         genDeclareAndAssign(
-          genFunctionCall("checkAuthorization", "env", s"${root.decapitalizedName}ID", "auth"),
+          genFunctionCall("checkAuthorization", "env", s"${block.decapitalizedName}ID", "auth"),
           "authorized",
           "err",
         ),
@@ -134,7 +192,7 @@ object GoServiceMainHandlersGenerator {
           genSwitchReturn(
             "err.(type)",
             ListMap(
-              s"dao.Err${root.name}NotFound" -> generateRespondWithError(
+              s"dao.Err${block.name}NotFound" -> generateRespondWithError(
                 genHTTPEnum(StatusUnauthorized),
                 metricSuffix,
                 doubleQuote("Unauthorized"),
@@ -157,7 +215,7 @@ object GoServiceMainHandlersGenerator {
 
   /** Generate the block for decoding an incoming request JSON into a request object */
   private[main] def generateDecodeRequestBlock(
-    root: ServiceRoot,
+    block: AttributesRoot,
     op: CRUD,
     typePrefix: String,
     metricSuffix: Option[String],
@@ -165,7 +223,7 @@ object GoServiceMainHandlersGenerator {
     val jsonDecodeCall = genMethodCall(genMethodCall("json", "NewDecoder", "r.Body"), "Decode", "&req")
     mkCode.lines(
       genVar("req", s"${typePrefix}Request"),
-      if (!root.projectUsesAuth && op == Create) genDeclareAndAssign(jsonDecodeCall, "err")
+      if (!block.projectUsesAuth && op == Create) genDeclareAndAssign(jsonDecodeCall, "err")
       else {
         genAssign(jsonDecodeCall, "err")
       },
@@ -209,7 +267,7 @@ object GoServiceMainHandlersGenerator {
     )
 
   private def generateForeignKeyCheckBlock(
-    root: ServiceRoot,
+    block: AttributesRoot,
     name: String,
     reference: String,
     metricSuffix: Option[String],
@@ -220,7 +278,7 @@ object GoServiceMainHandlersGenerator {
           "env.comm",
           s"Check$reference",
           s"*req.${name.capitalize}",
-          when(root.projectUsesAuth) { genMethodCall("r.Header", "Get", doubleQuote("Authorization")) },
+          when(block.projectUsesAuth) { genMethodCall("r.Header", "Get", doubleQuote("Authorization")) },
         ),
         s"${name}Valid",
         "err",
@@ -245,13 +303,13 @@ object GoServiceMainHandlersGenerator {
     )
 
   /** Generate the blocks for checking foreign keys against other services */
-  private[main] def generateForeignKeyCheckBlocks(root: ServiceRoot, metricSuffix: Option[String]): String =
+  private[main] def generateForeignKeyCheckBlocks(block: AttributesRoot, metricSuffix: Option[String]): String =
     mkCode.doubleLines(
-      root.requestAttributes.map {
+      block.requestAttributes.map {
         case name -> attribute =>
           attribute.attributeType match {
             case AttributeType.ForeignKey(reference) =>
-              generateForeignKeyCheckBlock(root, name, reference, metricSuffix)
+              generateForeignKeyCheckBlock(block, name, reference, metricSuffix)
             case _ => ""
           }
       },
@@ -348,45 +406,47 @@ object GoServiceMainHandlersGenerator {
     }
 
   /** Generate DAO call block error handling for Read, Update and Delete */
-  private[main] def generateDAOCallErrorBlock(root: ServiceRoot, metricSuffix: Option[String]): String =
-    genIfErr(
-      genSwitchReturn(
-        "err.(type)",
-        ListMap(
-          s"dao.Err${root.name}NotFound" -> generateRespondWithError(
-            genHTTPEnum(StatusNotFound),
+  private[main] def generateDAOCallErrorBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
+    mkCode.lines(
+      genIfErr(
+        genSwitchReturn(
+          "err.(type)",
+          ListMap(
+            s"dao.Err${block.name}NotFound" -> generateRespondWithError(
+              genHTTPEnum(StatusNotFound),
+              metricSuffix,
+              genMethodCall("err", "Error"),
+            ),
+          ),
+          generateRespondWithError(
+            genHTTPEnum(StatusInternalServerError),
             metricSuffix,
+            "Something went wrong: %s",
             genMethodCall("err", "Error"),
           ),
-        ),
-        generateRespondWithError(
-          genHTTPEnum(StatusInternalServerError),
-          metricSuffix,
-          "Something went wrong: %s",
-          genMethodCall("err", "Error"),
         ),
       ),
     )
 
   private[main] def generateInvokeBeforeHookBlock(
-    root: ServiceRoot,
+    block: AttributesRoot,
     operation: CRUD,
     metricSuffix: Option[String],
   ): String = {
     val hookArguments: Seq[String] = (operation match {
         case List =>
-          root.readable match {
+          block.readable match {
             case Readable.This => Seq("env", "&input")
             case Readable.All  => Seq("env")
           }
         case Create | Update =>
-          if (root.requestAttributes.isEmpty) Seq("env", "&input") else Seq("env", "req", "&input")
+          if (block.requestAttributes.isEmpty) Seq("env", "&input") else Seq("env", "req", "&input")
         case Read | Delete | Identify =>
           Seq("env", "&input")
-      }) ++ when(root.projectUsesAuth) { "auth" }
+      }) ++ when(block.projectUsesAuth) { "auth" }
 
     genForLoop(
-      genDeclareAndAssign(s"range env.hook.before${operation.toString}${hookSuffix(root)}Hooks", "_", "hook"),
+      genDeclareAndAssign(s"range env.hook.before${operation.toString}${block.structName}Hooks", "_", "hook"),
       mkCode.lines(
         genDeclareAndAssign(
           genFunctionCall("(*hook)", hookArguments),
@@ -398,21 +458,21 @@ object GoServiceMainHandlersGenerator {
   }
 
   private[main] def generateInvokeAfterHookBlock(
-    root: ServiceRoot,
+    block: AttributesRoot,
     operation: CRUD,
     metricSuffix: Option[String],
   ): String = {
     val hookArguments = (operation match {
         case List =>
-          Seq("env", s"${root.decapitalizedName}List")
+          Seq("env", s"${block.decapitalizedName}List")
         case Create | Read | Update | Identify =>
-          Seq("env", root.decapitalizedName)
+          Seq("env", block.decapitalizedName)
         case Delete =>
           Seq("env")
-      }) ++ when(root.projectUsesAuth) { "auth" }
+      }) ++ when(block.projectUsesAuth) { "auth" }
 
     genForLoop(
-      genDeclareAndAssign(s"range env.hook.after${operation.toString}${hookSuffix(root)}Hooks", "_", "hook"),
+      genDeclareAndAssign(s"range env.hook.after${operation.toString}${block.structName}Hooks", "_", "hook"),
       mkCode.lines(
         genDeclareAndAssign(
           genFunctionCall("(*hook)", hookArguments),
@@ -433,35 +493,35 @@ object GoServiceMainHandlersGenerator {
 
   /** Generate the env handler functions */
   private[service] def generateHandlers(
-    root: ServiceRoot,
+    block: AttributesRoot,
+    parent: Option[ServiceRoot],
     usesComms: Boolean,
-    enumeratingByCreator: Boolean,
     usesMetrics: Boolean,
   ): String = {
-    val responseMap = generateResponseMap(root)
+    val responseMap = generateResponseMap(block)
 
     // Whether or not the client attributes contain attributes of type date, time or datetime
     val clientUsesTime = Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateTimeType)
-      .intersect(root.requestAttributes.values.map(_.attributeType).toSet)
+      .intersect(block.requestAttributes.values.map(_.attributeType).toSet)
       .nonEmpty
 
     // Whether or not the client attributes contain attributes of type blob
-    val clientUsesBase64 = root.requestAttributes.values.exists(_.attributeType.isInstanceOf[AttributeType.BlobType])
+    val clientUsesBase64 = block.requestAttributes.values.exists(_.attributeType.isInstanceOf[AttributeType.BlobType])
 
     mkCode.doubleLines(
-      root.operations.toSeq.map {
+      block.operations.toSeq.map {
         case List =>
-          generateListHandler(root, responseMap, enumeratingByCreator, usesMetrics)
+          generateListHandler(block, parent, responseMap, usesMetrics)
         case Create =>
-          generateCreateHandler(root, usesComms, responseMap, clientUsesTime, clientUsesBase64, usesMetrics)
+          generateCreateHandler(block, parent, usesComms, responseMap, clientUsesTime, clientUsesBase64, usesMetrics)
         case Read =>
-          generateReadHandler(root, responseMap, usesMetrics)
+          generateReadHandler(block, parent, responseMap, usesMetrics)
         case Update =>
-          generateUpdateHandler(root, usesComms, responseMap, clientUsesTime, clientUsesBase64, usesMetrics)
+          generateUpdateHandler(block, parent, usesComms, responseMap, clientUsesTime, clientUsesBase64, usesMetrics)
         case Delete =>
-          generateDeleteHandler(root, usesMetrics)
+          generateDeleteHandler(block, parent, usesMetrics)
         case Identify =>
-          generateIdentifyHandler(root, usesMetrics)
+          generateIdentifyHandler(block, parent, usesMetrics)
       },
     )
   }
