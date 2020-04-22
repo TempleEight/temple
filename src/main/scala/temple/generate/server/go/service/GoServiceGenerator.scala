@@ -107,7 +107,7 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceUtilGenerator.generateAuthStruct(),
         GoCommonUtilGenerator.generateGetConfig(),
         GoCommonUtilGenerator.generateCreateErrorJSON(),
-        GoServiceUtilGenerator.generateIDsFromRequest(),
+        GoServiceUtilGenerator.generateIDsFromRequest(root.structs.nonEmpty),
       ),
     ) ++ when(usesComms)(
       File(s"${root.kebabName}/comm", "handler.go") -> mkCode.doubleLines(

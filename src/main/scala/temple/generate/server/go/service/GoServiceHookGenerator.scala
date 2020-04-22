@@ -14,7 +14,7 @@ import scala.Option.when
 object GoServiceHookGenerator {
 
   private[service] def hookSuffix(block: AttributesRoot): String =
-    if (block.parentAttribute.nonEmpty) block.name else ""
+    if (block.isStruct) block.name else ""
 
   private[service] def generateImports(root: ServiceRoot): String = {
     val daoImport = s"${doubleQuote(root.module + "/dao")}"

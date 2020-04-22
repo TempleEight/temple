@@ -46,7 +46,7 @@ object GoServiceDAOFunctionsGenerator {
         Seq(s"$prefix.${inputName.capitalize}")
       case _ => Seq.empty
     }
-    lazy val parentBlock = when(block.parentAttribute.isDefined) { "input.ParentID" }
+    lazy val parentBlock = when(block.isStruct) { "input.ParentID" }
     lazy val attributes  = block.storedAttributes.map { case name -> _ => s"$prefix.${name.capitalize}" }.toSeq
 
     operation match {
