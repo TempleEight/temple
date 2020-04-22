@@ -77,9 +77,10 @@ private class Validator private (templefile: Templefile) {
     * languages that are generated from the block), and entering it into the map of renamings. Note that an entry is
     * always inserted into this block, even if the same name is kept. */
   private def renameBlock(name: String, block: AttributeBlock[_]): Unit = {
-    val database = block.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
-    val language = block.lookupMetadata[Metadata.ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
-    val newServiceName = constructUniqueName(name, templefile.projectName, allGlobalNames - name)(
+    val database      = block.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
+    val language      = block.lookupMetadata[Metadata.ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
+    val reservedNames = allGlobalNames ++ block.attributes.keySet - name
+    val newServiceName = constructUniqueName(name, templefile.projectName, reservedNames)(
       validators = Seq(
         Some(templeServiceNameValidator),
         when(database == Metadata.Database.Postgres) { postgresValidator },
