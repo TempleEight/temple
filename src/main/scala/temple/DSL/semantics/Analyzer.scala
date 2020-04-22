@@ -82,8 +82,8 @@ object Analyzer {
               "precision" -> Some(Arg.IntArg(4)),
             )(args)(innerContext)
             AttributeType.IntType(
-              argMap.getOptionArg("min", IntArgType)(innerContext),
               argMap.getOptionArg("max", IntArgType)(innerContext),
+              argMap.getOptionArg("min", IntArgType)(innerContext),
               argMap.getArg("precision", IntArgType)(innerContext).toByte,
             )
           case "string" =>

@@ -69,7 +69,7 @@ Review: service {
   property: Property;
   tenant: Tenant;
   reservation: Reservation;
-  stars: int(0, 5);
+  stars: int(5, 0);
   review: string;
   #readable(by: all);
   // implicit #writable(by: this) since project has auth
