@@ -2,13 +2,14 @@ package temple.utils
 
 import java.io.IOException
 import java.nio.charset.Charset
-import java.nio.file.attribute.BasicFileAttributes
 import java.nio.file._
+import java.nio.file.attribute.BasicFileAttributes
 
 import temple.builder.project.Project
 import temple.generate.FileSystem
 import temple.generate.FileSystem.File
 
+import scala.collection.mutable
 import scala.io.{Source, StdIn}
 
 /** Helper functions useful for manipulating files */
@@ -65,6 +66,13 @@ object FileUtils {
   def buildFileMap(path: Path): FileSystem.Files = buildFileMap(path, path)
 
   /**
+    * Build a sequence of filenames of files present in the provided filepath
+    * @param path The root path to explore
+    * @return A sequence of filenames, relative to the provided path
+    */
+  def buildFilenameSeq(path: Path): Seq[File] = buildFilenameSeq(path, path)
+
+  /**
     * Build a map of files present in the provided filepath
     * @param path The root path to explore
     * @param subdirectory The subdirectory to restrict the search to
@@ -104,5 +112,37 @@ object FileUtils {
       },
     )
     foundFiles
+  }
+
+  /**
+    * Build a sequence of filenames of files present in the provided filepath
+    * @param path The root path to explore
+    * @param cwd The location to give paths relative to
+    * @return A sequence of filenames, relative to the provided path
+    */
+  private def buildFilenameSeq(path: Path, cwd: Path): Seq[File] = {
+    val foundFiles: mutable.Buffer[File] = mutable.Buffer.empty
+    Files.walkFileTree(
+      path,
+      new FileVisitor[Path] {
+        override def preVisitDirectory(dir: Path, attrs: BasicFileAttributes): FileVisitResult =
+          FileVisitResult.CONTINUE
+
+        override def visitFile(file: Path, attrs: BasicFileAttributes): FileVisitResult = {
+          foundFiles += File(
+            Option(cwd.relativize(file).getParent).map(_.toString).getOrElse(""),
+            file.getFileName.toString,
+          )
+          FileVisitResult.CONTINUE
+        }
+
+        override def visitFileFailed(file: Path, exc: IOException): FileVisitResult =
+          throw exc
+
+        override def postVisitDirectory(dir: Path, exc: IOException): FileVisitResult =
+          FileVisitResult.CONTINUE
+      },
+    )
+    foundFiles.toSeq
   }
 }

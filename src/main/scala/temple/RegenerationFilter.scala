@@ -24,12 +24,11 @@ object RegenerationFilter {
   private def filesToOmit(existingFiles: Seq[File]): Seq[File] =
     existingFiles.filter(file => file.filename == "setup.go" || file.filename == "datastore.go")
 
-  // Get all the files under a directory, up to a max depth of 4 (the deepest Temple generates)
-  // TODO: Should this be moved to FileUtils?
+  // Get all the filenames under a directory
   private def filesUnderDirectory(directory: String): Seq[File] = {
     val directoryPath = Paths.get(directory)
     if (Files.exists(directoryPath)) {
-      FileUtils.buildFileMap(directoryPath).keys.toSeq
+      FileUtils.buildFilenameSeq(directoryPath)
     } else Seq()
   }
 

@@ -3,6 +3,7 @@ package temple.utils
 import java.nio.file.{FileAlreadyExistsException, Files, Paths}
 
 import org.scalatest.{FlatSpec, Matchers}
+import temple.generate.FileSystem.File
 
 class FileUtilsTest extends FlatSpec with Matchers {
 
@@ -31,5 +32,20 @@ class FileUtilsTest extends FlatSpec with Matchers {
     val expectedDogSize = 128166
     val dog             = FileUtils.readBinaryFile("src/test/scala/temple/testfiles/dog.jpeg")
     dog.length shouldBe expectedDogSize
+  }
+
+  it should "correctly get all the filenames under a directory" in {
+    val foundFiles = FileUtils.buildFilenameSeq(Paths.get("src/test/scala/temple/testfiles"))
+    foundFiles.toSet shouldBe Set(
+      File("", "attributes.temple"),
+      File("", "badSemantics.temple"),
+      File("", "badSyntax.temple"),
+      File("", "badValidation.temple"),
+      File("", "data.temple"),
+      File("", "dog.jpeg"),
+      File("", "enumReadAll.temple"),
+      File("", "simple.temple"),
+      File("", "simple-dc.temple"),
+    )
   }
 }
