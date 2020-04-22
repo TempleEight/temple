@@ -10,9 +10,18 @@ object GoServiceMetricGenerator {
   // Generate global variables for metrics, including string identifiers and metric objects
   private[service] def generateVars(root: ServiceRoot): String = {
     // Assign strings to variables of form `RequestCreate = "create"`
-    val serviceGlobals = CodeUtils.pad(root.operations.toSeq.map { operation =>
-      (s"Request${operation.toString.capitalize}", doubleQuote(operation.toString.toLowerCase))
-    }, separator = " = ")
+    val serviceGlobals = CodeUtils.pad(
+      root.blockIterator.flatMap { block =>
+        block.operations.toSeq.map { operation =>
+          val suffix = if (block.parentAttribute.nonEmpty) "_" + block.snakeName else ""
+          (
+            s"Request${operation.toString.capitalize}${block.structName}",
+            doubleQuote(operation.toString.toLowerCase + suffix),
+          )
+        }
+      }.toSeq,
+      separator = " = ",
+    )
 
     GoCommonMetricGenerator.generateVars(serviceGlobals, root.name)
   }

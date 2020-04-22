@@ -9,6 +9,8 @@ trait ServiceName {
   def decapitalizedName: String = StringUtils.decapitalize(name)
 
   def kebabName: String = StringUtils.kebabCase(name)
+
+  def snakeName: String = StringUtils.snakeCase(name)
 }
 
 object ServiceName {
