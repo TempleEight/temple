@@ -14,11 +14,21 @@ type Hook struct {
 	beforeDeleteHooks   []*func(env *env, input *dao.DeleteComplexUserInput, auth *util.Auth) *HookError
 	beforeIdentifyHooks []*func(env *env, input *dao.IdentifyComplexUserInput, auth *util.Auth) *HookError
 
+	beforeCreateTempleUserHooks []*func(env *env, req createTempleUserRequest, input *dao.CreateTempleUserInput, auth *util.Auth) *HookError
+	beforeReadTempleUserHooks   []*func(env *env, input *dao.ReadTempleUserInput, auth *util.Auth) *HookError
+	beforeUpdateTempleUserHooks []*func(env *env, req updateTempleUserRequest, input *dao.UpdateTempleUserInput, auth *util.Auth) *HookError
+	beforeDeleteTempleUserHooks []*func(env *env, input *dao.DeleteTempleUserInput, auth *util.Auth) *HookError
+
 	afterCreateHooks   []*func(env *env, complexUser *dao.ComplexUser, auth *util.Auth) *HookError
 	afterReadHooks     []*func(env *env, complexUser *dao.ComplexUser, auth *util.Auth) *HookError
 	afterUpdateHooks   []*func(env *env, complexUser *dao.ComplexUser, auth *util.Auth) *HookError
 	afterDeleteHooks   []*func(env *env, auth *util.Auth) *HookError
 	afterIdentifyHooks []*func(env *env, complexUser *dao.ComplexUser, auth *util.Auth) *HookError
+
+	afterCreateTempleUserHooks []*func(env *env, templeUser *dao.TempleUser, auth *util.Auth) *HookError
+	afterReadTempleUserHooks   []*func(env *env, templeUser *dao.TempleUser, auth *util.Auth) *HookError
+	afterUpdateTempleUserHooks []*func(env *env, templeUser *dao.TempleUser, auth *util.Auth) *HookError
+	afterDeleteTempleUserHooks []*func(env *env, auth *util.Auth) *HookError
 }
 
 // HookError wraps an existing error with HTTP status code
@@ -56,6 +66,26 @@ func (h *Hook) BeforeIdentify(hook func(env *env, input *dao.IdentifyComplexUser
 	h.beforeIdentifyHooks = append(h.beforeIdentifyHooks, &hook)
 }
 
+// BeforeCreateTempleUser adds a new hook to be executed before creating an object in the datastore
+func (h *Hook) BeforeCreateTempleUser(hook func(env *env, req createTempleUserRequest, input *dao.CreateTempleUserInput, auth *util.Auth) *HookError) {
+	h.beforeCreateTempleUserHooks = append(h.beforeCreateTempleUserHooks, &hook)
+}
+
+// BeforeReadTempleUser adds a new hook to be executed before reading an object in the datastore
+func (h *Hook) BeforeReadTempleUser(hook func(env *env, input *dao.ReadTempleUserInput, auth *util.Auth) *HookError) {
+	h.beforeReadTempleUserHooks = append(h.beforeReadTempleUserHooks, &hook)
+}
+
+// BeforeUpdateTempleUser adds a new hook to be executed before updating an object in the datastore
+func (h *Hook) BeforeUpdateTempleUser(hook func(env *env, req updateTempleUserRequest, input *dao.UpdateTempleUserInput, auth *util.Auth) *HookError) {
+	h.beforeUpdateTempleUserHooks = append(h.beforeUpdateTempleUserHooks, &hook)
+}
+
+// BeforeDeleteTempleUser adds a new hook to be executed before deleting an object in the datastore
+func (h *Hook) BeforeDeleteTempleUser(hook func(env *env, input *dao.DeleteTempleUserInput, auth *util.Auth) *HookError) {
+	h.beforeDeleteTempleUserHooks = append(h.beforeDeleteTempleUserHooks, &hook)
+}
+
 // AfterCreate adds a new hook to be executed after creating an object in the datastore
 func (h *Hook) AfterCreate(hook func(env *env, complexUser *dao.ComplexUser, auth *util.Auth) *HookError) {
 	h.afterCreateHooks = append(h.afterCreateHooks, &hook)
@@ -79,4 +109,24 @@ func (h *Hook) AfterDelete(hook func(env *env, auth *util.Auth) *HookError) {
 // AfterIdentify adds a new hook to be executed after identifying an object in the datastore
 func (h *Hook) AfterIdentify(hook func(env *env, complexUser *dao.ComplexUser, auth *util.Auth) *HookError) {
 	h.afterIdentifyHooks = append(h.afterIdentifyHooks, &hook)
+}
+
+// AfterCreateTempleUser adds a new hook to be executed after creating an object in the datastore
+func (h *Hook) AfterCreateTempleUser(hook func(env *env, templeUser *dao.TempleUser, auth *util.Auth) *HookError) {
+	h.afterCreateTempleUserHooks = append(h.afterCreateTempleUserHooks, &hook)
+}
+
+// AfterReadTempleUser adds a new hook to be executed after reading an object in the datastore
+func (h *Hook) AfterReadTempleUser(hook func(env *env, templeUser *dao.TempleUser, auth *util.Auth) *HookError) {
+	h.afterReadTempleUserHooks = append(h.afterReadTempleUserHooks, &hook)
+}
+
+// AfterUpdateTempleUser adds a new hook to be executed after updating an object in the datastore
+func (h *Hook) AfterUpdateTempleUser(hook func(env *env, templeUser *dao.TempleUser, auth *util.Auth) *HookError) {
+	h.afterUpdateTempleUserHooks = append(h.afterUpdateTempleUserHooks, &hook)
+}
+
+// AfterDeleteTempleUser adds a new hook to be executed after deleting an object in the datastore
+func (h *Hook) AfterDeleteTempleUser(hook func(env *env, auth *util.Auth) *HookError) {
+	h.afterDeleteTempleUserHooks = append(h.afterDeleteTempleUserHooks, &hook)
 }

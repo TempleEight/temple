@@ -24,7 +24,7 @@ object GoServiceGenerator extends ServiceGenerator {
     // Whether or not this service uses the time type, by checking for attributes of type date, time or datetime
     val usesTime =
       Set[AttributeType](AttributeType.DateType, AttributeType.TimeType, AttributeType.DateTimeType)
-        .intersect(root.attributes.values.map(_.attributeType).toSet)
+        .intersect(root.blockIterator.flatMap(_.attributes.values).map(_.attributeType).toSet)
         .nonEmpty
 
     // Whether or not this service uses base64, by checking for attributes of type blob
@@ -45,13 +45,17 @@ object GoServiceGenerator extends ServiceGenerator {
         GoCommonGenerator.generatePackage("main"),
         GoServiceMainGenerator.generateImports(root, usesBase64, usesTime, usesComms, usesMetrics),
         GoServiceMainStructGenerator.generateEnvStruct(usesComms),
-        when(
-          root.requestAttributes.nonEmpty
-          && (root.operations.contains(CRUD.Create) || root.operations.contains(CRUD.Update)),
-        ) {
-          GoServiceMainStructGenerator.generateRequestStructs(root)
+        root.blockIterator.map { block =>
+          when(
+            block.requestAttributes.nonEmpty
+            && (block.opQueries.contains(CRUD.Create) || block.opQueries.contains(CRUD.Update)),
+          ) {
+            GoServiceMainStructGenerator.generateRequestStructs(block)
+          }
         },
-        GoServiceMainStructGenerator.generateResponseStructs(root),
+        root.blockIterator.map { block =>
+          GoServiceMainStructGenerator.generateResponseStructs(block)
+        },
         GoServiceMainGenerator.generateRouter(root),
         GoCommonMainGenerator.generateMain(root, usesComms, isAuth = false, usesMetrics),
         GoCommonMainGenerator.generateJsonMiddleware(),
