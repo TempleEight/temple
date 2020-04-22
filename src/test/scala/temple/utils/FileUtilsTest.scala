@@ -37,6 +37,7 @@ class FileUtilsTest extends FlatSpec with Matchers {
   it should "correctly get all the filenames under a directory" in {
     val foundFiles = FileUtils.buildFilenameSeq(Paths.get("src/test/scala/temple/testfiles"))
     foundFiles.toSet shouldBe Set(
+      File("", "attributes.temple"),
       File("", "badSemantics.temple"),
       File("", "badSyntax.temple"),
       File("", "badValidation.temple"),
