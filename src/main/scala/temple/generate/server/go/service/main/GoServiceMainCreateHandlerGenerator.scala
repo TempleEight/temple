@@ -4,7 +4,7 @@ import temple.ast.Annotation.Unique
 import temple.generate.CRUD.Create
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.{StatusForbidden, StatusInternalServerError}
-import temple.generate.server.go.common.GoCommonGenerator.{genReturn, _}
+import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}

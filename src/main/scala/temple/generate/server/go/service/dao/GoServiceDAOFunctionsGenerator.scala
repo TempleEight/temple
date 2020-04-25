@@ -3,7 +3,7 @@ package temple.generate.server.go.service.dao
 import temple.ast.Annotation.Unique
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD._
-import temple.generate.server.go.common.GoCommonGenerator.{genReturn, _}
+import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.dao.GoServiceDAOGenerator.generateDAOFunctionName
 import temple.generate.server.go.service.dao.GoServiceDAOInterfaceGenerator.generateInterfaceFunction
 import temple.generate.server.{AttributesRoot, CreatedByAttribute}
