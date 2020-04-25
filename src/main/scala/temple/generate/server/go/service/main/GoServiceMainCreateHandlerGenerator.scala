@@ -1,10 +1,10 @@
 package temple.generate.server.go.service.main
 
-import temple.ast.AbstractAttribute
+import temple.ast.Annotation.Unique
 import temple.generate.CRUD.Create
 import temple.generate.server.AttributesRoot.ServiceRoot
-import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
-import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.server.go.GoHTTPStatus.{StatusForbidden, StatusInternalServerError}
+import temple.generate.server.go.common.GoCommonGenerator.{genReturn, _}
 import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -42,7 +42,14 @@ object GoServiceMainCreateHandlerGenerator {
     )
   }
 
-  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean, metricSuffix: Option[String]): String =
+  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean, metricSuffix: Option[String]): String = {
+    val defaultError = generateRespondWithError(
+      genHTTPEnum(StatusInternalServerError),
+      metricSuffix,
+      "Something went wrong: %s",
+      genMethodCall("err", "Error"),
+    )
+
     mkCode.lines(
       when(usesMetrics) { generateMetricTimerDecl(Create.toString) },
       genDeclareAndAssign(
@@ -56,14 +63,24 @@ object GoServiceMainCreateHandlerGenerator {
       ),
       when(usesMetrics) { generateMetricTimerObservation() },
       genIfErr(
-        generateRespondWithErrorReturn(
-          genHTTPEnum(StatusInternalServerError),
-          metricSuffix,
-          "Something went wrong: %s",
-          genMethodCall("err", "Error"),
-        ),
+        if (root.contains(Unique)) {
+          genSwitchReturn(
+            "err.(type)",
+            ListMap(
+              s"dao.ErrDuplicate${root.name}" -> generateRespondWithError(
+                genHTTPEnum(StatusForbidden),
+                metricSuffix,
+                genMethodCall("err", "Error"),
+              ),
+            ),
+            defaultError,
+          )
+        } else {
+          mkCode.lines(defaultError, genReturn())
+        },
       ),
     )
+  }
 
   /** Generate the create handler function */
   private[main] def generateCreateHandler(

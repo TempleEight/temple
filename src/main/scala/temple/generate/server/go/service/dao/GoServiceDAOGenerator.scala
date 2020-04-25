@@ -1,10 +1,11 @@
 package temple.generate.server.go.service.dao
 
+import temple.ast.Annotation.Unique
 import temple.ast.AttributeType
 import temple.generate.CRUD._
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonDAOGenerator
-import temple.generate.server.go.common.GoCommonGenerator.generateGoType
+import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.{AttributesRoot, ServiceName}
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.generate.utils.CodeUtils
@@ -27,7 +28,9 @@ object GoServiceDAOGenerator {
         doubleQuote("github.com/google/uuid"),
         "",
         "// pq acts as the driver for SQL requests",
-        s"_ ${doubleQuote("github.com/lib/pq")}",
+        // Don't use import unless unique is present
+        if (root.contains(Unique)) doubleQuote("github.com/lib/pq")
+        else s"_ ${doubleQuote("github.com/lib/pq")}",
       ),
     )
 
@@ -76,6 +79,24 @@ object GoServiceDAOGenerator {
         s"func (e Err${block.name}NotFound) Error() string",
         CodeWrap.curly.tabbed(s"""return fmt.Sprintf("${block.decapitalizedName} not found with ID %s", string(e))"""),
       ),
+      when(block.contains(Unique)) {
+        mkCode.lines(
+          "",
+          s"// ErrDuplicate${block.name}NotFound is returned when a ${block.decapitalizedName} already exists for some unique constraint",
+          s"type ErrDuplicate${block.name} string",
+          "",
+          mkCode(
+            genMethod(
+              "e",
+              s"ErrDuplicate${block.name}",
+              "Error",
+              Seq(),
+              Some("string"),
+              genReturn(doubleQuote(s"Duplicate ${block.name} found")),
+            ),
+          ),
+        )
+      },
     )
 
   private[service] def generateErrors(root: ServiceRoot): String =
@@ -83,5 +104,11 @@ object GoServiceDAOGenerator {
       "package dao",
       """import "fmt"""",
       root.blockIterator.map(generateError),
+    )
+
+  private[service] def generateUniqueConstant(): String =
+    mkCode.lines(
+      "// https://www.postgresql.org/docs/9.3/errcodes-appendix.html",
+      genConst("psqlUniqueViolation", doubleQuote("unique_violation")),
     )
 }

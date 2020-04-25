@@ -347,7 +347,7 @@ object GoServiceMainHandlersGenerator {
         )
     }
 
-  /** Generate DAO call block error handling for Read, Update and Delete */
+  /** Generate DAO call block error handling for Read and Delete */
   private[main] def generateDAOCallErrorBlock(root: ServiceRoot, metricSuffix: Option[String]): String =
     genIfErr(
       genSwitchReturn(

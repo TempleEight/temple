@@ -9,7 +9,7 @@ import (
 	"github.com/google/uuid"
 
 	// pq acts as the driver for SQL requests
-	_ "github.com/lib/pq"
+	"github.com/lib/pq"
 )
 
 // BaseDatastore provides the basic datastore methods
@@ -128,6 +128,9 @@ type DeleteFredInput struct {
 	ID uuid.UUID
 }
 
+// https://www.postgresql.org/docs/9.3/errcodes-appendix.html
+const psqlUniqueViolation = "unique_violation"
+
 // Init opens the datastore connection, returning a DAO
 func Init(config *util.Config) (*DAO, error) {
 	connStr := fmt.Sprintf("user=%s dbname=%s host=%s sslmode=%s", config.User, config.DBName, config.Host, config.SSLMode)
@@ -188,6 +191,13 @@ func (dao *DAO) CreateSimpleTempleTestUser(input CreateSimpleTempleTestUserInput
 	var simpleTempleTestUser SimpleTempleTestUser
 	err := row.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
 	if err != nil {
+		// pq specific error
+		if err, ok := err.(*pq.Error); ok {
+			if err.Code.Name() == psqlUniqueViolation {
+				return nil, ErrDuplicateSimpleTempleTestUser
+			}
+		}
+
 		return nil, err
 	}
 
@@ -219,6 +229,13 @@ func (dao *DAO) UpdateSimpleTempleTestUser(input UpdateSimpleTempleTestUserInput
 	var simpleTempleTestUser SimpleTempleTestUser
 	err := row.Scan(&simpleTempleTestUser.ID, &simpleTempleTestUser.SimpleTempleTestUser, &simpleTempleTestUser.Email, &simpleTempleTestUser.FirstName, &simpleTempleTestUser.LastName, &simpleTempleTestUser.CreatedAt, &simpleTempleTestUser.NumberOfDogs, &simpleTempleTestUser.Yeets, &simpleTempleTestUser.CurrentBankBalance, &simpleTempleTestUser.BirthDate, &simpleTempleTestUser.BreakfastTime)
 	if err != nil {
+		// pq specific error
+		if err, ok := err.(*pq.Error); ok {
+			if err.Code.Name() == psqlUniqueViolation {
+				return nil, ErrDuplicateSimpleTempleTestUser
+			}
+		}
+
 		switch err {
 		case sql.ErrNoRows:
 			return nil, ErrSimpleTempleTestUserNotFound(input.ID.String())
