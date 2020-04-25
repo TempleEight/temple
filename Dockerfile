@@ -1,4 +1,4 @@
-FROM java:8-jdk-alpine
+FROM openjdk:13-alpine
 WORKDIR /usr/bin
 
 RUN apk add --update ca-certificates openssl && update-ca-certificates
