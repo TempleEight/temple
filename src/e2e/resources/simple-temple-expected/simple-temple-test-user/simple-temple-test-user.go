@@ -348,7 +348,12 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	simpleTempleTestUser, err := env.dao.CreateSimpleTempleTestUser(input)
 	timer.ObserveDuration()
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreate)
+		switch err.(type) {
+		case dao.ErrDuplicateSimpleTempleTestUser:
+			respondWithError(w, err.Error(), http.StatusForbidden, metric.RequestCreate)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreate)
+		}
 		return
 	}
 
@@ -520,6 +525,8 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestUserNotFound:
 			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestUpdate)
+		case dao.ErrDuplicateSimpleTempleTestUser:
+			respondWithError(w, err.Error(), http.StatusForbidden, metric.RequestUpdate)
 		default:
 			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdate)
 		}

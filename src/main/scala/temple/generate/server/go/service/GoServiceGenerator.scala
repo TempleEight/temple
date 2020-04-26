@@ -1,5 +1,6 @@
 package temple.generate.server.go.service
 
+import temple.ast.Annotation.Unique
 import temple.ast.AttributeType
 import temple.ast.Metadata.{Readable, Writable}
 import temple.generate.CRUD
@@ -90,6 +91,7 @@ object GoServiceGenerator extends ServiceGenerator {
         root.blockIterator.map { block =>
           GoServiceDAOInputStructsGenerator.generateStructs(block)
         },
+        when(root.contains(Unique)) { GoServiceDAOGenerator.generateUniqueConstant() },
         GoCommonDAOGenerator.generateInit(),
         GoServiceDAOGenerator.generateQueryFunctions(root.blockIterator.flatMap(_.operations).toSet),
         root.blockIterator.map { block =>
