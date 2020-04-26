@@ -1,10 +1,11 @@
 package temple.generate.server.go.service.main
 
+import temple.ast.Annotation.Unique
 import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Create
 import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
-import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
+import temple.generate.server.go.GoHTTPStatus.{StatusForbidden, StatusInternalServerError}
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
@@ -46,6 +47,32 @@ object GoServiceMainCreateHandlerGenerator {
     )
   }
 
+  private def generateDAOCallErrorBlock(block: AttributesRoot, metricSuffix: Option[String]): String = {
+    val defaultError = generateRespondWithError(
+      genHTTPEnum(StatusInternalServerError),
+      metricSuffix,
+      "Something went wrong: %s",
+      genMethodCall("err", "Error"),
+    )
+    genIfErr(
+      if (block.contains(Unique)) {
+        genSwitchReturn(
+          "err.(type)",
+          ListMap(
+            s"dao.ErrDuplicate${block.name}" -> generateRespondWithError(
+              genHTTPEnum(StatusForbidden),
+              metricSuffix,
+              genMethodCall("err", "Error"),
+            ),
+          ),
+          defaultError,
+        )
+      } else {
+        mkCode.lines(defaultError, genReturn())
+      },
+    )
+  }
+
   private def generateDAOCallBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
     mkCode.lines(
       metricSuffix.map(metricSuffix => generateMetricTimerDecl(metricSuffix)),
@@ -59,14 +86,7 @@ object GoServiceMainCreateHandlerGenerator {
         "err",
       ),
       metricSuffix.map(_ => generateMetricTimerObservation()),
-      genIfErr(
-        generateRespondWithErrorReturn(
-          genHTTPEnum(StatusInternalServerError),
-          metricSuffix,
-          "Something went wrong: %s",
-          genMethodCall("err", "Error"),
-        ),
-      ),
+      generateDAOCallErrorBlock(block, metricSuffix),
     )
 
   /** Generate the create handler function */

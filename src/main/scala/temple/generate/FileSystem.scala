@@ -1,5 +1,7 @@
 package temple.generate
 
+import io.circe.KeyEncoder
+
 object FileSystem {
   type Files       = Map[File, FileContent]
   type FileContent = String
@@ -11,4 +13,5 @@ object FileSystem {
 
     override def toString: FileContent = s"$folder/$filename"
   }
+  implicit def fileKeyEncoder: KeyEncoder[File] = _.toString
 }

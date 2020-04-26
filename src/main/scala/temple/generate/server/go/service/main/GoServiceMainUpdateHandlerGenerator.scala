@@ -1,9 +1,11 @@
 package temple.generate.server.go.service.main
 
+import temple.ast.Annotation.Unique
 import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Update
 import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.server.go.GoHTTPStatus.{StatusForbidden, StatusInternalServerError, StatusNotFound}
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
@@ -25,9 +27,34 @@ object GoServiceMainUpdateHandlerGenerator {
     )
   }
 
+  private def generateDAOCallErrorBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
+    genIfErr(
+      genSwitchReturn(
+        "err.(type)",
+        ListMap(
+          s"dao.Err${block.name}NotFound" -> generateRespondWithError(
+            genHTTPEnum(StatusNotFound),
+            metricSuffix,
+            genMethodCall("err", "Error"),
+          ),
+        ) ++ when(block.contains(Unique)) {
+          s"dao.ErrDuplicate${block.name}" -> generateRespondWithError(
+            genHTTPEnum(StatusForbidden),
+            metricSuffix,
+            genMethodCall("err", "Error"),
+          )
+        },
+        generateRespondWithError(
+          genHTTPEnum(StatusInternalServerError),
+          metricSuffix,
+          "Something went wrong: %s",
+          genMethodCall("err", "Error"),
+        ),
+      ),
+    )
+
   private def generateDAOCallBlock(
     block: AttributesRoot,
-    parent: Option[ServiceRoot],
     metricSuffix: Option[String],
   ): String =
     mkCode.lines(
@@ -80,7 +107,7 @@ object GoServiceMainUpdateHandlerGenerator {
           },
           generateDAOInput(block),
           generateInvokeBeforeHookBlock(block, Update, metricSuffix),
-          generateDAOCallBlock(block, parent, metricSuffix),
+          generateDAOCallBlock(block, metricSuffix),
           generateInvokeAfterHookBlock(block, Update, metricSuffix),
           generateJSONResponse(s"update${block.name}", responseMap),
           metricSuffix.map(metricSuffix => generateMetricSuccess(metricSuffix)),

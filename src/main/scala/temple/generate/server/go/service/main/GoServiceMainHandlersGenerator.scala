@@ -405,7 +405,7 @@ object GoServiceMainHandlersGenerator {
         )
     }
 
-  /** Generate DAO call block error handling for Read, Update and Delete */
+  /** Generate DAO call block error handling for Read and Delete */
   private[main] def generateDAOCallErrorBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
     mkCode.lines(
       genIfErr(
