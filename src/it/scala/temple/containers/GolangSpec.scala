@@ -5,17 +5,18 @@ import com.whisk.docker.DockerFactory
 import com.whisk.docker.impl.spotify.SpotifyDockerFactory
 import com.whisk.docker.scalatest.DockerTestKit
 import io.circe.syntax._
-import org.scalatest.BeforeAndAfterAll
 import scalaj.http.Http
 import temple.DSL.DSLProcessor
 import temple.DSL.semantics.Analyzer
 import temple.builder.project.ProjectBuilder
 import temple.detail.LanguageDetail.GoLanguageDetail
 import temple.generate.FileSystem._
-import temple.utils.StringUtils
 import temple.utils.MonadUtils.FromEither
+import temple.utils.StringUtils
 
-abstract class GolangSpec extends DockerShell2HttpService(8081) with DockerTestKit with BeforeAndAfterAll {
+import scala.collection.immutable.SortedMap
+
+abstract class GolangSpec extends DockerShell2HttpService(8081) with DockerTestKit {
   implicit override val dockerFactory: DockerFactory = new SpotifyDockerFactory(DefaultDockerClient.fromEnv().build())
 
   // Validate a given Go file, returning the output of the Go compiler
@@ -25,12 +26,22 @@ abstract class GolangSpec extends DockerShell2HttpService(8081) with DockerTestK
   }
 
   def validateAll(files: Files, entryFile: File): String = {
-    val json = files.map { case (file, contents) => (file.folder + "/" + file.filename, contents) }.asJson.toString()
-    Http(golangVerifyUrl)
+    val json = files.asJson.toString()
+    val errors = Http(golangVerifyUrl)
       .params(Map("src" -> json, "root" -> entryFile.folder, "entrypoint" -> entryFile.filename))
-      .timeout(connTimeoutMs = 1000, readTimeoutMs = 30000)
+      .timeout(connTimeoutMs = 1000, readTimeoutMs = 60000)
       .asString
       .body
+    if (errors.nonEmpty) {
+      for ((file, content) <- files.to(SortedMap)) {
+        System.err.println(s"$file:")
+        val marginWidth = 6 // width of margin for column numbers: ≤4 for line number, 1 for colon, ≥1 space
+        for ((line, i) <- content.linesIterator.zipWithIndex) {
+          System.err.println(s"${i + 1}:".padTo(marginWidth, ' ') + line)
+        }
+      }
+    }
+    errors
   }
 
   protected def buildAndValidate(templefile: String): Iterable[String] = {

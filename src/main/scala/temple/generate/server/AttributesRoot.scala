@@ -2,6 +2,7 @@ package temple.generate.server
 
 import temple.ast.AbstractAttribute
 import temple.ast.AbstractAttribute.Attribute
+import temple.ast.Annotation.ValueAnnotation
 import temple.ast.Metadata.{Database, Metrics, Readable, Writable}
 import temple.generate.CRUD.CRUD
 import temple.generate.server.AbstractAttributesRoot.AbstractServiceRoot
@@ -21,6 +22,8 @@ sealed trait AttributesRoot extends AbstractAttributesRoot {
   def hasAuthBlock: Boolean
   def projectUsesAuth: Boolean
 
+  def structName: String
+
   def requestAttributes: ListMap[String, AbstractAttribute] = attributes.filter { case (_, attr) => attr.inRequest }
   def storedAttributes: ListMap[String, AbstractAttribute]  = attributes.filter { case (_, attr) => attr.isStored }
 
@@ -29,6 +32,12 @@ sealed trait AttributesRoot extends AbstractAttributesRoot {
   }
 
   def operations: SortedSet[CRUD] = opQueries.keySet
+
+  @inline final def isStruct: Boolean = parentAttribute.nonEmpty
+
+  // Determine if any attribute in this block contains a given annotation
+  def contains(annotation: ValueAnnotation): Boolean =
+    attributes.values.map(_.valueAnnotations).exists(_.contains(annotation))
 }
 
 object AttributesRoot {
@@ -72,6 +81,8 @@ object AttributesRoot {
     def blockIterator: Iterator[AttributesRoot] = Iterator(this) ++ structs
 
     override def parentAttribute: None.type = None
+
+    override def structName: String = ""
   }
 
   case class StructRoot(
@@ -86,5 +97,7 @@ object AttributesRoot {
   ) extends AttributesRoot {
     override def createdByAttribute: None.type = None
     override def hasAuthBlock: Boolean         = false
+
+    override def structName: String = name
   }
 }

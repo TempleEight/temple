@@ -52,6 +52,20 @@ type updateSimpleTempleTestUserRequest struct {
 	BreakfastTime        *string  `json:"breakfastTime" validate:"required"`
 }
 
+// createFredRequest contains the client-provided information required to create a single fred
+type createFredRequest struct {
+	Field  *string    `json:"field" validate:"required"`
+	Friend *uuid.UUID `json:"friend" validate:"required"`
+	Image  *string    `json:"image" validate:"base64,required"`
+}
+
+// updateFredRequest contains the client-provided information required to update a single fred
+type updateFredRequest struct {
+	Field  *string    `json:"field" validate:"required"`
+	Friend *uuid.UUID `json:"friend" validate:"required"`
+	Image  *string    `json:"image" validate:"base64,required"`
+}
+
 // listSimpleTempleTestUserElement contains a single simpleTempleTestUser list element
 type listSimpleTempleTestUserElement struct {
 	ID                   uuid.UUID `json:"id"`
@@ -111,6 +125,43 @@ type updateSimpleTempleTestUserResponse struct {
 	CurrentBankBalance   float32   `json:"currentBankBalance"`
 	BirthDate            string    `json:"birthDate"`
 	BreakfastTime        string    `json:"breakfastTime"`
+}
+
+// listFredElement contains a single fred list element
+type listFredElement struct {
+	ID     uuid.UUID `json:"id"`
+	Field  string    `json:"field"`
+	Friend uuid.UUID `json:"friend"`
+	Image  string    `json:"image"`
+}
+
+// listFredResponse contains a single fred list to be returned to the client
+type listFredResponse struct {
+	FredList []listFredElement
+}
+
+// createFredResponse contains a newly created fred to be returned to the client
+type createFredResponse struct {
+	ID     uuid.UUID `json:"id"`
+	Field  string    `json:"field"`
+	Friend uuid.UUID `json:"friend"`
+	Image  string    `json:"image"`
+}
+
+// readFredResponse contains a single fred to be returned to the client
+type readFredResponse struct {
+	ID     uuid.UUID `json:"id"`
+	Field  string    `json:"field"`
+	Friend uuid.UUID `json:"friend"`
+	Image  string    `json:"image"`
+}
+
+// updateFredResponse contains a newly updated fred to be returned to the client
+type updateFredResponse struct {
+	ID     uuid.UUID `json:"id"`
+	Field  string    `json:"field"`
+	Friend uuid.UUID `json:"friend"`
+	Image  string    `json:"image"`
 }
 
 // defaultRouter generates a router for this service
@@ -297,7 +348,12 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	simpleTempleTestUser, err := env.dao.CreateSimpleTempleTestUser(input)
 	timer.ObserveDuration()
 	if err != nil {
-		respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreate)
+		switch err.(type) {
+		case dao.ErrDuplicateSimpleTempleTestUser:
+			respondWithError(w, err.Error(), http.StatusForbidden, metric.RequestCreate)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestCreate)
+		}
 		return
 	}
 
@@ -469,6 +525,8 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		switch err.(type) {
 		case dao.ErrSimpleTempleTestUserNotFound:
 			respondWithError(w, err.Error(), http.StatusNotFound, metric.RequestUpdate)
+		case dao.ErrDuplicateSimpleTempleTestUser:
+			respondWithError(w, err.Error(), http.StatusForbidden, metric.RequestUpdate)
 		default:
 			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestUpdate)
 		}

@@ -59,6 +59,30 @@ type updateComplexUserRequest struct {
 	BlobField          *string  `json:"blobField" validate:"base64,required"`
 }
 
+// createTempleUserRequest contains the client-provided information required to create a single templeUser
+type createTempleUserRequest struct {
+	IntField      *int32   `json:"intField" validate:"required"`
+	DoubleField   *float64 `json:"doubleField" validate:"required"`
+	StringField   *string  `json:"stringField" validate:"required"`
+	BoolField     *bool    `json:"boolField" validate:"required"`
+	DateField     *string  `json:"dateField" validate:"required"`
+	TimeField     *string  `json:"timeField" validate:"required"`
+	DateTimeField *string  `json:"dateTimeField" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
+	BlobField     *string  `json:"blobField" validate:"base64,required"`
+}
+
+// updateTempleUserRequest contains the client-provided information required to update a single templeUser
+type updateTempleUserRequest struct {
+	IntField      *int32   `json:"intField" validate:"required"`
+	DoubleField   *float64 `json:"doubleField" validate:"required"`
+	StringField   *string  `json:"stringField" validate:"required"`
+	BoolField     *bool    `json:"boolField" validate:"required"`
+	DateField     *string  `json:"dateField" validate:"required"`
+	TimeField     *string  `json:"timeField" validate:"required"`
+	DateTimeField *string  `json:"dateTimeField" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
+	BlobField     *string  `json:"blobField" validate:"base64,required"`
+}
+
 // createComplexUserResponse contains a newly created complexUser to be returned to the client
 type createComplexUserResponse struct {
 	ID                 uuid.UUID `json:"id"`
@@ -108,6 +132,45 @@ type updateComplexUserResponse struct {
 	TimeField          string    `json:"timeField"`
 	DateTimeField      string    `json:"dateTimeField"`
 	BlobField          string    `json:"blobField"`
+}
+
+// createTempleUserResponse contains a newly created templeUser to be returned to the client
+type createTempleUserResponse struct {
+	ID            uuid.UUID `json:"id"`
+	IntField      int32     `json:"intField"`
+	DoubleField   float64   `json:"doubleField"`
+	StringField   string    `json:"stringField"`
+	BoolField     bool      `json:"boolField"`
+	DateField     string    `json:"dateField"`
+	TimeField     string    `json:"timeField"`
+	DateTimeField string    `json:"dateTimeField"`
+	BlobField     string    `json:"blobField"`
+}
+
+// readTempleUserResponse contains a single templeUser to be returned to the client
+type readTempleUserResponse struct {
+	ID            uuid.UUID `json:"id"`
+	IntField      int32     `json:"intField"`
+	DoubleField   float64   `json:"doubleField"`
+	StringField   string    `json:"stringField"`
+	BoolField     bool      `json:"boolField"`
+	DateField     string    `json:"dateField"`
+	TimeField     string    `json:"timeField"`
+	DateTimeField string    `json:"dateTimeField"`
+	BlobField     string    `json:"blobField"`
+}
+
+// updateTempleUserResponse contains a newly updated templeUser to be returned to the client
+type updateTempleUserResponse struct {
+	ID            uuid.UUID `json:"id"`
+	IntField      int32     `json:"intField"`
+	DoubleField   float64   `json:"doubleField"`
+	StringField   string    `json:"stringField"`
+	BoolField     bool      `json:"boolField"`
+	DateField     string    `json:"dateField"`
+	TimeField     string    `json:"timeField"`
+	DateTimeField string    `json:"dateTimeField"`
+	BlobField     string    `json:"blobField"`
 }
 
 // defaultRouter generates a router for this service

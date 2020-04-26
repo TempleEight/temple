@@ -2,9 +2,8 @@ package temple.generate.server.go.service.main
 
 import temple.ast.AttributeType
 import temple.ast.AttributeType.{BlobType, DateTimeType, DateType, TimeType}
-import temple.generate.CRUD
-import temple.generate.CRUD.{CRUD, Create, Read, Update}
-import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.CRUD._
+import temple.generate.server.AttributesRoot
 import temple.generate.server.go.common.GoCommonGenerator.{genStruct, genStructWithAnnotations, generateGoType}
 import temple.generate.utils.CodeTerm.mkCode
 import temple.utils.StringUtils.{backTick, doubleQuote}
@@ -69,18 +68,18 @@ object GoServiceMainStructGenerator {
     backTick(mkCode(generateJSONAnnotation(name), generateValidatorAnnotation(attrType)))
 
   private def generateRequestStruct(
-    root: ServiceRoot,
+    block: AttributesRoot,
     operation: CRUD,
     fields: Iterable[(String, String, String)],
   ): String =
     mkCode.lines(
-      s"// ${operation.toString.toLowerCase}${root.name}Request contains the client-provided information " +
-      s"required to ${operation.toString.toLowerCase} a single ${root.decapitalizedName}",
-      genStructWithAnnotations(s"${operation.toString.toLowerCase}${root.name}Request", fields),
+      s"// ${operation.toString.toLowerCase}${block.name}Request contains the client-provided information " +
+      s"required to ${operation.toString.toLowerCase} a single ${block.decapitalizedName}",
+      genStructWithAnnotations(s"${operation.toString.toLowerCase}${block.name}Request", fields),
     )
 
-  private[service] def generateRequestStructs(root: ServiceRoot): String = {
-    val fields = root.requestAttributes.map {
+  private[service] def generateRequestStructs(block: AttributesRoot): String = {
+    val fields = block.requestAttributes.map {
       case (name, attr) =>
         (
           name.capitalize,
@@ -89,11 +88,11 @@ object GoServiceMainStructGenerator {
         )
     }
     mkCode.doubleLines(
-      when(root.operations contains CRUD.Create) {
-        generateRequestStruct(root, CRUD.Create, fields)
+      when(block.operations contains Create) {
+        generateRequestStruct(block, Create, fields)
       },
-      when(root.operations contains CRUD.Update) {
-        generateRequestStruct(root, CRUD.Update, fields)
+      when(block.operations contains Update) {
+        generateRequestStruct(block, Update, fields)
       },
     )
   }
@@ -104,46 +103,47 @@ object GoServiceMainStructGenerator {
       case _                                                => generateGoType(attributeType)
     }
 
-  private def generateListResponseStructs(root: ServiceRoot, fields: Iterable[(String, String, String)]): String =
+  private def generateListResponseStructs(block: AttributesRoot, fields: Iterable[(String, String, String)]): String =
     mkCode.lines(
-      s"// list${root.name}Element contains a single ${root.decapitalizedName} list element",
-      genStructWithAnnotations(s"list${root.name}Element", fields),
+      s"// list${block.name}Element contains a single ${block.decapitalizedName} list element",
+      genStructWithAnnotations(s"list${block.name}Element", fields),
       "",
-      s"// list${root.name}Response contains a single ${root.decapitalizedName} list to be returned to the client",
+      s"// list${block.name}Response contains a single ${block.decapitalizedName} list to be returned to the client",
       genStruct(
-        s"list${root.name}Response",
-        ListMap(s"${root.name}List" -> s"[]list${root.name}Element"),
+        s"list${block.name}Response",
+        ListMap(s"${block.name}List" -> s"[]list${block.name}Element"),
       ),
     )
 
   private def generateResponseStruct(
-    root: ServiceRoot,
+    block: AttributesRoot,
     operation: CRUD,
     fields: Iterable[(String, String, String)],
   ): String =
     mkCode.lines(
       mkCode(
-        s"// ${operation.toString.toLowerCase}${root.name}Response contains a",
+        s"// ${operation.toString.toLowerCase}${block.name}Response contains a",
         operation match {
-          case Create => s"newly created ${root.decapitalizedName}"
-          case Read   => s"single ${root.decapitalizedName}"
-          case Update => s"newly updated ${root.decapitalizedName}"
+          case Create                   => s"newly created ${block.decapitalizedName}"
+          case Read                     => s"single ${block.decapitalizedName}"
+          case Update                   => s"newly updated ${block.decapitalizedName}"
+          case Delete | Identify | List => throw new MatchError(s"$operation should not have a response struct")
         },
         "to be returned to the client",
       ),
-      genStructWithAnnotations(s"${operation.toString.toLowerCase}${root.name}Response", fields),
+      genStructWithAnnotations(s"${operation.toString.toLowerCase}${block.name}Response", fields),
     )
 
-  private[service] def generateResponseStructs(root: ServiceRoot): String = {
+  private[service] def generateResponseStructs(block: AttributesRoot): String = {
     // Response struct fields include ID and user-defined attributes without the @server annotation
     val fields = Iterable(
         (
-          root.idAttribute.name.toUpperCase,
+          block.idAttribute.name.toUpperCase,
           generateRequestResponseType(AttributeType.UUIDType),
-          backTick(generateJSONAnnotation(root.idAttribute.name)),
+          backTick(generateJSONAnnotation(block.idAttribute.name)),
         ),
       ) ++
-      root.attributes.collect {
+      block.attributes.collect {
         case (name, attribute) if attribute.inResponse =>
           (
             name.capitalize,
@@ -152,9 +152,9 @@ object GoServiceMainStructGenerator {
           )
       }
     mkCode.doubleLines(
-      when(root.operations contains CRUD.List) { generateListResponseStructs(root, fields) },
-      for (operation <- root.operations intersect Set(CRUD.Create, CRUD.Read, CRUD.Update))
-        yield generateResponseStruct(root, operation, fields),
+      when(block.operations contains List) { generateListResponseStructs(block, fields) },
+      for (operation <- block.operations intersect Set(Create, Read, Update))
+        yield generateResponseStruct(block, operation, fields),
     )
   }
 }

@@ -8,6 +8,7 @@ import temple.generate.CRUD._
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus._
 import temple.generate.server.go.common.GoCommonGenerator._
+import temple.generate.server.go.service.GoServiceHookGenerator.hookSuffix
 import temple.generate.server.go.service.main.GoServiceMainCreateHandlerGenerator.generateCreateHandler
 import temple.generate.server.go.service.main.GoServiceMainDeleteHandlerGenerator.generateDeleteHandler
 import temple.generate.server.go.service.main.GoServiceMainIdentifyHandlerGenerator.generateIdentifyHandler
@@ -346,7 +347,7 @@ object GoServiceMainHandlersGenerator {
         )
     }
 
-  /** Generate DAO call block error handling for Read, Update and Delete */
+  /** Generate DAO call block error handling for Read and Delete */
   private[main] def generateDAOCallErrorBlock(root: ServiceRoot, metricSuffix: Option[String]): String =
     genIfErr(
       genSwitchReturn(
@@ -385,7 +386,7 @@ object GoServiceMainHandlersGenerator {
       }) ++ when(root.projectUsesAuth) { "auth" }
 
     genForLoop(
-      genDeclareAndAssign(s"range env.hook.before${operation.toString}Hooks", "_", "hook"),
+      genDeclareAndAssign(s"range env.hook.before${operation.toString}${hookSuffix(root)}Hooks", "_", "hook"),
       mkCode.lines(
         genDeclareAndAssign(
           genFunctionCall("(*hook)", hookArguments),
@@ -411,7 +412,7 @@ object GoServiceMainHandlersGenerator {
       }) ++ when(root.projectUsesAuth) { "auth" }
 
     genForLoop(
-      genDeclareAndAssign(s"range env.hook.after${operation.toString}Hooks", "_", "hook"),
+      genDeclareAndAssign(s"range env.hook.after${operation.toString}${hookSuffix(root)}Hooks", "_", "hook"),
       mkCode.lines(
         genDeclareAndAssign(
           genFunctionCall("(*hook)", hookArguments),

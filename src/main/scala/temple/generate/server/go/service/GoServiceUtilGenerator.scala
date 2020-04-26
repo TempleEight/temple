@@ -4,6 +4,8 @@ import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.FileUtils
 import temple.utils.StringUtils.doubleQuote
 
+import scala.Option.when
+
 object GoServiceUtilGenerator {
 
   private[service] def generateImports(): String = {
@@ -16,6 +18,11 @@ object GoServiceUtilGenerator {
   private[service] def generateAuthStruct(): String =
     FileUtils.readResources("go/genFiles/service/util/auth_struct.go.snippet").stripLineEnd
 
-  private[service] def generateIDsFromRequest(): String =
-    FileUtils.readResources("go/genFiles/service/util/ids_from_request.go.snippet").stripLineEnd
+  private[service] def generateIDsFromRequest(hasStructs: Boolean): String =
+    mkCode.doubleLines(
+      FileUtils.readResources("go/genFiles/service/util/ids_from_request.go.snippet").stripLineEnd,
+      when(hasStructs) {
+        FileUtils.readResources("go/genFiles/service/util/struct_parent_id_from_request.go.snippet").stripLineEnd
+      },
+    )
 }
