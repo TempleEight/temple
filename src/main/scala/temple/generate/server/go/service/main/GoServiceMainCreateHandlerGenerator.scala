@@ -75,7 +75,7 @@ object GoServiceMainCreateHandlerGenerator {
 
   private def generateDAOCallBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
     mkCode.lines(
-      metricSuffix.map(metricSuffix => generateMetricTimerDecl(metricSuffix)),
+      metricSuffix.map(generateMetricTimerDecl),
       genDeclareAndAssign(
         genMethodCall(
           "env.dao",
@@ -130,7 +130,7 @@ object GoServiceMainCreateHandlerGenerator {
           generateDAOCallBlock(block, metricSuffix),
           generateInvokeAfterHookBlock(block, Create, metricSuffix),
           generateJSONResponse(s"create${block.name}", responseMap),
-          metricSuffix.map(metricSuffix => generateMetricSuccess(metricSuffix)),
+          metricSuffix.map(generateMetricSuccess),
         ),
       ),
     )

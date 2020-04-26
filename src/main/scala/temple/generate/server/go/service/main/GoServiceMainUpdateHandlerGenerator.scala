@@ -53,12 +53,9 @@ object GoServiceMainUpdateHandlerGenerator {
       ),
     )
 
-  private def generateDAOCallBlock(
-    block: AttributesRoot,
-    metricSuffix: Option[String],
-  ): String =
+  private def generateDAOCallBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
     mkCode.lines(
-      metricSuffix.map(metricSuffix => generateMetricTimerDecl(metricSuffix)),
+      metricSuffix.map(generateMetricTimerDecl),
       genDeclareAndAssign(
         genMethodCall("env.dao", s"Update${block.name}", "input"),
         block.decapitalizedName,
@@ -110,7 +107,7 @@ object GoServiceMainUpdateHandlerGenerator {
           generateDAOCallBlock(block, metricSuffix),
           generateInvokeAfterHookBlock(block, Update, metricSuffix),
           generateJSONResponse(s"update${block.name}", responseMap),
-          metricSuffix.map(metricSuffix => generateMetricSuccess(metricSuffix)),
+          metricSuffix.map(generateMetricSuccess),
         ),
       ),
     )

@@ -2,6 +2,7 @@ package temple.generate.server.go.service.main
 
 import temple.generate.CRUD.Identify
 import temple.generate.server.AttributesRoot
+import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._
@@ -40,7 +41,7 @@ object GoServiceMainIdentifyHandlerGenerator {
       generateDAOInput(block),
       generateInvokeBeforeHookBlock(block, Identify, metricSuffix),
       mkCode.lines(
-        metricSuffix.map(metricSuffix => generateMetricTimerDecl(metricSuffix)),
+        metricSuffix.map(generateMetricTimerDecl),
         generateDAOCall(block),
         metricSuffix.map(_ => generateMetricTimerObservation()),
         generateDAOCallErrorBlock(block, metricSuffix),
@@ -81,7 +82,7 @@ object GoServiceMainIdentifyHandlerGenerator {
           generateExtractAuthBlock(metricSuffix),
           generateDAOCallBlock(block, parent, metricSuffix),
           generateRedirectResponse(block),
-          metricSuffix.map(metricSuffix => generateMetricSuccess(metricSuffix)),
+          metricSuffix.map(generateMetricSuccess),
         ),
       ),
     )

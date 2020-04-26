@@ -3,6 +3,7 @@ package temple.generate.server.go.service.main
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD.Read
 import temple.generate.server.AttributesRoot
+import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainGenerator.{generateDAOReadCall, generateDAOReadInput}
@@ -24,9 +25,9 @@ object GoServiceMainReadHandlerGenerator {
       generateDAOReadInput(block),
       generateInvokeBeforeHookBlock(block, Read, metricSuffix),
       mkCode.lines(
-        metricSuffix.map(metricSuffix => generateMetricTimerDecl(metricSuffix)),
+        metricSuffix.map(generateMetricTimerDecl),
         generateDAOReadCall(block),
-        when(metricSuffix.isDefined) { generateMetricTimerObservation() },
+        metricSuffix.map(_ => generateMetricTimerObservation()),
         generateDAOCallErrorBlock(block, metricSuffix),
       ),
       generateInvokeAfterHookBlock(block, Read, metricSuffix),
@@ -57,7 +58,7 @@ object GoServiceMainReadHandlerGenerator {
           },
           generateDAOCallBlock(block, parent, metricSuffix),
           generateJSONResponse(s"read${block.name}", responseMap),
-          metricSuffix.map(metricSuffix => generateMetricSuccess(metricSuffix)),
+          metricSuffix.map(generateMetricSuccess),
         ),
       ),
     )

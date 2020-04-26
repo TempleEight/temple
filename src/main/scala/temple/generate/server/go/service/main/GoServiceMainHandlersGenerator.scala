@@ -6,6 +6,7 @@ import temple.ast.Metadata.Readable
 import temple.ast.{AbstractAttribute, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.AttributesRoot
+import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus._
 import temple.generate.server.go.common.GoCommonGenerator._
@@ -100,7 +101,7 @@ object GoServiceMainHandlersGenerator {
       ),
     )
 
-  /** Generate the block for extracting ID from the request URL */
+  /** Generate the block for extracting the ID from the request URL */
   private[main] def generateExtractIDBlock(varPrefix: String, metricSuffix: Option[String]): String =
     mkCode.lines(
       genDeclareAndAssign(

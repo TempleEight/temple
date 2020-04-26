@@ -26,7 +26,7 @@ object GoServiceMainDeleteHandlerGenerator {
     metricSuffix: Option[String],
   ): String =
     mkCode.lines(
-      metricSuffix.map(metricSuffix => generateMetricTimerDecl(metricSuffix)),
+      metricSuffix.map(generateMetricTimerDecl),
       genAssign(
         genMethodCall(
           "env.dao",

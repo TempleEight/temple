@@ -3,6 +3,7 @@ package temple.generate.server.go.service.main
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD.List
 import temple.generate.server.AttributesRoot
+import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
 import temple.generate.server.go.common.GoCommonGenerator._
@@ -45,9 +46,7 @@ object GoServiceMainListHandlerGenerator {
         genMethodCall(
           "env.dao",
           s"List${block.name}",
-          when(block.readable == Readable.This || parent.nonEmpty) {
-            "input"
-          },
+          when(block.readable == Readable.This || parent.nonEmpty) { "input" },
         ),
         s"${block.decapitalizedName}List",
         "err",
@@ -106,16 +105,16 @@ object GoServiceMainListHandlerGenerator {
           queryDAOInputBlock,
           generateInvokeBeforeHookBlock(block, List, metricSuffix),
           mkCode.lines(
-            metricSuffix.map(metricSuffix => generateMetricTimerDecl(metricSuffix)),
+            metricSuffix.map(generateMetricTimerDecl),
             queryDAOBlock,
-            when(usesMetrics) { generateMetricTimerObservation() },
+            metricSuffix.map(_ => generateMetricTimerObservation()),
             queryDAOErrorBlock,
           ),
           generateInvokeAfterHookBlock(block, List, metricSuffix),
           instantiateResponseBlock,
           mapResponseBlock,
           genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", s"${block.decapitalizedName}ListResp"),
-          metricSuffix.map(metricSuffix => generateMetricSuccess(metricSuffix)),
+          metricSuffix.map(generateMetricSuccess),
         ),
       ),
     )
