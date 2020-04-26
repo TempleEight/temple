@@ -234,7 +234,7 @@ object NameClashes {
   case class NameValidator private (private val validators: Iterable[String => Boolean]) {
 
     def isValid(word: String): Boolean = validators.forall { validator =>
-      val normalized = NameValidator.normalize(word)
+      val normalized = normalize(word)
       validator(normalized)
     }
 
@@ -242,8 +242,9 @@ object NameClashes {
     def &(that: NameValidator): NameValidator = NameValidator(this.validators ++ that.validators)
   }
 
+  def normalize(string: String): String = string.toLowerCase.replaceAll("[^a-z0-9]", "")
+
   private[NameClashes] object NameValidator {
-    private def normalize(string: String): String = string.toLowerCase.replaceAll("[^a-z0-9]", "")
 
     // Combine many validators
     def combine(validators: IterableOnce[NameValidator]): NameValidator =

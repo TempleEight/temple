@@ -7,7 +7,7 @@ ImageServer: project {
 }
 
 Image: service {
-    image: data(4M);
+    imageData: data(4M);
     description: string;
     owner: User;
     #enumerable;

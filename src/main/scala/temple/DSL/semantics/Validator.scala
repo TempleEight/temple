@@ -26,6 +26,7 @@ private class Validator private (templefile: Templefile) {
 
   private def validateAttributes(
     block: AttributeBlock[_],
+    blockName: String,
     serviceName: String,
     context: SemanticContext,
   ): Map[String, AbstractAttribute] = {
@@ -53,11 +54,15 @@ private class Validator private (templefile: Templefile) {
         val database = block.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
         val language = block.lookupMetadata[Metadata.ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
 
+        if (normalize(attributeName) == normalize(blockName)) {
+          errors += context.errorMessage("Illegal attribute with same name as service")
+        }
+
         // takenNames includes this attribute’s names, so remove it
         val newName = constructUniqueName(
           attributeName,
           templefile.projectName,
-          takenNames.toSet - attributeName,
+          takenNames.toSet + serviceName - attributeName,
         )(
           validators = Seq(
             Some(templeAttributeNameValidator),
@@ -77,10 +82,9 @@ private class Validator private (templefile: Templefile) {
     * languages that are generated from the block), and entering it into the map of renamings. Note that an entry is
     * always inserted into this block, even if the same name is kept. */
   private def renameBlock(name: String, block: AttributeBlock[_]): Unit = {
-    val database      = block.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
-    val language      = block.lookupMetadata[Metadata.ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
-    val reservedNames = allGlobalNames ++ block.attributes.keySet - name
-    val newServiceName = constructUniqueName(name, templefile.projectName, reservedNames)(
+    val database = block.lookupMetadata[Metadata.Database].getOrElse(ProjectConfig.defaultDatabase)
+    val language = block.lookupMetadata[Metadata.ServiceLanguage].getOrElse(ProjectConfig.defaultLanguage)
+    val newServiceName = constructUniqueName(name, templefile.projectName, allGlobalNames - name)(
       validators = Seq(
         Some(templeServiceNameValidator),
         when(database == Metadata.Database.Postgres) { postgresValidator },
@@ -96,7 +100,7 @@ private class Validator private (templefile: Templefile) {
     val newStructs = service.structs.transform {
       case (name, struct) => validateStruct(name, struct, serviceName, context :+ name)
     }
-    val newAttributes = validateAttributes(service, serviceName, context)
+    val newAttributes = validateAttributes(service, serviceName, serviceName, context)
     val newMetadata   = validateStructMetadata(service.metadata, newAttributes, context)
 
     ServiceBlock(newAttributes, newMetadata, newStructs)
@@ -110,7 +114,7 @@ private class Validator private (templefile: Templefile) {
   ): StructBlock = {
     renameBlock(structName, struct)
 
-    val newAttributes = validateAttributes(struct, serviceName, context)
+    val newAttributes = validateAttributes(struct, structName, serviceName, context)
     val newMetadata   = validateStructMetadata(struct.metadata, newAttributes, context)
 
     StructBlock(newAttributes, newMetadata)
