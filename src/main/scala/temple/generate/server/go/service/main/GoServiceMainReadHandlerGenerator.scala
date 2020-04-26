@@ -2,7 +2,7 @@ package temple.generate.server.go.service.main
 
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD.Read
-import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.server.AttributesRoot
 import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainGenerator.{generateDAOReadCall, generateDAOReadInput}
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
@@ -13,36 +13,36 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainReadHandlerGenerator {
 
-  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean, metricSuffix: Option[String]): String =
+  private def generateDAOCallBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
     mkCode.doubleLines(
-      generateDAOReadInput(root),
-      generateInvokeBeforeHookBlock(root, Read, metricSuffix),
+      generateDAOReadInput(block),
+      generateInvokeBeforeHookBlock(block, Read, metricSuffix),
       mkCode.lines(
-        when(usesMetrics) { generateMetricTimerDecl(Read.toString) },
-        generateDAOReadCall(root),
-        when(usesMetrics) { generateMetricTimerObservation() },
-        generateDAOCallErrorBlock(root, metricSuffix),
+        metricSuffix.map(generateMetricTimerDecl),
+        generateDAOReadCall(block),
+        metricSuffix.map(_ => generateMetricTimerObservation()),
+        generateDAOCallErrorBlock(block, metricSuffix),
       ),
-      generateInvokeAfterHookBlock(root, Read, metricSuffix),
+      generateInvokeAfterHookBlock(block, Read, metricSuffix),
     )
 
   /** Generate the read handler function */
   private[main] def generateReadHandler(
-    root: ServiceRoot,
+    block: AttributesRoot,
     responseMap: ListMap[String, String],
     usesMetrics: Boolean,
   ): String = {
     val metricSuffix = when(usesMetrics) { Read.toString }
     mkCode(
-      generateHandlerDecl(root, Read),
+      generateHandlerDecl(block, Read),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(root.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
-          generateExtractIDBlock(root.decapitalizedName, metricSuffix),
-          when(root.readable == Readable.This) { generateCheckAuthorizationBlock(root, metricSuffix) },
-          generateDAOCallBlock(root, usesMetrics, metricSuffix),
-          generateJSONResponse(s"read${root.name}", responseMap),
-          when(usesMetrics) { generateMetricSuccess(Read.toString) },
+          when(block.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
+          generateExtractIDBlock(block.decapitalizedName, metricSuffix),
+          when(block.readable == Readable.This) { generateCheckAuthorizationBlock(block, metricSuffix) },
+          generateDAOCallBlock(block, metricSuffix),
+          generateJSONResponse(s"read${block.name}", responseMap),
+          metricSuffix.map(generateMetricSuccess),
         ),
       ),
     )

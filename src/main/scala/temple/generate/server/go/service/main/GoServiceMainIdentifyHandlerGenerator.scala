@@ -1,50 +1,50 @@
 package temple.generate.server.go.service.main
 
 import temple.generate.CRUD.Identify
-import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.server.AttributesRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
 
-import Option.when
+import scala.Option.when
 import scala.collection.immutable.ListMap
 
 object GoServiceMainIdentifyHandlerGenerator {
 
-  private def generateDAOInput(root: ServiceRoot): String =
+  private def generateDAOInput(block: AttributesRoot): String =
     genDeclareAndAssign(
-      genPopulateStruct(s"dao.Identify${root.name}Input", ListMap("ID" -> s"auth.ID")),
+      genPopulateStruct(s"dao.Identify${block.name}Input", ListMap("ID" -> s"auth.ID")),
       "input",
     )
 
-  private def generateDAOCall(root: ServiceRoot): String =
+  private def generateDAOCall(block: AttributesRoot): String =
     genDeclareAndAssign(
       genMethodCall(
         "env.dao",
-        s"Identify${root.name}",
+        s"Identify${block.name}",
         "input",
       ),
-      root.decapitalizedName,
+      block.decapitalizedName,
       "err",
     )
 
-  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean, metricSuffix: Option[String]): String =
+  private def generateDAOCallBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
     mkCode.doubleLines(
-      generateDAOInput(root),
-      generateInvokeBeforeHookBlock(root, Identify, metricSuffix),
+      generateDAOInput(block),
+      generateInvokeBeforeHookBlock(block, Identify, metricSuffix),
       mkCode.lines(
-        when(usesMetrics) { generateMetricTimerDecl(Identify.toString) },
-        generateDAOCall(root),
-        when(usesMetrics) { generateMetricTimerObservation() },
-        generateDAOCallErrorBlock(root, metricSuffix),
+        metricSuffix.map(generateMetricTimerDecl),
+        generateDAOCall(block),
+        metricSuffix.map(_ => generateMetricTimerObservation()),
+        generateDAOCallErrorBlock(block, metricSuffix),
       ),
-      generateInvokeAfterHookBlock(root, Identify, metricSuffix),
+      generateInvokeAfterHookBlock(block, Identify, metricSuffix),
     )
 
   // The headers used here are defined by Kong: https://docs.konghq.com/2.0.x/proxy/#3-proxying--upstream-timeouts
-  private def generateRedirectResponse(root: ServiceRoot): String = mkCode.lines(
+  private def generateRedirectResponse(block: AttributesRoot): String = mkCode.lines(
     genDeclareAndAssign(
       genMethodCall(
         "fmt",
@@ -53,7 +53,7 @@ object GoServiceMainIdentifyHandlerGenerator {
         genMethodCall("r.Header", "Get", doubleQuote("X-Forwarded-Host")),
         genMethodCall("r.Header", "Get", doubleQuote("X-Forwarded-Port")),
         "r.URL.Path",
-        s"${root.decapitalizedName}.ID",
+        s"${block.decapitalizedName}.ID",
       ),
       "url",
     ),
@@ -62,17 +62,17 @@ object GoServiceMainIdentifyHandlerGenerator {
   )
 
   /** Generate the identify handler function */
-  private[main] def generateIdentifyHandler(root: ServiceRoot, usesMetrics: Boolean): String = {
+  private[main] def generateIdentifyHandler(block: AttributesRoot, usesMetrics: Boolean): String = {
     val metricSuffix = when(usesMetrics) { Identify.toString }
 
     mkCode(
-      generateHandlerDecl(root, Identify),
+      generateHandlerDecl(block, Identify),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
           generateExtractAuthBlock(metricSuffix),
-          generateDAOCallBlock(root, usesMetrics, metricSuffix),
-          generateRedirectResponse(root),
-          when(usesMetrics) { generateMetricSuccess(Identify.toString) },
+          generateDAOCallBlock(block, metricSuffix),
+          generateRedirectResponse(block),
+          metricSuffix.map(generateMetricSuccess),
         ),
       ),
     )

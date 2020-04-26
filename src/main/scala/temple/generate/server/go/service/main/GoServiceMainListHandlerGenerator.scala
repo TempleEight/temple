@@ -1,7 +1,8 @@
 package temple.generate.server.go.service.main
 
+import temple.ast.Metadata.Readable
 import temple.generate.CRUD.List
-import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.server.AttributesRoot
 import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._
@@ -16,16 +17,15 @@ object GoServiceMainListHandlerGenerator {
   // TODO: This needs a refactor
   /** Generate the list handler function */
   private[main] def generateListHandler(
-    root: ServiceRoot,
+    block: AttributesRoot,
     responseMap: ListMap[String, String],
-    enumeratingByCreator: Boolean,
     usesMetrics: Boolean,
   ): String = {
     val metricSuffix = when(usesMetrics) { List.toString }
-    val queryDAOInputBlock = when(enumeratingByCreator) {
+    val queryDAOInputBlock = when(block.readable == Readable.This) {
       genDeclareAndAssign(
         genPopulateStruct(
-          s"dao.List${root.name}Input",
+          s"dao.List${block.name}Input",
           ListMap(s"AuthID" -> "auth.ID"),
         ),
         "input",
@@ -37,12 +37,12 @@ object GoServiceMainListHandlerGenerator {
       genDeclareAndAssign(
         genMethodCall(
           "env.dao",
-          s"List${root.name}",
-          when(enumeratingByCreator) {
+          s"List${block.name}",
+          when(block.readable == Readable.This) {
             "input"
           },
         ),
-        s"${root.decapitalizedName}List",
+        s"${block.decapitalizedName}List",
         "err",
       )
 
@@ -62,47 +62,45 @@ object GoServiceMainListHandlerGenerator {
     // Instantiate list response object
     val instantiateResponseBlock = genDeclareAndAssign(
       genPopulateStruct(
-        s"list${root.name}Response",
+        s"list${block.name}Response",
         ListMap(
-          s"${root.name}List" -> genFunctionCall("make", s"[]list${root.name}Element", "0"),
+          s"${block.name}List" -> genFunctionCall("make", s"[]list${block.name}Element", "0"),
         ),
       ),
-      s"${root.decapitalizedName}ListResp",
+      s"${block.decapitalizedName}ListResp",
     )
 
     // Map DAO result into response object
     val mapResponseBlock = genForLoop(
-      genDeclareAndAssign(s"range *${root.decapitalizedName}List", "_", root.decapitalizedName),
+      genDeclareAndAssign(s"range *${block.decapitalizedName}List", "_", block.decapitalizedName),
       genAssign(
         genFunctionCall(
           "append",
-          s"${root.decapitalizedName}ListResp.${root.name}List",
-          genPopulateStruct(s"list${root.name}Element", responseMap),
+          s"${block.decapitalizedName}ListResp.${block.name}List",
+          genPopulateStruct(s"list${block.name}Element", responseMap),
         ),
-        s"${root.decapitalizedName}ListResp.${root.name}List",
+        s"${block.decapitalizedName}ListResp.${block.name}List",
       ),
     )
 
     mkCode(
-      generateHandlerDecl(root, List),
+      generateHandlerDecl(block, List),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(root.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
-          mkCode.doubleLines(
-            queryDAOInputBlock,
-            generateInvokeBeforeHookBlock(root, List, metricSuffix),
-            mkCode.lines(
-              when(usesMetrics) { generateMetricTimerDecl(List.toString) },
-              queryDAOBlock,
-              when(usesMetrics) { generateMetricTimerObservation() },
-              queryDAOErrorBlock,
-            ),
-            generateInvokeAfterHookBlock(root, List, metricSuffix),
+          when(block.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
+          queryDAOInputBlock,
+          generateInvokeBeforeHookBlock(block, List, metricSuffix),
+          mkCode.lines(
+            metricSuffix.map(generateMetricTimerDecl),
+            queryDAOBlock,
+            metricSuffix.map(_ => generateMetricTimerObservation()),
+            queryDAOErrorBlock,
           ),
+          generateInvokeAfterHookBlock(block, List, metricSuffix),
           instantiateResponseBlock,
           mapResponseBlock,
-          genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", s"${root.decapitalizedName}ListResp"),
-          when(usesMetrics) { generateMetricSuccess(List.toString) },
+          genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", s"${block.decapitalizedName}ListResp"),
+          metricSuffix.map(generateMetricSuccess),
         ),
       ),
     )

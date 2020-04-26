@@ -34,12 +34,6 @@ object GoServiceGenerator extends ServiceGenerator {
     // Whether or not the service uses metrics
     val usesMetrics = root.metrics.isDefined
 
-    // Whether or not this service is enumerating by creator
-    lazy val enumeratingByCreator = root.readable match {
-      case Readable.All  => false
-      case Readable.This => true
-    }
-
     (Map(
       File(s"${root.kebabName}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
       File(root.kebabName, s"${root.kebabName}.go") -> mkCode.doubleLines(
@@ -64,7 +58,7 @@ object GoServiceGenerator extends ServiceGenerator {
           GoServiceMainGenerator.generateCheckAuthorization(root)
         },
         GoCommonMainGenerator.generateRespondWithErrorFunc(usesMetrics),
-        GoServiceMainHandlersGenerator.generateHandlers(root, usesComms, enumeratingByCreator, usesMetrics),
+        GoServiceMainHandlersGenerator.generateHandlers(root, usesComms, usesMetrics),
       ),
       File(root.kebabName, "setup.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
