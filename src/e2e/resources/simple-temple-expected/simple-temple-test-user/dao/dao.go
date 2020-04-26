@@ -194,7 +194,7 @@ func (dao *DAO) CreateSimpleTempleTestUser(input CreateSimpleTempleTestUserInput
 		// pq specific error
 		if err, ok := err.(*pq.Error); ok {
 			if err.Code.Name() == psqlUniqueViolation {
-				return nil, ErrDuplicateSimpleTempleTestUser
+				return nil, ErrDuplicateSimpleTempleTestUser("")
 			}
 		}
 
@@ -232,7 +232,7 @@ func (dao *DAO) UpdateSimpleTempleTestUser(input UpdateSimpleTempleTestUserInput
 		// pq specific error
 		if err, ok := err.(*pq.Error); ok {
 			if err.Code.Name() == psqlUniqueViolation {
-				return nil, ErrDuplicateSimpleTempleTestUser
+				return nil, ErrDuplicateSimpleTempleTestUser("")
 			}
 		}
 
