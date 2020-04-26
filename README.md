@@ -23,8 +23,6 @@ In addition to this, the microservices can optionally be augmented with:
 - systems for security, including JWT authentication
 - usage metrics, providing critical information about success, failure and latency
 
-Full documentation can be found at https://templeeight.github.io/temple-docs/
-
 ## Installation
 
 For installation information, see https://templeeight.github.io/temple-docs/docs/installation
