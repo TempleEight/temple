@@ -3,7 +3,6 @@ package temple.generate.server.go.service.main
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD.List
 import temple.generate.server.AttributesRoot
-import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.StatusInternalServerError
 import temple.generate.server.go.common.GoCommonGenerator._

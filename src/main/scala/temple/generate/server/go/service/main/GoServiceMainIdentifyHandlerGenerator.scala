@@ -2,7 +2,6 @@ package temple.generate.server.go.service.main
 
 import temple.generate.CRUD.Identify
 import temple.generate.server.AttributesRoot
-import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._

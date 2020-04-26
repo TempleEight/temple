@@ -3,7 +3,6 @@ package temple.generate.server.go.service.main
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD.Read
 import temple.generate.server.AttributesRoot
-import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainGenerator.{generateDAOReadCall, generateDAOReadInput}

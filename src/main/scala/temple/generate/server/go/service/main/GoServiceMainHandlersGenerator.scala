@@ -6,7 +6,6 @@ import temple.ast.Metadata.Readable
 import temple.ast.{AbstractAttribute, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.AttributesRoot
-import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus._
 import temple.generate.server.go.common.GoCommonGenerator._
