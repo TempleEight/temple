@@ -42,14 +42,33 @@ object GoServiceMainCreateHandlerGenerator {
     )
   }
 
-  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean, metricSuffix: Option[String]): String = {
+  private def generateDAOCallErrorBlock(root: ServiceRoot, metricSuffix: Option[String]): String = {
     val defaultError = generateRespondWithError(
       genHTTPEnum(StatusInternalServerError),
       metricSuffix,
       "Something went wrong: %s",
       genMethodCall("err", "Error"),
     )
+    genIfErr(
+      if (root.contains(Unique)) {
+        genSwitchReturn(
+          "err.(type)",
+          ListMap(
+            s"dao.ErrDuplicate${root.name}" -> generateRespondWithError(
+              genHTTPEnum(StatusForbidden),
+              metricSuffix,
+              genMethodCall("err", "Error"),
+            ),
+          ),
+          defaultError,
+        )
+      } else {
+        mkCode.lines(defaultError, genReturn())
+      },
+    )
+  }
 
+  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean, metricSuffix: Option[String]): String =
     mkCode.lines(
       when(usesMetrics) { generateMetricTimerDecl(Create.toString) },
       genDeclareAndAssign(
@@ -62,25 +81,8 @@ object GoServiceMainCreateHandlerGenerator {
         "err",
       ),
       when(usesMetrics) { generateMetricTimerObservation() },
-      genIfErr(
-        if (root.contains(Unique)) {
-          genSwitchReturn(
-            "err.(type)",
-            ListMap(
-              s"dao.ErrDuplicate${root.name}" -> generateRespondWithError(
-                genHTTPEnum(StatusForbidden),
-                metricSuffix,
-                genMethodCall("err", "Error"),
-              ),
-            ),
-            defaultError,
-          )
-        } else {
-          mkCode.lines(defaultError, genReturn())
-        },
-      ),
+      generateDAOCallErrorBlock(root, metricSuffix),
     )
-  }
 
   /** Generate the create handler function */
   private[main] def generateCreateHandler(
