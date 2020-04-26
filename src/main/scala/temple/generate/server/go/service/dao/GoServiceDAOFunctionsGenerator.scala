@@ -137,7 +137,7 @@ object GoServiceDAOFunctionsGenerator {
         "err, ok := err.(*pq.Error); ok",
         genIf(
           "err.Code.Name() == psqlUniqueViolation",
-          genReturn("nil", s"ErrDuplicate${block.name}(${doubleQuote("")})"),
+          genReturn("nil", s"ErrDuplicate${block.name}(err.Detail)"),
         ),
       ),
     )

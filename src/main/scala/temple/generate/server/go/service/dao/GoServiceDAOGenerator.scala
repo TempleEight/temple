@@ -92,7 +92,7 @@ object GoServiceDAOGenerator {
               "Error",
               Seq(),
               Some("string"),
-              genReturn(doubleQuote(s"Duplicate ${block.name} found")),
+              genReturn("string(e)"),
             ),
           ),
         )

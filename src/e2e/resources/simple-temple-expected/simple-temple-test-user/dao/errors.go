@@ -13,7 +13,7 @@ func (e ErrSimpleTempleTestUserNotFound) Error() string {
 type ErrDuplicateSimpleTempleTestUser string
 
 func (e ErrDuplicateSimpleTempleTestUser) Error() string {
-	return "Duplicate SimpleTempleTestUser found"
+	return string(e)
 }
 
 // ErrFredNotFound is returned when a fred for the provided ID was not found
