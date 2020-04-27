@@ -13,9 +13,6 @@ import scala.Option.when
 
 object GoServiceHookGenerator {
 
-  private[service] def hookSuffix(block: AttributesRoot): String =
-    if (block.isStruct) block.name else ""
-
   private[service] def generateImports(root: ServiceRoot): String = {
     val daoImport = s"${doubleQuote(root.module + "/dao")}"
     if (root.projectUsesAuth)
@@ -62,13 +59,13 @@ object GoServiceHookGenerator {
   private[service] def generateHookStruct(root: ServiceRoot): String = {
     val beforeCreate = root.blockIterator.map { block =>
       block.operations.toSeq.map { op =>
-        s"before${op.toString}${hookSuffix(block)}Hooks" -> s"[]*${generateBeforeHookType(block, op)}"
+        s"before${op.toString}${block.structName}Hooks" -> s"[]*${generateBeforeHookType(block, op)}"
       }
     }
 
     val afterCreate = root.blockIterator.map { block =>
       block.operations.toSeq.map { op =>
-        s"after${op.toString}${hookSuffix(block)}Hooks" -> s"[]*${generateAfterHookType(block, op)}"
+        s"after${op.toString}${block.structName}Hooks" -> s"[]*${generateAfterHookType(block, op)}"
       }
     }
 
@@ -104,13 +101,13 @@ object GoServiceHookGenerator {
   private[service] def generateAddHookMethods(root: ServiceRoot): String = {
     val beforeHooks = root.blockIterator.flatMap { block =>
       block.operations.toSeq.map { op =>
-        generateAddHookMethod("before", generateBeforeHookType(block, op), op, hookSuffix(block))
+        generateAddHookMethod("before", generateBeforeHookType(block, op), op, block.structName)
       }
     }
 
     val afterHooks = root.blockIterator.flatMap { block =>
       block.operations.toSeq.map { op =>
-        generateAddHookMethod("after", generateAfterHookType(block, op), op, hookSuffix(block))
+        generateAddHookMethod("after", generateAfterHookType(block, op), op, block.structName)
       }
     }
 
