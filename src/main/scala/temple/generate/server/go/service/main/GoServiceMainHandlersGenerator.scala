@@ -6,6 +6,7 @@ import temple.ast.Metadata.Readable
 import temple.ast.{AbstractAttribute, AttributeType}
 import temple.generate.CRUD._
 import temple.generate.server.AttributesRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus._
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.service.main.GoServiceMainCreateHandlerGenerator.generateCreateHandler
@@ -112,10 +113,68 @@ object GoServiceMainHandlersGenerator {
       ),
     )
 
+  /** Generate the block for extracting parent ID from the request URL */
+  private[main] def generateExtractParentIDBlock(varPrefix: String, metricSuffix: Option[String]): String =
+    mkCode.lines(
+      genDeclareAndAssign(
+        genMethodCall("util", "ExtractParentIDFromRequest", genMethodCall("mux", "Vars", "r")),
+        s"${varPrefix}ID",
+        "err",
+      ),
+      genIfErr(
+        generateRespondWithErrorReturn(genHTTPEnum(StatusBadRequest), metricSuffix, genMethodCall("err", "Error")),
+      ),
+    )
+
+  /** Generate the block for checking if a block’s parent is correct */
+  private[main] def generateCheckParentBlock(
+    block: AttributesRoot,
+    parent: ServiceRoot,
+    metricSuffix: Option[String],
+  ): String =
+    mkCode.lines(
+      genDeclareAndAssign(
+        genFunctionCall(
+          s"check${block.name}Parent",
+          "env",
+          s"${block.decapitalizedName}ID",
+          s"${parent.decapitalizedName}ID",
+        ),
+        "correctParent",
+        "err",
+      ),
+      genIfErr(
+        genSwitchReturn(
+          "err.(type)",
+          ListMap(
+            s"dao.Err${block.name}NotFound" -> generateRespondWithError(
+              genHTTPEnum(StatusNotFound),
+              metricSuffix,
+              doubleQuote("Not Found"),
+            ),
+          ),
+          generateRespondWithError(
+            genHTTPEnum(StatusInternalServerError),
+            metricSuffix,
+            "Something went wrong: %s",
+            genMethodCall("err", "Error"),
+          ),
+        ),
+      ),
+      genIf(
+        "!correctParent",
+        generateRespondWithErrorReturn(genHTTPEnum(StatusNotFound), metricSuffix, doubleQuote("Not Found")),
+      ),
+    )
+
   /** Generate the block for checking if a request is authorized to perform operation  */
-  private[main] def generateCheckAuthorizationBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
+  private[main] def generateCheckAuthorizationBlock(
+    block: AttributesRoot,
+    blockHasAuth: Boolean,
+    metricSuffix: Option[String],
+  ): String =
     // If the service has an auth block, we can simply check the AuthID is the same as the resource ID being requested
-    if (block.hasAuthBlock) {
+    if (blockHasAuth) {
       mkCode.lines(
         genIf(
           s"auth.ID != ${block.decapitalizedName}ID",
@@ -348,21 +407,23 @@ object GoServiceMainHandlersGenerator {
 
   /** Generate DAO call block error handling for Read and Delete */
   private[main] def generateDAOCallErrorBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
-    genIfErr(
-      genSwitchReturn(
-        "err.(type)",
-        ListMap(
-          s"dao.Err${block.name}NotFound" -> generateRespondWithError(
-            genHTTPEnum(StatusNotFound),
+    mkCode.lines(
+      genIfErr(
+        genSwitchReturn(
+          "err.(type)",
+          ListMap(
+            s"dao.Err${block.name}NotFound" -> generateRespondWithError(
+              genHTTPEnum(StatusNotFound),
+              metricSuffix,
+              genMethodCall("err", "Error"),
+            ),
+          ),
+          generateRespondWithError(
+            genHTTPEnum(StatusInternalServerError),
             metricSuffix,
+            "Something went wrong: %s",
             genMethodCall("err", "Error"),
           ),
-        ),
-        generateRespondWithError(
-          genHTTPEnum(StatusInternalServerError),
-          metricSuffix,
-          "Something went wrong: %s",
-          genMethodCall("err", "Error"),
         ),
       ),
     )
@@ -433,6 +494,7 @@ object GoServiceMainHandlersGenerator {
   /** Generate the env handler functions */
   private[service] def generateHandlers(
     block: AttributesRoot,
+    parent: Option[ServiceRoot],
     usesComms: Boolean,
     usesMetrics: Boolean,
   ): String = {
@@ -449,17 +511,17 @@ object GoServiceMainHandlersGenerator {
     mkCode.doubleLines(
       block.operations.toSeq.map {
         case List =>
-          generateListHandler(block, responseMap, usesMetrics)
+          generateListHandler(block, parent, responseMap, usesMetrics)
         case Create =>
-          generateCreateHandler(block, usesComms, responseMap, clientUsesTime, clientUsesBase64, usesMetrics)
+          generateCreateHandler(block, parent, usesComms, responseMap, clientUsesTime, clientUsesBase64, usesMetrics)
         case Read =>
-          generateReadHandler(block, responseMap, usesMetrics)
+          generateReadHandler(block, parent, responseMap, usesMetrics)
         case Update =>
-          generateUpdateHandler(block, usesComms, responseMap, clientUsesTime, clientUsesBase64, usesMetrics)
+          generateUpdateHandler(block, parent, usesComms, responseMap, clientUsesTime, clientUsesBase64, usesMetrics)
         case Delete =>
-          generateDeleteHandler(block, usesMetrics)
+          generateDeleteHandler(block, parent, usesMetrics)
         case Identify =>
-          generateIdentifyHandler(block, usesMetrics)
+          generateIdentifyHandler(block, parent, usesMetrics)
       },
     )
   }

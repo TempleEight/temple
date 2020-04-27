@@ -2,6 +2,7 @@ package temple.generate.server.go.service.main
 
 import temple.generate.CRUD.Identify
 import temple.generate.server.AttributesRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._
 import temple.generate.server.go.service.main.GoServiceMainHandlersGenerator._
@@ -62,8 +63,12 @@ object GoServiceMainIdentifyHandlerGenerator {
   )
 
   /** Generate the identify handler function */
-  private[main] def generateIdentifyHandler(block: AttributesRoot, usesMetrics: Boolean): String = {
-    val metricSuffix = when(usesMetrics) { Identify.toString }
+  private[main] def generateIdentifyHandler(
+    block: AttributesRoot,
+    parent: Option[ServiceRoot],
+    usesMetrics: Boolean,
+  ): String = {
+    val metricSuffix = when(usesMetrics) { Identify.toString + block.structName }
 
     mkCode(
       generateHandlerDecl(block, Identify),

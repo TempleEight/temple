@@ -4,6 +4,7 @@ import temple.ast.Annotation.Unique
 import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Update
 import temple.generate.server.AttributesRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.{StatusForbidden, StatusInternalServerError, StatusNotFound}
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._
@@ -67,20 +68,29 @@ object GoServiceMainUpdateHandlerGenerator {
   /** Generate the update handler function */
   private[main] def generateUpdateHandler(
     block: AttributesRoot,
+    parent: Option[ServiceRoot],
     usesComms: Boolean,
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
     clientUsesBase64: Boolean,
     usesMetrics: Boolean,
   ): String = {
-    val metricSuffix = when(usesMetrics) { Update.toString }
+    val metricSuffix = when(usesMetrics) { Update.toString + block.structName }
     mkCode(
       generateHandlerDecl(block, Update),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
           when(block.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
           generateExtractIDBlock(block.decapitalizedName, metricSuffix),
-          when(block.writable == Writable.This) { generateCheckAuthorizationBlock(block, metricSuffix) },
+          parent.map(parent =>
+            Seq(
+              generateExtractParentIDBlock(parent.decapitalizedName, metricSuffix),
+              generateCheckParentBlock(block, parent, metricSuffix),
+            ),
+          ),
+          when(block.writable == Writable.This) {
+            generateCheckAuthorizationBlock(parent getOrElse block, block.hasAuthBlock, metricSuffix)
+          },
           // Only need to handle request JSONs when there are client attributes
           when(block.requestAttributes.nonEmpty) {
             mkCode.doubleLines(

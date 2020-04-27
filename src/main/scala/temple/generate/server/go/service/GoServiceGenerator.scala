@@ -29,7 +29,8 @@ object GoServiceGenerator extends ServiceGenerator {
         .nonEmpty
 
     // Whether or not this service uses base64, by checking for attributes of type blob
-    val usesBase64 = root.attributes.values.exists(_.attributeType.isInstanceOf[AttributeType.BlobType])
+    val usesBase64 =
+      root.blockIterator.flatMap(_.attributes.values).exists(_.attributeType.isInstanceOf[AttributeType.BlobType])
 
     // Whether or not the service uses metrics
     val usesMetrics = root.metrics.isDefined
@@ -54,11 +55,16 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainGenerator.generateRouter(root),
         GoCommonMainGenerator.generateMain(root, usesComms, isAuth = false, usesMetrics),
         GoCommonMainGenerator.generateJsonMiddleware(),
-        when((root.readable == Readable.This || root.writable == Writable.This) && !root.hasAuthBlock) {
+        when(
+          (root.readable == Readable.This || root.writable == Writable.This) && (!root.hasAuthBlock || root.structs.nonEmpty),
+        ) {
           GoServiceMainGenerator.generateCheckAuthorization(root)
         },
+        root.structs.map(GoServiceMainGenerator.generateCheckParent),
         GoCommonMainGenerator.generateRespondWithErrorFunc(usesMetrics),
-        GoServiceMainHandlersGenerator.generateHandlers(root, usesComms, usesMetrics),
+        root.blockIterator.map { block =>
+          GoServiceMainHandlersGenerator.generateHandlers(block, when(root != block)(root), usesComms, usesMetrics)
+        },
       ),
       File(root.kebabName, "setup.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),

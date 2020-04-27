@@ -2,7 +2,7 @@ package temple.generate.server.go.service.main
 
 import temple.generate.CRUD._
 import temple.generate.server.AttributesRoot
-import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.server.AttributesRoot.{ServiceRoot, StructRoot}
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
 import temple.utils.StringUtils.doubleQuote
@@ -49,21 +49,23 @@ object GoServiceMainGenerator {
 
   private[service] def generateRouter(root: ServiceRoot): String = {
     val handleFuncs =
-      for (operation <- root.operations.toSeq)
-        yield operation match {
+      root.blockIterator.map { block =>
+        val urlPrefix = if (block.isStruct) s"/${root.kebabName}/{parent_id}" else ""
+        block.operations.toSeq.map {
           case List =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/all")}, env.list${root.name}Handler).Methods(http.MethodGet)"
+            s"r.HandleFunc(${doubleQuote(s"$urlPrefix/${block.kebabName}/all")}, env.list${block.name}Handler).Methods(http.MethodGet)"
           case Create =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}")}, env.create${root.name}Handler).Methods(http.MethodPost)"
+            s"r.HandleFunc(${doubleQuote(s"$urlPrefix/${block.kebabName}")}, env.create${block.name}Handler).Methods(http.MethodPost)"
           case Read =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.read${root.name}Handler).Methods(http.MethodGet)"
+            s"r.HandleFunc(${doubleQuote(s"$urlPrefix/${block.kebabName}/{id}")}, env.read${block.name}Handler).Methods(http.MethodGet)"
           case Update =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.update${root.name}Handler).Methods(http.MethodPut)"
+            s"r.HandleFunc(${doubleQuote(s"$urlPrefix/${block.kebabName}/{id}")}, env.update${block.name}Handler).Methods(http.MethodPut)"
           case Delete =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}/{id}")}, env.delete${root.name}Handler).Methods(http.MethodDelete)"
+            s"r.HandleFunc(${doubleQuote(s"$urlPrefix/${block.kebabName}/{id}")}, env.delete${block.name}Handler).Methods(http.MethodDelete)"
           case Identify =>
-            s"r.HandleFunc(${doubleQuote(s"/${root.kebabName}")}, env.identify${root.name}Handler).Methods(http.MethodGet)"
+            s"r.HandleFunc(${doubleQuote(s"$urlPrefix/${block.kebabName}")}, env.identify${block.name}Handler).Methods(http.MethodGet)"
         }
+      }
 
     mkCode.lines(
       "// defaultRouter generates a router for this service",
@@ -106,7 +108,23 @@ object GoServiceMainGenerator {
         generateDAOReadInput(root),
         generateDAOReadCall(root),
         genCheckAndReturnError("false"),
-        genReturn(s"${root.decapitalizedName}.CreatedBy == auth.ID", "nil"),
+        genReturn({
+          if (root.hasAuthBlock) s"${root.decapitalizedName}.ID == auth.ID"
+          else s"${root.decapitalizedName}.CreatedBy == auth.ID"
+        }, "nil"),
+      ),
+    )
+
+  private[service] def generateCheckParent(struct: StructRoot): String =
+    genFunc(
+      s"check${struct.name}Parent",
+      Seq("env *env", s"${struct.decapitalizedName}ID uuid.UUID", "parentID uuid.UUID"),
+      Some(CodeWrap.parens(mkCode.list("bool", "error"))),
+      mkCode.lines(
+        generateDAOReadInput(struct),
+        generateDAOReadCall(struct),
+        genCheckAndReturnError("false"),
+        genReturn(s"${struct.decapitalizedName}.ParentID == parentID", "nil"),
       ),
     )
 

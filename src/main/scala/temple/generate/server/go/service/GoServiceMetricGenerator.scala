@@ -13,7 +13,7 @@ object GoServiceMetricGenerator {
     val serviceGlobals = CodeUtils.pad(
       root.blockIterator.flatMap { block =>
         block.operations.toSeq.map { operation =>
-          val suffix = if (block.parentAttribute.nonEmpty) "_" + block.snakeName else ""
+          val suffix = if (block.isStruct) "_" + block.snakeName else ""
           (
             s"Request${operation.toString.capitalize}${block.structName}",
             doubleQuote(operation.toString.toLowerCase + suffix),

@@ -1,8 +1,10 @@
 package temple.generate.server.go.service.main
 
 import temple.ast.Annotation.Unique
+import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Create
 import temple.generate.server.AttributesRoot
+import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.GoHTTPStatus.{StatusForbidden, StatusInternalServerError}
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._
@@ -34,7 +36,9 @@ object GoServiceMainCreateHandlerGenerator {
     val createInput =
       ListMap(idCapitalized -> (if (block.hasAuthBlock) s"auth.$idCapitalized" else "uuid")) ++
       // If the project uses auth, but this service does not have an auth block, AuthID is passed for created_by field
-      when(!block.hasAuthBlock && block.projectUsesAuth) { s"Auth$idCapitalized" -> s"auth.$idCapitalized" } ++
+      when(!block.hasAuthBlock && block.projectUsesAuth && !block.isStruct) {
+        s"Auth$idCapitalized" -> s"auth.$idCapitalized"
+      } ++
       generateDAOInputClientMap(block.storedRequestAttributes)
 
     genDeclareAndAssign(
@@ -88,18 +92,27 @@ object GoServiceMainCreateHandlerGenerator {
   /** Generate the create handler function */
   private[main] def generateCreateHandler(
     block: AttributesRoot,
+    parent: Option[ServiceRoot],
     usesComms: Boolean,
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
     clientUsesBase64: Boolean,
     usesMetrics: Boolean,
   ): String = {
-    val metricSuffix = when(usesMetrics) { Create.toString }
+    val metricSuffix = when(usesMetrics) { Create.toString + block.structName }
     mkCode(
       generateHandlerDecl(block, Create),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
           when(block.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
+          parent.map { parent =>
+            mkCode.doubleLines(
+              generateExtractParentIDBlock(parent.decapitalizedName, metricSuffix),
+              when(parent.writable == Writable.This) {
+                generateCheckAuthorizationBlock(parent, blockHasAuth = false, metricSuffix)
+              },
+            )
+          },
           // Only need to handle request JSONs when there are client attributes
           when(block.requestAttributes.nonEmpty) {
             mkCode.doubleLines(
