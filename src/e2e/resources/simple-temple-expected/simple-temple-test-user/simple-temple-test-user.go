@@ -942,11 +942,10 @@ func (env *env) updateFredHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	input := dao.UpdateFredInput{
-		ID:       fredID,
-		ParentID: simpleTempleTestUserID,
-		Field:    *req.Field,
-		Friend:   *req.Friend,
-		Image:    image,
+		ID:     fredID,
+		Field:  *req.Field,
+		Friend: *req.Friend,
+		Image:  image,
 	}
 
 	for _, hook := range env.hook.beforeUpdateFredHooks {

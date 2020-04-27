@@ -16,10 +16,9 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainUpdateHandlerGenerator {
 
-  private def generateDAOInput(block: AttributesRoot, parent: Option[ServiceRoot]): String = {
+  private def generateDAOInput(block: AttributesRoot): String = {
     val updateInput =
       ListMap("ID" -> s"${block.decapitalizedName}ID") ++
-      parent.map(parent => block.parentAttribute.map(_.name).get.capitalize -> s"${parent.decapitalizedName}ID") ++
       generateDAOInputClientMap(block.storedRequestAttributes)
 
     genDeclareAndAssign(
@@ -103,7 +102,7 @@ object GoServiceMainUpdateHandlerGenerator {
               when(clientUsesBase64) { generateParseBase64Blocks(block.requestAttributes, metricSuffix) },
             )
           },
-          generateDAOInput(block, parent),
+          generateDAOInput(block),
           generateInvokeBeforeHookBlock(block, Update, metricSuffix),
           generateDAOCallBlock(block, metricSuffix),
           generateInvokeAfterHookBlock(block, Update, metricSuffix),

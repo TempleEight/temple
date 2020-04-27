@@ -983,7 +983,6 @@ func (env *env) updateTempleUserHandler(w http.ResponseWriter, r *http.Request) 
 
 	input := dao.UpdateTempleUserInput{
 		ID:            templeUserID,
-		ParentID:      complexUserID,
 		IntField:      *req.IntField,
 		DoubleField:   *req.DoubleField,
 		StringField:   *req.StringField,
