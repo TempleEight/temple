@@ -1,5 +1,6 @@
 package temple.generate.server.go.service.dao
 
+import temple.ast.Annotation.Unique
 import temple.ast.Metadata.Readable
 import temple.generate.CRUD._
 import temple.generate.server.go.common.GoCommonGenerator._
@@ -107,6 +108,9 @@ object GoServiceDAOFunctionsGenerator {
         block.createdByAttribute.map { enumerating =>
           Some(s"&${block.decapitalizedName}.${enumerating.name.capitalize}")
         },
+        block.parentAttribute.map { parent =>
+          Some(s"&${block.decapitalizedName}.${parent.name.capitalize}")
+        },
         block.storedAttributes.map { case (name, _) => s"&${block.decapitalizedName}.${name.capitalize}" },
       )
 
@@ -129,29 +133,48 @@ object GoServiceDAOFunctionsGenerator {
       genCheckAndReturnError("nil"),
     )
 
+  private def checkPQUniqueError(block: AttributesRoot): String =
+    mkCode.lines(
+      "// pq specific error",
+      genIf(
+        "err, ok := err.(*pq.Error); ok",
+        genIf(
+          "err.Code.Name() == psqlUniqueViolation",
+          genReturn("nil", s"ErrDuplicate${block.name}(err.Detail)"),
+        ),
+      ),
+    )
+
   private def generateCreateScanBlock(block: AttributesRoot, scanFunctionCall: String): String =
     mkCode.lines(
       genVar(block.decapitalizedName, block.name),
       genDeclareAndAssign(s"row.$scanFunctionCall", "err"),
-      genCheckAndReturnError("nil"),
+      genIfErr(
+        mkCode.doubleLines(
+          when(block.contains(Unique)) { checkPQUniqueError(block) },
+          genReturn("nil", "err"),
+        ),
+      ),
     )
 
-  private def generateReadUpdateScanBlock(block: AttributesRoot, scanFunctionCall: String): String =
+  private def generateReadUpdateScanBlock(block: AttributesRoot, scanFunctionCall: String, operation: CRUD): String =
     mkCode.lines(
       genVar(block.decapitalizedName, block.name),
       genDeclareAndAssign(s"row.$scanFunctionCall", "err"),
       mkCode(
-        "if err != nil",
-        CodeWrap.curly.tabbed(
-          genSwitch(
-            "err",
-            ListMap(
-              "sql.ErrNoRows" -> genReturn(
-                "nil",
-                s"Err${block.name}NotFound(input.${block.idAttribute.name.toUpperCase}.String())",
+        genIfErr(
+          mkCode.doubleLines(
+            when(block.contains(Unique) && operation == Update) { checkPQUniqueError(block) },
+            genSwitch(
+              "err",
+              ListMap(
+                "sql.ErrNoRows" -> genReturn(
+                  "nil",
+                  s"Err${block.name}NotFound(input.${block.idAttribute.name.toUpperCase}.String())",
+                ),
               ),
+              genReturn("nil", "err"),
             ),
-            genReturn("nil", "err"),
           ),
         ),
       ),
@@ -162,7 +185,7 @@ object GoServiceDAOFunctionsGenerator {
     operation match {
       case List                     => Some(generateListScanBlock(block, scanFunctionCall))
       case Create                   => Some(generateCreateScanBlock(block, scanFunctionCall))
-      case Read | Update | Identify => Some(generateReadUpdateScanBlock(block, scanFunctionCall))
+      case Read | Update | Identify => Some(generateReadUpdateScanBlock(block, scanFunctionCall, operation))
       case Delete                   => None
     }
   }

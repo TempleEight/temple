@@ -9,6 +9,13 @@ func (e ErrSimpleTempleTestUserNotFound) Error() string {
 	return fmt.Sprintf("simpleTempleTestUser not found with ID %s", string(e))
 }
 
+// ErrDuplicateSimpleTempleTestUserNotFound is returned when a simpleTempleTestUser already exists for some unique constraint
+type ErrDuplicateSimpleTempleTestUser string
+
+func (e ErrDuplicateSimpleTempleTestUser) Error() string {
+	return string(e)
+}
+
 // ErrFredNotFound is returned when a fred for the provided ID was not found
 type ErrFredNotFound string
 

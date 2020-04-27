@@ -289,6 +289,29 @@ class ValidatorTest extends FlatSpec with Matchers {
     ) shouldBe Set("Invalid foreign key Baz in baz, in Foo", "Invalid foreign key Baz in baz, in Quux, in Foo")
   }
 
+  it should "fail when attribute names are identical to their service name" in {
+    validationErrors(
+      Templefile(
+        "MyProject",
+        services = Map(
+          "Foo" -> ServiceBlock(
+            attributes = Map(
+              "foo" -> Attribute(IntType()),
+            ),
+            structs = Map(
+              "Bar" -> StructBlock(
+                attributes = Map("bar" -> Attribute(StringType())),
+              ),
+            ),
+          ),
+        ),
+      ),
+    ) shouldBe Set(
+      "Illegal attribute with same name as service in Bar, in Foo",
+      "Illegal attribute with same name as service in Foo",
+    )
+  }
+
   it should "enforce the existence of an auth block when other dependent metadata are used" in {
     validationErrors(
       Templefile(
@@ -391,7 +414,7 @@ class ValidatorTest extends FlatSpec with Matchers {
       Templefile(
         "MyProject",
         services = Map(
-          "Box" -> ServiceBlock(Map("box" -> Attribute(ForeignKey("Box")))),
+          "Box" -> ServiceBlock(Map("otherBox" -> Attribute(ForeignKey("Box")))),
         ),
       ),
     ) shouldBe Set("Cycle(s) were detected in foreign keys, between elements: { Box }")

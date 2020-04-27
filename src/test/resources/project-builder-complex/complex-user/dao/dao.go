@@ -256,7 +256,7 @@ func (dao *DAO) CreateTempleUser(input CreateTempleUserInput) (*TempleUser, erro
 	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO temple_user (id, parent_id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field) VALUES ($1, $2, $3, $4, $5, $6, $7, $8, $9, $10) RETURNING id, parent_id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field;", input.ID, input.ParentID, input.IntField, input.DoubleField, input.StringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField)
 
 	var templeUser TempleUser
-	err := row.Scan(&templeUser.ID, &templeUser.IntField, &templeUser.DoubleField, &templeUser.StringField, &templeUser.BoolField, &templeUser.DateField, &templeUser.TimeField, &templeUser.DateTimeField, &templeUser.BlobField)
+	err := row.Scan(&templeUser.ID, &templeUser.ParentID, &templeUser.IntField, &templeUser.DoubleField, &templeUser.StringField, &templeUser.BoolField, &templeUser.DateField, &templeUser.TimeField, &templeUser.DateTimeField, &templeUser.BlobField)
 	if err != nil {
 		return nil, err
 	}
@@ -269,7 +269,7 @@ func (dao *DAO) ReadTempleUser(input ReadTempleUserInput) (*TempleUser, error) {
 	row := executeQueryWithRowResponse(dao.DB, "SELECT id, parent_id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field FROM temple_user WHERE id = $1;", input.ID)
 
 	var templeUser TempleUser
-	err := row.Scan(&templeUser.ID, &templeUser.IntField, &templeUser.DoubleField, &templeUser.StringField, &templeUser.BoolField, &templeUser.DateField, &templeUser.TimeField, &templeUser.DateTimeField, &templeUser.BlobField)
+	err := row.Scan(&templeUser.ID, &templeUser.ParentID, &templeUser.IntField, &templeUser.DoubleField, &templeUser.StringField, &templeUser.BoolField, &templeUser.DateField, &templeUser.TimeField, &templeUser.DateTimeField, &templeUser.BlobField)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
@@ -284,10 +284,10 @@ func (dao *DAO) ReadTempleUser(input ReadTempleUserInput) (*TempleUser, error) {
 
 // UpdateTempleUser updates the templeUser in the datastore for a given ID, returning the newly updated templeUser
 func (dao *DAO) UpdateTempleUser(input UpdateTempleUserInput) (*TempleUser, error) {
-	row := executeQueryWithRowResponse(dao.DB, "UPDATE temple_user SET parent_id = $1, int_field = $2, double_field = $3, string_field = $4, bool_field = $5, date_field = $6, time_field = $7, date_time_field = $8, blob_field = $9 WHERE id = $10 RETURNING id, parent_id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field;", input.IntField, input.DoubleField, input.StringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField, input.ID)
+	row := executeQueryWithRowResponse(dao.DB, "UPDATE temple_user SET int_field = $1, double_field = $2, string_field = $3, bool_field = $4, date_field = $5, time_field = $6, date_time_field = $7, blob_field = $8 WHERE id = $9 RETURNING id, parent_id, int_field, double_field, string_field, bool_field, date_field, time_field, date_time_field, blob_field;", input.IntField, input.DoubleField, input.StringField, input.BoolField, input.DateField, input.TimeField, input.DateTimeField, input.BlobField, input.ID)
 
 	var templeUser TempleUser
-	err := row.Scan(&templeUser.ID, &templeUser.IntField, &templeUser.DoubleField, &templeUser.StringField, &templeUser.BoolField, &templeUser.DateField, &templeUser.TimeField, &templeUser.DateTimeField, &templeUser.BlobField)
+	err := row.Scan(&templeUser.ID, &templeUser.ParentID, &templeUser.IntField, &templeUser.DoubleField, &templeUser.StringField, &templeUser.BoolField, &templeUser.DateField, &templeUser.TimeField, &templeUser.DateTimeField, &templeUser.BlobField)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:

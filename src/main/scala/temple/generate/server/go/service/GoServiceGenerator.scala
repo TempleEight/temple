@@ -1,5 +1,6 @@
 package temple.generate.server.go.service
 
+import temple.ast.Annotation.Unique
 import temple.ast.AttributeType
 import temple.ast.Metadata.{Readable, Writable}
 import temple.generate.CRUD
@@ -28,16 +29,11 @@ object GoServiceGenerator extends ServiceGenerator {
         .nonEmpty
 
     // Whether or not this service uses base64, by checking for attributes of type blob
-    val usesBase64 = root.attributes.values.exists(_.attributeType.isInstanceOf[AttributeType.BlobType])
+    val usesBase64 =
+      root.blockIterator.flatMap(_.attributes.values).exists(_.attributeType.isInstanceOf[AttributeType.BlobType])
 
     // Whether or not the service uses metrics
     val usesMetrics = root.metrics.isDefined
-
-    // Whether or not this service is enumerating by creator
-    lazy val enumeratingByCreator = root.readable match {
-      case Readable.All  => false
-      case Readable.This => true
-    }
 
     (Map(
       File(s"${root.kebabName}", "go.mod") -> GoCommonGenerator.generateMod(root.module),
@@ -59,11 +55,16 @@ object GoServiceGenerator extends ServiceGenerator {
         GoServiceMainGenerator.generateRouter(root),
         GoCommonMainGenerator.generateMain(root, usesComms, isAuth = false, usesMetrics),
         GoCommonMainGenerator.generateJsonMiddleware(),
-        when((root.readable == Readable.This || root.writable == Writable.This) && !root.hasAuthBlock) {
+        when(
+          (root.readable == Readable.This || root.writable == Writable.This) && (!root.hasAuthBlock || root.structs.nonEmpty),
+        ) {
           GoServiceMainGenerator.generateCheckAuthorization(root)
         },
+        root.structs.map(GoServiceMainGenerator.generateCheckParent),
         GoCommonMainGenerator.generateRespondWithErrorFunc(usesMetrics),
-        GoServiceMainHandlersGenerator.generateHandlers(root, usesComms, enumeratingByCreator, usesMetrics),
+        root.blockIterator.map { block =>
+          GoServiceMainHandlersGenerator.generateHandlers(block, when(root != block)(root), usesComms, usesMetrics)
+        },
       ),
       File(root.kebabName, "setup.go") -> mkCode.doubleLines(
         GoCommonGenerator.generatePackage("main"),
@@ -90,6 +91,7 @@ object GoServiceGenerator extends ServiceGenerator {
         root.blockIterator.map { block =>
           GoServiceDAOInputStructsGenerator.generateStructs(block)
         },
+        when(root.contains(Unique)) { GoServiceDAOGenerator.generateUniqueConstant() },
         GoCommonDAOGenerator.generateInit(),
         GoServiceDAOGenerator.generateQueryFunctions(root.blockIterator.flatMap(_.operations).toSet),
         root.blockIterator.map { block =>

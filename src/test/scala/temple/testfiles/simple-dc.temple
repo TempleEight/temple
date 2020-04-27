@@ -5,7 +5,7 @@ SimpleTempleTest: project {
 }
 
 User: service {
-  user: string;
+  log: string;
   email: string(40,5);
   firstName: string;
   lastName: string;

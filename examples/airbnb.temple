@@ -70,7 +70,7 @@ Review: service {
   tenant: Tenant;
   reservation: Reservation;
   stars: int(5, 0);
-  review: string;
+  message: string;
   #readable(by: all);
   // implicit #writable(by: this) since project has auth
 }
