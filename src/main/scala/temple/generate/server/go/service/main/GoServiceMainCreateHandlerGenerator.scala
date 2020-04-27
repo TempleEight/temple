@@ -36,7 +36,7 @@ object GoServiceMainCreateHandlerGenerator {
     val createInput =
       ListMap(idCapitalized -> (if (block.hasAuthBlock) s"auth.$idCapitalized" else "uuid")) ++
       // If the project uses auth, but this service does not have an auth block, AuthID is passed for created_by field
-      when(!block.hasAuthBlock && block.projectUsesAuth && block.parentAttribute.isEmpty) {
+      when(!block.hasAuthBlock && block.projectUsesAuth && !block.isStruct) {
         s"Auth$idCapitalized" -> s"auth.$idCapitalized"
       } ++
       generateDAOInputClientMap(block.storedRequestAttributes)
