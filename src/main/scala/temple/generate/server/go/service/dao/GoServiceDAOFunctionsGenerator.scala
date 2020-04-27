@@ -108,6 +108,9 @@ object GoServiceDAOFunctionsGenerator {
         block.createdByAttribute.map { enumerating =>
           Some(s"&${block.decapitalizedName}.${enumerating.name.capitalize}")
         },
+        block.parentAttribute.map { parent =>
+          Some(s"&${block.decapitalizedName}.${parent.name.capitalize}")
+        },
         block.storedAttributes.map { case (name, _) => s"&${block.decapitalizedName}.${name.capitalize}" },
       )
 
