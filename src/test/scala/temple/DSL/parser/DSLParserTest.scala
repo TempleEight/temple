@@ -65,7 +65,7 @@ class DSLParserTest extends FlatSpec with DSLParserMatchers {
         "User",
         "service",
         Seq(
-          Attribute("user", AttributeType.Primitive("string")),
+          Attribute("log", AttributeType.Primitive("string")),
           Attribute("email", AttributeType.Primitive("string", Args(Seq(Arg.IntArg(40), Arg.IntArg(5))))),
           Attribute("firstName", AttributeType.Primitive("string")),
           Attribute("lastName", AttributeType.Primitive("string")),

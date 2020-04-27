@@ -1,6 +1,6 @@
 CREATE TABLE simple_temple_test_user (
   id UUID NOT NULL PRIMARY KEY,
-  simple_temple_test_user TEXT NOT NULL,
+  simple_temple_test_log TEXT NOT NULL,
   email VARCHAR(40) CHECK (length(email) >= 5) NOT NULL,
   first_name TEXT NOT NULL,
   last_name TEXT NOT NULL,

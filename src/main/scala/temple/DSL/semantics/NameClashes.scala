@@ -124,7 +124,8 @@ object NameClashes {
   def goServiceValidator: NameValidator =
     templeGoNameValidator & goGlobalsValidator & goKeywordValidator & templeServiceNameValidator & templeGoServiceValidator
 
-  val goAttributeValidator: NameValidator = goKeywordValidator & templeAttributeNameValidator
+  val goAttributeValidator: NameValidator =
+    goGlobalsValidator & goKeywordValidator & templeAttributeNameValidator & templeGoServiceValidator
 
   // https://www.postgresql.org/docs/10/sql-keywords-appendix.html
   // only those marked as "reserved"/"reserved (can be function or type)" in Postgres
@@ -234,7 +235,7 @@ object NameClashes {
   case class NameValidator private (private val validators: Iterable[String => Boolean]) {
 
     def isValid(word: String): Boolean = validators.forall { validator =>
-      val normalized = NameValidator.normalize(word)
+      val normalized = normalize(word)
       validator(normalized)
     }
 
@@ -242,8 +243,9 @@ object NameClashes {
     def &(that: NameValidator): NameValidator = NameValidator(this.validators ++ that.validators)
   }
 
+  def normalize(string: String): String = string.toLowerCase.replaceAll("[^a-z0-9]", "")
+
   private[NameClashes] object NameValidator {
-    private def normalize(string: String): String = string.toLowerCase.replaceAll("[^a-z0-9]", "")
 
     // Combine many validators
     def combine(validators: IterableOnce[NameValidator]): NameValidator =
