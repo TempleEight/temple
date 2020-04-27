@@ -49,6 +49,8 @@ paths:
                     breakfastTime:
                       type: string
                       format: time
+        '401':
+          $ref: '#/components/responses/Error401'
         '500':
           $ref: '#/components/responses/Error500'
   /simple-temple-test-user:
@@ -159,8 +161,8 @@ paths:
     - in: path
       name: id
       schema:
-        type: number
-        format: int32
+        type: string
+        format: uuid
       required: true
       description: ID of the simpletempletestuser to perform operations on
     get:
@@ -297,6 +299,224 @@ paths:
           $ref: '#/components/responses/Error404'
         '500':
           $ref: '#/components/responses/Error500'
+  /simple-temple-test-user/{parent_id}/fred/all:
+    parameters:
+    - in: path
+      name: parent_id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the parent entity to perform operations on
+    get:
+      summary: Get a list of every fred
+      security:
+      - bearerAuth: []
+      tags:
+      - Fred
+      responses:
+        '200':
+          description: Fred list successfully fetched
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  type: object
+                  properties:
+                    id:
+                      type: string
+                      format: uuid
+                    field:
+                      type: string
+                    friend:
+                      type: number
+                      format: int32
+                      description: Reference to SimpleTempleTestUser ID
+                    image:
+                      type: string
+                      maxLength: 10000000
+        '401':
+          $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /simple-temple-test-user/{parent_id}/fred:
+    parameters:
+    - in: path
+      name: parent_id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the parent entity to perform operations on
+    post:
+      summary: Register a new fred
+      security:
+      - bearerAuth: []
+      tags:
+      - Fred
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                field:
+                  type: string
+                friend:
+                  type: number
+                  format: int32
+                  description: Reference to SimpleTempleTestUser ID
+                image:
+                  type: string
+                  maxLength: 10000000
+      responses:
+        '200':
+          description: Fred successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  field:
+                    type: string
+                  friend:
+                    type: number
+                    format: int32
+                    description: Reference to SimpleTempleTestUser ID
+                  image:
+                    type: string
+                    maxLength: 10000000
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /simple-temple-test-user/{parent_id}/fred/{id}:
+    parameters:
+    - in: path
+      name: id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the fred to perform operations on
+    - in: path
+      name: parent_id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the parent entity to perform operations on
+    get:
+      summary: Look up a single fred
+      security:
+      - bearerAuth: []
+      tags:
+      - Fred
+      responses:
+        '200':
+          description: Fred details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  field:
+                    type: string
+                  friend:
+                    type: number
+                    format: int32
+                    description: Reference to SimpleTempleTestUser ID
+                  image:
+                    type: string
+                    maxLength: 10000000
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    put:
+      summary: Update a single fred
+      security:
+      - bearerAuth: []
+      tags:
+      - Fred
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                field:
+                  type: string
+                friend:
+                  type: number
+                  format: int32
+                  description: Reference to SimpleTempleTestUser ID
+                image:
+                  type: string
+                  maxLength: 10000000
+      responses:
+        '200':
+          description: Fred successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  field:
+                    type: string
+                  friend:
+                    type: number
+                    format: int32
+                    description: Reference to SimpleTempleTestUser ID
+                  image:
+                    type: string
+                    maxLength: 10000000
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      summary: Delete a single fred
+      security:
+      - bearerAuth: []
+      tags:
+      - Fred
+      responses:
+        '200':
+          description: Fred successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
   /booking:
     post:
       summary: Register a new booking
@@ -332,8 +552,8 @@ paths:
     - in: path
       name: id
       schema:
-        type: number
-        format: int32
+        type: string
+        format: uuid
       required: true
       description: ID of the booking to perform operations on
     get:
@@ -418,8 +638,8 @@ paths:
     - in: path
       name: id
       schema:
-        type: number
-        format: int32
+        type: string
+        format: uuid
       required: true
       description: ID of the simpletempletestgroup to perform operations on
     get:

@@ -146,8 +146,8 @@ paths:
     - in: path
       name: id
       schema:
-        type: number
-        format: int32
+        type: string
+        format: uuid
       required: true
       description: ID of the complexuser to perform operations on
     get:
@@ -350,6 +350,243 @@ paths:
       responses:
         '200':
           description: ComplexUser successfully deleted
+          content:
+            application/json:
+              schema:
+                type: object
+                properties: {}
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /complex-user/{parent_id}/temple-user:
+    parameters:
+    - in: path
+      name: parent_id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the parent entity to perform operations on
+    post:
+      summary: Register a new templeuser
+      security:
+      - bearerAuth: []
+      tags:
+      - TempleUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                intField:
+                  type: number
+                  format: int32
+                doubleField:
+                  type: number
+                  format: double
+                stringField:
+                  type: string
+                boolField:
+                  type: boolean
+                dateField:
+                  type: string
+                  format: date
+                timeField:
+                  type: string
+                  format: time
+                dateTimeField:
+                  type: string
+                  format: date-time
+                blobField:
+                  type: string
+      responses:
+        '200':
+          description: TempleUser successfully created
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  intField:
+                    type: number
+                    format: int32
+                  doubleField:
+                    type: number
+                    format: double
+                  stringField:
+                    type: string
+                  boolField:
+                    type: boolean
+                  dateField:
+                    type: string
+                    format: date
+                  timeField:
+                    type: string
+                    format: time
+                  dateTimeField:
+                    type: string
+                    format: date-time
+                  blobField:
+                    type: string
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '500':
+          $ref: '#/components/responses/Error500'
+  /complex-user/{parent_id}/temple-user/{id}:
+    parameters:
+    - in: path
+      name: id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the templeuser to perform operations on
+    - in: path
+      name: parent_id
+      schema:
+        type: string
+        format: uuid
+      required: true
+      description: ID of the parent entity to perform operations on
+    get:
+      summary: Look up a single templeuser
+      security:
+      - bearerAuth: []
+      tags:
+      - TempleUser
+      responses:
+        '200':
+          description: TempleUser details
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  intField:
+                    type: number
+                    format: int32
+                  doubleField:
+                    type: number
+                    format: double
+                  stringField:
+                    type: string
+                  boolField:
+                    type: boolean
+                  dateField:
+                    type: string
+                    format: date
+                  timeField:
+                    type: string
+                    format: time
+                  dateTimeField:
+                    type: string
+                    format: date-time
+                  blobField:
+                    type: string
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    put:
+      summary: Update a single templeuser
+      security:
+      - bearerAuth: []
+      tags:
+      - TempleUser
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                intField:
+                  type: number
+                  format: int32
+                doubleField:
+                  type: number
+                  format: double
+                stringField:
+                  type: string
+                boolField:
+                  type: boolean
+                dateField:
+                  type: string
+                  format: date
+                timeField:
+                  type: string
+                  format: time
+                dateTimeField:
+                  type: string
+                  format: date-time
+                blobField:
+                  type: string
+      responses:
+        '200':
+          description: TempleUser successfully updated
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  id:
+                    type: string
+                    format: uuid
+                  intField:
+                    type: number
+                    format: int32
+                  doubleField:
+                    type: number
+                    format: double
+                  stringField:
+                    type: string
+                  boolField:
+                    type: boolean
+                  dateField:
+                    type: string
+                    format: date
+                  timeField:
+                    type: string
+                    format: time
+                  dateTimeField:
+                    type: string
+                    format: date-time
+                  blobField:
+                    type: string
+        '400':
+          $ref: '#/components/responses/Error400'
+        '401':
+          $ref: '#/components/responses/Error401'
+        '404':
+          $ref: '#/components/responses/Error404'
+        '500':
+          $ref: '#/components/responses/Error500'
+    delete:
+      summary: Delete a single templeuser
+      security:
+      - bearerAuth: []
+      tags:
+      - TempleUser
+      responses:
+        '200':
+          description: TempleUser successfully deleted
           content:
             application/json:
               schema:
