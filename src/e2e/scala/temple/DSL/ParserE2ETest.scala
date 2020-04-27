@@ -32,17 +32,17 @@ class ParserE2ETest extends FlatSpec with Matchers with DSLParserMatchers {
       services = Map(
         "SimpleTempleTestUser" -> ServiceBlock(
           attributes = ListMap(
-            "id"                   -> IDAttribute,
-            "simpleTempleTestUser" -> Attribute(StringType()),
-            "email"                -> Attribute(StringType(Some(40), Some(5))),
-            "firstName"            -> Attribute(StringType()),
-            "lastName"             -> Attribute(StringType()),
-            "createdAt"            -> Attribute(DateTimeType),
-            "numberOfDogs"         -> Attribute(IntType()),
-            "yeets"                -> Attribute(BoolType, Some(Server), Set(Unique)),
-            "currentBankBalance"   -> Attribute(FloatType(min = Some(0.0), precision = 2)),
-            "birthDate"            -> Attribute(DateType),
-            "breakfastTime"        -> Attribute(TimeType),
+            "id"                  -> IDAttribute,
+            "simpleTempleTestLog" -> Attribute(StringType()),
+            "email"               -> Attribute(StringType(Some(40), Some(5))),
+            "firstName"           -> Attribute(StringType()),
+            "lastName"            -> Attribute(StringType()),
+            "createdAt"           -> Attribute(DateTimeType),
+            "numberOfDogs"        -> Attribute(IntType()),
+            "yeets"               -> Attribute(BoolType, Some(Server), Set(Unique)),
+            "currentBankBalance"  -> Attribute(FloatType(min = Some(0.0), precision = 2)),
+            "birthDate"           -> Attribute(DateType),
+            "breakfastTime"       -> Attribute(TimeType),
           ),
           metadata = Seq(
             ServiceEnumerable,

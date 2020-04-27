@@ -29,28 +29,28 @@ type env struct {
 
 // createSimpleTempleTestUserRequest contains the client-provided information required to create a single simpleTempleTestUser
 type createSimpleTempleTestUserRequest struct {
-	SimpleTempleTestUser *string  `json:"simpleTempleTestUser" validate:"required"`
-	Email                *string  `json:"email" validate:"required,gte=5,lte=40"`
-	FirstName            *string  `json:"firstName" validate:"required"`
-	LastName             *string  `json:"lastName" validate:"required"`
-	CreatedAt            *string  `json:"createdAt" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
-	NumberOfDogs         *int32   `json:"numberOfDogs" validate:"required"`
-	CurrentBankBalance   *float32 `json:"currentBankBalance" validate:"required,gte=0.0"`
-	BirthDate            *string  `json:"birthDate" validate:"required"`
-	BreakfastTime        *string  `json:"breakfastTime" validate:"required"`
+	SimpleTempleTestLog *string  `json:"simpleTempleTestLog" validate:"required"`
+	Email               *string  `json:"email" validate:"required,gte=5,lte=40"`
+	FirstName           *string  `json:"firstName" validate:"required"`
+	LastName            *string  `json:"lastName" validate:"required"`
+	CreatedAt           *string  `json:"createdAt" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
+	NumberOfDogs        *int32   `json:"numberOfDogs" validate:"required"`
+	CurrentBankBalance  *float32 `json:"currentBankBalance" validate:"required,gte=0.0"`
+	BirthDate           *string  `json:"birthDate" validate:"required"`
+	BreakfastTime       *string  `json:"breakfastTime" validate:"required"`
 }
 
 // updateSimpleTempleTestUserRequest contains the client-provided information required to update a single simpleTempleTestUser
 type updateSimpleTempleTestUserRequest struct {
-	SimpleTempleTestUser *string  `json:"simpleTempleTestUser" validate:"required"`
-	Email                *string  `json:"email" validate:"required,gte=5,lte=40"`
-	FirstName            *string  `json:"firstName" validate:"required"`
-	LastName             *string  `json:"lastName" validate:"required"`
-	CreatedAt            *string  `json:"createdAt" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
-	NumberOfDogs         *int32   `json:"numberOfDogs" validate:"required"`
-	CurrentBankBalance   *float32 `json:"currentBankBalance" validate:"required,gte=0.0"`
-	BirthDate            *string  `json:"birthDate" validate:"required"`
-	BreakfastTime        *string  `json:"breakfastTime" validate:"required"`
+	SimpleTempleTestLog *string  `json:"simpleTempleTestLog" validate:"required"`
+	Email               *string  `json:"email" validate:"required,gte=5,lte=40"`
+	FirstName           *string  `json:"firstName" validate:"required"`
+	LastName            *string  `json:"lastName" validate:"required"`
+	CreatedAt           *string  `json:"createdAt" validate:"required,datetime=2006-01-02T15:04:05.999999999Z07:00"`
+	NumberOfDogs        *int32   `json:"numberOfDogs" validate:"required"`
+	CurrentBankBalance  *float32 `json:"currentBankBalance" validate:"required,gte=0.0"`
+	BirthDate           *string  `json:"birthDate" validate:"required"`
+	BreakfastTime       *string  `json:"breakfastTime" validate:"required"`
 }
 
 // createFredRequest contains the client-provided information required to create a single fred
@@ -69,16 +69,16 @@ type updateFredRequest struct {
 
 // listSimpleTempleTestUserElement contains a single simpleTempleTestUser list element
 type listSimpleTempleTestUserElement struct {
-	ID                   uuid.UUID `json:"id"`
-	SimpleTempleTestUser string    `json:"simpleTempleTestUser"`
-	Email                string    `json:"email"`
-	FirstName            string    `json:"firstName"`
-	LastName             string    `json:"lastName"`
-	CreatedAt            string    `json:"createdAt"`
-	NumberOfDogs         int32     `json:"numberOfDogs"`
-	CurrentBankBalance   float32   `json:"currentBankBalance"`
-	BirthDate            string    `json:"birthDate"`
-	BreakfastTime        string    `json:"breakfastTime"`
+	ID                  uuid.UUID `json:"id"`
+	SimpleTempleTestLog string    `json:"simpleTempleTestLog"`
+	Email               string    `json:"email"`
+	FirstName           string    `json:"firstName"`
+	LastName            string    `json:"lastName"`
+	CreatedAt           string    `json:"createdAt"`
+	NumberOfDogs        int32     `json:"numberOfDogs"`
+	CurrentBankBalance  float32   `json:"currentBankBalance"`
+	BirthDate           string    `json:"birthDate"`
+	BreakfastTime       string    `json:"breakfastTime"`
 }
 
 // listSimpleTempleTestUserResponse contains a single simpleTempleTestUser list to be returned to the client
@@ -88,44 +88,44 @@ type listSimpleTempleTestUserResponse struct {
 
 // createSimpleTempleTestUserResponse contains a newly created simpleTempleTestUser to be returned to the client
 type createSimpleTempleTestUserResponse struct {
-	ID                   uuid.UUID `json:"id"`
-	SimpleTempleTestUser string    `json:"simpleTempleTestUser"`
-	Email                string    `json:"email"`
-	FirstName            string    `json:"firstName"`
-	LastName             string    `json:"lastName"`
-	CreatedAt            string    `json:"createdAt"`
-	NumberOfDogs         int32     `json:"numberOfDogs"`
-	CurrentBankBalance   float32   `json:"currentBankBalance"`
-	BirthDate            string    `json:"birthDate"`
-	BreakfastTime        string    `json:"breakfastTime"`
+	ID                  uuid.UUID `json:"id"`
+	SimpleTempleTestLog string    `json:"simpleTempleTestLog"`
+	Email               string    `json:"email"`
+	FirstName           string    `json:"firstName"`
+	LastName            string    `json:"lastName"`
+	CreatedAt           string    `json:"createdAt"`
+	NumberOfDogs        int32     `json:"numberOfDogs"`
+	CurrentBankBalance  float32   `json:"currentBankBalance"`
+	BirthDate           string    `json:"birthDate"`
+	BreakfastTime       string    `json:"breakfastTime"`
 }
 
 // readSimpleTempleTestUserResponse contains a single simpleTempleTestUser to be returned to the client
 type readSimpleTempleTestUserResponse struct {
-	ID                   uuid.UUID `json:"id"`
-	SimpleTempleTestUser string    `json:"simpleTempleTestUser"`
-	Email                string    `json:"email"`
-	FirstName            string    `json:"firstName"`
-	LastName             string    `json:"lastName"`
-	CreatedAt            string    `json:"createdAt"`
-	NumberOfDogs         int32     `json:"numberOfDogs"`
-	CurrentBankBalance   float32   `json:"currentBankBalance"`
-	BirthDate            string    `json:"birthDate"`
-	BreakfastTime        string    `json:"breakfastTime"`
+	ID                  uuid.UUID `json:"id"`
+	SimpleTempleTestLog string    `json:"simpleTempleTestLog"`
+	Email               string    `json:"email"`
+	FirstName           string    `json:"firstName"`
+	LastName            string    `json:"lastName"`
+	CreatedAt           string    `json:"createdAt"`
+	NumberOfDogs        int32     `json:"numberOfDogs"`
+	CurrentBankBalance  float32   `json:"currentBankBalance"`
+	BirthDate           string    `json:"birthDate"`
+	BreakfastTime       string    `json:"breakfastTime"`
 }
 
 // updateSimpleTempleTestUserResponse contains a newly updated simpleTempleTestUser to be returned to the client
 type updateSimpleTempleTestUserResponse struct {
-	ID                   uuid.UUID `json:"id"`
-	SimpleTempleTestUser string    `json:"simpleTempleTestUser"`
-	Email                string    `json:"email"`
-	FirstName            string    `json:"firstName"`
-	LastName             string    `json:"lastName"`
-	CreatedAt            string    `json:"createdAt"`
-	NumberOfDogs         int32     `json:"numberOfDogs"`
-	CurrentBankBalance   float32   `json:"currentBankBalance"`
-	BirthDate            string    `json:"birthDate"`
-	BreakfastTime        string    `json:"breakfastTime"`
+	ID                  uuid.UUID `json:"id"`
+	SimpleTempleTestLog string    `json:"simpleTempleTestLog"`
+	Email               string    `json:"email"`
+	FirstName           string    `json:"firstName"`
+	LastName            string    `json:"lastName"`
+	CreatedAt           string    `json:"createdAt"`
+	NumberOfDogs        int32     `json:"numberOfDogs"`
+	CurrentBankBalance  float32   `json:"currentBankBalance"`
+	BirthDate           string    `json:"birthDate"`
+	BreakfastTime       string    `json:"breakfastTime"`
 }
 
 // listFredElement contains a single fred list element
@@ -290,16 +290,16 @@ func (env *env) listSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 
 	for _, simpleTempleTestUser := range *simpleTempleTestUserList {
 		simpleTempleTestUserListResp.SimpleTempleTestUserList = append(simpleTempleTestUserListResp.SimpleTempleTestUserList, listSimpleTempleTestUserElement{
-			ID:                   simpleTempleTestUser.ID,
-			SimpleTempleTestUser: simpleTempleTestUser.SimpleTempleTestUser,
-			Email:                simpleTempleTestUser.Email,
-			FirstName:            simpleTempleTestUser.FirstName,
-			LastName:             simpleTempleTestUser.LastName,
-			CreatedAt:            simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
-			NumberOfDogs:         simpleTempleTestUser.NumberOfDogs,
-			CurrentBankBalance:   simpleTempleTestUser.CurrentBankBalance,
-			BirthDate:            simpleTempleTestUser.BirthDate.Format("2006-01-02"),
-			BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
+			ID:                  simpleTempleTestUser.ID,
+			SimpleTempleTestLog: simpleTempleTestUser.SimpleTempleTestLog,
+			Email:               simpleTempleTestUser.Email,
+			FirstName:           simpleTempleTestUser.FirstName,
+			LastName:            simpleTempleTestUser.LastName,
+			CreatedAt:           simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
+			NumberOfDogs:        simpleTempleTestUser.NumberOfDogs,
+			CurrentBankBalance:  simpleTempleTestUser.CurrentBankBalance,
+			BirthDate:           simpleTempleTestUser.BirthDate.Format("2006-01-02"),
+			BreakfastTime:       simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
 		})
 	}
 
@@ -322,7 +322,7 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	if req.SimpleTempleTestUser == nil || req.Email == nil || req.FirstName == nil || req.LastName == nil || req.CreatedAt == nil || req.NumberOfDogs == nil || req.CurrentBankBalance == nil || req.BirthDate == nil || req.BreakfastTime == nil {
+	if req.SimpleTempleTestLog == nil || req.Email == nil || req.FirstName == nil || req.LastName == nil || req.CreatedAt == nil || req.NumberOfDogs == nil || req.CurrentBankBalance == nil || req.BirthDate == nil || req.BreakfastTime == nil {
 		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestCreate)
 		return
 	}
@@ -352,16 +352,16 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	}
 
 	input := dao.CreateSimpleTempleTestUserInput{
-		ID:                   auth.ID,
-		SimpleTempleTestUser: *req.SimpleTempleTestUser,
-		Email:                *req.Email,
-		FirstName:            *req.FirstName,
-		LastName:             *req.LastName,
-		CreatedAt:            createdAt,
-		NumberOfDogs:         *req.NumberOfDogs,
-		CurrentBankBalance:   *req.CurrentBankBalance,
-		BirthDate:            birthDate,
-		BreakfastTime:        breakfastTime,
+		ID:                  auth.ID,
+		SimpleTempleTestLog: *req.SimpleTempleTestLog,
+		Email:               *req.Email,
+		FirstName:           *req.FirstName,
+		LastName:            *req.LastName,
+		CreatedAt:           createdAt,
+		NumberOfDogs:        *req.NumberOfDogs,
+		CurrentBankBalance:  *req.CurrentBankBalance,
+		BirthDate:           birthDate,
+		BreakfastTime:       breakfastTime,
 	}
 
 	for _, hook := range env.hook.beforeCreateHooks {
@@ -394,16 +394,16 @@ func (env *env) createSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	}
 
 	json.NewEncoder(w).Encode(createSimpleTempleTestUserResponse{
-		ID:                   simpleTempleTestUser.ID,
-		SimpleTempleTestUser: simpleTempleTestUser.SimpleTempleTestUser,
-		Email:                simpleTempleTestUser.Email,
-		FirstName:            simpleTempleTestUser.FirstName,
-		LastName:             simpleTempleTestUser.LastName,
-		CreatedAt:            simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
-		NumberOfDogs:         simpleTempleTestUser.NumberOfDogs,
-		CurrentBankBalance:   simpleTempleTestUser.CurrentBankBalance,
-		BirthDate:            simpleTempleTestUser.BirthDate.Format("2006-01-02"),
-		BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
+		ID:                  simpleTempleTestUser.ID,
+		SimpleTempleTestLog: simpleTempleTestUser.SimpleTempleTestLog,
+		Email:               simpleTempleTestUser.Email,
+		FirstName:           simpleTempleTestUser.FirstName,
+		LastName:            simpleTempleTestUser.LastName,
+		CreatedAt:           simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
+		NumberOfDogs:        simpleTempleTestUser.NumberOfDogs,
+		CurrentBankBalance:  simpleTempleTestUser.CurrentBankBalance,
+		BirthDate:           simpleTempleTestUser.BirthDate.Format("2006-01-02"),
+		BreakfastTime:       simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
 	})
 
 	metric.RequestSuccess.WithLabelValues(metric.RequestCreate).Inc()
@@ -456,16 +456,16 @@ func (env *env) readSimpleTempleTestUserHandler(w http.ResponseWriter, r *http.R
 	}
 
 	json.NewEncoder(w).Encode(readSimpleTempleTestUserResponse{
-		ID:                   simpleTempleTestUser.ID,
-		SimpleTempleTestUser: simpleTempleTestUser.SimpleTempleTestUser,
-		Email:                simpleTempleTestUser.Email,
-		FirstName:            simpleTempleTestUser.FirstName,
-		LastName:             simpleTempleTestUser.LastName,
-		CreatedAt:            simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
-		NumberOfDogs:         simpleTempleTestUser.NumberOfDogs,
-		CurrentBankBalance:   simpleTempleTestUser.CurrentBankBalance,
-		BirthDate:            simpleTempleTestUser.BirthDate.Format("2006-01-02"),
-		BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
+		ID:                  simpleTempleTestUser.ID,
+		SimpleTempleTestLog: simpleTempleTestUser.SimpleTempleTestLog,
+		Email:               simpleTempleTestUser.Email,
+		FirstName:           simpleTempleTestUser.FirstName,
+		LastName:            simpleTempleTestUser.LastName,
+		CreatedAt:           simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
+		NumberOfDogs:        simpleTempleTestUser.NumberOfDogs,
+		CurrentBankBalance:  simpleTempleTestUser.CurrentBankBalance,
+		BirthDate:           simpleTempleTestUser.BirthDate.Format("2006-01-02"),
+		BreakfastTime:       simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
 	})
 
 	metric.RequestSuccess.WithLabelValues(metric.RequestRead).Inc()
@@ -496,7 +496,7 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 		return
 	}
 
-	if req.SimpleTempleTestUser == nil || req.Email == nil || req.FirstName == nil || req.LastName == nil || req.CreatedAt == nil || req.NumberOfDogs == nil || req.CurrentBankBalance == nil || req.BirthDate == nil || req.BreakfastTime == nil {
+	if req.SimpleTempleTestLog == nil || req.Email == nil || req.FirstName == nil || req.LastName == nil || req.CreatedAt == nil || req.NumberOfDogs == nil || req.CurrentBankBalance == nil || req.BirthDate == nil || req.BreakfastTime == nil {
 		respondWithError(w, "Missing request parameter(s)", http.StatusBadRequest, metric.RequestUpdate)
 		return
 	}
@@ -526,16 +526,16 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	}
 
 	input := dao.UpdateSimpleTempleTestUserInput{
-		ID:                   simpleTempleTestUserID,
-		SimpleTempleTestUser: *req.SimpleTempleTestUser,
-		Email:                *req.Email,
-		FirstName:            *req.FirstName,
-		LastName:             *req.LastName,
-		CreatedAt:            createdAt,
-		NumberOfDogs:         *req.NumberOfDogs,
-		CurrentBankBalance:   *req.CurrentBankBalance,
-		BirthDate:            birthDate,
-		BreakfastTime:        breakfastTime,
+		ID:                  simpleTempleTestUserID,
+		SimpleTempleTestLog: *req.SimpleTempleTestLog,
+		Email:               *req.Email,
+		FirstName:           *req.FirstName,
+		LastName:            *req.LastName,
+		CreatedAt:           createdAt,
+		NumberOfDogs:        *req.NumberOfDogs,
+		CurrentBankBalance:  *req.CurrentBankBalance,
+		BirthDate:           birthDate,
+		BreakfastTime:       breakfastTime,
 	}
 
 	for _, hook := range env.hook.beforeUpdateHooks {
@@ -570,16 +570,16 @@ func (env *env) updateSimpleTempleTestUserHandler(w http.ResponseWriter, r *http
 	}
 
 	json.NewEncoder(w).Encode(updateSimpleTempleTestUserResponse{
-		ID:                   simpleTempleTestUser.ID,
-		SimpleTempleTestUser: simpleTempleTestUser.SimpleTempleTestUser,
-		Email:                simpleTempleTestUser.Email,
-		FirstName:            simpleTempleTestUser.FirstName,
-		LastName:             simpleTempleTestUser.LastName,
-		CreatedAt:            simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
-		NumberOfDogs:         simpleTempleTestUser.NumberOfDogs,
-		CurrentBankBalance:   simpleTempleTestUser.CurrentBankBalance,
-		BirthDate:            simpleTempleTestUser.BirthDate.Format("2006-01-02"),
-		BreakfastTime:        simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
+		ID:                  simpleTempleTestUser.ID,
+		SimpleTempleTestLog: simpleTempleTestUser.SimpleTempleTestLog,
+		Email:               simpleTempleTestUser.Email,
+		FirstName:           simpleTempleTestUser.FirstName,
+		LastName:            simpleTempleTestUser.LastName,
+		CreatedAt:           simpleTempleTestUser.CreatedAt.Format(time.RFC3339),
+		NumberOfDogs:        simpleTempleTestUser.NumberOfDogs,
+		CurrentBankBalance:  simpleTempleTestUser.CurrentBankBalance,
+		BirthDate:           simpleTempleTestUser.BirthDate.Format("2006-01-02"),
+		BreakfastTime:       simpleTempleTestUser.BreakfastTime.Format("15:04:05.999999999"),
 	})
 
 	metric.RequestSuccess.WithLabelValues(metric.RequestUpdate).Inc()

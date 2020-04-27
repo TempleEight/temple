@@ -23,7 +23,7 @@ paths:
                     id:
                       type: string
                       format: uuid
-                    simpleTempleTestUser:
+                    simpleTempleTestLog:
                       type: string
                     email:
                       type: string
@@ -64,7 +64,7 @@ paths:
             schema:
               type: object
               properties:
-                simpleTempleTestUser:
+                simpleTempleTestLog:
                   type: string
                 email:
                   type: string
@@ -101,7 +101,7 @@ paths:
                   id:
                     type: string
                     format: uuid
-                  simpleTempleTestUser:
+                  simpleTempleTestLog:
                     type: string
                   email:
                     type: string
@@ -180,7 +180,7 @@ paths:
                   id:
                     type: string
                     format: uuid
-                  simpleTempleTestUser:
+                  simpleTempleTestLog:
                     type: string
                   email:
                     type: string
@@ -226,7 +226,7 @@ paths:
             schema:
               type: object
               properties:
-                simpleTempleTestUser:
+                simpleTempleTestLog:
                   type: string
                 email:
                   type: string
@@ -263,7 +263,7 @@ paths:
                   id:
                     type: string
                     format: uuid
-                  simpleTempleTestUser:
+                  simpleTempleTestLog:
                     type: string
                   email:
                     type: string

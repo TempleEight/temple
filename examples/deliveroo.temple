@@ -69,7 +69,7 @@ Dish: service {
     restaurant: Restaurant;
 
     Img: struct {
-        img: data(4M);
+        data: data(4M);
         #enumerable;
     }
     #enumerable;
