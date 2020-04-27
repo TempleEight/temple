@@ -69,12 +69,13 @@ object MetricsBuilder {
     datasource: Datasource,
     endpoints: SortedSet[CRUD],
     structName: Option[String] = None,
+    indexOffset: Int = 0,
   ): Seq[Row] =
     endpoints.toSeq.zipWithIndex.map {
       case (endpoint, index) =>
         Row(
           Metric(
-            index * 2,
+            (index + indexOffset) * 2,
             s"$endpoint ${structName.getOrElse(serviceName)} Requests",
             datasource,
             "QPS",
@@ -84,7 +85,7 @@ object MetricsBuilder {
             ),
           ),
           Metric(
-            index * 2 + 1,
+            (index + indexOffset) * 2 + 1,
             s"DB $endpoint ${structName.fold("Queries")(name => s"$name Queries")}",
             datasource,
             "Time (seconds)",
