@@ -1,6 +1,7 @@
 package temple.generate.server.go.service.main
 
 import temple.generate.CRUD._
+import temple.generate.server.AttributesRoot
 import temple.generate.server.AttributesRoot.ServiceRoot
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.utils.CodeTerm.{CodeWrap, mkCode}
@@ -79,20 +80,20 @@ object GoServiceMainGenerator {
     )
   }
 
-  private[main] def generateDAOReadInput(root: ServiceRoot): String =
+  private[main] def generateDAOReadInput(block: AttributesRoot): String =
     genDeclareAndAssign(
-      genPopulateStruct(s"dao.Read${root.name}Input", ListMap("ID" -> s"${root.decapitalizedName}ID")),
+      genPopulateStruct(s"dao.Read${block.name}Input", ListMap("ID" -> s"${block.decapitalizedName}ID")),
       "input",
     )
 
-  private[main] def generateDAOReadCall(root: ServiceRoot): String =
+  private[main] def generateDAOReadCall(block: AttributesRoot): String =
     genDeclareAndAssign(
       genMethodCall(
         "env.dao",
-        s"Read${root.name}",
+        s"Read${block.name}",
         "input",
       ),
-      root.decapitalizedName,
+      block.decapitalizedName,
       "err",
     )
 

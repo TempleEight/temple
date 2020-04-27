@@ -3,7 +3,7 @@ package temple.generate.server.go.service.main
 import temple.ast.Annotation.Unique
 import temple.ast.Metadata.Writable
 import temple.generate.CRUD.Update
-import temple.generate.server.AttributesRoot.ServiceRoot
+import temple.generate.server.AttributesRoot
 import temple.generate.server.go.GoHTTPStatus.{StatusForbidden, StatusInternalServerError, StatusNotFound}
 import temple.generate.server.go.common.GoCommonGenerator._
 import temple.generate.server.go.common.GoCommonMainGenerator._
@@ -15,29 +15,29 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainUpdateHandlerGenerator {
 
-  private def generateDAOInput(root: ServiceRoot): String = {
+  private def generateDAOInput(block: AttributesRoot): String = {
     val updateInput =
-      ListMap("ID" -> s"${root.decapitalizedName}ID") ++
-      generateDAOInputClientMap(root.storedRequestAttributes)
+      ListMap("ID" -> s"${block.decapitalizedName}ID") ++
+      generateDAOInputClientMap(block.storedRequestAttributes)
 
     genDeclareAndAssign(
-      genPopulateStruct(s"dao.Update${root.name}Input", updateInput),
+      genPopulateStruct(s"dao.Update${block.name}Input", updateInput),
       "input",
     )
   }
 
-  private def generateDAOCallErrorBlock(root: ServiceRoot, metricSuffix: Option[String]): String =
+  private def generateDAOCallErrorBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
     genIfErr(
       genSwitchReturn(
         "err.(type)",
         ListMap(
-          s"dao.Err${root.name}NotFound" -> generateRespondWithError(
+          s"dao.Err${block.name}NotFound" -> generateRespondWithError(
             genHTTPEnum(StatusNotFound),
             metricSuffix,
             genMethodCall("err", "Error"),
           ),
-        ) ++ when(root.contains(Unique)) {
-          s"dao.ErrDuplicate${root.name}" -> generateRespondWithError(
+        ) ++ when(block.contains(Unique)) {
+          s"dao.ErrDuplicate${block.name}" -> generateRespondWithError(
             genHTTPEnum(StatusForbidden),
             metricSuffix,
             genMethodCall("err", "Error"),
@@ -52,21 +52,21 @@ object GoServiceMainUpdateHandlerGenerator {
       ),
     )
 
-  private def generateDAOCallBlock(root: ServiceRoot, usesMetrics: Boolean, metricSuffix: Option[String]): String =
+  private def generateDAOCallBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
     mkCode.lines(
-      when(usesMetrics) { generateMetricTimerDecl(Update.toString) },
+      metricSuffix.map(generateMetricTimerDecl),
       genDeclareAndAssign(
-        genMethodCall("env.dao", s"Update${root.name}", "input"),
-        root.decapitalizedName,
+        genMethodCall("env.dao", s"Update${block.name}", "input"),
+        block.decapitalizedName,
         "err",
       ),
-      when(usesMetrics) { generateMetricTimerObservation() },
-      generateDAOCallErrorBlock(root, metricSuffix),
+      metricSuffix.map(_ => generateMetricTimerObservation()),
+      generateDAOCallErrorBlock(block, metricSuffix),
     )
 
   /** Generate the update handler function */
   private[main] def generateUpdateHandler(
-    root: ServiceRoot,
+    block: AttributesRoot,
     usesComms: Boolean,
     responseMap: ListMap[String, String],
     clientUsesTime: Boolean,
@@ -75,29 +75,29 @@ object GoServiceMainUpdateHandlerGenerator {
   ): String = {
     val metricSuffix = when(usesMetrics) { Update.toString }
     mkCode(
-      generateHandlerDecl(root, Update),
+      generateHandlerDecl(block, Update),
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
-          when(root.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
-          generateExtractIDBlock(root.decapitalizedName, metricSuffix),
-          when(root.writable == Writable.This) { generateCheckAuthorizationBlock(root, metricSuffix) },
+          when(block.projectUsesAuth) { generateExtractAuthBlock(metricSuffix) },
+          generateExtractIDBlock(block.decapitalizedName, metricSuffix),
+          when(block.writable == Writable.This) { generateCheckAuthorizationBlock(block, metricSuffix) },
           // Only need to handle request JSONs when there are client attributes
-          when(root.requestAttributes.nonEmpty) {
+          when(block.requestAttributes.nonEmpty) {
             mkCode.doubleLines(
-              generateDecodeRequestBlock(root, Update, s"update${root.name}", metricSuffix),
-              generateRequestNilCheck(root.requestAttributes, metricSuffix),
+              generateDecodeRequestBlock(block, Update, s"update${block.name}", metricSuffix),
+              generateRequestNilCheck(block.requestAttributes, metricSuffix),
               generateValidateStructBlock(metricSuffix),
-              when(usesComms) { generateForeignKeyCheckBlocks(root, metricSuffix) },
-              when(clientUsesTime) { generateParseTimeBlocks(root.requestAttributes, metricSuffix) },
-              when(clientUsesBase64) { generateParseBase64Blocks(root.requestAttributes, metricSuffix) },
+              when(usesComms) { generateForeignKeyCheckBlocks(block, metricSuffix) },
+              when(clientUsesTime) { generateParseTimeBlocks(block.requestAttributes, metricSuffix) },
+              when(clientUsesBase64) { generateParseBase64Blocks(block.requestAttributes, metricSuffix) },
             )
           },
-          generateDAOInput(root),
-          generateInvokeBeforeHookBlock(root, Update, metricSuffix),
-          generateDAOCallBlock(root, usesMetrics, metricSuffix),
-          generateInvokeAfterHookBlock(root, Update, metricSuffix),
-          generateJSONResponse(s"update${root.name}", responseMap),
-          when(usesMetrics) { generateMetricSuccess(Update.toString) },
+          generateDAOInput(block),
+          generateInvokeBeforeHookBlock(block, Update, metricSuffix),
+          generateDAOCallBlock(block, metricSuffix),
+          generateInvokeAfterHookBlock(block, Update, metricSuffix),
+          generateJSONResponse(s"update${block.name}", responseMap),
+          metricSuffix.map(generateMetricSuccess),
         ),
       ),
     )
