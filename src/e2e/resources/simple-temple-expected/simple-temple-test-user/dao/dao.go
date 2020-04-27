@@ -322,7 +322,7 @@ func (dao *DAO) ReadFred(input ReadFredInput) (*Fred, error) {
 
 // UpdateFred updates the fred in the datastore for a given ID, returning the newly updated fred
 func (dao *DAO) UpdateFred(input UpdateFredInput) (*Fred, error) {
-	row := executeQueryWithRowResponse(dao.DB, "UPDATE fred SET parent_id = $1, field = $2, friend = $3, image = $4 WHERE id = $5 RETURNING id, parent_id, field, friend, image;", input.Field, input.Friend, input.Image, input.ID)
+	row := executeQueryWithRowResponse(dao.DB, "UPDATE fred SET field = $1, friend = $2, image = $3 WHERE id = $4 RETURNING id, parent_id, field, friend, image;", input.Field, input.Friend, input.Image, input.ID)
 
 	var fred Fred
 	err := row.Scan(&fred.ID, &fred.ParentID, &fred.Field, &fred.Friend, &fred.Image)

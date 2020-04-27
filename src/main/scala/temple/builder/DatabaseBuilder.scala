@@ -1,6 +1,6 @@
 package temple.builder
 
-import temple.ast.AbstractAttribute.{CreatedByAttribute, IDAttribute}
+import temple.ast.AbstractAttribute.{CreatedByAttribute, IDAttribute, ParentAttribute}
 import temple.ast._
 import temple.generate.CRUD._
 import temple.generate.database.ast.ColumnConstraint.Check
@@ -62,7 +62,7 @@ object DatabaseBuilder {
     val columns   = attributes.keys.map(att => Column(snakeCase(att))).toSeq
     val providedColumns =
       attributes
-        .filter { case (_, attr) => attr != IDAttribute && attr != CreatedByAttribute }
+        .filter { case (_, attr) => attr != IDAttribute && attr != CreatedByAttribute && attr != ParentAttribute }
         .keys
         .map(att => Column(snakeCase(att)))
         .toSeq

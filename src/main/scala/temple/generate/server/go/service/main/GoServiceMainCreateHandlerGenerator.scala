@@ -30,7 +30,7 @@ object GoServiceMainCreateHandlerGenerator {
       ),
     )
 
-  private def generateDAOInput(block: AttributesRoot): String = {
+  private def generateDAOInput(block: AttributesRoot, parent: Option[ServiceRoot]): String = {
     val idCapitalized = block.idAttribute.name.toUpperCase
     // If service has auth block then an AuthID is passed in as ID, otherwise a created uuid is passed in
     val createInput =
@@ -39,6 +39,7 @@ object GoServiceMainCreateHandlerGenerator {
       when(!block.hasAuthBlock && block.projectUsesAuth && !block.isStruct) {
         s"Auth$idCapitalized" -> s"auth.$idCapitalized"
       } ++
+      parent.map(parent => block.parentAttribute.map(_.name).get.capitalize -> s"${parent.decapitalizedName}ID") ++
       generateDAOInputClientMap(block.storedRequestAttributes)
 
     genDeclareAndAssign(
@@ -125,7 +126,7 @@ object GoServiceMainCreateHandlerGenerator {
             )
           },
           when(!block.hasAuthBlock) { generateNewUUIDBlock(metricSuffix) },
-          generateDAOInput(block),
+          generateDAOInput(block, parent),
           generateInvokeBeforeHookBlock(block, Create, metricSuffix),
           generateDAOCallBlock(block, metricSuffix),
           generateInvokeAfterHookBlock(block, Create, metricSuffix),

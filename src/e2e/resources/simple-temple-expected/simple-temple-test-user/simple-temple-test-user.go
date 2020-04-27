@@ -750,10 +750,11 @@ func (env *env) createFredHandler(w http.ResponseWriter, r *http.Request) {
 	}
 
 	input := dao.CreateFredInput{
-		ID:     uuid,
-		Field:  *req.Field,
-		Friend: *req.Friend,
-		Image:  image,
+		ID:       uuid,
+		ParentID: simpleTempleTestUserID,
+		Field:    *req.Field,
+		Friend:   *req.Friend,
+		Image:    image,
 	}
 
 	for _, hook := range env.hook.beforeCreateFredHooks {
