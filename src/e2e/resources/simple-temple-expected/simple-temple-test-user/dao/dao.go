@@ -275,7 +275,7 @@ func (dao *DAO) ListFred(input ListFredInput) (*[]Fred, error) {
 	fredList := make([]Fred, 0)
 	for rows.Next() {
 		var fred Fred
-		err = rows.Scan(&fred.ID, &fred.Field, &fred.Friend, &fred.Image)
+		err = rows.Scan(&fred.ID, &fred.ParentID, &fred.Field, &fred.Friend, &fred.Image)
 		if err != nil {
 			return nil, err
 		}
@@ -294,7 +294,7 @@ func (dao *DAO) CreateFred(input CreateFredInput) (*Fred, error) {
 	row := executeQueryWithRowResponse(dao.DB, "INSERT INTO fred (id, parent_id, field, friend, image) VALUES ($1, $2, $3, $4, $5) RETURNING id, parent_id, field, friend, image;", input.ID, input.ParentID, input.Field, input.Friend, input.Image)
 
 	var fred Fred
-	err := row.Scan(&fred.ID, &fred.Field, &fred.Friend, &fred.Image)
+	err := row.Scan(&fred.ID, &fred.ParentID, &fred.Field, &fred.Friend, &fred.Image)
 	if err != nil {
 		return nil, err
 	}
@@ -307,7 +307,7 @@ func (dao *DAO) ReadFred(input ReadFredInput) (*Fred, error) {
 	row := executeQueryWithRowResponse(dao.DB, "SELECT id, parent_id, field, friend, image FROM fred WHERE id = $1;", input.ID)
 
 	var fred Fred
-	err := row.Scan(&fred.ID, &fred.Field, &fred.Friend, &fred.Image)
+	err := row.Scan(&fred.ID, &fred.ParentID, &fred.Field, &fred.Friend, &fred.Image)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
@@ -325,7 +325,7 @@ func (dao *DAO) UpdateFred(input UpdateFredInput) (*Fred, error) {
 	row := executeQueryWithRowResponse(dao.DB, "UPDATE fred SET parent_id = $1, field = $2, friend = $3, image = $4 WHERE id = $5 RETURNING id, parent_id, field, friend, image;", input.Field, input.Friend, input.Image, input.ID)
 
 	var fred Fred
-	err := row.Scan(&fred.ID, &fred.Field, &fred.Friend, &fred.Image)
+	err := row.Scan(&fred.ID, &fred.ParentID, &fred.Field, &fred.Friend, &fred.Image)
 	if err != nil {
 		switch err {
 		case sql.ErrNoRows:
