@@ -124,7 +124,8 @@ object NameClashes {
   def goServiceValidator: NameValidator =
     templeGoNameValidator & goGlobalsValidator & goKeywordValidator & templeServiceNameValidator & templeGoServiceValidator
 
-  val goAttributeValidator: NameValidator = goKeywordValidator & templeAttributeNameValidator
+  val goAttributeValidator: NameValidator =
+    goGlobalsValidator & goKeywordValidator & templeAttributeNameValidator & templeGoServiceValidator
 
   // https://www.postgresql.org/docs/10/sql-keywords-appendix.html
   // only those marked as "reserved"/"reserved (can be function or type)" in Postgres
