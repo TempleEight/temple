@@ -15,11 +15,7 @@ import scala.collection.immutable.ListMap
 
 object GoServiceMainReadHandlerGenerator {
 
-  private def generateDAOCallBlock(
-    block: AttributesRoot,
-    parent: Option[ServiceRoot],
-    metricSuffix: Option[String],
-  ): String =
+  private def generateDAOCallBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
     mkCode.doubleLines(
       generateDAOReadInput(block),
       generateInvokeBeforeHookBlock(block, Read, metricSuffix),
@@ -55,7 +51,7 @@ object GoServiceMainReadHandlerGenerator {
           when(block.readable == Readable.This) {
             generateCheckAuthorizationBlock(parent getOrElse block, block.hasAuthBlock, metricSuffix)
           },
-          generateDAOCallBlock(block, parent, metricSuffix),
+          generateDAOCallBlock(block, metricSuffix),
           generateJSONResponse(s"read${block.name}", responseMap),
           metricSuffix.map(generateMetricSuccess),
         ),

@@ -20,11 +20,7 @@ object GoServiceMainDeleteHandlerGenerator {
       "input",
     )
 
-  private def generateDAOCallBlock(
-    block: AttributesRoot,
-    parent: Option[ServiceRoot],
-    metricSuffix: Option[String],
-  ): String =
+  private def generateDAOCallBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
     mkCode.lines(
       metricSuffix.map(generateMetricTimerDecl),
       genAssign(
@@ -63,7 +59,7 @@ object GoServiceMainDeleteHandlerGenerator {
           },
           generateDAOInput(block),
           generateInvokeBeforeHookBlock(block, Delete, metricSuffix),
-          generateDAOCallBlock(block, parent, metricSuffix),
+          generateDAOCallBlock(block, metricSuffix),
           generateInvokeAfterHookBlock(block, Delete, metricSuffix),
           genMethodCall(genMethodCall("json", "NewEncoder", "w"), "Encode", "struct{}{}"),
           metricSuffix.map(metricSuffix => generateMetricSuccess(metricSuffix)),

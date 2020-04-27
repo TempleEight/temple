@@ -31,11 +31,7 @@ object GoServiceMainIdentifyHandlerGenerator {
       "err",
     )
 
-  private def generateDAOCallBlock(
-    block: AttributesRoot,
-    parent: Option[ServiceRoot],
-    metricSuffix: Option[String],
-  ): String =
+  private def generateDAOCallBlock(block: AttributesRoot, metricSuffix: Option[String]): String =
     mkCode.doubleLines(
       generateDAOInput(block),
       generateInvokeBeforeHookBlock(block, Identify, metricSuffix),
@@ -79,7 +75,7 @@ object GoServiceMainIdentifyHandlerGenerator {
       CodeWrap.curly.tabbed(
         mkCode.doubleLines(
           generateExtractAuthBlock(metricSuffix),
-          generateDAOCallBlock(block, parent, metricSuffix),
+          generateDAOCallBlock(block, metricSuffix),
           generateRedirectResponse(block),
           metricSuffix.map(generateMetricSuccess),
         ),
