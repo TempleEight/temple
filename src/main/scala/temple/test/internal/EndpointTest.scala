@@ -9,7 +9,7 @@ import temple.utils.StringUtils
 
 class TestFailedException(msg: String) extends RuntimeException(msg)
 
-private[internal] class EndpointTest(service: String, endpointName: String) {
+private[internal] class EndpointTest(service: String, endpointName: String, struct: Option[String]) {
 
   // Validate that the response JSON for the provided key matches the Attribute
   private def validateResponseType(
@@ -163,8 +163,8 @@ private[internal] class EndpointTest(service: String, endpointName: String) {
     if (!value) fail(failMsg)
 
   def pass(): Unit =
-    println(StringUtils.indent(s"✅ $service $endpointName", 4))
+    println(StringUtils.indent(s"✅ ${struct.getOrElse(service)} $endpointName", 4))
 
   def fail(message: String): Nothing =
-    throw new TestFailedException(StringUtils.indent(s"❌ $service $endpointName: $message", 4))
+    throw new TestFailedException(StringUtils.indent(s"❌ ${struct.getOrElse(service)} $endpointName: $message", 4))
 }
