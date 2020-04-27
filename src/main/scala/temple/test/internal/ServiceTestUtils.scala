@@ -82,13 +82,24 @@ object ServiceTestUtils {
     executeRequest("DELETE", test, url, token)
 
   /**
+    * Execute a request, returning the response code
+    * @param test The endpoint under test
+    * @param url The URL to send the request to, prefixed with the protocol
+    * @param token the bearer access token
+    * @param method the HTTP method to use
+    * @return the HTTP response code
+    */
+  def executeRequest(test: EndpointTest, url: String, token: String = "", method: String = "GET"): Int =
+    Http(url).method(method).header("Authorization", s"Bearer $token").asString.code
+
+  /**
     * Create an access token for use by the provided service
     * @param service The service the access token is required for
     * @param baseURL The base URL to execute requests
     * @return The access token, as a string
     */
   def getAuthTokenWithEmail(service: String, baseURL: String): String = {
-    val test         = new EndpointTest(service, "fetch auth token")
+    val test         = new EndpointTest(service, "fetch auth token", None)
     val body         = Map("email" -> randomEmail(), "password" -> StringUtils.randomString(10))
     val registerJson = postRequest(test, s"http://$baseURL/api/auth/register", body.asJson)
     registerJson("AccessToken").flatMap(_.asString).getOrElse(test.fail("access token was not a valid string"))
@@ -193,6 +204,31 @@ object ServiceTestUtils {
 
     val idJSON = createJSON("id").getOrElse(test.fail(s"response to create $serviceName did not contain an id key"))
     idJSON.asString.getOrElse(test.fail(s"response to create $serviceName contained field id, but was not a string"))
+  }
+
+  def createStruct(
+    test: EndpointTest,
+    parentID: String,
+    structName: String,
+    serviceName: String,
+    allServices: Map[String, ServiceBlock],
+    baseURL: String,
+    accessToken: String,
+  ): String = {
+    // A struct can only be from the same service
+    val service = allServices.getOrElse(serviceName, test.fail(s"service $serviceName does not exist"))
+    val struct  = service.structs.getOrElse(structName, test.fail(s"struct $structName does not exist in $serviceName"))
+
+    val requestBody = constructRequestBody(test, struct.attributes, allServices, baseURL, accessToken)
+    val url =
+      s"http://$baseURL/api/${StringUtils.kebabCase(serviceName)}/$parentID/${StringUtils.kebabCase(structName)}"
+    val createJSON = postRequest(test, url, requestBody, accessToken)
+
+    val idJSON =
+      createJSON("id").getOrElse(test.fail(s"response to create $structName in $serviceName did not contain an id key"))
+    idJSON.asString.getOrElse(
+      test.fail(s"response to create $structName in $serviceName contained field id, but was not a string"),
+    )
   }
 
   /**
