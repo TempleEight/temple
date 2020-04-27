@@ -1077,7 +1077,7 @@
         "y" : 25
       },
       "hiddenSeries" : false,
-      "id" : 0,
+      "id" : 10,
       "legend" : {
         "avg" : false,
         "current" : false,
@@ -1177,7 +1177,7 @@
         "y" : 25
       },
       "hiddenSeries" : false,
-      "id" : 1,
+      "id" : 11,
       "legend" : {
         "avg" : false,
         "current" : false,
@@ -1287,7 +1287,7 @@
         "y" : 30
       },
       "hiddenSeries" : false,
-      "id" : 2,
+      "id" : 12,
       "legend" : {
         "avg" : false,
         "current" : false,
@@ -1387,7 +1387,7 @@
         "y" : 30
       },
       "hiddenSeries" : false,
-      "id" : 3,
+      "id" : 13,
       "legend" : {
         "avg" : false,
         "current" : false,
@@ -1497,7 +1497,7 @@
         "y" : 35
       },
       "hiddenSeries" : false,
-      "id" : 4,
+      "id" : 14,
       "legend" : {
         "avg" : false,
         "current" : false,
@@ -1597,7 +1597,7 @@
         "y" : 35
       },
       "hiddenSeries" : false,
-      "id" : 5,
+      "id" : 15,
       "legend" : {
         "avg" : false,
         "current" : false,
@@ -1707,7 +1707,7 @@
         "y" : 40
       },
       "hiddenSeries" : false,
-      "id" : 6,
+      "id" : 16,
       "legend" : {
         "avg" : false,
         "current" : false,
@@ -1807,7 +1807,7 @@
         "y" : 40
       },
       "hiddenSeries" : false,
-      "id" : 7,
+      "id" : 17,
       "legend" : {
         "avg" : false,
         "current" : false,
