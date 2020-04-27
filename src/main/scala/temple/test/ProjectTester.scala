@@ -141,7 +141,7 @@ object ProjectTester {
   }
 
   /** Execute the tests on each generated service */
-  private def performTests(templefile: Templefile, generatedPath: String, url: String): Unit = {
+  private def performTests(templefile: Templefile, url: String): Unit = {
     val authMethod = templefile.lookupMetadata[AuthMethod]
     var anyFailed  = false
     authMethod.foreach { auth =>
@@ -169,7 +169,7 @@ object ProjectTester {
     try {
       // Check we can actually connect to the URL
       Http(s"http://${config.baseIP}").asString
-      performTests(templefile, generatedPath, config.baseIP)
+      performTests(templefile, config.baseIP)
     } catch {
       case e: ConnectException =>
         println(s"😢 Could not connect to ${config.baseIP}, is the project running?")
@@ -186,7 +186,7 @@ object ProjectTester {
   def test(templefile: Templefile, generatedPath: String): Unit =
     try {
       val config = performSetup(templefile, generatedPath)
-      performTests(templefile, generatedPath, config.baseIP)
+      performTests(templefile, config.baseIP)
     } finally {
       performShutdown(templefile, generatedPath)
     }
