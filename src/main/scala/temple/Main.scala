@@ -2,6 +2,7 @@ package temple
 
 import java.nio.file.{FileAlreadyExistsException, NoSuchFileException}
 
+import temple.detail.LanguageSpecificDetailBuilder.InvalidPackageName
 import temple.detail.StdInQuestionAsker
 
 /** Main entry point into the application */
@@ -24,6 +25,7 @@ object Main extends App {
   } catch {
     case error: FileAlreadyExistsException => exit(s"File already exists: ${error.getMessage}")
     case error: NoSuchFileException        => exit(s"File not found: ${error.getMessage}")
+    case error: InvalidPackageName         => exit(s"Package name isn't valid: ${error.getMessage}")
     case error: Exception                  => exit((error.toString +: error.getStackTrace.toSeq).mkString("\n"))
   }
 
