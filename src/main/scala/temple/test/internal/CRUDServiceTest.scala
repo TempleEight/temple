@@ -11,6 +11,7 @@ import temple.builder.project.ProjectBuilder
 import temple.generate.CRUD
 import temple.generate.CRUD.CRUD
 import temple.utils.StringUtils.kebabCase
+import temple.builder.project.ProjectConfig.{getDefaultReadable, getDefaultWritable}
 
 class CRUDServiceTest(
   serviceName: String,
@@ -21,14 +22,10 @@ class CRUDServiceTest(
 ) extends ServiceTest(serviceName, baseURL, usesAuth) {
 
   private def serviceReadable: Metadata.Readable =
-    service.lookupLocalMetadata[Metadata.Readable].getOrElse {
-      if (usesAuth) Metadata.Readable.This else Metadata.Readable.All
-    }
+    service.lookupLocalMetadata[Metadata.Readable].getOrElse(getDefaultReadable(usesAuth))
 
   private def serviceWritable: Metadata.Writable =
-    service.lookupLocalMetadata[Metadata.Writable].getOrElse {
-      if (usesAuth) Metadata.Writable.This else Metadata.Writable.All
-    }
+    service.lookupLocalMetadata[Metadata.Writable].getOrElse(getDefaultWritable(usesAuth))
 
   private def testReadability(test: EndpointTest, endpoints: Set[CRUD], url: String): Unit = {
     val accessToken = if (usesAuth) getAuthTokenWithEmail(serviceName, baseURL) else ""
