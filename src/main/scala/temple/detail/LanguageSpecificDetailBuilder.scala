@@ -7,7 +7,7 @@ import temple.detail.LanguageDetail.GoLanguageDetail
 
 /** Call out to the user and ask for any required extra input based on their Templefile options */
 object LanguageSpecificDetailBuilder {
-  class InvalidPackageName(str: String) extends RuntimeException(str)
+  class InvalidPackageNameException(str: String) extends RuntimeException(str)
 
   private def buildGoDetail(questionAsker: QuestionAsker): GoLanguageDetail = {
     var packageName = ""
