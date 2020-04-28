@@ -1,12 +1,17 @@
 package temple.test.internal
 
+import java.net.HttpURLConnection
+
 import scalaj.http.Http
 import temple.ast.AbstractServiceBlock.ServiceBlock
+import temple.ast.Metadata.{Readable, Writable}
 import temple.test.internal.ServiceTestUtils._
-import temple.ast.{Metadata, StructBlock}
+import temple.ast.{AbstractAttribute, Metadata, StructBlock}
 import temple.builder.project.ProjectBuilder
 import temple.generate.CRUD
+import temple.generate.CRUD.CRUD
 import temple.utils.StringUtils.kebabCase
+import temple.builder.project.ProjectConfig.{getDefaultReadable, getDefaultWritable}
 
 class CRUDServiceTest(
   serviceName: String,
@@ -15,6 +20,52 @@ class CRUDServiceTest(
   baseURL: String,
   usesAuth: Boolean,
 ) extends ServiceTest(serviceName, baseURL, usesAuth) {
+
+  private def serviceReadable: Metadata.Readable =
+    service.lookupLocalMetadata[Metadata.Readable].getOrElse(getDefaultReadable(usesAuth))
+
+  private def serviceWritable: Metadata.Writable =
+    service.lookupLocalMetadata[Metadata.Writable].getOrElse(getDefaultWritable(usesAuth))
+
+  private def testReadability(test: EndpointTest, endpoints: Set[CRUD], url: String): Unit = {
+    val accessToken = if (usesAuth) getAuthTokenWithEmail(serviceName, baseURL) else ""
+    val expected = serviceReadable match {
+      case Readable.All  => HttpURLConnection.HTTP_OK
+      case Readable.This => HttpURLConnection.HTTP_UNAUTHORIZED
+    }
+
+    if (endpoints.contains(CRUD.Read)) {
+      // Make a read request using a new access token, then validate the response code
+      val responseCode = executeRequest(test, url, accessToken)
+      test.assertEqual(expected, responseCode, "entity did not have the correct readability")
+    }
+  }
+
+  private def testWritability(
+    test: EndpointTest,
+    attributes: Map[String, AbstractAttribute],
+    endpoints: Set[CRUD],
+    url: String,
+  ): Unit = {
+    val accessToken = if (usesAuth) getAuthTokenWithEmail(serviceName, baseURL) else ""
+    val expected = serviceWritable match {
+      case Writable.All  => HttpURLConnection.HTTP_OK
+      case Writable.This => HttpURLConnection.HTTP_UNAUTHORIZED
+    }
+
+    if (endpoints.contains(CRUD.Update)) {
+      // Make an update request using a new access token, then validate the response code
+      val requestBody    = constructRequestBody(test, attributes, allServices, baseURL, accessToken)
+      val updateResponse = executeRequest(test, url, accessToken, "PUT", Some(requestBody))
+      test.assertEqual(expected, updateResponse, "entity did not have the correct writability for updating")
+    }
+
+    if (endpoints.contains(CRUD.Delete)) {
+      // Also attempt to make a delete call - the outcome should be the same
+      val deleteResponse = executeRequest(test, url, accessToken, "DELETE")
+      test.assertEqual(expected, deleteResponse, "entity did not have the correct writability for deleting")
+    }
+  }
 
   private def testCreateEndpoint(): Unit =
     testEndpoint("create") { (test, accessToken) =>
@@ -67,10 +118,10 @@ class CRUDServiceTest(
       }
     }
 
-  def testIdentifyEndpoint(): Unit =
+  private def testIdentifyEndpoint(): Unit =
     testEndpoint("identify") { (test, accessToken) =>
       val requestBody = constructRequestBody(test, service.attributes, allServices, baseURL, accessToken)
-      // Check the entity does not alreayd exist
+      // Check the entity does not already exist
       val preIdentifyResponse = Http(serviceURL).method("GET").header("Authorization", s"Bearer $accessToken").asString
       test.assertEqual(404, preIdentifyResponse.code)
 
@@ -91,7 +142,7 @@ class CRUDServiceTest(
       test.validateResponseBody(requestBody.asObject, response, service.attributes)
     }
 
-  def testCreateStructEndpoint(structName: String, struct: StructBlock): Unit =
+  private def testCreateStructEndpoint(structName: String, struct: StructBlock): Unit =
     testEndpoint("create", Some(structName)) { (test, accessToken) =>
       val parentID    = create(test, serviceName, allServices, baseURL, accessToken)
       val requestBody = constructRequestBody(test, struct.attributes, allServices, baseURL, accessToken)
@@ -99,7 +150,7 @@ class CRUDServiceTest(
       test.validateResponseBody(requestBody.asObject, createJSON, struct.attributes)
     }
 
-  def testReadStructEndpoint(structName: String, struct: StructBlock): Unit =
+  private def testReadStructEndpoint(structName: String, struct: StructBlock): Unit =
     testEndpoint("read", Some(structName)) { (test, accessToken) =>
       val parentID = create(test, serviceName, allServices, baseURL, accessToken)
       val structID = createStruct(test, parentID, structName, serviceName, allServices, baseURL, accessToken)
@@ -107,7 +158,7 @@ class CRUDServiceTest(
       test.validateResponseBody(None, getJSON, struct.attributes)
     }
 
-  def testUpdateStructEndpoint(structName: String, struct: StructBlock): Unit =
+  private def testUpdateStructEndpoint(structName: String, struct: StructBlock): Unit =
     testEndpoint("update", Some(structName)) { (test, accessToken) =>
       val parentID    = create(test, serviceName, allServices, baseURL, accessToken)
       val structID    = createStruct(test, parentID, structName, serviceName, allServices, baseURL, accessToken)
@@ -121,7 +172,7 @@ class CRUDServiceTest(
       test.validateResponseBody(requestBody.asObject, getJSON, struct.attributes)
     }
 
-  def testDeleteStructEndpoint(structName: String, struct: StructBlock): Unit =
+  private def testDeleteStructEndpoint(structName: String, struct: StructBlock): Unit =
     testEndpoint("delete", Some(structName)) { (test, accessToken) =>
       val parentID   = create(test, serviceName, allServices, baseURL, accessToken)
       val structID   = createStruct(test, parentID, structName, serviceName, allServices, baseURL, accessToken)
@@ -133,7 +184,7 @@ class CRUDServiceTest(
       test.assertEqual(404, code, "entity should have been deleted")
     }
 
-  def testListStructEndpoint(structName: String, struct: StructBlock): Unit =
+  private def testListStructEndpoint(structName: String, struct: StructBlock): Unit =
     testEndpoint("list", Some(structName)) { (test, accessToken) =>
       val parentID = create(test, serviceName, allServices, baseURL, accessToken)
       val _        = createStruct(test, parentID, structName, serviceName, allServices, baseURL, accessToken)
@@ -149,9 +200,39 @@ class CRUDServiceTest(
       }
     }
 
+  // Determine that entities within the service can be correctly read
+  private def testServiceReadability(endpoints: Set[CRUD]): Unit =
+    testEndpoint("readability") { (test, accessToken) =>
+      val id = create(test, serviceName, allServices, baseURL, accessToken)
+      testReadability(test, endpoints, s"$serviceURL/$id")
+    }
+
+  // Determine that entities within the service can be correctly written
+  private def testServiceWritability(endpoints: Set[CRUD]): Unit =
+    testEndpoint("writablity") { (test, accessToken) =>
+      val id = create(test, serviceName, allServices, baseURL, accessToken)
+      testWritability(test, service.attributes, endpoints, s"$serviceURL/$id")
+    }
+
+  // Determine that entities within the service can be correctly read
+  private def testStructReadability(structName: String, endpoints: Set[CRUD]): Unit =
+    testEndpoint("readability", Some(structName)) { (test, accessToken) =>
+      val parentID = create(test, serviceName, allServices, baseURL, accessToken)
+      val structID = createStruct(test, parentID, structName, serviceName, allServices, baseURL, accessToken)
+      testReadability(test, endpoints, s"$serviceURL/$parentID/${kebabCase(structName)}/$structID")
+    }
+
+  private def testStructWritability(structName: String, struct: StructBlock, endpoints: Set[CRUD.CRUD]): Unit =
+    testEndpoint("writability", Some(structName)) { (test, accessToken) =>
+      val parentID = create(test, serviceName, allServices, baseURL, accessToken)
+      val structID = createStruct(test, parentID, structName, serviceName, allServices, baseURL, accessToken)
+      testWritability(test, struct.attributes, endpoints, s"$serviceURL/$parentID/${kebabCase(structName)}/$structID")
+    }
+
   // Test each type of endpoint that is present in the service
   def test(): Boolean = {
-    ProjectBuilder.endpoints(service).foreach {
+    val serviceEndpoints = ProjectBuilder.endpoints(service)
+    serviceEndpoints.foreach {
       case CRUD.List     => testListEndpoint()
       case CRUD.Create   => testCreateEndpoint()
       case CRUD.Read     => testReadEndpoint()
@@ -159,10 +240,13 @@ class CRUDServiceTest(
       case CRUD.Delete   => testDeleteEndpoint()
       case CRUD.Identify => testIdentifyEndpoint()
     }
+    testServiceReadability(serviceEndpoints)
+    testServiceWritability(serviceEndpoints)
 
     service.structs.foreach {
       case (name, struct) =>
-        ProjectBuilder.endpoints(struct).foreach {
+        val structEndpoints = ProjectBuilder.endpoints(struct)
+        structEndpoints.foreach {
           case CRUD.List     => testListStructEndpoint(name, struct)
           case CRUD.Create   => testCreateStructEndpoint(name, struct)
           case CRUD.Read     => testReadStructEndpoint(name, struct)
@@ -170,6 +254,8 @@ class CRUDServiceTest(
           case CRUD.Delete   => testDeleteStructEndpoint(name, struct)
           case CRUD.Identify => throw new RuntimeException("A struct cannot have an identify endpoint")
         }
+        testStructReadability(name, structEndpoints)
+        testStructWritability(name, struct, structEndpoints)
     }
 
     anyTestFailed
