@@ -78,8 +78,8 @@ paths:
     - in: path
       name: id
       schema:
-        type: number
-        format: int32
+        type: string
+        format: uuid
       required: true
       description: ID of the templeuser to perform operations on
     get:

@@ -13,6 +13,7 @@ import temple.generate.target.openapi.ast.OpenAPIType._
 import temple.generate.target.openapi.ast.Parameter.InPath
 import temple.generate.target.openapi.ast._
 import temple.utils.StringUtils
+import Option.when
 
 import scala.collection.immutable.ListMap
 import scala.collection.mutable
@@ -37,18 +38,28 @@ private class OpenAPIGenerator private (
 
   private val paths = mutable.LinkedHashMap[String, Path.Mutable]()
 
-  private def path(url: String): mutable.Map[HTTPVerb, Handler] =
-    paths.getOrElseUpdate(url, Path.Mutable()).handlers
+  private def path(url: String, lowerName: String): mutable.Map[HTTPVerb, Handler] = {
+    val idParameter = when(url.contains("{id}")) {
+      Parameter(
+        InPath,
+        name = "id",
+        required = Some(true),
+        schema = OpenAPISimpleType("string", "uuid"),
+        description = s"ID of the $lowerName to perform operations on",
+      )
+    }
 
-  private def pathWithID(url: String, lowerName: String): mutable.Map[HTTPVerb, Handler] = {
-    val parameter = Parameter(
-      InPath,
-      name = "id",
-      required = Some(true),
-      schema = OpenAPISimpleType("number", "int32"),
-      description = s"ID of the $lowerName to perform operations on",
-    )
-    paths.getOrElseUpdate(url, Path.Mutable(parameters = Seq(parameter))).handlers
+    val parentIDParameter = when(url.contains("{parent_id}")) {
+      Parameter(
+        InPath,
+        name = "parent_id",
+        required = Some(true),
+        schema = OpenAPISimpleType("string", "uuid"),
+        description = s"ID of the parent which owns this entity",
+      )
+    }
+
+    paths.getOrElseUpdate(url, Path.Mutable(parameters = Seq(idParameter, parentIDParameter).flatten)).handlers
   }
 
   private def attributeToOpenAPIType(attribute: AbstractAttribute): OpenAPISimpleType = attribute.attributeType match {
@@ -90,15 +101,14 @@ private class OpenAPIGenerator private (
       .to(attributes.mapFactory),
   )
 
-  def addPaths(service: Service): this.type = {
+  def addPaths(prefix: String, service: AbstractService): this.type = {
     val securitySchemeName = securityScheme.map { case (name, _) => name }
-    val kebabName          = StringUtils.kebabCase(service.name)
     val lowerName          = service.name.toLowerCase
     val capitalizedName    = service.name.capitalize
     val tags               = Seq(capitalizedName)
     service.operations.foreach {
       case List =>
-        path(s"/$kebabName/all") += HTTPVerb.Get -> Handler(
+        path(s"$prefix/all", lowerName) += HTTPVerb.Get -> Handler(
             s"Get a list of every $lowerName",
             tags = tags,
             security = securitySchemeName,
@@ -107,11 +117,12 @@ private class OpenAPIGenerator private (
                 s"$capitalizedName list successfully fetched",
                 Some(jsonContent(MediaTypeObject(OpenAPIArray(generateItemType(service.attributes))))),
               ),
+              401 -> Response.Ref(useError(401)),
               500 -> Response.Ref(useError(500)),
             ),
           )
       case Create =>
-        path(s"/$kebabName") += HTTPVerb.Post -> Handler(
+        path(s"$prefix", lowerName) += HTTPVerb.Post -> Handler(
             s"Register a new $lowerName",
             tags = tags,
             security = securitySchemeName,
@@ -128,7 +139,7 @@ private class OpenAPIGenerator private (
             ),
           )
       case Read =>
-        pathWithID(s"/$kebabName/{id}", lowerName) += HTTPVerb.Get -> Handler(
+        path(s"$prefix/{id}", lowerName) += HTTPVerb.Get -> Handler(
             s"Look up a single $lowerName",
             tags = tags,
             security = securitySchemeName,
@@ -144,7 +155,7 @@ private class OpenAPIGenerator private (
             ),
           )
       case Update =>
-        pathWithID(s"/$kebabName/{id}", lowerName) += HTTPVerb.Put -> Handler(
+        path(s"$prefix/{id}", lowerName) += HTTPVerb.Put -> Handler(
             s"Update a single $lowerName",
             tags = tags,
             security = securitySchemeName,
@@ -162,7 +173,7 @@ private class OpenAPIGenerator private (
             ),
           )
       case Delete =>
-        pathWithID(s"/$kebabName/{id}", lowerName) += HTTPVerb.Delete -> Handler(
+        path(s"$prefix/{id}", lowerName) += HTTPVerb.Delete -> Handler(
             s"Delete a single $lowerName",
             tags = tags,
             security = securitySchemeName,
@@ -178,7 +189,7 @@ private class OpenAPIGenerator private (
             ),
           )
       case Identify =>
-        path(s"/$kebabName") += HTTPVerb.Get -> Handler(
+        path(s"$prefix", lowerName) += HTTPVerb.Get -> Handler(
             s"Look up the single $lowerName associated with the access token",
             tags = tags,
             security = securitySchemeName,
@@ -220,7 +231,7 @@ private class OpenAPIGenerator private (
 
         val responseBody = OpenAPIObject(Map("AccessToken" -> OpenAPISimpleType("string")))
 
-        path(s"/auth/register") += HTTPVerb.Post -> Handler(
+        path(s"/auth/register", "auth") += HTTPVerb.Post -> Handler(
           s"Register and get an access token",
           tags = tags,
           requestBody = Some(RequestBodyObject(jsonContent(MediaTypeObject(OpenAPIObject(requestBody))))),
@@ -234,7 +245,7 @@ private class OpenAPIGenerator private (
             500 -> Response.Ref(useError(500)),
           ),
         )
-        path(s"/auth/login") += HTTPVerb.Post -> Handler(
+        path(s"/auth/login", "auth") += HTTPVerb.Post -> Handler(
           s"Login and get an access token",
           tags = tags,
           requestBody = Some(RequestBodyObject(jsonContent(MediaTypeObject(OpenAPIObject(requestBody))))),
@@ -276,7 +287,17 @@ object OpenAPIGenerator {
       case Auth.Email => "bearerAuth" -> SecurityScheme("http", "bearer", "JWT")
     }
     val builder = new OpenAPIGenerator(root.name, root.version, root.description, securityScheme)
-    root.services.foreach(builder.addPaths)
+
+    root.services.foreach { service =>
+      val kebabName = StringUtils.kebabCase(service.name)
+      builder.addPaths(s"/$kebabName", service)
+
+      service.structs.foreach { struct =>
+        val kebabStructName = StringUtils.kebabCase(struct.name)
+        builder.addPaths(s"/$kebabName/{parent_id}/$kebabStructName", struct)
+      }
+    }
+
     root.auth.foreach(builder.addAuthPaths)
     builder.toOpenAPI
   }
