@@ -102,8 +102,6 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                      type: number
         |                      format: int32
         |                      description: Reference to User ID
-        |        '401':
-        |          $ref: '#/components/responses/Error401'
         |        '500':
         |          $ref: '#/components/responses/Error500'
         |  /match:
@@ -173,8 +171,6 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                    description: Reference to User ID
         |        '400':
         |          $ref: '#/components/responses/Error400'
-        |        '401':
-        |          $ref: '#/components/responses/Error401'
         |        '500':
         |          $ref: '#/components/responses/Error500'
         |    get:
@@ -189,6 +185,8 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |              description: The location where the single match can be found
         |              schema:
         |                type: string
+        |        '401':
+        |          $ref: '#/components/responses/Error401'
         |        '404':
         |          $ref: '#/components/responses/Error404'
         |        '500':
@@ -239,8 +237,6 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                    description: Reference to User ID
         |        '400':
         |          $ref: '#/components/responses/Error400'
-        |        '401':
-        |          $ref: '#/components/responses/Error401'
         |        '404':
         |          $ref: '#/components/responses/Error404'
         |        '500':
@@ -311,8 +307,6 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                    description: Reference to User ID
         |        '400':
         |          $ref: '#/components/responses/Error400'
-        |        '401':
-        |          $ref: '#/components/responses/Error401'
         |        '404':
         |          $ref: '#/components/responses/Error404'
         |        '500':
@@ -331,8 +325,6 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                properties: {}
         |        '400':
         |          $ref: '#/components/responses/Error400'
-        |        '401':
-        |          $ref: '#/components/responses/Error401'
         |        '404':
         |          $ref: '#/components/responses/Error404'
         |        '500':

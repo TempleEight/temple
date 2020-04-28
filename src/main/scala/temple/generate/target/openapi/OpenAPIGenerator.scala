@@ -113,13 +113,12 @@ private class OpenAPIGenerator private (
             tags = tags,
             security = securitySchemeName,
             responses = Seq(
-              200 -> ResponseObject(
-                s"$capitalizedName list successfully fetched",
-                Some(jsonContent(MediaTypeObject(OpenAPIArray(generateItemType(service.attributes))))),
-              ),
-              401 -> Response.Ref(useError(401)),
-              500 -> Response.Ref(useError(500)),
-            ),
+                200 -> ResponseObject(
+                  s"$capitalizedName list successfully fetched",
+                  Some(jsonContent(MediaTypeObject(OpenAPIArray(generateItemType(service.attributes))))),
+                ),
+                500 -> Response.Ref(useError(500)),
+              ) ++ securityScheme.map(_ => 401 -> Response.Ref(useError(401))),
           )
       case Create =>
         path(s"$prefix", lowerName) += HTTPVerb.Post -> Handler(
@@ -129,14 +128,13 @@ private class OpenAPIGenerator private (
             requestBody =
               Some(RequestBodyObject(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
             responses = Seq(
-              200 -> ResponseObject(
-                s"$capitalizedName successfully created",
-                Some(jsonContent(MediaTypeObject(generateItemType(service.attributes)))),
-              ),
-              400 -> Response.Ref(useError(400)),
-              401 -> Response.Ref(useError(401)),
-              500 -> Response.Ref(useError(500)),
-            ),
+                200 -> ResponseObject(
+                  s"$capitalizedName successfully created",
+                  Some(jsonContent(MediaTypeObject(generateItemType(service.attributes)))),
+                ),
+                400 -> Response.Ref(useError(400)),
+                500 -> Response.Ref(useError(500)),
+              ) ++ securityScheme.map(_ => 401 -> Response.Ref(useError(401))),
           )
       case Read =>
         path(s"$prefix/{id}", lowerName) += HTTPVerb.Get -> Handler(
@@ -144,15 +142,14 @@ private class OpenAPIGenerator private (
             tags = tags,
             security = securitySchemeName,
             responses = Seq(
-              200 -> ResponseObject(
-                s"$capitalizedName details",
-                Some(jsonContent(MediaTypeObject(generateItemType(service.attributes)))),
-              ),
-              400 -> Response.Ref(useError(400)),
-              401 -> Response.Ref(useError(401)),
-              404 -> Response.Ref(useError(404)),
-              500 -> Response.Ref(useError(500)),
-            ),
+                200 -> ResponseObject(
+                  s"$capitalizedName details",
+                  Some(jsonContent(MediaTypeObject(generateItemType(service.attributes)))),
+                ),
+                400 -> Response.Ref(useError(400)),
+                404 -> Response.Ref(useError(404)),
+                500 -> Response.Ref(useError(500)),
+              ) ++ securityScheme.map(_ => 401 -> Response.Ref(useError(401))),
           )
       case Update =>
         path(s"$prefix/{id}", lowerName) += HTTPVerb.Put -> Handler(
@@ -162,15 +159,14 @@ private class OpenAPIGenerator private (
             requestBody =
               Some(RequestBodyObject(jsonContent(MediaTypeObject(generateItemInputType(service.attributes))))),
             responses = Seq(
-              200 -> ResponseObject(
-                s"$capitalizedName successfully updated",
-                Some(jsonContent(MediaTypeObject(generateItemType(service.attributes)))),
-              ),
-              400 -> Response.Ref(useError(400)),
-              401 -> Response.Ref(useError(401)),
-              404 -> Response.Ref(useError(404)),
-              500 -> Response.Ref(useError(500)),
-            ),
+                200 -> ResponseObject(
+                  s"$capitalizedName successfully updated",
+                  Some(jsonContent(MediaTypeObject(generateItemType(service.attributes)))),
+                ),
+                400 -> Response.Ref(useError(400)),
+                404 -> Response.Ref(useError(404)),
+                500 -> Response.Ref(useError(500)),
+              ) ++ securityScheme.map(_ => 401 -> Response.Ref(useError(401))),
           )
       case Delete =>
         path(s"$prefix/{id}", lowerName) += HTTPVerb.Delete -> Handler(
@@ -178,15 +174,14 @@ private class OpenAPIGenerator private (
             tags = tags,
             security = securitySchemeName,
             responses = Seq(
-              200 -> ResponseObject(
-                s"$capitalizedName successfully deleted",
-                Some(jsonContent(MediaTypeObject(OpenAPIObject(Map())))),
-              ),
-              400 -> Response.Ref(useError(400)),
-              401 -> Response.Ref(useError(401)),
-              404 -> Response.Ref(useError(404)),
-              500 -> Response.Ref(useError(500)),
-            ),
+                200 -> ResponseObject(
+                  s"$capitalizedName successfully deleted",
+                  Some(jsonContent(MediaTypeObject(OpenAPIObject(Map())))),
+                ),
+                400 -> Response.Ref(useError(400)),
+                404 -> Response.Ref(useError(404)),
+                500 -> Response.Ref(useError(500)),
+              ) ++ securityScheme.map(_ => 401 -> Response.Ref(useError(401))),
           )
       case Identify =>
         path(s"$prefix", lowerName) += HTTPVerb.Get -> Handler(
@@ -206,6 +201,7 @@ private class OpenAPIGenerator private (
                   ),
                 ),
               ),
+              401 -> Response.Ref(useError(401)),
               404 -> Response.Ref(useError(404)),
               500 -> Response.Ref(useError(500)),
             ),
