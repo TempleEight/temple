@@ -87,10 +87,22 @@ object ServiceTestUtils {
     * @param url The URL to send the request to, prefixed with the protocol
     * @param token the bearer access token
     * @param method the HTTP method to use
+    * @param body JSON body to send with request
     * @return the HTTP response code
     */
-  def executeRequest(test: EndpointTest, url: String, token: String = "", method: String = "GET"): Int =
-    Http(url).method(method).header("Authorization", s"Bearer $token").asString.code
+  def executeRequest(
+    test: EndpointTest,
+    url: String,
+    token: String = "",
+    method: String = "GET",
+    body: Option[Json] = None,
+  ): Int = {
+    val http = body match {
+      case Some(body) => Http(url).postData(body.toString)
+      case None       => Http(url)
+    }
+    http.method(method).header("Authorization", s"Bearer $token").asString.code
+  }
 
   /**
     * Create an access token for use by the provided service
