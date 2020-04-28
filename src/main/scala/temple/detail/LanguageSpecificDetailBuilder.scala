@@ -18,7 +18,7 @@ object LanguageSpecificDetailBuilder {
     }
 
     if (packageName.contains(" ")) {
-      throw new InvalidPackageName("Please enter a valid Go module name, it cannot contain whitespace")
+      throw new InvalidPackageNameException("Please enter a valid Go module name, it cannot contain whitespace")
     }
     GoLanguageDetail(packageName)
   }
