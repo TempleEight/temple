@@ -6,9 +6,6 @@ import scala.io.StdIn
 object StdInQuestionAsker extends QuestionAsker {
 
   /** Given a question string, get the user to respond, returning their answer */
-  override def askQuestion(question: String): String = {
-    val answer = StdIn.readLine(Console.BLUE + question + "\n" + Console.RESET)
-    println(answer)
-    answer
-  }
+  override def askQuestion(question: String): String =
+    StdIn.readLine(Console.BLUE + question + "\n" + Console.RESET)
 }
