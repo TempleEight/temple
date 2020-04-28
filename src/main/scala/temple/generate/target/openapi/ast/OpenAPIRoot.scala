@@ -1,5 +1,7 @@
 package temple.generate.target.openapi.ast
 
+import temple.generate.target.openapi.ast.AbstractService.Service
+
 case class OpenAPIRoot(
   name: String,
   version: String,

@@ -8,7 +8,8 @@ import temple.ast.Annotation
 import temple.ast.AttributeType._
 import temple.generate.CRUD
 import temple.generate.target.openapi.OpenAPIGenerator.generateError
-import temple.generate.target.openapi.ast.{OpenAPIRoot, Response, Service}
+import temple.generate.target.openapi.ast.{OpenAPIRoot, Response}
+import temple.generate.target.openapi.ast.AbstractService._
 
 import scala.collection.immutable.ListMap
 
@@ -101,6 +102,8 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |                      type: number
         |                      format: int32
         |                      description: Reference to User ID
+        |        '401':
+        |          $ref: '#/components/responses/Error401'
         |        '500':
         |          $ref: '#/components/responses/Error500'
         |  /match:
@@ -195,8 +198,8 @@ class OpenAPIGeneratorTest extends FlatSpec with Matchers {
         |    - in: path
         |      name: id
         |      schema:
-        |        type: number
-        |        format: int32
+        |        type: string
+        |        format: uuid
         |      required: true
         |      description: ID of the match to perform operations on
         |    get:
