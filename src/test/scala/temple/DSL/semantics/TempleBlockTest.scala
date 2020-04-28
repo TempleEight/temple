@@ -12,10 +12,6 @@ class TempleBlockTest extends FlatSpec with Matchers {
     val projectBlock = ProjectBlock(Seq(Metadata.Database.Postgres))
     projectBlock.lookupLocalMetadata[Metadata.ServiceLanguage] shouldBe None
     projectBlock.lookupLocalMetadata[Metadata.Database] shouldBe Some(Metadata.Database.Postgres)
-
-    val targetBlock = TargetBlock(Seq(Metadata.TargetLanguage.JavaScript))
-    targetBlock.lookupLocalMetadata[Metadata.TargetLanguage] shouldBe Some(Metadata.TargetLanguage.JavaScript)
-    targetBlock.lookupLocalMetadata[Metadata.Database] shouldBe None
   }
 
   it should "fail to lookupMetadata without being in a project file" in {

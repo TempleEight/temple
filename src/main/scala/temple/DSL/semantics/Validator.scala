@@ -143,7 +143,6 @@ private class Validator private (templefile: Templefile) {
         errors += context.errorMessage(s"Multiple occurrences of ${classTag[T].runtimeClass.getSimpleName} metadata")
 
     metadata foreach {
-      case _: Metadata.TargetLanguage  => assertUnique[Metadata.TargetLanguage]()
       case _: Metadata.ServiceLanguage => assertUnique[Metadata.ServiceLanguage]()
       case _: Metadata.Database        => assertUnique[Metadata.Database]()
       case _: Metadata.AuthMethod =>
@@ -221,8 +220,8 @@ private class Validator private (templefile: Templefile) {
       case FloatType(_, _, _) => // all good
     }
 
-  private def validateBlockOfMetadata[T <: Metadata](target: TempleBlock[T], context: SemanticContext): Unit =
-    validateMetadata(target.metadata, context)
+  private def validateBlockOfMetadata[T <: Metadata](block: TempleBlock[T], context: SemanticContext): Unit =
+    validateMetadata(block.metadata, context)
 
   private val referenceCycles: Set[Set[String]] = {
     val graph = templefile.providedBlockNames.map { blockName =>
@@ -239,17 +238,13 @@ private class Validator private (templefile: Templefile) {
     newServices = templefile.services.transform {
       case (name, service) => validateService(name, service, context :+ name)
     }
-    templefile.targets.foreach {
-      case (name, block) => validateBlockOfMetadata(block, context :+ name)
-    }
 
     validateBlockOfMetadata(templefile.projectBlock, context :+ s"${templefile.projectName} project")
 
     val rootNames: Seq[(String, String)] =
       Seq(templefile.projectName     -> "project") ++
       templefile.services.keys.map(_ -> "service") ++
-      templefile.structNames.map(_   -> "struct") ++
-      templefile.targets.keys.map(_  -> "target")
+      templefile.structNames.map(_   -> "struct")
     val duplicates = rootNames
       .groupBy(_._1)
       .collect { case (name, repeats) if repeats.sizeIs > 1 => (name, repeats.map(_._2)) }
@@ -261,7 +256,7 @@ private class Validator private (templefile: Templefile) {
       val suffix =
         if (duplicates.sizeIs == 1) s"duplicate found: $duplicateString"
         else s"duplicates found: $duplicateString"
-      errors += context.errorMessage(s"Project, targets and structs must be globally unique, $suffix")
+      errors += context.errorMessage(s"Project, services and structs must be globally unique, $suffix")
     }
     rootNames.collect {
       case (name, location) if !name.head.isUpper =>

@@ -3,25 +3,13 @@ package temple.ast
 import temple.collection.enumeration._
 import temple.errors.ErrorHandlingContext
 
-/** A piece of metadata modifying a service/project/target block */
+/** A piece of metadata modifying a service/project block */
 sealed trait Metadata
 
 object Metadata {
-  sealed trait TargetMetadata  extends Metadata
   sealed trait ProjectMetadata extends Metadata
   sealed trait ServiceMetadata extends Metadata
   sealed trait StructMetadata  extends ServiceMetadata
-
-  sealed abstract class TargetLanguage private (name: String, aliases: String*)
-      extends EnumEntry(name, aliases)
-      with TargetMetadata
-
-  object TargetLanguage extends Enum[TargetLanguage] {
-    val values: IndexedSeq[TargetLanguage] = findValues
-
-    case object Swift      extends TargetLanguage("Swift")
-    case object JavaScript extends TargetLanguage("JavaScript", "js")
-  }
 
   sealed abstract class ServiceLanguage private (name: String, aliases: String*)
       extends EnumEntry(name, aliases)
