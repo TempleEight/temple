@@ -152,6 +152,8 @@ paths:
                 be found
               schema:
                 type: string
+        '401':
+          $ref: '#/components/responses/Error401'
         '404':
           $ref: '#/components/responses/Error404'
         '500':

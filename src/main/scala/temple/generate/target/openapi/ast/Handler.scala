@@ -38,5 +38,5 @@ object Handler {
     tags: Seq[String] = Nil,
     requestBody: Option[RequestBody] = None,
     responses: Seq[(Int, Response)] = Seq(),
-  ): Handler = Handler(summary, description, security, tags, requestBody, responses.to(ListMap))
+  ): Handler = Handler(summary, description, security, tags, requestBody, responses.sortBy(_._1).to(ListMap))
 }

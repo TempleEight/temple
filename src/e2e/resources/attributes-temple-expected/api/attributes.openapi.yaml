@@ -31,8 +31,6 @@ paths:
                     type: boolean
         '400':
           $ref: '#/components/responses/Error400'
-        '401':
-          $ref: '#/components/responses/Error401'
         '500':
           $ref: '#/components/responses/Error500'
   /example/{id}:
@@ -63,8 +61,6 @@ paths:
                     type: boolean
         '400':
           $ref: '#/components/responses/Error400'
-        '401':
-          $ref: '#/components/responses/Error401'
         '404':
           $ref: '#/components/responses/Error404'
         '500':
@@ -96,8 +92,6 @@ paths:
                     type: boolean
         '400':
           $ref: '#/components/responses/Error400'
-        '401':
-          $ref: '#/components/responses/Error401'
         '404':
           $ref: '#/components/responses/Error404'
         '500':
@@ -116,8 +110,6 @@ paths:
                 properties: {}
         '400':
           $ref: '#/components/responses/Error400'
-        '401':
-          $ref: '#/components/responses/Error401'
         '404':
           $ref: '#/components/responses/Error404'
         '500':
@@ -134,16 +126,6 @@ components:
               error:
                 type: string
                 example: 'Invalid request parameters: name'
-    Error401:
-      description: Valid request but forbidden by server
-      content:
-        application/json:
-          schema:
-            type: object
-            properties:
-              error:
-                type: string
-                example: Not authorised to create this object
     Error404:
       description: ID not found
       content:
