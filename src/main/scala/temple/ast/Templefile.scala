@@ -12,10 +12,11 @@ import scala.reflect.ClassTag
 case class Templefile(
   projectName: String,
   projectBlock: ProjectBlock = ProjectBlock(),
+  targets: Map[String, TargetBlock] = Map(),
   services: Map[String, ServiceBlock] = Map(),
 ) extends TempleNode {
   // Inform every child node of their parent, so that they can access the project information
-  for (block <- Iterator(projectBlock) ++ services.valuesIterator) {
+  for (block <- Iterator(projectBlock) ++ targets.valuesIterator ++ services.valuesIterator) {
     block.setParent(this)
   }
 

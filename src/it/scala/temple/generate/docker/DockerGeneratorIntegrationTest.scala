@@ -48,6 +48,7 @@ class DockerGeneratorIntegrationTest extends HadolintSpec with Matchers with Bef
     val templefile = Templefile(
       "ExampleProject",
       ProjectBlock(),
+      targets = Map(),
       services = Map("ComplexService" -> DockerGeneratorIntegrationTestData.sampleService),
     )
 
