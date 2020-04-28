@@ -181,11 +181,6 @@ object Analyzer {
     registerKeywordWithContext("writable", "by", TokenArgType)(Writable)
   }
 
-  /** A parser of Metadata items that can occur in target blocks */
-  private val parseTargetMetadata = new MetadataParser[TargetMetadata] {
-    registerKeywordWithContext("language", TokenArgType)(TargetLanguage)
-  }
-
   /**
     * Parse a service block from a list of entries into the distinct attributes, metadatas and structs
     *
@@ -241,9 +236,6 @@ object Analyzer {
   private def parseProjectBlock(entries: Seq[Entry])(implicit context: SemanticContext): ProjectBlock =
     ProjectBlock(parseMetadataBlock(entries, parseProjectMetadata))
 
-  private def parseTargetBlock(entries: Seq[Entry])(implicit context: SemanticContext): TargetBlock =
-    TargetBlock(parseMetadataBlock(entries, parseTargetMetadata))
-
   private def parseStructBlock(entries: Seq[Entry])(implicit context: SemanticContext): StructBlock = {
     val attributes = mutable.LinkedHashMap[String, AbstractAttribute]()
     val metadata = parseBlockWithMetadata(entries, parseStructMetadata) {
@@ -257,15 +249,13 @@ object Analyzer {
   /**
     * Turns an AST of a Templefile into a semantic representation
     * @param templefile the AST parsed from the Templefile
-    * @return A semantic representation of the project, as well as all the targets and services, defined in the
-    *         Templefile
+    * @return A semantic representation of the project, as well as all the services, defined in the Templefile
     * @throws SemanticParsingException when there is no project information, as well as when any of the definitions are
     *                                  malformed
     */
   private[semantics] def parseSemantics(templefile: syntax.Templefile): Templefile = {
     var projectNameBlock: Option[(String, ProjectBlock)] = None
 
-    val targets  = mutable.LinkedHashMap[String, TargetBlock]()
     val services = mutable.LinkedHashMap[String, ServiceBlock]()
 
     templefile.foreach {
@@ -278,8 +268,6 @@ object Analyzer {
             projectNameBlock.fold { projectNameBlock = Some(key -> parseProjectBlock(entries)) } {
               case (str, _) => context.fail(s"Second project found in addition to $str,")
             }
-          // TODO: error message
-          case "target" => targets.safeInsert(key -> parseTargetBlock(entries))
 
           case _ => context.fail(s"Unknown block type")
         }
@@ -289,14 +277,13 @@ object Analyzer {
       throw new SemanticParsingException("Temple file has no project block")
     }
 
-    Templefile(projectName, projectBlock, targets.to(ListMap), services.to(ListMap))
+    Templefile(projectName, projectBlock, services.to(ListMap))
   }
 
   /**
     * Turns an AST of a Templefile into a semantic representation and validates it
     * @param templefileAST the AST parsed from the Templefile
-    * @return A semantic representation of the project, as well as all the targets and services, defined in the
-    *         Templefile
+    * @return A semantic representation of the project, as well as all the  services, defined in the Templefile
     * @throws SemanticParsingException when there is no project information, as well as when any of the definitions are
     *                                  malformed or the contents is not valid
     */

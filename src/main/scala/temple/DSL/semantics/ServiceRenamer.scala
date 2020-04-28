@@ -9,12 +9,6 @@ case class ServiceRenamer(renamingMap: Map[String, String]) {
   private def rename(string: String): String =
     renamingMap.getOrElse(string, { throw new NoSuchElementException(s"Key $string missing from renaming map") })
 
-  private def renameTargetBlock(block: TargetBlock): TargetBlock =
-    // currently `identity`, as language is the only metadata
-    TargetBlock(block.metadata.map {
-      case language: Metadata.TargetLanguage => language
-    })
-
   private def renameProjectBlock(block: ProjectBlock): ProjectBlock =
     // currently `identity`, as no metadata contains a service name
     ProjectBlock(
@@ -28,9 +22,6 @@ case class ServiceRenamer(renamingMap: Map[String, String]) {
         case metrics: Metadata.Metrics          => metrics
       },
     )
-
-  private def renameTargetBlocks(targets: Map[String, TargetBlock]): Map[String, TargetBlock] =
-    targets.view.mapValues(renameTargetBlock).toMap
 
   private def renameServiceMetadata(metadata: Metadata.ServiceMetadata): Metadata.ServiceMetadata = metadata match {
     // rename any services referenced in #uses
@@ -90,7 +81,6 @@ case class ServiceRenamer(renamingMap: Map[String, String]) {
     Templefile(
       templefile.projectName,
       renameProjectBlock(templefile.projectBlock),
-      renameTargetBlocks(templefile.targets),
       renameServiceBlocks(templefile.services),
     )
 }

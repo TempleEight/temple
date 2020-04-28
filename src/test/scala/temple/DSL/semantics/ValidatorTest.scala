@@ -63,14 +63,13 @@ class ValidatorTest extends FlatSpec with Matchers {
         ),
       ),
     ) shouldBe Set(
-      "Project, targets and structs must be globally unique, duplicate found: User (service, struct)",
+      "Project, services and structs must be globally unique, duplicate found: User (service, struct)",
     )
 
     validationErrors(
       Templefile(
         "Box",
         projectBlock = ProjectBlock(Seq(Database.Postgres)),
-        targets = Map("User" -> TargetBlock(Seq(TargetLanguage.JavaScript))),
         services = Map(
           "User" -> ServiceBlock(
             attributes = Map(
@@ -90,7 +89,7 @@ class ValidatorTest extends FlatSpec with Matchers {
         ),
       ),
     ) shouldBe Set(
-      "Project, targets and structs must be globally unique, duplicates found: Box (project, struct), User (service, struct, target)",
+      "Project, services and structs must be globally unique, duplicates found: Box (project, struct), User (service, struct)",
     )
 
     validationErrors(
@@ -106,7 +105,7 @@ class ValidatorTest extends FlatSpec with Matchers {
         ),
       ),
     ) shouldBe Set(
-      "Project, targets and structs must be globally unique, duplicate found: User (project, service)",
+      "Project, services and structs must be globally unique, duplicate found: User (project, service)",
     )
   }
 
@@ -467,7 +466,7 @@ class ValidatorTest extends FlatSpec with Matchers {
       )
     } should have message {
       """An error was encountered while validating the Templefile
-        |Project, targets and structs must be globally unique, duplicate found: User (service, struct)""".stripMargin
+        |Project, services and structs must be globally unique, duplicate found: User (service, struct)""".stripMargin
     }
 
     the[SemanticParsingException] thrownBy {
