@@ -55,7 +55,7 @@ private class OpenAPIGenerator private (
         name = "parent_id",
         required = Some(true),
         schema = OpenAPISimpleType("string", "uuid"),
-        description = s"ID of the parent entity to perform operations on",
+        description = s"ID of the parent which owns this entity",
       )
     }
 

@@ -371,7 +371,7 @@ paths:
         type: string
         format: uuid
       required: true
-      description: ID of the parent entity to perform operations on
+      description: ID of the parent which owns this entity
     post:
       summary: Register a new templeuser
       security:
@@ -458,7 +458,7 @@ paths:
         type: string
         format: uuid
       required: true
-      description: ID of the parent entity to perform operations on
+      description: ID of the parent which owns this entity
     get:
       summary: Look up a single templeuser
       security:
