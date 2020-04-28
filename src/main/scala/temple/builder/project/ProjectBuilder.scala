@@ -13,7 +13,7 @@ import temple.generate.FileSystem._
 import temple.generate.database.ast.Statement
 import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.docker.DockerfileGenerator
-import temple.generate.metrics.grafana.ast.Datasource
+import temple.generate.metrics.grafana.ast.{Datasource, Row}
 import temple.generate.metrics.grafana.{GrafanaDashboardConfigGenerator, GrafanaDashboardGenerator, GrafanaDatasourceConfigGenerator}
 import temple.generate.metrics.prometheus.PrometheusConfigGenerator
 import temple.generate.metrics.prometheus.ast.PrometheusJob
@@ -101,9 +101,15 @@ object ProjectBuilder {
         case (name, service)          =>
           // Create row for every endpoint in the service
           val serviceRows = MetricsBuilder.createDashboardRows(name, datasource, endpoints(service))
-          val structRows = service.structs.flatMap {
-            case (structName, struct) =>
-              MetricsBuilder.createDashboardRows(name, datasource, endpoints(struct), Some(structName))
+          val structRows = service.structs.foldLeft(Seq[Row]()) {
+            case (rows, (structName, struct)) =>
+              rows ++ MetricsBuilder.createDashboardRows(
+                name,
+                datasource,
+                endpoints(struct),
+                Some(structName),
+                serviceRows.length + rows.length,
+              )
           }
           (name, serviceRows ++ structRows)
       }
