@@ -6,7 +6,8 @@ import temple.ast.Annotation
 import temple.ast.AttributeType._
 import temple.containers.SwaggerSpec
 import temple.generate.CRUD
-import temple.generate.target.openapi.ast.{OpenAPIRoot, Service}
+import temple.generate.target.openapi.ast.OpenAPIRoot
+import temple.generate.target.openapi.ast.AbstractService._
 
 import scala.collection.immutable.ListMap
 

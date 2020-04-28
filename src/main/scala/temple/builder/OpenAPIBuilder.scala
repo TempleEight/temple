@@ -3,7 +3,8 @@ package temple.builder
 import temple.ast.Metadata.AuthMethod
 import temple.ast.{Metadata, Templefile}
 import temple.builder.project.ProjectBuilder.endpoints
-import temple.generate.target.openapi.ast.{Auth, OpenAPIRoot, Service}
+import temple.generate.target.openapi.ast.{Auth, OpenAPIRoot}
+import temple.generate.target.openapi.ast.AbstractService._
 
 object OpenAPIBuilder {
 
@@ -21,7 +22,7 @@ object OpenAPIBuilder {
             attributes = block.attributes,
             structs = block.structs.map {
               case (structName, structBlock) =>
-                Service.Struct(structName, endpoints(structBlock), attributes = structBlock.attributes)
+                Struct(structName, endpoints(structBlock), attributes = structBlock.attributes)
             },
           )
       }.toSeq,
