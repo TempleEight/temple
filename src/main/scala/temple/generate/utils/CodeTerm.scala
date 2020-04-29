@@ -1,6 +1,7 @@
 package temple.generate.utils
 
-import temple.utils.StringUtils.indent
+import temple.generate.utils.CodeTerm.CodeTermList
+import temple.utils.StringUtils.{indent, tabIndent}
 
 import scala.Option.when
 
@@ -12,19 +13,26 @@ trait CodeTerm {
     * @return An iterator of strings
     */
   def flatIterator: Iterator[String]
+
+  /** Turn a list of code terms into a comma-separated list */
+  def mkCodeList: CodeTermList = new CodeTermList(flatIterator)
 }
 
 object CodeTerm {
 
-  /** Turns a [[String]] into a [[CodeTerm]], with a trivial iterator of just the single string
-    */
-  implicit class CodeTermString(string: String) extends CodeTerm {
-    override def flatIterator: Iterator[String] = Iterable.single(string).iterator
+  // https://scalac.io/typeclasses-in-scala/
+  trait CodeTermClass[-C] {
+    def flatIterator(code: C): Iterator[String]
+  }
+
+  /** Add the flatIterator method to anything that is a codeterm*/
+  implicit class CodeTermOps[C](codeTerm: C)(implicit codeTermClass: CodeTermClass[C]) extends CodeTerm {
+    def flatIterator: Iterator[String] = codeTermClass.flatIterator(codeTerm)
   }
 
   /**
     * Turns a list of items into a string with separators, constructed with
-    * [[temple.generate.utils.CodeTerm.mkCode#list(temple.generate.utils.CodeTerm.CodeTermIterableString)]]
+    * [[temple.generate.utils.CodeTerm.mkCode#list(scala.collection.immutable.Seq)]]
     *
     * @param strings a list of strings to be separated
     * @param separator the separator between the items
@@ -39,27 +47,39 @@ object CodeTerm {
     def spaced: CodeTermList = new CodeTermList(strings, ",\n")
   }
 
-  /** Turns a [[IterableOnce]] of [[CodeTerm]]s into a [[CodeTerm]], with an iterator that visits
-    * every child */
-  implicit class CodeTermIterable(strings: IterableOnce[CodeTerm]) extends CodeTerm {
-    override def flatIterator: Iterator[String] = strings.iterator.flatMap(_.flatIterator)
-  }
+  /** Turns a [[String]] into a [[CodeTerm]], with a trivial iterator of just the single string */
+  implicit val stringCodeTerm: CodeTermClass[String] = Iterable.single(_).iterator
 
-  /** An iterable of strings can be treated as an iterable of CodeTerms, but can also be turned into a list. */
-  implicit class CodeTermIterableString(strings: IterableOnce[String])
-      extends CodeTermIterable(strings.iterator.map(CodeTermString)) {
+  /** Turns a [[None]] into a [[CodeTerm]], with a trivial iterator of nothing */
+  implicit val noneCodeTerm: CodeTermClass[None.type] = _ => Iterator.empty
 
-    /** Turn a list of code terms into a comma-separated list */
-    def mkCodeList: CodeTermList = new CodeTermList(strings)
+  /** Turns an [[IterableOnce]] into a [[CodeTerm]], with a trivial iterator of nothing */
+  implicit def iterableCodeTerm[C: CodeTermClass]: CodeTermClass[IterableOnce[C]] = _.iterator.flatMap(_.flatIterator)
+
+  /** Turns a [[CodeTerm]] into a [[CodeTerm]], necessary for nested code terms */
+  implicit val codeTermCodeTerm: CodeTermClass[CodeTerm] = _.flatIterator
+
+  /** Handles the case of an iterable of optional strings */
+  implicit class CodeTermDoubleIterable(options: IterableOnce[IterableOnce[String]]) extends CodeTerm {
+    override def flatIterator: Iterator[String] = options.iterator.flatMap(_.flatIterator)
   }
 
   object mkCode {
 
     /** Turn a list of terms into a comma-separated string */
-    def list(terms: CodeTermIterableString): String = mkCode(terms.mkCodeList)
+    def list(terms: CodeTerm*): String = mkCode(terms.mkCodeList)
 
     /** Turn a list of terms into a comma- and newline-separated string */
-    def spacedList(terms: CodeTermIterableString): String = mkCode(terms.mkCodeList.spaced)
+    def spacedList(terms: CodeTerm*): String = mkCode(terms.mkCodeList.spaced)
+
+    /** Turn a list of terms into an escaped newline-seperated string */
+    def shellLines(terms: CodeTerm*): String = mkCode(new CodeTermList(terms.flatIterator, " \\\n  "))
+
+    /** Turn a list of terms into newlines */
+    def lines(terms: CodeTerm*): String = mkCode(new CodeTermList(terms.flatIterator, "\n"))
+
+    /** Turn a list of terms into double-newlines */
+    def doubleLines(terms: CodeTerm*): String = mkCode(new CodeTermList(terms.flatIterator, "\n\n"))
 
     /** Combine a sequence of code terms into a single string, omitting spaces as necessary */
     def apply(strings: CodeTerm*): String = {
@@ -87,17 +107,44 @@ object CodeTerm {
     def stmt(string: CodeTerm*): String = mkCode(string, ";")
   }
 
-  sealed class codeParens private (start: String, end: String) {
+  sealed class CodeWrap private (start: String, end: String) {
 
-    /** Wrap a code snippet in parentheses */
+    /** Add a string before the opening symbol, without any spacing */
+    def prefix(prefix: String): CodeWrap = new CodeWrap(prefix + start, end)
+
+    /** Wrap a (space-separated list of) terms in parentheses */
     def apply(string: CodeTerm*): String = mkCode(start, string, end)
 
-    /** Wrap a code snippet in parentheses, with newlines inside them */
-    def spaced(string: CodeTerm*): String = mkCode(start, "\n", indent(mkCode(string)), "\n", end)
+    /** Wrap a (comma-separated list of) terms in parentheses */
+    def list(string: CodeTerm*): String = mkCode(start, mkCode.list(string), end)
+
+    /** Wrap a (comma-separated list of) code snippet in parentheses, indenting with spaces */
+    def spacedList(string: CodeTerm*): String = mkCode(start, "\n", indent(mkCode.spacedList(string)), "\n", end)
+
+    /** Wrap a (newline-separated list of) code snippet in parentheses, indenting with spaces */
+    def spaced(string: CodeTerm*): String = mkCode(start, "\n", indent(mkCode.lines(string)), "\n", end)
+
+    /** Wrap a (comma-separated list of) code snippet in parentheses, indenting with tabs */
+    def tabbedList(string: CodeTerm*): String = mkCode(start, "\n", tabIndent(mkCode.spacedList(string)), "\n", end)
+
+    /** Wrap a (newline-separated list of) code snippet in parentheses, indenting with tabs */
+    def tabbed(string: CodeTerm*): String = mkCode(start, "\n", tabIndent(mkCode.lines(string)), "\n", end)
+
+    /** Wrap a (newline-separated list of) code snippet in parentheses, with no indent */
+    def lines(string: CodeTerm*): String = mkCode(start, "\n", mkCode.lines(string), "\n", end)
+
+    /** Wrap a (trailing-comma-separated list of) code snippet in parentheses, indenting with spaces */
+    def spacedTrailingList(string: CodeTerm*): String =
+      mkCode(start, "\n", indent(mkCode.spacedList(string)), ",\n", end)
+
+    /** Wrap a (trailing-comma-separated list of) code snippet in parentheses, indenting with tabs */
+    def tabbedTrailingList(string: CodeTerm*): String =
+      mkCode(start, "\n", tabIndent(mkCode.spacedList(string)), ",\n", end)
   }
 
-  object codeParens extends codeParens("(", ")") {
-    object curly  extends codeParens("{", "}")
-    object square extends codeParens("[", "]")
+  object CodeWrap {
+    val parens = new CodeWrap("(", ")")
+    val curly  = new CodeWrap("{", "}")
+    val square = new CodeWrap("[", "]")
   }
 }

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: user-db
+  labels:
+    app: user
+    kind: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: user
+      kind: db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: user-db
+      labels:
+        app: user
+        kind: db
+    spec:
+      hostname: user-db
+      containers:
+      - env:
+        - name: PGUSER
+          value: postgres
+        image: postgres:12.1
+        name: user-db
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: user-db-claim
+        - mountPath: /docker-entrypoint-initdb.d/init.sql
+          subPath: init.sql
+          name: user-db-init
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - echo done
+      restartPolicy: Always
+      volumes:
+      - name: user-db-init
+        configMap:
+          name: user-db-config
+      - name: user-db-claim
+        persistentVolumeClaim:
+          claimName: user-db-claim

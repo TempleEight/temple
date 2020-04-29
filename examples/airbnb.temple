@@ -1,0 +1,76 @@
+Airbnb: project {
+  #language(go);
+  #database(postgres);
+  #provider(dockerCompose);
+  #metrics(prometheus);
+  #authMethod(email);
+}
+
+Landlord: service {
+  // implicit 'id' field that matches auth service 'id' field
+  firstName: string;
+  lastName: string;
+  #auth;
+  #readable(by: all);
+  // implicit #writable(by: this) since project has auth
+}
+
+Tenant: service {
+  // implicit 'id' field that matches auth service 'id' field
+  firstName: string;
+  lastName: string;
+  #auth;
+  // implicit #readable(by: this) since project has auth
+  // implicit #writable(by: this) since project has auth
+}
+
+Property: service {
+  // implicit 'id' field
+  // implicit 'createdBy' field since service does not have auth
+  landlord: Landlord;
+  address: string;
+  city: string;
+  postcode: string;
+  description: string;
+  pricePerNight: float;
+
+  Photo: struct {
+    // implicit 'id' field
+    // implicit 'parentID' field
+    image: data(5M);
+    caption: string;
+    #enumerable;
+  }
+
+  #enumerable;
+  #readable(by: all);
+  // implicit #writable(by: this) since project has auth
+}
+
+Reservation: service {
+  // implicit 'id' field
+  // implicit 'createdBy' field since service does not have auth
+  tenant: Tenant;
+  property: Property;
+  startTime: datetime;
+  endTime: datetime;
+  // implicit #readable(by: this) since project has auth
+  // implicit #writable(by: this) since project has auth
+}
+
+/*
+ * The presence of the tenant and reservation field loosely enforces that only tenants with reservations can leave
+ * reviews, as landlords are readable by all, but tenants are not. A strong enforcement could be implemented in the
+ * hooks, with interservice communication, even enforcing that reviews can only be left after the stay
+ */
+Review: service {
+  // implicit 'id' field
+  // implicit 'createdBy' field since service does not have auth
+  property: Property;
+  tenant: Tenant;
+  reservation: Reservation;
+  stars: int(5, 0);
+  message: string;
+  #readable(by: all);
+  // implicit #writable(by: this) since project has auth
+}

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-temple-test-user
+  labels:
+    app: simple-temple-test-user
+    kind: service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-temple-test-user
+      kind: service
+  template:
+    metadata:
+      name: simple-temple-test-user
+      labels:
+        app: simple-temple-test-user
+        kind: service
+    spec:
+      hostname: simple-temple-test-user
+      containers:
+      - image: localhost:5000/simple-temple-test-simple-temple-test-user
+        name: simple-temple-test-user
+        ports:
+        - containerPort: 1026
+        - containerPort: 1027
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always

@@ -1,0 +1,30 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: auth
+  labels:
+    app: auth
+    kind: service
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: auth
+      kind: service
+  template:
+    metadata:
+      name: auth
+      labels:
+        app: auth
+        kind: service
+    spec:
+      hostname: auth
+      containers:
+      - image: localhost:5000/simple-temple-test-auth
+        name: auth
+        ports:
+        - containerPort: 1024
+        - containerPort: 1025
+      imagePullSecrets:
+      - name: regcred
+      restartPolicy: Always

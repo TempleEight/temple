@@ -34,6 +34,14 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
     PostgresGenerator.generate(TestData.insertStatement)(questionMarkContext) shouldBe TestData.postgresInsertStringWithQuestionMarks
   }
 
+  it should "generate correct INSERT statements with RETURNING" in {
+    PostgresGenerator.generate(TestData.insertStatementWithReturn) shouldBe TestData.postgresInsertStringWithReturn
+  }
+
+  it should "generate correct INSERT statements with prepared and provided values" in {
+    PostgresGenerator.generate(TestData.insertStatementWithProvidedValue) shouldBe TestData.postgresInsertStringWithProvidedValue
+  }
+
   it should "handle conjunctions in WHERE correctly" in {
     PostgresGenerator.generate(TestData.readStatementWithWhereConjunction) shouldBe TestData.postgresSelectStringWithWhereConjunction
   }
@@ -54,6 +62,14 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
     PostgresGenerator.generate(TestData.updateStatementWithWhere) shouldBe TestData.postgresUpdateStringWithWhere
   }
 
+  it should "generate correct update statements with RETURNING" in {
+    PostgresGenerator.generate(TestData.updateStatementWithReturn) shouldBe TestData.postgresUpdateStringWithReturn
+  }
+
+  it should "generate correct update statements with WHERE and RETURNING" in {
+    PostgresGenerator.generate(TestData.updateStatementWithWhereAndReturn) shouldBe TestData.postgresUpdateStringWithWhereAndReturn
+  }
+
   it should "generate correct DELETE statements" in {
     PostgresGenerator.generate(TestData.deleteStatement) shouldBe TestData.postgresDeleteString
   }
@@ -72,5 +88,71 @@ class PostgresGeneratorTest extends FlatSpec with Matchers {
 
   it should "handle complex SELECT statements" in {
     PostgresGenerator.generate(TestData.readStatementComplex) shouldBe TestData.postgresSelectStringComplex
+  }
+
+  it should "handle SELECT statements with prepared WHERE queries correctly" in {
+    PostgresGenerator.generate(TestData.readStatementWithWherePrepared) shouldBe TestData.postgresSelectStringWithWherePrepared
+  }
+
+  it should "handle SELECT statements with nested prepared WHERE queries correctly" in {
+    PostgresGenerator.generate(TestData.readStatementWithNestedWherePrepared) shouldBe TestData.postgresSelectStringWithNestedWherePrepared
+  }
+
+  it should "handle SELECT statements with nested prepared WHERE queries correctly with question marks" in {
+    val questionMarkContext: PostgresContext = PostgresContext(PreparedType.QuestionMarks)
+    PostgresGenerator.generate(TestData.readStatementWithNestedWherePrepared)(questionMarkContext) shouldBe TestData.postgresSelectStringWithNestedWherePreparedUsingQuestionMarks
+  }
+
+  it should "handle UPDATE statements with prepared values correctly" in {
+    PostgresGenerator.generate(TestData.updateStatementPrepared) shouldBe TestData.postgresUpdateStringPrepared
+  }
+
+  it should "handle UPDATE statements with prepared values correctly with question marks" in {
+    val questionMarkContext: PostgresContext = PostgresContext(PreparedType.QuestionMarks)
+    PostgresGenerator.generate(TestData.updateStatementPrepared)(questionMarkContext) shouldBe TestData.postgresUpdateStringPreparedWithQuestionMarks
+  }
+
+  it should "handle UPDATE statements with prepared values and WHERE statement correctly" in {
+    PostgresGenerator.generate(TestData.updateStatementPreparedWithWhere) shouldBe TestData.postgresUpdateStringPreparedWithWhere
+  }
+
+  it should "handle UPDATE statements with prepared values and prepared WHERE statement correctly" in {
+    PostgresGenerator.generate(TestData.updateStatementPreparedWithWherePrepared) shouldBe TestData.postgresUpdateStringPreparedWithWherePrepared
+  }
+
+  it should "handle UPDATE statements with prepared values and nested prepared WHERE statement correctly" in {
+    PostgresGenerator.generate(TestData.updateStatementPreparedWithNestedWherePrepared) shouldBe TestData.postgresUpdateStringPreparedWithNestedWherePrepared
+  }
+
+  it should "handle UPDATE statments with prepared and provided values and nested prepared WHERE statement correctly" in {
+    PostgresGenerator.generate(TestData.updateStatementPreparedAndValuesWithNestedWherePrepared) shouldBe TestData.postgresUpdateStringPreparedAndValuesWithNestedWherePrepared
+  }
+
+  it should "handle DELETE statements with prepared WHERE statement correctly" in {
+    PostgresGenerator.generate(TestData.deleteStatementWithWherePrepared) shouldBe TestData.postgresDeleteStringWithWherePrepared
+  }
+
+  it should "handle DELETE statements with nested prepared WHERE statement correctly" in {
+    PostgresGenerator.generate(TestData.deleteStatementWithNestedWherePrepared) shouldBe TestData.postgresDeleteStringWithNestedWherePrepared
+  }
+
+  it should "handle a list query from spec-golang" in {
+    PostgresGenerator.generate(TestData.specGolangList) shouldBe TestData.specGolangListPostgresString
+  }
+
+  it should "handle a create query from spec-golang" in {
+    PostgresGenerator.generate(TestData.specGolangCreate) shouldBe TestData.specGolangCreatePostgresString
+  }
+
+  it should "handle a read query from spec-golang" in {
+    PostgresGenerator.generate(TestData.specGolangRead) shouldBe TestData.specGolangReadPostgresString
+  }
+
+  it should "handle a update query from spec-golang" in {
+    PostgresGenerator.generate(TestData.specGolangUpdate) shouldBe TestData.specGolangUpdatePostgresString
+  }
+
+  it should "handle a delete query from spec-golang" in {
+    PostgresGenerator.generate(TestData.specGolangDelete) shouldBe TestData.specGolangDeletePostgresString
   }
 }

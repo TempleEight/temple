@@ -1,0 +1,12 @@
+{
+  "user" : "postgres",
+  "dbName" : "postgres",
+  "host" : "temple-user-db",
+  "sslMode" : "disable",
+  "services" : {
+    
+  },
+  "ports" : {
+    "service" : 1026
+  }
+}

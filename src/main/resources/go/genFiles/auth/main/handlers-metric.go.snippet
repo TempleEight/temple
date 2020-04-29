@@ -1,0 +1,140 @@
+func (env *env) registerAuthHandler(w http.ResponseWriter, r *http.Request) {
+	var req registerAuthRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestRegister)
+		return
+	}
+
+	err = env.valid.Struct(req)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestRegister)
+		return
+	}
+
+	// Hash and salt the password before storing
+	hashedPassword, err := bcrypt.GenerateFromPassword([]byte(req.Password), bcrypt.DefaultCost)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not hash password: %s", err.Error()), http.StatusInternalServerError, metric.RequestRegister)
+		return
+	}
+
+	uuid, err := uuid.NewUUID()
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not create UUID: %s", err.Error()), http.StatusInternalServerError, metric.RequestRegister)
+		return
+	}
+
+	input := dao.CreateAuthInput{
+		ID:       uuid,
+		Email:    req.Email,
+		Password: string(hashedPassword),
+	}
+
+	for _, hook := range env.hook.beforeRegisterHooks {
+		err := (*hook)(env, req, &input)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestRegister)
+			return
+		}
+	}
+
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestRegister))
+	auth, err := env.dao.CreateAuth(input)
+	timer.ObserveDuration()
+	if err != nil {
+		switch err {
+		case dao.ErrDuplicateAuth:
+			respondWithError(w, err.Error(), http.StatusForbidden, metric.RequestRegister)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestRegister)
+		}
+		return
+	}
+
+	accessToken, err := createToken(auth.ID, env.jwtCredential.Key, env.jwtCredential.Secret)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not create access token: %s", err.Error()), http.StatusInternalServerError, metric.RequestRegister)
+		return
+	}
+
+	for _, hook := range env.hook.afterRegisterHooks {
+		err := (*hook)(env, auth, accessToken)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestRegister)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(registerAuthResponse{
+		AccessToken: accessToken,
+	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestRegister).Inc()
+}
+
+func (env *env) loginAuthHandler(w http.ResponseWriter, r *http.Request) {
+	var req loginAuthRequest
+	err := json.NewDecoder(r.Body).Decode(&req)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestLogin)
+		return
+	}
+
+	err = env.valid.Struct(req)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid request parameters: %s", err.Error()), http.StatusBadRequest, metric.RequestLogin)
+		return
+	}
+
+	input := dao.ReadAuthInput{
+		Email: req.Email,
+	}
+
+	for _, hook := range env.hook.beforeLoginHooks {
+		err := (*hook)(env, req, &input)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestLogin)
+			return
+		}
+	}
+
+	timer := prometheus.NewTimer(metric.DatabaseRequestDuration.WithLabelValues(metric.RequestLogin))
+	auth, err := env.dao.ReadAuth(input)
+	timer.ObserveDuration()
+	if err != nil {
+		switch err {
+		case dao.ErrAuthNotFound:
+			respondWithError(w, fmt.Sprintf("Invalid email or password"), http.StatusUnauthorized, metric.RequestLogin)
+		default:
+			respondWithError(w, fmt.Sprintf("Something went wrong: %s", err.Error()), http.StatusInternalServerError, metric.RequestLogin)
+		}
+		return
+	}
+
+	err = bcrypt.CompareHashAndPassword([]byte(auth.Password), []byte(req.Password))
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Invalid email or password"), http.StatusUnauthorized, metric.RequestLogin)
+		return
+	}
+
+	accessToken, err := createToken(auth.ID, env.jwtCredential.Key, env.jwtCredential.Secret)
+	if err != nil {
+		respondWithError(w, fmt.Sprintf("Could not create access token: %s", err.Error()), http.StatusInternalServerError, metric.RequestLogin)
+		return
+	}
+
+	for _, hook := range env.hook.afterLoginHooks {
+		err := (*hook)(env, auth, accessToken)
+		if err != nil {
+			respondWithError(w, err.Error(), err.statusCode, metric.RequestLogin)
+			return
+		}
+	}
+
+	json.NewEncoder(w).Encode(loginAuthResponse{
+		AccessToken: accessToken,
+	})
+
+	metric.RequestSuccess.WithLabelValues(metric.RequestLogin).Inc()
+}

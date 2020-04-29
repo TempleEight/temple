@@ -11,11 +11,14 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   /** A parser generator for an entire Templefile */
   protected def templefile: Parser[Templefile] = repAll(rootItem)
 
+  /** A parser generator for an identifier beginning in a letter */
+  protected def templeIdent: Parser[String] = """[a-zA-Z][a-zA-Z0-9]*""".r
+
   /** A parser generator for an identifier beginning in a lowercase letter */
-  protected def lowerIdent: Parser[String] = guard("""[a-z]""".r) ~> ident
+  protected def lowerIdent: Parser[String] = guard("""[a-z]""".r) ~> templeIdent
 
   /** A parser generator for an identifier beginning in an uppercase letter */
-  protected def upperIdent: Parser[String] = guard("""[A-Z]""".r) ~> ident
+  protected def upperIdent: Parser[String] = guard("""[A-Z]""".r) ~> templeIdent
 
   /** A parser generator for each item at the root level, i.e. a name, tag and block */
   protected def rootItem: Parser[DSLRootItem] = (upperIdent <~ ":") ~ (ident <~ "{") ~ repUntil(entry, "}") ^^ {
@@ -52,15 +55,23 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   /** A parser generator for a floating point number other than an integer
     *
     * This excludes integer literals, to avoid integers being misparsed as floating point numbers. */
-  protected def floatingNumber: Parser[String] =
-    """-?\d+(\.\d+)?([eE][+-]?\d+)""".r | // exponential
-    """-?\d+\.\d+""".r                    // decimal
+  protected def floatingNumber: Parser[Double] =
+    (
+      """-?\d+(\.\d+)?([eE][+-]?\d+)""".r | // exponential
+      """-?\d+\.\d+""".r                    // decimal
+    ) ^^ (_.toDouble)
+
+  /** A parser generator for an integer with an optional suffix (G, M or K) for 1e9, 1e6 or 1e3 respectively. */
+  protected def scaledNumber: Parser[Int] = {
+    val siPrefix = "[gG]".r ^^^ 1_000_000_000 | "[mM]".r ^^^ 1_000_000 | "[kK]".r ^^^ 1_000 | success(1)
+    (wholeNumber ~ siPrefix) ^^ { case num ~ scale => num.toInt * scale }
+  }
 
   /** A parser generator for any argument passed to a type or metadata */
   protected def arg: Parser[Arg] =
     ident ^^ Arg.TokenArg |
-    floatingNumber ^^ (str => Arg.FloatingArg(str.toDouble)) |
-    wholeNumber ^^ (str => Arg.IntArg(str.toInt)) |
+    floatingNumber ^^ Arg.FloatingArg |
+    scaledNumber ^^ Arg.IntArg |
     listArg
 
   /** A parser generator for an argument keyed by a keyword */
@@ -104,5 +115,5 @@ class DSLParser extends JavaTokenParsers with UtilParsers {
   //                     \*(?!/)                      - are a star not followed by a slash
   //                             [^\*]                - are not a star
   //                                    \*/         - a star-slash
-  override protected val whiteSpace: Regex = """(\s+|//[^\n]*\n|/\*(\*(?!/)|[^\*])*\*/)+""".r
+  override protected val whiteSpace: Regex = """(\s+|//[^\n]*\n|/\*(\*(?!/)|[^*])*\*/)+""".r
 }

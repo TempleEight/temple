@@ -1,14 +1,30 @@
 package temple.builder.project
 
-import temple.DSL.semantics.AttributeType._
-import temple.DSL.semantics.Metadata.Database
-import temple.DSL.semantics._
+import temple.ast.AbstractAttribute.{Attribute, IDAttribute, ParentAttribute}
+import temple.ast.AbstractServiceBlock._
+import temple.ast.AttributeType._
+import temple.ast.Metadata.{AuthMethod, Database, ServiceAuth}
+import temple.ast._
 
 import scala.collection.immutable.ListMap
 
 object ProjectBuilderTestData {
 
   private val simpleServiceAttributes = ListMap(
+    "id"            -> IDAttribute,
+    "intField"      -> Attribute(IntType()),
+    "doubleField"   -> Attribute(FloatType()),
+    "stringField"   -> Attribute(StringType()),
+    "boolField"     -> Attribute(BoolType),
+    "dateField"     -> Attribute(DateType),
+    "timeField"     -> Attribute(TimeType),
+    "dateTimeField" -> Attribute(DateTimeType),
+    "blobField"     -> Attribute(BlobType()),
+  )
+
+  private val simpleStructAttributes = ListMap(
+    "id"            -> IDAttribute,
+    "parentID"      -> ParentAttribute,
     "intField"      -> Attribute(IntType()),
     "doubleField"   -> Attribute(FloatType()),
     "stringField"   -> Attribute(StringType()),
@@ -20,6 +36,7 @@ object ProjectBuilderTestData {
   )
 
   private val complexServiceAttributes = ListMap(
+    "id"                 -> IDAttribute,
     "smallIntField"      -> Attribute(IntType(max = Some(100), min = Some(10), precision = 2)),
     "intField"           -> Attribute(IntType(max = Some(100), min = Some(10))),
     "bigIntField"        -> Attribute(IntType(max = Some(100), min = Some(10), precision = 8)),
@@ -36,69 +53,77 @@ object ProjectBuilderTestData {
 
   val simpleTemplefile: Templefile = Templefile(
     "SampleProject",
-    ProjectBlock(Nil),
-    Map(),
-    Map(
-      "Users" -> ServiceBlock(simpleServiceAttributes),
+    services = Map(
+      "TempleUser" -> ServiceBlock(simpleServiceAttributes),
     ),
   )
 
   val simpleTemplefilePostgresProject: Templefile = Templefile(
     "SampleProject",
     ProjectBlock(Seq(Database.Postgres)),
-    Map(),
-    Map(
-      "Users" -> ServiceBlock(simpleServiceAttributes),
+    services = Map(
+      "TempleUser" -> ServiceBlock(simpleServiceAttributes),
     ),
   )
 
   val simpleTemplefilePostgresService: Templefile = Templefile(
     "SampleProject",
-    ProjectBlock(Nil),
-    Map(),
-    Map(
-      "Users" -> ServiceBlock(simpleServiceAttributes, metadata = Seq(Database.Postgres)),
+    services = Map(
+      "TempleUser" -> ServiceBlock(simpleServiceAttributes, metadata = Seq(Database.Postgres)),
     ),
   )
 
-  val simpleTemplefilePostgresCreateOutput: String =
-    """CREATE TABLE Users (
-      |  intField INT NOT NULL,
-      |  doubleField DOUBLE PRECISION NOT NULL,
-      |  stringField TEXT NOT NULL,
-      |  boolField BOOLEAN NOT NULL,
-      |  dateField DATE NOT NULL,
-      |  timeField TIME NOT NULL,
-      |  dateTimeField TIMESTAMPTZ NOT NULL,
-      |  blobField BYTEA NOT NULL
-      |);""".stripMargin
-
-  val complexTemplefile: Templefile = Templefile(
-    "SampleComplexProject",
-    ProjectBlock(Nil),
-    Map(),
-    Map(
-      "ComplexUsers" -> ServiceBlock(
-        complexServiceAttributes,
-        structs = Map("Users" -> StructBlock(simpleServiceAttributes)),
+  val simpleTemplefileForeignKeyService: Templefile = Templefile(
+    "SampleProject",
+    services = Map(
+      "A" -> ServiceBlock(
+        attributes = Map("myB" -> Attribute(ForeignKey("B"))),
+        structs = Map(
+          "InnerStruct" -> StructBlock(
+            attributes = Map("myC" -> Attribute(ForeignKey("C"))),
+          ),
+        ),
+      ),
+      "B" -> ServiceBlock(
+        attributes = Map("example" -> Attribute(IntType())),
+      ),
+      "C" -> ServiceBlock(
+        attributes = Map("anotherExample" -> Attribute(IntType())),
       ),
     ),
   )
 
-  val complexTemplefilePostgresCreateOutput: String =
-    """CREATE TABLE ComplexUsers (
-      |  smallIntField SMALLINT CHECK (smallIntField <= 100) CHECK (smallIntField >= 10) NOT NULL,
-      |  intField INT CHECK (intField <= 100) CHECK (intField >= 10) NOT NULL,
-      |  bigIntField BIGINT CHECK (bigIntField <= 100) CHECK (bigIntField >= 10) NOT NULL,
-      |  floatField REAL CHECK (floatField <= 300.0) CHECK (floatField >= 0.0) NOT NULL,
-      |  doubleField DOUBLE PRECISION CHECK (doubleField <= 123.0) CHECK (doubleField >= 0.0) NOT NULL,
-      |  stringField TEXT CHECK (length(stringField) >= 1) NOT NULL,
-      |  boundedStringField VARCHAR(5) CHECK (length(boundedStringField) >= 0) NOT NULL,
-      |  boolField BOOLEAN NOT NULL,
-      |  dateField DATE NOT NULL,
-      |  timeField TIME NOT NULL,
-      |  dateTimeField TIMESTAMPTZ NOT NULL,
-      |  blobField BYTEA NOT NULL
-      |);""".stripMargin + "\n\n" + simpleTemplefilePostgresCreateOutput
+  val complexTemplefile: Templefile = Templefile(
+    "SampleComplexProject",
+    projectBlock = ProjectBlock(
+      metadata = Seq(
+        Metadata.Metrics.Prometheus,
+        Metadata.Provider.Kubernetes,
+        AuthMethod.Email,
+      ),
+    ),
+    services = Map(
+      "ComplexUser" -> ServiceBlock(
+        complexServiceAttributes,
+        metadata = Seq(ServiceAuth),
+        structs = Map("TempleUser" -> StructBlock(simpleStructAttributes)),
+      ),
+    ),
+  )
 
+  val foreignKeyConfigJson: String =
+    """|{
+       |  "user" : "postgres",
+       |  "dbName" : "postgres",
+       |  "host" : "a-db",
+       |  "sslMode" : "disable",
+       |  "services" : {
+       |    "b" : "http://b:1028/b",
+       |    "c" : "http://c:1030/c"
+       |  },
+       |  "ports" : {
+       |    "service" : 1026
+       |  }
+       |}
+       |""".stripMargin
 }

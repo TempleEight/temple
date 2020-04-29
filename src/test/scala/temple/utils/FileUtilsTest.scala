@@ -3,12 +3,9 @@ package temple.utils
 import java.nio.file.{FileAlreadyExistsException, Files, Paths}
 
 import org.scalatest.{FlatSpec, Matchers}
-
-import scala.util.Random
+import temple.generate.FileSystem.File
 
 class FileUtilsTest extends FlatSpec with Matchers {
-
-  def randomString(length: Int): String = new Random().alphanumeric.take(length).mkString
 
   behavior of "FileUtils"
 
@@ -23,7 +20,8 @@ class FileUtilsTest extends FlatSpec with Matchers {
 
   it should "create a file successfully in" in {
     // Generate a filename randomly, retrying if the file name already exists
-    val filename = Iterator.continually(s"/tmp/test-${randomString(10)}").find(x => !Files.exists(Paths.get(x))).get
+    val filename =
+      Iterator.continually(s"/tmp/test-${StringUtils.randomString(10)}").find(x => !Files.exists(Paths.get(x))).get
 
     val fileContents = "Example file contents"
     FileUtils.writeToFile(filename, fileContents)
@@ -34,5 +32,20 @@ class FileUtilsTest extends FlatSpec with Matchers {
     val expectedDogSize = 128166
     val dog             = FileUtils.readBinaryFile("src/test/scala/temple/testfiles/dog.jpeg")
     dog.length shouldBe expectedDogSize
+  }
+
+  it should "correctly get all the filenames under a directory" in {
+    val foundFiles = FileUtils.buildFilenameSeq(Paths.get("src/test/scala/temple/testfiles"))
+    foundFiles.toSet shouldBe Set(
+      File("", "attributes.temple"),
+      File("", "badSemantics.temple"),
+      File("", "badSyntax.temple"),
+      File("", "badValidation.temple"),
+      File("", "data.temple"),
+      File("", "dog.jpeg"),
+      File("", "enumReadAll.temple"),
+      File("", "simple.temple"),
+      File("", "simple-dc.temple"),
+    )
   }
 }

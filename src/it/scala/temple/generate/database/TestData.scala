@@ -1,12 +1,13 @@
 package temple.generate.database
 
 import java.sql.{Date, Time, Timestamp}
+import java.util.UUID
 
 import temple.generate.database.ast.ColType._
 import temple.generate.database.ast.ColumnConstraint._
 import temple.generate.database.ast.ComparisonOperator._
 import temple.generate.database.ast.Condition._
-import temple.generate.database.ast.Expression.Value
+import temple.generate.database.ast.Expression.{PreparedValue, Value}
 import temple.generate.database.ast.Statement._
 import temple.generate.database.ast._
 
@@ -14,7 +15,7 @@ import temple.generate.database.ast._
 object TestData {
 
   val createStatement: Create = Create(
-    "Users",
+    "temple_user",
     Seq(
       ColumnDef("id", IntCol(2), Seq(Unique)),
       ColumnDef("anotherId", IntCol(4), Seq(Unique)),
@@ -27,11 +28,12 @@ object TestData {
       ColumnDef("dateOfBirth", DateCol),
       ColumnDef("timeOfDay", TimeCol),
       ColumnDef("expiry", DateTimeTzCol),
+      ColumnDef("veryUnique", UUIDCol),
     ),
   )
 
   val createStatementWithUniqueConstraint: Create = Create(
-    "UniqueTest",
+    "unique_test",
     Seq(
       ColumnDef("itemID", IntCol(4), Seq(NonNull, PrimaryKey)),
       ColumnDef("createdAt", DateTimeTzCol, Seq(Unique)),
@@ -39,15 +41,15 @@ object TestData {
   )
 
   val createStatementWithReferenceConstraint: Create = Create(
-    "ReferenceTest",
+    "reference_test",
     Seq(
       ColumnDef("itemID", IntCol(4), Seq(NonNull, PrimaryKey)),
-      ColumnDef("userID", IntCol(4), Seq(References("Users", "id"))),
+      ColumnDef("userID", IntCol(4), Seq(References("temple_user", "id"))),
     ),
   )
 
   val createStatementWithCheckConstraint: Create = Create(
-    "CheckTest",
+    "check_test",
     Seq(
       ColumnDef("itemID", IntCol(4), Seq(NonNull, PrimaryKey)),
       ColumnDef("value", IntCol(4), Seq(Check("value", GreaterEqual, "1"), Check("value", LessEqual, "10"))),
@@ -55,7 +57,7 @@ object TestData {
   )
 
   val readStatement: Read = Read(
-    "Users",
+    "temple_user",
     Seq(
       Column("id"),
       Column("anotherId"),
@@ -68,11 +70,12 @@ object TestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
   )
 
   val readStatementWithWhere: Read = Read(
-    "Users",
+    "temple_user",
     Seq(
       Column("id"),
       Column("anotherId"),
@@ -85,14 +88,15 @@ object TestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
     Some(
-      Comparison("Users.id", Equal, "123456"),
+      Comparison("user.id", Equal, "123456"),
     ),
   )
 
   val readStatementWithWhereConjunction: Read = Read(
-    "Users",
+    "temple_user",
     Seq(
       Column("id"),
       Column("anotherId"),
@@ -105,17 +109,18 @@ object TestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
     Some(
       Conjunction(
-        Comparison("Users.id", Equal, "123456"),
-        Comparison("Users.expiry", LessEqual, "2"),
+        Comparison("temple_user.id", Equal, "123456"),
+        Comparison("temple_user.expiry", LessEqual, "2"),
       ),
     ),
   )
 
   val readStatementWithWhereDisjunction: Read = Read(
-    "Users",
+    "temple_user",
     Seq(
       Column("id"),
       Column("anotherId"),
@@ -128,17 +133,18 @@ object TestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
     Some(
       Disjunction(
-        Comparison("Users.id", NotEqual, "123456"),
-        Comparison("Users.expiry", Greater, "2"),
+        Comparison("temple_user.id", NotEqual, "123456"),
+        Comparison("temple_user.expiry", Greater, "2"),
       ),
     ),
   )
 
   val readStatementWithWhereInverse: Read = Read(
-    "Users",
+    "temple_user",
     Seq(
       Column("id"),
       Column("anotherId"),
@@ -151,16 +157,17 @@ object TestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
     Some(
       Inverse(
-        Comparison("Users.id", Less, "123456"),
+        Comparison("temple_user.id", Less, "123456"),
       ),
     ),
   )
 
   val readStatementComplex: Read = Read(
-    "Users",
+    "temple_user",
     Seq(
       Column("id"),
       Column("anotherId"),
@@ -173,84 +180,123 @@ object TestData {
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
+      Column("veryUnique"),
     ),
     Some(
       Conjunction(
         Disjunction(
           IsNull(Column("isStudent")),
-          Comparison("Users.id", GreaterEqual, "1"),
+          Comparison("temple_user.id", GreaterEqual, "1"),
         ),
         Disjunction(
           Inverse(IsNull(Column("isStudent"))),
-          Inverse(Comparison("Users.expiry", Less, "TIMESTAMP '2020-02-03 00:00:00+00'")),
+          Inverse(Comparison("temple_user.expiry", Less, "TIMESTAMP '2020-02-03 00:00:00+00'")),
         ),
       ),
     ),
   )
 
-  val insertStatement: Insert = Insert(
-    "Users",
+  val readStatementWithWherePrepared: Read = Read(
+    "temple_user",
     Seq(
       Column("id"),
-      Column("anotherId"),
-      Column("yetAnotherId"),
       Column("bankBalance"),
-      Column("bigBankBalance"),
       Column("name"),
-      Column("initials"),
       Column("isStudent"),
       Column("dateOfBirth"),
       Column("timeOfDay"),
       Column("expiry"),
     ),
+    Some(
+      PreparedComparison("temple_user.id", Equal),
+    ),
+  )
+
+  val insertStatement: Insert = Insert(
+    "temple_user",
+    Seq(
+      Assignment(Column("id"), PreparedValue),
+      Assignment(Column("anotherId"), PreparedValue),
+      Assignment(Column("yetAnotherId"), PreparedValue),
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("bigBankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+      Assignment(Column("initials"), PreparedValue),
+      Assignment(Column("isStudent"), PreparedValue),
+      Assignment(Column("dateOfBirth"), PreparedValue),
+      Assignment(Column("timeOfDay"), PreparedValue),
+      Assignment(Column("expiry"), PreparedValue),
+      Assignment(Column("veryUnique"), PreparedValue),
+    ),
+  )
+
+  val insertStatementWithReturn: Insert = Insert(
+    "temple_user",
+    Seq(
+      Assignment(Column("id"), PreparedValue),
+      Assignment(Column("anotherId"), PreparedValue),
+      Assignment(Column("yetAnotherId"), PreparedValue),
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("bigBankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+      Assignment(Column("initials"), PreparedValue),
+      Assignment(Column("isStudent"), PreparedValue),
+      Assignment(Column("dateOfBirth"), PreparedValue),
+      Assignment(Column("timeOfDay"), PreparedValue),
+      Assignment(Column("expiry"), PreparedValue),
+      Assignment(Column("veryUnique"), PreparedValue),
+    ),
+    Seq(
+      Column("id"),
+    ),
   )
 
   val insertStatementForUniqueConstraint: Insert = Insert(
-    "UniqueTest",
+    "unique_test",
     Seq(
-      Column("itemID"),
-      Column("createdAt"),
+      Assignment(Column("itemID"), PreparedValue),
+      Assignment(Column("createdAt"), PreparedValue),
     ),
   )
 
   val insertStatementForReferenceConstraint: Insert = Insert(
-    "ReferenceTest",
+    "reference_test",
     Seq(
-      Column("itemID"),
-      Column("userID"),
+      Assignment(Column("itemID"), PreparedValue),
+      Assignment(Column("userID"), PreparedValue),
     ),
   )
 
   val insertStatementForCheckConstraint: Insert = Insert(
-    "CheckTest",
+    "check_test",
     Seq(
-      Column("itemID"),
-      Column("value"),
+      Assignment(Column("itemID"), PreparedValue),
+      Assignment(Column("value"), PreparedValue),
     ),
   )
 
   val deleteStatement: Delete = Delete(
-    "Users",
+    "temple_user",
   )
 
   val deleteStatementWithWhere: Delete = Delete(
-    "Users",
+    "temple_user",
     Some(
-      Comparison("Users.id", Equal, "123456"),
+      Comparison("temple_user.id", Equal, "123456"),
     ),
   )
 
   val dropStatement: Drop = Drop(
-    "Users",
+    "temple_user",
     ifExists = false,
   )
 
   val dropStatementIfExists: Drop = Drop(
-    "Users",
+    "temple_user",
   )
 
   val updateStatement: Update = Update(
-    "Users",
+    "temple_user",
     Seq(
       Assignment(Column("bankBalance"), Value("123.456")),
       Assignment(Column("name"), Value("'Will'")),
@@ -258,13 +304,67 @@ object TestData {
   )
 
   val updateStatementWithWhere: Update = Update(
-    "Users",
+    "temple_user",
     Seq(
       Assignment(Column("bankBalance"), Value("123.456")),
       Assignment(Column("name"), Value("'Will'")),
     ),
     Some(
-      Comparison("Users.id", Equal, "12345"),
+      Comparison("temple_user.id", Equal, "12345"),
+    ),
+  )
+
+  val updateStatementWithReturn: Update = Update(
+    "temple_user",
+    Seq(
+      Assignment(Column("bankBalance"), Value("123.456")),
+      Assignment(Column("name"), Value("'Will'")),
+    ),
+    None,
+    Seq(
+      Column("bankBalance"),
+    ),
+  )
+
+  val updateStatementWithWhereAndReturn: Update = Update(
+    "temple_user",
+    Seq(
+      Assignment(Column("bankBalance"), Value("123.456")),
+      Assignment(Column("name"), Value("'Will'")),
+    ),
+    Some(
+      Comparison("temple_user.id", Equal, "12345"),
+    ),
+    Seq(
+      Column("bankBalance"),
+    ),
+  )
+
+  val updateStatementWithPreparedInputAndReturn: Update = Update(
+    "temple_user",
+    Seq(
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+    ),
+    None,
+    Seq(
+      Column("bankBalance"),
+      Column("name"),
+    ),
+  )
+
+  val updateStatementWithPreparedInputWhereAndReturn: Update = Update(
+    "temple_user",
+    Seq(
+      Assignment(Column("bankBalance"), PreparedValue),
+      Assignment(Column("name"), PreparedValue),
+    ),
+    Some(
+      PreparedComparison("temple_user.id", Equal),
+    ),
+    Seq(
+      Column("bankBalance"),
+      Column("name"),
     ),
   )
 
@@ -280,6 +380,7 @@ object TestData {
     PreparedVariable.DateVariable(Date.valueOf("1998-03-05")),
     PreparedVariable.TimeVariable(Time.valueOf("12:00:00")),
     PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2020-01-01 00:00:00.0")),
+    PreparedVariable.UUIDVariable(UUID.fromString("00000000-1234-5678-9012-000000000000")),
   )
 
   val insertDataB: Seq[PreparedVariable] = Seq(
@@ -294,6 +395,7 @@ object TestData {
     PreparedVariable.DateVariable(Date.valueOf("1998-03-05")),
     PreparedVariable.TimeVariable(Time.valueOf("12:00:00")),
     PreparedVariable.DateTimeTzVariable(Timestamp.valueOf("2019-02-03 02:23:50.0")),
+    PreparedVariable.UUIDVariable(UUID.fromString("00000000-1234-5678-9012-000000000001")),
   )
 
   val insertDataUniqueConstraintA: Seq[PreparedVariable] = Seq(
@@ -329,6 +431,17 @@ object TestData {
   val insertDataCheckConstraintPasses: Seq[PreparedVariable] = Seq(
     PreparedVariable.IntVariable(1),
     PreparedVariable.IntVariable(5),
+  )
+
+  val updateDataPreparedA: Seq[PreparedVariable] = Seq(
+    PreparedVariable.FloatVariable(678.90f),
+    PreparedVariable.StringVariable("Smithe Williamson"),
+  )
+
+  val updateDataPreparedB: Seq[PreparedVariable] = Seq(
+    PreparedVariable.FloatVariable(678.90f),
+    PreparedVariable.StringVariable("Smithe Williamson"),
+    PreparedVariable.ShortVariable(3),
   )
 
 }

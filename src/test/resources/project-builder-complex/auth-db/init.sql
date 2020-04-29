@@ -1,0 +1,5 @@
+CREATE TABLE auth (
+  id UUID NOT NULL PRIMARY KEY,
+  email TEXT UNIQUE NOT NULL,
+  password TEXT NOT NULL
+);

@@ -1,0 +1,50 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: simple-temple-test-user-db
+  labels:
+    app: simple-temple-test-user
+    kind: db
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: simple-temple-test-user
+      kind: db
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      name: simple-temple-test-user-db
+      labels:
+        app: simple-temple-test-user
+        kind: db
+    spec:
+      hostname: simple-temple-test-user-db
+      containers:
+      - env:
+        - name: PGUSER
+          value: postgres
+        image: postgres:12.1
+        name: simple-temple-test-user-db
+        volumeMounts:
+        - mountPath: /var/lib/postgresql/data
+          name: simple-temple-test-user-db-claim
+        - mountPath: /docker-entrypoint-initdb.d/init.sql
+          subPath: init.sql
+          name: simple-temple-test-user-db-init
+        lifecycle:
+          postStart:
+            exec:
+              command:
+              - /bin/sh
+              - -c
+              - psql -U postgres -f /docker-entrypoint-initdb.d/init.sql && echo done
+      restartPolicy: Always
+      volumes:
+      - name: simple-temple-test-user-db-init
+        configMap:
+          name: simple-temple-test-user-db-config
+      - name: simple-temple-test-user-db-claim
+        persistentVolumeClaim:
+          claimName: simple-temple-test-user-db-claim

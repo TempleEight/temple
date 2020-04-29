@@ -1,0 +1,18 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: simple-temple-test-group
+  labels:
+    app: simple-temple-test-group
+    kind: service
+spec:
+  ports:
+  - name: api
+    port: 1030
+    targetPort: 1030
+  - name: prom
+    port: 1031
+    targetPort: 1031
+  selector:
+    app: simple-temple-test-group
+    kind: service

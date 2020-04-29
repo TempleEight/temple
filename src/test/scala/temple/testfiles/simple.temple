@@ -1,7 +1,11 @@
-SimpleTempleTest: project {}
+SimpleTempleTest: project {
+  #metrics(prometheus);
+  #provider(kubernetes);
+  #authMethod(email);
+}
 
 User: service {
-  username: string;
+  log: string;
   email: string(40,5);
   firstName: string;
   lastName: string;
@@ -13,13 +17,20 @@ User: service {
   breakfastTime: time;
 
   Fred: struct {
-    field: string @nullable;
+    field: string;
     friend: User;
-    #enumerable(by: friend);
+    image: data(10M);
+    #enumerable;
   };
 
   #enumerable;
+  #omit [delete];
+  #readable(by: all);
+  #writable(by: this);
 
-  #auth(login: username);
-  #uses [Booking, Events, /* Reservations */];
+  #auth;
+  #uses [Booking, Group, /* Reservations */];
 }
+
+Booking: service {}
+Group: service {}
