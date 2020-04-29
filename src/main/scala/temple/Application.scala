@@ -9,6 +9,7 @@ import temple.utils.FileUtils
 import temple.utils.MonadUtils.FromEither
 
 object Application {
+  class InvalidTemplefileException(str: String) extends RuntimeException(str)
 
   private def readFileOrStdIn(filename: String): String =
     if (filename == "-") FileUtils.readStdIn() else FileUtils.readFile(filename)
@@ -17,7 +18,7 @@ object Application {
     val outputDirectory = config.Generate.outputDirectory.getOrElse(System.getProperty("user.dir"))
     val fileContents    = readFileOrStdIn(config.Generate.filename())
     val data = DSLProcessor.parse(fileContents) fromEither { error =>
-      throw new RuntimeException(error)
+      throw new InvalidTemplefileException(error)
     }
     val analyzedTemplefile = Analyzer.parseAndValidate(data)
     val detail             = LanguageSpecificDetailBuilder.build(analyzedTemplefile, questionAsker)
@@ -33,14 +34,14 @@ object Application {
   def validate(config: TempleConfig): Unit = {
     val fileContents = readFileOrStdIn(config.Validate.filename())
     val data = DSLProcessor.parse(fileContents) fromEither { error =>
-      throw new RuntimeException("Templefile could not be parsed\n" + error)
+      throw new InvalidTemplefileException("Templefile could not be parsed\n" + error)
     }
     try {
       Analyzer.parseAndValidate(data)
       println(s"Templefile validated correctly")
     } catch {
       case error: SemanticParsingException =>
-        throw new RuntimeException("Templefile could not be validated\n" + error.getMessage, error)
+        throw new InvalidTemplefileException("Templefile could not be validated\n" + error.getMessage)
     }
   }
 
@@ -48,7 +49,7 @@ object Application {
     val generatedDirectory = config.Test.generatedDirectory.getOrElse(System.getProperty("user.dir"))
     val fileContents       = readFileOrStdIn(config.Test.filename())
     val data = DSLProcessor.parse(fileContents) fromEither { error =>
-      throw new RuntimeException(error)
+      throw new InvalidTemplefileException(error)
     }
     val analyzedTemplefile = Analyzer.parseAndValidate(data)
     if (config.Test.testOnly()) {
