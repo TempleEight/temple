@@ -15,7 +15,12 @@ object Main extends App {
   }
 
   try {
-    val config = new TempleConfig(args)
+    val config =
+      try new TempleConfig(args)
+      catch {
+        case error: IllegalArgumentException => exit(error.getMessage)
+      }
+
     config.subcommand match {
       case Some(config.Generate) => Application.generate(config, StdInQuestionAsker)
       case Some(config.Validate) => Application.validate(config)
@@ -28,7 +33,6 @@ object Main extends App {
     case error: NoSuchFileException         => exit(s"File not found: ${error.getMessage}")
     case error: InvalidPackageNameException => exit(s"Package name isn't valid: ${error.getMessage}")
     case error: InvalidTemplefileException  => exit(error.getMessage)
-    case error: IllegalArgumentException    => exit(error.getMessage)
     case error: Exception                   => exit((error.toString +: error.getStackTrace.toSeq).mkString("\n"))
   }
 
