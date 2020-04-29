@@ -15,12 +15,12 @@ object PushImageScriptGenerator {
 
     File("", "push-image.sh") ->
     s"""#!/bin/sh
-       |REGISTRY_URL="localhost:5000"
+       |REG_URL="$${REG_URL:-localhost:5000}"
        |BASEDIR=$$(dirname "$$BASH_SOURCE")
        |
        |for service in $directories; do
-       |  docker build -t "$$REGISTRY_URL/${StringUtils.kebabCase(projectName)}-$$service" "$$BASEDIR/$$service"
-       |  docker push "$$REGISTRY_URL/${StringUtils.kebabCase(projectName)}-$$service"
+       |  docker build -t "$$REG_URL/${StringUtils.kebabCase(projectName)}-$$service" "$$BASEDIR/$$service"
+       |  docker push "$$REG_URL/${StringUtils.kebabCase(projectName)}-$$service"
        |done
        |""".stripMargin
   }
