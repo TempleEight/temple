@@ -13,6 +13,7 @@ import temple.generate.FileSystem._
 import temple.generate.database.ast.Statement
 import temple.generate.database.{PostgresContext, PostgresGenerator}
 import temple.generate.docker.DockerfileGenerator
+import temple.generate.docs.DocumentationGenerator
 import temple.generate.metrics.grafana.ast.{Datasource, Row}
 import temple.generate.metrics.grafana.{GrafanaDashboardConfigGenerator, GrafanaDashboardGenerator, GrafanaDatasourceConfigGenerator}
 import temple.generate.metrics.prometheus.PrometheusConfigGenerator
@@ -182,6 +183,9 @@ object ProjectBuilder {
     serverFiles.toMap
   }
 
+  private def buildDocumentation(templefile: Templefile): Files =
+    DocumentationGenerator.generate(templefile)
+
   /**
     * Converts a Templefile to an associated project, containing all generated code
     *
@@ -195,6 +199,7 @@ object ProjectBuilder {
       buildOrchestration(templefile) ++
       buildOpenAPI(templefile) ++
       buildServerFiles(templefile, detail) ++
-      buildMetrics(templefile),
+      buildMetrics(templefile) ++
+      buildDocumentation(templefile),
     )
 }

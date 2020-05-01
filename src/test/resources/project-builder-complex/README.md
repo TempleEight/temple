@@ -1,0 +1,253 @@
+# SampleComplexProject
+
+
+## API Documentation
+
+### Auth
+
+#### Register
+**URL:** `/api/register`  
+**Method:** `POST`  
+**Description:** Register and get an access token  
+**Request Contents:**  
+
+|Parameter|Type|Details|
+|---|---|---|
+|email|String|Valid email address|
+|password|String|Between 8 and 64 characters|
+
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "AccessToken" : ""
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `403 FORBIDDEN`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Login
+**URL:** `/api/login`  
+**Method:** `POST`  
+**Description:** Login and get an access token  
+**Request Contents:**  
+
+|Parameter|Type|Details|
+|---|---|---|
+|email|String|Valid email address|
+|password|String|Between 8 and 64 characters|
+
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "AccessToken" : ""
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+### ComplexUser Service
+
+#### Create ComplexUser
+**URL:** `/api/complex-user`  
+**Method:** `POST`  
+**Description:** Register a new complexuser  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+**Request Contents:**  
+
+|Parameter|Type|Details|
+|---|---|---|
+|smallIntField|Integer|Min Value: 10, Max Value: 100, Precision: 2 bytes|
+|intField|Integer|Min Value: 10, Max Value: 100, Precision: 4 bytes|
+|bigIntField|Integer|Min Value: 10, Max Value: 100, Precision: 8 bytes|
+|floatField|Float|Min Value: 0.0, Max Value: 300.0, Precision: 4 bytes|
+|doubleField|Float|Min Value: 0.0, Max Value: 123.0, Precision: 8 bytes|
+|stringField|String|Min Length: 1|
+|boundedStringField|String|Min Length: 0, Max Length: 5|
+|boolField|Boolean||
+|dateField|Date|Format: 'YYYY-MM-DD'|
+|timeField|Time|Format: 'HH:MM:SS.NNNNNN'|
+|dateTimeField|DateTime|Format: 'YYYY-MM-DDTHH:MM:SS.NNNNNN'|
+|blobField|Base64 String|Max Size: None bytes|
+
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "floatField" : 42.0,
+  "timeField" : "23:59:59",
+  "blobField" : "data",
+  "bigIntField" : 42,
+  "dateTimeField" : "2020-01-01T23:59:59",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "boundedStringField" : "string-contents",
+  "intField" : 42,
+  "doubleField" : 42.0,
+  "stringField" : "string-contents",
+  "boolField" : true,
+  "smallIntField" : 42,
+  "dateField" : "2020-01-01"
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Read ComplexUser
+**URL:** `/api/complex-user/{id}`  
+**Method:** `GET`  
+**Description:** Look up a single complexuser  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "floatField" : 42.0,
+  "timeField" : "23:59:59",
+  "blobField" : "data",
+  "bigIntField" : 42,
+  "dateTimeField" : "2020-01-01T23:59:59",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "boundedStringField" : "string-contents",
+  "intField" : 42,
+  "doubleField" : 42.0,
+  "stringField" : "string-contents",
+  "boolField" : true,
+  "smallIntField" : 42,
+  "dateField" : "2020-01-01"
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `404 NOT FOUND`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Update ComplexUser
+**URL:** `/api/complex-user/{id}`  
+**Method:** `PUT`  
+**Description:** Update a single complexuser  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+**Request Contents:**  
+
+|Parameter|Type|Details|
+|---|---|---|
+|smallIntField|Integer|Min Value: 10, Max Value: 100, Precision: 2 bytes|
+|intField|Integer|Min Value: 10, Max Value: 100, Precision: 4 bytes|
+|bigIntField|Integer|Min Value: 10, Max Value: 100, Precision: 8 bytes|
+|floatField|Float|Min Value: 0.0, Max Value: 300.0, Precision: 4 bytes|
+|doubleField|Float|Min Value: 0.0, Max Value: 123.0, Precision: 8 bytes|
+|stringField|String|Min Length: 1|
+|boundedStringField|String|Min Length: 0, Max Length: 5|
+|boolField|Boolean||
+|dateField|Date|Format: 'YYYY-MM-DD'|
+|timeField|Time|Format: 'HH:MM:SS.NNNNNN'|
+|dateTimeField|DateTime|Format: 'YYYY-MM-DDTHH:MM:SS.NNNNNN'|
+|blobField|Base64 String|Max Size: None bytes|
+
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "floatField" : 42.0,
+  "timeField" : "23:59:59",
+  "blobField" : "data",
+  "bigIntField" : 42,
+  "dateTimeField" : "2020-01-01T23:59:59",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "boundedStringField" : "string-contents",
+  "intField" : 42,
+  "doubleField" : 42.0,
+  "stringField" : "string-contents",
+  "boolField" : true,
+  "smallIntField" : 42,
+  "dateField" : "2020-01-01"
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `404 NOT FOUND`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Delete ComplexUser
+**URL:** `/api/complex-user/{id}`  
+**Method:** `DELETE`  
+**Description:** Delete a single complexuser  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `404 NOT FOUND`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Identify ComplexUser
+**URL:** `/api/complex-user`  
+**Method:** `GET`  
+**Description:** Look up the single complexuser associated with the access token  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+
+##### Success Response:
+**Code:** `302 FOUND`  
+**Headers:**`Location: http://path/to/resource`  
+
+##### Error Responses:
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `404 NOT FOUND`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***

@@ -1,0 +1,145 @@
+# SampleProject
+
+
+## API Documentation
+
+### TempleUser Service
+
+#### Create TempleUser
+**URL:** `/api/temple-user`  
+**Method:** `POST`  
+**Description:** Register a new templeuser  
+**Request Contents:**  
+
+|Parameter|Type|Details|
+|---|---|---|
+|intField|Integer|Precision: 4 bytes|
+|doubleField|Float|Precision: 8 bytes|
+|stringField|String||
+|boolField|Boolean||
+|dateField|Date|Format: 'YYYY-MM-DD'|
+|timeField|Time|Format: 'HH:MM:SS.NNNNNN'|
+|dateTimeField|DateTime|Format: 'YYYY-MM-DDTHH:MM:SS.NNNNNN'|
+|blobField|Base64 String|Max Size: None bytes|
+
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "timeField" : "23:59:59",
+  "blobField" : "data",
+  "dateTimeField" : "2020-01-01T23:59:59",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "dateField" : "2020-01-01",
+  "intField" : 42,
+  "doubleField" : 42.0,
+  "stringField" : "string-contents",
+  "boolField" : true
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Read TempleUser
+**URL:** `/api/temple-user/{id}`  
+**Method:** `GET`  
+**Description:** Look up a single templeuser  
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "timeField" : "23:59:59",
+  "blobField" : "data",
+  "dateTimeField" : "2020-01-01T23:59:59",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "dateField" : "2020-01-01",
+  "intField" : 42,
+  "doubleField" : 42.0,
+  "stringField" : "string-contents",
+  "boolField" : true
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `404 NOT FOUND`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Update TempleUser
+**URL:** `/api/temple-user/{id}`  
+**Method:** `PUT`  
+**Description:** Update a single templeuser  
+**Request Contents:**  
+
+|Parameter|Type|Details|
+|---|---|---|
+|intField|Integer|Precision: 4 bytes|
+|doubleField|Float|Precision: 8 bytes|
+|stringField|String||
+|boolField|Boolean||
+|dateField|Date|Format: 'YYYY-MM-DD'|
+|timeField|Time|Format: 'HH:MM:SS.NNNNNN'|
+|dateTimeField|DateTime|Format: 'YYYY-MM-DDTHH:MM:SS.NNNNNN'|
+|blobField|Base64 String|Max Size: None bytes|
+
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "timeField" : "23:59:59",
+  "blobField" : "data",
+  "dateTimeField" : "2020-01-01T23:59:59",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "dateField" : "2020-01-01",
+  "intField" : 42,
+  "doubleField" : 42.0,
+  "stringField" : "string-contents",
+  "boolField" : true
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `404 NOT FOUND`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Delete TempleUser
+**URL:** `/api/temple-user/{id}`  
+**Method:** `DELETE`  
+**Description:** Delete a single templeuser  
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `404 NOT FOUND`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
