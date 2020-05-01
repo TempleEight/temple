@@ -20,7 +20,7 @@
 |dateField|Date|Format: 'YYYY-MM-DD'|
 |timeField|Time|Format: 'HH:MM:SS.NNNNNN'|
 |dateTimeField|DateTime|Format: 'YYYY-MM-DDTHH:MM:SS.NNNNNN'|
-|blobField|Base64 String|Max Size: None bytes|
+|blobField|Base64 String||
 
 
 ##### Success Response:
@@ -94,7 +94,7 @@
 |dateField|Date|Format: 'YYYY-MM-DD'|
 |timeField|Time|Format: 'HH:MM:SS.NNNNNN'|
 |dateTimeField|DateTime|Format: 'YYYY-MM-DDTHH:MM:SS.NNNNNN'|
-|blobField|Base64 String|Max Size: None bytes|
+|blobField|Base64 String||
 
 
 ##### Success Response:

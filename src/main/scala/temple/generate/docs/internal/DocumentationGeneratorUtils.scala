@@ -39,19 +39,25 @@ object DocumentationGeneratorUtils {
     standard ++ when(usesAuth) { 401 }
   }
 
-  private[docs] def description(entity: String, crud: CRUD): String = crud match {
-    case CRUD.List     => s"Get a list of every $entity"
-    case CRUD.Create   => s"Register a new $entity"
-    case CRUD.Read     => s"Look up a single $entity"
-    case CRUD.Update   => s"Update a single $entity"
-    case CRUD.Delete   => s"Delete a single $entity"
-    case CRUD.Identify => s"Look up the single $entity associated with the access token"
+  private[docs] def description(entity: String, crud: CRUD, struct: Option[String]): String = {
+    val structText = struct.fold(entity)(name => s"$name belonging to the provided $entity")
+    crud match {
+      case CRUD.List     => s"Get a list of every $structText"
+      case CRUD.Create   => s"Register a new $structText"
+      case CRUD.Read     => s"Look up a single $structText"
+      case CRUD.Update   => s"Update a single $structText"
+      case CRUD.Delete   => s"Delete a single $structText"
+      case CRUD.Identify => s"Look up the single $entity associated with the access token"
+    }
   }
 
-  private[docs] def url(service: String, crud: CRUD): String = crud match {
-    case CRUD.List                             => s"/api/$service/all"
-    case CRUD.Create | CRUD.Identify           => s"/api/$service"
-    case CRUD.Read | CRUD.Update | CRUD.Delete => s"/api/$service/{id}"
+  private[docs] def url(service: String, crud: CRUD, structName: Option[String]): String = {
+    val base = s"/api/$service${structName.fold("")(name => s"/{parent_id}/$name")}"
+    crud match {
+      case CRUD.List                             => s"$base/all"
+      case CRUD.Create | CRUD.Identify           => base
+      case CRUD.Read | CRUD.Update | CRUD.Delete => s"$base/{id}"
+    }
   }
 
   private[docs] def generateRequestBody(attributes: Map[String, AbstractAttribute]): Seq[Seq[String]] =
@@ -64,7 +70,7 @@ object DocumentationGeneratorUtils {
           case DateType               => ("Date", "Format: 'YYYY-MM-DD'")
           case DateTimeType           => ("DateTime", "Format: 'YYYY-MM-DDTHH:MM:SS.NNNNNN'")
           case TimeType               => ("Time", "Format: 'HH:MM:SS.NNNNNN'")
-          case BlobType(size)         => ("Base64 String", s"Max Size: $size bytes")
+          case BlobType(size)         => ("Base64 String", size.fold("")(bytes => s"Max Size: $bytes bytes"))
           case StringType(max, min) =>
             val minString = min.map(v => s"Min Length: $v")
             val maxString = max.map(v => s"Max Length: $v")
