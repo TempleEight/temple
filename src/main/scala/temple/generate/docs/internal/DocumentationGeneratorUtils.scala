@@ -19,14 +19,14 @@ object DocumentationGeneratorUtils {
   }
 
   private[docs] def httpCodeString(code: Int): String = code match {
-    case 200 => "200 OK"
-    case 302 => "302 FOUND"
-    case 400 => "400 BAD REQUEST"
-    case 401 => "401 UNAUTHORIZED"
-    case 403 => "403 FORBIDDEN"
-    case 404 => "404 NOT FOUND"
-    case 500 => "500 INTERNAL SERVER ERROR"
-    case v   => throw new RuntimeException(s"Unhandled HTTP Code $v")
+    case 200  => "200 OK"
+    case 302  => "302 FOUND"
+    case 400  => "400 BAD REQUEST"
+    case 401  => "401 UNAUTHORIZED"
+    case 403  => "403 FORBIDDEN"
+    case 404  => "404 NOT FOUND"
+    case 500  => "500 INTERNAL SERVER ERROR"
+    case code => throw new RuntimeException(s"Unhandled HTTP Code $code")
   }
 
   private[docs] def errorCodes(crud: CRUD, usesAuth: Boolean): Set[Int] = {
