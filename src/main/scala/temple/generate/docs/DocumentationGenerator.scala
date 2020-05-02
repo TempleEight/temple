@@ -1,14 +1,14 @@
 package temple.generate.docs
 
 import io.github.swagger2markup.markup.builder.{MarkupDocBuilder, MarkupDocBuilders, MarkupLanguage, MarkupTableColumn}
-import temple.ast.{AbstractServiceBlock, Templefile}
+import temple.ast.{AbstractServiceBlock, AttributeBlock, Templefile}
 import temple.builder.project.ProjectBuilder
 import temple.generate.CRUD
 import temple.generate.FileSystem.{File, Files}
 import temple.utils.StringUtils
 import temple.generate.docs.internal.DocumentationGeneratorUtils.{description, url, _}
-
 import io.circe.syntax._
+
 import scala.jdk.CollectionConverters._
 
 object DocumentationGenerator {
@@ -70,26 +70,27 @@ object DocumentationGenerator {
     }
   }
 
-  private def generateServiceDocs(
+  private def generateDocs(
     builder: MarkupDocBuilder,
     name: String,
-    service: AbstractServiceBlock,
+    block: AttributeBlock[_],
     usesAuth: Boolean,
+    structName: Option[String] = None,
   ): Unit = {
     val kebabName          = StringUtils.kebabCase(name)
     val lowerName          = name.toLowerCase
-    val requestAttributes  = service.attributes.filter { _._2.inRequest }
-    val responseAttributes = service.attributes.filter { _._2.inResponse }
+    val requestAttributes  = block.attributes.filter { _._2.inRequest }
+    val responseAttributes = block.attributes.filter { _._2.inResponse }
     val mockResponse       = generateResponseBody(responseAttributes)
 
-    builder.sectionTitleLevel2(s"$name Service")
-    ProjectBuilder.endpoints(service).foreach { endpoint =>
-      builder.sectionTitleLevel3(s"${endpoint.toString} $name")
+    if (structName.isEmpty) builder.sectionTitleLevel2(s"$name Service")
+    ProjectBuilder.endpoints(block).foreach { endpoint =>
+      builder.sectionTitleLevel3(s"${endpoint.toString} ${structName.getOrElse(name)}")
       addGeneralInfo(
         builder,
-        url(kebabName, endpoint),
+        url(kebabName, endpoint, structName.map(StringUtils.kebabCase)),
         httpMethod(endpoint),
-        description(lowerName, endpoint),
+        description(lowerName, endpoint, structName.map(_.toLowerCase)),
         usesAuth,
       )
 
@@ -154,7 +155,11 @@ object DocumentationGenerator {
 
     templefile.providedServices.foreach {
       case (name, service) =>
-        generateServiceDocs(builder, name, service, templefile.usesAuth)
+        generateDocs(builder, name, service, templefile.usesAuth)
+        service.structs.foreach {
+          case (structName, struct) =>
+            generateDocs(builder, name, struct, templefile.usesAuth, Some(structName))
+        }
     }
 
     Map(File("", "README.md") -> builder.toString)

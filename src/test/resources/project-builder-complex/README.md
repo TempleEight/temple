@@ -87,7 +87,7 @@
 |dateField|Date|Format: 'YYYY-MM-DD'|
 |timeField|Time|Format: 'HH:MM:SS.NNNNNN'|
 |dateTimeField|DateTime|Format: 'YYYY-MM-DDTHH:MM:SS.NNNNNN'|
-|blobField|Base64 String|Max Size: None bytes|
+|blobField|Base64 String||
 
 
 ##### Success Response:
@@ -177,7 +177,7 @@
 |dateField|Date|Format: 'YYYY-MM-DD'|
 |timeField|Time|Format: 'HH:MM:SS.NNNNNN'|
 |dateTimeField|DateTime|Format: 'YYYY-MM-DDTHH:MM:SS.NNNNNN'|
-|blobField|Base64 String|Max Size: None bytes|
+|blobField|Base64 String||
 
 
 ##### Success Response:
@@ -245,6 +245,153 @@
 **Headers:**`Location: http://path/to/resource`  
 
 ##### Error Responses:
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `404 NOT FOUND`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Create TempleUser
+**URL:** `/api/complex-user/{parent_id}/temple-user`  
+**Method:** `POST`  
+**Description:** Register a new templeuser belonging to the provided complexuser  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+**Request Contents:**  
+
+|Parameter|Type|Details|
+|---|---|---|
+|intField|Integer|Precision: 4 bytes|
+|doubleField|Float|Precision: 8 bytes|
+|stringField|String||
+|boolField|Boolean||
+|dateField|Date|Format: 'YYYY-MM-DD'|
+|timeField|Time|Format: 'HH:MM:SS.NNNNNN'|
+|dateTimeField|DateTime|Format: 'YYYY-MM-DDTHH:MM:SS.NNNNNN'|
+|blobField|Base64 String||
+
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "timeField" : "23:59:59",
+  "blobField" : "data",
+  "dateTimeField" : "2020-01-01T23:59:59",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "dateField" : "2020-01-01",
+  "intField" : 42,
+  "doubleField" : 42.0,
+  "stringField" : "string-contents",
+  "boolField" : true
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Read TempleUser
+**URL:** `/api/complex-user/{parent_id}/temple-user/{id}`  
+**Method:** `GET`  
+**Description:** Look up a single templeuser belonging to the provided complexuser  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "timeField" : "23:59:59",
+  "blobField" : "data",
+  "dateTimeField" : "2020-01-01T23:59:59",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "dateField" : "2020-01-01",
+  "intField" : 42,
+  "doubleField" : 42.0,
+  "stringField" : "string-contents",
+  "boolField" : true
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `404 NOT FOUND`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Update TempleUser
+**URL:** `/api/complex-user/{parent_id}/temple-user/{id}`  
+**Method:** `PUT`  
+**Description:** Update a single templeuser belonging to the provided complexuser  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+**Request Contents:**  
+
+|Parameter|Type|Details|
+|---|---|---|
+|intField|Integer|Precision: 4 bytes|
+|doubleField|Float|Precision: 8 bytes|
+|stringField|String||
+|boolField|Boolean||
+|dateField|Date|Format: 'YYYY-MM-DD'|
+|timeField|Time|Format: 'HH:MM:SS.NNNNNN'|
+|dateTimeField|DateTime|Format: 'YYYY-MM-DDTHH:MM:SS.NNNNNN'|
+|blobField|Base64 String||
+
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "timeField" : "23:59:59",
+  "blobField" : "data",
+  "dateTimeField" : "2020-01-01T23:59:59",
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "dateField" : "2020-01-01",
+  "intField" : 42,
+  "doubleField" : 42.0,
+  "stringField" : "string-contents",
+  "boolField" : true
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `404 NOT FOUND`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Delete TempleUser
+**URL:** `/api/complex-user/{parent_id}/temple-user/{id}`  
+**Method:** `DELETE`  
+**Description:** Delete a single templeuser belonging to the provided complexuser  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
 **Code:** `401 UNAUTHORIZED`  
 **Code:** `404 NOT FOUND`  
 **Code:** `500 INTERNAL SERVER ERROR`  

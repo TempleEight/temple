@@ -250,6 +250,158 @@
 
 ***
 
+#### List Fred
+**URL:** `/api/simple-temple-test-user/{parent_id}/fred/all`  
+**Method:** `GET`  
+**Description:** Get a list of every fred belonging to the provided simpletempletestuser  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "SimpleTempleTestUserList" : [
+    {
+      "id" : "00000000-0000-0000-0000-000000000000",
+      "field" : "string-contents",
+      "friend" : "00000000-0000-0000-0000-000000000000",
+      "image" : "data"
+    }
+  ]
+}
+```
+
+
+##### Error Responses:
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Create Fred
+**URL:** `/api/simple-temple-test-user/{parent_id}/fred`  
+**Method:** `POST`  
+**Description:** Register a new fred belonging to the provided simpletempletestuser  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+**Request Contents:**  
+
+|Parameter|Type|Details|
+|---|---|---|
+|field|String||
+|friend|UUID|Must reference an existing SimpleTempleTestUser|
+|image|Base64 String|Max Size: 10000000 bytes|
+
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "field" : "string-contents",
+  "friend" : "00000000-0000-0000-0000-000000000000",
+  "image" : "data"
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Read Fred
+**URL:** `/api/simple-temple-test-user/{parent_id}/fred/{id}`  
+**Method:** `GET`  
+**Description:** Look up a single fred belonging to the provided simpletempletestuser  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "field" : "string-contents",
+  "friend" : "00000000-0000-0000-0000-000000000000",
+  "image" : "data"
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `404 NOT FOUND`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Update Fred
+**URL:** `/api/simple-temple-test-user/{parent_id}/fred/{id}`  
+**Method:** `PUT`  
+**Description:** Update a single fred belonging to the provided simpletempletestuser  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+**Request Contents:**  
+
+|Parameter|Type|Details|
+|---|---|---|
+|field|String||
+|friend|UUID|Must reference an existing SimpleTempleTestUser|
+|image|Base64 String|Max Size: 10000000 bytes|
+
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{
+  "id" : "00000000-0000-0000-0000-000000000000",
+  "field" : "string-contents",
+  "friend" : "00000000-0000-0000-0000-000000000000",
+  "image" : "data"
+}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `404 NOT FOUND`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
+#### Delete Fred
+**URL:** `/api/simple-temple-test-user/{parent_id}/fred/{id}`  
+**Method:** `DELETE`  
+**Description:** Delete a single fred belonging to the provided simpletempletestuser  
+**Auth:** Include Authorization header in format `Authorization: Bearer <token>`  
+
+##### Success Response:
+**Code:** `200 OK`  
+**Response Body:**  
+```
+{}
+```
+
+
+##### Error Responses:
+**Code:** `400 BAD REQUEST`  
+**Code:** `401 UNAUTHORIZED`  
+**Code:** `404 NOT FOUND`  
+**Code:** `500 INTERNAL SERVER ERROR`  
+
+
+***
+
 ### Booking Service
 
 #### Create Booking
