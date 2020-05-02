@@ -2,7 +2,7 @@ import sbtassembly.AssemblyPlugin.defaultShellScript
 
 name := "temple"
 
-version := "1.0.1"
+version := "1.1.0"
 
 scalaVersion := "2.13.1"
 
@@ -29,21 +29,23 @@ lazy val root = (project in file("."))
   .settings(
     Defaults.itSettings,
     libraryDependencies ++= Seq(
-        "org.scala-lang.modules" %% "scala-parser-combinators"    % "1.1.2",
-        "org.scalatest"          %% "scalatest"                   % "3.0.8" % "it,test",
-        "org.rogach"             %% "scallop"                     % "3.3.2",
-        "org.postgresql"         % "postgresql"                   % "42.2.9",
-        "com.sun.activation"     % "javax.activation"             % "1.2.0",
-        "com.spotify"            % "docker-client"                % "8.9.1",
-        "com.whisk"              %% "docker-testkit-scalatest"    % "0.9.9" % "it,test",
-        "com.whisk"              %% "docker-testkit-impl-spotify" % "0.9.9" % "it,test",
-        "com.beachape"           %% "enumeratum"                  % "1.5.15",
-        "io.circe"               %% "circe-core"                  % "0.12.3",
-        "io.circe"               %% "circe-generic"               % "0.12.3",
-        "io.circe"               %% "circe-parser"                % "0.12.3",
-        "io.circe"               %% "circe-yaml"                  % "0.12.0",
-        "org.scalaj"             %% "scalaj-http"                 % "2.4.2",
+        "org.scala-lang.modules"   %% "scala-parser-combinators"    % "1.1.2",
+        "org.scalatest"            %% "scalatest"                   % "3.0.8" % "it,test",
+        "org.rogach"               %% "scallop"                     % "3.3.2",
+        "org.postgresql"           % "postgresql"                   % "42.2.9",
+        "com.sun.activation"       % "javax.activation"             % "1.2.0",
+        "com.spotify"              % "docker-client"                % "8.9.1",
+        "io.github.swagger2markup" % "markup-document-builder"      % "1.1.1",
+        "com.whisk"                %% "docker-testkit-scalatest"    % "0.9.9" % "it,test",
+        "com.whisk"                %% "docker-testkit-impl-spotify" % "0.9.9" % "it,test",
+        "com.beachape"             %% "enumeratum"                  % "1.5.15",
+        "io.circe"                 %% "circe-core"                  % "0.12.3",
+        "io.circe"                 %% "circe-generic"               % "0.12.3",
+        "io.circe"                 %% "circe-parser"                % "0.12.3",
+        "io.circe"                 %% "circe-yaml"                  % "0.12.0",
+        "org.scalaj"               %% "scalaj-http"                 % "2.4.2",
       ),
+    resolvers += "JCenter" at "https://jcenter.bintray.com"
   )
   .enablePlugins(BuildInfoPlugin)
   .settings(
