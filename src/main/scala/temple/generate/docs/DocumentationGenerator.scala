@@ -72,7 +72,7 @@ object DocumentationGenerator {
     }
   }
 
-  private def generateServiceDocs(
+  private def generateDocs(
     builder: MarkupDocBuilder,
     name: String,
     block: AttributeBlock[_],
@@ -207,10 +207,10 @@ object DocumentationGenerator {
 
     templefile.providedServices.foreach {
       case (name, service) =>
-        generateServiceDocs(builder, name, service, templefile.usesAuth)
+        generateDocs(builder, name, service, templefile.usesAuth)
         service.structs.foreach {
           case (structName, struct) =>
-            generateServiceDocs(builder, name, struct, templefile.usesAuth, Some(structName))
+            generateDocs(builder, name, struct, templefile.usesAuth, Some(structName))
         }
     }
 
