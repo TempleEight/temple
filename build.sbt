@@ -2,7 +2,7 @@ import sbtassembly.AssemblyPlugin.defaultShellScript
 
 name := "temple"
 
-version := "1.1.0"
+version := "1.1.1"
 
 scalaVersion := "2.13.1"
 
@@ -36,6 +36,7 @@ lazy val root = (project in file("."))
         "com.sun.activation"       % "javax.activation"             % "1.2.0",
         "com.spotify"              % "docker-client"                % "8.9.1",
         "io.github.swagger2markup" % "markup-document-builder"      % "1.1.1",
+        "org.slf4j"                % "slf4j-nop"                    % "1.7.30",
         "com.whisk"                %% "docker-testkit-scalatest"    % "0.9.9" % "it,test",
         "com.whisk"                %% "docker-testkit-impl-spotify" % "0.9.9" % "it,test",
         "com.beachape"             %% "enumeratum"                  % "1.5.15",
