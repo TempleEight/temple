@@ -10,7 +10,6 @@ import temple.generate.docs.internal.DocumentationGeneratorUtils.{description, u
 import io.circe.syntax._
 import temple.ast.Metadata.Provider
 
-import Option.when
 import scala.jdk.CollectionConverters._
 
 object DocumentationGenerator {
@@ -124,7 +123,7 @@ object DocumentationGenerator {
 
         addGeneralInfo(
           builder,
-          s"/api/$endpoint",
+          s"/api/auth/$endpoint",
           "POST",
           s"${endpoint.capitalize} and get an access token",
           usesAuth = false,
@@ -201,6 +200,41 @@ object DocumentationGenerator {
 
     builder.sectionTitleLevel1("API Documentation")
 
+    // Generate a contents
+    if (templefile.usesAuth) {
+      builder.boldTextLine("Auth Service", true)
+      builder.crossReference("register", "Register").text(": ").literalTextLine("POST /api/auth/register", true)
+      builder.crossReference("login", "Login").text(": ").literalTextLine("POST /api/auth/login", true)
+      builder.newLine()
+    }
+
+    templefile.providedServices.foreach {
+      case (name, service) =>
+        builder.boldTextLine(s"$name Service", true)
+        ProjectBuilder.endpoints(service).foreach { endpoint =>
+          builder
+            .crossReference(s"$endpoint-$name", s"$endpoint $name")
+            .text(": ")
+            .literalTextLine(s"${httpMethod(endpoint)} ${url(StringUtils.kebabCase(name), endpoint, None)}", true)
+        }
+        service.structs.foreach {
+          case (structName, struct) =>
+            ProjectBuilder.endpoints(struct).foreach { endpoint =>
+              builder
+                .crossReference(s"$endpoint-$structName", s"$endpoint $structName")
+                .text(": ")
+                .literalTextLine(
+                  s"${httpMethod(endpoint)} ${url(StringUtils.kebabCase(name), endpoint, Some(StringUtils.kebabCase(structName)))}",
+                  true,
+                )
+            }
+        }
+
+        builder.newLine()
+    }
+    builder.pageBreak()
+
+    // Generate the actual documentation
     if (templefile.usesAuth) {
       generateAuthServiceDocs(builder)
     }
