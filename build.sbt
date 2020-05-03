@@ -2,7 +2,7 @@ import sbtassembly.AssemblyPlugin.defaultShellScript
 
 name := "temple"
 
-version := "1.1.1"
+version := "1.1.2"
 
 scalaVersion := "2.13.1"
 
