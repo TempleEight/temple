@@ -219,11 +219,12 @@ object GoServiceMainHandlersGenerator {
     op: CRUD,
     typePrefix: String,
     metricSuffix: Option[String],
+    parent: Option[AttributesRoot] = None,
   ): String = {
     val jsonDecodeCall = genMethodCall(genMethodCall("json", "NewDecoder", "r.Body"), "Decode", "&req")
     mkCode.lines(
       genVar("req", s"${typePrefix}Request"),
-      if (!block.projectUsesAuth && op == Create) genDeclareAndAssign(jsonDecodeCall, "err")
+      if (!block.projectUsesAuth && op == Create && parent.isEmpty) genDeclareAndAssign(jsonDecodeCall, "err")
       else {
         genAssign(jsonDecodeCall, "err")
       },

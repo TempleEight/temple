@@ -139,4 +139,12 @@ class GoGeneratorIntegrationTest extends GolangSpec with Matchers with BeforeAnd
       error shouldBe ""
     }
   }
+
+  it should "generate the entire structWithoutAuth.temple project" in {
+    val structTemple     = FileUtils.readFile("src/test/scala/temple/testfiles/structWithoutAuth.temple")
+    val validationErrors = buildAndValidate(structTemple)
+    validationErrors.foreach { error =>
+      error shouldBe ""
+    }
+  }
 }

@@ -1,0 +1,7 @@
+Example: project {}
+
+Brendon: service {
+  Foo: struct {
+    bar: string;
+  }
+}

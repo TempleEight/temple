@@ -46,6 +46,7 @@ class FileUtilsTest extends FlatSpec with Matchers {
       File("", "enumReadAll.temple"),
       File("", "simple.temple"),
       File("", "simple-dc.temple"),
+      File("", "structWithoutAuth.temple"),
     )
   }
 }
