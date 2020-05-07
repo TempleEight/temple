@@ -44,6 +44,7 @@ object BuilderTestData {
   val simpleTemplefile: Templefile = Templefile(
     "TestProject",
     ProjectBlock(Seq(ServiceLanguage.Go)),
+    targets = Map(),
     services = Map("TestService" -> sampleService),
   )
 
@@ -79,6 +80,7 @@ object BuilderTestData {
   val complexTemplefile: Templefile = Templefile(
     "TestComplexProject",
     ProjectBlock(Seq(ServiceLanguage.Go)),
+    targets = Map(),
     services = Map("TestComplexService" -> sampleComplexService),
   )
 }

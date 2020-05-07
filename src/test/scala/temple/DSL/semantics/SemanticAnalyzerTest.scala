@@ -397,6 +397,28 @@ class SemanticAnalyzerTest extends FlatSpec with Matchers {
       parseSemantics(Seq(DSLRootItem("Test", "project", Seq()), DSLRootItem("other", "badItem", Seq())))
     } should have message "Unknown block type in other badItem"
   }
+
+  it should "parse target blocks correctly" in {
+    noException should be thrownBy {
+      parseSemantics(
+        mkTemplefileAST(DSLRootItem("mobile", "target", Seq(Entry.Metadata("language", Args(Seq(TokenArg("swift"))))))),
+      )
+    }
+
+    the[SemanticParsingException] thrownBy {
+      parseSemantics(
+        mkTemplefileAST(DSLRootItem("mobile", "target", Seq(Entry.Metadata("badKey", Args(Seq(TokenArg("swift"))))))),
+      )
+    } should have message "No valid metadata badKey in mobile target"
+
+    the[SemanticParsingException] thrownBy {
+      parseSemantics(
+        mkTemplefileAST(
+          DSLRootItem("mobile", "target", Seq(Entry.Attribute("field", syntax.AttributeType.Primitive("int")))),
+        ),
+      )
+    } should have message "Found unexpected attribute: `field: int;` in mobile target"
+  }
 }
 
 object SemanticAnalyzerTest {
